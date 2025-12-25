@@ -3,7 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use App\Models\SDG;
+use App\Models\Sdg;
 use Illuminate\Support\Str;
 
 class SdgSeeder extends Seeder
@@ -31,7 +31,7 @@ class SdgSeeder extends Seeder
         ];
 
         foreach ($sdgs as $sdg) {
-            SDG::firstOrCreate(
+            Sdg::firstOrCreate(
                 ['number' => $sdg['number']], // Check by number to avoid duplicates
                 [
                     'name' => $sdg['name'],

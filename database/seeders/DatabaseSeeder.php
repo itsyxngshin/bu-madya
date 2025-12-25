@@ -23,7 +23,10 @@ class DatabaseSeeder extends Seeder
             LinkageLookupSeeder::class,
             LinkageSeeder::class,
             CategorySeeder::class,
+            AcademicYearSeeder::class,
+            DirectorsSeeder::class,
             UserSeeder::class,  
+            MadyaOfficialSeeder::class,
         ]);
     }
 }

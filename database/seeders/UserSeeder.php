@@ -99,7 +99,6 @@ class UserSeeder extends Seeder
             'first_name' => $firstName,
             'last_name' => $lastName,
             'middle_name' => 'A.',
-            'student_id' => '2025-' . rand(10000, 99999),
             'college_id' => $collegeId,
             'course' => $course,
             'year_level' => '3rd Year',

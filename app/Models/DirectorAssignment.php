@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Pivot;
+use App\Models\Scopes\ActiveYearScope;
 
 class DirectorAssignment extends Model
 {
@@ -24,10 +25,11 @@ class DirectorAssignment extends Model
     }
 
     // 2. The Title (e.g., "Director-General", "Director")
-    public function position() // I recommend calling this 'position' for clarity
+    public function director() // I recommend calling this 'position' for clarity
     {
         return $this->belongsTo(Director::class, 'director_id');
     }
+    
 
     // 3. The Committee (Optional - will be null for DG)
     public function committee()
@@ -39,5 +41,10 @@ class DirectorAssignment extends Model
     public function academicYear()
     {
         return $this->belongsTo(AcademicYear::class);
+    }
+
+     protected static function booted()
+    {
+        static::addGlobalScope(new ActiveYearScope);
     }
 }

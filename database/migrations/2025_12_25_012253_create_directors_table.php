@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name'); // "Technical & Productions"
             $table->string(column: 'description')->nullable();
+            $table->integer('order')->default(99); //
             $table->timestamps();
         });
     }

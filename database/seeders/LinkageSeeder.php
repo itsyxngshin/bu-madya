@@ -6,15 +6,11 @@ use Illuminate\Database\Seeder;
 use App\Models\Linkage;
 use App\Models\LinkageActivity;
 use App\Models\Project;
-use App\Models\SDG;
-
+use App\Models\Sdg;
 class LinkageSeeder extends Seeder
 {
     public function run()
     {
-        // 1. Ensure Lookup Tables are filled first
-        $this->call(LinkageLookupSeeder::class);
-
         // 2. Create 10 Dummy Partners
         $linkages = Linkage::factory()->count(10)->create();
 
@@ -28,7 +24,7 @@ class LinkageSeeder extends Seeder
 
             // B. Attach Random SDGs (e.g., Goal 4 and 17)
             // (Assuming you have populated the SDGs table already)
-            $sdgs = SDG::inRandomOrder()->limit(rand(1, 4))->pluck('id');
+            $sdgs = Sdg::inRandomOrder()->limit(rand(1, 4))->pluck('id');
             $linkage->sdgs()->attach($sdgs);
 
             // C. Attach Random Projects (e.g., they partnered on Project ID 1)

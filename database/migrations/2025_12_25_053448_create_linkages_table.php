@@ -12,7 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('linkages', function (Blueprint $table) {
-            $table->id();$table->string('name');             // e.g. "LGU Legazpi City"
+            $table->id();
+            $table->string('name');             // e.g. "LGU Legazpi City"
             $table->string('slug')->unique();   // For URL: /linkages/lgu-legazpi
             $table->string('acronym')->nullable(); // e.g. "DOH"
             

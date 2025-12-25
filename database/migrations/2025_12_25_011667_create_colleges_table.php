@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::create('colleges', function (Blueprint $table) {
             $table->id();
-            $table->id();
             $table->string('name'); // e.g., "College of Science"
             $table->string('slug')->unique(); // e.g., "cs"
             

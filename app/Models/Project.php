@@ -68,6 +68,14 @@ class Project extends Model
     public function sdgs()
     {
         // Uses the pivot table 'project_sdg'
-        return $this->belongsToMany(Sdg::class, 'project_sdg');
+        return $this->belongsToMany(Sdg::class, 'project_sdgs');
+    }
+
+    public function partners()
+    {
+        // You can name this 'linkages' or 'partners'
+        return $this->belongsToMany(Linkage::class, 'linkage_project')
+                    ->withPivot('role')
+                    ->withTimestamps();
     }
 }

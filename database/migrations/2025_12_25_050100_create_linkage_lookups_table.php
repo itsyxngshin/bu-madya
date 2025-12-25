@@ -15,7 +15,7 @@ return new class extends Migration
         Schema::create('linkage_types', function (Blueprint $table) {
             $table->id();
             $table->string('name'); // Display Name
-            $table->string('slug')->unique(); // For reference/classes
+            $table->string('slug'); // For reference/classes
             $table->string('color')->nullable(); // For badges
             $table->timestamps();
         });
@@ -24,7 +24,7 @@ return new class extends Migration
         Schema::create('linkage_statuses', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('slug')->unique();
+            $table->string('slug');
             $table->string('color')->nullable(); // e.g., 'bg-green-100'
             $table->timestamps();
         });
@@ -33,7 +33,7 @@ return new class extends Migration
         Schema::create('agreement_levels', function (Blueprint $table) {
             $table->id();
             $table->string('name'); 
-            $table->string('slug')->unique(); 
+            $table->string('slug'); 
             $table->string('description')->nullable(); // Explains what this level means
             $table->timestamps();
         });

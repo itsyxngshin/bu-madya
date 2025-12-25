@@ -1,38 +1,4 @@
 <div class="text-gray-800 bg-gray-50 overflow-x-hidden selection:bg-red-500 selection:text-white">
-
-    <nav 
-        x-data="{ scrolled: false }" 
-        @scroll.window="scrolled = (window.pageYOffset > 20)"
-        :class="scrolled ? 'bg-white/95 backdrop-blur-md shadow-lg py-4' : 'bg-transparent py-6'"
-        class="fixed top-0 w-full z-50 transition-all duration-300"
-    >
-        <div class="max-w-[1800px] w-[95%] mx-auto px-6 flex justify-between items-center">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-lg overflow-hidden p-1">
-                   <img src="{{ asset('images/official_logo.png') }}" alt="Logo" class="w-full h-full object-contain">
-                </div>
-                
-                <span :class="scrolled ? 'text-gray-800' : 'text-white'" class="font-heading font-bold text-lg tracking-tight transition-colors duration-300">BU MADYA</span>
-            </div>
-
-            <div class="hidden md:flex items-center space-x-8 text-sm font-semibold tracking-wide">
-                @foreach(['Home', 'Engagement', 'Advocacy', 'Directory'] as $link)
-                <a href="#" 
-                   :class="scrolled ? 'text-gray-600 hover:text-red-600' : 'text-green-50 hover:text-yellow-300'"
-                   class="transition-colors duration-300 relative group">
-                    {{ $link }}
-                    <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-red-500 transition-all group-hover:w-full"></span>
-                </a>
-                @endforeach
-                
-                <a href="#" class="px-5 py-2 rounded-full font-bold text-sm transition transform hover:scale-105 shadow-lg"
-                   :class="scrolled ? 'bg-red-600 text-white hover:bg-red-700' : 'bg-red-600 text-white hover:bg-red-500 border border-white/20'">
-                    Contact Us
-                </a>
-            </div>
-        </div>
-    </nav>
-
     <header class="relative min-h-[850px] flex items-center justify-center text-white overflow-hidden rounded-b-[60px] shadow-2xl">
     
         <div class="absolute inset-0 z-0">

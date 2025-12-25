@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('project_categories', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('description');
+            $table->string('description')->nullable();
             $table->string('color')->nullable(); // e.g., 'bg-green-500'
             // You might add project-specific fields here later, like 'icon'
             $table->string('icon')->nullable();

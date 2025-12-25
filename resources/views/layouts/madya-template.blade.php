@@ -19,11 +19,16 @@
     @livewireStyles
 </head>
 <body class="bg-gray-100 font-sans antialiased">
-    
-    <div x-data="{ sidebarOpen: true }" class="min-h-screen flex bg-gray-100 relative">
-        
-        <x-madya-sidebar />
+    <x-madya-navbar />
 
+    <div class="p-6">
+                {{ $slot }}
+    </div>
+
+        {{-- 
+    <div x-data="{ sidebarOpen: true }" class="min-h-screen flex bg-gray-100 relative">
+        <x-madya-sidebar />
+        
         <main class="flex-1 flex flex-col min-h-screen transition-all duration-300 ease-in-out"
               :class="sidebarOpen ? 'lg:ml-64' : 'lg:ml-0'">
             
@@ -41,14 +46,11 @@
                 </h2>
             </div>
             
-            <div class="p-6">
-                {{ $slot }}
-            </div>
+           
 
         </main>
-
     </div>
-
+    --}}
     @stack('modals')
     @livewireScripts
 </body>
