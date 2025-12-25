@@ -6,7 +6,7 @@ use Livewire\Component;
 use Livewire\Attributes\Layout; 
 
 #[Layout('layouts.madya-template')]
-class ProjectCreate extends Component
+class ProjectsCreate extends Component
 {
    // Basic Info
     public $title = 'New Project Title';

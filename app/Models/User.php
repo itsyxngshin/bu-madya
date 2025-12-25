@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Models;
+use App\Models\Profile;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -29,6 +30,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role_id',
+        'username'
     ];
 
     /**
@@ -63,5 +66,65 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function profile()
+    {
+        return $this->hasOne(Profile::class);
+    }
+
+    // Helper to get role easily (optional)
+    public function isAdmin() 
+    {
+        return $this->role === 'admin' || $this->role === 'director';
+    }
+
+    public function role()
+    {
+        return $this->belongsTo(Role::class);
+    }
+
+    public function assignments()
+    {
+        return $this->hasMany(DirectorAssignment::class);
+    }
+
+    // Get ONLY the current active assignment
+    public function currentAssignment()
+    {
+        return $this->hasOne(DirectorAssignment::class)
+                    ->where('academic_year_id', AcademicYear::current()->id);
+    }
+
+    // Helper: "Is this user the current Director-General?"
+    public function isDirectorGeneral()
+    {
+        return $this->currentAssignment && 
+               $this->currentAssignment->committee_id === null; // The logic: No committee = DG
+    }
+    
+    // Helper: "Is this user a Committee Director?"
+    public function isCommitteeDirector()
+    {
+        return $this->currentAssignment && 
+               $this->currentAssignment->committee_id !== null;
+    }
+
+    public function engagements()
+    {
+        return $this->hasMany(Engagement::class);
+    }
+
+    public function portfolioSet() {
+        // Since PortfolioSet belongs to a Profile, and User belongs to a Profile,
+        // we access it via the Profile relationship.
+        return $this->hasOneThrough(
+            PortfolioSet::class, 
+            Profile::class, 
+            'id', // Foreign key on profiles table (user.profile_id is actually on users table, so we might need a different approach if schema is strict)
+            'profile_id', // Foreign key on portfolio_sets table
+            'profile_id', // Local key on users table
+            'id' // Local key on profiles table
+        );
     }
 }

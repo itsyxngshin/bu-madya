@@ -300,7 +300,10 @@
                             @endif
 
                             @if(!empty($comm['heads']))
-                                <a href="#" class="px-3 py-1 bg-green-600 text-white rounded-full text-[10px] font-bold hover:bg-green-700 transition shadow-sm">View Members</a>
+                                <a href="{{ route('open.committees.show', \Illuminate\Support\Str::slug($comm['name'])) }}" 
+                                class="px-3 py-1 bg-green-600 text-white rounded-full text-[10px] font-bold hover:bg-green-700 transition shadow-sm">
+                                View Members
+                                </a>
                             @endif
                         </div>
 

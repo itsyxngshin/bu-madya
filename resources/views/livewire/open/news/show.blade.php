@@ -25,6 +25,10 @@
         </span>
 
         <div class="flex gap-2">
+            <a href="{{ route('news.edit', $articleId) }}" class="flex items-center gap-1 px-3 py-1 bg-gray-100 hover:bg-yellow-100 text-gray-500 hover:text-yellow-700 rounded-full text-[10px] font-bold uppercase tracking-wider transition border border-gray-200 hover:border-yellow-300">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                Edit
+            </a>
             <button class="w-8 h-8 rounded-full bg-white/50 border border-gray-200 text-gray-400 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 hover:scale-110 flex items-center justify-center transition shadow-sm">
                 <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"></path></svg>
             </button>

@@ -87,11 +87,10 @@
         @endif
 
         {{-- View Members Link --}}
-        @if(!empty($comm['heads']))
-            <a href="#" class="mt-1 px-3 py-1 bg-green-600 text-white rounded-full text-[10px] font-bold hover:bg-green-700 transition shadow-sm">
-                View Members
-            </a>
-        @endif
+        <a href="{{ route('open.committees.show', Str::slug($comm['name'])) }}" 
+        class="mt-1 px-3 py-1 bg-green-600 text-white rounded-full text-[10px] font-bold hover:bg-green-700 transition shadow-sm">
+            View Members
+        </a>
         
         {{-- Back Button (Optional UX) --}}
         <button class="mt-2 text-[10px] text-gray-400 hover:text-gray-600 flex items-center gap-1">
