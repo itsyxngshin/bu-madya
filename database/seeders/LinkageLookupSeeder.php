@@ -25,6 +25,7 @@ class LinkageLookupSeeder extends Seeder
         $statuses = [
             ['name' => 'Active', 'slug' => 'active', 'color' => 'bg-emerald-100 text-emerald-800'],
             ['name' => 'Inactive', 'slug' => 'inactive', 'color' => 'bg-gray-100 text-gray-800'],
+            ['name' => 'Ongoing', 'slug' => 'inactive', 'color' => 'bg-gray-100 text-gray-800'],
             ['name' => 'Pending Renewal', 'slug' => 'pending', 'color' => 'bg-orange-100 text-orange-800'],
         ];
         foreach($statuses as $s) \App\Models\LinkageStatus::create($s);
@@ -34,6 +35,7 @@ class LinkageLookupSeeder extends Seeder
             ['name' => 'Memorandum of Understanding (MOU)', 'slug' => 'mou'],
             ['name' => 'Memorandum of Agreement (MOA)', 'slug' => 'moa'],
             ['name' => 'Letter of Partnership', 'slug' => 'lop'],
+            ['name' => 'Media Partnership', 'slug' => 'mp'],
             ['name' => 'Verbal / Informal', 'slug' => 'informal'],
         ];
         foreach($levels as $l) \App\Models\AgreementLevel::create($l);

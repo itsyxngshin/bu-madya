@@ -3,106 +3,135 @@
 namespace App\Livewire\Director;
 
 use Livewire\Component;
-use Livewire\Attributes\Layout; 
+use Livewire\WithFileUploads;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
+use App\Models\Linkage;
+use App\Models\LinkageType;
+use App\Models\LinkageStatus;
+use App\Models\Sdg;
+use App\Models\Project;
+use App\Models\ProjectCategory;
+use Livewire\Attributes\Layout;
 
 #[Layout('layouts.madya-template')]
 class LinkagesEdit extends Component
 {
-    public $partnerId;
+    use WithFileUploads;
 
-    // Form Fields (Same as Create)
+    public Linkage $linkage; // The model instance
+
+    // Form Properties
     public $name;
-    public $type;
-    public $status;
-    public $since;
-    public $logo;
-    public $cover_img;
+    public $slug;
+    public $type_id;
+    public $status_id;
+    public $established_at;
+    public $scope; 
     public $description;
-    public $scope;
     public $email;
     public $website;
     public $address;
 
-    // Dynamic Lists
+    // File Uploads (New)
+    public $logo; 
+    public $cover;
+
+    // Existing File Paths (For display)
+    public $existingLogo;
+    public $existingCover;
+
+    // Relationships
     public $engagements = [];
-    public $joint_projects = [];
-
-    // SDGs
     public $selectedSdgs = [];
-    public $allSdgs = [
-        1 => ['label' => 'No Poverty', 'color' => 'bg-red-500'],
-        2 => ['label' => 'Zero Hunger', 'color' => 'bg-yellow-500'],
-        3 => ['label' => 'Good Health', 'color' => 'bg-green-500'],
-        4 => ['label' => 'Quality Education', 'color' => 'bg-red-700'],
-        5 => ['label' => 'Gender Equality', 'color' => 'bg-orange-500'],
-        6 => ['label' => 'Clean Water', 'color' => 'bg-cyan-500'],
-        7 => ['label' => 'Clean Energy', 'color' => 'bg-yellow-400'],
-        8 => ['label' => 'Decent Work', 'color' => 'bg-red-800'],
-        9 => ['label' => 'Industry/Infras.', 'color' => 'bg-orange-600'],
-        10 => ['label' => 'Reduced Inequal.', 'color' => 'bg-pink-500'],
-        11 => ['label' => 'Sustainable Cities', 'color' => 'bg-orange-400'],
-        12 => ['label' => 'Consumption', 'color' => 'bg-yellow-600'],
-        13 => ['label' => 'Climate Action', 'color' => 'bg-green-700'],
-        14 => ['label' => 'Life Below Water', 'color' => 'bg-blue-500'],
-        15 => ['label' => 'Life on Land', 'color' => 'bg-green-600'],
-        16 => ['label' => 'Peace & Justice', 'color' => 'bg-blue-700'],
-        17 => ['label' => 'Partnerships', 'color' => 'bg-blue-900'],
-    ];
+    public $selectedProjects = [];
 
-    public function mount($id)
-    {
-        $this->partnerId = $id;
-        $this->loadModel();
-    }
+    // Modal
+    public $showProjectModal = false;
+    public $newProjectTitle = '';
+    public $newProjectStatus = 'Ongoing';
+    public $newProjectCategoryId = '';
 
-    public function loadModel()
+    protected function rules()
     {
-        // SIMULATED DB FETCH
-        // In real app: $partner = Partner::findOrFail($this->partnerId);
-        
-        $mockPartner = [
-            'name' => 'LGU Legazpi City',
-            'type' => 'Government',
-            'status' => 'MOU Signed',
-            'since' => 'September 2023',
-            'logo' => 'https://ui-avatars.com/api/?name=Legazpi+City&background=0D47A1&color=fff&size=256',
-            'cover_img' => 'https://images.unsplash.com/photo-1577962917302-cd874c4e31d2?q=80&w=1000',
-            'description' => 'A strategic partnership focused on empowering the youth of Legazpi through leadership governance workshops.',
-            'scope' => 'Local Policy, Youth Welfare',
-            'email' => 'youth@legazpi.gov.ph',
-            'website' => 'www.legazpi.gov.ph',
-            'address' => 'City Hall Compound, Albay District, Legazpi City',
-            'engagements' => [
-                ['title' => 'MOU Signing', 'date' => 'Sept 15, 2024', 'type' => 'Formalization', 'desc' => 'Official signing ceremony.']
-            ],
-            'selectedSdgs' => [11, 17] // IDs of selected SDGs
+        return [
+            'name' => 'required|min:3',
+            'slug' => 'required|alpha_dash|unique:linkages,slug,' . $this->linkage->id, // Ignore current ID
+            'type_id' => 'required|exists:linkage_types,id',
+            'status_id' => 'required|exists:linkage_statuses,id',
+            'logo' => 'nullable|image|max:2048',
+            'cover' => 'nullable|image|max:4096',
+            'engagements.*.title' => 'required_with:engagements.*.date',
         ];
-
-        // Assign to properties
-        $this->name = $mockPartner['name'];
-        $this->type = $mockPartner['type'];
-        $this->status = $mockPartner['status'];
-        $this->since = $mockPartner['since'];
-        $this->logo = $mockPartner['logo'];
-        $this->cover_img = $mockPartner['cover_img'];
-        $this->description = $mockPartner['description'];
-        $this->scope = $mockPartner['scope'];
-        $this->email = $mockPartner['email'];
-        $this->website = $mockPartner['website'];
-        $this->address = $mockPartner['address'];
-        $this->engagements = $mockPartner['engagements'];
-        $this->selectedSdgs = $mockPartner['selectedSdgs'];
     }
 
-    // --- Dynamic List Actions (Same as Create) ---
+    public function mount(Linkage $linkage)
+    {
+        $this->linkage = $linkage;
+
+        // 1. Populate Basic Fields
+        $this->name = $linkage->name;
+        $this->slug = $linkage->slug;
+        $this->type_id = $linkage->linkage_type_id;
+        $this->status_id = $linkage->linkage_status_id;
+        $this->established_at = $linkage->established_at ? $linkage->established_at->format('Y-m-d') : null;
+        // Assume 'scope' might be part of description or a separate column. 
+        // If it's not a column, we skip it or extract it. 
+        // For this example, let's assume you added a 'scope' column as discussed.
+        $this->scope = $linkage->scope; 
+        
+        $this->description = $linkage->description;
+        $this->email = $linkage->email;
+        $this->website = $linkage->website;
+        $this->address = $linkage->address;
+
+        // 2. Populate Files
+        $this->existingLogo = $linkage->logo_path;
+        $this->existingCover = $linkage->cover_img_path;
+
+        // 3. Populate Relationships
+        // Engagements
+        foreach ($linkage->activities as $activity) {
+            $this->engagements[] = [
+                'id' => $activity->id, // Keep ID to update existing records
+                'date' => $activity->activity_date->format('Y-m-d'),
+                'title' => $activity->title,
+                // Extract 'Type' from description if you merged it earlier, or just use description
+                'type' => '', // You might need to parse this if you stored it in description
+                'desc' => $activity->description,
+            ];
+        }
+        // If empty, add one blank row
+        if (empty($this->engagements)) {
+            $this->addEngagement();
+        }
+
+        // SDGs (Pluck IDs)
+        $this->selectedSdgs = $linkage->sdgs->pluck('id')->toArray();
+
+        // Projects (Pluck IDs)
+        $this->selectedProjects = $linkage->projects->pluck('id')->toArray();
+    }
+
+    // --- Actions ---
+
+    public function updatedName($value)
+    {
+        // Only auto-update slug if it hasn't been manually customized (optional logic)
+        // For simplicity, let's just update it if they are editing the name
+        $this->slug = Str::slug($value);
+    }
 
     public function addEngagement()
     {
-        $this->engagements[] = ['title' => '', 'date' => '', 'type' => '', 'desc' => ''];
+        $this->engagements[] = ['id' => null, 'date' => '', 'type' => '', 'title' => '', 'desc' => ''];
     }
 
     public function removeEngagement($index)
     {
+        // If it has an ID, we should probably mark it for deletion or delete it immediately.
+        // For simplicity in this example, we just remove from the array. 
+        // Actual deletion happens on save() by comparing IDs.
         unset($this->engagements[$index]);
         $this->engagements = array_values($this->engagements);
     }
@@ -116,10 +145,101 @@ class LinkagesEdit extends Component
         }
     }
 
-    public function update()
+    public function toggleProject($id)
     {
-        // DB Update Logic Here: Partner::find($id)->update(...)
+        if (in_array($id, $this->selectedProjects)) {
+            $this->selectedProjects = array_diff($this->selectedProjects, [$id]);
+        } else {
+            $this->selectedProjects[] = $id;
+        }
+    }
+
+    // Modal Actions
+    public function createProject()
+    {
+        $this->validate([
+            'newProjectTitle' => 'required|min:3|unique:projects,title',
+            'newProjectCategoryId' => 'required|exists:project_categories,id',
+        ]);
+
+        $project = Project::create([
+            'title' => $this->newProjectTitle,
+            'slug' => Str::slug($this->newProjectTitle),
+            'project_category_id' => $this->newProjectCategoryId,
+            'status' => $this->newProjectStatus,
+        ]);
+
+        $this->selectedProjects[] = $project->id;
+        $this->reset(['newProjectTitle', 'newProjectStatus', 'newProjectCategoryId', 'showProjectModal']);
+    }
+
+    // Computed Properties
+    public function getTypesProperty() { return LinkageType::all(); }
+    public function getStatusesProperty() { return LinkageStatus::all(); }
+    public function getAllSdgsProperty() { return Sdg::orderBy('id')->get(); }
+    public function getAllProjectsProperty() { return Project::orderBy('title')->get(); }
+    public function getProjectCategoriesProperty() { return ProjectCategory::orderBy('name')->get(); }
+
+    public function save()
+    {
+        $this->validate();
+
+        // 1. Handle Files
+        $logoPath = $this->existingLogo;
+        if ($this->logo) {
+            // Delete old if exists? Optional.
+            $logoPath = $this->logo->store('linkages/logos', 'public');
+        }
+
+        $coverPath = $this->existingCover;
+        if ($this->cover) {
+            $coverPath = $this->cover->store('linkages/covers', 'public');
+        }
+
+        // 2. Update Main Linkage
+        $this->linkage->update([
+            'name' => $this->name,
+            'slug' => $this->slug,
+            'linkage_type_id' => $this->type_id,
+            'linkage_status_id' => $this->status_id,
+            'established_at' => $this->established_at,
+            'scope' => $this->scope,
+            'logo_path' => $logoPath,
+            'cover_img_path' => $coverPath,
+            'description' => $this->description,
+            'email' => $this->email,
+            'website' => $this->website,
+            'address' => $this->address,
+        ]);
+
+        // 3. Sync SDGs & Projects
+        $this->linkage->sdgs()->sync($this->selectedSdgs);
+        $this->linkage->projects()->sync($this->selectedProjects);
+
+        // 4. Handle Engagements (The tricky part: Create, Update, Delete)
+        // Get current IDs from the form
+        $currentEngagementIds = array_filter(array_column($this->engagements, 'id'));
+        
+        // Delete removed engagements
+        $this->linkage->activities()->whereNotIn('id', $currentEngagementIds)->delete();
+
+        // Create or Update
+        foreach ($this->engagements as $eng) {
+            if (!empty($eng['title'])) {
+                $this->linkage->activities()->updateOrCreate(
+                    ['id' => $eng['id']], // Find by ID
+                    [
+                        'title' => $eng['title'],
+                        'activity_date' => $eng['date'],
+                        'description' => $eng['desc'],
+                        // 'type' => $eng['type'] // If you added a type column
+                    ]
+                );
+            }
+        }
+
         session()->flash('message', 'Partner profile updated successfully!');
+        return redirect()->route('linkages.index');
     }
 
     public function render()

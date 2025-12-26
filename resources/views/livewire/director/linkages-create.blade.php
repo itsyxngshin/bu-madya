@@ -12,13 +12,16 @@
             </span>
         </div>
         
+        {{-- Mobile Toggle --}}
         <button @click="mobilePreview = !mobilePreview" class="md:hidden text-xs font-bold uppercase bg-gray-200 px-3 py-1 rounded">
             <span x-text="mobilePreview ? 'Edit' : 'Preview'"></span>
         </button>
 
         <div class="flex items-center gap-3">
-            <button class="px-4 py-2 bg-white border border-gray-300 text-gray-600 text-xs font-bold uppercase rounded-lg hover:bg-gray-50 transition shadow-sm">Save Draft</button>
-            <button wire:click="save" class="px-5 py-2 bg-gradient-to-r from-blue-600 to-cyan-500 text-white text-xs font-bold uppercase rounded-lg hover:shadow-lg hover:scale-105 transition shadow-md">Publish</button>
+            <div wire:loading class="text-xs text-blue-500 font-bold animate-pulse">Saving...</div>
+            <button wire:click="save" class="px-5 py-2 bg-gradient-to-r from-blue-600 to-cyan-500 text-white text-xs font-bold uppercase rounded-lg hover:shadow-lg hover:scale-105 transition shadow-md">
+                Publish
+            </button>
         </div>
     </nav>
 
@@ -37,27 +40,42 @@
                 <div class="space-y-4">
                     <div>
                         <label class="block text-xs font-bold text-gray-700 mb-1">Organization Name</label>
-                        <input wire:model.live="name" type="text" class="w-full text-sm border-gray-200 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                        <input wire:model.live="name" type="text" class="w-full text-sm border-gray-200 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="e.g. Dept of Science & Tech">
+                        @error('name') <span class="text-red-500 text-[10px]">{{ $message }}</span> @enderror
+                    </div>
+
+                    <div class="mt-3">
+                        <label class="block text-xs font-bold text-gray-500 mb-1">
+                            URL Slug <span class="text-[9px] font-normal text-gray-400">(Auto-generated)</span>
+                        </label>
+                        <div class="flex items-center">
+                            <span class="bg-gray-100 border border-r-0 border-gray-200 rounded-l-lg px-3 py-2 text-xs text-gray-500 select-none">
+                                /linkages/
+                            </span>
+                            <input wire:model.blur="slug" type="text" 
+                                class="w-full text-xs text-blue-600 font-mono bg-gray-50 border-gray-200 rounded-r-lg focus:ring-blue-500 focus:border-blue-500 placeholder-gray-300" 
+                                placeholder="dept-of-science-tech">
+                        </div>
+                        @error('slug') <span class="text-red-500 text-[10px] block mt-1">{{ $message }}</span> @enderror
                     </div>
                     
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-bold text-gray-700 mb-1">Type</label>
-                            <select wire:model.live="type" class="w-full text-xs border-gray-200 rounded-lg">
-                                <option>Government</option>
-                                <option>NGO</option>
-                                <option>Academic</option>
-                                <option>International</option>
-                                <option>Private Sector</option>
+                            <select wire:model.live="type_id" class="w-full text-xs border-gray-200 rounded-lg">
+                                <option value="">Select Type</option>
+                                @foreach($this->types as $t)
+                                    <option value="{{ $t->id }}">{{ $t->name }}</option>
+                                @endforeach
                             </select>
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-gray-700 mb-1">Status</label>
-                            <select wire:model.live="status" class="w-full text-xs border-gray-200 rounded-lg">
-                                <option>MOU Signed</option>
-                                <option>Accredited</option>
-                                <option>Formal Partner</option>
-                                <option>Project-based</option>
+                            <select wire:model.live="status_id" class="w-full text-xs border-gray-200 rounded-lg">
+                                <option value="">Select Status</option>
+                                @foreach($this->statuses as $s)
+                                    <option value="{{ $s->id }}">{{ $s->name }}</option>
+                                @endforeach
                             </select>
                         </div>
                     </div>
@@ -65,22 +83,106 @@
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-bold text-gray-700 mb-1">Partner Since</label>
-                            <input wire:model.live="since" type="text" class="w-full text-xs border-gray-200 rounded-lg">
+                            <input wire:model.live="established_at" type="date" class="w-full text-xs border-gray-200 rounded-lg">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-gray-700 mb-1">Scope (Tags)</label>
-                            <input wire:model.live="scope" type="text" class="w-full text-xs border-gray-200 rounded-lg" placeholder="Policy, Youth...">
+                            <input wire:model.live="scope" type="text" class="w-full text-xs border-gray-200 rounded-lg" placeholder="Policy, Youth, Tech...">
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-bold text-gray-700 mb-1">Logo URL</label>
-                            <input wire:model.live="logo" type="text" class="w-full text-xs text-gray-500 border-gray-200 rounded-lg">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-2">Organization Logo</label>
+                        
+                        {{-- Container determines size --}}
+                        <div x-data="{ isDropping: false, isUploading: false }"
+                            class="relative w-24 h-24 group">
+                            
+                            {{-- 1. VISUAL LAYER (The look) --}}
+                            {{-- pointer-events-none ensures clicks pass through to the input below if z-index is wrong, 
+                                but here the input is on top anyway. --}}
+                            <div class="absolute inset-0 flex flex-col items-center justify-center border-2 border-dashed rounded-xl transition-colors duration-200"
+                                :class="isDropping ? 'border-blue-500 bg-blue-50' : 'border-gray-300 group-hover:border-blue-400 group-hover:bg-gray-50'">
+                                
+                                @if($logo)
+                                    {{-- FIX: Use w-full h-full with padding so it fits inside the rounded border without cutting --}}
+                                    <img src="{{ $logo->temporaryUrl() }}" class="w-full h-full object-contain p-1 rounded-xl">
+                                @else
+                                    {{-- Default Icon --}}
+                                    <svg class="w-6 h-6 text-gray-400 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                    <p class="text-[9px] text-gray-500 text-center leading-tight">Drop or<br>Click</p>
+                                @endif
+                            </div>
+
+                            {{-- 2. FUNCTIONAL LAYER (The invisible input) --}}
+                            {{-- absolute inset-0 makes it cover the whole parent div --}}
+                            {{-- opacity-0 makes it invisible but still clickable/droppable --}}
+                            <input type="file" wire:model="logo" 
+                                class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                                accept="image/png, image/jpeg, image/jpg"
+                                x-on:dragenter="isDropping = true"
+                                x-on:dragleave="isDropping = false"
+                                x-on:drop="isDropping = false"
+                                {{-- These handle the loading spinner state --}}
+                                x-on:livewire-upload-start="isUploading = true"
+                                x-on:livewire-upload-finish="isUploading = false"
+                                x-on:livewire-upload-error="isUploading = false">
+
+                            {{-- 3. LOADING OVERLAY --}}
+                            <div x-show="isUploading" class="absolute inset-0 bg-white/80 flex items-center justify-center z-20 rounded-xl">
+                                <svg class="animate-spin h-5 w-5 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                            </div>
+
+                            @error('logo') <span class="absolute -bottom-5 left-0 text-red-500 text-[10px] whitespace-nowrap">{{ $message }}</span> @enderror
                         </div>
-                        <div>
-                            <label class="block text-xs font-bold text-gray-700 mb-1">Cover Image URL</label>
-                            <input wire:model.live="cover_img" type="text" class="w-full text-xs text-gray-500 border-gray-200 rounded-lg">
+                    </div>
+
+                    {{-- COVER IMAGE UPLOAD --}}
+                    <div class="mt-4">
+                        <label class="block text-xs font-bold text-gray-700 mb-2">Cover Image</label>
+                        
+                        <div x-data="{ isDropping: false, isUploading: false }"
+                            class="relative w-full h-32 group">
+                            
+                            {{-- VISUAL LAYER --}}
+                            <div class="absolute inset-0 flex flex-col items-center justify-center border-2 border-dashed rounded-xl transition-colors duration-200 overflow-hidden"
+                                :class="isDropping ? 'border-blue-500 bg-blue-50' : 'border-gray-300 group-hover:border-blue-400 group-hover:bg-gray-50'">
+                                
+                                @if($cover)
+                                    {{-- object-cover is usually fine for backgrounds, but use object-contain if you don't want cutting --}}
+                                    <img src="{{ $cover->temporaryUrl() }}" class="w-full h-full object-cover">
+                                    <div class="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
+                                        <span class="text-white text-xs font-bold">Change Image</span>
+                                    </div>
+                                @else
+                                    <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                                        <svg class="w-8 h-8 text-gray-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                                        <p class="text-xs text-gray-500">Drag & Drop cover image here</p>
+                                    </div>
+                                @endif
+                            </div>
+
+                            {{-- FUNCTIONAL LAYER (Invisible Input) --}}
+                            <input type="file" wire:model="cover" 
+                                class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                                accept="image/png, image/jpeg, image/jpg"
+                                x-on:dragenter="isDropping = true"
+                                x-on:dragleave="isDropping = false"
+                                x-on:drop="isDropping = false"
+                                x-on:livewire-upload-start="isUploading = true"
+                                x-on:livewire-upload-finish="isUploading = false"
+                                x-on:livewire-upload-error="isUploading = false">
+
+                            {{-- LOADING LAYER --}}
+                            <div x-show="isUploading" class="absolute inset-0 bg-white/80 flex items-center justify-center z-20 rounded-xl">
+                                <div class="w-full max-w-[100px] bg-gray-200 rounded-full h-1.5">
+                                    <div class="bg-blue-600 h-1.5 rounded-full animate-pulse" style="width: 100%"></div>
+                                </div>
+                            </div>
+                            @error('cover') <span class="text-red-500 text-[10px] block mt-1">{{ $message }}</span> @enderror
                         </div>
                     </div>
                 </div>
@@ -117,7 +219,7 @@
                         </button>
                         
                         <div class="grid grid-cols-2 gap-2 mb-2">
-                            <input wire:model.live="engagements.{{ $index }}.date" type="text" class="text-[10px] border-gray-200 rounded" placeholder="Date (e.g. Oct 2024)">
+                            <input wire:model.live="engagements.{{ $index }}.date" type="date" class="text-[10px] border-gray-200 rounded">
                             <input wire:model.live="engagements.{{ $index }}.type" type="text" class="text-[10px] border-gray-200 rounded" placeholder="Type (e.g. Meeting)">
                         </div>
                         <input wire:model.live="engagements.{{ $index }}.title" type="text" class="w-full text-xs font-bold border-gray-200 rounded mb-2" placeholder="Activity Title">
@@ -129,15 +231,96 @@
 
             {{-- 5. SDGs --}}
             <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
-                <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest border-b border-gray-100 pb-2 mb-4">Shared Goals (SDGs)</h3>
-                <div class="grid grid-cols-6 gap-2">
-                    @foreach($allSdgs as $id => $sdg)
-                    <button wire:click="toggleSdg({{ $id }})" 
-                            class="aspect-square flex items-center justify-center rounded text-[10px] font-bold transition-all transform hover:scale-105
-                            {{ in_array($id, $selectedSdgs) ? $sdg['color'] . ' text-white ring-2 ring-offset-1 ring-gray-300' : 'bg-gray-100 text-gray-400' }}">
-                        {{ $id }}
-                    </button>
+                <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest border-b border-gray-100 pb-2 mb-4">
+                    Shared Goals (SDGs)
+                </h3>
+                
+                {{-- Changed to 2 columns to fit the names --}}
+                <div class="grid grid-cols-2 gap-2">
+                    @foreach($this->allSdgs as $sdg)
+                        {{-- 
+                        1. Get the base color name (e.g., 'red-500' from 'bg-red-500') 
+                        We assume your DB stores 'bg-color-shade'
+                        --}}
+                        @php
+                            // Extract 'red-500' from 'bg-red-500'
+                            $baseColor = str_replace('bg-', '', $sdg->color); 
+                            
+                            // Create dynamic classes
+                            $activeBorder = "border-$baseColor"; // border-red-500
+                            $activeBg = "bg-" . explode('-', $baseColor)[0] . "-50"; // bg-red-50
+                            $activeText = "text-" . explode('-', $baseColor)[0] . "-700"; // text-red-700
+                        @endphp
+
+                        <button wire:click="toggleSdg({{ $sdg->id }})" 
+                                class="group flex items-center gap-2 p-1.5 rounded-lg border transition-all text-left
+                                {{ in_array($sdg->id, $selectedSdgs) 
+                                    ? "$activeBorder $activeBg shadow-sm ring-1 ring-offset-0" 
+                                    : 'border-transparent hover:bg-gray-50' }}"
+                                
+                                {{-- Valid inline style for the ring color if needed --}}
+                                style="{{ in_array($sdg->id, $selectedSdgs) ? 'border-color: var(--tw-color-' . str_replace('-', '-', $baseColor) . ')' : '' }}"
+                        >
+                            
+                            {{-- Color Swatch (The Box) --}}
+                            <span class="w-8 h-8 shrink-0 flex items-center justify-center rounded text-white font-black text-[10px] shadow-sm {{ $sdg->color }}">
+                                {{ $sdg->id }}
+                            </span>
+                            
+                            {{-- Name Display --}}
+                            <span class="text-[10px] font-bold leading-tight line-clamp-2
+                                {{ in_array($sdg->id, $selectedSdgs) ? $activeText : 'text-gray-500 group-hover:text-gray-700' }}">
+                                {{ $sdg->name }}
+                            </span>
+                        </button>
                     @endforeach
+                </div>
+            </div>
+
+            {{-- 6. JOINT PROJECTS --}}
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 mt-6">
+                <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest border-b border-gray-100 pb-2 mb-4">
+                    Joint Projects
+                </h3>
+
+                <button wire:click="$set('showProjectModal', true)" 
+                        class="text-[10px] font-bold text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-2 py-1 rounded transition flex items-center gap-1">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                    New Project
+                </button>
+                
+                <div class="space-y-2 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
+                    @forelse($this->allProjects as $proj)
+                    <button wire:click="toggleProject({{ $proj->id }})" 
+                            class="w-full flex items-center gap-3 p-2 rounded-xl border text-left transition-all group
+                            {{ in_array($proj->id, $selectedProjects) 
+                                ? 'border-yellow-400 bg-yellow-50 ring-1 ring-yellow-200' 
+                                : 'border-gray-100 hover:border-blue-200 hover:bg-gray-50' }}">
+                        
+                        {{-- Project Thumbnail --}}
+                        <div class="w-12 h-12 rounded-lg bg-gray-200 overflow-hidden shrink-0">
+                            @if($proj->cover_image)
+                                <img src="{{ asset('storage/'.$proj->cover_image) }}" class="w-full h-full object-cover">
+                            @endif
+                        </div>
+
+                        {{-- Info --}}
+                        <div class="flex-1 min-w-0">
+                            <h4 class="text-xs font-bold text-gray-800 truncate">{{ $proj->title }}</h4>
+                            <span class="text-[10px] text-gray-400 uppercase tracking-wide">{{ $proj->status ?? 'Ongoing' }}</span>
+                        </div>
+
+                        {{-- Checkmark Icon --}}
+                        <div class="w-5 h-5 rounded-full border flex items-center justify-center transition-colors
+                            {{ in_array($proj->id, $selectedProjects) ? 'bg-yellow-400 border-yellow-400 text-white' : 'border-gray-200 text-transparent' }}">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                        </div>
+                    </button>
+                    @empty
+                    <div class="text-center py-4">
+                        <p class="text-xs text-gray-400 italic">No projects found in database.</p>
+                    </div>
+                    @endforelse
                 </div>
             </div>
 
@@ -153,13 +336,16 @@
                 Live Preview
             </div>
 
-            {{-- COPY OF SHOW TEMPLATE --}}
             <div class="min-h-full bg-stone-50 pb-20 origin-top scale-90 md:scale-100 transition-transform pointer-events-none select-none">
                 
                 {{-- HERO --}}
                 <div class="relative h-[300px] w-full overflow-hidden bg-gray-200">
-                    @if($cover_img)
-                        <img src="{{ $cover_img }}" class="w-full h-full object-cover">
+                    @if($cover)
+                        <img src="{{ $cover->temporaryUrl() }}" class="w-full h-full object-cover">
+                    @else
+                        <div class="w-full h-full flex items-center justify-center text-gray-400 font-bold uppercase tracking-widest text-xs">
+                            No Cover Image
+                        </div>
                     @endif
                     <div class="absolute inset-0 bg-gradient-to-t from-stone-50 via-stone-50/20 to-transparent"></div>
                 </div>
@@ -174,47 +360,123 @@
                             {{-- Profile --}}
                             <div class="bg-white p-8 rounded-[2rem] shadow-xl border border-gray-100 text-center relative overflow-hidden">
                                 <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-600 to-green-400"></div>
-                                <div class="w-32 h-32 mx-auto bg-white rounded-2xl p-2 shadow-lg -mt-16 mb-6 border border-gray-100 relative z-10">
+                                <div class="w-32 h-32 mx-auto bg-white rounded-2xl p-1 shadow-lg -mt-16 mb-6 border border-gray-100 relative z-10 flex items-center justify-center">
                                     @if($logo)
-                                        <img src="{{ $logo }}" class="w-full h-full object-contain rounded-xl">
+                                        {{-- 
+                                        Used 'object-contain' instead of 'object-cover' or just 'object-fit'.
+                                        This ensures the logo is never cropped, even if it's a wide rectangle.
+                                        --}}
+                                        <img src="{{ $logo->temporaryUrl() }}" class="w-full h-full object-contain rounded-xl">
+                                    @else
+                                        <span class="text-xs font-bold text-gray-300">LOGO</span>
                                     @endif
+                                    
                                 </div>
                                 <h1 class="font-heading font-black text-2xl text-gray-900 leading-tight mb-2">{{ $name ?: 'Partner Name' }}</h1>
-                                
                                 <div class="flex flex-wrap justify-center gap-2 mb-6">
-                                    <span class="px-3 py-1 bg-gray-100 text-gray-600 text-[10px] font-bold uppercase tracking-wider rounded-full">{{ $type }}</span>
-                                    <span class="px-3 py-1 bg-green-100 text-green-700 text-[10px] font-bold uppercase tracking-wider rounded-full flex items-center gap-1">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span> {{ $status }}
-                                    </span>
+                                    @if($type_id)
+                                        @php $typeName = $this->types->find($type_id)->name ?? ''; @endphp
+                                        <span class="px-3 py-1 bg-gray-100 text-gray-600 text-[10px] font-bold uppercase tracking-wider rounded-full">{{ $typeName }}</span>
+                                    @endif
+
+                                    @if($status_id)
+                                        @php $statusObj = $this->statuses->find($status_id); @endphp
+                                        <span class="px-3 py-1 {{ $statusObj->color ?? 'bg-green-100' }} text-green-700 text-[10px] font-bold uppercase tracking-wider rounded-full flex items-center gap-1">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-current"></span> {{ $statusObj->name ?? 'Status' }}
+                                        </span>
+                                    @endif
                                 </div>
 
                                 <div class="text-sm text-gray-500 space-y-3 border-t border-gray-100 pt-6 text-left">
-                                    {{-- Address, Website, Etc --}}
                                     <div class="flex items-start gap-3">
-                                        <div class="w-4 h-4 bg-gray-200 rounded-full shrink-0"></div>
-                                        <div><span class="block text-[10px] font-bold uppercase text-gray-400">Since</span>{{ $since }}</div>
+                                        <div class="w-4 h-4 bg-gray-200 rounded-full shrink-0 flex items-center justify-center text-[8px]">📅</div>
+                                        <div><span class="block text-[10px] font-bold uppercase text-gray-400">Since</span>{{ $established_at ?: 'N/A' }}</div>
                                     </div>
                                     @if($website)
                                     <div class="flex items-start gap-3">
-                                        <div class="w-4 h-4 bg-gray-200 rounded-full shrink-0"></div>
-                                        <div><span class="block text-[10px] font-bold uppercase text-gray-400">Web</span>{{ $website }}</div>
+                                        <div class="w-4 h-4 bg-gray-200 rounded-full shrink-0 flex items-center justify-center text-[8px]">🌐</div>
+                                        <div class="truncate w-40"><span class="block text-[10px] font-bold uppercase text-gray-400">Web</span>{{ $website }}</div>
                                     </div>
                                     @endif
                                 </div>
                             </div>
 
-                            {{-- SDGs --}}
-                            <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
-                                <h3 class="font-bold text-gray-900 uppercase tracking-widest text-xs border-b border-gray-100 pb-3 mb-4">Shared Goals</h3>
-                                <div class="flex flex-col gap-2">
-                                    @foreach($selectedSdgs as $id)
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-8 h-8 {{ $allSdgs[$id]['color'] }} rounded text-white font-black text-xs flex items-center justify-center">{{ $id }}</div>
-                                        <span class="text-[10px] font-bold text-gray-700 uppercase">{{ $allSdgs[$id]['label'] }}</span>
+                            {{-- 6. JOINT PROJECTS --}}
+                            <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 mt-6">
+                                <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest border-b border-gray-100 pb-2 mb-4">
+                                    Joint Projects
+                                </h3>
+                                
+                                <div class="space-y-2 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
+                                    @forelse($this->allProjects as $proj)
+                                    <button wire:click="toggleProject({{ $proj->id }})" 
+                                            class="w-full flex items-center gap-3 p-2 rounded-xl border text-left transition-all group
+                                            {{ in_array($proj->id, $selectedProjects) 
+                                                ? 'border-yellow-400 bg-yellow-50 ring-1 ring-yellow-200' 
+                                                : 'border-gray-100 hover:border-blue-200 hover:bg-gray-50' }}">
+                                        
+                                        {{-- Project Thumbnail --}}
+                                        <div class="w-12 h-12 rounded-lg bg-gray-200 overflow-hidden shrink-0">
+                                            @if($proj->cover_image)
+                                                <img src="{{ asset('storage/'.$proj->cover_image) }}" class="w-full h-full object-cover">
+                                            @endif
+                                        </div>
+
+                                        {{-- Info --}}
+                                        <div class="flex-1 min-w-0">
+                                            <h4 class="text-xs font-bold text-gray-800 truncate">{{ $proj->title }}</h4>
+                                            <span class="text-[10px] text-gray-400 uppercase tracking-wide">{{ $proj->status ?? 'Ongoing' }}</span>
+                                        </div>
+
+                                        {{-- Checkmark Icon --}}
+                                        <div class="w-5 h-5 rounded-full border flex items-center justify-center transition-colors
+                                            {{ in_array($proj->id, $selectedProjects) ? 'bg-yellow-400 border-yellow-400 text-white' : 'border-gray-200 text-transparent' }}">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                        </div>
+                                    </button>
+                                    @empty
+                                    <div class="text-center py-4">
+                                        <p class="text-xs text-gray-400 italic">No projects found in database.</p>
                                     </div>
+                                    @endforelse
+                                </div>
+                            </div>
+
+                            {{-- Inside the Right Panel Preview --}}
+                            @if(count($selectedSdgs) > 0)
+                            <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
+                                <h3 class="font-bold text-gray-900 uppercase tracking-widest text-xs border-b border-gray-100 pb-3 mb-4">
+                                    Shared Goals
+                                </h3>
+                                <div class="flex flex-col gap-3">
+                                    @foreach($selectedSdgs as $id)
+                                        @php 
+                                            $sdg = $this->allSdgs->find($id);
+                                            if($sdg) {
+                                                // Extract 'red' from 'bg-red-500' to create 'text-red-700'
+                                                $colorName = explode('-', str_replace('bg-', '', $sdg->color))[0];
+                                                $textColor = "text-{$colorName}-700";
+                                                $bgColor   = "bg-{$colorName}-50";
+                                            }
+                                        @endphp
+                                        
+                                        @if($sdg)
+                                        <div class="flex items-center gap-3 p-2 rounded-lg border border-transparent {{ $bgColor }}">
+                                            {{-- Color Swatch --}}
+                                            <div class="w-8 h-8 {{ $sdg->color }} rounded-md text-white font-black text-xs flex items-center justify-center shadow-sm">
+                                                {{ $sdg->id }}
+                                            </div>
+                                            
+                                            {{-- Name Label (Now Colored) --}}
+                                            <span class="text-[10px] font-bold {{ $textColor }} uppercase tracking-wide">
+                                                {{ $sdg->name }}
+                                            </span>
+                                        </div>
+                                        @endif
                                     @endforeach
                                 </div>
                             </div>
+                            @endif
 
                         </aside>
 
@@ -225,7 +487,9 @@
                             <section>
                                 <h3 class="font-bold text-gray-900 uppercase tracking-widest text-xs border-b-2 border-blue-500 w-16 pb-2 mb-6">About</h3>
                                 <div class="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
-                                    <p class="text-gray-600 leading-relaxed font-serif text-lg">{{ $description ?: 'Partner description...' }}</p>
+                                    <p class="text-gray-600 leading-relaxed font-serif text-lg whitespace-pre-line">{{ $description ?: 'Partner description will appear here...' }}</p>
+                                    
+                                    @if($scope)
                                     <div class="mt-6">
                                         <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Scope</h4>
                                         <div class="flex flex-wrap gap-2">
@@ -236,6 +500,7 @@
                                             @endforeach
                                         </div>
                                     </div>
+                                    @endif
                                 </div>
                             </section>
 
@@ -243,8 +508,8 @@
                             <section>
                                 <h3 class="font-bold text-gray-900 uppercase tracking-widest text-xs border-b-2 border-red-500 w-32 pb-2 mb-6">Partnership Journey</h3>
                                 <div class="relative border-l-2 border-gray-200 ml-4 space-y-8 pl-8 pb-4">
-                                    @foreach($engagements as $activity)
-                                        @if($activity['title'])
+                                    @forelse($engagements as $activity)
+                                        @if(!empty($activity['title']))
                                         <div class="relative group">
                                             <div class="absolute -left-[41px] top-1 w-6 h-6 bg-white rounded-full border-4 border-gray-200"></div>
                                             <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-2">
@@ -255,9 +520,47 @@
                                             <p class="text-sm text-gray-600 leading-relaxed bg-white p-4 rounded-xl shadow-sm border border-gray-100">{{ $activity['desc'] }}</p>
                                         </div>
                                         @endif
+                                    @empty
+                                        <p class="text-xs text-gray-400 italic">No activities added yet.</p>
+                                    @endforelse
+                                </div>
+                            </section>
+
+                            @if(count($selectedProjects) > 0) 
+                            <section class="mt-12 border-t border-gray-200 pt-8">
+                                <h3 class="font-bold text-gray-900 uppercase tracking-widest text-xs border-b-2 border-yellow-500 w-24 pb-2 mb-6">
+                                    Joint Projects
+                                </h3>
+                                
+                                <div class="grid sm:grid-cols-2 gap-4">
+                                    @foreach($selectedProjects as $id)
+                                        @php 
+                                            $proj = $this->allProjects->find($id); 
+                                        @endphp
+                                        
+                                        @if($proj)
+                                        <div class="group relative aspect-video rounded-xl overflow-hidden shadow-sm hover:shadow-md transition">
+                                            {{-- Background Image --}}
+                                            @if($proj->cover_image)
+                                                <img src="{{ asset('storage/'.$proj->cover_image) }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-700">
+                                            @else
+                                                <div class="w-full h-full bg-gray-200 flex items-center justify-center text-gray-400 text-xs font-bold uppercase">No Image</div>
+                                            @endif
+
+                                            {{-- Overlay --}}
+                                            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-90"></div>
+                                            
+                                            {{-- Content --}}
+                                            <div class="absolute bottom-3 left-3 right-3">
+                                                <span class="text-[9px] font-bold text-yellow-400 uppercase tracking-widest mb-0.5 block">Project</span>
+                                                <h4 class="font-bold text-white text-sm leading-tight line-clamp-2">{{ $proj->title }}</h4>
+                                            </div>
+                                        </div>
+                                        @endif
                                     @endforeach
                                 </div>
                             </section>
+                            @endif
 
                         </main>
                     </div>
@@ -267,4 +570,62 @@
         </div>
 
     </div>
+    {{-- QUICK CREATE PROJECT MODAL --}}
+    @if($showProjectModal)
+    <div class="fixed inset-0 z-[100] flex items-center justify-center px-4">
+        
+        {{-- Backdrop --}}
+        <div wire:click="$set('showProjectModal', false)" 
+            class="absolute inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity"></div>
+
+        {{-- Modal --}}
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md relative z-10 p-6 border border-gray-100 transform transition-all">
+            
+            <h3 class="font-heading font-bold text-lg text-gray-900 mb-1">Create New Project</h3>
+            <p class="text-xs text-gray-500 mb-6">Quickly add a project to link with this partner.</p>
+
+            <div class="space-y-4">
+                {{-- Title --}}
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">Project Title</label>
+                    <input wire:model="newProjectTitle" type="text" class="w-full text-sm border-gray-200 rounded-lg focus:ring-blue-500" placeholder="e.g. Coastal Cleanup 2025" autofocus>
+                    @error('newProjectTitle') <span class="text-red-500 text-[10px]">{{ $message }}</span> @enderror
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    {{-- Category (REQUIRED) --}}
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">Category</label>
+                        <select wire:model="newProjectCategoryId" class="w-full text-sm border-gray-200 rounded-lg focus:ring-blue-500">
+                            <option value="">Select...</option>
+                            @foreach($this->projectCategories as $cat)
+                                <option value="{{ $cat->id }}">{{ $cat->name }}</option>
+                            @endforeach
+                        </select>
+                        @error('newProjectCategoryId') <span class="text-red-500 text-[10px] block">{{ $message }}</span> @enderror
+                    </div>
+
+                    {{-- Status --}}
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">Status</label>
+                        <select wire:model="newProjectStatus" class="w-full text-sm border-gray-200 rounded-lg focus:ring-blue-500">
+                            <option value="Upcoming">Upcoming</option>
+                            <option value="Ongoing">Ongoing</option>
+                            <option value="Completed">Completed</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-end gap-3 mt-8">
+                <button wire:click="$set('showProjectModal', false)" class="px-4 py-2 text-xs font-bold text-gray-500 hover:text-gray-700 uppercase tracking-wider">
+                    Cancel
+                </button>
+                <button wire:click="createProject" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold uppercase tracking-wider rounded-lg shadow-md hover:shadow-lg transition">
+                    Create & Link
+                </button>
+            </div>
+        </div>
+    </div>
+    @endif
 </div>

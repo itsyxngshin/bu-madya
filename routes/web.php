@@ -39,8 +39,10 @@ Route::middleware(['auth', 'role:director'])
     ->group(function () {
     Route::get('/profile/edit', EditProfile::class)->name('profile.edit');
     Route::get('/news/create', NewsCreate::class)->name('news.create');
+    Route::get('/linkage/create', LinkagesCreate::class)->name('linkages.create');
     Route::get('/news/{slug}', NewsShow::class)->name('news.show');  
     Route::get('/news/{slug}/edit', NewsEdit::class)->name('news.edit');  
+    Route::get('/linkage/{linkage:slug}/edit', LinkagesEdit::class)->name('linkages.edit');
 });
 // Public view blades with access control on parts of the navigation
 Route::get('/', LandingPage::class)->name('open.home');  
@@ -53,9 +55,7 @@ Route::get('/projects', ProjectsIndex::class)->name('projects.index');
 Route::get('/projects/{slug}', ProjectsShow::class)->name('projects.show');
 Route::get('/project/create', ProjectsCreate::class)->name('projects.create');
 Route::get('/linkages', LinkagesIndex::class)->name('linkages.index');
-Route::get('/linkages/{id}', LinkagesShow::class)->name('linkages.show');
-Route::get('/linkage/create', LinkagesCreate::class)->name('linkages.create');
-Route::get('/linkage/{id}/edit', LinkagesEdit::class)->name('linkages.edit');
+Route::get('/linkages/{linkage:slug}', LinkagesShow::class)->name('linkages.show');
 Route::get('/partner-with-us', LinkagesProposal::class)->name('linkages.proposal'); 
 
 
