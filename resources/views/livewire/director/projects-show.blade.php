@@ -1,35 +1,38 @@
 <div class="min-h-screen bg-stone-50 font-sans text-gray-900">
     
     {{-- 1. NAVIGATION BAR (Sticky) --}}
-    <div class="fixed top-0 left-0 w-full z-50 bg-white/90 backdrop-blur-md border-b border-gray-200 h-16 flex items-center justify-between px-6 transition-all duration-300">
-        <a href="{{ route('projects.index') }}" class="group flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-500 hover:text-red-600 transition">
-            <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center group-hover:bg-red-50 transition">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+    <div class="w-full bg-white border-b border-gray-200 h-16 flex items-center justify-between px-6 shadow-sm relative z-30">
+            
+            {{-- Back Link --}}
+            <a href="{{ route('projects.index') }}" class="group flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-500 hover:text-red-600 transition">
+                <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center group-hover:bg-red-50 transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                </div>
+                <span class="hidden md:inline">Back to Projects</span>
+            </a>
+
+            {{-- Title --}}
+            <span class="font-heading font-black text-lg tracking-tighter text-gray-900">
+                Project <span class="text-red-600">Spotlight</span>
+            </span>
+
+            {{-- Status Badge --}}
+            <div class="flex items-center gap-2">
+                @if($project->status === 'Completed')
+                    <span class="px-3 py-1 bg-green-100 text-green-700 text-[10px] font-black uppercase tracking-widest rounded-full border border-green-200 shadow-sm flex items-center gap-1">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg> 
+                        Completed
+                    </span>
+                @elseif($project->status === 'Ongoing')
+                    <span class="px-3 py-1 bg-red-100 text-red-600 text-[10px] font-black uppercase tracking-widest rounded-full border border-red-200 shadow-sm flex items-center gap-1 animate-pulse">
+                        <span class="w-2 h-2 bg-red-500 rounded-full"></span> Ongoing
+                    </span>
+                @else
+                    <span class="px-3 py-1 bg-yellow-100 text-yellow-800 text-[10px] font-black uppercase tracking-widest rounded-full border border-yellow-200 shadow-sm">
+                        Upcoming
+                    </span>
+                @endif
             </div>
-            <span class="hidden md:inline">Back to Projects</span>
-        </a>
-
-        <span class="font-heading font-black text-lg tracking-tighter text-gray-900">
-            Project <span class="text-red-600">Spotlight</span>
-        </span>
-
-        {{-- Status Badge --}}
-        <div class="flex items-center gap-2">
-            @if($project['status'] === 'Completed')
-                <span class="px-3 py-1 bg-green-100 text-green-700 text-[10px] font-black uppercase tracking-widest rounded-full border border-green-200 shadow-sm flex items-center gap-1">
-                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg> 
-                    Completed
-                </span>
-            @elseif($project['status'] === 'Ongoing')
-                <span class="px-3 py-1 bg-red-100 text-red-600 text-[10px] font-black uppercase tracking-widest rounded-full border border-red-200 shadow-sm flex items-center gap-1 animate-pulse">
-                    <span class="w-2 h-2 bg-red-500 rounded-full"></span> Ongoing
-                </span>
-            @else
-                <span class="px-3 py-1 bg-yellow-100 text-yellow-800 text-[10px] font-black uppercase tracking-widest rounded-full border border-yellow-200 shadow-sm">
-                    Upcoming
-                </span>
-            @endif
-        </div>
     </div>
 
     {{-- 2. HERO SECTION --}}
@@ -40,33 +43,47 @@
             <div class="order-2 lg:order-1">
                 <div class="mb-6 flex items-center gap-3">
                      <span class="w-10 h-1 bg-gradient-to-r from-red-600 to-yellow-500 rounded-full"></span>
-                     <span class="text-xs font-bold text-gray-500 uppercase tracking-widest">{{ $project['cat'] }}</span>
+                     {{-- RELATIONSHIP: Category Name --}}
+                     <span class="text-xs font-bold text-gray-500 uppercase tracking-widest">
+                         {{ $project->category?->name ?? 'Uncategorized' }}
+                     </span>
                 </div>
                 
                 <h1 class="font-heading text-4xl md:text-6xl font-black text-gray-900 leading-[1.1] mb-6">
-                    {{ $project['title'] }}
+                    {{ $project->title }}
                 </h1>
                 
-                <p class="text-lg text-gray-600 leading-relaxed font-serif mb-8 border-l-4 border-yellow-400 pl-6">
-                    "{{ $project['description'] }}"
+                {{-- DESCRIPTION: With whitespace-pre-line to respect paragraphs --}}
+                <p class="text-lg text-gray-600 leading-relaxed font-serif mb-8 border-l-4 border-yellow-400 pl-6 whitespace-pre-line">
+                    "{{ $project->description }}"
                 </p>
 
-                {{-- Impact Stats --}}
+                {{-- Impact Stats (JSON Array) --}}
+                @if(!empty($project->impact_stats))
                 <div class="grid grid-cols-3 gap-4 border-t border-gray-200 pt-8">
-                    @foreach($project['impact_stats'] as $stat)
-                    <div>
-                        <span class="block text-2xl font-black text-gray-900">{{ $stat['value'] }}</span>
-                        <span class="text-[10px] uppercase tracking-wider text-gray-400 font-bold">{{ $stat['label'] }}</span>
-                    </div>
+                    @foreach($project->impact_stats as $stat)
+                        @if(!empty($stat['value']))
+                        <div>
+                            <span class="block text-2xl font-black text-gray-900">{{ $stat['value'] }}</span>
+                            <span class="text-[10px] uppercase tracking-wider text-gray-400 font-bold">{{ $stat['label'] }}</span>
+                        </div>
+                        @endif
                     @endforeach
                 </div>
+                @endif
             </div>
 
             {{-- Main Image --}}
             <div class="order-1 lg:order-2 relative group">
                 <div class="absolute inset-0 bg-red-600 rounded-[2.5rem] rotate-3 opacity-20 group-hover:rotate-6 transition duration-500"></div>
-                <div class="relative overflow-hidden rounded-[2.5rem] shadow-2xl aspect-[4/3] border-4 border-white">
-                    <img src="{{ $project['img'] }}" class="w-full h-full object-cover transform group-hover:scale-105 transition duration-700">
+                <div class="relative overflow-hidden rounded-[2.5rem] shadow-2xl aspect-[4/3] border-4 border-white bg-gray-200">
+                    @if($project->cover_img)
+                        {{-- Logic to check if image is external URL or uploaded file --}}
+                        <img src="{{ Str::startsWith($project->cover_img, 'http') ? $project->cover_img : asset('storage/' . $project->cover_img) }}" 
+                             class="w-full h-full object-cover transform group-hover:scale-105 transition duration-700">
+                    @else
+                        <div class="flex items-center justify-center h-full text-gray-400 font-bold bg-gray-100">NO IMAGE</div>
+                    @endif
                     <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
                     
                     {{-- Floating Location Badge --}}
@@ -74,7 +91,7 @@
                         <svg class="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                         <div>
                             <p class="text-[10px] text-gray-400 font-bold uppercase">Location</p>
-                            <p class="text-xs font-bold text-gray-900">{{ $project['location'] }}</p>
+                            <p class="text-xs font-bold text-gray-900">{{ $project->location ?? 'Various Locations' }}</p>
                         </div>
                     </div>
                 </div>
@@ -88,7 +105,7 @@
         {{-- LEFT SIDEBAR: Project Meta --}}
         <aside class="lg:col-span-4 space-y-8">
             
-            {{-- 1. QUICK INFO CARD (Updated with Proponent) --}}
+            {{-- 1. QUICK INFO CARD --}}
             <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
                 <h3 class="font-bold text-gray-900 uppercase tracking-widest text-xs border-b border-gray-100 pb-3 mb-4">
                     Project Details
@@ -102,7 +119,8 @@
                         </div>
                         <div>
                             <span class="block text-[10px] font-bold text-gray-400 uppercase">Lead Proponent</span>
-                            <span class="text-sm font-bold text-gray-800">{{ $project['proponent'] }}</span>
+                            {{-- Use the text fallback if relationship is null --}}
+                            <span class="text-sm font-bold text-gray-800">{{ $project->proponent_text ?? 'Committee' }}</span>
                         </div>
                     </li>
 
@@ -113,7 +131,9 @@
                         </div>
                         <div>
                             <span class="block text-[10px] font-bold text-gray-400 uppercase">Implementation Date</span>
-                            <span class="text-sm font-bold text-gray-800">{{ $project['date'] }}</span>
+                            <span class="text-sm font-bold text-gray-800">
+                                {{ $project->implementation_date ? $project->implementation_date->format('F d, Y') : 'TBA' }}
+                            </span>
                         </div>
                     </li>
 
@@ -124,52 +144,60 @@
                         </div>
                         <div>
                             <span class="block text-[10px] font-bold text-gray-400 uppercase">Current Status</span>
-                            <span class="text-sm font-bold text-gray-800">{{ $project['status'] }}</span>
+                            <span class="text-sm font-bold text-gray-800">{{ $project->status }}</span>
                         </div>
                     </li>
                 </ul>
             </div>
 
-            {{-- 2. PARTNERS CARD (New) --}}
+            {{-- 2. PARTNERS CARD (JSON Array) --}}
+            @if(!empty($project->partners_list))
             <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
                 <h3 class="font-bold text-gray-900 uppercase tracking-widest text-xs border-b border-gray-100 pb-3 mb-4">
                     In Partnership With
                 </h3>
                 <div class="flex flex-wrap gap-2">
-                    @foreach($project['partners'] as $partner)
-                    <span class="px-3 py-1 bg-gray-50 text-gray-600 text-xs font-bold rounded-lg border border-gray-200">
-                        {{ $partner }}
-                    </span>
+                    @foreach($project->partners_list as $partner)
+                        @if(!empty($partner))
+                        <span class="px-3 py-1 bg-gray-50 text-gray-600 text-xs font-bold rounded-lg border border-gray-200">
+                            {{ $partner }}
+                        </span>
+                        @endif
                     @endforeach
                 </div>
             </div>
+            @endif
 
-            {{-- 3. SDGs CARD (New) --}}
+            {{-- 3. SDGs CARD (Database Relation) --}}
+            @if($project->sdgs->count() > 0)
             <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
                 <h3 class="font-bold text-gray-900 uppercase tracking-widest text-xs border-b border-gray-100 pb-3 mb-4">
                     Targeted SDGs
                 </h3>
                 <div class="flex flex-col gap-2">
-                    @foreach($project['sdgs'] as $sdg)
+                    @foreach($project->sdgs as $sdg)
                     <div class="flex items-center gap-3">
-                        {{-- SDG Colored Box --}}
-                        <div class="w-10 h-10 {{ $sdg['color'] }} rounded-lg text-white font-black text-lg flex items-center justify-center shadow-sm">
-                            {{ $sdg['id'] }}
+                        {{-- Dynamic Color Box from DB --}}
+                        <div class="w-10 h-10 rounded-lg text-white font-black text-lg flex items-center justify-center shadow-sm"
+                             style="background-color: {{ $sdg->color_hex }}">
+                            {{ $sdg->number }}
                         </div>
                         <span class="text-xs font-bold text-gray-700 uppercase tracking-wide">
-                            {{ $sdg['label'] }}
+                            {{ $sdg->name }}
                         </span>
                     </div>
                     @endforeach
                 </div>
             </div>
+            @endif
 
         </aside>
 
         {{-- RIGHT CONTENT --}}
         <main class="lg:col-span-8 space-y-12">
             
-            {{-- 4. OBJECTIVES SECTION (Updated Design) --}}
+            {{-- 4. OBJECTIVES SECTION (Database Relation) --}}
+            @if($project->objectives->count() > 0)
             <div class="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-8 rounded-[2rem] shadow-lg relative overflow-hidden">
                 <div class="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full blur-3xl -mr-10 -mt-10"></div>
                 
@@ -179,23 +207,26 @@
                 </h3>
                 
                 <ul class="space-y-4 relative z-10">
-                    @foreach($project['objectives'] as $obj)
+                    @foreach($project->objectives as $obj)
                     <li class="flex items-start gap-3 group">
                         <div class="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center shrink-0 group-hover:bg-green-500 transition-colors duration-300">
                             <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
                         </div>
                         <span class="text-gray-200 text-sm md:text-base leading-relaxed group-hover:text-white transition-colors">
-                            {{ $obj }}
+                            {{ $obj->objective }}
                         </span>
                     </li>
                     @endforeach
                 </ul>
             </div>
+            @endif
 
-            {{-- Gallery Section (Keep existing code) --}}
+            {{-- Gallery Placeholder --}}
             <div>
                  <h3 class="font-bold text-gray-900 uppercase tracking-widest text-xs border-b-2 border-green-500 w-16 pb-2 mb-6">Gallery</h3>
-                 {{-- ... gallery code ... --}}
+                 <div class="bg-gray-100 rounded-2xl p-8 text-center text-gray-400 text-xs font-bold uppercase tracking-widest border border-dashed border-gray-300">
+                     No additional photos yet
+                 </div>
             </div>
 
         </main>

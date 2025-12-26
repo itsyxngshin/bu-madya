@@ -3,68 +3,85 @@
 namespace App\Livewire\Director;
 
 use Livewire\Component;
+use Illuminate\Support\Str;
+use App\Models\Project;
+use App\Models\ProjectCategory; // Assuming you have this
+use App\Models\ProjectObjective;
+use App\Models\Sdg;
+use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Layout; 
 
 #[Layout('layouts.madya-template')]
 class ProjectsCreate extends Component
 {
-   // Basic Info
-    public $title = 'New Project Title';
-    public $cat = 'Community Outreach';
+    // 1. Basic Fields
+    public $title = '';
+    public $cat = 'Community Outreach'; // Default selection
     public $status = 'Upcoming';
-    public $date;
+    public $date = '';
     public $location = '';
-    public $beneficiaries = '';
     public $proponent = '';
+    public $beneficiaries = '';
+    public $coverImg = '';
     public $description = '';
-    public $coverImg = 'https://images.unsplash.com/photo-1559027615-cd4628902d4a?q=80&w=2074';
+    public $slug = '';
 
-    // Dynamic Lists
-    public $partners = [''];
-    public $objectives = [''];
+    // 2. Dynamic Lists (Arrays)
+    public $objectives = ['']; // Start with one empty row
+    public $partners = [''];   // Start with one empty row
     public $impact_stats = [
-        ['label' => 'Beneficiaries', 'value' => '0']
-    ];
-    
-    // SDGs (Selected IDs)
+        ['label' => '', 'value' => '']
+    ]; 
+
+    // 3. SDGs
     public $selectedSdgs = [];
+    
+    
+    // Static SDG Data for the UI (Colors/Labels)
 
-    // Static Data for SDG Selector
-    public $allSdgs = [
-        1 => ['label' => 'No Poverty', 'color' => 'bg-red-500'],
-        2 => ['label' => 'Zero Hunger', 'color' => 'bg-yellow-500'],
-        3 => ['label' => 'Good Health', 'color' => 'bg-green-500'],
-        4 => ['label' => 'Quality Education', 'color' => 'bg-red-700'],
-        5 => ['label' => 'Gender Equality', 'color' => 'bg-orange-500'],
-        6 => ['label' => 'Clean Water', 'color' => 'bg-cyan-500'],
-        7 => ['label' => 'Clean Energy', 'color' => 'bg-yellow-400'],
-        8 => ['label' => 'Decent Work', 'color' => 'bg-red-800'],
-        9 => ['label' => 'Industry/Infras.', 'color' => 'bg-orange-600'],
-        10 => ['label' => 'Reduced Inequal.', 'color' => 'bg-pink-500'],
-        11 => ['label' => 'Sustainable Cities', 'color' => 'bg-orange-400'],
-        12 => ['label' => 'Consumption', 'color' => 'bg-yellow-600'],
-        13 => ['label' => 'Climate Action', 'color' => 'bg-green-700'],
-        14 => ['label' => 'Life Below Water', 'color' => 'bg-blue-500'],
-        15 => ['label' => 'Life on Land', 'color' => 'bg-green-600'],
-        16 => ['label' => 'Peace & Justice', 'color' => 'bg-blue-700'],
-        17 => ['label' => 'Partnerships', 'color' => 'bg-blue-900'],
-    ];
+    // ==========================================
+    // DYNAMIC LIST MANAGEMENT
+    // ==========================================
 
-    public function mount()
+    public function updatedTitle($value)
     {
-        $this->date = now()->format('F Y');
+        // Only auto-fill if the user hasn't manually entered a complex slug yet
+        // Or simply always update it for convenience until they save
+        $this->slug = Str::slug($value); 
     }
 
-    // --- Dynamic List Logic ---
+    public function addObjective()
+    {
+        $this->objectives[] = '';
+    }
 
-    public function addPartner() { $this->partners[] = ''; }
-    public function removePartner($index) { unset($this->partners[$index]); $this->partners = array_values($this->partners); }
+    public function removeObjective($index)
+    {
+        unset($this->objectives[$index]);
+        $this->objectives = array_values($this->objectives); // Re-index array
+    }
 
-    public function addObjective() { $this->objectives[] = ''; }
-    public function removeObjective($index) { unset($this->objectives[$index]); $this->objectives = array_values($this->objectives); }
+    public function addPartner()
+    {
+        $this->partners[] = '';
+    }
 
-    public function addStat() { $this->impact_stats[] = ['label' => '', 'value' => '']; }
-    public function removeStat($index) { unset($this->impact_stats[$index]); $this->impact_stats = array_values($this->impact_stats); }
+    public function removePartner($index)
+    {
+        unset($this->partners[$index]);
+        $this->partners = array_values($this->partners);
+    }
+
+    public function addStat()
+    {
+        $this->impact_stats[] = ['label' => '', 'value' => ''];
+    }
+
+    public function removeStat($index)
+    {
+        unset($this->impact_stats[$index]);
+        $this->impact_stats = array_values($this->impact_stats);
+    }
 
     public function toggleSdg($id)
     {
@@ -75,8 +92,69 @@ class ProjectsCreate extends Component
         }
     }
 
+    // ==========================================
+    // SAVING LOGIC
+    // ==========================================
+
+    public function save()
+    {
+        $this->validate([
+            'title' => 'required|min:5',
+            'slug'  => ['required', 'alpha_dash', Rule::unique('projects', 'slug')],
+            'date' => 'required',
+            'cat' => 'required',
+        ]);
+
+        DB::transaction(function () {
+            // 1. Handle Category Logic (Find ID based on Name, or create if strictly needed)
+            // Assuming you have a ProjectCategory model seeded with these names
+            $category = ProjectCategory::firstOrCreate(['name' => $this->cat]);
+
+            // 2. Create the Main Project
+            $project = Project::create([
+                'title' => $this->title,
+                'slug' => $this->slug,
+                'project_category_id' => $category->id,
+                'status' => $this->status,
+                'implementation_date' => $this->date, // Ensure Model casts this to date
+                'location' => $this->location,
+                'beneficiaries' => $this->beneficiaries,
+                'proponent_text' => $this->proponent, // Storing as text for now
+                'description' => $this->description,
+                'cover_img' => $this->coverImg,
+                
+                // Saving JSON columns directly
+                'partners_list' => array_filter($this->partners), // Remove empty strings
+                'impact_stats' => array_filter($this->impact_stats, fn($i) => !empty($i['value'])),
+            ]);
+
+            // 3. Save Objectives (HasMany)
+            foreach ($this->objectives as $obj) {
+                if (!empty($obj)) {
+                    ProjectObjective::create([
+                        'project_id' => $project->id,
+                        'objective' => $obj
+                    ]);
+                }
+            }
+
+            // 4. Save SDGs (BelongsToMany)
+            // Make sure your Project model has: return $this->belongsToMany(Sdg::class, 'project_sdgs');
+            if (!empty($this->selectedSdgs)) {
+                $project->sdgs()->attach($this->selectedSdgs);
+            }
+        });
+
+        // Redirect
+        session()->flash('message', 'Project successfully created!');
+        return redirect()->route('projects.index');
+    }
+
     public function render()
     {
-        return view('livewire.director.projects-create');
+        return view('livewire.director.projects-create', [
+            // Order by number so they appear 1-17
+            'sdgs' => Sdg::orderBy('number')->get() 
+        ]);
     }
 }

@@ -17,6 +17,8 @@ use App\Livewire\Director\LinkagesShow;
 use App\Livewire\Director\LinkagesCreate;
 use App\Livewire\Director\LinkagesEdit;
 use App\Livewire\Director\LinkagesProposal;
+use App\Livewire\Director\UserProfile;
+use App\Livewire\Director\EditProfile;
 
 Route::get('/', function () {
     return view('welcome');
@@ -32,19 +34,33 @@ Route::middleware([
     })->name('dashboard');
 });
 
+// Middleware accessible to both members and directors
+Route::middleware(['auth', 'role:director'])
+    ->group(function () {
+    Route::get('/profile/edit', EditProfile::class)->name('profile.edit');
+    Route::get('/news/create', NewsCreate::class)->name('news.create');
+    Route::get('/news/{slug}', NewsShow::class)->name('news.show');  
+    Route::get('/news/{slug}/edit', NewsEdit::class)->name('news.edit');  
+});
+// Public view blades with access control on parts of the navigation
 Route::get('/', LandingPage::class)->name('open.home');  
 Route::get('/directory', Directory::class)->name('open.directory');  
 Route::get('/committees', Committees::class)->name('open.committees'); 
 Route::get('/committees/{slug}', CommitteeMembers::class)->name('open.committees.show');
 Route::get('/news', NewsIndex::class)->name('news.index');
-Route::get('/news/create', NewsCreate::class)->name('news.create');
-Route::get('/news/{id}', NewsShow::class)->name('news.show');  
-Route::get('/news/{id}/edit', NewsEdit::class)->name('news.edit');
+
 Route::get('/projects', ProjectsIndex::class)->name('projects.index'); 
-Route::get('/projects/{id}', ProjectsShow::class)->name('projects.show');
+Route::get('/projects/{slug}', ProjectsShow::class)->name('projects.show');
 Route::get('/project/create', ProjectsCreate::class)->name('projects.create');
 Route::get('/linkages', LinkagesIndex::class)->name('linkages.index');
 Route::get('/linkages/{id}', LinkagesShow::class)->name('linkages.show');
 Route::get('/linkage/create', LinkagesCreate::class)->name('linkages.create');
 Route::get('/linkage/{id}/edit', LinkagesEdit::class)->name('linkages.edit');
 Route::get('/partner-with-us', LinkagesProposal::class)->name('linkages.proposal'); 
+
+
+
+Route::get('/profile/{username}', UserProfile::class)->name('profile.public');
+
+
+

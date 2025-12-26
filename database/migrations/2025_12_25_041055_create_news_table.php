@@ -20,8 +20,6 @@ return new class extends Migration
             $table->foreignId('news_category_id')->constrained('news_categories')->onDelete('cascade');
             $table->foreignId('user_id')->nullable()->constrained()->onDelete('set null');
             $table->string('author');         // Display name (e.g., "Secretariat")
-            
-            // Main Body
             $table->longText('content');      // longText allows for extensive articles
             
             // Visuals & Meta
@@ -31,10 +29,12 @@ return new class extends Migration
             // Publishing Control
             $table->date('published_at')->nullable();
             $table->boolean('is_featured')->default(false); // To pin to the top of the feed
-            
             // Optional: Link to a system user
             $table->string('author_display_name')->nullable();
-
+            $table->text('summary')->nullable();
+            $table->string('photo_credit')->nullable();
+            $table->boolean('show_drop_cap')->default(false);
+            $table->enum('status', ['draft', 'active', 'hidden'])->default('draft');
             $table->timestamps();
         });
     }

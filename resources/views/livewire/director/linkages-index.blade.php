@@ -1,24 +1,4 @@
 <div class="min-h-screen bg-stone-50 font-sans text-gray-900">
-    
-    {{-- 1. STICKY NAV --}}
-    <nav x-data="{ scrolled: false }" @scroll.window="scrolled = (window.pageYOffset > 20)"
-        class="sticky top-0 z-30 transition-all duration-300 w-full"
-        :class="scrolled ? 'bg-white/90 backdrop-blur-md shadow-md py-2' : 'bg-transparent py-4'">
-        <div class="px-6 flex justify-between items-center">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-lg overflow-hidden p-1">
-                   <img src="{{ asset('images/official_logo.png') }}" alt="Logo" class="w-full h-full object-contain">
-                </div>
-                <span class="font-bold text-lg tracking-tight transition-colors duration-300">BU MADYA</span>
-            </div>
-            <div class="hidden md:flex items-center space-x-6 text-sm font-semibold tracking-wide">
-                <a href="{{ route('dashboard') }}" class="text-gray-600 hover:text-red-600 transition">Home</a>
-                <a href="{{ route('projects.index') }}" class="text-gray-600 hover:text-red-600 transition">Projects</a>
-                <a href="#" class="text-red-600">Linkages</a>
-            </div>
-        </div>
-    </nav>
-
     {{-- 2. HERO HEADER --}}
     <header class="relative h-[400px] flex items-center justify-center text-white overflow-hidden rounded-3xl shadow-xl mx-6 -mt-20 z-10">
         <div class="absolute inset-0 z-0">

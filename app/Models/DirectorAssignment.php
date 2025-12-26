@@ -47,4 +47,6 @@ class DirectorAssignment extends Model
     {
         static::addGlobalScope(new ActiveYearScope);
     }
+
+    
 }

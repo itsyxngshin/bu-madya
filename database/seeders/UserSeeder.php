@@ -27,7 +27,7 @@ class UserSeeder extends Seeder
             roleName: 'IT Head'
         );
 
-        // B. The Director-General - CSSP (College of Social Sciences)
+        // B. The Director-General
         $this->createUser(
             roleId: 2, 
             email: 'director-general@bu-madya.org',

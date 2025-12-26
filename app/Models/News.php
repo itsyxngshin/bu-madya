@@ -4,6 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\NewsVote;
+use App\Models\NewsComment;
+use App\Models\NewsCategory;
+use App\Models\NewsSdg;
 
 class News extends Model
 {
@@ -11,7 +15,8 @@ class News extends Model
 
     protected $fillable = [
         'title', 'slug', 'news_category_id', 'author', 'content', 
-        'cover_img', 'tags', 'published_at', 'is_featured', 'user_id'
+        'cover_img', 'tags', 'published_at', 'is_featured', 'user_id',
+        'photo_credit', 'show_drop_cap', 'status', 'summary',
     ];
 
     protected $casts = [
@@ -52,4 +57,17 @@ class News extends Model
         // Points to the specific NewsCategory model
         return $this->belongsTo(NewsCategory::class, 'news_category_id');
     }
+
+    public function sdgs()
+    {
+        return $this->belongsToMany(Sdg::class, 'news_sdgs');
+    }
+    public function comments(){
+        return $this->hasMany(NewsComment::class)->latest(); 
+    }
+
+    public function votes(){
+        return $this->hasMany(NewsVote::class); 
+    }
+    
 }

@@ -27,6 +27,7 @@ class DatabaseSeeder extends Seeder
             DirectorsSeeder::class,
             UserSeeder::class,  
             MadyaOfficialSeeder::class,
+            TrialProfileSeeder::class,
         ]);
     }
 }

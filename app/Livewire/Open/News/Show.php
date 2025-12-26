@@ -4,27 +4,26 @@ namespace App\Livewire\Open\News;
 
 use Livewire\Component;
 use Livewire\Attributes\Layout; 
+use App\Models\News;
 
 #[Layout('layouts.madya-template')]
 class Show extends Component
 {
-    public $articleId;
+    // public $articleId; // <--- Remove this (not needed anymore)
     public $article;
 
-    public function mount($id)
+    public function mount($slug)
     {
-        $this->articleId = $id;
+        // 1. Fetch Article
+        // REMOVED 'author' from with() because it is a column, not a relationship.
+        $this->article = News::with(['category', 'votes', 'sdgs']) 
+            ->where('slug', $slug)
+            ->firstOrFail();
 
-        // Simulate fetching from DB
-        $this->article = [
-            'id' => $id,
-            'title' => 'BU MADYA Launches National Youth Advocacy Summit 2025',
-            'category' => 'Advocacy',
-            'date' => 'December 12, 2024',
-            'author' => 'Secretariat Committee',
-            'img' => 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?q=80&w=2070',
-            'content' => 'Lorem ipsum dolor sit amet...', // Add full content here
-        ]; 
+        // 2. Security: Prevent access to drafts (unless it's the creator)
+        if ($this->article->status !== 'active' && auth()->id() !== $this->article->user_id) {
+            abort(404);
+        }
     }
 
     public function render()

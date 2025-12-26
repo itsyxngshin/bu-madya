@@ -3,13 +3,22 @@
 namespace App\Livewire\Open\News;
 
 use Livewire\Component;
+use Livewire\WithPagination;
+use App\Models\News;
+use App\Models\NewsCategory;
 use Livewire\Attributes\Layout; 
 
 #[Layout('layouts.madya-template')]
 class Index extends Component
 {
+    use WithPagination;
+
     public $search = '';
     public $category = 'All Stories';
+
+    // Reset pagination when filtering
+    public function updatedSearch() { $this->resetPage(); }
+    public function updatedCategory() { $this->resetPage(); }
 
     public function setCategory($cat)
     {
@@ -18,29 +27,48 @@ class Index extends Component
 
     public function render()
     {
-        // Simulated Data (In a real app, this comes from the Database)
-        $allNews = [
-            ['id' => 1, 'title' => 'Tree Planting Initiative in Albay', 'cat' => 'Environment', 'date' => 'Dec 12, 2024', 'img' => 'https://images.unsplash.com/photo-1542601906990-b4d3fb7d5763?q=80&w=1000'],
-            ['id' => 2, 'title' => 'Digital Literacy Workshop Success', 'cat' => 'Education', 'date' => 'Nov 28, 2024', 'img' => 'https://images.unsplash.com/photo-1531482615713-2afd69097998?q=80&w=1000'],
-            ['id' => 3, 'title' => 'Call for New Members: A.Y. 2025', 'cat' => 'Announcement', 'date' => 'Oct 15, 2024', 'img' => 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?q=80&w=1000'],
-            ['id' => 4, 'title' => 'Cultural Heritage Month Exhibit', 'cat' => 'Culture', 'date' => 'Sep 05, 2024', 'img' => 'https://images.unsplash.com/photo-1461301214746-1e790926d323?q=80&w=1000'],
-            ['id' => 5, 'title' => 'Partnership with UNESCO Signed', 'cat' => 'Achievement', 'date' => 'Aug 20, 2024', 'img' => 'https://images.unsplash.com/photo-1521791136064-7986c2920216?q=80&w=1000'],
-            ['id' => 6, 'title' => 'Student Mental Health Forum', 'cat' => 'Social Science', 'date' => 'Aug 10, 2024', 'img' => 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?q=80&w=1000'],
-        ];
+        // 1. Get Featured Article (Optimized)
+        $featured = null;
 
-        // Filter Logic
-        $news = collect($allNews)->filter(function ($item) {
-            // 1. Filter by Search
-            $matchesSearch = empty($this->search) || stripos($item['title'], $this->search) !== false;
-            
-            // 2. Filter by Category
-            $matchesCategory = $this->category === 'All Stories' || $item['cat'] === $this->category;
+        if ($this->category === 'All Stories' && empty($this->search)) { 
+            $featured = News::query()
+                // Optimized: Count only real "likes"
+                ->withCount(['votes as likes_count' => function ($query) {
+                    $query->where('is_like', true);
+                }])
+                ->where('status', 'active')
+                ->orderBy('likes_count', 'desc') 
+                ->orderBy('published_at', 'desc')
+                ->first();
+        }
 
-            return $matchesSearch && $matchesCategory;
-        });
+        // 2. Get the Grid Query (Optimized)
+        $query = News::query()
+            ->with('category') // Only load the category relationship
+            // PERFORMANCE FIX: Don't load votes, just count them!
+            ->withCount(['votes as votes_count' => function ($query) {
+                $query->where('is_like', true);
+            }])
+            ->where('status', 'active');
+
+        if ($featured) {
+            $query->where('id', '!=', $featured->id);
+        }
+
+        if (!empty($this->search)) {
+            $query->where('title', 'like', '%' . $this->search . '%');
+        }
+
+        if ($this->category !== 'All Stories') {
+            $query->whereHas('category', function ($q) {
+                $q->where('name', $this->category);
+            });
+        }
 
         return view('livewire.open.news.index', [
-            'news' => $news
+            'featured' => $featured,
+            'news' => $query->latest('published_at')->paginate(9),
+            'categories' => NewsCategory::pluck('name')->prepend('All Stories'),
         ]);
     }
 }

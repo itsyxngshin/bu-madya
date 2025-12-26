@@ -127,4 +127,24 @@ class User extends Authenticatable
             'id' // Local key on profiles table
         );
     }
+
+    public function directorAssignment()
+    {
+        // A User "has one" current assignment
+        return $this->hasOne(DirectorAssignment::class); 
+    }
+    
+    /**
+     * Optional: If you want to access ALL past assignments
+     */
+    public function directorAssignments()
+    {
+        return $this->hasMany(DirectorAssignment::class);
+    }
+
+    public function committeeMember()
+    {
+        // A user might be a member of a committee
+        return $this->hasOne(CommitteeMember::class)->latest(); // Gets the latest/current assignment
+    }
 }

@@ -5,6 +5,8 @@ namespace App\Models;
 use App\Models\Scopes\ActiveYearScope;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\ProjectSdg;
+use App\Models\ProjectCategory;
 
 class Project extends Model
 {

@@ -49,11 +49,25 @@ class CategorySeeder extends Seeder
                 'color' => 'bg-green-600',
                 'icon' => 'hand-heart', // Optional: You can store icon names (e.g. for Heroicons)
             ],
+
+            [
+                'name' => 'Advocacy Campaign',
+                'color' => 'bg-pink-500',
+                'icon' => 'color-swatch',
+            ],
+
             [
                 'name' => 'Capacity Building',
                 'color' => 'bg-purple-600',
                 'icon' => 'academic-cap',
             ],
+
+            [
+                'name' => 'Internal Affairs',
+                'color' => 'bg-purple-600',
+                'icon' => 'academic-cap',
+            ],
+
             [
                 'name' => 'Environmental',
                 'color' => 'bg-emerald-500',

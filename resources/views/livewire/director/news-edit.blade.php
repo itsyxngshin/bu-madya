@@ -1,186 +1,279 @@
-<div class="min-h-screen bg-gray-100 font-sans text-gray-900" x-data="{ mobilePreview: false }">
+<div class="h-screen bg-gray-100 font-sans text-gray-900 overflow-hidden flex flex-col" x-data="{ mobilePreview: false, fullScreen: false }">
 
-    {{-- 1. EDITOR NAV --}}
-    <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-200 h-16 px-6 flex items-center justify-between">
+    {{-- 1. NAVIGATION BAR --}}
+    <nav class="shrink-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-200 h-16 px-6 flex items-center justify-between">
         
         <div class="flex items-center gap-3">
-            {{-- Cancel / Back Link --}}
-            <a href="{{ route('news.show', $articleId) }}" class="text-xs font-bold uppercase text-gray-400 hover:text-red-600 transition">
+            {{-- Exit back to the Article Show page --}}
+            <a href="{{ route('news.show', $slug) }}" class="text-xs font-bold uppercase text-gray-400 hover:text-red-600 transition">
                 &larr; Cancel
             </a>
             <div class="h-4 w-px bg-gray-300"></div>
             <span class="font-heading font-black text-gray-800 tracking-tight">
-                Edit <span class="text-red-600">Story</span>
+                Edit <span class="text-red-600">Mode</span>
             </span>
         </div>
 
+        {{-- Mobile Toggle --}}
         <button @click="mobilePreview = !mobilePreview" class="md:hidden text-xs font-bold uppercase bg-gray-200 px-3 py-1 rounded">
             <span x-text="mobilePreview ? 'Edit' : 'Preview'"></span>
         </button>
 
         <div class="flex items-center gap-3">
-            {{-- Flash Message --}}
             <span class="text-xs text-green-600 font-bold mr-2" 
                   x-data="{ show: false }" 
                   x-show="show" 
-                  x-transition.duration.1000ms
+                  x-transition.duration.1000ms 
                   x-init="@this.on('message', () => { show = true; setTimeout(() => show = false, 2000) })">
-                Changes Saved!
+                Saved!
             </span>
 
-            {{-- Update Button --}}
-            <button wire:click="update" class="px-5 py-2 bg-gradient-to-r from-red-600 to-yellow-500 text-white text-xs font-bold uppercase rounded-lg hover:shadow-lg hover:scale-105 transition shadow-md">
-                Update Article
+            {{-- SAVE DRAFT BUTTON --}}
+            <button wire:click="saveDraft" class="px-4 py-2 bg-white border border-gray-300 text-gray-600 text-xs font-bold uppercase rounded-lg hover:bg-gray-50 transition shadow-sm">
+                Save Draft
+            </button>
+
+            {{-- PUBLISH BUTTON --}}
+            <button wire:click="publish" class="px-5 py-2 bg-gradient-to-r from-red-600 to-yellow-500 text-white text-xs font-bold uppercase rounded-lg hover:shadow-lg hover:scale-105 transition shadow-md">
+                Publish Updates
             </button>
         </div>
     </nav>
 
-    <div class="flex h-[calc(100vh-64px)] overflow-hidden">
+    {{-- 2. MAIN WORKSPACE --}}
+    <div class="flex-1 flex overflow-hidden relative">
         
         {{-- ======================== --}}
         {{-- LEFT PANEL: EDITOR       --}}
         {{-- ======================== --}}
-        <div class="w-full md:w-1/2 lg:w-5/12 h-full overflow-y-auto p-6 bg-gray-50 border-r border-gray-200"
-             :class="mobilePreview ? 'hidden' : 'block'">
+        <div class="h-full overflow-y-auto bg-gray-50 border-r border-gray-200 transition-all duration-300 ease-in-out pb-20"
+             :class="[
+                mobilePreview ? 'hidden' : 'w-full md:w-1/2 lg:w-5/12',
+                fullScreen ? 'hidden' : 'block'
+             ]">
             
-            <div class="max-w-xl mx-auto space-y-6">
+            <div class="p-6 max-w-xl mx-auto flex flex-col gap-6">
                 
-                {{-- Metadata --}}
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-4">
+                {{-- Metadata Card --}}
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 space-y-4">
                     <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest border-b border-gray-100 pb-2">Metadata</h3>
+                    
+                    {{-- Slug --}}
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">URL Slug</label>
+                        <div class="flex items-center">
+                            <span class="text-[10px] text-gray-400 bg-gray-50 border border-r-0 border-gray-200 rounded-l-lg px-2 py-2">/news/</span>
+                            <input wire:model="slug" type="text" class="w-full text-xs text-gray-600 border-gray-200 rounded-r-lg focus:ring-yellow-400 focus:border-yellow-400 bg-gray-50 h-8">
+                        </div>
+                        @error('slug') <span class="text-red-500 text-[10px]">{{ $message }}</span> @enderror
+                    </div>
+
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-bold text-gray-700 mb-1">Category</label>
-                            <select wire:model.live="category" class="w-full text-sm border-gray-200 rounded-lg focus:ring-yellow-400">
-                                <option>Advocacy</option>
-                                <option>Event</option>
-                                <option>Announcement</option>
-                                <option>Opinion</option>
+                            <select wire:model.live="category" class="w-full text-xs border-gray-200 rounded-lg focus:ring-yellow-400 py-1.5">
+                                @foreach($categoryOptions as $cat)
+                                    <option value="{{ $cat->name }}">{{ $cat->name }}</option>
+                                @endforeach
                             </select>
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-gray-700 mb-1">Author</label>
-                            <input wire:model.live="author" type="text" class="w-full text-sm border-gray-200 rounded-lg focus:ring-yellow-400">
+                            <input wire:model.live="author" type="text" class="w-full text-xs border-gray-200 rounded-lg focus:ring-yellow-400 py-1.5">
                         </div>
                     </div>
+
+                    {{-- Summary --}}
                     <div>
-                        <label class="block text-xs font-bold text-gray-700 mb-1">Cover Image URL</label>
-                        <input wire:model.live="imageUrl" type="text" class="w-full text-xs text-gray-500 border-gray-200 rounded-lg focus:ring-yellow-400">
+                        <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Summary</label>
+                        <textarea wire:model.live="summary" rows="2" class="w-full text-xs border-gray-200 rounded-lg resize-none focus:ring-yellow-400"></textarea>
+                    </div>
+
+                    {{-- Cover Image (Drag & Drop) --}}
+                    <div x-data="{ isDropping: false, isUploading: false }"
+                         x-on:livewire-upload-start="isUploading = true"
+                         x-on:livewire-upload-finish="isUploading = false"
+                         x-on:livewire-upload-error="isUploading = false">
+                        
+                        <label class="block text-[10px] font-bold text-gray-500 uppercase mb-2">Cover Image</label>
+
+                        <div class="relative flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-xl transition-all duration-200 bg-white"
+                             :class="isDropping ? 'border-red-500 bg-red-50' : 'border-gray-300 hover:bg-gray-50'">
+                            
+                            {{-- Invisible Overlay Input --}}
+                            <input type="file" 
+                                   wire:model="cover_photo" 
+                                   class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" 
+                                   accept="image/png, image/jpeg, image/jpg"
+                                   @dragover="isDropping = true" 
+                                   @dragleave="isDropping = false" 
+                                   @drop="isDropping = false">
+
+                            {{-- Visual Content --}}
+                            <div class="absolute inset-0 w-full h-full flex flex-col items-center justify-center pointer-events-none z-0">
+                                @if ($cover_photo)
+                                    <img src="{{ $cover_photo->temporaryUrl() }}" class="w-full h-full object-cover rounded-xl opacity-90">
+                                    <div class="absolute bg-black/50 text-white text-[10px] px-2 py-1 rounded backdrop-blur-sm">New File Selected</div>
+                                @elseif($imageUrl)
+                                    <img src="{{ Str::startsWith($imageUrl, 'http') ? $imageUrl : asset('storage/'.$imageUrl) }}" class="w-full h-full object-cover rounded-xl opacity-90">
+                                    <div class="absolute bg-black/50 text-white text-[10px] px-2 py-1 rounded backdrop-blur-sm">Current Image</div>
+                                @else
+                                    <div class="text-gray-400 text-center"><p class="text-[10px] font-bold">Click to Upload</p></div>
+                                @endif
+                            </div>
+
+                            {{-- Spinner --}}
+                            <div x-show="isUploading" class="absolute inset-0 bg-white/90 flex items-center justify-center z-20 rounded-xl">
+                                <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-red-600"></div>
+                            </div>
+                        </div>
+
+                        <div class="mt-2">
+                            <input wire:model.live="photo_credit" type="text" class="w-full text-[10px] border-gray-200 rounded-lg focus:ring-red-500" placeholder="Photo Credit">
+                        </div>
                     </div>
                 </div>
 
-                {{-- Content Editor --}}
-                <div class="space-y-2"
-                     x-data="{ 
-                        insert(start, end) {
-                            let el = $refs.editor;
-                            let text = el.value;
-                            let s = el.selectionStart;
-                            let e = el.selectionEnd;
-                            let replacement = start + text.substring(s, e) + end;
-                            el.value = text.substring(0, s) + replacement + text.substring(e);
-                            el.dispatchEvent(new Event('input'));
-                            setTimeout(() => { el.focus(); el.setSelectionRange(s + start.length, e + start.length); }, 50);
-                        }
-                     }">
-                    
-                    <input wire:model.live="title" type="text" 
-                           class="w-full text-3xl font-serif font-bold text-gray-900 bg-transparent border-0 border-b-2 border-transparent focus:border-red-500 focus:ring-0 placeholder-gray-300 transition px-0" 
-                           placeholder="Headline...">
+                {{-- SDG Picker --}}
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 space-y-3">
+                    <div class="flex items-center justify-between border-b border-gray-100 pb-2">
+                        <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest">Target SDGs</h3>
+                        <span class="text-[10px] font-bold text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">{{ count($selectedSdgs) }} Selected</span>
+                    </div>
+                    <div class="grid grid-cols-6 gap-2">
+                        @foreach($sdgOptions as $sdg)
+                            <label class="cursor-pointer group relative">
+                                <input type="checkbox" wire:model.live="selectedSdgs" value="{{ $sdg->id }}" class="peer hidden">
+                                <div class="w-7 h-7 rounded-md flex items-center justify-center transition-all duration-200 border border-transparent peer-checked:scale-110 peer-checked:shadow-md peer-checked:border-gray-800 {{ $sdg->color_class }} bg-opacity-20 hover:bg-opacity-40 peer-checked:bg-opacity-100 text-gray-400 peer-checked:text-white">
+                                    <span class="font-black text-[10px]">{{ $sdg->id }}</span>
+                                </div>
+                                <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 hidden group-hover:block whitespace-nowrap z-10 bg-gray-900 text-white text-[10px] px-2 py-1 rounded">{{ $sdg->name }}</div>
+                            </label>
+                        @endforeach
+                    </div>
+                </div>
 
+                {{-- Main Editor --}}
+                <div class="space-y-2" x-data="{ isUploading: false, insert(start, end) { 
+                        let el = $refs.editor;
+                        let text = el.value;
+                        let s = el.selectionStart;
+                        let e = el.selectionEnd;
+                        let replacement = start + text.substring(s, e) + end;
+                        el.value = text.substring(0, s) + replacement + text.substring(e);
+                        el.dispatchEvent(new Event('input'));
+                        setTimeout(() => { el.focus(); el.setSelectionRange(s + start.length, e + start.length); }, 50);
+                    } }">
+                    
                     {{-- Toolbar --}}
                     <div class="flex items-center gap-1 bg-white border border-gray-200 p-1.5 rounded-lg shadow-sm w-fit mb-2">
-                        <button @click="insert('**', '**')" class="p-2 hover:bg-gray-100 rounded" title="Bold"><strong>B</strong></button>
-                        <button @click="insert('*', '*')" class="p-2 hover:bg-gray-100 rounded" title="Italic"><em>I</em></button>
+                        <button @click="insert('**', '**')" class="p-2 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-md transition" title="Bold"><strong>B</strong></button>
+                        <button @click="insert('*', '*')" class="p-2 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-md transition" title="Italic"><em>I</em></button>
                         <div class="w-px h-4 bg-gray-200 mx-1"></div>
-                        <button @click="insert('### ', '')" class="p-2 hover:bg-gray-100 rounded text-xs font-bold">H3</button>
-                        <button @click="insert('#### ', '')" class="p-2 hover:bg-gray-100 rounded text-xs font-bold">H4</button>
-                        <div class="w-px h-4 bg-gray-200 mx-1"></div>
-                        <button @click="insert('> ', '')" class="p-2 hover:bg-gray-100 rounded text-xs font-bold">“</button>
-                        <button @click="insert('\n![Img](', ')\n')" class="p-2 hover:bg-gray-100 rounded text-xs font-bold">IMG</button>
+                        <button @click="insert('### ', '')" class="p-2 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-md text-xs font-bold">H3</button>
+                        <button @click="insert('> ', '')" class="p-2 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-md" title="Quote">&ldquo;</button>
+                        {{-- Editor Image Upload --}}
+                        <button @click="$refs.photoUploader.click()" class="p-2 hover:bg-gray-100 rounded text-xs font-bold relative group" title="Upload Photo">
+                            <span x-show="!isUploading">IMG</span>
+                            <span x-show="isUploading" class="animate-spin block w-4 h-4 border-2 border-gray-300 border-t-red-600 rounded-full"></span>
+                        </button>
                     </div>
+
+                    {{-- Hidden Uploader for Editor --}}
+                    <input type="file" wire:model="photo_upload" class="hidden" x-ref="photoUploader" accept="image/*">
                     
-                    {{-- Textarea --}}
-                    <textarea x-ref="editor"
-                              wire:model.live="content" 
-                              rows="20" 
-                              class="w-full text-lg leading-relaxed text-gray-700 bg-transparent border-2 border-transparent focus:border-gray-200 rounded-xl p-4 focus:ring-0 resize-none font-serif placeholder-gray-300 transition-all focus:bg-white"
-                              placeholder="Write here..."></textarea>
+                    <input wire:model.live="title" type="text" class="w-full text-2xl font-serif font-bold text-gray-900 bg-transparent border-0 border-b-2 border-transparent focus:border-red-500 focus:ring-0 placeholder-gray-300 transition px-0 mb-4" placeholder="Headline...">
+                    
+                    <textarea x-ref="editor" wire:model.live="content" rows="12" class="w-full text-base leading-relaxed text-gray-700 bg-transparent border-2 border-transparent focus:border-gray-200 rounded-xl p-4 focus:ring-0 resize-none font-serif placeholder-gray-300 transition-all focus:bg-white" placeholder="Start writing..."></textarea>
                 </div>
 
                 {{-- Tags --}}
                 <div class="bg-white p-4 rounded-xl border border-gray-100">
                     <label class="block text-xs font-bold text-gray-700 mb-2">Tags</label>
-                    <input wire:model.live="tags" type="text" class="w-full text-sm border-gray-200 rounded-lg focus:ring-yellow-400">
+                    <input wire:model.live="tags" type="text" class="w-full text-sm border-gray-200 rounded-lg focus:ring-yellow-400 focus:border-yellow-400">
                 </div>
-
+                 <div class="h-10"></div>
             </div>
         </div>
 
         {{-- ======================== --}}
         {{-- RIGHT PANEL: PREVIEW     --}}
         {{-- ======================== --}}
-        <div class="w-full md:w-1/2 lg:w-7/12 h-full overflow-y-auto bg-stone-100 relative shadow-inner"
-             :class="mobilePreview ? 'block' : 'hidden md:block'">
+        <div class="h-full overflow-y-auto bg-stone-100 relative shadow-inner transition-all duration-300 ease-in-out"
+             :class="[mobilePreview ? 'block w-full' : 'hidden md:block', fullScreen ? 'w-full' : 'md:w-1/2 lg:w-7/12']">
             
-            <div class="absolute top-4 right-4 z-50 bg-black/80 text-white text-[10px] font-bold uppercase px-3 py-1 rounded-full backdrop-blur pointer-events-none">
-                Live Preview
-            </div>
+            <button @click="fullScreen = !fullScreen" class="fixed top-20 right-8 z-50 bg-white/80 p-2 rounded-full shadow-md hover:scale-110 transition">
+               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
+            </button>
 
-            <div class="min-h-full bg-stone-50 pb-20 origin-top scale-90 md:scale-100 transition-transform">
+            <div class="min-h-full bg-stone-50 pb-20 origin-top transition-transform" :class="fullScreen ? 'scale-100 px-0' : 'scale-90 md:scale-100'">
                 
-                <header class="relative pt-20 pb-12 px-6 z-10 text-center">
-                    <div class="mb-6 flex justify-center">
-                        <span class="px-5 py-2 bg-white/60 text-red-600 text-xs font-black uppercase tracking-[0.2em] border border-white/50 rounded-full shadow-lg">
-                            {{ $category }}
-                        </span>
-                    </div>
-                    <h1 class="font-heading text-4xl md:text-5xl font-black text-gray-900 leading-[1.1] mb-8">
-                        {{ $title ?: 'Headline' }}
-                    </h1>
-                    <div class="inline-flex items-center gap-6 px-8 py-4 bg-white/60 rounded-2xl shadow-lg border border-white/40">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-red-500 to-yellow-500 p-0.5">
-                                <div class="w-full h-full rounded-full bg-white flex items-center justify-center text-red-600 font-bold text-sm">
-                                    {{ substr($author, 0, 1) }}
-                                </div>
-                            </div>
-                            <div class="text-left">
-                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Author</p>
-                                <p class="text-sm font-bold text-gray-800">{{ $author }}</p>
-                            </div>
+                {{-- PREVIEW HEADER --}}
+                <header class="relative pt-20 pb-12 px-6 z-10 text-center max-w-4xl mx-auto">
+                    <span class="px-4 py-1 bg-red-50 text-red-600 text-[10px] font-black uppercase tracking-[0.2em] rounded-full border border-red-100 mb-6 inline-block">{{ $category ?: 'Category' }}</span>
+                    <h1 class="font-heading text-4xl md:text-6xl font-black text-gray-900 leading-tight mb-8">{{ $title ?: 'Article Headline' }}</h1>
+                    
+                    {{-- AUTHOR PREVIEW --}}
+                    <div class="inline-flex items-center gap-4 bg-white/60 px-6 py-2 rounded-full border border-white/40 shadow-sm">
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-red-500 to-yellow-500 flex items-center justify-center text-white font-bold text-xs">
+                             {{ substr($author, 0, 1) }}
                         </div>
-                        <div class="w-px h-8 bg-gray-300"></div>
                         <div class="text-left">
-                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Date</p>
-                            <p class="text-sm font-bold text-gray-800">{{ $date }}</p>
+                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Written By</p>
+                            <p class="text-xs font-bold text-gray-800">{{ $author }}</p>
                         </div>
                     </div>
                 </header>
 
-                <div class="w-full max-w-4xl mx-auto px-6 mb-12">
-                    <div class="relative p-2 bg-white/30 rounded-[2.5rem] shadow-xl border border-white/50">
-                        <div class="relative aspect-[21/9] overflow-hidden rounded-[2rem] bg-gray-200">
-                            @if($imageUrl) <img src="{{ $imageUrl }}" class="w-full h-full object-cover"> @endif
+                {{-- PREVIEW IMAGE (Handles New Upload vs Old DB Image) --}}
+                <div class="w-full max-w-5xl mx-auto px-6 mb-12">
+                     <div class="relative group aspect-[21/9] overflow-hidden rounded-3xl shadow-2xl bg-gray-200">
+                        @if ($cover_photo)
+                            <img src="{{ $cover_photo->temporaryUrl() }}" class="w-full h-full object-cover">
+                        @elseif($imageUrl)
+                            <img src="{{ Str::startsWith($imageUrl, 'http') ? $imageUrl : asset('storage/'.$imageUrl) }}" class="w-full h-full object-cover">
+                        @else
+                            <div class="w-full h-full flex items-center justify-center text-gray-400 font-bold uppercase tracking-widest text-xs">No Cover Image</div>
+                        @endif
+
+                        @if($photo_credit)
+                        <div class="absolute bottom-4 right-4 bg-black/60 backdrop-blur px-3 py-1.5 rounded-lg border border-white/10">
+                            <p class="text-[10px] text-white/90 italic">{{ $photo_credit }}</p>
                         </div>
+                        @endif
                     </div>
                 </div>
 
-                <div class="max-w-3xl mx-auto px-6">
-                    <div class="bg-white/70 p-8 md:p-12 rounded-[2rem] shadow-xl border border-white/60">
-                        <div class="prose prose-lg prose-red font-serif text-gray-600 leading-8">
-                            {!! Str::markdown($content ?? '') !!}
-                        </div>
-                        <div class="mt-12 pt-8 border-t border-gray-100 flex flex-wrap gap-2">
-                            @if($tags)
-                                @foreach(explode(',', $tags) as $tag)
-                                <span class="px-4 py-1.5 bg-gray-50 text-gray-500 text-xs font-bold uppercase tracking-wider rounded-lg border border-gray-100">#{{ trim($tag) }}</span>
+                <div class="max-w-[1400px] mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-10">
+                    <aside class="hidden lg:block lg:col-span-3">
+                        <div class="sticky top-24 space-y-6">
+                            @if($summary)
+                            <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm relative overflow-hidden">
+                                <div class="absolute top-0 left-0 w-1 h-full bg-red-500"></div>
+                                <h4 class="font-bold text-gray-900 uppercase tracking-widest text-xs mb-3">In Brief</h4>
+                                <p class="text-sm text-gray-600 leading-relaxed font-medium italic">"{{ $summary }}"</p>
+                            </div>
+                            @endif
+
+                            {{-- SDGs Preview --}}
+                             @if(count($selectedSdgs) > 0)
+                            <div class="flex flex-wrap gap-2">
+                                @foreach($selectedSdgs as $selectedId)
+                                    @php $s = $sdgOptions->firstWhere('id', $selectedId); @endphp
+                                    @if($s)
+                                        <div class="w-8 h-8 {{ $s->color_class }} rounded flex items-center justify-center text-white font-black text-xs shadow-sm" title="{{ $s->name }}">{{ $s->id }}</div>
+                                    @endif
                                 @endforeach
+                            </div>
                             @endif
                         </div>
-                    </div>
+                    </aside>
+                    <article class="lg:col-span-7">
+                        <div class="prose prose-lg prose-red font-serif text-gray-600 leading-8 max-w-none {{ $show_drop_cap ? "[&>p:first-child]:first-letter:text-6xl [&>p:first-child]:first-letter:font-black [&>p:first-child]:first-letter:text-red-600 [&>p:first-child]:first-letter:mr-3 [&>p:first-child]:first-letter:float-left" : '' }}">
+                            {!! Str::markdown($content ?? '') !!}
+                        </div>
+                    </article>
                 </div>
-
             </div>
         </div>
     </div>

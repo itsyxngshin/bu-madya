@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class CommitteeMember extends Model
 {
+    protected $guarded = [];
     protected $fillable = [
         'committee_id', 
         'user_id', // Optional: if linking to a registered user
@@ -17,8 +18,15 @@ class CommitteeMember extends Model
         'photo_url'
     ];
 
+
     public function committee()
     {
         return $this->belongsTo(Committee::class);
     }
+    
+    public function academicYear()
+    {
+        return $this->belongsTo(AcademicYear::class);
+    }
+    
 }

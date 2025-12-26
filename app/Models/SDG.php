@@ -13,4 +13,9 @@ class Sdg extends Model
     {
         return $this->belongsToMany(Project::class, 'project_sdgs');
     }
+
+    public function news()
+    {
+        return $this->belongsToMany(News::class, 'news_sdg');
+    }
 }

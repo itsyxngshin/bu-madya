@@ -40,44 +40,62 @@
             <div class="hidden sm:flex sm:items-center sm:ml-6">
                 
                 @auth
-                    {{-- STATE A: LOGGED IN (Show Dropdown) --}}
-                    <div class="ml-3 relative" x-data="{ dropdownOpen: false }">
-                        <div>
-                            <button @click="dropdownOpen = !dropdownOpen" type="button" class="flex text-sm border-2 border-transparent rounded-full focus:outline-none focus:border-gray-300 transition shadow-sm hover:shadow-md">
-                                <img class="h-8 w-8 rounded-full object-cover" src="{{ Auth::user()->profile_photo_url }}" alt="{{ Auth::user()->name }}" />
-                            </button>
-                        </div>
-
-                        <div x-show="dropdownOpen" 
-                             @click.away="dropdownOpen = false"
-                             class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white/90 backdrop-blur-md ring-1 ring-black ring-opacity-5 focus:outline-none" 
-                             style="display: none;">
+                    <div class="flex items-center ml-3">
+                        
+                        {{-- SECTION 1: USER INFO (Visible directly on Navbar) --}}
+                        {{-- 'hidden md:block' hides this on mobile phones to save space --}}
+                        <div class="hidden md:block text-right mr-3">
+                            {{-- Name --}}
+                            <p class="text-sm font-bold text-gray-900 leading-tight">
+                                {{ Auth::user()->name }}
+                            </p>
                             
-                            <div class="px-4 py-2 border-b border-gray-100">
-                                <p class="text-xs text-gray-500 uppercase tracking-wider font-bold">Signed in as</p>
-                                <p class="text-sm font-bold text-gray-900 truncate">{{ Auth::user()->name }}</p>
-                            </div>
-
-                            <a href="{{ route('profile.show') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-red-700">Your Profile</a>
-
-                            <form method="POST" action="{{ route('logout') }}">
-                                @csrf
-                                <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 font-bold">
-                                    Log Out
-                                </button>
-                            </form>
+                            {{-- Director Assignment / Role --}}
+                            @if(Auth::user()->directorAssignment)
+                                <p class="text-[10px] text-gray-500 font-medium leading-tight">
+                                    {{ Auth::user()->directorAssignment->director->title }}
+                                </p>
+                            @else
+                                {{-- Fallback for users without assignment --}}
+                                <p class="text-xs text-gray-500 leading-tight">
+                                    {{ Auth::user()->role?->role_name ?? 'User' }}
+                                </p>
+                            @endif
                         </div>
-                    </div>
 
-                @else
-                    {{-- STATE B: GUEST (Show Login Buttons) --}}
-                    <div class="flex items-center gap-4">
-                        <a href="{{ route('login') }}" class="text-sm font-bold text-gray-600 hover:text-red-700">
-                            Log in
-                        </a>
-                        <a href="{{ route('register') }}" class="px-4 py-2 text-sm font-bold text-white bg-red-700 rounded-lg hover:bg-red-800 shadow-md transition">
-                            Register
-                        </a>
+                        {{-- SECTION 2: AVATAR & DROPDOWN (Only for Profile/Logout) --}}
+                        <div class="relative" x-data="{ dropdownOpen: false }">
+                            {{-- Avatar Trigger --}}
+                            <button @click="dropdownOpen = !dropdownOpen" type="button" class="flex text-sm border-2 border-transparent rounded-full focus:outline-none focus:border-gray-300 transition shadow-sm hover:shadow-md">
+                                <img class="h-9 w-9 rounded-full object-cover" src="{{ Auth::user()->profile_photo_path && filter_var(Auth::user()->profile_photo_path, FILTER_VALIDATE_URL) ? Auth::user()->profile_photo_path : asset(Auth::user()->profile_photo_path) }}" alt="{{ Auth::user()->name }}" />
+                            </button>
+                        
+                            {{-- Dropdown Menu --}}
+                            <div x-show="dropdownOpen" 
+                                @click.away="dropdownOpen = false"
+                                x-transition:enter="transition ease-out duration-100"
+                                x-transition:enter-start="transform opacity-0 scale-95"
+                                x-transition:enter-end="transform opacity-100 scale-100"
+                                x-transition:leave="transition ease-in duration-75"
+                                x-transition:leave-start="transform opacity-100 scale-100"
+                                x-transition:leave-end="transform opacity-0 scale-95"
+                                class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 focus:outline-none" 
+                                style="display: none;">
+                                
+                                <a href="{{ route('profile.show') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    Your Profile
+                                </a>
+
+                                <div class="border-t border-gray-100"></div>
+
+                                <form method="POST" action="{{ route('logout') }}">
+                                    @csrf
+                                    <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 font-bold">
+                                        Log Out
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
                     </div>
                 @endauth
             </div>

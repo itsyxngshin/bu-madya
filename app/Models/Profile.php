@@ -42,4 +42,14 @@ class Profile extends Model
     {
         return $this->belongsTo(College::class);
     }
+
+    public function portfolios()
+    {
+        return $this->belongsToMany(
+            Portfolio::class, 
+            'portfolio_sets', // The Pivot Table Name
+            'profile_id',     // Foreign Key for THIS model (Profile)
+            'portfolio_id'    // Foreign Key for the RELATED model (Portfolio)
+        )->withTimestamps();
+    }
 }

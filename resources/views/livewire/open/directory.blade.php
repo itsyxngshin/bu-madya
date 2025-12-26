@@ -76,6 +76,12 @@
                                 ? 'bg-gradient-to-b from-yellow-50 to-white border-2 border-yellow-400 shadow-[0_0_15px_rgba(250,204,21,0.3)] z-10 scale-105' 
                                 : 'bg-white/40 backdrop-blur-md border border-white/50 shadow-lg hover:shadow-xl hover:bg-white/60') 
                          }}">
+
+                         @if(!$isVacant && $user)
+                            <a href="{{ route('profile.public', $user->username) }}" class="absolute inset-0 z-30">
+                                <span class="sr-only">View Profile of {{ $user->name }}</span>
+                            </a>
+                        @endif
                         
                         {{-- IMAGE CONTAINER --}}
                         <div class="aspect-square relative overflow-hidden {{ $isVacant ? 'bg-gray-200' : ($isDG ? 'bg-yellow-100' : 'bg-white/30') }}">
@@ -102,6 +108,12 @@
                             {{-- DG BADGE --}}
                             @if($isDG && !$isVacant)
                                 <div class="absolute top-4 left-4 z-20 bg-yellow-400 text-green-900 text-xs font-black px-3 py-1 rounded-full shadow-lg border border-yellow-200 uppercase tracking-wider">Head</div>
+                            @endif
+
+                            @if(!$isVacant)
+                                <div class="absolute bottom-0 left-0 w-full bg-black/60 text-white text-[10px] font-bold uppercase tracking-widest text-center py-2 translate-y-full group-hover:translate-y-0 transition duration-300 z-20">
+                                    View Profile
+                                </div>
                             @endif
                         </div>
 

@@ -13,7 +13,7 @@ class PortfolioSet extends Model
         return $this->belongsTo(Profile::class);
     }
 
-    public function workPortfolio()
+    public function portfolio()
     {
         return $this->belongsTo(Portfolio::class);
     }
