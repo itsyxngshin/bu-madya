@@ -10,14 +10,15 @@ return new class extends Migration
      * Run the migrations.
      */
     public function up(): void
-    {
+    { 
         Schema::create('linkage_projects', function (Blueprint $table) {
-            $table->id();
+            $table->id(); 
             
             // The Partner
             $table->foreignId('linkage_id')
                   ->constrained('linkages')
-                  ->onDelete('cascade');
+                  ->onDelete('cascade')
+                  ->nullable();
 
             // The Project
             $table->foreignId('project_id')
@@ -29,7 +30,7 @@ return new class extends Migration
             $table->string('role')->nullable()->default('Partner');
 
             $table->timestamps();
-        });
+        }); 
     }
 
     /**

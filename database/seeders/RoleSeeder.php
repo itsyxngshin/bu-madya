@@ -26,6 +26,10 @@ class RoleSeeder extends Seeder
                 'role_name' => 'member',
                 'role_description' => 'Standard access. Can view protected content, join committees, and update own profile.',
             ],
+            [
+                'role_name' => 'alumni',
+                'role_description' => 'Limited access. Can view protected content, and update own profile, but cannot create new projects',
+            ],
         ];
 
         foreach ($roles as $role) {

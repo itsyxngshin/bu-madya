@@ -22,9 +22,7 @@ return new class extends Migration
             
             // Specifics
             $table->string('location')->nullable();
-            $table->string('beneficiaries')->nullable(); // e.g., "150 Families"
-            $table->string('proponent')->nullable();     // e.g., "Committee on Education"
-            
+            $table->string('beneficiaries')->nullable(); // e.g., "150 Families"  
             $table->text('description')->nullable();
             $table->string('cover_img')->nullable();
 
@@ -34,12 +32,6 @@ return new class extends Migration
             $table->json('partners_list')->nullable(); // ["LGU Legazpi", "Red Cross"]
             // 1. Link to the Committee leading it
             $table->foreignId('committee_id')->nullable()->constrained()->onDelete('set null');
-
-            // 2. Link to a specific Project Head (User) - Optional but useful
-            $table->foreignId('project_head_id')->nullable()->constrained('users')->onDelete('set null');
-
-            // 3. Fallback Text (e.g. "Office of the President" - might not be a committee)
-            $table->string('proponent_text')->nullable();
             
             // Link to Academic Year (Critical for filtering)
             $table->foreignId('academic_year_id')->nullable()->constrained()->nullOnDelete();

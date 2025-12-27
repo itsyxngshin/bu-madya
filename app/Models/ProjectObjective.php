@@ -12,4 +12,5 @@ class ProjectObjective extends Model
     {
         return $this->belongsTo(Project::class);
     }
+    
 }
