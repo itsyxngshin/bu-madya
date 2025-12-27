@@ -451,27 +451,31 @@
                                 <div class="flex flex-col gap-3">
                                     @foreach($selectedSdgs as $id)
                                         @php 
-                                            $sdg = $this->allSdgs->find($id);
-                                            if($sdg) {
-                                                // Extract 'red' from 'bg-red-500' to create 'text-red-700'
-                                                $colorName = explode('-', str_replace('bg-', '', $sdg->color_hex))[0];
-                                                $textColor = "text-{$colorName}-700";
-                                                $bgColor   = "bg-{$colorName}-50";
-                                            }
+                                            // 1. Find the SDG object from the collection
+                                            $sdg = $this->allSdgs->find($id);; // Assuming $sdgs is passed to the view, or use $this->allSdgs->find($id)
                                         @endphp
-                                        
+
                                         @if($sdg)
-                                        <div class="flex items-center gap-3 p-2 rounded-lg border border-transparent {{ $bgColor }}">
-                                            {{-- Color Swatch --}}
-                                            <div class="w-8 h-8 {{ $sdg->color_hex }} rounded-md text-white font-black text-xs flex items-center justify-center shadow-sm">
-                                                {{ $sdg->id }}
+                                            {{-- 
+                                                STRATEGY:
+                                                1. Background: Use the Hex Code + '15' (approx 8% opacity) to simulate a 'bg-50' look.
+                                                2. Border: Use Hex + '30' (approx 20% opacity) for a subtle border.
+                                            --}}
+                                            <div class="flex items-center gap-3 p-2 rounded-lg border"
+                                                style="background-color: {{ $sdg->color_hex }}15; border-color: {{ $sdg->color_hex }}30;">
+                                                
+                                                {{-- Color Swatch (Solid Color) --}}
+                                                <div class="w-8 h-8 rounded-md text-white font-black text-xs flex items-center justify-center shadow-sm"
+                                                    style="background-color: {{ $sdg->color_hex }}">
+                                                    {{ $sdg->number }}
+                                                </div>
+                                                
+                                                {{-- Name Label (Text Color matches SDG Color) --}}
+                                                <span class="text-[10px] font-bold uppercase tracking-wide"
+                                                    style="color: {{ $sdg->color_hex }}">
+                                                    {{ $sdg->name }}
+                                                </span>
                                             </div>
-                                            
-                                            {{-- Name Label (Now Colored) --}}
-                                            <span class="text-[10px] font-bold {{ $textColor }} uppercase tracking-wide">
-                                                {{ $sdg->name }}
-                                            </span>
-                                        </div>
                                         @endif
                                     @endforeach
                                 </div>

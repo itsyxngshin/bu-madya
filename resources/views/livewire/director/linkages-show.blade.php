@@ -145,7 +145,7 @@
                 <section>
                     <h3 class="font-bold text-gray-900 uppercase tracking-widest text-xs border-b-2 border-blue-500 w-16 pb-2 mb-6">About</h3>
                     <div class="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
-                        <p class="text-gray-600 leading-relaxed font-serif text-lg whitespace-pre-line">
+                        <p class="text-gray-600 leading-relaxed font-sans text-lg whitespace-pre-line">
                             {{ $linkage->description }}
                         </p>
                         
