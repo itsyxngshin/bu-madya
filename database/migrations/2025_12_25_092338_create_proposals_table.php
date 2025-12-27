@@ -17,7 +17,7 @@ return new class extends Migration
             // 2. Proposal Progress (For the "Builder" wizard)
             // e.g. 1 = Basic Info, 2 = Objectives, 3 = Budget, 4 = Review
             $table->integer('current_step')->default(1); 
-            $table->enum('status', ['Draft', 'Pending Review', 'Approved', 'Rejected', 'Returned'])->default('Draft');
+            $table->enum('status', ['draft', 'pending review', 'approved', 'rejected', 'returned'])->default('draft');
 
             // 3. Core Content (Nullable because they fill it step-by-step)
             $table->string('title')->nullable();
