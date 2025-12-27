@@ -14,7 +14,7 @@ class Project extends Model
 
     protected $fillable = [
         'title', 'slug', 'category', 'status', 'implementation_date',
-        'location', 'beneficiaries', 'proponent', 'description', 'cover_img',
+        'location', 'beneficiaries', 'description', 'cover_img', 'project_category_id',
         'objectives', 'impact_stats', 'partners_list', 'sdg_ids', 'academic_year_id'
     ];
 
@@ -72,12 +72,45 @@ class Project extends Model
         // Uses the pivot table 'project_sdg'
         return $this->belongsToMany(Sdg::class, 'project_sdgs');
     }
+    
+    public function projectLinkages()
+    {
+        return $this->hasMany(LinkageProject::class);
+    }
 
+    // Helper to get a clean list of names/roles for the UI
+    public function getPartnersListAttribute()
+    {
+        return $this->projectLinkages->map(function ($row) {
+            return [
+                'name' => $row->linkage_id ? $row->linkage->name : $row->manual_name,
+                'role' => $row->role,
+                'is_official' => !is_null($row->linkage_id),
+            ];
+        });
+    }
     public function partners()
     {
         // You can name this 'linkages' or 'partners'
         return $this->belongsToMany(Linkage::class, 'linkage_project')
                     ->withPivot('role')
+                    ->withTimestamps();
+    }
+
+    public function proponents()
+    {
+        return $this->hasMany(ProjectProponent::class);
+    }
+
+    
+    // Helper to get the main lead name easily
+    public function getLeadProponentAttribute(){
+        return $this->proponents->first()?->name ?? 'N/A';
+    }
+
+    public function linkages(){
+        return $this->belongsToMany(Linkage::class, 'linkage_projects')
+                    ->withPivot('role') // We want to access the 'role' column
                     ->withTimestamps();
     }
 }
