@@ -212,7 +212,7 @@
                             setTimeout(() => { el.focus(); el.setSelectionRange(s + start.length, e + start.length); }, 50);
                         }
                      }"
-                     x-on:photo-inserted.window="insert('\n![Image](' + $event.detail.url + ')\n', ''); isUploading = false;"
+                     x-on:photo-inserted.window="insert('\n<figure>\n  <img src=\'' + $event.detail.url + '\' alt=\'Image\'>\n  <figcaption>Write your caption here...</figcaption>\n</figure>\n', ''); isUploading = false;"
                      x-on:livewire-upload-start="isUploading = true"
                      x-on:livewire-upload-finish="isUploading = false"
                      x-on:livewire-upload-error="isUploading = false"
@@ -362,7 +362,9 @@
                     </aside>
 
                     <article class="lg:col-span-7">
-                        <div class="prose prose-lg prose-red font-serif text-gray-600 leading-8 max-w-none {{ $show_drop_cap ? "[&>p:first-child]:first-letter:text-6xl [&>p:first-child]:first-letter:font-black [&>p:first-child]:first-letter:text-red-600 [&>p:first-child]:first-letter:mr-3 [&>p:first-child]:first-letter:float-left" : '' }}">
+                        <div class="prose prose-lg prose-red font-serif text-gray-600 leading-8 max-w-none {{ $show_drop_cap ? "[&>p:first-child]:first-letter:text-6xl [&>p:first-child]:first-letter:font-black [&>p:first-child]:first-letter:text-red-600 [&>p:first-child]:first-letter:mr-3 [&>p:first-child]:first-letter:float-left" : '' }}
+                            [&_figcaption]:text-center [&_figcaption]:text-sm [&_figcaption]:text-gray-500 [&_figcaption]:italic [&_figcaption]:mt-2
+                            [&_img]:rounded-xl [&_img]:shadow-lg" > 
                             {!! Str::markdown($content) !!}
                         </div>
                         <div class="mt-12 pt-8 border-t border-gray-100 flex flex-wrap gap-2">

@@ -137,18 +137,25 @@
                 @endif
 
                 {{-- SDGs (If any) --}}
-                @if($article->sdgs->count() > 0)
+                @if($article->sdgs->isNotEmpty())
                 <div class="bg-white/60 backdrop-blur-md p-6 rounded-3xl border border-white/60 shadow-lg">
                     <h4 class="font-bold text-gray-900 uppercase tracking-widest text-xs mb-4">Targets</h4>
                     <div class="flex flex-wrap gap-2">
                         @foreach($article->sdgs as $sdg)
-                            <div class="w-8 h-8 {{ $sdg->color_hex ?? 'bg-gray-500' }} rounded flex items-center justify-center text-white font-black text-xs shadow-sm" title="{{ $sdg->name }}">
+                            {{-- 
+                            FIX: Use style="background-color: ..." for dynamic hex codes.
+                            We assume your DB column is named 'color' based on previous steps.
+                            If it is 'color_hex', just change $sdg->color to $sdg->color_hex
+                            --}}
+                            <div style="background-color: {{ $sdg->color_hex ?? '#6b7280' }}"
+                                class="w-8 h-8 rounded flex items-center justify-center text-white font-black text-xs shadow-sm" 
+                                title="{{ $sdg->name }}">
                                 {{ $sdg->id }}
                             </div>
                         @endforeach
                     </div>
                 </div>
-                @endif
+            @endif
             </div>
         </aside>
 
@@ -158,7 +165,9 @@
                 
                 {{-- Markdown Content Rendering --}}
                 <div class="prose prose-lg prose-red max-w-none font-sans text-gray-600 leading-8
-                            {{ $article->show_drop_cap ? "[&>p:first-child]:first-letter:text-6xl [&>p:first-child]:first-letter:font-black [&>p:first-child]:first-letter:text-transparent [&>p:first-child]:first-letter:bg-clip-text [&>p:first-child]:first-letter:bg-gradient-to-br [&>p:first-child]:first-letter:from-red-600 [&>p:first-child]:first-letter:to-yellow-500 [&>p:first-child]:first-letter:float-left [&>p:first-child]:first-letter:mr-3 [&>p:first-child]:first-letter:mt-[-5px]" : '' }}">
+                            {{ $article->show_drop_cap ? "[&>p:first-child]:first-letter:text-6xl [&>p:first-child]:first-letter:font-black [&>p:first-child]:first-letter:text-transparent [&>p:first-child]:first-letter:bg-clip-text [&>p:first-child]:first-letter:bg-gradient-to-br [&>p:first-child]:first-letter:from-red-600 [&>p:first-child]:first-letter:to-yellow-500 [&>p:first-child]:first-letter:float-left [&>p:first-child]:first-letter:mr-3 [&>p:first-child]:first-letter:mt-[-5px]" : '' }}
+                             [&_figcaption]:text-center [&_figcaption]:text-sm [&_figcaption]:text-gray-500 [&_figcaption]:italic [&_figcaption]:mt-2
+                            [&_img]:rounded-xl [&_img]:shadow-lg">
                     
                     {!! Str::markdown($article->content) !!}
 
