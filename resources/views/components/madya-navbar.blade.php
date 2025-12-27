@@ -17,10 +17,11 @@
                         $active = 'border-red-600 text-red-700 focus:border-red-700';
                         $inactive = 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 focus:text-gray-700 focus:border-gray-300';
                     @endphp
-
-                    <a href="{{ route('dashboard') }}" class="{{ $navLink }} {{ request()->routeIs('dashboard') ? $active : $inactive }}">
-                        Dashboard
-                    </a>
+                    @auth
+                        <a href="{{ route('dashboard') }}" class="{{ $navLink }} {{ request()->routeIs('dashboard') ? $active : $inactive }}">
+                            Dashboard
+                        </a>
+                    @endauth
                     <a href="{{ route('projects.index') }}" class="{{ $navLink }} {{ request()->routeIs('projects.*') ? $active : $inactive }}">
                         Projects
                     </a>
@@ -33,6 +34,9 @@
                     <a href="{{ route('news.index') }}" class="{{ $navLink }} {{ request()->routeIs('news.*') ? $active : $inactive }}">
                         News
                     </a>
+                    <a href="#" class="{{ $navLink }} {{ request()->routeIs('about.*') ? $active : $inactive }}">
+                        About
+                    </a>
                 </div>
             </div>
 
@@ -40,37 +44,29 @@
             <div class="hidden sm:flex sm:items-center sm:ml-6">
                 
                 @auth
+                    {{-- LOGGED IN STATE --}}
                     <div class="flex items-center ml-3">
-                        
-                        {{-- SECTION 1: USER INFO (Visible directly on Navbar) --}}
-                        {{-- 'hidden md:block' hides this on mobile phones to save space --}}
                         <div class="hidden md:block text-right mr-3">
-                            {{-- Name --}}
                             <p class="text-sm font-bold text-gray-900 leading-tight">
                                 {{ Auth::user()->name }}
                             </p>
-                            
-                            {{-- Director Assignment / Role --}}
                             @if(Auth::user()->directorAssignment)
                                 <p class="text-[10px] text-gray-500 font-medium leading-tight">
-                                    {{ Auth::user()->directorAssignment->director->title }}
+                                    {{ Auth::user()->directorAssignment?->director->name }}
                                 </p>
                             @else
-                                {{-- Fallback for users without assignment --}}
                                 <p class="text-xs text-gray-500 leading-tight">
                                     {{ Auth::user()->role?->role_name ?? 'User' }}
                                 </p>
                             @endif
                         </div>
 
-                        {{-- SECTION 2: AVATAR & DROPDOWN (Only for Profile/Logout) --}}
+                        {{-- Avatar Dropdown --}}
                         <div class="relative" x-data="{ dropdownOpen: false }">
-                            {{-- Avatar Trigger --}}
                             <button @click="dropdownOpen = !dropdownOpen" type="button" class="flex text-sm border-2 border-transparent rounded-full focus:outline-none focus:border-gray-300 transition shadow-sm hover:shadow-md">
                                 <img class="h-9 w-9 rounded-full object-cover" src="{{ Auth::user()->profile_photo_path && filter_var(Auth::user()->profile_photo_path, FILTER_VALIDATE_URL) ? Auth::user()->profile_photo_path : asset(Auth::user()->profile_photo_path) }}" alt="{{ Auth::user()->name }}" />
                             </button>
                         
-                            {{-- Dropdown Menu --}}
                             <div x-show="dropdownOpen" 
                                 @click.away="dropdownOpen = false"
                                 x-transition:enter="transition ease-out duration-100"
@@ -96,6 +92,20 @@
                                 </form>
                             </div>
                         </div>
+                    </div>
+
+                @else
+                    {{-- [NEW] GUEST STATE (Login / Register) --}}
+                    <div class="flex items-center gap-4">
+                        <a href="{{ route('login') }}" class="text-sm font-bold text-gray-600 hover:text-gray-900 transition">
+                            Log in
+                        </a>
+
+                        @if (Route::has('register'))
+                            <a href="{{ route('register') }}" class="px-5 py-2.5 bg-red-600 text-white text-sm font-bold rounded-lg shadow-md hover:bg-red-700 transition transform hover:-translate-y-0.5">
+                                Register
+                            </a>
+                        @endif
                     </div>
                 @endauth
             </div>
