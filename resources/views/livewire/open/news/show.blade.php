@@ -142,7 +142,7 @@
                     <h4 class="font-bold text-gray-900 uppercase tracking-widest text-xs mb-4">Targets</h4>
                     <div class="flex flex-wrap gap-2">
                         @foreach($article->sdgs as $sdg)
-                            <div class="w-8 h-8 {{ $sdg->color_class ?? 'bg-gray-500' }} rounded flex items-center justify-center text-white font-black text-xs shadow-sm" title="{{ $sdg->name }}">
+                            <div class="w-8 h-8 {{ $sdg->color_hex ?? 'bg-gray-500' }} rounded flex items-center justify-center text-white font-black text-xs shadow-sm" title="{{ $sdg->name }}">
                                 {{ $sdg->id }}
                             </div>
                         @endforeach

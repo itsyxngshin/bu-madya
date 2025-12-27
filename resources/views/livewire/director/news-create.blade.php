@@ -164,7 +164,7 @@
                                 
                                 {{-- Visual Box --}}
                                 {{-- We use inline style for the specific HEX color from DB --}}
-                                <div style="background-color: {{ $sdg->color }}; box-shadow: 0 0 0 1px {{ $sdg->color }}"
+                                <div style="background-color: {{ $sdg->color_hex }}; box-shadow: 0 0 0 1px {{ $sdg->color_hex }}"
                                     class="w-8 h-8 rounded-md flex items-center justify-center transition-all duration-200 
                                             text-white font-black text-[10px]
                                             {{-- DEFAULT STATE (Unchecked): Faded & Grayscale --}}
@@ -349,7 +349,7 @@
                                     
                                     @if($s)
                                         {{-- Preview Badge --}}
-                                        <div style="background-color: {{ $s->color }}" 
+                                        <div style="background-color: {{ $s->color_hex }}" 
                                             class="w-8 h-8 rounded flex items-center justify-center text-white font-black text-xs shadow-sm transform hover:scale-110 transition" 
                                             title="{{ $s->name }}">
                                             {{ $s->id }}

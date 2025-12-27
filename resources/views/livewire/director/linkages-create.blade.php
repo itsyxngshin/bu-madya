@@ -244,7 +244,7 @@
                         --}}
                         @php
                             // Extract 'red-500' from 'bg-red-500'
-                            $baseColor = str_replace('bg-', '', $sdg->color); 
+                            $baseColor = str_replace('bg-', '', $sdg->color_hex); 
                             
                             // Create dynamic classes
                             $activeBorder = "border-$baseColor"; // border-red-500
@@ -263,7 +263,7 @@
                         >
                             
                             {{-- Color Swatch (The Box) --}}
-                            <span class="w-8 h-8 shrink-0 flex items-center justify-center rounded text-white font-black text-[10px] shadow-sm {{ $sdg->color }}">
+                            <span class="w-8 h-8 shrink-0 flex items-center justify-center rounded text-white font-black text-[10px] shadow-sm {{ $sdg->color_hex }}">
                                 {{ $sdg->id }}
                             </span>
                             
@@ -454,7 +454,7 @@
                                             $sdg = $this->allSdgs->find($id);
                                             if($sdg) {
                                                 // Extract 'red' from 'bg-red-500' to create 'text-red-700'
-                                                $colorName = explode('-', str_replace('bg-', '', $sdg->color))[0];
+                                                $colorName = explode('-', str_replace('bg-', '', $sdg->color_hex))[0];
                                                 $textColor = "text-{$colorName}-700";
                                                 $bgColor   = "bg-{$colorName}-50";
                                             }
@@ -463,7 +463,7 @@
                                         @if($sdg)
                                         <div class="flex items-center gap-3 p-2 rounded-lg border border-transparent {{ $bgColor }}">
                                             {{-- Color Swatch --}}
-                                            <div class="w-8 h-8 {{ $sdg->color }} rounded-md text-white font-black text-xs flex items-center justify-center shadow-sm">
+                                            <div class="w-8 h-8 {{ $sdg->color_hex }} rounded-md text-white font-black text-xs flex items-center justify-center shadow-sm">
                                                 {{ $sdg->id }}
                                             </div>
                                             

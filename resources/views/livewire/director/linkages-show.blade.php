@@ -111,20 +111,26 @@
                     </h3>
                     <div class="flex flex-col gap-3">
                         @foreach($linkage->sdgs as $sdg)
-                        @php
-                            // Dynamic color extraction
-                            $colorName = explode('-', str_replace('bg-', '', $sdg->color))[0];
-                            $textColor = "text-{$colorName}-700";
-                            $bgColor   = "bg-{$colorName}-50";
-                        @endphp
-                        <div class="flex items-center gap-3 p-2 rounded-lg {{ $bgColor }}">
-                            <div class="w-10 h-10 {{ $sdg->color }} rounded-lg text-white font-black text-lg flex items-center justify-center shadow-sm">
-                                {{ $sdg->id }}
+                            {{-- 
+                            LOGIC: 
+                            1. We append '1A' to the hex code to make the background 10% transparent (Hex Alpha).
+                            2. We use the raw hex for the main box and text color.
+                            --}}
+                            <div class="flex items-center gap-3 p-2 rounded-lg transition hover:brightness-95"
+                                style="background-color: {{ $sdg->color_hex }}1A;"> 
+                                
+                                {{-- SDG Icon Box --}}
+                                <div class="w-10 h-10 rounded-lg text-white font-black text-lg flex items-center justify-center shadow-sm shrink-0"
+                                    style="background-color: {{ $sdg->color_hex }};">
+                                    {{ $sdg->id }}
+                                </div>
+                                
+                                {{-- Text Label --}}
+                                <span class="text-xs font-bold uppercase tracking-wide"
+                                    style="color: {{ $sdg->color_hex }}; filter: brightness(0.8);"> {{-- Darken text slightly for readability --}}
+                                    {{ $sdg->name }}
+                                </span>
                             </div>
-                            <span class="text-xs font-bold {{ $textColor }} uppercase tracking-wide">
-                                {{ $sdg->name }}
-                            </span>
-                        </div>
                         @endforeach
                     </div>
                 </div>
