@@ -20,6 +20,13 @@ use App\Livewire\Director\LinkagesEdit;
 use App\Livewire\Director\LinkagesProposal;
 use App\Livewire\Director\UserProfile;
 use App\Livewire\Director\EditProfile;
+use App\Livewire\Open\ProposalsCreate;
+use App\Livewire\Admin\ProposalsShow;
+use App\Livewire\Admin\ProposalsIndex;
+
+#use App\Livewire\Admin\AdminProposalsIndex;
+// ADMIN ROUTE (Protect this group!)
+
 
 Route::get('/', function () {
     return view('welcome');
@@ -48,16 +55,9 @@ Route::middleware(['auth', 'role:director'])
     Route::get('/linkage/{linkage:slug}/edit', LinkagesEdit::class)->name('linkages.edit');
 });
 
-Route::middleware(['auth', 'role:director'])
-    ->group(function () {
-    Route::get('/project/create', ProjectsCreate::class)->name('projects.create');
-    Route::get('/projects/{project:slug}/edit', ProjectsEdit::class)->name('projects.edit');
-    Route::get('/profile/edit', EditProfile::class)->name('profile.edit');
-    Route::get('/news/create', NewsCreate::class)->name('news.create');
-    Route::get('/linkage/create', LinkagesCreate::class)->name('linkages.create');
-    Route::get('/news/{slug}', NewsShow::class)->name('news.show');  
-    Route::get('/news/{slug}/edit', NewsEdit::class)->name('news.edit');  
-    Route::get('/linkage/{linkage:slug}/edit', LinkagesEdit::class)->name('linkages.edit');
+Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/proposals', ProposalsIndex::class)->name('proposals.index');
+    Route::get('/proposals/{proposal}', ProposalsShow::class)->name('proposals.show');
 });
 
 Route::middleware(['auth', 'role:director'])
@@ -78,6 +78,7 @@ Route::get('/linkages', LinkagesIndex::class)->name('linkages.index');
 Route::get('/linkages/{linkage:slug}', LinkagesShow::class)->name('linkages.show');
 Route::get('/partner-with-us', LinkagesProposal::class)->name('linkages.proposal'); 
 Route::get('/profile/{username}', UserProfile::class)->name('profile.public');
+Route::get('/submit-proposal', ProposalsCreate::class)->name('proposals.create');
 
 
 
