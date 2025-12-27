@@ -20,6 +20,7 @@ use App\Livewire\Director\LinkagesEdit;
 use App\Livewire\Director\LinkagesProposal;
 use App\Livewire\Director\UserProfile;
 use App\Livewire\Director\EditProfile;
+use App\Livewire\Director\Dashboard;
 use App\Livewire\Open\ProposalsCreate;
 use App\Livewire\Admin\ProposalsShow;
 use App\Livewire\Admin\ProposalsIndex;
@@ -32,6 +33,7 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+/*
 Route::middleware([
     'auth:sanctum',
     config('jetstream.auth_session'),
@@ -41,10 +43,12 @@ Route::middleware([
         return view('dashboard');
     })->name('dashboard');
 });
+*/
 
 // Middleware accessible to both members and directors
 Route::middleware(['auth', 'role:director'])
     ->group(function () {
+    Route::get('/dashboard', Dashboard::class)->name('dashboard');
     Route::get('/project/create', ProjectsCreate::class)->name('projects.create');
     Route::get('/projects/{project:slug}/edit', ProjectsEdit::class)->name('projects.edit');
     Route::get('/profile/edit', EditProfile::class)->name('profile.edit');
@@ -53,11 +57,12 @@ Route::middleware(['auth', 'role:director'])
     Route::get('/news/{slug}', NewsShow::class)->name('news.show');  
     Route::get('/news/{slug}/edit', NewsEdit::class)->name('news.edit');  
     Route::get('/linkage/{linkage:slug}/edit', LinkagesEdit::class)->name('linkages.edit');
+    Route::get('/proposals', ProposalsIndex::class)->name('proposals.index');
 });
 
-Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/proposals', ProposalsIndex::class)->name('proposals.index');
+Route::middleware(['auth', 'role:administrator'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/proposals/{proposal}', ProposalsShow::class)->name('proposals.show');
+    Route::get('/proposals', ProposalsIndex::class)->name('proposals.index');
 });
 
 Route::middleware(['auth', 'role:director'])

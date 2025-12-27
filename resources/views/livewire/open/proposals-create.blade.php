@@ -1,7 +1,7 @@
 <div class="min-h-screen bg-stone-50 font-sans text-gray-900">
 
     {{-- NAVBAR --}}
-    <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-200 h-16 px-6 flex items-center justify-between">
+    <nav class="relative top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-200 h-16 px-6 flex items-center justify-between">
         <div class="flex items-center gap-3">
             <a href="/" class="text-xs font-bold uppercase text-gray-400 hover:text-red-600 transition">
                 &larr; Home
