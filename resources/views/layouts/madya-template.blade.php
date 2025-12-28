@@ -3,7 +3,24 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BU MADYA</title>
+    {{-- 1. Dynamic Page Title --}}
+    <title>@yield('meta_title', config('app.name'))</title>
+
+    {{-- 2. Standard Description --}}
+    <meta name="description" content="@yield('meta_description', 'Advocating for youth empowerment and social change.')">
+
+    {{-- 3. FACEBOOK / OPEN GRAPH META TAGS --}}
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="{{ url()->current() }}" />
+    <meta property="og:title" content="@yield('meta_title', config('app.name'))" />
+    <meta property="og:description" content="@yield('meta_description', 'Join the movement for youth-led advocacy.')" />
+    <meta property="og:image" content="@yield('meta_image', asset('images/default_share_image.jpg'))" />
+
+    {{-- 4. TWITTER CARD DATA --}}
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="@yield('meta_title', config('app.name'))">
+    <meta name="twitter:description" content="@yield('meta_description', 'Join the movement for youth-led advocacy.')">
+    <meta name="twitter:image" content="@yield('meta_image', asset('images/default_share_image.jpg'))">
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -21,8 +38,8 @@
 <body class="bg-gray-100 font-sans antialiased">
     <x-madya-navbar />
 
-    <div class="p-6">
-                {{ $slot }}
+    <div>
+        {{ $slot }}
     </div>
 
         {{-- 
