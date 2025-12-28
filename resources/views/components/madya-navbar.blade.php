@@ -81,7 +81,7 @@
                                 class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 focus:outline-none" 
                                 style="display: none;">
                                 
-                                <a href="{{ route('profile.show') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                <a href="{{ route('profile.public', Auth::user()->username) }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                     Profile
                                 </a>
 
@@ -162,7 +162,7 @@
                 <div class="mt-3 space-y-1">
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
-                        <x-responsive-nav-link href="{{ route('profile.show') }}">
+                        <x-responsive-nav-link href="{{ route('profile.public', Auth::user()->username) }}">
                             Profile
                         </x-responsive-nav-link>
                         <x-responsive-nav-link href="{{ route('logout') }}"
