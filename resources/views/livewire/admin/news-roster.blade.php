@@ -28,13 +28,13 @@
             </div>
             <input wire:model.live.debounce.300ms="search" type="text" 
                    class="block w-full pl-10 pr-3 py-2 border border-gray-200 rounded-xl leading-5 bg-gray-50 placeholder-gray-400 focus:outline-none focus:bg-white focus:ring-1 focus:ring-red-500 focus:border-red-500 sm:text-sm transition duration-150 ease-in-out" 
-                   placeholder="Search by title or author...">
+                   placeholder="Search title or authors...">
         </div>
 
         {{-- Filters --}}
         <div class="flex items-center gap-2 w-full md:w-auto">
             
-            {{-- Category Filter (Dynamic) --}}
+            {{-- Category Filter --}}
             <select wire:model.live="categoryFilter" class="block w-1/2 md:w-40 pl-3 pr-8 py-2 text-xs font-bold border-gray-200 focus:outline-none focus:ring-red-500 focus:border-red-500 rounded-xl bg-gray-50">
                 <option value="">All Categories</option>
                 @foreach($categories as $cat)
@@ -42,11 +42,13 @@
                 @endforeach
             </select>
 
-            {{-- Status Filter --}}
+            {{-- Status Filter (UPDATED) --}}
             <select wire:model.live="statusFilter" class="block w-1/2 md:w-32 pl-3 pr-8 py-2 text-xs font-bold border-gray-200 focus:outline-none focus:ring-red-500 focus:border-red-500 rounded-xl bg-gray-50">
                 <option value="">All Status</option>
-                <option value="Published">Published</option>
-                <option value="Draft">Draft</option>
+                <option value="active">Published (Active)</option>
+                <option value="for evaluation">For Evaluation</option>
+                <option value="draft">Draft</option>
+                <option value="hidden">Hidden</option>
             </select>
         </div>
     </div>
@@ -57,7 +59,7 @@
         {{-- Table Header --}}
         <div class="grid grid-cols-12 gap-4 px-8 py-4 bg-gray-50 border-b border-gray-100 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
             <div class="col-span-6 md:col-span-5">Article Details</div>
-            <div class="hidden md:block md:col-span-3">Author & Category</div>
+            <div class="hidden md:block md:col-span-3">Authors & Category</div>
             <div class="hidden md:block md:col-span-2">Status</div>
             <div class="col-span-6 md:col-span-2 text-right">Actions</div>
         </div>
@@ -70,18 +72,17 @@
                 <div class="col-span-6 md:col-span-5 flex items-start gap-4">
                     {{-- Thumbnail --}}
                     <div class="w-16 h-12 rounded-lg bg-gray-200 shrink-0 overflow-hidden border border-gray-100">
-                        @if($article->cover_photo)
-                             {{-- Handle both uploaded storage paths and external URLs --}}
-                            <img src="{{ Str::startsWith($article->cover_photo, 'http') ? $article->cover_photo : asset('storage/' . $article->cover_photo) }}" class="w-full h-full object-cover">
+                        @if($article->cover_img)
+                            <img src="{{ Str::startsWith($article->cover_img, 'http') ? $article->cover_img : asset('storage/' . $article->cover_img) }}" class="w-full h-full object-cover">
                         @else
                             <div class="w-full h-full flex items-center justify-center text-gray-400 font-bold text-[8px] bg-gray-100">NO IMG</div>
                         @endif
                     </div>
 
                     <div>
-                        <h3 class="text-sm font-bold text-gray-900 leading-tight group-hover:text-red-600 transition line-clamp-1">
+                        <a href="{{ route('news.show', $article->slug) }}" target="_blank" class="text-sm font-bold text-gray-900 leading-tight group-hover:text-red-600 transition line-clamp-1">
                             {{ $article->title }}
-                        </h3>
+                        </a>
                         <p class="text-[10px] text-gray-500 mt-1 line-clamp-2 leading-relaxed">
                             {{ $article->summary ?? Str::limit(strip_tags($article->content), 80) }}
                         </p>
@@ -91,42 +92,82 @@
                 {{-- 2. Author & Category --}}
                 <div class="hidden md:block md:col-span-3">
                     <div class="flex items-center gap-2 mb-1">
+                        {{-- Avatar --}}
                         <div class="w-5 h-5 rounded-full bg-red-100 text-red-600 flex items-center justify-center text-[9px] font-bold">
-                            {{ substr($article->author ?? 'A', 0, 1) }}
+                            {{ substr($article->authors->first()->name ?? $article->author, 0, 1) }}
                         </div>
-                        <span class="text-xs font-bold text-gray-700">{{ $article->author }}</span>
+                        
+                        {{-- Name Logic --}}
+                        <span class="text-xs font-bold text-gray-700">
+                            {{ $article->authors->first()->name ?? $article->author }}
+                            @if($article->authors->count() > 1)
+                                <span class="text-gray-400 text-[9px] font-normal ml-1">(+{{ $article->authors->count() - 1 }} others)</span>
+                            @endif
+                        </span>
                     </div>
                     <span class="text-[9px] font-bold text-gray-400 uppercase bg-gray-100 px-1.5 py-0.5 rounded tracking-wide">
-                        {{ $article->category }}
+                        {{ $article->category->name ?? 'Uncategorized' }}
                     </span>
                 </div>
 
-                {{-- 3. Status --}}
-                <div class="hidden md:block md:col-span-2">
-                    @if($article->status === 'Published')
-                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-green-50 text-green-700 border border-green-100 uppercase tracking-wide">
-                            <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span> Published
-                        </span>
-                        <p class="text-[9px] text-gray-400 mt-1 pl-1">
-                            {{ $article->created_at->format('M d, Y') }}
-                        </p>
-                    @else
-                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-gray-100 text-gray-600 border border-gray-200 uppercase tracking-wide">
-                            <span class="w-1.5 h-1.5 rounded-full bg-gray-400"></span> Draft
-                        </span>
-                        <p class="text-[9px] text-gray-400 mt-1 pl-1">Last edited {{ $article->updated_at->diffForHumans() }}</p>
-                    @endif
+                {{-- 3. Status (UPDATED) --}}
+                {{-- 3. Status Column (Interactive) --}}
+                <div class="hidden md:block md:col-span-2 relative group" x-data>
+                    
+                    {{-- The Visual Badge (Changes based on status) --}}
+                    <div class="absolute inset-0 pointer-events-none flex items-center">
+                        @if($article->status === 'active')
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-green-50 text-green-700 border border-green-100 uppercase tracking-wide">
+                                <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span> Published
+                            </span>
+                        @elseif($article->status === 'for evaluation')
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-100 uppercase tracking-wide">
+                                <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span> For Review
+                            </span>
+                        @elseif($article->status === 'draft')
+                             <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-gray-100 text-gray-600 border border-gray-200 uppercase tracking-wide">
+                                <span class="w-1.5 h-1.5 rounded-full bg-gray-400"></span> Draft
+                            </span>
+                        @else
+                             <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-gray-50 text-gray-400 border border-gray-200 uppercase tracking-wide">
+                                Hidden
+                            </span>
+                        @endif
+                    </div>
+
+                    {{-- Invisible Select Overlay (Triggers the update) --}}
+                    <select 
+                        wire:change="updateStatus({{ $article->id }}, $event.target.value)"
+                        class="opacity-0 w-full h-8 cursor-pointer relative z-10"
+                        title="Change Status"
+                    >
+                        <option value="active" {{ $article->status === 'active' ? 'selected' : '' }}>Publish (Active)</option>
+                        <option value="for evaluation" {{ $article->status === 'for evaluation' ? 'selected' : '' }}>For Evaluation</option>
+                        <option value="draft" {{ $article->status === 'draft' ? 'selected' : '' }}>Revert to Draft</option>
+                        <option value="hidden" {{ $article->status === 'hidden' ? 'selected' : '' }}>Hide</option>
+                    </select>
+
+                    {{-- Helper Text --}}
+                    <p class="text-[9px] text-gray-400 mt-8 pl-1">
+                        @if($article->status === 'active')
+                            {{ $article->published_at ? $article->published_at->format('M d') : 'Live' }}
+                        @elseif($article->status === 'for evaluation')
+                            Action Required
+                        @else
+                            {{ $article->updated_at->diffForHumans() }}
+                        @endif
+                    </p>
                 </div>
 
                 {{-- 4. Actions --}}
                 <div class="col-span-6 md:col-span-2 flex items-center justify-end gap-2">
-                    {{-- Edit Button (Uses route parameter) --}}
-                    <a href="{{ route('news.edit', $article->id) }}" class="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition" title="Edit">
+                    {{-- Edit Button (Uses SLUG now to match component) --}}
+                    <a href="{{ route('news.edit', $article->slug) }}" class="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition" title="Edit">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                     </a>
                     
                     <button wire:click="deleteArticle({{ $article->id }})" 
-                            wire:confirm="Are you sure you want to delete this article? This cannot be undone."
+                            wire:confirm="Are you sure? This cannot be undone."
                             class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition" 
                             title="Delete">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
@@ -140,7 +181,7 @@
                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"></path></svg>
                 </div>
                 <h3 class="text-sm font-bold text-gray-900">No Articles Found</h3>
-                <p class="text-xs text-gray-500 mt-1">Try changing your search terms or write a new article.</p>
+                <p class="text-xs text-gray-500 mt-1">Try changing your search terms.</p>
             </div>
             @endforelse
         </div>
