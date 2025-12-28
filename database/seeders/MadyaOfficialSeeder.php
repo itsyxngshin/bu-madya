@@ -218,7 +218,7 @@ class MadyaOfficialSeeder extends Seeder
             $firstNameRaw = trim($parts[1] ?? 'Unknown');
             $firstName = preg_replace('/\s+[A-Z]\.?$/', '', $firstNameRaw);
 
-            $email = Str::slug($firstName . '.' . $lastName) . '@bumadya.org';
+            $email = Str::slug($firstName . '.' . $lastName) . '@bu-madya.org';
             $college = College::where('slug', $officer['college_code'])->first();
 
             // C. CREATE OR UPDATE USER (Updating Photo Logic Added)

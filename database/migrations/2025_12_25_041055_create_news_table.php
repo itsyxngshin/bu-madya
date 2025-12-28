@@ -30,11 +30,10 @@ return new class extends Migration
             $table->date('published_at')->nullable();
             $table->boolean('is_featured')->default(false); // To pin to the top of the feed
             // Optional: Link to a system user
-            $table->string('author_display_name')->nullable();
             $table->text('summary')->nullable();
             $table->string('photo_credit')->nullable();
             $table->boolean('show_drop_cap')->default(false);
-            $table->enum('status', ['draft', 'active', 'hidden'])->default('draft');
+            $table->enum('status', ['draft', 'active', 'hidden', 'for evaluation'])->default('draft');
             $table->timestamps();
         });
     }

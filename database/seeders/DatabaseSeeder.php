@@ -25,6 +25,7 @@ class DatabaseSeeder extends Seeder
             CategorySeeder::class,
             AcademicYearSeeder::class,
             DirectorsSeeder::class,
+            CommitteeSeeder::class,
             UserSeeder::class,  
             MadyaOfficialSeeder::class,
             TrialProfileSeeder::class,

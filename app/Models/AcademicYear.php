@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache; 
 
 class AcademicYear extends Model
 {
@@ -17,7 +18,10 @@ class AcademicYear extends Model
     // Helper to get the current active year
     public static function current()
     {
-        return self::where('is_active', true)->first();
+        // Cache the active year for 24 hours (or until you clear cache) to save DB queries
+        return Cache::remember('active_academic_year', 60 * 60 * 24, function () {
+            return self::where('is_active', true)->first();
+        });
     }
 
     // Logic: When saving, if this is set to active, deactivate others

@@ -11,12 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('committees', function (Blueprint $table) {
+        Schema::create('news_authors', function (Blueprint $table) {
             $table->id();
-            $table->string('name'); 
-            $table->string('slug')->unique()->nullable(); 
-            $table->string('description')->nullable();
-            $table->integer('order')->default(99); 
+            $table->foreignId('news_id')->constrained('news')->onDelete('cascade');
+            $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('cascade');
+            $table->string('name')->nullable(); 
+            $table->string('type')->default('Head Writer'); 
             $table->timestamps();
         });
     }
@@ -26,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('committees');
+        Schema::dropIfExists('news_authors');
     }
 };

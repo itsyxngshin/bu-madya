@@ -91,7 +91,7 @@ class UserSeeder extends Seeder
             'email' => $email,
             'password' => Hash::make('password'),
             'email_verified_at' => now(),
-            // 'role_id' => $roleId, // Uncomment if using role_id on users table
+            'role_id' => $roleId,
         ]);
 
         DB::table('profiles')->insert([

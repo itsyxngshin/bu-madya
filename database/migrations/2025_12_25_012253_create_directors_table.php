@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('directors', function (Blueprint $table) {
             $table->id();
-            $table->string('name'); // "Technical & Productions"
+            $table->string('name');
             $table->string(column: 'description')->nullable();
             $table->integer('order')->default(99); //
             $table->timestamps();

@@ -17,6 +17,9 @@
                         $active = 'border-red-600 text-red-700 focus:border-red-700';
                         $inactive = 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 focus:text-gray-700 focus:border-gray-300';
                     @endphp
+                    <a href="{{ route('open.home') }}" class="{{ $navLink }} {{ request()->routeIs('open.home.*') ? $active : $inactive }}">
+                        Home
+                    </a>
                     @auth
                         <a href="{{ route('dashboard') }}" class="{{ $navLink }} {{ request()->routeIs('dashboard') ? $active : $inactive }}">
                             Dashboard
@@ -34,7 +37,7 @@
                     <a href="{{ route('news.index') }}" class="{{ $navLink }} {{ request()->routeIs('news.*') ? $active : $inactive }}">
                         News
                     </a>
-                    <a href="#" class="{{ $navLink }} {{ request()->routeIs('about.*') ? $active : $inactive }}">
+                    <a href="{{ route('about') }}" class="{{ $navLink }} {{ request()->routeIs('about.*') ? $active : $inactive }}">
                         About
                     </a>
                 </div>

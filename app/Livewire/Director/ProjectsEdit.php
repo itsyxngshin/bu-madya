@@ -62,7 +62,8 @@ class ProjectsEdit extends Component
     public function mount(Project $project)
     {
         $this->project = $project;
-
+        $this->authorize('update', $this->project);
+        
         // A. Basic Fields
         $this->title = $project->title;
         $this->slug = $project->slug;

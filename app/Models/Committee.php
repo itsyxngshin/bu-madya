@@ -6,6 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class Committee extends Model
 {
+    protected $fillable = [
+        'name',
+        'description',
+        'slug'
+    ];
     public function directorAssignment()
     {
         return $this->hasOne(DirectorAssignment::class)

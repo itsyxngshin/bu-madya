@@ -27,12 +27,12 @@ class DirectorsSeeder extends Seeder
             ['order' => 12, 'name' => 'Director for Multimedia and Creatives'],
             ['order' => 13, 'name' => 'Director for Marketing and Logistics'],
             ['order' => 14, 'name' => 'Director for Strategic Initiatives'],
-            ['order' => 15, 'name' => 'Director for Digital Strategies'],
+            ['order' => 15, 'name' => 'Director for Digital Strategies & Communication'],
             ['order' => 16, 'name' => 'Director for Science and Technology'],
-            ['order' => 17, 'name' => 'Director for Social Science'],
+            ['order' => 17, 'name' => 'Director for Social Sciences'],
             ['order' => 18, 'name' => 'Director for Culture and Heritage'],
-            ['order' => 19, 'name' => 'Director for Operations'],
-            ['order' => 20, 'name' => 'Director for Technical'],
+            ['order' => 19, 'name' => 'Director for Operations & Documentation'],
+            ['order' => 20, 'name' => 'Director for Technicals & Production'],
             
             // --- ENVOYS (31+) ---
             ['order' => 31, 'name' => 'BU Legazpi - West Envoy'],

@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Livewire\Open\LandingPage;
+use App\Livewire\About;
 use App\Livewire\Open\Directory;
 use App\Livewire\Open\Committees;
 use App\Livewire\Open\CommitteeMembers;
@@ -24,6 +25,13 @@ use App\Livewire\Director\Dashboard;
 use App\Livewire\Open\ProposalsCreate;
 use App\Livewire\Admin\ProposalsShow;
 use App\Livewire\Admin\ProposalsIndex;
+use App\Livewire\Admin\LinkagesRoster;
+use App\Livewire\Admin\UserRoster;
+use App\Livewire\Admin\ProjectRoster;
+use App\Livewire\Admin\NewsRoster;
+use App\Livewire\Admin\AdminDashboard;
+use App\Livewire\Admin\Settings;
+
 
 #use App\Livewire\Admin\AdminProposalsIndex;
 // ADMIN ROUTE (Protect this group!)
@@ -31,7 +39,7 @@ use App\Livewire\Admin\ProposalsIndex;
 
 Route::get('/', function () {
     return view('welcome');
-});
+}); 
 
 /*
 Route::middleware([
@@ -46,37 +54,51 @@ Route::middleware([
 */
 
 // Middleware accessible to both members and directors
-Route::middleware(['auth', 'role:director'])
+Route::middleware(['auth', 'role:director']) 
     ->group(function () {
-    Route::get('/dashboard', Dashboard::class)->name('dashboard');
+    Route::get('/dashboard', Dashboard::class)->name('dashboard'); 
     Route::get('/project/create', ProjectsCreate::class)->name('projects.create');
     Route::get('/projects/{project:slug}/edit', ProjectsEdit::class)->name('projects.edit');
     Route::get('/profile/edit', EditProfile::class)->name('profile.edit');
     Route::get('/news/create', NewsCreate::class)->name('news.create');
     Route::get('/linkage/create', LinkagesCreate::class)->name('linkages.create');
-    Route::get('/news/{slug}', NewsShow::class)->name('news.show');  
+    
     Route::get('/news/{slug}/edit', NewsEdit::class)->name('news.edit');  
     Route::get('/linkage/{linkage:slug}/edit', LinkagesEdit::class)->name('linkages.edit');
-    Route::get('/proposals', ProposalsIndex::class)->name('proposals.index');
 });
 
 Route::middleware(['auth', 'role:administrator'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/projects', ProjectRoster::class)->name('projects.index');
     Route::get('/proposals/{proposal}', ProposalsShow::class)->name('proposals.show');
     Route::get('/proposals', ProposalsIndex::class)->name('proposals.index');
+    Route::get('/linkages', LinkagesRoster::class)->name('linkages.index');
+    Route::get('/news', NewsRoster::class)->name('news.index');
+    Route::get('/user', UserRoster::class)->name('user.index');
+    Route::get('/settings', Settings::class)->name('settings');
+    Route::get('/dashboard', AdminDashboard::class)->name('dashboard');
 });
 
-Route::middleware(['auth', 'role:director'])
-    ->prefix('admin')
-    ->group(function () {
-   
+Route::middleware(['auth', 'role:administrator', 'role:director'])->prefix('admin')->group(function () {
+    Route::get('/proposals/{proposal}', ProposalsShow::class)->name('admin.proposals.show');
+    Route::get('/proposals', ProposalsIndex::class)->name('admin.proposals.index');
+    Route::get('/project/create', ProjectsCreate::class)->name('projects.create');
+    Route::get('/projects/{project:slug}/edit', ProjectsEdit::class)->name('projects.edit');
+    Route::get('/profile/edit', EditProfile::class)->name('profile.edit');
+    Route::get('/news/create', NewsCreate::class)->name('news.create');
+    Route::get('/linkage/create', LinkagesCreate::class)->name('linkages.create');
+    Route::get('/news/{slug}/edit', NewsEdit::class)->name('news.edit');  
+    Route::get('/linkage/{linkage:slug}/edit', LinkagesEdit::class)->name('linkages.edit');
 });
+
 
 // Public view blades with access control on parts of the navigation
 Route::get('/', LandingPage::class)->name('open.home');  
+Route::get('/about', About::class)->name('about'); 
 Route::get('/directory', Directory::class)->name('open.directory');  
 Route::get('/committees', Committees::class)->name('open.committees'); 
 Route::get('/committees/{slug}', CommitteeMembers::class)->name('open.committees.show');
 Route::get('/news', NewsIndex::class)->name('news.index');
+Route::get('/news/{slug}', NewsShow::class)->name('news.show');  
 Route::get('/projects', ProjectsIndex::class)->name('projects.index'); 
 Route::get('/projects/{project:slug}', ProjectsShow::class)->name('projects.show');
 Route::get('/linkages', LinkagesIndex::class)->name('linkages.index');
