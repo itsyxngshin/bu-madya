@@ -148,6 +148,12 @@ class User extends Authenticatable
         return $this->hasOne(CommitteeMember::class)->latest(); // Gets the latest/current assignment
     }
 
+    public function committeeMembers()
+    {
+        // A user has many committee memberships over time (history)
+        return $this->hasMany(CommitteeMember::class);
+    }
+
     public function proponents()
     {
         return $this->hasMany(ProjectProponent::class);

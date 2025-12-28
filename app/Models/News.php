@@ -35,9 +35,9 @@ class News extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function author()
+    public function authors()
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->hasMany(NewsAuthor::class);
     }
 
 // Helper to get the name to show
@@ -63,11 +63,15 @@ class News extends Model
         return $this->belongsToMany(Sdg::class, 'news_sdgs');
     }
     public function comments(){
-        return $this->hasMany(NewsComment::class)->latest(); 
+        return $this->hasMany(Comment::class)->latest(); 
     }
 
     public function votes(){
         return $this->hasMany(NewsVote::class); 
+    }
+
+    public function isLikedBy(User $user){
+        return $this->votes()->where('user_id', $user->id)->where('is_like', true)->exists();
     }
     
 }

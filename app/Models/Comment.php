@@ -4,14 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class NewsVote extends Model
+class Comment extends Model
 {
-    protected $fillable = ['user_id', 'news_id', 'is_like',]; 
-
-    protected $casts = [
-        'is_like' => 'boolean'
-    ]; 
-
+    protected $fillable = [
+        'user_id',
+        'news_id',
+        'content',
+    ];
+    
     public function user(){
         return $this->belongsTo(User::class);
     }
