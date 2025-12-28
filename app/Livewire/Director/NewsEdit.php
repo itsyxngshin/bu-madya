@@ -7,7 +7,9 @@ use Livewire\WithFileUploads;
 use Livewire\Attributes\Layout;
 use App\Models\News;
 use App\Models\NewsCategory;
+use App\Models\NewsAuthor;
 use App\Models\Sdg;
+use App\Models\User;
 use Illuminate\Support\Str;
 
 #[Layout('layouts.madya-template')]
@@ -19,12 +21,18 @@ class NewsEdit extends Component
 
     // Form Properties
     public $title;
-    public $slug; // <--- Fully Editable
+    public $slug; 
     public $category;
-    public $author;
     public $content;
     public $tags;
     
+    // Authors (Arrays for logic loop)
+    public $authors = [];
+    public $authorMatches = []; // Search results
+
+    // Date
+    public $published_at;
+
     // Metadata & Visuals
     public $summary;
     public $photo_credit;
@@ -34,35 +42,101 @@ class NewsEdit extends Component
 
     // Logic
     public $selectedSdgs = [];
-    public $photo_upload; 
+    public $photo_upload;  
 
     public function mount($slug)
     {
-        $this->article = News::with(['category', 'sdgs'])->where('slug', $slug)->firstOrFail();
+        // 1. Load Article with Relationships
+        $this->article = News::with(['category', 'sdgs', 'authors'])->where('slug', $slug)->firstOrFail();
 
         if (auth()->id() !== $this->article->user_id) {
             abort(403, 'Unauthorized action.');
         }
 
-        // Fill data
+        // 2. Fill Basic Data
         $this->title = $this->article->title;
         $this->slug = $this->article->slug;
         $this->category = $this->article->category->name ?? '';
-        $this->author = $this->article->author;
         $this->content = $this->article->content;
         $this->tags = $this->article->tags;
         $this->imageUrl = $this->article->cover_img;
         $this->summary = $this->article->summary;
         $this->photo_credit = $this->article->photo_credit;
         $this->show_drop_cap = (bool) $this->article->show_drop_cap;
+        
+        // 3. Fill Date
+        $this->published_at = $this->article->published_at?->format('Y-m-d');
+
+        // 4. Fill Authors (Pivot to Array)
+        $this->authors = $this->article->authors->map(function($author) {
+            return [
+                'name' => $author->name,
+                'type' => $author->type,
+                'user_id' => $author->user_id
+            ];
+        })->toArray();
+
+        // Fallback for legacy data (if pivot is empty)
+        if (empty($this->authors)) {
+            $this->authors = [[
+                'name' => $this->article->author ?? 'Secretariat', 
+                'type' => 'Head Writer', 
+                'user_id' => $this->article->user_id
+            ]];
+        }
+
+        // 5. Fill SDGs
         $this->selectedSdgs = $this->article->sdgs->pluck('id')->toArray();
     }
 
-    // 1. Hook: Only auto-update slug if the user hasn't saved the article yet 
-    // or if you want to allow manual overrides, remove this method entirely.
-    // For now, I'll remove updatedTitle so we don't overwrite manual slug edits.
+    // --- Author Search & Management ---
 
-    // 2. Image Handlers
+    public function addAuthor()
+    {
+        $this->authors[] = ['name' => '', 'type' => 'Contributor', 'user_id' => null];
+    }
+
+    public function removeAuthor($index)
+    {
+        if (count($this->authors) > 1) {
+            unset($this->authors[$index]);
+            $this->authors = array_values($this->authors);
+            if (isset($this->authorMatches[$index])) {
+                unset($this->authorMatches[$index]);
+            }
+        }
+    }
+
+    // Real-time Search Hook
+    public function updatedAuthors($value, $key)
+    {
+        $parts = explode('.', $key);
+        
+        if (count($parts) === 2 && $parts[1] === 'name') {
+            $index = $parts[0];
+            $this->authors[$index]['user_id'] = null; // Reset ID on type
+
+            if (strlen($value) >= 2) {
+                $this->authorMatches[$index] = User::where('name', 'like', "%{$value}%")
+                    ->orWhere('email', 'like', "%{$value}%")
+                    ->limit(5)
+                    ->get()
+                    ->toArray();
+            } else {
+                $this->authorMatches[$index] = [];
+            }
+        }
+    }
+
+    public function selectUser($index, $userId, $userName)
+    {
+        $this->authors[$index]['name'] = $userName;
+        $this->authors[$index]['user_id'] = $userId;
+        $this->authorMatches[$index] = [];
+    }
+
+    // --- Visuals ---
+
     public function updatedCoverPhoto()
     {
         $this->validate(['cover_photo' => 'image|max:10240']);
@@ -76,7 +150,8 @@ class NewsEdit extends Component
         $this->dispatch('photo-inserted', url: asset('storage/' . $path));
     }
 
-    // 3. ACTION BUTTONS
+    // --- Save Logic ---
+
     public function saveDraft()
     {
         $this->commitSave('draft');
@@ -87,49 +162,52 @@ class NewsEdit extends Component
         $this->commitSave('active');
     }
 
-    // 4. SHARED SAVE LOGIC
     private function commitSave($targetStatus)
     {
-        // Validation
         $this->validate([
             'title' => 'required|min:5',
-            // Critical: Unique check must ignore THIS article's ID
             'slug' => 'required|alpha_dash|unique:news,slug,' . $this->article->id,
             'category' => 'required',
             'content' => 'required',
-            'author' => 'required',
+            'authors.*.name' => 'required',
+            'published_at' => 'nullable|date',
         ]);
 
         $cat = NewsCategory::firstOrCreate(['name' => $this->category]);
 
-        // Logic for Published Date:
-        // If switching to Active and it wasn't active before, set date to Now.
-        // If already active, keep the original date.
-        $publishedDate = $this->article->published_at;
-        if ($targetStatus === 'active' && $this->article->status !== 'active') {
-            $publishedDate = now();
-        }
-
+        // Update Main Article
         $this->article->update([
             'news_category_id' => $cat->id,
             'title' => $this->title,
-            'slug' => $this->slug, // Saves the edited slug
-            'author' => $this->author,
+            'slug' => $this->slug,
+            'author' => $this->authors[0]['name'] ?? 'Unknown', // Legacy fallback
             'content' => $this->content,
             'cover_img' => $this->imageUrl,
             'tags' => $this->tags,
             'summary' => $this->summary,
             'photo_credit' => $this->photo_credit,
             'show_drop_cap' => $this->show_drop_cap,
-            'status' => $targetStatus, // Updates status (Draft/Active)
-            'published_at' => $publishedDate,
+            'status' => $targetStatus,
+            'published_at' => $this->published_at,
         ]);
 
+        // Sync Authors (Delete Old -> Create New)
+        NewsAuthor::where('news_id', $this->article->id)->delete();
+
+        foreach ($this->authors as $authData) {
+            NewsAuthor::create([
+                'news_id' => $this->article->id,
+                'user_id' => $authData['user_id'] ?? null,
+                'name' => $authData['name'],
+                'type' => $authData['type'],
+            ]);
+        }
+
+        // Sync SDGs
         $this->article->sdgs()->sync($this->selectedSdgs);
 
         session()->flash('message', $targetStatus === 'active' ? 'Article Published!' : 'Draft Saved!');
         
-        // Redirect using the (potentially new) slug
         return redirect()->route('news.show', $this->slug);
     }
 
@@ -140,4 +218,4 @@ class NewsEdit extends Component
             'categoryOptions' => NewsCategory::all(),
         ]);
     }
-}
+} 

@@ -2,9 +2,7 @@
 
     {{-- 1. NAVIGATION BAR --}}
     <nav class="shrink-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-200 h-16 px-6 flex items-center justify-between">
-        
         <div class="flex items-center gap-3">
-            {{-- Exit back to the Article Show page --}}
             <a href="{{ route('news.show', $slug) }}" class="text-xs font-bold uppercase text-gray-400 hover:text-red-600 transition">
                 &larr; Cancel
             </a>
@@ -14,7 +12,6 @@
             </span>
         </div>
 
-        {{-- Mobile Toggle --}}
         <button @click="mobilePreview = !mobilePreview" class="md:hidden text-xs font-bold uppercase bg-gray-200 px-3 py-1 rounded">
             <span x-text="mobilePreview ? 'Edit' : 'Preview'"></span>
         </button>
@@ -27,13 +24,9 @@
                   x-init="@this.on('message', () => { show = true; setTimeout(() => show = false, 2000) })">
                 Saved!
             </span>
-
-            {{-- SAVE DRAFT BUTTON --}}
             <button wire:click="saveDraft" class="px-4 py-2 bg-white border border-gray-300 text-gray-600 text-xs font-bold uppercase rounded-lg hover:bg-gray-50 transition shadow-sm">
                 Save Draft
             </button>
-
-            {{-- PUBLISH BUTTON --}}
             <button wire:click="publish" class="px-5 py-2 bg-gradient-to-r from-red-600 to-yellow-500 text-white text-xs font-bold uppercase rounded-lg hover:shadow-lg hover:scale-105 transition shadow-md">
                 Publish Updates
             </button>
@@ -47,10 +40,7 @@
         {{-- LEFT PANEL: EDITOR       --}}
         {{-- ======================== --}}
         <div class="h-full overflow-y-auto bg-gray-50 border-r border-gray-200 transition-all duration-300 ease-in-out pb-20"
-             :class="[
-                mobilePreview ? 'hidden' : 'w-full md:w-1/2 lg:w-5/12',
-                fullScreen ? 'hidden' : 'block'
-             ]">
+             :class="[mobilePreview ? 'hidden' : 'w-full md:w-1/2 lg:w-5/12', fullScreen ? 'hidden' : 'block']">
             
             <div class="p-6 max-w-xl mx-auto flex flex-col gap-6">
                 
@@ -58,7 +48,6 @@
                 <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 space-y-4">
                     <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest border-b border-gray-100 pb-2">Metadata</h3>
                     
-                    {{-- Slug --}}
                     <div>
                         <label class="block text-xs font-bold text-gray-700 mb-1">URL Slug</label>
                         <div class="flex items-center">
@@ -78,8 +67,76 @@
                             </select>
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-gray-700 mb-1">Author</label>
-                            <input wire:model.live="author" type="text" class="w-full text-xs border-gray-200 rounded-lg focus:ring-yellow-400 py-1.5">
+                            <label class="block text-xs font-bold text-gray-700 mb-1">Publication Date</label>
+                            <input wire:model="published_at" type="date" class="w-full text-xs border-gray-200 rounded-lg focus:ring-yellow-400 py-1.5 text-gray-600">
+                        </div>
+                    </div>
+
+                    {{-- Authors Section with Search --}}
+                    <div class="space-y-2 pt-2 border-t border-gray-50">
+                        <div class="flex items-center justify-between">
+                            <label class="block text-xs font-bold text-gray-700">Authors / Credits</label>
+                            <button wire:click="addAuthor" class="text-[10px] uppercase font-bold text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 px-2 py-1 rounded transition">
+                                + Add
+                            </button>
+                        </div>
+                        
+                        <div class="space-y-3">
+                            @foreach($authors as $index => $auth)
+                                <div class="flex gap-2 items-start z-20 relative" wire:key="author-row-{{ $index }}">
+                                    
+                                    <div class="grow grid grid-cols-3 gap-2">
+                                        {{-- NAME INPUT --}}
+                                        <div class="col-span-2 relative">
+                                            <input 
+                                                wire:model.live.debounce.300ms="authors.{{ $index }}.name" 
+                                                type="text" 
+                                                placeholder="Name (Search...)" 
+                                                class="w-full text-xs border-gray-200 rounded-lg focus:ring-yellow-400 placeholder-gray-300 py-1.5"
+                                                autocomplete="off"
+                                            >
+                                            
+                                            {{-- Link Icon --}}
+                                            @if(!empty($auth['user_id']))
+                                                <div class="absolute right-2 top-1.5 text-green-500" title="Linked User">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                                </div>
+                                            @endif
+
+                                            {{-- DROPDOWN --}}
+                                            @if(!empty($authorMatches[$index]))
+                                                <div class="absolute z-50 w-full bg-white border border-gray-100 rounded-lg shadow-xl mt-1 max-h-40 overflow-y-auto">
+                                                    <ul>
+                                                        @foreach($authorMatches[$index] as $match)
+                                                            <li 
+                                                                wire:click="selectUser({{ $index }}, {{ $match['id'] }}, '{{ addslashes($match['name']) }}')"
+                                                                class="px-3 py-2 hover:bg-red-50 cursor-pointer border-b border-gray-50 last:border-0"
+                                                            >
+                                                                <p class="text-xs font-bold text-gray-800">{{ $match['name'] }}</p>
+                                                            </li>
+                                                        @endforeach
+                                                    </ul>
+                                                </div>
+                                            @endif
+                                            @error("authors.{$index}.name") <span class="text-red-500 text-[9px]">Required</span> @enderror
+                                        </div>
+
+                                        {{-- ROLE --}}
+                                        <div>
+                                            <select wire:model="authors.{{ $index }}.type" class="w-full text-xs border-gray-200 rounded-lg focus:ring-yellow-400 text-gray-500 py-1.5">
+                                                <option value="Head Writer">Writer</option>
+                                                <option value="Contributor">Contrib.</option>
+                                                <option value="Photographer">Photo</option>
+                                                <option value="Editor">Editor</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <button wire:click="removeAuthor({{ $index }})" class="shrink-0 p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition mt-0.5" title="Remove">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                    </button>
+                                </div>
+                            @endforeach
                         </div>
                     </div>
 
@@ -89,7 +146,7 @@
                         <textarea wire:model.live="summary" rows="2" class="w-full text-xs border-gray-200 rounded-lg resize-none focus:ring-yellow-400"></textarea>
                     </div>
 
-                    {{-- Cover Image (Drag & Drop) --}}
+                    {{-- Cover Image --}}
                     <div x-data="{ isDropping: false, isUploading: false }"
                          x-on:livewire-upload-start="isUploading = true"
                          x-on:livewire-upload-finish="isUploading = false"
@@ -100,29 +157,21 @@
                         <div class="relative flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-xl transition-all duration-200 bg-white"
                              :class="isDropping ? 'border-red-500 bg-red-50' : 'border-gray-300 hover:bg-gray-50'">
                             
-                            {{-- Invisible Overlay Input --}}
-                            <input type="file" 
-                                   wire:model="cover_photo" 
-                                   class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" 
-                                   accept="image/png, image/jpeg, image/jpg"
-                                   @dragover="isDropping = true" 
-                                   @dragleave="isDropping = false" 
-                                   @drop="isDropping = false">
+                            <input type="file" wire:model="cover_photo" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" accept="image/*"
+                                   @dragover="isDropping = true" @dragleave="isDropping = false" @drop="isDropping = false">
 
-                            {{-- Visual Content --}}
                             <div class="absolute inset-0 w-full h-full flex flex-col items-center justify-center pointer-events-none z-0">
                                 @if ($cover_photo)
                                     <img src="{{ $cover_photo->temporaryUrl() }}" class="w-full h-full object-cover rounded-xl opacity-90">
-                                    <div class="absolute bg-black/50 text-white text-[10px] px-2 py-1 rounded backdrop-blur-sm">New File Selected</div>
+                                    <div class="absolute bg-black/50 text-white text-[10px] px-2 py-1 rounded backdrop-blur-sm">New File</div>
                                 @elseif($imageUrl)
                                     <img src="{{ Str::startsWith($imageUrl, 'http') ? $imageUrl : asset('storage/'.$imageUrl) }}" class="w-full h-full object-cover rounded-xl opacity-90">
-                                    <div class="absolute bg-black/50 text-white text-[10px] px-2 py-1 rounded backdrop-blur-sm">Current Image</div>
+                                    <div class="absolute bg-black/50 text-white text-[10px] px-2 py-1 rounded backdrop-blur-sm">Current</div>
                                 @else
                                     <div class="text-gray-400 text-center"><p class="text-[10px] font-bold">Click to Upload</p></div>
                                 @endif
                             </div>
 
-                            {{-- Spinner --}}
                             <div x-show="isUploading" class="absolute inset-0 bg-white/90 flex items-center justify-center z-20 rounded-xl">
                                 <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-red-600"></div>
                             </div>
@@ -144,46 +193,39 @@
                         @foreach($sdgOptions as $sdg)
                             <label class="cursor-pointer group relative">
                                 <input type="checkbox" wire:model.live="selectedSdgs" value="{{ $sdg->id }}" class="peer hidden">
-                                <div class="w-7 h-7 rounded-md flex items-center justify-center transition-all duration-200 border border-transparent peer-checked:scale-110 peer-checked:shadow-md peer-checked:border-gray-800 {{ $sdg->color_class }} bg-opacity-20 hover:bg-opacity-40 peer-checked:bg-opacity-100 text-gray-400 peer-checked:text-white">
-                                    <span class="font-black text-[10px]">{{ $sdg->id }}</span>
+                                <div style="background-color: {{ $sdg->color_hex }}" class="w-8 h-8 rounded-md flex items-center justify-center text-white font-black text-[10px] bg-opacity-10 grayscale opacity-40 hover:grayscale-0 hover:opacity-100 peer-checked:bg-opacity-100 peer-checked:grayscale-0 peer-checked:opacity-100 transition-all shadow-sm">
+                                    {{ $sdg->id }}
                                 </div>
-                                <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 hidden group-hover:block whitespace-nowrap z-10 bg-gray-900 text-white text-[10px] px-2 py-1 rounded">{{ $sdg->name }}</div>
                             </label>
                         @endforeach
                     </div>
                 </div>
 
-                {{-- Main Editor --}}
+                {{-- Editor --}}
                 <div class="space-y-2" x-data="{ isUploading: false, insert(start, end) { 
                         let el = $refs.editor;
                         let text = el.value;
                         let s = el.selectionStart;
                         let e = el.selectionEnd;
-                        let replacement = start + text.substring(s, e) + end;
-                        el.value = text.substring(0, s) + replacement + text.substring(e);
+                        el.value = text.substring(0, s) + start + text.substring(s, e) + end + text.substring(e);
                         el.dispatchEvent(new Event('input'));
                         setTimeout(() => { el.focus(); el.setSelectionRange(s + start.length, e + start.length); }, 50);
                     } }">
                     
-                    {{-- Toolbar --}}
                     <div class="flex items-center gap-1 bg-white border border-gray-200 p-1.5 rounded-lg shadow-sm w-fit mb-2">
                         <button @click="insert('**', '**')" class="p-2 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-md transition" title="Bold"><strong>B</strong></button>
                         <button @click="insert('*', '*')" class="p-2 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-md transition" title="Italic"><em>I</em></button>
                         <div class="w-px h-4 bg-gray-200 mx-1"></div>
                         <button @click="insert('### ', '')" class="p-2 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-md text-xs font-bold">H3</button>
                         <button @click="insert('> ', '')" class="p-2 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-md" title="Quote">&ldquo;</button>
-                        {{-- Editor Image Upload --}}
-                        <button @click="$refs.photoUploader.click()" class="p-2 hover:bg-gray-100 rounded text-xs font-bold relative group" title="Upload Photo">
+                        <button @click="$refs.photoUploader.click()" class="p-2 hover:bg-gray-100 rounded text-xs font-bold relative group">
                             <span x-show="!isUploading">IMG</span>
                             <span x-show="isUploading" class="animate-spin block w-4 h-4 border-2 border-gray-300 border-t-red-600 rounded-full"></span>
                         </button>
                     </div>
 
-                    {{-- Hidden Uploader for Editor --}}
                     <input type="file" wire:model="photo_upload" class="hidden" x-ref="photoUploader" accept="image/*">
-                    
                     <input wire:model.live="title" type="text" class="w-full text-2xl font-serif font-bold text-gray-900 bg-transparent border-0 border-b-2 border-transparent focus:border-red-500 focus:ring-0 placeholder-gray-300 transition px-0 mb-4" placeholder="Headline...">
-                    
                     <textarea x-ref="editor" wire:model.live="content" rows="12" class="w-full text-base leading-relaxed text-gray-700 bg-transparent border-2 border-transparent focus:border-gray-200 rounded-xl p-4 focus:ring-0 resize-none font-serif placeholder-gray-300 transition-all focus:bg-white" placeholder="Start writing..."></textarea>
                 </div>
 
@@ -208,24 +250,26 @@
 
             <div class="min-h-full bg-stone-50 pb-20 origin-top transition-transform" :class="fullScreen ? 'scale-100 px-0' : 'scale-90 md:scale-100'">
                 
-                {{-- PREVIEW HEADER --}}
                 <header class="relative pt-20 pb-12 px-6 z-10 text-center max-w-4xl mx-auto">
                     <span class="px-4 py-1 bg-red-50 text-red-600 text-[10px] font-black uppercase tracking-[0.2em] rounded-full border border-red-100 mb-6 inline-block">{{ $category ?: 'Category' }}</span>
                     <h1 class="font-heading text-4xl md:text-6xl font-black text-gray-900 leading-tight mb-8">{{ $title ?: 'Article Headline' }}</h1>
                     
                     {{-- AUTHOR PREVIEW --}}
-                    <div class="inline-flex items-center gap-4 bg-white/60 px-6 py-2 rounded-full border border-white/40 shadow-sm">
-                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-red-500 to-yellow-500 flex items-center justify-center text-white font-bold text-xs">
-                             {{ substr($author, 0, 1) }}
-                        </div>
-                        <div class="text-left">
-                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Written By</p>
-                            <p class="text-xs font-bold text-gray-800">{{ $author }}</p>
-                        </div>
+                    <div class="flex flex-wrap justify-center gap-3">
+                        @foreach($authors as $auth)
+                            <div class="inline-flex items-center gap-3 bg-white/60 px-4 py-1.5 rounded-full border border-white/40 shadow-sm">
+                                <div class="w-6 h-6 rounded-full bg-gradient-to-br from-red-500 to-yellow-500 flex items-center justify-center text-white font-bold text-[10px]">
+                                     {{ substr($auth['name'] ?? '?', 0, 1) }}
+                                </div>
+                                <div class="text-left">
+                                    <p class="text-[9px] font-bold text-gray-400 uppercase tracking-wider leading-none">{{ $auth['type'] }}</p>
+                                    <p class="text-[11px] font-bold text-gray-800 leading-none">{{ $auth['name'] }}</p>
+                                </div>
+                            </div>
+                        @endforeach
                     </div>
                 </header>
 
-                {{-- PREVIEW IMAGE (Handles New Upload vs Old DB Image) --}}
                 <div class="w-full max-w-5xl mx-auto px-6 mb-12">
                      <div class="relative group aspect-[21/9] overflow-hidden rounded-3xl shadow-2xl bg-gray-200">
                         @if ($cover_photo)
@@ -255,14 +299,25 @@
                             </div>
                             @endif
 
-                            {{-- SDGs Preview --}}
-                             @if(count($selectedSdgs) > 0)
+                            @if(count($selectedSdgs) > 0)
                             <div class="flex flex-wrap gap-2">
                                 @foreach($selectedSdgs as $selectedId)
                                     @php $s = $sdgOptions->firstWhere('id', $selectedId); @endphp
                                     @if($s)
-                                        <div class="w-8 h-8 {{ $s->color_class }} rounded flex items-center justify-center text-white font-black text-xs shadow-sm" title="{{ $s->name }}">{{ $s->id }}</div>
+                                        <div style="background-color: {{ $s->color_hex }}" class="w-8 h-8 rounded flex items-center justify-center text-white font-black text-xs shadow-sm transform hover:scale-110 transition" title="{{ $s->name }}">
+                                            {{ $s->id }}
+                                        </div>
+
+                                        {{-- THE TOOLTIP --}}
+                                        <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-max max-w-[150px] hidden group-hover:block z-20">
+                                            <div class="bg-gray-900 text-white text-[10px] font-bold px-2 py-1.5 rounded shadow-lg text-center leading-tight">
+                                                {{ $s->name }}
+                                            </div>
+                                            {{-- Little Triangle Pointer --}}
+                                            <div class="w-2 h-2 bg-gray-900 rotate-45 absolute left-1/2 -translate-x-1/2 -bottom-1"></div>
+                                        </div>
                                     @endif
+                                    
                                 @endforeach
                             </div>
                             @endif
