@@ -51,103 +51,116 @@
                 
                 @forelse($officers as $director)
                     @php
-                        // Check if active assignment exists
-                        $assignment = $director->assignments->first();
-                        $isVacant = is_null($assignment);
+                        // 1. Get all assignments for this position
+                        $assignments = $director->assignments;
                         
-                        // Data Setup
-                        $user = $assignment?->user;
-                        $profile = $user?->profile;
-                        $isDG = $director->name === 'Director General';
-                        
-                        // College Display Logic
-                        $collegeDisplay = 'N/A';
-                        if ($profile?->college) {
-                            $collegeDisplay = strtoupper(str_replace('bu-', '', $profile->college->slug));
-                            if($profile->college->slug === 'bu-cbem') $collegeDisplay = 'CBEM';
-                        }
+                        // 2. If valid assignments exist, loop through them. 
+                        //    If not, create an array with one NULL item to render a single "Vacant" card.
+                        $cardsToRender = $assignments->isEmpty() ? [null] : $assignments;
                     @endphp
 
-                    <div wire:key="dir-{{ $director->id }}" 
-                         class="group relative flex flex-col overflow-hidden rounded-2xl transition-all duration-300 hover:-translate-y-2
-                         {{ $isVacant 
-                            ? 'bg-gray-100 border border-gray-200 opacity-80 hover:opacity-100' // Vacant Style
-                            : ($isDG 
-                                ? 'bg-gradient-to-b from-yellow-50 to-white border-2 border-yellow-400 shadow-[0_0_15px_rgba(250,204,21,0.3)] z-10 scale-105' 
-                                : 'bg-white/40 backdrop-blur-md border border-white/50 shadow-lg hover:shadow-xl hover:bg-white/60') 
-                         }}">
-
-                         @if(!$isVacant && $user)
-                            <a href="{{ route('profile.public', $user->username) }}" class="absolute inset-0 z-30">
-                                <span class="sr-only">View Profile of {{ $user->name }}</span>
-                            </a>
-                        @endif
-                        
-                        {{-- IMAGE CONTAINER --}}
-                        <div class="aspect-square relative overflow-hidden {{ $isVacant ? 'bg-gray-200' : ($isDG ? 'bg-yellow-100' : 'bg-white/30') }}">
+                    {{-- INNER LOOP: Renders one card per person (or one vacant card) --}}
+                    @foreach($cardsToRender as $assignment)
+                        @php
+                            $isVacant = is_null($assignment);
                             
-                            @if($isVacant)
-                                {{-- VACANT STATE ICON --}}
-                                <div class="absolute inset-0 flex flex-col items-center justify-center text-gray-400">
-                                    <div class="w-12 h-12 rounded-full bg-gray-300/50 flex items-center justify-center mb-2">
-                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                            // Data Setup
+                            $user = $assignment?->user;
+                            $profile = $user?->profile;
+                            
+                            // Special Styling for Director General
+                            $isDG = $director->name === 'Director General';
+                            
+                            // College Display Logic
+                            $collegeDisplay = 'N/A';
+                            if ($profile?->college) {
+                                $collegeDisplay = strtoupper(str_replace('bu-', '', $profile->college->slug));
+                                if($profile->college->slug === 'bu-cbem') $collegeDisplay = 'CBEM';
+                            }
+                        @endphp
+
+                        <div wire:key="dir-{{ $director->id }}-{{ $isVacant ? 'vacant' : $user->id }}" 
+                             class="group relative flex flex-col overflow-hidden rounded-2xl transition-all duration-300 hover:-translate-y-2
+                             {{ $isVacant 
+                                ? 'bg-gray-100 border border-gray-200 opacity-80 hover:opacity-100' // Vacant Style
+                                : ($isDG 
+                                    ? 'bg-gradient-to-b from-yellow-50 to-white border-2 border-yellow-400 shadow-[0_0_15px_rgba(250,204,21,0.3)] z-10 scale-105' 
+                                    : 'bg-white/40 backdrop-blur-md border border-white/50 shadow-lg hover:shadow-xl hover:bg-white/60') 
+                             }}">
+
+                             @if(!$isVacant && $user)
+                                <a href="{{ route('profile.public', $user->username) }}" class="absolute inset-0 z-30">
+                                    <span class="sr-only">View Profile of {{ $user->name }}</span>
+                                </a>
+                            @endif
+                            
+                            {{-- IMAGE CONTAINER --}}
+                            <div class="aspect-square relative overflow-hidden {{ $isVacant ? 'bg-gray-200' : ($isDG ? 'bg-yellow-100' : 'bg-white/30') }}">
+                                
+                                @if($isVacant)
+                                    {{-- VACANT STATE ICON --}}
+                                    <div class="absolute inset-0 flex flex-col items-center justify-center text-gray-400">
+                                        <div class="w-12 h-12 rounded-full bg-gray-300/50 flex items-center justify-center mb-2">
+                                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                                        </div>
+                                        <span class="text-[10px] font-bold uppercase tracking-widest opacity-70">Vacant</span>
                                     </div>
-                                    <span class="text-[10px] font-bold uppercase tracking-widest opacity-70">Vacant</span>
-                                </div>
-                            @else
-                                {{-- FILLED STATE IMAGE --}}
-                                <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition duration-300 z-10"></div>
-                               <img src="{{ $user->profile_photo_path 
-                                        ? (filter_var($user->profile_photo_path, FILTER_VALIDATE_URL) ? $user->profile_photo_path : asset($user->profile_photo_path)) 
-                                        : 'https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=1000&auto=format&fit=crop' }}" 
-                                alt="{{ $user->name }}"
-                                class="w-full h-full object-cover {{ $isDG ? 'object-center' : 'object-top' }} transition duration-500 group-hover:scale-110" 
-                                loading="lazy">
-                            @endif
+                                @else
+                                    {{-- FILLED STATE IMAGE --}}
+                                    <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition duration-300 z-10"></div>
+                                   <img src="{{ $user->profile_photo_path 
+                                                ? (filter_var($user->profile_photo_path, FILTER_VALIDATE_URL) ? $user->profile_photo_path : asset($user->profile_photo_path)) 
+                                                : 'https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=1000&auto=format&fit=crop' }}" 
+                                    alt="{{ $user->name }}"
+                                    class="w-full h-full object-cover {{ $isDG ? 'object-center' : 'object-top' }} transition duration-500 group-hover:scale-110" 
+                                    loading="lazy">
+                                @endif
 
-                            {{-- DG BADGE --}}
-                            @if($isDG && !$isVacant)
-                                <div class="absolute top-4 left-4 z-20 bg-yellow-400 text-green-900 text-xs font-black px-3 py-1 rounded-full shadow-lg border border-yellow-200 uppercase tracking-wider">Head</div>
-                            @endif
+                                {{-- DG BADGE --}}
+                                @if($isDG && !$isVacant)
+                                    <div class="absolute top-4 left-4 z-20 bg-yellow-400 text-green-900 text-xs font-black px-3 py-1 rounded-full shadow-lg border border-yellow-200 uppercase tracking-wider">Head</div>
+                                @endif
 
-                            @if(!$isVacant)
-                                <div class="absolute bottom-0 left-0 w-full bg-black/60 text-white text-[10px] font-bold uppercase tracking-widest text-center py-2 translate-y-full group-hover:translate-y-0 transition duration-300 z-20">
-                                    View Profile
-                                </div>
-                            @endif
-                        </div>
-
-                        {{-- DETAILS CONTAINER --}}
-                        <div class="p-4 flex-grow flex flex-col justify-between 
-                                    {{ $isVacant ? 'border-t border-gray-200' : ($isDG ? 'border-t-2 border-yellow-200 bg-white/50' : 'border-t border-white/40') }}">
-                            
-                            <div class="mb-2">
-                                <h3 class="font-heading font-bold leading-tight mb-1 line-clamp-2
-                                           {{ $isVacant ? 'text-gray-400 italic' : 'text-gray-900 group-hover:text-red-700 transition-colors' }}
-                                           {{ $isDG ? 'text-sm md:text-base' : 'text-xs md:text-sm' }}">
-                                    {{ $isVacant ? 'Position Unfilled' : $user->name }}
-                                </h3>
-                                <p class="font-bold uppercase tracking-wide leading-snug
-                                          {{ $isVacant ? 'text-[10px] text-gray-400' : ($isDG ? 'text-xs text-yellow-700 font-black' : 'text-[10px] text-green-700') }}">
-                                    {{ $director->name }}
-                                </p>
+                                @if(!$isVacant)
+                                    <div class="absolute bottom-0 left-0 w-full bg-black/60 text-white text-[10px] font-bold uppercase tracking-widest text-center py-2 translate-y-full group-hover:translate-y-0 transition duration-300 z-20">
+                                        View Profile
+                                    </div>
+                                @endif
                             </div>
-                            
-                            @if(!$isVacant)
-                            <div class="pt-2 border-t {{ $isDG ? 'border-yellow-200/50' : 'border-gray-200/30' }}">
-                                <p class="text-[10px] text-gray-600 font-medium truncate" title="{{ $profile->course ?? 'N/A' }}">
-                                    {{ $profile->course ?? 'Course Unspecified' }}
-                                </p>
-                                <div class="flex items-center gap-1 mt-1">
-                                    <span class="inline-block w-1.5 h-1.5 rounded-full {{ $isDG ? 'bg-red-500' : 'bg-yellow-400' }}"></span>
-                                    <span class="text-[10px] text-gray-500 font-bold uppercase tracking-wider">
-                                        {{ $collegeDisplay }} • {{ $profile->year_level ?? '' }}
-                                    </span>
+
+                            {{-- DETAILS CONTAINER --}}
+                            <div class="p-4 flex-grow flex flex-col justify-between 
+                                        {{ $isVacant ? 'border-t border-gray-200' : ($isDG ? 'border-t-2 border-yellow-200 bg-white/50' : 'border-t border-white/40') }}">
+                                
+                                <div class="mb-2">
+                                    <h3 class="font-heading font-bold leading-tight mb-1 line-clamp-2
+                                                 {{ $isVacant ? 'text-gray-400 italic' : 'text-gray-900 group-hover:text-red-700 transition-colors' }}
+                                                 {{ $isDG ? 'text-sm md:text-base' : 'text-xs md:text-sm' }}">
+                                        {{ $isVacant ? 'Position Unfilled' : $user->name }}
+                                    </h3>
+                                    <p class="font-bold uppercase tracking-wide leading-snug
+                                              {{ $isVacant ? 'text-[10px] text-gray-400' : ($isDG ? 'text-xs text-yellow-700 font-black' : 'text-[10px] text-green-700') }}">
+                                        {{ $director->name }}
+                                    </p>
                                 </div>
+                                
+                                @if(!$isVacant)
+                                <div class="pt-2 border-t {{ $isDG ? 'border-yellow-200/50' : 'border-gray-200/30' }}">
+                                    <p class="text-[10px] text-gray-600 font-medium truncate" title="{{ $profile->course ?? 'N/A' }}">
+                                        {{ $profile->course ?? 'Course Unspecified' }}
+                                    </p>
+                                    <div class="flex items-center gap-1 mt-1">
+                                        <span class="inline-block w-1.5 h-1.5 rounded-full {{ $isDG ? 'bg-red-500' : 'bg-yellow-400' }}"></span>
+                                        <span class="text-[10px] text-gray-500 font-bold uppercase tracking-wider">
+                                            {{ $collegeDisplay }} • {{ $profile->year_level ?? '' }}
+                                        </span>
+                                    </div>
+                                </div>
+                                @endif
                             </div>
-                            @endif
                         </div>
-                    </div>
+                    @endforeach {{-- End Inner Assignment Loop --}}
+
                 @empty
                     <div class="col-span-full py-12 text-center">
                         <p class="text-gray-500 font-medium">No positions found.</p>
