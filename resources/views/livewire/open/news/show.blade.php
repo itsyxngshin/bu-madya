@@ -1,3 +1,15 @@
+@section('meta_title', $article->title . ' | BU MADYA')
+
+@section('meta_description', $article->summary ?? Str::limit(strip_tags($article->content), 150))
+
+@section('meta_image')
+    @if($article->cover_img)
+        {{ Str::startsWith($article->cover_img, 'http') ? $article->cover_img : asset('storage/' . $article->cover_img) }}
+    @else
+        {{ asset('images/default_news.jpg') }}
+    @endif
+@endsection
+
 <div class="relative min-h-screen bg-gray-50 font-sans text-gray-900 selection:bg-red-200 selection:text-red-900">
     
     {{-- BACKGROUND BLOBS --}}
@@ -8,7 +20,8 @@
         <div class="absolute bottom-[-10%] right-[20%] w-[500px] h-[500px] bg-green-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob animation-delay-4000"></div>
     </div>
 
-    {{-- 1. READING PROGRESS BAR --}}
+    {{-- 1. READING PROGRESS BAR & STICKY NAV --}}
+    {{-- (Kept identical to previous version) --}}
     <div x-data="{ width: 0 }" 
          @scroll.window="width = (window.pageYOffset / (document.documentElement.scrollHeight - window.innerHeight)) * 100"
          class="fixed top-0 left-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-white/20 shadow-sm h-16 flex items-center justify-between px-4 lg:px-12 transition-all duration-300">
@@ -17,7 +30,7 @@
             <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center group-hover:bg-red-50 transition">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
             </div>
-            <span class="hidden md:inline">Back to News</span>
+            <span class="hidden md:inline">Back</span>
         </a>
 
         <span class="font-heading font-black text-lg tracking-tighter text-gray-900">
@@ -27,188 +40,231 @@
         <div class="flex gap-2">
             @auth
                 @if(auth()->id() === $article->user_id)
-                    {{-- Edit Button (Corrected Route) --}}
-                    {{-- We pass $article->slug because you switched to using slugs in the URL --}}
                     <a href="{{ route('news.edit', $article->slug) }}" 
                     class="flex items-center gap-1 px-3 py-1 bg-gray-100 hover:bg-yellow-100 text-gray-500 hover:text-yellow-700 rounded-full text-[10px] font-bold uppercase tracking-wider transition border border-gray-200 hover:border-yellow-300">
-                        
                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                         Edit
                     </a>
                 @endif
             @endauth
 
-            {{-- Like Button (Static for now, can be connected to Livewire later) --}}
-            <button class="w-8 h-8 rounded-full bg-white/50 border border-gray-200 text-gray-400 hover:bg-red-50 hover:text-red-600 hover:border-red-200 hover:scale-110 flex items-center justify-center transition shadow-sm" title="Like">
-                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"></path></svg>
-            </button>
-            
-            {{-- Share Button --}}
-            <button class="w-8 h-8 rounded-full bg-white/50 border border-gray-200 text-gray-400 hover:bg-sky-50 hover:text-sky-500 hover:border-sky-200 hover:scale-110 flex items-center justify-center transition shadow-sm" title="Share">
-                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"></path></svg>
+            <button wire:click="toggleLike" 
+                    class="group relative w-8 h-8 rounded-full border flex items-center justify-center transition shadow-sm {{ $isLiked ? 'bg-red-50 border-red-200 text-red-600' : 'bg-white/50 border-gray-200 text-gray-400 hover:text-red-600' }}" 
+                    title="{{ $likesCount }} Likes">
+                <svg class="w-4 h-4 transition-transform group-hover:scale-110 {{ $isLiked ? 'fill-current' : 'fill-none' }}" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                </svg>
+                @if($likesCount > 0)
+                <span class="absolute -top-2 -right-2 bg-red-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full shadow-sm">{{ $likesCount }}</span>
+                @endif
             </button>
         </div>
 
-        {{-- Gradient Progress Line --}}
         <div class="absolute bottom-0 left-0 h-[3px] bg-gradient-to-r from-green-500 via-yellow-400 to-red-600 transition-all duration-100 ease-out shadow-[0_0_10px_rgba(239,68,68,0.5)]" 
              :style="`width: ${width}%`"></div>
     </div>
 
-    {{-- 2. HERO HEADER --}}
-    <header class="relative pt-32 pb-20 px-6 z-10">
-        <div class="max-w-5xl mx-auto text-center">
+    {{-- 2. NEW SIDE-BY-SIDE HEADER SECTION --}}
+    <section class="relative pt-24 pb-8 px-4 md:px-6 z-10 max-w-[1400px] mx-auto animate-fade-in-up">
+        
+        {{-- Added gap-8 for mobile (tighter) vs gap-12 for desktop --}}
+        <div class="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
             
-            {{-- Category --}}
-            <div class="mb-8 flex justify-center animate-fade-in-up">
-                <span class="px-5 py-2 bg-white/60 backdrop-blur-md text-red-600 text-xs font-black uppercase tracking-[0.2em] border border-white/50 rounded-full shadow-lg ring-1 ring-red-100">
-                    {{ $article->category->name ?? 'General' }}
-                </span>
-            </div>
+            {{-- LEFT COLUMN: Text Content --}}
+            <div class="text-left space-y-6 md:space-y-8">
+                
+                {{-- Category: Smaller text and padding on mobile --}}
+                <div>
+                    <span class="px-3 py-1 md:px-4 md:py-1.5 bg-white/60 backdrop-blur-md text-red-600 text-[10px] md:text-xs font-black uppercase tracking-[0.2em] border border-white/50 rounded-full shadow-sm ring-1 ring-red-100">
+                        {{ $article->category->name ?? 'General' }}
+                    </span>
+                </div>
 
-            {{-- Headline --}}
-            <h1 class="font-heading text-4xl md:text-6xl lg:text-7xl font-black text-gray-900 leading-[1.1] mb-10 drop-shadow-sm animate-fade-in-up animation-delay-100">
-                {{ $article->title }}
-            </h1>
+                {{-- Headline: text-3xl on mobile -> text-6xl on desktop --}}
+                <h1 class="font-heading text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-gray-900 leading-tight drop-shadow-sm">
+                    {{ $article->title }}
+                </h1>
 
-            {{-- Meta Data --}}
-            <div class="inline-flex items-center gap-6 px-8 py-4 bg-white/60 backdrop-blur-lg rounded-2xl shadow-lg border border-white/40 animate-fade-in-up animation-delay-200">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-red-500 to-yellow-500 p-0.5 shadow-md">
-                        <div class="w-full h-full rounded-full bg-white flex items-center justify-center text-red-600 font-bold text-sm">
-                            {{ substr($article->author, 0, 1) }}
+                {{-- Meta Data: Stacked on very small screens, flex on others --}}
+                <div class="flex flex-wrap items-start gap-3 md:gap-4 text-left">
+                    @foreach($article->authors as $author)
+                        <div class="inline-flex items-center gap-2 md:gap-3 px-4 py-2 md:px-5 md:py-2.5 bg-white/60 backdrop-blur-lg rounded-2xl shadow-sm border border-white/40">
+                            {{-- Smaller Avatar on Mobile --}}
+                            <div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-red-500 to-yellow-500 p-0.5 shadow-md shrink-0">
+                                <div class="w-full h-full rounded-full bg-white flex items-center justify-center text-red-600 font-bold text-xs md:text-sm">
+                                    {{ substr($author->name, 0, 1) }}
+                                </div>
+                            </div>
+                            <div>
+                                <p class="text-[8px] md:text-[9px] font-bold text-gray-400 uppercase tracking-wider leading-none mb-0.5">{{ $author->type }}</p>
+                                {{-- Smaller Name text on Mobile --}}
+                                <p class="text-xs md:text-sm font-bold text-gray-800 leading-none whitespace-nowrap">{{ $author->name }}</p>
+                            </div>
+                        </div>
+                    @endforeach
+
+                    {{-- Date Badge --}}
+                    <div class="inline-flex items-center gap-3 px-4 py-2 md:px-5 md:py-2.5 bg-white/60 backdrop-blur-lg rounded-2xl shadow-sm border border-white/40">
+                        <div>
+                            <p class="text-[8px] md:text-[9px] font-bold text-gray-400 uppercase tracking-wider leading-none mb-0.5">Published</p>
+                            <p class="text-xs md:text-sm font-bold text-gray-800 leading-none">
+                                {{ $article->published_at ? $article->published_at->format('M d, Y') : 'Draft' }}
+                            </p>
                         </div>
                     </div>
-                    <div class="text-left">
-                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Author</p>
-                        <p class="text-xs md:text-sm font-bold text-gray-800">{{ $article->author }}</p>
+                </div>
+            </div>
+
+            {{-- RIGHT COLUMN: Image --}}
+            <div class="relative mt-4 lg:mt-0">
+                <div class="relative p-2 bg-white/30 backdrop-blur-sm rounded-[2rem] md:rounded-[2.5rem] shadow-2xl border border-white/50 transform hover:scale-[1.02] transition duration-500">
+                    <div class="relative aspect-[16/9] lg:aspect-[4/3] overflow-hidden rounded-[1.5rem] md:rounded-[2rem]">
+                        @php
+                            $imgSrc = $article->cover_img 
+                                ? (Str::startsWith($article->cover_img, 'http') ? $article->cover_img : asset('storage/' . $article->cover_img))
+                                : asset('images/default_news.jpg');
+                        @endphp
+                        <img src="{{ $imgSrc }}" class="w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
                     </div>
-                </div>
-                
-                <div class="w-px h-8 bg-gray-300"></div>
-
-                <div class="text-left">
-                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Published</p>
-                    <p class="text-xs md:text-sm font-bold text-gray-800">
-                        {{ $article->published_at ? $article->published_at->format('M d, Y') : 'Draft' }}
-                    </p>
+                    
+                    @if($article->photo_credit)
+                    <div class="absolute bottom-4 right-6 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/10 hidden md:block">
+                        <p class="text-[10px] md:text-xs text-white/90 italic">Image: {{ $article->photo_credit }}</p>
+                    </div>
+                    @endif
                 </div>
             </div>
-
         </div>
-    </header>
+    </section>
 
-    {{-- 3. MAIN IMAGE --}}
-    <div class="relative z-10 w-full max-w-6xl mx-auto px-4 md:px-6 mb-16">
-        <div class="relative p-2 bg-white/30 backdrop-blur-sm rounded-[2.5rem] shadow-2xl border border-white/50">
-            <div class="relative aspect-[21/9] overflow-hidden rounded-[2rem]">
-                {{-- Handle both Uploaded Images and External URLs --}}
-                <img src="{{ Str::startsWith($article->cover_img, 'http') ? $article->cover_img : asset('storage/' . $article->cover_img) }}" 
-                     class="w-full h-full object-cover transform hover:scale-105 transition duration-[2s]">
-                
-                <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
-            </div>
-            
-            @if($article->photo_credit)
-            <div class="absolute bottom-6 right-8 bg-black/60 backdrop-blur-md px-4 py-2 rounded-xl border border-white/10 hidden md:block">
-                <p class="text-xs text-white/90 italic">
-                    Image: {{ $article->photo_credit }}
-                </p>
-            </div>
-            @endif
-        </div>
-    </div>
-
-    {{-- 4. ARTICLE BODY --}}
-    <div class="relative z-10 max-w-[1400px] mx-auto px-4 md:px-6 grid grid-cols-1 lg:grid-cols-12 gap-8 pb-32">
+    {{-- 3. ARTICLE BODY & SIDEBAR --}}
+    <div class="relative z-10 max-w-[1400px] mx-auto px-4 md:px-6 grid grid-cols-1 lg:grid-cols-12 gap-8 pb-12">
         
         {{-- LEFT: Sticky Sidebar --}}
         <aside class="hidden lg:block lg:col-span-3">
             <div class="sticky top-28 space-y-6">
-                {{-- Summary Card --}}
                 @if($article->summary)
                 <div class="bg-white/60 backdrop-blur-md p-6 rounded-3xl border border-white/60 shadow-lg">
                     <h4 class="font-bold text-gray-900 uppercase tracking-widest text-xs mb-4 flex items-center gap-2">
                         <span class="w-8 h-1 bg-red-500 rounded-full"></span> In Brief
                     </h4>
-                    <p class="text-sm text-gray-600 leading-relaxed font-medium">
-                        "{{ $article->summary }}"
-                    </p>
+                    <p class="text-sm text-gray-600 leading-relaxed font-medium">"{{ $article->summary }}"</p>
                 </div>
                 @endif
 
-                {{-- SDGs (If any) --}}
                 @if($article->sdgs->isNotEmpty())
                 <div class="bg-white/60 backdrop-blur-md p-6 rounded-3xl border border-white/60 shadow-lg">
                     <h4 class="font-bold text-gray-900 uppercase tracking-widest text-xs mb-4">Targets</h4>
                     <div class="flex flex-wrap gap-2">
                         @foreach($article->sdgs as $sdg)
-                            {{-- 
-                            FIX: Use style="background-color: ..." for dynamic hex codes.
-                            We assume your DB column is named 'color' based on previous steps.
-                            If it is 'color_hex', just change $sdg->color to $sdg->color_hex
-                            --}}
                             <div style="background-color: {{ $sdg->color_hex ?? '#6b7280' }}"
-                                class="w-8 h-8 rounded flex items-center justify-center text-white font-black text-xs shadow-sm" 
+                                class="w-8 h-8 rounded flex items-center justify-center text-white font-black text-xs shadow-sm transform hover:scale-110 transition" 
                                 title="{{ $sdg->name }}">
                                 {{ $sdg->id }}
                             </div>
                         @endforeach
                     </div>
                 </div>
-            @endif
+                @endif
             </div>
         </aside>
 
-        {{-- CENTER: Content --}}
-        <article class="lg:col-span-6">
-            <div class="bg-white/70 backdrop-blur-xl p-8 md:p-12 rounded-[2rem] shadow-xl border border-white/60">
+        {{-- CENTER: Content (Expanded col-span-9) --}}
+        {{-- CENTER: Content (Expanded col-span-9) --}}
+        <article class="lg:col-span-9">
+            <div class="bg-white/70 backdrop-blur-xl p-6 md:p-12 rounded-[2rem] shadow-xl border border-white/60">
                 
-                {{-- Markdown Content Rendering --}}
-                <div class="prose prose-lg prose-red max-w-none font-sans text-gray-600 leading-8
-                            {{ $article->show_drop_cap ? "[&>p:first-child]:first-letter:text-6xl [&>p:first-child]:first-letter:font-black [&>p:first-child]:first-letter:text-transparent [&>p:first-child]:first-letter:bg-clip-text [&>p:first-child]:first-letter:bg-gradient-to-br [&>p:first-child]:first-letter:from-red-600 [&>p:first-child]:first-letter:to-yellow-500 [&>p:first-child]:first-letter:float-left [&>p:first-child]:first-letter:mr-3 [&>p:first-child]:first-letter:mt-[-5px]" : '' }}
-                             [&_figcaption]:text-center [&_figcaption]:text-sm [&_figcaption]:text-gray-500 [&_figcaption]:italic [&_figcaption]:mt-2
-                            [&_img]:rounded-xl [&_img]:shadow-lg">
+                {{-- 
+                    RESPONSIVE TEXT SIZING:
+                    1. 'prose' = Base size (16px) for mobile.
+                    2. 'md:prose-lg' = Large size (18px) for desktop.
+                    3. 'leading-7' vs 'md:leading-8' = Tighter line spacing on mobile.
+                --}}
+                <div class="prose prose-red max-w-none font-sans text-gray-600 leading-7 md:prose-lg md:leading-8
+                            {{-- Drop Cap Logic: Smaller on mobile (4xl), larger on desktop (6xl) --}}
+                            {{ $article->show_drop_cap ? "[&>p:first-child]:first-letter:text-4xl md:[&>p:first-child]:first-letter:text-6xl [&>p:first-child]:first-letter:font-black [&>p:first-child]:first-letter:text-transparent [&>p:first-child]:first-letter:bg-clip-text [&>p:first-child]:first-letter:bg-gradient-to-br [&>p:first-child]:first-letter:from-red-600 [&>p:first-child]:first-letter:to-yellow-500 [&>p:first-child]:first-letter:float-left [&>p:first-child]:first-letter:mr-2 md:[&>p:first-child]:first-letter:mr-3 [&>p:first-child]:first-letter:mt-[-2px] md:[&>p:first-child]:first-letter:mt-[-5px]" : '' }}
+                            [&_img]:rounded-xl [&_img]:shadow-lg [&_img]:w-full">
                     
                     {!! Str::markdown($article->content) !!}
-
+                
                 </div>
 
-                {{-- Tags --}}
                 @if($article->tags)
-                <div class="mt-12 pt-8 border-t border-gray-100/50 flex flex-wrap gap-2">
+                <div class="mt-8 md:mt-12 pt-6 md:pt-8 border-t border-gray-100/50 flex flex-wrap gap-2">
                     @foreach(explode(',', $article->tags) as $tag)
-                    <span class="px-4 py-1.5 bg-gray-50 text-gray-500 text-xs font-bold uppercase tracking-wider rounded-lg border border-gray-100 hover:bg-yellow-400 hover:text-green-900 hover:border-yellow-400 transition cursor-pointer shadow-sm">
+                    <span class="px-3 py-1 md:px-4 md:py-1.5 bg-gray-50 text-gray-500 text-[10px] md:text-xs font-bold uppercase tracking-wider rounded-lg border border-gray-100 shadow-sm">
                         #{{ trim($tag) }}
                     </span>
                     @endforeach
                 </div>
                 @endif
             </div>
+
+            {{-- COMMENT SECTION --}}
+            <div class="mt-8 bg-white/60 backdrop-blur-xl p-6 md:p-8 rounded-[2rem] shadow-lg border border-white/60">
+                <h3 class="font-heading font-bold text-lg md:text-xl text-gray-900 mb-6 flex items-center gap-2">
+                    Discussion <span class="bg-red-100 text-red-600 text-xs px-2 py-0.5 rounded-full">{{ $article->comments->count() }}</span>
+                </h3>
+
+                @auth
+                    <div class="mb-8 flex gap-3 md:gap-4">
+                        <div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gray-200 shrink-0 overflow-hidden">
+                             <div class="w-full h-full flex items-center justify-center bg-gray-300 font-bold text-gray-500 text-xs md:text-sm">{{ substr(auth()->user()->name, 0, 1) }}</div>
+                        </div>
+                        <div class="grow">
+                            <textarea wire:model="newComment" rows="2" class="w-full bg-white/50 border border-white/60 rounded-xl p-3 md:p-4 text-xs md:text-sm focus:ring-2 focus:ring-yellow-400 focus:border-transparent transition resize-none shadow-inner" placeholder="Share your thoughts..."></textarea>
+                            <div class="flex justify-end mt-2">
+                                <button wire:click="postComment" class="px-4 py-2 md:px-6 md:py-2 bg-gray-900 text-white text-[10px] md:text-xs font-bold uppercase rounded-lg hover:bg-red-600 transition shadow-lg">
+                                    Post Comment
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                @else
+                    <div class="bg-gray-50 rounded-xl p-6 text-center mb-8 border border-gray-200">
+                        <p class="text-xs md:text-sm text-gray-500 mb-2">Join the conversation</p>
+                        <a href="{{ route('login') }}" class="text-red-600 font-bold text-xs md:text-sm hover:underline">Log in to comment</a>
+                    </div>
+                @endauth
+
+                <div class="space-y-6">
+                    @forelse($article->comments as $comment)
+                        <div class="flex gap-3 md:gap-4 group">
+                            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 shrink-0 flex items-center justify-center font-bold text-gray-500 text-xs">
+                                {{ substr($comment->user->name, 0, 1) }}
+                            </div>
+                            <div class="grow">
+                                <div class="bg-white/80 p-3 md:p-4 rounded-2xl rounded-tl-none shadow-sm border border-gray-100">
+                                    <div class="flex justify-between items-start mb-1">
+                                        <span class="text-xs font-bold text-gray-900">{{ $comment->user->name }}</span>
+                                        <span class="text-[9px] md:text-[10px] text-gray-400">{{ $comment->created_at->diffForHumans() }}</span>
+                                    </div>
+                                    <p class="text-xs md:text-sm text-gray-600 leading-relaxed">{{ $comment->content }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="text-center py-8 md:py-10">
+                            <p class="text-gray-400 italic text-xs md:text-sm">No comments yet. Be the first to share your thoughts!</p>
+                        </div>
+                    @endforelse
+                </div>
+            </div>
         </article>
 
-        {{-- RIGHT: Related News (Placeholder / Could be Dynamic Later) --}}
-        <aside class="lg:col-span-3 space-y-8">
-            <div class="bg-gradient-to-br from-gray-900 to-gray-800 p-6 rounded-3xl shadow-xl text-white relative overflow-hidden text-center">
-                <div class="absolute top-0 right-0 w-40 h-40 bg-red-500/20 rounded-full blur-3xl -mr-10 -mt-10"></div>
-                <h5 class="font-bold text-lg mb-2 text-yellow-400 relative z-10">Stay Updated</h5>
-                <p class="text-xs text-gray-400 mb-6 relative z-10">Get the latest advocacy news straight to your inbox.</p>
-                <input type="email" placeholder="Email address" class="w-full bg-white/10 border border-white/10 text-xs p-3 rounded-xl text-white mb-3 focus:ring-1 focus:ring-yellow-400 placeholder-gray-500 backdrop-blur-sm relative z-10">
-                <button class="w-full bg-gradient-to-r from-red-600 to-red-500 text-white text-xs font-bold uppercase py-3 rounded-xl hover:shadow-lg hover:from-red-500 hover:to-red-400 transition relative z-10">
-                    Subscribe
-                </button>
-            </div>
-        </aside>
+        {{-- RIGHT SIDEBAR REMOVED --}}
 
     </div>
 
-    {{-- 5. FOOTER --}}
+    {{-- FOOTER (Kept identical) --}}
     <footer class="bg-white/80 backdrop-blur-md border-t border-gray-200 py-12 relative z-10">
         <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 bg-gradient-to-br from-red-600 to-yellow-500 p-0.5 rounded-full shadow-md">
-                     <div class="w-full h-full bg-white rounded-full flex items-center justify-center">
-                        <img src="{{ asset('images/official_logo.png') }}" class="w-6 h-6 object-contain">
-                     </div>
+                      <div class="w-full h-full bg-white rounded-full flex items-center justify-center">
+                         <img src="{{ asset('images/official_logo.png') }}" class="w-6 h-6 object-contain">
+                      </div>
                 </div>
                 <span class="font-bold text-gray-900 tracking-tight text-sm">BU MADYA Newsroom</span>
             </div>
