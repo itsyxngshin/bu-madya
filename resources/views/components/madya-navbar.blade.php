@@ -82,7 +82,7 @@
                                 style="display: none;">
                                 
                                 <a href="{{ route('profile.show') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                    Your Profile
+                                    Profile
                                 </a>
 
                                 <div class="border-t border-gray-100"></div>
@@ -128,6 +128,9 @@
     {{-- 4. MOBILE MENU (Expanded) --}}
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden bg-white/90 backdrop-blur-md border-b border-gray-200">
         <div class="pt-2 pb-3 space-y-1">
+            <x-responsive-nav-link href="{{ route('open.home') }}" :active="request()->routeIs('open.home')">
+                Dashboard
+            </x-responsive-nav-link>
             <x-responsive-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
                 Dashboard
             </x-responsive-nav-link>
@@ -149,7 +152,7 @@
             @auth
                 <div class="flex items-center px-4">
                     <div class="shrink-0">
-                        <img class="h-10 w-10 rounded-full" src="{{ Auth::user()->profile_photo_url }}" alt="" />
+                        <img class="h-10 w-10 rounded-full" src="{{ Auth::user()->profile_photo_path && filter_var(Auth::user()->profile_photo_path, FILTER_VALIDATE_URL) ? Auth::user()->profile_photo_path : asset(Auth::user()->profile_photo_path) }}" alt="{{ Auth::user()->name }}" />
                     </div>
                     <div class="ml-3">
                         <div class="font-medium text-base text-gray-800">{{ Auth::user()->name }}</div>
@@ -159,6 +162,9 @@
                 <div class="mt-3 space-y-1">
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
+                        <x-responsive-nav-link href="{{ route('profile.show') }}">
+                            Profile
+                        </x-responsive-nav-link>
                         <x-responsive-nav-link href="{{ route('logout') }}"
                                 onclick="event.preventDefault(); this.closest('form').submit();"
                                 class="text-red-600 font-bold">

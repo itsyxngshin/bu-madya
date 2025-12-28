@@ -21,7 +21,6 @@ class DatabaseSeeder extends Seeder
             CollegeSeeder::class,
             SDGSeeder::class,
             LinkageLookupSeeder::class,
-            LinkageSeeder::class,
             CategorySeeder::class,
             AcademicYearSeeder::class,
             DirectorsSeeder::class,
