@@ -261,7 +261,8 @@
                                 <span wire:loading wire:target="photo_upload" class="animate-spin block w-4 h-4 border-2 border-gray-300 border-t-red-600 rounded-full"></span>
                             </button>
                         </div>
-
+                        <input type="file" wire:model="photo_upload" class="hidden" x-ref="photoUploader" accept="image/*">
+                        
                         <button @click="editorFullScreen = !editorFullScreen; previewFullScreen = false" 
                                 class="p-2 bg-white border border-gray-200 rounded-lg shadow-sm text-gray-500 hover:text-red-600 transition"
                                 :class="editorFullScreen ? 'text-red-600 ring-2 ring-red-100' : ''"
