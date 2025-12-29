@@ -28,6 +28,29 @@ class Show extends Component
                              ->where('slug', $slug)
                              ->firstOrFail();
 
+        // Restriction of access to the article
+        if ($this->article->status !== 'active') {
+            
+            // If user is not logged in, strictly deny access
+            if (!Auth::check()) {
+                abort(404); // Return 404 so guests don't know the slug exists
+            }
+
+            $user = Auth::user();
+
+            // Allow access ONLY if:
+            // A. User is a Director
+            // B. User is the Creator (user_id)
+            // C. User is listed as a Co-Author in the pivot table
+            $checkDir = $user->role->role_name === 'director';
+            $checkCreator  = $user->id === $this->article->user_id;
+            $checkAuthor = $this->article->authors->contains('user_id', $user->id);
+
+            if (! ($checkDir || $checkCreator || $checkAuthor)) {
+                abort(404); // Unauthorized users also get 404
+            }
+        }
+
         $this->refreshVoteState();
     }
 
