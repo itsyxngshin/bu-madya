@@ -25,6 +25,7 @@
                     ['name' => 'Linkages', 'route' => 'linkages.index', 'active' => 'linkages.*'],
                     ['name' => 'News', 'route' => 'news.index', 'active' => 'news.*'],
                     ['name' => 'About', 'route' => 'about', 'active' => 'about.*'],
+                    ['name' => 'The Pillars', 'route' => 'pillars.index', 'active' => 'pillars.*'],
                 ] as $link)
                     <a href="{{ route($link['route']) }}" 
                        class="px-3 py-2 text-sm font-bold rounded-lg transition-all duration-200 

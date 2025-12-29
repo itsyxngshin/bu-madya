@@ -10,6 +10,7 @@ use App\Livewire\Open\RoundtableIndex;
 use App\Livewire\Open\RoundtableShow;
 use App\Livewire\Open\News\Index as NewsIndex;
 use App\Livewire\Open\News\Show as NewsShow;
+use App\Livewire\Open\ThePillars;
 
 use App\Livewire\Director\NewsCreate;
 use App\Livewire\Director\NewsEdit;
@@ -25,6 +26,7 @@ use App\Livewire\Director\LinkagesProposal;
 use App\Livewire\Director\UserProfile;
 use App\Livewire\Director\EditProfile;
 use App\Livewire\Director\Dashboard;
+use App\Livewire\Director\ThePillarsManager;
 use App\Livewire\Open\ProposalsCreate;
 use App\Livewire\Admin\ProposalsShow;
 use App\Livewire\Admin\ProposalsIndex;
@@ -65,6 +67,7 @@ Route::middleware(['auth', 'role:director'])
     Route::get('/profile/edit', EditProfile::class)->name('profile.edit');
     Route::get('/news/create', NewsCreate::class)->name('news.create');
     Route::get('/linkage/create', LinkagesCreate::class)->name('linkages.create');
+    Route::get('/director/the-pillars', ThePillarsManager::class)->name('director.pillars.index');
     
     Route::get('/news/{slug}/edit', NewsEdit::class)->name('news.edit');  
     Route::get('/linkage/{linkage:slug}/edit', LinkagesEdit::class)->name('linkages.edit');
@@ -117,6 +120,7 @@ Route::get('/linkages/{linkage:slug}', LinkagesShow::class)->name('linkages.show
 Route::get('/partner-with-us', LinkagesProposal::class)->name('linkages.proposal'); 
 Route::get('/profile/{username}', UserProfile::class)->name('profile.public');
 Route::get('/submit-proposal', ProposalsCreate::class)->name('proposals.create');
+Route::get('/the-pillars', ThePillars::class)->name('pillars.index');
 
 
 
