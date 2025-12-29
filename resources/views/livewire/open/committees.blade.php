@@ -1,34 +1,6 @@
 <div class="font-sans antialiased text-gray-800 bg-gray-50 selection:bg-red-500 selection:text-white">
-    <nav 
-        x-data="{ scrolled: false }" 
-        @scroll.window="scrolled = (window.pageYOffset > 20)"
-        class="sticky top-0 z-30 transition-all duration-300 w-full"
-        :class="scrolled ? 'bg-white/90 backdrop-blur-md shadow-md py-2' : 'bg-transparent py-4'"
-    >
-        <div class="px-6 flex justify-between items-center">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-lg overflow-hidden p-1">
-                   <img src="{{ asset('images/official_logo.png') }}" alt="Logo" class="w-full h-full object-contain">
-                </div>
-                <span class="font-bold text-lg tracking-tight transition-colors duration-300"
-                      :class="scrolled ? 'text-gray-800' : 'text-gray-800'">
-                    BU MADYA
-                </span>
-            </div>
-
-            <div class="hidden md:flex items-center space-x-6 text-sm font-semibold tracking-wide">
-                @foreach(['Home', 'Engagement', 'Advocacy', 'Directory'] as $link)
-                <a href="#" 
-                   class="transition-colors duration-300 relative group text-gray-600 hover:text-red-600">
-                    {{ $link }}
-                    <span class="absolute -bottom-1 left-0 h-0.5 bg-red-500 transition-all w-0 group-hover:w-full"></span>
-                </a>
-                @endforeach
-            </div>
-        </div>
-    </nav>
-
-    {{-- 2. HERO HEADER --}}
+    
+    {{--  HERO HEADER --}}
     <header class="relative h-[350px] flex items-center justify-center text-white overflow-hidden rounded-3xl shadow-xl mx-6 -mt-20 z-10">
         <div class="absolute inset-0 z-0">
             <img src="https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=2070&auto=format&fit=crop" 

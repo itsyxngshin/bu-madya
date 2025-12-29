@@ -129,7 +129,7 @@
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden bg-white/90 backdrop-blur-md border-b border-gray-200">
         <div class="pt-2 pb-3 space-y-1">
             <x-responsive-nav-link href="{{ route('open.home') }}" :active="request()->routeIs('open.home')">
-                Dashboard
+                Home
             </x-responsive-nav-link>
             <x-responsive-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
                 Dashboard

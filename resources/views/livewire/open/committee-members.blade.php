@@ -1,20 +1,4 @@
 <div class="min-h-screen bg-stone-50 font-sans text-gray-900">
-    
-    {{-- 1. NAVBAR (Consistent) --}}
-    <nav class="fixed top-0 left-0 w-full z-50 bg-white/90 backdrop-blur-md border-b border-gray-200 h-16 flex items-center justify-between px-6 transition-all duration-300">
-        <a href="{{ route('open.committees') }}" class="group flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-500 hover:text-red-600 transition">
-            <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center group-hover:bg-red-50 transition">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-            </div>
-            <span class="hidden md:inline">Back to Committees</span>
-        </a>
-
-        <span class="font-heading font-black text-lg tracking-tighter text-gray-900">
-            Committee <span class="text-red-600">Profile</span>
-        </span>
-
-        <div class="w-8"></div> {{-- Spacer for balance --}}
-    </nav>
 
     {{-- 2. HERO HEADER --}}
     <header class="relative pt-32 pb-16 px-6 bg-white border-b border-gray-200">

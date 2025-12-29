@@ -17,7 +17,9 @@
                 <img src="{{ asset('images/official_logo.png') }}" alt="Logo" class="w-full h-full object-contain">
             </div>
             <div class="flex flex-col">
-                <span class="font-bold text-gray-800 tracking-tight leading-none">BU MADYA</span>
+                <span class="font-heading font-black text-lg tracking-tighter text-gray-900">
+                BU <span class="text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-yellow-500">MADYA</span>
+                </span>
                 <span class="text-[9px] font-bold text-red-600 uppercase tracking-wider">Admin Panel</span>
             </div>
         </div>

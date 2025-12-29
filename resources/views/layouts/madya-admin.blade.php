@@ -20,7 +20,7 @@
 </head>
 <body class="bg-stone-50 font-sans antialiased text-gray-900">
     
-    <div x-data="{ sidebarOpen: true }" class="min-h-screen flex bg-stone-50 relative">
+    <div x-data="{ sidebarOpen: false }" class="min-h-screen flex bg-stone-50 relative">
         
         {{-- SIDEBAR --}}
         <x-madya-sidebar />

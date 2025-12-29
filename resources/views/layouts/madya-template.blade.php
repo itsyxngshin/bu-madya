@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     {{-- 1. Dynamic Page Title --}}
-    <title>@yield('meta_title', config('app.name'))</title>
+    <title>@yield('meta_title', 'BU MADYA Web')</title>
 
     {{-- 2. Standard Description --}}
     <meta name="description" content="@yield('meta_description', 'Advocating for youth empowerment and social change.')">
