@@ -43,10 +43,11 @@ class Show extends Component
             // B. User is the Creator (user_id)
             // C. User is listed as a Co-Author in the pivot table
             $checkDir = $user->role->role_name === 'director';
+            $checkAdmin = $user->role->role_name === 'administrator';
             $checkCreator  = $user->id === $this->article->user_id;
             $checkAuthor = $this->article->authors->contains('user_id', $user->id);
 
-            if (! ($checkDir || $checkCreator || $checkAuthor)) {
+            if (! ($checkDir || $checkCreator || $checkAuthor || $checkAdmin)) {
                 abort(404); // Unauthorized users also get 404
             }
         }
