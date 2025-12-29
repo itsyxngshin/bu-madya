@@ -7,9 +7,8 @@ use App\Models\News;
 use App\Models\NewsVote;
 use App\Models\Comment;
 use Illuminate\Support\Facades\Auth;
-use Livewire\Attributes\Layout; 
+use Illuminate\Support\Str;
 
-#[Layout('layouts.madya-template')]
 class Show extends Component
 {
     public News $article;
@@ -112,6 +111,9 @@ class Show extends Component
 
     public function render()
     {
-        return view('livewire.open.news.show'); // Adjust layout name as needed
+        return view('livewire.open.news.show')
+        ->layout('layouts.madya-template', ['meta_title' => $this->news->title,
+            'meta_description' => Str::limit($this->news->content,160),
+            'meta_image' => asset('storage/'.$this->news->cover_img),]); 
     }
 } 

@@ -1,15 +1,3 @@
-@section('meta_title', $article->title . ' | BU MADYA')
-
-@section('meta_description', $article->summary ?? Str::limit(strip_tags($article->content), 150)) 
-
-@section('meta_image')
-    @if($article->cover_img)
-        {{ Str::startsWith($article->cover_img, 'http') ? $article->cover_img : asset('storage/' . $article->cover_img) }}
-    @else
-        {{ asset('images/default_news.jpg') }}
-    @endif
-@endsection
-
 <div class="relative min-h-screen bg-gray-50 font-sans text-gray-900 selection:bg-red-200 selection:text-red-900">
     
     {{-- BACKGROUND BLOBS --}}
@@ -26,7 +14,7 @@
          @scroll.window="width = (window.pageYOffset / (document.documentElement.scrollHeight - window.innerHeight)) * 100"
          class="fixed top-0 left-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-white/20 shadow-sm h-16 flex items-center justify-between px-4 lg:px-12 transition-all duration-300">
         
-        <a href="{{ route('news.index') }}" class="group flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-500 hover:text-red-600 transition">
+        <a href="{{ route('news.index') }}" clsection: ass="group flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-500 hover:text-red-600 transition">
             <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center group-hover:bg-red-50 transition">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
             </div>
