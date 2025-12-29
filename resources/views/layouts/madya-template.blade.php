@@ -14,7 +14,7 @@
     <meta property="og:url" content="{{ url()->current() }}" />
     <meta property="og:title" content="@yield('meta_title', 'BU MADYA Web')" />
     <meta property="og:description" content="@yield('meta_description', 'Join the movement for youth-led advocacy.')" />
-    <meta property="og:image" content="{{$meta_image ?? asset('images/official_logo.png')}}" />
+    <meta property="og:image" content="@yield('meta_image', asset('images/default_share_image.jpg')) />
 
     {{-- 4. TWITTER CARD DATA --}}
     <meta name="twitter:card" content="summary_large_image">

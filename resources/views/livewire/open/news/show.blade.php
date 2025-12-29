@@ -1,3 +1,15 @@
+@section('meta_title', $article->title)
+@section('meta_description', $article->summary ?? Str::limit(strip_tags($article->content), 150))
+@php
+    // 1. Determine the image URL using PHP logic
+    $ogImage = $article->cover_img 
+        ? (Str::startsWith($article->cover_img, 'http') ? $article->cover_img : asset('storage/' . $article->cover_img))
+        : asset('images/default_news.jpg');
+@endphp
+
+{{-- 2. Pass the CLEAN variable to the layout --}}
+@section('meta_image', $ogImage)
+
 <div class="relative min-h-screen bg-gray-50 font-sans text-gray-900 selection:bg-red-200 selection:text-red-900">
     
     {{-- BACKGROUND BLOBS --}}
