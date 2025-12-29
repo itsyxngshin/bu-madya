@@ -148,9 +148,14 @@
              <x-responsive-nav-link href="{{ route('open.directory') }}" :active="request()->routeIs('open.directory.*')">
                 Directory
             </x-responsive-nav-link>
-             <x-responsive-nav-link href="{{ route('news.index') }}" :active="request()->routeIs('news.*')">
+            <x-responsive-nav-link href="{{ route('news.index') }}" :active="request()->routeIs('news.*')">
                 News
             </x-responsive-nav-link>
+            @auth
+                <x-responsive-nav-link href="{{ route('roundtable.index') }}" :active="request()->routeIs('roundtable.*')">
+                    Roundtable
+                </x-responsive-nav-link>
+            @endauth
         </div>
         
         <div class="pt-4 pb-4 border-t border-gray-200">
