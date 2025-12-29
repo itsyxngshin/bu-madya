@@ -8,7 +8,7 @@
     </div>
 
     {{-- NAVIGATION (Floating Header) --}}
-    <div class="fixed top-0 left-0 w-full z-40 px-4 pt-4 pointer-events-none">
+    <div class="relative top-0 left-0 w-full z-40 px-4 pt-4 pointer-events-none">
         <div class="max-w-3xl mx-auto flex justify-between items-center pointer-events-auto">
             {{-- Back Button --}}
             <a href="{{ route('roundtable.index') }}" 
