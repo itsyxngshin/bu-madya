@@ -8,7 +8,7 @@
     </div>
 
     {{-- HEADER: THE HALL --}}
-    <div class="bg-gray-900 text-white pt-12 pb-32 md:pb-40 px-6 rounded-b-[3rem] shadow-2xl relative overflow-hidden z-10">
+    <div class="bg-gray-900 text-white pt-12 pb-32 md:pb-64 px-6 rounded-b-[3rem] shadow-2xl relative overflow-hidden z-10">
         {{-- Decorative Circle --}}
         <div class="absolute -top-24 -right-24 w-96 h-96 bg-gradient-to-br from-red-600 to-transparent rounded-full opacity-20 blur-2xl"></div>
         <div class="absolute top-10 -left-10 w-48 h-48 bg-yellow-500 rounded-full mix-blend-overlay filter blur-3xl opacity-10"></div>
@@ -33,10 +33,10 @@
     </div>
 
     {{-- MAIN CONTENT: THE TABLES --}}
-    <div class="max-w-3xl mx-auto px-4 -mt-16 md:-mt-24 relative z-20">
+    <div class="max-w-3xl mx-auto px-4 -mt-16 md:-mt-32 relative z-20">
         
         {{-- TOOLBAR (Floating) --}}
-        <div class="bg-white/80 backdrop-blur-xl p-3 md:p-4 rounded-[2rem] shadow-xl border border-white/50 mb-8 flex flex-col md:flex-row gap-3">
+        <div class="bg-white/80 backdrop-blur-xl p-3 md:p-4 rounded-[2rem] shadow-xl border border-white/50 mb-8 flex flex-col md:flex-row gap-4">
             
             {{-- Search --}}
             <div class="relative w-full group">

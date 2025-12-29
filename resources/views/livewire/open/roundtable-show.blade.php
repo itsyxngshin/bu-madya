@@ -85,7 +85,7 @@
 
                     <div class="px-5 py-3.5 shadow-sm text-sm leading-relaxed relative backdrop-blur-sm
                         {{ $reply->user_id === auth()->id() 
-                            ? 'bg-gray-900/90 text-white rounded-[1.5rem] rounded-br-none' 
+                            ? 'bg-gray-900/90 text-gray-700 rounded-[1.5rem] rounded-br-none' 
                             : 'bg-white/80 text-gray-800 border border-white/50 rounded-[1.5rem] rounded-bl-none' }}">
                         {{ $reply->content }}
                     </div>
