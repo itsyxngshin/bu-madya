@@ -31,21 +31,25 @@
     {{-- MAIN CONTENT: THE TABLES --}}
     <div class="max-w-3xl mx-auto px-4 -mt-16 relative z-20">
         
-        {{-- TOOLBAR (Floating) --}}
-        <div class="bg-white/80 backdrop-blur-xl p-3 rounded-[2rem] shadow-xl border border-white/50 mb-8 flex flex-col md:flex-row gap-2">
+        {{-- TOOLBAR (Optimized for Mobile) --}}
+        {{-- Changed: flex-col to flex-row to put them side-by-side on mobile --}}
+        <div class="bg-white/80 backdrop-blur-xl p-2 md:p-3 rounded-[2rem] shadow-xl border border-white/50 mb-8 flex flex-row gap-2">
+            
             {{-- Search --}}
             <div class="relative w-full group">
                 <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                     <svg class="h-5 w-5 text-gray-400 group-focus-within:text-red-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                 </div>
+                {{-- Changed: py-2.5 for mobile, py-3.5 for desktop to reduce height --}}
                 <input wire:model.live.debounce="search" type="text" placeholder="Find a table discussion..." 
-                       class="w-full pl-12 pr-4 py-3.5 bg-gray-50 border-transparent rounded-[1.5rem] text-sm font-medium focus:bg-white focus:border-red-100 focus:ring-4 focus:ring-red-50 transition-all placeholder-gray-400">
+                       class="w-full pl-10 md:pl-12 pr-4 py-2.5 md:py-3.5 bg-gray-50 border-transparent rounded-[1.5rem] text-xs md:text-sm font-medium focus:bg-white focus:border-red-100 focus:ring-4 focus:ring-red-50 transition-all placeholder-gray-400">
             </div>
             
             {{-- Start Topic Button --}}
+            {{-- Changed: w-auto to prevent full width, hidden text on mobile --}}
             <button wire:click="$set('isCreateModalOpen', true)" 
-                    class="w-full md:w-auto px-8 py-3.5 bg-gray-900 text-white font-bold text-xs uppercase tracking-widest rounded-[1.5rem] hover:bg-red-600 hover:shadow-lg hover:-translate-y-0.5 transition-all flex items-center justify-center gap-3 shrink-0 group">
-                <span>New Topic</span>
+                    class="w-auto px-4 md:px-8 py-2.5 md:py-3.5 bg-gray-900 text-white font-bold text-xs uppercase tracking-widest rounded-[1.5rem] hover:bg-red-600 hover:shadow-lg hover:-translate-y-0.5 transition-all flex items-center justify-center gap-3 shrink-0 group">
+                <span class="hidden md:inline">New Topic</span>
                 <div class="bg-white/20 rounded-full p-1 group-hover:bg-white/30 transition">
                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                 </div>
@@ -82,7 +86,7 @@
                         {{-- Content --}}
                         <div class="flex-1 pt-1">
                             <a href="{{ route('roundtable.show', $topic->id) }}" class="block">
-                                <h3 class="font-heading font-black text-xl text-gray-900 leading-tight mb-2 group-hover:text-red-600 transition-colors">
+                                <h3 class="font-heading font-black text-lg md:text-xl text-gray-900 leading-tight mb-2 group-hover:text-red-600 transition-colors">
                                     {{ $topic->headline }}
                                 </h3>
                             </a>
@@ -103,14 +107,14 @@
                                 <div class="flex items-center gap-2">
                                     <div class="flex -space-x-2 mr-2">
                                         {{-- Simulate seats occupied --}}
-                                        @if($topic->replies_count > 0)
+                                        @if($topic->roundtable_replies_count > 0)
                                             <div class="w-6 h-6 rounded-full bg-gray-200 border-2 border-white flex items-center justify-center text-[8px] font-bold text-gray-500">
-                                                +{{ $topic->replies_count }}
+                                                +{{ $topic->roundtable_replies_count }}
                                             </div>
                                         @endif
                                     </div>
                                     <span class="px-3 py-1 bg-gray-50 rounded-full text-xs font-bold text-gray-600 group-hover:bg-red-50 group-hover:text-red-600 transition-colors">
-                                        {{ $topic->replies_count }} {{ Str::plural('Seat', $topic->replies_count) }} Taken
+                                        {{ $topic->roundtable_replies_count }} {{ Str::plural('Seat', $topic->roundtable_replies_count) }} Taken
                                     </span>
                                 </div>
                             </div>
@@ -119,52 +123,42 @@
                 </div>
             </div>
             @empty
-            <div class="text-center py-24 px-6">
-                <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <svg class="w-10 h-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+            <div class="text-center py-20">
+                <div class="inline-block p-4 rounded-full bg-gray-100 text-gray-400 mb-4">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
                 </div>
-                <h3 class="font-heading font-bold text-gray-900 text-lg mb-2">The Hall is Empty</h3>
-                <p class="text-gray-500 text-sm mb-6">Be the first to pull up a chair and start a discussion.</p>
-                <button wire:click="$set('isCreateModalOpen', true)" class="text-red-600 font-bold text-sm hover:underline">Start a Topic now &rarr;</button>
+                <p class="text-gray-500 font-medium">It's quiet here. Start a conversation!</p>
             </div>
             @endforelse
         </div>
 
-        <div class="mt-8 px-2">
+        <div class="mt-6">
             {{ $topics->links() }}
         </div>
     </div>
 
     {{-- CREATE MODAL --}}
     @if($isCreateModalOpen)
-    <div class="fixed inset-0 z-50 flex items-center justify-center px-4 bg-gray-900/60 backdrop-blur-md"
-         x-data x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
-        
-        <div class="bg-white w-full max-w-lg rounded-[2.5rem] shadow-2xl p-8 relative overflow-hidden"
-             x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 scale-95 translate-y-4" x-transition:enter-end="opacity-100 scale-100 translate-y-0">
+    <div class="fixed inset-0 z-50 flex items-center justify-center px-4 bg-gray-900/60 backdrop-blur-sm">
+        <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl p-6 md:p-8 animate-fade-in-up">
+            <h2 class="font-heading font-black text-2xl mb-6">Start a Topic</h2>
             
-            {{-- Decoration --}}
-            <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-red-500 to-yellow-500"></div>
-
-            <div class="text-center mb-8">
-                <h2 class="font-heading font-black text-3xl text-gray-900 mb-2">Open a Table</h2>
-                <p class="text-xs text-gray-500 uppercase tracking-widest font-bold">Start a new discussion</p>
-            </div>
-            
-            <div class="space-y-5">
+            <div class="space-y-4">
                 <div>
-                    <input wire:model="headline" type="text" class="w-full bg-gray-50 border-gray-200 rounded-2xl px-5 py-3.5 text-sm font-bold focus:ring-2 focus:ring-red-500 focus:bg-white transition" placeholder="Topic Title (e.g. Campus Safety)">
-                    @error('headline') <span class="text-red-500 text-xs ml-2 font-bold">{{ $message }}</span> @enderror
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Topic Title</label>
+                    <input wire:model="headline" type="text" class="w-full border-gray-200 rounded-xl text-sm focus:ring-red-500" placeholder="What's on your mind?">
+                    @error('headline') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                 </div>
                 <div>
-                    <textarea wire:model="content" rows="5" class="w-full bg-gray-50 border-gray-200 rounded-2xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-red-500 focus:bg-white transition resize-none" placeholder="What's on your mind? Elaborate here..."></textarea>
-                    @error('content') <span class="text-red-500 text-xs ml-2 font-bold">{{ $message }}</span> @enderror
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Content</label>
+                    <textarea wire:model="content" rows="5" class="w-full border-gray-200 rounded-xl text-sm focus:ring-red-500" placeholder="Elaborate on your topic..."></textarea>
+                    @error('content') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                 </div>
             </div>
 
-            <div class="flex justify-between items-center gap-4 mt-8 pt-6 border-t border-gray-100">
-                <button wire:click="$set('isCreateModalOpen', false)" class="text-gray-400 font-bold text-xs uppercase tracking-widest hover:text-gray-600 transition">Cancel</button>
-                <button wire:click="createTopic" class="px-8 py-3 bg-gray-900 text-white text-xs font-bold uppercase tracking-widest rounded-xl hover:bg-red-600 hover:shadow-lg transition transform hover:-translate-y-0.5">Post Topic</button>
+            <div class="flex justify-end gap-3 mt-8">
+                <button wire:click="$set('isCreateModalOpen', false)" class="px-4 py-2 text-sm font-bold text-gray-500 hover:bg-gray-100 rounded-lg">Cancel</button>
+                <button wire:click="createTopic" class="px-6 py-2 bg-red-600 text-white text-sm font-bold rounded-lg hover:bg-red-700 shadow-md">Post Topic</button>
             </div>
         </div>
     </div>

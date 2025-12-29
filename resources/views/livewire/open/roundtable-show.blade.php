@@ -97,7 +97,7 @@
                         {{-- The Bubble --}}
                         <div class="px-6 py-4 shadow-sm text-sm leading-relaxed relative backdrop-blur-md border
                             {{ $reply->user_id === auth()->id() 
-                                ? 'bg-gray-900/95 text-white border-transparent rounded-[2rem] rounded-br-sm' 
+                                ? 'bg-yellow-500/95 text-gray-800 border-transparent rounded-[2rem] rounded-br-sm' 
                                 : 'bg-white/90 text-gray-800 border-white/60 rounded-[2rem] rounded-bl-sm' }}">
                             {{ $reply->content }}
                         </div>
