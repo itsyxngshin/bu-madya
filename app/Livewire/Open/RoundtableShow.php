@@ -5,7 +5,9 @@ namespace App\Livewire\Open;
 use Livewire\Component;
 use App\Models\RoundtableTopic;
 use App\Models\RoundtableReply;
+use Livewire\Attributes\Layout;
 
+#[Layout('layouts.madya-template')]
 class RoundtableShow extends Component
 {
     public $topic;
@@ -22,7 +24,7 @@ class RoundtableShow extends Component
 
         RoundtableReply::create([
             'user_id' => auth()->id(),
-            'topic_id' => $this->topic->id,
+            'roundtable_topic_id' => $this->topic->id,
             'content' => $this->newReply
         ]);
 

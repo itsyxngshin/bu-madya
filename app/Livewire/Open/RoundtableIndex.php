@@ -24,7 +24,7 @@ class RoundtableIndex extends Component
     {
         $topics = RoundtableTopic::with('user')
             ->withCount('roundtable_replies')
-            ->when($this->search, fn($q) => $q->where('title', 'like', '%'.$this->search.'%'))
+            ->when($this->search, fn($q) => $q->where('headline', 'like', '%'.$this->search.'%'))
             ->orderBy('is_pinned', 'desc') // Pinned first
             ->orderBy('created_at', 'desc')
             ->paginate(10);
