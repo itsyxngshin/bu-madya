@@ -1,96 +1,85 @@
-<nav x-data="{ open: false }" class="bg-white/70 backdrop-blur-md border-b border-gray-200/50 sticky top-0 z-30 transition-all duration-300">
+<nav x-data="{ open: false, scrolled: false }" 
+     @scroll.window="scrolled = (window.pageYOffset > 20)"
+     :class="{ 'bg-white/90 backdrop-blur-xl shadow-sm border-b border-gray-200': scrolled, 'bg-white/50 backdrop-blur-md border-b border-transparent': !scrolled }"
+     class="sticky top-0 z-50 transition-all duration-300">
+
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
             
-            {{-- 1. LEFT SIDE: Logo & Main Links --}}
-            <div class="flex">
-                <div class="shrink-0 flex items-center gap-2">
-                    <a href="{{ url('/') }}">
-                        <img src="{{ asset('images/official_logo.png') }}" class="block h-9 w-auto drop-shadow-sm" alt="BU MADYA Logo" />
-                    </a>
-                    <span class="font-heading font-black text-xl text-red-700 hidden md:block tracking-tight">BU MADYA</span>
-                </div>
-
-                <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
-                    @php
-                        $navLink = 'inline-flex items-center px-1 pt-1 border-b-2 text-sm font-bold leading-5 transition duration-150 ease-in-out';
-                        $active = 'border-red-600 text-red-700 focus:border-red-700';
-                        $inactive = 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 focus:text-gray-700 focus:border-gray-300';
-                    @endphp
-                    <a href="{{ route('open.home') }}" class="{{ $navLink }} {{ request()->routeIs('open.home.*') ? $active : $inactive }}">
-                        Home
-                    </a>
-                    @auth
-                        <a href="{{ route('dashboard') }}" class="{{ $navLink }} {{ request()->routeIs('dashboard') ? $active : $inactive }}">
-                            Dashboard
-                        </a>
-                    @endauth
-                    <a href="{{ route('projects.index') }}" class="{{ $navLink }} {{ request()->routeIs('projects.*') ? $active : $inactive }}">
-                        Projects
-                    </a>
-                    <a href="{{ route('open.directory') }}" class="{{ $navLink }} {{ request()->routeIs('open.directory.*') ? $active : $inactive }}">
-                        Directory
-                    </a>
-                    <a href="{{ route('linkages.index') }}" class="{{ $navLink }} {{ request()->routeIs('linkages.*') ? $active : $inactive }}">
-                        Linkages
-                    </a>
-                    <a href="{{ route('news.index') }}" class="{{ $navLink }} {{ request()->routeIs('news.*') ? $active : $inactive }}">
-                        News
-                    </a>
-                    <a href="{{ route('about') }}" class="{{ $navLink }} {{ request()->routeIs('about.*') ? $active : $inactive }}">
-                        About
-                    </a>
-                    @auth
-                        <a href="{{ route('roundtable.index') }}" class="{{ $navLink }} {{ request()->routeIs('roundtable.*') ? $active : $inactive }}">
-                            Roundtable
-                        </a>
-                    @endauth
-                </div>
+            {{-- 1. LEFT SIDE: Logo --}}
+            <div class="flex items-center gap-3">
+                <a href="{{ url('/') }}" class="shrink-0 flex items-center gap-2 group">
+                    <img src="{{ asset('images/official_logo.png') }}" class="block h-9 w-auto drop-shadow-sm group-hover:scale-105 transition transform" alt="BU MADYA Logo" />
+                    <div class="flex flex-col">
+                        <span class="font-heading font-black text-xl text-gray-900 leading-none tracking-tighter group-hover:text-red-600 transition">BU <span class="text-red-600">MADYA</span></span>
+                    </div>
+                </a>
             </div>
 
-            {{-- 2. RIGHT SIDE: Auth Check --}}
-            <div class="hidden sm:flex sm:items-center sm:ml-6">
-                
+            {{-- 2. CENTER: Desktop Navigation --}}
+            <div class="hidden md:flex items-center space-x-1 lg:space-x-6">
+                @foreach([
+                    ['name' => 'Home', 'route' => 'open.home', 'active' => 'open.home.*'],
+                    ['name' => 'Projects', 'route' => 'projects.index', 'active' => 'projects.*'],
+                    ['name' => 'Directory', 'route' => 'open.directory', 'active' => 'open.directory.*'],
+                    ['name' => 'Linkages', 'route' => 'linkages.index', 'active' => 'linkages.*'],
+                    ['name' => 'News', 'route' => 'news.index', 'active' => 'news.*'],
+                    ['name' => 'About', 'route' => 'about', 'active' => 'about.*'],
+                ] as $link)
+                    <a href="{{ route($link['route']) }}" 
+                       class="px-3 py-2 text-sm font-bold rounded-lg transition-all duration-200 
+                       {{ request()->routeIs($link['active']) 
+                          ? 'text-red-600 bg-red-50' 
+                          : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50' }}">
+                        {{ $link['name'] }}
+                    </a>
+                @endforeach
+
                 @auth
-                    {{-- LOGGED IN STATE --}}
-                    <div class="flex items-center ml-3">
-                        <div class="hidden md:block text-right mr-3">
-                            <p class="text-sm font-bold text-gray-900 leading-tight">
-                                {{ Auth::user()->name }}
-                            </p>
-                            @if(Auth::user()->directorAssignment)
-                                <p class="text-[10px] text-gray-500 font-medium leading-tight">
-                                    {{ Auth::user()->directorAssignment?->director->name }}
-                                </p>
-                            @else
-                                <p class="text-xs text-gray-500 leading-tight">
-                                    {{ Auth::user()->role?->role_name ?? 'User' }}
-                                </p>
-                            @endif
-                        </div>
+                    <a href="{{ route('roundtable.index') }}" 
+                       class="px-3 py-2 text-sm font-bold rounded-lg transition-all duration-200 border border-dashed border-yellow-400
+                       {{ request()->routeIs('roundtable.*') ? 'text-yellow-700 bg-yellow-50' : 'text-gray-500 hover:text-yellow-700 hover:bg-yellow-50' }}">
+                        Roundtable
+                    </a>
+                @endauth
+            </div>
 
-                        {{-- Avatar Dropdown --}}
-                        <div class="relative" x-data="{ dropdownOpen: false }">
-                            <button @click="dropdownOpen = !dropdownOpen" type="button" class="flex text-sm border-2 border-transparent rounded-full focus:outline-none focus:border-gray-300 transition shadow-sm hover:shadow-md">
-                                <img class="h-9 w-9 rounded-full object-cover" src="{{ Auth::user()->profile_photo_path && filter_var(Auth::user()->profile_photo_path, FILTER_VALIDATE_URL) ? Auth::user()->profile_photo_path : asset(Auth::user()->profile_photo_path) }}" alt="{{ Auth::user()->name }}" />
+            {{-- 3. RIGHT SIDE: Auth & Mobile Toggle --}}
+            <div class="flex items-center gap-4">
+                
+                {{-- Auth Buttons (Desktop) --}}
+                <div class="hidden md:flex items-center gap-3">
+                    @auth
+                        {{-- Dashboard Link --}}
+                        <a href="{{ route('dashboard') }}" class="text-xs font-bold uppercase tracking-widest text-gray-500 hover:text-red-600 transition">
+                            Dashboard
+                        </a>
+
+                        {{-- User Dropdown --}}
+                        <div class="relative ml-3" x-data="{ dropdownOpen: false }">
+                            <button @click="dropdownOpen = !dropdownOpen" type="button" class="flex text-sm border-2 border-transparent rounded-full focus:outline-none focus:border-red-300 transition hover:shadow-md">
+                                <img class="h-8 w-8 rounded-full object-cover" src="{{ Auth::user()->profile_photo_path ? (filter_var(Auth::user()->profile_photo_path, FILTER_VALIDATE_URL) ? Auth::user()->profile_photo_path : asset(Auth::user()->profile_photo_path)) : 'https://ui-avatars.com/api/?name='.urlencode(Auth::user()->name).'&color=7F9CF5&background=EBF4FF' }}" alt="{{ Auth::user()->name }}" />
                             </button>
-                        
-                            <div x-show="dropdownOpen" 
-                                @click.away="dropdownOpen = false"
-                                x-transition:enter="transition ease-out duration-100"
-                                x-transition:enter-start="transform opacity-0 scale-95"
-                                x-transition:enter-end="transform opacity-100 scale-100"
-                                x-transition:leave="transition ease-in duration-75"
-                                x-transition:leave-start="transform opacity-100 scale-100"
-                                x-transition:leave-end="transform opacity-0 scale-95"
-                                class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 focus:outline-none" 
-                                style="display: none;">
-                                
-                                <a href="{{ route('profile.public', Auth::user()->username) }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                    Profile
-                                </a>
 
-                                <div class="border-t border-gray-100"></div>
+                            <div x-show="dropdownOpen" 
+                                 @click.away="dropdownOpen = false"
+                                 x-transition:enter="transition ease-out duration-100"
+                                 x-transition:enter-start="transform opacity-0 scale-95"
+                                 x-transition:enter-end="transform opacity-100 scale-100"
+                                 x-transition:leave="transition ease-in duration-75"
+                                 x-transition:leave-start="transform opacity-100 scale-100"
+                                 x-transition:leave-end="transform opacity-0 scale-95"
+                                 class="absolute right-0 mt-2 w-48 rounded-xl shadow-xl py-1 bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-50" 
+                                 style="display: none;">
+                                
+                                <div class="px-4 py-3 border-b border-gray-100">
+                                    <p class="text-xs text-gray-500 uppercase font-bold">Signed in as</p>
+                                    <p class="text-sm font-bold text-gray-900 truncate">{{ Auth::user()->name }}</p>
+                                </div>
+
+                                <a href="{{ route('profile.public', Auth::user()->username) }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-red-600">
+                                    Your Profile
+                                </a>
 
                                 <form method="POST" action="{{ route('logout') }}">
                                     @csrf
@@ -100,92 +89,97 @@
                                 </form>
                             </div>
                         </div>
-                    </div>
-
-                @else
-                    {{-- [NEW] GUEST STATE (Login / Register) --}}
-                    <div class="flex items-center gap-4">
-                        <a href="{{ route('login') }}" class="text-sm font-bold text-gray-600 hover:text-gray-900 transition">
-                            Log in
+                    @else
+                        <a href="{{ route('login') }}" class="text-sm font-bold text-gray-600 hover:text-gray-900 transition">Log in</a>
+                        <a href="{{ route('register') }}" class="px-5 py-2 bg-gray-900 text-white text-xs font-bold uppercase tracking-widest rounded-xl hover:bg-red-600 hover:shadow-lg transition transform hover:-translate-y-0.5">
+                            Join Us
                         </a>
+                    @endauth
+                </div>
 
-                        @if (Route::has('register'))
-                            <a href="{{ route('register') }}" class="px-5 py-2.5 bg-red-600 text-white text-sm font-bold rounded-lg shadow-md hover:bg-red-700 transition transform hover:-translate-y-0.5">
-                                Register
-                            </a>
-                        @endif
-                    </div>
-                @endauth
-            </div>
-
-            {{-- 3. MOBILE HAMBURGER --}}
-            <div class="-mr-2 flex items-center sm:hidden">
-                <button @click="open = ! open" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none transition duration-150 ease-in-out">
-                    <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
-                        <path :class="{'hidden': open, 'inline-flex': ! open }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                        <path :class="{'hidden': ! open, 'inline-flex': open }" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
+                {{-- Mobile Hamburger --}}
+                <div class="flex items-center md:hidden">
+                    <button @click="open = ! open" class="inline-flex items-center justify-center p-2 rounded-lg text-gray-400 hover:text-gray-900 hover:bg-gray-100 focus:outline-none transition">
+                        <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                            <path :class="{'hidden': open, 'inline-flex': ! open }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                            <path :class="{'hidden': ! open, 'inline-flex': open }" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
 
-    {{-- 4. MOBILE MENU (Expanded) --}}
-    <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden bg-white/90 backdrop-blur-md border-b border-gray-200">
-        <div class="pt-2 pb-3 space-y-1">
-            <x-responsive-nav-link href="{{ route('open.home') }}" :active="request()->routeIs('open.home')">
-                Home
-            </x-responsive-nav-link>
-            <x-responsive-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
-                Dashboard
-            </x-responsive-nav-link>
-            <x-responsive-nav-link href="{{ route('projects.index') }}" :active="request()->routeIs('projects.*')">
-                Projects
-            </x-responsive-nav-link>
-            <x-responsive-nav-link href="{{ route('linkages.index') }}" :active="request()->routeIs('linkages.*')">
-                Linkages
-            </x-responsive-nav-link>
-             <x-responsive-nav-link href="{{ route('open.directory') }}" :active="request()->routeIs('open.directory.*')">
-                Directory
-            </x-responsive-nav-link>
-            <x-responsive-nav-link href="{{ route('news.index') }}" :active="request()->routeIs('news.*')">
-                News
-            </x-responsive-nav-link>
+    {{-- 4. MOBILE MENU (Animated Sheet) --}}
+    <div x-show="open" 
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0 -translate-y-2"
+         x-transition:enter-end="opacity-100 translate-y-0"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100 translate-y-0"
+         x-transition:leave-end="opacity-0 -translate-y-2"
+         class="md:hidden bg-white border-b border-gray-200 shadow-xl relative z-40">
+        
+        <div class="px-4 py-6 space-y-2">
+            
+            {{-- Navigation Links with Icons --}}
+            @php
+                $mobileLinks = [
+                    ['name' => 'Home', 'route' => 'open.home', 'active' => 'open.home.*', 'icon' => 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6'],
+                    ['name' => 'Projects', 'route' => 'projects.index', 'active' => 'projects.*', 'icon' => 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10'],
+                    ['name' => 'Directory', 'route' => 'open.directory', 'active' => 'open.directory.*', 'icon' => 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z'],
+                    ['name' => 'Linkages', 'route' => 'linkages.index', 'active' => 'linkages.*', 'icon' => 'M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1'],
+                    ['name' => 'News', 'route' => 'news.index', 'active' => 'news.*', 'icon' => 'M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z'],
+                ];
+            @endphp
+
+            @foreach($mobileLinks as $link)
+                <a href="{{ route($link['route']) }}" 
+                   class="flex items-center gap-3 px-4 py-3 rounded-xl transition text-sm font-bold
+                   {{ request()->routeIs($link['active']) ? 'bg-red-50 text-red-700' : 'text-gray-600 hover:bg-gray-50' }}">
+                    <svg class="w-5 h-5 {{ request()->routeIs($link['active']) ? 'text-red-500' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $link['icon'] }}"></path></svg>
+                    {{ $link['name'] }}
+                </a>
+            @endforeach
+
             @auth
-                <x-responsive-nav-link href="{{ route('roundtable.index') }}" :active="request()->routeIs('roundtable.*')">
-                    Roundtable
-                </x-responsive-nav-link>
+                <a href="{{ route('roundtable.index') }}" 
+                   class="flex items-center gap-3 px-4 py-3 rounded-xl transition text-sm font-bold mt-2 border border-dashed border-yellow-300
+                   {{ request()->routeIs('roundtable.*') ? 'bg-yellow-50 text-yellow-800' : 'text-gray-600 hover:bg-yellow-50 hover:text-yellow-800' }}">
+                    <svg class="w-5 h-5 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"></path></svg>
+                    The Roundtable
+                </a>
             @endauth
         </div>
         
-        <div class="pt-4 pb-4 border-t border-gray-200">
+        <div class="p-4 bg-gray-50 border-t border-gray-100">
             @auth
-                <div class="flex items-center px-4">
-                    <div class="shrink-0">
-                        <img class="h-10 w-10 rounded-full" src="{{ Auth::user()->profile_photo_path && filter_var(Auth::user()->profile_photo_path, FILTER_VALIDATE_URL) ? Auth::user()->profile_photo_path : asset(Auth::user()->profile_photo_path) }}" alt="{{ Auth::user()->name }}" />
-                    </div>
-                    <div class="ml-3">
-                        <div class="font-medium text-base text-gray-800">{{ Auth::user()->name }}</div>
-                        <div class="font-medium text-sm text-gray-500">{{ Auth::user()->email }}</div>
+                <div class="flex items-center gap-4 mb-4">
+                    <img class="h-10 w-10 rounded-full object-cover border border-white shadow-sm" src="{{ Auth::user()->profile_photo_path ? (filter_var(Auth::user()->profile_photo_path, FILTER_VALIDATE_URL) ? Auth::user()->profile_photo_path : asset(Auth::user()->profile_photo_path)) : 'https://ui-avatars.com/api/?name='.urlencode(Auth::user()->name).'&color=7F9CF5&background=EBF4FF' }}" />
+                    <div>
+                        <div class="font-bold text-gray-900 leading-tight">{{ Auth::user()->name }}</div>
+                        <div class="text-xs text-gray-500 font-medium">{{ Auth::user()->email }}</div>
                     </div>
                 </div>
-                <div class="mt-3 space-y-1">
+                <div class="grid grid-cols-2 gap-2">
+                    <a href="{{ route('dashboard') }}" class="flex justify-center py-2 bg-white border border-gray-200 rounded-lg text-xs font-bold uppercase tracking-wide text-gray-600 hover:bg-gray-100">
+                        Dashboard
+                    </a>
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
-                        <x-responsive-nav-link href="{{ route('profile.public', Auth::user()->username) }}">
-                            Profile
-                        </x-responsive-nav-link>
-                        <x-responsive-nav-link href="{{ route('logout') }}"
-                                onclick="event.preventDefault(); this.closest('form').submit();"
-                                class="text-red-600 font-bold">
+                        <button type="submit" class="w-full py-2 bg-red-100 border border-transparent rounded-lg text-xs font-bold uppercase tracking-wide text-red-700 hover:bg-red-200">
                             Log Out
-                        </x-responsive-nav-link>
+                        </button>
                     </form>
                 </div>
             @else
-                <div class="mt-3 space-y-1 px-4">
-                     <x-responsive-nav-link href="{{ route('login') }}">Log in</x-responsive-nav-link>
-                     <x-responsive-nav-link href="{{ route('register') }}">Register</x-responsive-nav-link>
+                <div class="grid grid-cols-2 gap-3">
+                     <a href="{{ route('login') }}" class="flex justify-center items-center py-3 border border-gray-300 rounded-xl text-sm font-bold text-gray-700 hover:bg-gray-100">
+                         Log In
+                     </a>
+                     <a href="{{ route('register') }}" class="flex justify-center items-center py-3 bg-gray-900 text-white rounded-xl text-sm font-bold hover:bg-red-600 transition shadow-lg">
+                         Join Us
+                     </a>
                 </div>
             @endauth
         </div>
