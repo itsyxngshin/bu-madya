@@ -4,7 +4,7 @@
 
 @section('meta_image')
     @if($article->cover_img)
-        {{ Str::startsWith($article->cover_img, 'http') ? $article->cover_img : asset('storage/' . $article->cover_img) }}
+        {{ Str::startsWith($article->cover_img, 'https') ? $article->cover_img : asset('storage/' . $article->cover_img) }}
     @else
         {{ asset('images/default_news.jpg') }}
     @endif
@@ -123,7 +123,7 @@
                     <div class="relative aspect-[16/9] lg:aspect-[4/3] overflow-hidden rounded-[1.5rem] md:rounded-[2rem]">
                         @php
                             $imgSrc = $article->cover_img 
-                                ? (Str::startsWith($article->cover_img, 'http') ? $article->cover_img : asset('storage/' . $article->cover_img))
+                                ? (Str::startsWith($article->cover_img, 'https') ? $article->cover_img : asset('storage/' . $article->cover_img))
                                 : asset('images/default_news.jpg');
                         @endphp
                         <img src="{{ $imgSrc }}" class="w-full h-full object-cover">
@@ -141,50 +141,64 @@
     </section>
 
     {{-- 3. ARTICLE BODY & SIDEBAR --}}
-    <div class="relative z-10 max-w-[1400px] mx-auto px-4 md:px-6 grid grid-cols-1 lg:grid-cols-12 gap-8 pb-12">
+    <div class="relative z-10 max-w-[1400px] mx-auto px-4 md:px-6 grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12 pb-12">
         
-        {{-- LEFT: Sticky Sidebar --}}
-        <aside class="hidden lg:block lg:col-span-3">
-            <div class="sticky top-28 space-y-6">
+        {{-- LEFT SIDEBAR: Summary & SDGs --}}
+        {{-- Mobile: Appears First. Desktop: Sticky Left Column --}}
+        <aside class="lg:col-span-3 order-1 lg:order-1">
+            <div class="lg:sticky lg:top-28 space-y-6">
+                
+                {{-- Summary Card --}}
                 @if($article->summary)
-                <div class="bg-white/60 backdrop-blur-md p-6 rounded-3xl border border-white/60 shadow-lg">
-                    <h4 class="font-bold text-gray-900 uppercase tracking-widest text-xs mb-4 flex items-center gap-2">
-                        <span class="w-8 h-1 bg-red-500 rounded-full"></span> In Brief
+                <div class="bg-white/80 backdrop-blur-md p-6 rounded-2xl border-l-4 border-red-500 shadow-sm">
+                    <h4 class="font-bold text-gray-900 uppercase tracking-widest text-xs mb-3 flex items-center gap-2">
+                        In Brief
                     </h4>
-                    <p class="text-sm text-gray-600 leading-relaxed font-medium">"{{ $article->summary }}"</p>
+                    <p class="text-sm text-gray-600 leading-relaxed font-medium italic">
+                        "{{ $article->summary }}"
+                    </p>
                 </div>
                 @endif
 
+                {{-- SDGs Card --}}
                 @if($article->sdgs->isNotEmpty())
-                <div class="bg-white/60 backdrop-blur-md p-6 rounded-3xl border border-white/60 shadow-lg">
-                    <h4 class="font-bold text-gray-900 uppercase tracking-widest text-xs mb-4">Targets</h4>
+                <div class="bg-white/60 backdrop-blur-md p-6 rounded-2xl border border-white/60 shadow-sm">
+                    <h4 class="font-bold text-gray-900 uppercase tracking-widest text-xs mb-4 text-gray-500">
+                        Target SDGs
+                    </h4>
                     <div class="flex flex-wrap gap-2">
                         @foreach($article->sdgs as $sdg)
-                            <div style="background-color: {{ $sdg->color_hex ?? '#6b7280' }}"
-                                class="w-8 h-8 rounded flex items-center justify-center text-white font-black text-xs shadow-sm transform hover:scale-110 transition" 
-                                title="{{ $sdg->name }}">
-                                {{ $sdg->id }}
+                            <div class="relative group cursor-help">
+                                {{-- The SDG Icon --}}
+                                <div style="background-color: {{ $sdg->color_hex ?? '#6b7280' }}" 
+                                     class="w-10 h-10 rounded-lg flex items-center justify-center text-white font-black text-xs shadow-sm transform group-hover:scale-110 transition z-10 relative">
+                                    {{ $sdg->id }}
+                                </div>
+
+                                {{-- Tooltip --}}
+                                <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-max max-w-[150px] hidden group-hover:block z-20">
+                                    <div class="bg-gray-900 text-white text-[10px] font-bold px-3 py-2 rounded shadow-lg text-center leading-tight">
+                                        {{ $sdg->name }}
+                                    </div>
+                                    <div class="w-2 h-2 bg-gray-900 rotate-45 absolute left-1/2 -translate-x-1/2 -bottom-1"></div>
+                                </div>
                             </div>
                         @endforeach
                     </div>
                 </div>
                 @endif
+
             </div>
         </aside>
 
-        {{-- CENTER: Content (Expanded col-span-9) --}}
-        {{-- CENTER: Content (Expanded col-span-9) --}}
-        <article class="lg:col-span-9">
-            <div class="bg-white/70 backdrop-blur-xl p-6 md:p-12 rounded-[2rem] shadow-xl border border-white/60">
+        {{-- CENTER: Main Content --}}
+        {{-- Mobile: Appears Second. Desktop: Takes up remaining 9 cols --}}
+        <article class="lg:col-span-9 order-2 lg:order-2">
+            <div class="bg-white/70 backdrop-blur-xl p-5 md:p-12 rounded-[2rem] shadow-xl border border-white/60">
                 
-                {{-- 
-                    RESPONSIVE TEXT SIZING:
-                    1. 'prose' = Base size (16px) for mobile.
-                    2. 'md:prose-lg' = Large size (18px) for desktop.
-                    3. 'leading-7' vs 'md:leading-8' = Tighter line spacing on mobile.
-                --}}
+                {{-- Markdown Content --}}
                 <div class="prose prose-red max-w-none font-sans text-gray-600 leading-7 md:prose-lg md:leading-8
-                            {{-- Drop Cap Logic: Smaller on mobile (4xl), larger on desktop (6xl) --}}
+                            {{-- Drop Cap Logic --}}
                             {{ $article->show_drop_cap ? "[&>p:first-child]:first-letter:text-4xl md:[&>p:first-child]:first-letter:text-6xl [&>p:first-child]:first-letter:font-black [&>p:first-child]:first-letter:text-transparent [&>p:first-child]:first-letter:bg-clip-text [&>p:first-child]:first-letter:bg-gradient-to-br [&>p:first-child]:first-letter:from-red-600 [&>p:first-child]:first-letter:to-yellow-500 [&>p:first-child]:first-letter:float-left [&>p:first-child]:first-letter:mr-2 md:[&>p:first-child]:first-letter:mr-3 [&>p:first-child]:first-letter:mt-[-2px] md:[&>p:first-child]:first-letter:mt-[-5px]" : '' }}
                             [&_img]:rounded-xl [&_img]:shadow-lg [&_img]:w-full">
                     
@@ -192,10 +206,11 @@
                 
                 </div>
 
+                {{-- Tags --}}
                 @if($article->tags)
                 <div class="mt-8 md:mt-12 pt-6 md:pt-8 border-t border-gray-100/50 flex flex-wrap gap-2">
                     @foreach(explode(',', $article->tags) as $tag)
-                    <span class="px-3 py-1 md:px-4 md:py-1.5 bg-gray-50 text-gray-500 text-[10px] md:text-xs font-bold uppercase tracking-wider rounded-lg border border-gray-100 shadow-sm">
+                    <span class="px-3 py-1 md:px-4 md:py-1.5 bg-gray-50 text-gray-500 text-[10px] md:text-xs font-bold uppercase tracking-wider rounded-lg border border-gray-100 shadow-sm hover:bg-red-50 hover:text-red-600 transition cursor-default">
                         #{{ trim($tag) }}
                     </span>
                     @endforeach
@@ -209,9 +224,10 @@
                     Discussion <span class="bg-red-100 text-red-600 text-xs px-2 py-0.5 rounded-full">{{ $article->comments->count() }}</span>
                 </h3>
 
+                {{-- Comment Form --}}
                 @auth
                     <div class="mb-8 flex gap-3 md:gap-4">
-                        <div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gray-200 shrink-0 overflow-hidden">
+                        <div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gray-200 shrink-0 overflow-hidden border border-white shadow-sm">
                              <div class="w-full h-full flex items-center justify-center bg-gray-300 font-bold text-gray-500 text-xs md:text-sm">{{ substr(auth()->user()->name, 0, 1) }}</div>
                         </div>
                         <div class="grow">
@@ -230,10 +246,11 @@
                     </div>
                 @endauth
 
+                {{-- Comments List --}}
                 <div class="space-y-6">
                     @forelse($article->comments as $comment)
                         <div class="flex gap-3 md:gap-4 group">
-                            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 shrink-0 flex items-center justify-center font-bold text-gray-500 text-xs">
+                            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 shrink-0 flex items-center justify-center font-bold text-gray-500 text-xs border border-white shadow-sm">
                                 {{ substr($comment->user->name, 0, 1) }}
                             </div>
                             <div class="grow">
@@ -254,8 +271,6 @@
                 </div>
             </div>
         </article>
-
-        {{-- RIGHT SIDEBAR REMOVED --}}
 
     </div>
 
