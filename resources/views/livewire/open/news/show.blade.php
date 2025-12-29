@@ -1,10 +1,10 @@
 @section('meta_title', $article->title . ' | BU MADYA')
 
-@section('meta_description', $article->summary ?? Str::limit(strip_tags($article->content), 150))
+@section('meta_description', $article->summary ?? Str::limit(strip_tags($article->content), 150)) 
 
 @section('meta_image')
     @if($article->cover_img)
-        {{ Str::startsWith($article->cover_img, 'https') ? $article->cover_img : asset('storage/' . $article->cover_img) }}
+        {{ Str::startsWith($article->cover_img, 'http') ? $article->cover_img : asset('storage/' . $article->cover_img) }}
     @else
         {{ asset('images/default_news.jpg') }}
     @endif
@@ -123,7 +123,7 @@
                     <div class="relative aspect-[16/9] lg:aspect-[4/3] overflow-hidden rounded-[1.5rem] md:rounded-[2rem]">
                         @php
                             $imgSrc = $article->cover_img 
-                                ? (Str::startsWith($article->cover_img, 'https') ? $article->cover_img : asset('storage/' . $article->cover_img))
+                                ? (Str::startsWith($article->cover_img, 'http') ? $article->cover_img : asset('storage/' . $article->cover_img))
                                 : asset('images/default_news.jpg');
                         @endphp
                         <img src="{{ $imgSrc }}" class="w-full h-full object-cover">

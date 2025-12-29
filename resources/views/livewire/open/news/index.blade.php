@@ -50,7 +50,7 @@
         @if($featured && !$search && !$category) {{-- Only show featured on home view --}}
         <div class="relative z-10 mb-12 animate-fade-in-up">
             <div class="group relative rounded-3xl overflow-hidden shadow-2xl h-[400px] md:h-[500px]">
-                <img src="{{ $featured->cover_img ? (Str::startsWith($featured->cover_img, 'https') ? $featured->cover_img : asset('storage/'.$featured->cover_img)) : 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?q=80&w=2070' }}" 
+                <img src="{{ $featured->cover_img ? (Str::startsWith($featured->cover_img, 'http') ? $featured->cover_img : asset('storage/'.$featured->cover_img)) : 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?q=80&w=2070' }}" 
                      class="absolute inset-0 w-full h-full object-cover transition duration-700 group-hover:scale-105">
                 <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent"></div>
                 <div class="absolute bottom-0 left-0 p-8 md:p-12 w-full md:w-2/3">
@@ -83,7 +83,7 @@
 
                 {{-- Thumbnail --}}
                 <div class="h-48 overflow-hidden relative">
-                    <img src="{{ $article->cover_img ? (Str::startsWith($article->cover_img, 'https') ? $article->cover_img : asset('storage/'.$article->cover_img)) : 'https://source.unsplash.com/random/400x300?sig='.$article->id }}" 
+                    <img src="{{ $article->cover_img ? (Str::startsWith($article->cover_img, 'http') ? $article->cover_img : asset('storage/'.$article->cover_img)) : 'https://source.unsplash.com/random/400x300?sig='.$article->id }}" 
                          class="w-full h-full object-cover group-hover:scale-110 transition duration-700 {{ $article->status !== 'active' ? 'grayscale opacity-70' : '' }}">
                     
                     <div class="absolute top-4 left-4 bg-white/90 backdrop-blur text-gray-800 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider shadow-sm">
