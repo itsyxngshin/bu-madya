@@ -158,4 +158,14 @@ class User extends Authenticatable
     {
         return $this->hasMany(ProjectProponent::class);
     }
+
+    public function roundtable_topic()
+    {
+        return $this->hasMany(RoundtableTopic::class);
+    }
+
+    public function roundtable_replies()
+    {
+        return $this->hasMany(RoundtableReply::class);
+    }
 }

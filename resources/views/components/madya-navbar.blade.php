@@ -40,6 +40,11 @@
                     <a href="{{ route('about') }}" class="{{ $navLink }} {{ request()->routeIs('about.*') ? $active : $inactive }}">
                         About
                     </a>
+                    @auth
+                        <a href="{{ route('roundtable.index') }}" class="{{ $navLink }} {{ request()->routeIs('roundtable.*') ? $active : $inactive }}">
+                            Roundtable
+                        </a>
+                    @endauth
                 </div>
             </div>
 

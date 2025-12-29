@@ -38,6 +38,12 @@
             $inactiveClass = 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 font-medium transition-colors';
         @endphp
 
+        <a href="{{ route('open.home') }}" 
+           class="flex items-center gap-3 px-3 py-2.5 rounded-l-md {{ request()->routeIs('open.home') ? $activeClass : $inactiveClass }}">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+            Home
+        </a>
+
         {{-- 1. DASHBOARD --}}
         <a href="{{ route('admin.dashboard') }}" 
            class="flex items-center gap-3 px-3 py-2.5 rounded-l-md {{ request()->routeIs('admin.dashboard') ? $activeClass : $inactiveClass }}">

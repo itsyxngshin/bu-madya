@@ -6,8 +6,11 @@ use App\Livewire\About;
 use App\Livewire\Open\Directory;
 use App\Livewire\Open\Committees;
 use App\Livewire\Open\CommitteeMembers;
+use App\Livewire\Open\RoundtableIndex;
+use App\Livewire\Open\RoundtableShow;
 use App\Livewire\Open\News\Index as NewsIndex;
 use App\Livewire\Open\News\Show as NewsShow;
+
 use App\Livewire\Director\NewsCreate;
 use App\Livewire\Director\NewsEdit;
 use App\Livewire\Director\ProjectsIndex;
@@ -66,6 +69,14 @@ Route::middleware(['auth', 'role:director'])
     Route::get('/news/{slug}/edit', NewsEdit::class)->name('news.edit');  
     Route::get('/linkage/{linkage:slug}/edit', LinkagesEdit::class)->name('linkages.edit');
 });
+
+Route::middleware(['auth']) 
+    ->group(function () {
+    Route::get('/roundtable', RoundtableIndex::class)->name('roundtable.index');
+    Route::get('/roundtable/{id}', RoundtableShow::class)->name('roundtable.show');
+});
+
+
 
 Route::middleware(['auth', 'role:administrator'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/projects', ProjectRoster::class)->name('projects.index');
