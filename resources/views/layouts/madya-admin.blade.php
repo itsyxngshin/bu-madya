@@ -97,7 +97,7 @@
                         <div class="relative" x-data="{ dropdownOpen: false }">
                             <button @click="dropdownOpen = !dropdownOpen" class="flex text-sm border-2 border-white ring-2 ring-gray-100 rounded-full focus:outline-none focus:ring-red-200 transition shadow-sm">
                                 <img class="h-9 w-9 rounded-full object-cover" 
-                                     src="{{ Auth::user()->profile_photo_url }}" 
+                                     src="{{ Auth::user()->profile_photo_path }}" 
                                      alt="{{ Auth::user()->name }}" />
                             </button>
                         
@@ -118,7 +118,7 @@
                                     <p class="text-xs text-gray-500 truncate">{{ Auth::user()->email }}</p>
                                 </div>
                                 
-                                <a href="{{ route('profile.show') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-red-600 font-medium">
+                                <a href="{{ route('profile.public', Auth::user()->username)  }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-red-600 font-medium">
                                     Profile Settings
                                 </a>
 
