@@ -112,8 +112,8 @@ class Show extends Component
     public function render()
     {
         return view('livewire.open.news.show')
-        ->layout('layouts.madya-template', ['meta_title' => $this->news->title,
-            'meta_description' => Str::limit($this->news->content,160),
-            'meta_image' => asset('storage/'.$this->news->cover_img),]); 
+        ->layout('layouts.madya-template', ['meta_title' => $this->article->title,
+            'meta_description' => Str::limit($this->article->content,160),
+            'meta_image' => asset('storage/'.$this->article->cover_img),]); 
     }
 } 
