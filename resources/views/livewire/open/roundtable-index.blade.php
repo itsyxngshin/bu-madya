@@ -78,11 +78,7 @@
                         {{-- Avatar (The Host) --}}
                         <div class="flex flex-col items-center gap-2 shrink-0">
                             <div class="p-1 rounded-full border-2 border-dashed border-red-200 group-hover:border-red-500 transition-colors duration-500">
-                                <img src="{{ $reply->user->profile_photo_path 
-                                            ? asset('storage/' . $reply->user->profile_photo_path) 
-                                            : 'https://ui-avatars.com/api/?name=' . urlencode($reply->user->name) . '&color=7F9CF5&background=EBF4FF' }}" 
-                                    alt="{{ $reply->user->name }}"
-                                    class="w-12 h-12 rounded-full object-cover"> 
+                                <img src="{{ asset($topic->user->profile_photo_path) }}" class="w-12 h-12 rounded-full object-cover">
                             </div>
                             <span class="text-[9px] font-bold uppercase text-gray-400 tracking-wider">Host</span>
                         </div>
