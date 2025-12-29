@@ -42,7 +42,11 @@
                 {{-- Host Avatar --}}
                 <div class="relative inline-block mb-6">
                     <div class="p-1.5 rounded-full border-2 border-dashed border-red-300">
-                        <img src="{{ asset($topic->user->profile_photo_path) }}" class="w-20 h-20 rounded-full object-cover shadow-sm">
+                        <img src="{{ $reply->user->profile_photo_path 
+                                        ? asset('storage/' . $reply->user->profile_photo_path) 
+                                        : 'https://ui-avatars.com/api/?name=' . urlencode($reply->user->name) . '&color=7F9CF5&background=EBF4FF' }}" 
+                            alt="{{ $reply->user->name }}"
+                            class="w-20 h-20 rounded-full object-cover shadow-sm">
                     </div>
                     <div class="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-[9px] font-black uppercase px-3 py-1 rounded-full tracking-widest border-4 border-white shadow-sm">
                         Host
@@ -74,7 +78,11 @@
                     
                     {{-- Avatar --}}
                     <div class="shrink-0">
-                        <img src="{{ asset($reply->user->profile_photo_path) }}" class="w-10 h-10 rounded-full border-2 border-white shadow-sm object-cover bg-gray-100">
+                        <img src="{{ $reply->user->profile_photo_path 
+                                    ? asset('storage/' . $reply->user->profile_photo_path) 
+                                    : 'https://ui-avatars.com/api/?name=' . urlencode($reply->user->name) . '&color=7F9CF5&background=EBF4FF' }}" 
+                        alt="{{ $reply->user->name }}"
+                        class="w-10 h-10 rounded-full border-2 border-white shadow-sm object-cover bg-gray-100">
                     </div>
                     
                     {{-- Message Bubble --}}
@@ -122,7 +130,7 @@
                 
                 <div class="flex-1 py-3">
                     <textarea wire:model="newReply" rows="1" 
-                        class="w-full bg-transparent border-none p-0 text-sm focus:ring-0 resize-none max-h-32 placeholder-gray-400 text-gray-800" 
+                        class="w-full bg-transparent border-none p-0 text-sm focus:ring-0 resize-none max-h-28 placeholder-gray-400 text-gray-800" 
                         placeholder="Type your thought here..."></textarea>
                 </div>
 
