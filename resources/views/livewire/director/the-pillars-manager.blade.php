@@ -266,7 +266,12 @@
             <div class="overflow-y-auto p-4 space-y-3">
                 @forelse($selectedOptionVoters as $voter)
                 <div class="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg transition border border-transparent hover:border-gray-100">
-                    <img src="{{ $voter['avatar'] }}" class="w-8 h-8 rounded-full bg-gray-200 object-cover border border-gray-100 shrink-0">
+                    <img src="{{ $voter['avatar'] 
+                                ? asset($voter['avatar']) 
+                                : 'https://ui-avatars.com/api/?name=' . urlencode($voter['name']) . '&color=7F9CF5&background=EBF4FF' 
+                            }}" 
+                        alt="{{ $voter['name'] }}"
+                        class="w-8 h-8 rounded-full bg-gray-200 object-cover border border-gray-100 shrink-0">
                     <div>
                         <p class="text-sm font-bold text-gray-900 leading-tight">{{ $voter['name'] }}</p>
                         <p class="text-[10px] text-gray-400">{{ $voter['date'] }}</p>
