@@ -67,9 +67,14 @@
                     </div>
 
                     {{-- Add Button (Hover Only) --}}
-                    @if(Auth::check() && in_array(Auth::user()->role_id, [1, 2]))
-                        <a href="{{ route('projects.create') }}?date={{ $currentYear }}-{{ $currentMonth }}-{{ $day }}" 
-                           class="absolute top-2 right-2 hidden group-hover:block p-1 bg-gray-100 text-gray-500 rounded hover:bg-red-600 hover:text-white transition">
+                    @if(Auth::check() && in_array(Auth::user()->role_id, [1, 2])) 
+                        {{-- Format the date properly --}}
+                        @php
+                            $targetDate = \Carbon\Carbon::create($currentYear, $currentMonth, $day)->format('Y-m-d');
+                        @endphp
+
+                        <a href="{{ route('projects.create', ['date' => $targetDate]) }}" 
+                        class="absolute top-2 right-2 hidden group-hover:block p-1 bg-gray-100 text-gray-400 rounded hover:bg-red-600 hover:text-white transition">
                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                         </a>
                     @endif
