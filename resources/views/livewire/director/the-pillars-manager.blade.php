@@ -64,7 +64,7 @@
 
     {{-- MODAL FORM --}}
     @if($isModalOpen)
-    <div class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/60 backdrop-blur-sm"
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/60 backdrop-blur-sm md:p-6"
         x-transition:enter="transition ease-out duration-200"
         x-transition:enter-start="opacity-0"
         x-transition:enter-end="opacity-100"
@@ -73,8 +73,11 @@
         x-transition:leave-end="opacity-0">
 
         {{-- MODAL CONTAINER --}}
-        {{-- Mobile: Full screen (h-full w-full rounded-none). Desktop: Card (rounded-2xl max-h-[90vh]) --}}
-        <div class="bg-white w-full h-full md:h-auto md:max-h-[90vh] md:max-w-4xl md:rounded-2xl shadow-2xl flex flex-col overflow-hidden transition-all transform">
+        {{-- 
+            MOBILE: w-full h-full rounded-none (Fills screen completely)
+            DESKTOP: md:rounded-2xl md:max-w-4xl md:h-auto md:max-h-[90vh] (Floating Card)
+        --}}
+        <div class="bg-white w-full h-full md:w-full md:max-w-4xl md:h-auto md:max-h-[90vh] md:rounded-2xl shadow-2xl flex flex-col overflow-hidden transition-all transform border border-gray-100">
             
             {{-- 1. STICKY HEADER --}}
             <div class="p-4 md:p-6 border-b border-gray-100 bg-white sticky top-0 z-20 flex justify-between items-center shrink-0">
@@ -92,7 +95,7 @@
             {{-- 2. SCROLLABLE BODY --}}
             <div class="flex-1 overflow-y-auto p-4 md:p-6 space-y-6 md:space-y-8 bg-gray-50/50">
                 
-                {{-- General Info Section --}}
+                {{-- A. General Info Section --}}
                 <div class="bg-white p-4 md:p-6 rounded-xl border border-gray-100 shadow-sm space-y-4">
                     <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 flex items-center gap-2">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -129,7 +132,7 @@
                     </div>
                 </div>
 
-                {{-- Questions Builder --}}
+                {{-- B. Questions Builder --}}
                 <div class="space-y-4">
                     <div class="flex justify-between items-center sticky top-0 z-10 py-2 bg-gray-50/95 backdrop-blur">
                         <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest">Questions</h3>
