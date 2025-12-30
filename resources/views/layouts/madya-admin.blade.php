@@ -23,7 +23,7 @@
 <body class="bg-stone-50 font-sans antialiased text-gray-900">
 
     {{-- LAYOUT WRAPPER --}}
-    <div x-data="{ sidebarOpen: false }" class="flex h-screen overflow-hidden bg-stone-50">
+    <div x-data="{ sidebarOpen: true }" class="flex h-screen overflow-hidden bg-stone-50">
 
         {{-- 1. MOBILE BACKDROP (Closes sidebar when clicking outside) --}}
         <div x-show="sidebarOpen" 
