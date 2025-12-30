@@ -19,7 +19,7 @@ class RoleMiddleware
         $user = $request->user();
 
         // (Keep your existing check ensuring user has a valid role generally)
-        $validSystemRoles = ['administrator', 'director', 'member', 'alumni'];
+        $validSystemRoles = ['administrator', 'director', 'member', 'alumni', 'regular'];
         if (!$user || !in_array($user->role->role_name, $validSystemRoles)) {
             abort(403, 'Unauthorized action.');
         }
