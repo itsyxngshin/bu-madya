@@ -1,11 +1,11 @@
 <aside 
     x-cloak
     :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
-    class="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 transition-transform duration-300 ease-in-out lg:static lg:inset-auto flex flex-col shadow-xl lg:shadow-none"
+    class="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 transition-transform duration-300 ease-in-out flex flex-col shadow-2xl lg:shadow-none"
 >
     
     {{-- LOGO AREA --}}
-    <div class="h-16 flex items-center justify-between px-6 border-b border-gray-100 shrink-0">
+    <div class="h-16 flex items-center justify-between px-6 border-b border-gray-100 shrink-0 bg-white">
         <div class="flex items-center gap-3">
             <div class="w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-md p-1 border border-gray-100">
                 <img src="{{ asset('images/official_logo.png') }}" alt="Logo" class="w-full h-full object-contain">
@@ -37,7 +37,6 @@
             Dashboard
         </a>
 
-        {{-- ADDED: THE PILLARS --}}
         <a href="{{ route('director.pillars.index') }}" 
            class="{{ $linkClass }} {{ request()->routeIs('director.pillars.*') ? $activeClass : $inactiveClass }}">
             <svg class="w-5 h-5 {{ request()->routeIs('director.pillars.*') ? $iconActive : $iconInactive }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
