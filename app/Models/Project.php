@@ -113,4 +113,9 @@ class Project extends Model
                     ->withPivot('role') // We want to access the 'role' column
                     ->withTimestamps();
     }
+
+    public function galleries()
+    {
+        return $this->hasMany(ProjectGallery::class);
+    }
 }

@@ -272,12 +272,82 @@
             </div>
             @endif
 
-            {{-- Gallery Placeholder --}}
-            <div>
-                 <h3 class="font-bold text-gray-900 uppercase tracking-widest text-xs border-b-2 border-green-500 w-16 pb-2 mb-6">Gallery</h3>
-                 <div class="bg-gray-100 rounded-2xl p-8 text-center text-gray-400 text-xs font-bold uppercase tracking-widest border border-dashed border-gray-300">
-                     No additional photos yet
-                 </div>
+            <div class="mt-12 bg-white rounded-2xl p-8 border border-gray-100 shadow-sm"> 
+                <h3 class="font-heading text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    Project Gallery
+                </h3>
+
+                {{-- ALPINE LIGHTBOX COMPONENT --}}
+                <div x-data="{ 
+                        lightboxOpen: false, 
+                        activeImage: '', 
+                        activeTitle: '',
+                        activeDesc: '' 
+                    }"
+                    @keydown.escape.window="lightboxOpen = false"
+                >
+                    {{-- 1. THE GRID (Thumbnails) --}}
+                    @if($project->galleries->count() > 0)
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            @foreach($project->galleries as $gallery)
+                                <div class="relative group aspect-square overflow-hidden rounded-xl bg-gray-100 cursor-pointer border border-transparent hover:border-red-500 transition-all"
+                                    @click="
+                                        lightboxOpen = true; 
+                                        activeImage = '{{ asset('storage/'.$gallery->image_path) }}'; 
+                                        activeTitle = '{{ addslashes($gallery->title) }}';
+                                        activeDesc = '{{ addslashes($gallery->description) }}';
+                                    ">
+                                    
+                                    {{-- Image --}}
+                                    <img src="{{ asset('storage/'.$gallery->image_path) }}" 
+                                        class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                        alt="{{ $gallery->title }}">
+                                    
+                                    {{-- Overlay on Hover --}}
+                                    <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white p-2 text-center">
+                                        <p class="text-xs font-bold uppercase tracking-wider">View</p>
+                                        @if($gallery->title)
+                                            <p class="text-[10px] truncate w-full mt-1">{{ $gallery->title }}</p>
+                                        @endif
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <div class="text-center py-8 bg-gray-50 rounded-lg border border-dashed border-gray-200 text-gray-400 text-sm">
+                            No images added to the gallery yet.
+                        </div>
+                    @endif
+
+                    {{-- 2. THE MODAL (Lightbox) --}}
+                    <div x-show="lightboxOpen" 
+                        style="display: none;"
+                        class="fixed inset-0 z-[999] flex items-center justify-center bg-black/90 backdrop-blur-sm p-4"
+                        x-transition:enter="transition ease-out duration-300"
+                        x-transition:enter-start="opacity-0"
+                        x-transition:enter-end="opacity-100"
+                        x-transition:leave="transition ease-in duration-200"
+                        x-transition:leave-start="opacity-100"
+                        x-transition:leave-end="opacity-0">
+
+                        {{-- Close Button --}}
+                        <button @click="lightboxOpen = false" class="absolute top-5 right-5 text-white/70 hover:text-white transition">
+                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        </button>
+
+                        {{-- Large Image Container --}}
+                        <div class="max-w-5xl w-full max-h-screen flex flex-col items-center" @click.outside="lightboxOpen = false">
+                            <img :src="activeImage" class="max-w-full max-h-[80vh] rounded-lg shadow-2xl">
+                            
+                            {{-- Caption --}}
+                            <div class="mt-4 text-center text-white space-y-1" x-show="activeTitle || activeDesc">
+                                <h4 x-text="activeTitle" class="font-bold text-lg"></h4>
+                                <p x-text="activeDesc" class="text-sm text-gray-300"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
         </main>

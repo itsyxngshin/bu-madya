@@ -6,5 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class ProjectGallery extends Model
 {
-    //
+    protected $guarded = [];
+
+    public function project()
+    {
+        return $this->belongsTo(Project::class);
+    }
 }

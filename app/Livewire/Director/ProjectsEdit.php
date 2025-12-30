@@ -56,6 +56,9 @@ class ProjectsEdit extends Component
     public $categories = [];
     public $availableLinkages = [];
 
+    public $newGalleryImages = []; // For the file upload (TemporaryUploadedFile[])
+    public $galleryInputs = [];    // For editing existing titles/descriptions
+
     // ==========================================
     // INITIALIZATION (Hydrate Form)
     // ==========================================
@@ -126,8 +129,38 @@ class ProjectsEdit extends Component
         $this->academic_years = AcademicYear::orderBy('is_active', 'desc')->orderBy('name', 'desc')->get();
         $this->categories = ProjectCategory::orderBy('name')->get();
         $this->availableLinkages = Linkage::orderBy('name')->get();
+        $this->refreshGalleryInputs();
     }
 
+    public function refreshGalleryInputs()
+    {
+        $this->galleryInputs = $this->project->galleries()
+            ->get()
+            ->map(function($item) {
+                return [
+                    'id' => $item->id,
+                    'image_path' => $item->image_path,
+                    'title' => $item->title,
+                    'description' => $item->description,
+                ];
+            })->toArray();
+    }
+
+    public function deleteGalleryItem($galleryId)
+    {
+        $item = \App\Models\ProjectGallery::find($galleryId);
+        
+        if ($item) {
+            // Optional: Delete file from storage
+            if (Storage::disk('public')->exists($item->image_path)) {
+                Storage::disk('public')->delete($item->image_path);
+            }
+            $item->delete();
+        }
+
+        $this->refreshGalleryInputs();
+        session()->flash('message', 'Image removed.');
+    }
     // ==========================================
     // DYNAMIC UPDATES
     // ==========================================
@@ -206,6 +239,24 @@ class ProjectsEdit extends Component
                 'impact_stats' => array_filter($this->impact_stats, fn($i) => !empty($i['value'])),
             ]);
 
+            foreach ($this->galleryInputs as $input) {
+                \App\Models\ProjectGallery::where('id', $input['id'])->update([
+                    'title' => $input['title'],
+                    'description' => $input['description'],
+                ]);
+            }
+
+            // B. Save NEW Images
+            foreach ($this->newGalleryImages as $photo) {
+                $path = $photo->store('projects/gallery', 'public');
+                
+                \App\Models\ProjectGallery::create([
+                    'project_id' => $this->project->id,
+                    'image_path' => $path,
+                    'title' => '',       // Default empty, they can edit later
+                    'description' => '', 
+                ]);
+            }
             // C. Refresh Relationships (Delete & Re-create Strategy)
             
             // 1. Linkages
@@ -256,6 +307,8 @@ class ProjectsEdit extends Component
             // 4. SDGs (Sync is easier for ManyToMany)
             $this->project->sdgs()->sync($this->selectedSdgs);
         });
+
+        $this->newGalleryImages = [];
 
         session()->flash('message', 'Project successfully updated!');
         return redirect()->route('projects.index');
