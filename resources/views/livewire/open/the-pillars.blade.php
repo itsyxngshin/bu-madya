@@ -1,4 +1,4 @@
-<div class="min-h-screen bg-stone-50 font-sans text-gray-900 pb-20 relative overflow-x-hidden">
+<div wire:poll.5s class="min-h-screen bg-stone-50 font-sans text-gray-900 pb-20 relative overflow-x-hidden">
 
     {{-- 1. ATMOSPHERE: SIGNATURE BLOBS --}}
     <div class="fixed inset-0 z-0 overflow-hidden pointer-events-none">
@@ -85,6 +85,7 @@
                                         legend: { position: 'bottom' },
                                         dataLabels: { enabled: true },
                                         plotOptions: { pie: { donut: { size: '65%' } } }
+                                        animations: { enabled: false }
                                     };
                                     let chart = new ApexCharts(this.$refs.chart, options);
                                     chart.render();
