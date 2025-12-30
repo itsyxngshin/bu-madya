@@ -53,7 +53,7 @@ class ThePillarsManager extends Component
                 ->map(function ($vote) {
                     return [
                         'name' => $vote->user->name ?? 'Unknown User',
-                        'avatar' => $vote->user->profile_photo_url ?? null, // Assuming Jetstream
+                        'avatar' => $vote->user->profile_photo_path ?? null, // Assuming Jetstream
                         'date' => $vote->created_at->format('M d, h:i A'),
                     ];
                 });
