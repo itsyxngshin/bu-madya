@@ -100,7 +100,7 @@ Route::middleware(['auth', 'role:administrator,director'])->group(function () {
 Route::middleware(['auth', 'role:administrator,director'])->group(function () {
     Route::get('/project/create', ProjectsCreate::class)->name('projects.create');
     Route::get('/projects/{project:slug}/edit', ProjectsEdit::class)->name('projects.edit');
-    Route::get('/profile/edit', EditProfile::class)->name('profile.edit');
+    
     Route::get('/news/create', NewsCreate::class)->name('news.create');
     Route::get('/linkage/create', LinkagesCreate::class)->name('linkages.create');
     Route::get('/news/{slug}/edit', NewsEdit::class)->name('news.edit');  

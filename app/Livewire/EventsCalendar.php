@@ -23,15 +23,15 @@ class EventsCalendar extends Component
 
     public function loadEvents()
     {
-        // Fetch projects for the current month to optimize performance
-        // Adjust 'implementation_date' to your actual column name
         $this->events = Project::query()
             ->whereMonth('implementation_date', $this->currentMonth)
             ->whereYear('implementation_date', $this->currentYear)
             ->get()
             ->groupBy(function ($event) {
-                return Carbon::parse($event->implementation_date)->format('j'); // Group by Day of Month (1-31)
-            });
+                // Force integer so it matches the loop ($day) in the view
+                return (int) \Carbon\Carbon::parse($event->implementation_date)->format('j');
+            })
+            ->toArray(); // <--- [IMPORTANT FIX] Convert to array
     }
 
     public function previousMonth()

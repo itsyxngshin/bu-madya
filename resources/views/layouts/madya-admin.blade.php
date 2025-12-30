@@ -89,7 +89,7 @@
                                 <p class="text-xs text-gray-500">Signed in as</p>
                                 <p class="text-sm font-bold text-gray-900 truncate">{{ Auth::user()->name }}</p>
                             </div>
-                            <a href="{{ route('profile.show') }}" class="block px-4 py-2 text-xs font-bold text-gray-700 hover:bg-gray-100">Profile</a>
+                            <a href="{{ route('profile.public', Auth::user()->username) }}" class="block px-4 py-2 text-xs font-bold text-gray-700 hover:bg-gray-100">Profile</a>
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
                                 <button type="submit" class="block w-full text-left px-4 py-2 text-xs font-bold text-red-600 hover:bg-red-50">Log Out</button>

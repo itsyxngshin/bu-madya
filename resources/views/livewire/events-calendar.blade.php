@@ -41,42 +41,16 @@
 
             {{-- Actual Days --}}
             @for($day = 1; $day <= $daysInMonth; $day++)
-                @php
-                    $hasEvents = isset($events[$day]);
-                    $isToday = $day == now()->day && $currentMonth == now()->month && $currentYear == now()->year;
-                @endphp
-
-                <div class="bg-white min-h-[100px] p-2 relative hover:bg-red-50 transition group flex flex-col gap-1">
-                    
-                    {{-- Date Number --}}
-                    <span class="text-xs font-bold {{ $isToday ? 'bg-red-600 text-white w-6 h-6 rounded-full flex items-center justify-center shadow-md' : 'text-gray-700' }}">
-                        {{ $day }}
-                    </span>
-
-                    {{-- Events List --}}
-                    <div class="flex-1">
-                        @if($hasEvents)
-                            @foreach($events[$day] as $event)
-                                <a href="{{ route('projects.show', $event->slug) }}" 
-                                   class="block px-2 py-1 mb-1 rounded bg-yellow-50 border-l-2 border-yellow-400 text-[9px] font-bold text-gray-800 truncate hover:bg-yellow-100 transition shadow-sm"
-                                   title="{{ $event->title }}">
-                                    {{ $event->title }}
-                                </a>
-                            @endforeach
-                        @endif
-                    </div>
-
-                    {{-- Add Button (Hover Only) --}}
-                    @if(Auth::check() && in_array(Auth::user()->role_id, [1, 2])) 
-                        {{-- Format the date properly --}}
-                        @php
-                            $targetDate = \Carbon\Carbon::create($currentYear, $currentMonth, $day)->format('Y-m-d');
-                        @endphp
-
-                        <a href="{{ route('projects.create', ['date' => $targetDate]) }}" 
-                        class="absolute top-2 right-2 hidden group-hover:block p-1 bg-gray-100 text-gray-400 rounded hover:bg-red-600 hover:text-white transition">
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                        </a>
+                <div class="mt-2 space-y-1">
+                    @if($hasEvents)
+                        @foreach($events[$day] as $event)
+                            {{-- FIX: Use array syntax $event['...'] instead of -> --}}
+                            <a href="{{ route('projects.show', $event['slug']) }}" 
+                            class="block px-2 py-1 mb-1 rounded bg-yellow-50 border-l-2 border-yellow-400 text-[9px] font-bold text-gray-800 truncate hover:bg-yellow-100 transition shadow-sm"
+                            title="{{ $event['title'] }}">
+                                {{ $event['title'] }}
+                            </a>
+                        @endforeach
                     @endif
                 </div>
             @endfor
