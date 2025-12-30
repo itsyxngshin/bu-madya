@@ -3,8 +3,8 @@
 namespace App\Livewire\Open;
 
 use Livewire\Component;
-use App\Models\Poll;
-use App\Models\PollVote;
+use App\Models\Pillar;
+use App\Models\PillarVote;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Http\Request;
@@ -13,83 +13,79 @@ use Livewire\Attributes\Layout;
 #[Layout('layouts.madya-template')] 
 class ThePillars extends Component 
 {
-    public function vote($pollId, $optionId)
+    public function vote($questionId, $optionId)
     {
-        $user = Auth::user();
+        $userId = Auth::id();
         $sessionId = Session::getId();
-        $ip = request()->ip();
 
-        // 1. CHECK FOR EXISTING VOTE
-        $query = PollVote::where('poll_id', $pollId);
+        // 1. Check Vote Existence (User OR Session)
+        $exists = PillarVote::where('pillar_question_id', $questionId)
+            ->where(function($q) use ($userId, $sessionId) {
+                if ($userId) {
+                    $q->where('user_id', $userId);
+                } else {
+                    $q->where('session_id', $sessionId);
+                }
+            })->exists();
 
-        if ($user) {
-            // If logged in, check by User ID
-            $query->where('user_id', $user->id);
-        } else {
-            // If guest, check by Session ID (and optionally IP)
-            $query->where('session_id', $sessionId);
-        }
-
-        if ($query->exists()) {
-            session()->flash('message', 'You have already voted on this Pillar.');
+        if ($exists) {
+            $this->dispatch('notify', message: 'You already voted on this question.'); // Assume you have a toaster
             return;
         }
 
-        // 2. CAST THE VOTE
-        PollVote::create([
-            'poll_id' => $pollId,
-            'poll_option_id' => $optionId,
-            'user_id' => $user ? $user->id : null, // Null if guest
+        // 2. Cast Vote
+        PillarVote::create([
+            'pillar_question_id' => $questionId,
+            'pillar_option_id' => $optionId,
+            'user_id' => $userId,
             'session_id' => $sessionId,
-            'ip_address' => $ip,
         ]);
-
-        session()->flash('message', 'Your voice has been recorded.');
+        
+        // No flash message needed to avoid reloading layout, just reactive UI update
     }
 
     public function render()
     {
-        $currentSession = Session::getId();
-        $currentUser = Auth::id();
+        $userId = Auth::id();
+        $sessionId = Session::getId();
 
-        $polls = Poll::with(['options.votes'])
+        $pillars = Pillar::with(['questions.options.votes'])
             ->where('is_active', true)
             ->latest()
             ->get()
-            ->map(function ($poll) use ($currentUser, $currentSession) {
+            ->map(function ($pillar) use ($userId, $sessionId) {
                 
-                $totalVotes = $poll->options->sum(fn($o) => $o->votes->count());
-                
-                // 3. CHECK IF THIS VIEWER HAS VOTED
-                // We check the "votes" relation to find a match for User ID OR Session ID
-                $userVoteRecord = $poll->options->flatMap->votes->first(function($vote) use ($currentUser, $currentSession) {
-                    if ($currentUser && $vote->user_id === $currentUser) {
-                        return true;
-                    }
-                    return $vote->session_id === $currentSession;
+                // Map Questions
+                $pillar->mapped_questions = $pillar->questions->map(function($q) use ($userId, $sessionId) {
+                    
+                    $totalVotes = $q->options->sum(fn($o) => $o->votes->count());
+                    
+                    // Check if voted
+                    $userVote = $q->options->flatMap->votes->first(function($v) use ($userId, $sessionId) {
+                        if ($userId && $v->user_id === $userId) return true;
+                        return $v->session_id === $sessionId;
+                    });
+
+                    return [
+                        'id' => $q->id,
+                        'text' => $q->question_text,
+                        'total_votes' => $totalVotes,
+                        'has_voted' => (bool) $userVote,
+                        'voted_option_id' => $userVote?->pillar_option_id,
+                        'options' => $q->options->map(function($opt) use ($totalVotes) {
+                            return [
+                                'id' => $opt->id,
+                                'label' => $opt->label,
+                                'color' => $opt->color,
+                                'percent' => $totalVotes > 0 ? round(($opt->votes->count() / $totalVotes) * 100) : 0
+                            ];
+                        })
+                    ];
                 });
 
-                return [
-                    'id' => $poll->id,
-                    'title' => $poll->title,
-                    'question' => $poll->question,
-                    'description' => $poll->description,
-                    'image' => $poll->image_path,
-                    'total_votes' => $totalVotes,
-                    'has_voted' => (bool) $userVoteRecord,
-                    'voted_option_id' => $userVoteRecord?->poll_option_id,
-                    'options' => $poll->options->map(function ($option) use ($totalVotes) {
-                        return [
-                            'id' => $option->id,
-                            'label' => $option->label,
-                            'color' => $option->color,
-                            'count' => $option->votes->count(),
-                            'percent' => $totalVotes > 0 ? round(($option->votes->count() / $totalVotes) * 100) : 0,
-                        ];
-                    }),
-                ];
+                return $pillar;
             });
 
-        return view('livewire.open.the-pillars', ['polls' => $polls]);
+        return view('livewire.open.the-pillars', ['pillars' => $pillars]);
     }
 }
