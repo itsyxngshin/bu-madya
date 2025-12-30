@@ -142,36 +142,79 @@
                     </div>
 
                     {{-- IMAGE UPLOAD (EDIT MODE) --}}
-                    <div x-data="{ isDropping: false, isFocused: false }">
-                        <label class="block text-xs font-bold text-gray-700 mb-1">Cover Image</label>
+                    <div x-data="{ 
+                            isDropping: false, 
+                            isUploading: false, 
+                            progress: 0 
+                        }"
+                        x-on:livewire-upload-start="isUploading = true"
+                        x-on:livewire-upload-finish="isUploading = false"
+                        x-on:livewire-upload-error="isUploading = false"
+                        x-on:livewire-upload-progress="progress = $event.detail.progress">
+
+                        <label class="block text-xs font-bold text-gray-700 mb-1">
+                            Cover Image 
+                            <span class="font-normal text-gray-400 ml-1">(Drag & Drop enabled)</span>
+                        </label>
+
                         <label
-                            @dragover.prevent="isDropping = true" @dragleave.prevent="isDropping = false" @drop.prevent="isDropping = false"
-                            :class="{'border-yellow-400 bg-yellow-50': isDropping, 'border-gray-300 bg-white': !isDropping}"
-                            class="relative flex flex-col items-center justify-center w-full h-36 border-2 border-dashed rounded-xl cursor-pointer hover:bg-gray-50 transition-all group overflow-hidden"
+                            @dragover.prevent="isDropping = true"
+                            @dragleave.prevent="isDropping = false"
+                            @drop.prevent="isDropping = false"
+                            :class="{'border-yellow-400 bg-yellow-50 ring-2 ring-yellow-200 ring-offset-1': isDropping, 'border-gray-300 bg-white hover:bg-gray-50': !isDropping}"
+                            class="relative flex flex-col items-center justify-center w-full h-40 border-2 border-dashed rounded-xl cursor-pointer transition-all duration-200 overflow-hidden group"
                         >
-                            {{-- A. New Upload Preview --}}
-                            @if($coverImg)
-                                <img src="{{ $coverImg->temporaryUrl() }}" class="absolute inset-0 w-full h-full object-cover z-0 opacity-60">
-                                <div class="relative z-10 bg-white/80 px-2 py-1 rounded-full text-[10px] font-bold uppercase">New Image Selected</div>
+                            {{-- 1. UPLOADING STATE (Progress Bar) --}}
+                            <div x-show="isUploading" class="absolute inset-0 z-50 flex flex-col items-center justify-center bg-white/90 backdrop-blur-sm transition-all">
+                                <svg class="animate-spin h-8 w-8 text-yellow-500 mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                <div class="w-1/2 bg-gray-200 rounded-full h-1.5 dark:bg-gray-200">
+                                    <div class="bg-yellow-500 h-1.5 rounded-full transition-all duration-300" :style="'width: ' + progress + '%'"></div>
+                                </div>
+                                <p class="text-[10px] font-bold text-gray-500 mt-2 uppercase tracking-wider">Uploading...</p>
+                            </div>
+
+                            {{-- 2. PREVIEW LOGIC --}}
                             
-                            {{-- B. Existing Image Preview --}}
-                            @elseif($oldCoverImg)
-                                <img src="{{ asset('storage/'.$oldCoverImg) }}" class="absolute inset-0 w-full h-full object-cover z-0 opacity-60">
-                                <div class="relative z-10 flex flex-col items-center justify-center text-gray-800">
-                                    <p class="text-[10px] font-bold uppercase bg-white/80 px-2 py-1 rounded-full">Current Image</p>
-                                    <p class="text-[9px] mt-1">Click to Replace</p>
+                            {{-- A. New Upload Preview (Top Priority) --}}
+                            @if($coverImg)
+                                <img src="{{ $coverImg->temporaryUrl() }}" class="absolute inset-0 w-full h-full object-cover z-0">
+                                <div class="absolute inset-0 bg-black/40 z-10"></div>
+                                <div class="relative z-20 bg-white/90 backdrop-blur px-3 py-1.5 rounded-full shadow-lg flex items-center gap-2">
+                                    <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                                    <span class="text-[10px] font-bold uppercase text-gray-800">New Image Ready</span>
                                 </div>
                             
-                            {{-- C. No Image --}}
+                            {{-- B. Existing Database Image (Fallback) --}}
+                            @elseif($oldCoverImg)
+                                <img src="{{ asset('storage/'.$oldCoverImg) }}" class="absolute inset-0 w-full h-full object-cover z-0 grayscale group-hover:grayscale-0 transition-all duration-500">
+                                <div class="absolute inset-0 bg-white/60 group-hover:bg-white/30 transition-all z-10"></div>
+                                
+                                <div class="relative z-20 flex flex-col items-center text-gray-600 group-hover:text-gray-800">
+                                    <div class="bg-white/80 p-2 rounded-full shadow-sm mb-2 group-hover:scale-110 transition-transform">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                    </div>
+                                    <span class="text-[10px] font-bold uppercase tracking-wider">Current Image</span>
+                                    <span class="text-[9px] mt-0.5 opacity-60">Drop new file to replace</span>
+                                </div>
+
+                            {{-- C. Empty State --}}
                             @else
-                                <div class="flex flex-col items-center justify-center pt-5 pb-6 text-gray-400">
-                                    <svg class="w-8 h-8 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                                    <p class="text-xs">Click to upload</p>
+                                <div class="flex flex-col items-center justify-center pt-5 pb-6 text-gray-400 group-hover:text-yellow-500 transition-colors z-20">
+                                    <svg class="w-8 h-8 mb-2 transform group-hover:-translate-y-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                                    <p class="text-xs font-medium"><span class="font-bold underline decoration-yellow-400">Click to upload</span> or drag and drop</p>
+                                    <p class="text-[10px] mt-1 text-gray-400">SVG, PNG, JPG (Max. 5MB)</p>
                                 </div>
                             @endif
 
-                            <input type="file" wire:model="coverImg" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+                            {{-- THE ACTUAL INPUT --}}
+                            <input type="file" wire:model="coverImg" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-30" title="">
                         </label>
+                        
+                        {{-- Error Message --}}
+                        @error('coverImg') <span class="text-red-500 text-[10px] mt-1 block">{{ $message }}</span> @enderror
                     </div>
                 </div>
             </div>
