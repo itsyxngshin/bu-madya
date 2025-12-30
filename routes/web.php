@@ -92,9 +92,9 @@ Route::middleware(['auth', 'role:administrator'])->prefix('admin')->name('admin.
     Route::get('/dashboard', AdminDashboard::class)->name('dashboard');
 });
 
-Route::middleware(['auth', 'role:administrator', 'role:director'])->prefix('admin')->group(function () {
-    Route::get('/proposals/{proposal}', ProposalsShow::class)->name('admin.proposals.show');
-    Route::get('/proposals', ProposalsIndex::class)->name('admin.proposals.index');
+Route::middleware(['auth', 'role:administrator', 'role:director'])->group(function () {
+    Route::get('admin/proposals/{proposal}', ProposalsShow::class)->name('admin.proposals.show');
+    Route::get('admin/proposals', ProposalsIndex::class)->name('admin.proposals.index');
     Route::get('/project/create', ProjectsCreate::class)->name('projects.create');
     Route::get('/projects/{project:slug}/edit', ProjectsEdit::class)->name('projects.edit');
     Route::get('/profile/edit', EditProfile::class)->name('profile.edit');
