@@ -85,15 +85,15 @@
                                 chartInstance: null,
 
                                 initChart() {
-                                    // Handle Zero Votes
-                                    let data = this.counts;
-                                    let palette = this.colors;
-                                    let total = data.reduce((a, b) => a + b, 0);
+                                    setTimeout(() => {
+                                        let data = this.counts;
+                                        let palette = this.colors;
+                                        let total = data.reduce((a, b) => a + b, 0);
 
-                                    if (total === 0) {
-                                        data = [1]; 
-                                        palette = ['#e5e7eb'];
-                                    }
+                                        if (total === 0) {
+                                            data = [1]; 
+                                            palette = ['#e5e7eb'];
+                                        }
 
                                     let options = {
                                         series: data,
