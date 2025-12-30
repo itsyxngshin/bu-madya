@@ -3,8 +3,6 @@
         activeDate: '', 
         activeEvents: [],
         openDay(date, events) {
-            // UPDATED: Removed the (window.innerWidth < 768) check
-            // Now this modal opens on ALL screen sizes if there are events
             if (events.length > 0) {
                 this.activeDate = date;
                 this.activeEvents = events;
@@ -14,7 +12,7 @@
      }"
      class="bg-white rounded-3xl border border-gray-200 shadow-sm overflow-hidden font-sans relative">
     
-    {{-- 1. HEADER (No changes needed here) --}}
+    {{-- 1. HEADER --}}
     <div class="px-6 py-4 border-b border-gray-200 flex flex-col md:flex-row items-center justify-between bg-stone-50 gap-4">
         <div>
             <h2 class="text-xl font-black text-gray-900 uppercase tracking-tight text-center md:text-left">
@@ -30,14 +28,16 @@
     {{-- 2. CALENDAR GRID --}}
     <div class="w-full">
         {{-- Days Header --}}
-        <div style="display: grid; grid-template-columns: repeat(7, 1fr);" class="border-b border-gray-200 bg-gray-50 text-center">
+        {{-- FIX 1: Use minmax(0, 1fr) to prevent header blowouts --}}
+        <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr));" class="border-b border-gray-200 bg-gray-50 text-center">
             @foreach(['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as $day)
                 <div class="py-2 text-[10px] md:text-xs font-bold text-gray-400 uppercase tracking-widest">{{ $day }}</div>
             @endforeach
         </div>
 
         {{-- Days Grid --}}
-        <div style="display: grid; grid-template-columns: repeat(7, 1fr);" class="bg-gray-200 gap-px border-b border-gray-200">
+        {{-- FIX 2: Use minmax(0, 1fr) to prevent content blowouts --}}
+        <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr));" class="bg-gray-200 gap-px border-b border-gray-200">
             {{-- Padding Cells --}}
             @for($i = 0; $i < $startDayOfWeek; $i++)
                 <div class="bg-stone-50 min-h-[70px] md:min-h-[120px]"></div>
@@ -54,7 +54,7 @@
 
                 {{-- DAY CELL --}}
                 <div @click="openDay('{{ $monthName }} {{ $day }}', {{ \Illuminate\Support\Js::from($dayEvents) }})"
-                     class="bg-white min-h-[70px] md:min-h-[120px] p-1 md:p-2 relative hover:bg-red-50 transition group flex flex-col gap-1 cursor-pointer">
+                     class="bg-white min-h-[70px] md:min-h-[120px] p-1 md:p-2 relative hover:bg-red-50 transition group flex flex-col gap-1 cursor-pointer overflow-hidden">
                     
                     {{-- Date Number & Mobile Dots --}}
                     <div class="flex justify-between items-start">
@@ -62,26 +62,26 @@
                             {{ $day }}
                         </span>
                         
-                        {{-- Mobile Dots (Only visible on small screens) --}}
+                        {{-- Mobile Dots --}}
                         <div class="flex gap-1 md:hidden">
                             @if($hasProject) <div class="w-1.5 h-1.5 rounded-full bg-yellow-400 animate-pulse"></div> @endif
                             @if($hasHoliday) <div class="w-1.5 h-1.5 rounded-full bg-blue-400"></div> @endif
                         </div>
                     </div>
 
-                    {{-- DESKTOP LIST (Visible on MD+) --}}
+                    {{-- DESKTOP LIST --}}
                     <div class="hidden md:block flex-1 w-full min-w-0 mt-1 space-y-1">
                         @foreach($dayEvents as $event)
                             <div wire:key="event-{{ $event['id'] }}">
                                 @if($event['is_holiday'])
-                                    {{-- HOLIDAY: Truncated --}}
-                                    <div class="block px-2 py-1 rounded bg-blue-50 border-l-2 border-blue-500 text-[9px] font-bold text-blue-700 truncate" 
+                                    {{-- HOLIDAY: Added 'truncate' and 'max-w-full' --}}
+                                    <div class="block w-full max-w-full px-2 py-1 rounded bg-blue-50 border-l-2 border-blue-500 text-[9px] font-bold text-blue-700 truncate" 
                                          title="{{ $event['title'] }}">
                                         <span class="mr-1 opacity-70">★</span> {{ $event['title'] }}
                                     </div>
                                 @else
-                                    {{-- PROJECT: Truncated (Using DIV instead of A tag so click bubbles to openDay) --}}
-                                    <div class="block px-2 py-1 rounded bg-yellow-50 border-l-2 border-yellow-400 text-[9px] font-bold text-gray-800 truncate hover:bg-yellow-100 transition shadow-sm"
+                                    {{-- PROJECT: Added 'truncate' and 'max-w-full' --}}
+                                    <div class="block w-full max-w-full px-2 py-1 rounded bg-yellow-50 border-l-2 border-yellow-400 text-[9px] font-bold text-gray-800 truncate hover:bg-yellow-100 transition shadow-sm"
                                          title="{{ $event['title'] }}">
                                         {{ $event['title'] }}
                                     </div>
@@ -90,10 +90,9 @@
                         @endforeach
                     </div>
 
-                    {{-- Quick Add Button (Still keeps functionality) --}}
+                    {{-- Quick Add Button --}}
                     @if(Auth::check() && in_array(Auth::user()->role_id, [1, 2]))
                         @php $targetDate = \Carbon\Carbon::create($currentYear, $currentMonth, $day)->format('Y-m-d'); @endphp
-                        {{-- Added @click.stop to prevent modal opening when clicking the 'plus' button --}}
                         <a href="{{ route('projects.create', ['date' => $targetDate]) }}" 
                            @click.stop
                            class="absolute top-2 right-2 hidden md:group-hover:block p-1 bg-gray-100 text-gray-500 rounded hover:bg-red-600 hover:text-white transition z-10">
@@ -111,7 +110,7 @@
         </div>
     </div>
 
-    {{-- 3. UNIFIED MODAL (Used for both Mobile & Desktop) --}}
+    {{-- 3. UNIFIED MODAL --}}
     <template x-teleport="body">
         <div x-show="showModal" 
              style="display: none;"
@@ -139,7 +138,6 @@
                 <div class="p-5 max-h-[60vh] overflow-y-auto space-y-3 bg-stone-50">
                     <template x-for="event in activeEvents" :key="event.id">
                         <div class="w-full">
-                            
                             <div x-show="event.is_holiday" class="p-4 bg-blue-50 rounded-xl border border-blue-200 shadow-sm">
                                 <h4 class="font-bold text-blue-900 text-sm md:text-base leading-tight" x-text="event.title"></h4>
                                 <span class="text-[10px] font-bold text-blue-600 uppercase mt-1 block" x-text="event.status"></span>
@@ -155,7 +153,6 @@
                                 </div>
                                 <h4 class="font-bold text-gray-900 text-sm md:text-base leading-tight group-hover:text-red-600 transition" x-text="event.title"></h4>
                             </a>
-
                         </div>
                     </template>
                 </div>
