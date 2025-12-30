@@ -91,9 +91,8 @@ Route::middleware(['auth', 'role:administrator'])->prefix('admin')->name('admin.
     Route::get('/dashboard', AdminDashboard::class)->name('dashboard');
 });
 
-Route::middleware(['auth', 'role:administrator'])->group(function () {
-    Route::get('/proposals/{proposal}', ProposalsShow::class)->name('admin.proposals.show');
-    Route::get('/proposals', ProposalsIndex::class)->name('admin.proposals.index');
+Route::middleware(['auth', 'role:administrator,director'])->group(function () {
+  
 });
 
 
