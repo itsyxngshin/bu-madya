@@ -73,19 +73,31 @@ class ThePillars extends Component
                         'has_voted' => (bool) $userVote,
                         'voted_option_id' => $userVote?->pillar_option_id,
                         'options' => $q->options->map(function($opt) use ($totalVotes) {
+                             $isDirector = Auth::check() && Auth::user()->role->role_name === 'director';
+
                             return [
                                 'id' => $opt->id,
                                 'label' => $opt->label,
                                 'color' => $opt->color,
-                                'percent' => $totalVotes > 0 ? round(($opt->votes->count() / $totalVotes) * 100) : 0
+                                'count' => $opt->votes->count(),
+                                'percent' => $totalVotes > 0 ? round(($opt->votes->count() / $totalVotes) * 100) : 0,
+                                
+                                // SECURITY FIX: Only fetch names if Admin. Otherwise, send empty list.
+                                'voters' => $isDirector
+                                    ? $opt->votes->whereNotNull('user_id')->map(function($vote) {
+                                        return [
+                                            'name' => $vote->user->name ?? 'Unknown',
+                                            'avatar' => $vote->user->profile_photo_url ?? null,
+                                            'date' => $vote->created_at->diffForHumans()
+                                        ];
+                                    }) 
+                                    : collect([]), 
                             ];
                         })
                     ];
                 });
-
                 return $pillar;
             });
-
         return view('livewire.open.the-pillars', ['pillars' => $pillars]);
     }
 }

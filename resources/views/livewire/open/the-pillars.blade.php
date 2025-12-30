@@ -71,29 +71,110 @@
 
                     {{-- Logic: Results OR Voting --}}
                     @if($q['has_voted'])
-                        
-                        {{-- RESULTS --}}
-                        <div class="space-y-3 animate-fade-in">
-                            @foreach($q['options'] as $opt)
-                                <div class="relative w-full h-12 bg-gray-50/50 rounded-xl overflow-hidden border border-gray-200/60 shadow-inner">
-                                    {{-- Bar --}}
-                                    <div style="width: {{ $opt['percent'] }}%" 
-                                         class="absolute top-0 left-0 h-full opacity-20 transition-all duration-1000 ease-out
-                                         {{ match($opt['color']) { 'green'=>'bg-green-500', 'red'=>'bg-red-500', 'yellow'=>'bg-yellow-400', default=>'bg-gray-800' } }}">
-                                    </div>
-                                    {{-- Content --}}
-                                    <div class="absolute inset-0 px-4 flex items-center justify-between text-xs font-bold text-gray-700">
+
+                        {{-- RESULTS AREA (Chart + List) --}}
+                        <div x-data="{ 
+                                showVotersModal: false,
+                                activeOption: null,
+                                initChart() {
+                                    let options = {
+                                        series: @js($q['options']->pluck('count')),
+                                        labels: @js($q['options']->pluck('label')),
+                                        chart: { type: 'donut', height: 250, fontFamily: 'Inter, sans-serif' },
+                                        colors: @js($q['options']->map(fn($o) => match($o['color']) { 'green'=>'#22c55e', 'red'=>'#ef4444', 'yellow'=>'#eab308', default=>'#374151' })),
+                                        legend: { position: 'bottom' },
+                                        dataLabels: { enabled: true },
+                                        plotOptions: { pie: { donut: { size: '65%' } } }
+                                    };
+                                    let chart = new ApexCharts(this.$refs.chart, options);
+                                    chart.render();
+                                }
+                            }" 
+                            x-init="initChart()"
+                            class="animate-fade-in bg-gray-50/50 rounded-2xl p-6 border border-gray-100 relative">
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                                
+                                {{-- 1. THE CHART --}}
+                                <div class="flex justify-center">
+                                    <div x-ref="chart" class="w-full max-w-[300px]"></div>
+                                </div>
+
+                                {{-- 2. BREAKDOWN & VOTER LIST BUTTONS --}}
+                                <div class="space-y-4">
+                                    <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest border-b border-gray-200 pb-2">Results Breakdown</h4>
+                                    
+                                    @foreach($q['options'] as $opt)
+                                    <div class="flex justify-between items-center group">
                                         <div class="flex items-center gap-2">
+                                            <span class="w-3 h-3 rounded-full {{ match($opt['color']) { 'green'=>'bg-green-500', 'red'=>'bg-red-500', 'yellow'=>'bg-yellow-400', default=>'bg-gray-800' } }}"></span>
+                                            <span class="text-sm font-bold text-gray-700">{{ $opt['label'] }}</span>
                                             @if($q['voted_option_id'] == $opt['id'])
-                                                <svg class="w-4 h-4 text-green-600 drop-shadow-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                                                <span class="text-[10px] bg-gray-200 text-gray-600 px-1.5 py-0.5 rounded">You</span>
                                             @endif
-                                            <span>{{ $opt['label'] }}</span>
                                         </div>
-                                        <span>{{ $opt['percent'] }}%</span>
+                                        
+                                        <div class="flex items-center gap-3">
+                                            <span class="text-sm font-bold">{{ $opt['percent'] }}%</span>
+                                            
+                                            {{-- RESTRICTION: Only show if Admin AND there are voters --}}
+                                            @if(Auth::check() && Auth::user()->role->role_name === 'director' && count($opt['voters']) > 0)
+                                                <button @click="showVotersModal = true; activeOption = @js($opt)" 
+                                                        class="text-[10px] text-blue-500 font-bold hover:underline cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    See who
+                                                </button>
+                                            @endif
+                                        </div>
+                                    </div>
+                                    @endforeach
+
+                                    <div class="pt-4 mt-2 border-t border-gray-200">
+                                        <p class="text-center text-xs text-gray-500">
+                                            Total Votes: <span class="font-bold text-gray-900">{{ $q['total_votes'] }}</span>
+                                        </p>
                                     </div>
                                 </div>
-                            @endforeach
-                            <p class="text-[10px] text-center text-gray-400 font-bold uppercase tracking-widest mt-2">{{ number_format($q['total_votes']) }} Votes</p>
+                            </div>
+
+                            {{-- 3. VOTERS MODAL (Nested Alpine) --}}
+                            <template x-teleport="body">
+                                <div x-show="showVotersModal" 
+                                    class="fixed inset-0 z-50 flex items-center justify-center px-4 bg-gray-900/60 backdrop-blur-sm"
+                                    x-transition.opacity
+                                    style="display: none;">
+                                    
+                                    <div @click.away="showVotersModal = false" 
+                                        class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[80vh] animate-scale-in">
+                                        
+                                        {{-- Modal Header --}}
+                                        <div class="p-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
+                                            <div>
+                                                <p class="text-[10px] font-bold text-gray-400 uppercase">Voters for</p>
+                                                <h3 class="font-bold text-gray-900 text-lg" x-text="activeOption?.label"></h3>
+                                            </div>
+                                            <button @click="showVotersModal = false" class="text-gray-400 hover:text-red-500">
+                                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                            </button>
+                                        </div>
+
+                                        {{-- Voters List --}}
+                                        <div class="overflow-y-auto p-4 space-y-3">
+                                            <template x-for="voter in activeOption?.voters" :key="voter.name">
+                                                <div class="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg transition">
+                                                    <img :src="voter.avatar" class="w-8 h-8 rounded-full bg-gray-200 object-cover border border-gray-100">
+                                                    <div>
+                                                        <p class="text-sm font-bold text-gray-900" x-text="voter.name"></p>
+                                                        <p class="text-[10px] text-gray-400" x-text="voter.date"></p>
+                                                    </div>
+                                                </div>
+                                            </template>
+                                            
+                                            {{-- Empty State fallback handled by count check above --}}
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+
                         </div>
 
                     @else
