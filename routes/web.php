@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Livewire\Open\LandingPage;
 use App\Livewire\About;
+use App\Livewire\EventsCalendar;
 use App\Livewire\Open\Directory;
 use App\Livewire\Open\Committees;
 use App\Livewire\Open\CommitteeMembers;
@@ -123,6 +124,7 @@ Route::get('/partner-with-us', LinkagesProposal::class)->name('linkages.proposal
 Route::get('/profile/{username}', UserProfile::class)->name('profile.public');
 Route::get('/submit-proposal', ProposalsCreate::class)->name('proposals.create');
 Route::get('/the-pillars', ThePillars::class)->name('pillars.index');
+Route::get('/calendar', EventsCalendar::class)->name('event-calendar');
 
 
 
