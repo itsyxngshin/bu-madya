@@ -191,16 +191,18 @@
                             </div>
 
                             {{-- MODAL MARKUP --}}
-                            <template x-teleport="body">  
+                            <template x-teleport="body">
+        
                                 <div x-show="showVotersModal" 
-                                    class="fixed inset-0 z-[99] flex items-center justify-center px-4 bg-gray-900/60 backdrop-blur-sm"
+                                    class="fixed inset-0 z-[999] flex items-center justify-center px-4 bg-gray-900/60 backdrop-blur-sm"
                                     x-transition.opacity
                                     style="display: none;">
                                     
+                                    {{-- Modal Content --}}
                                     <div @click.away="showVotersModal = false" 
                                         class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[80vh] animate-scale-in">
                                         
-                                        {{-- Modal Header --}}
+                                        {{-- Header --}}
                                         <div class="p-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
                                             <div>
                                                 <p class="text-[10px] font-bold text-gray-400 uppercase">Voters for</p>
@@ -211,7 +213,7 @@
                                             </button>
                                         </div>
 
-                                        {{-- Voters List --}}
+                                        {{-- List --}}
                                         <div class="overflow-y-auto p-4 space-y-3">
                                             <template x-for="voter in activeOption?.voters" :key="voter.name">
                                                 <div class="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg transition">
@@ -223,8 +225,10 @@
                                                 </div>
                                             </template>
                                         </div>
+
                                     </div>
                                 </div>
+
                             </template>
 
                         </div>
