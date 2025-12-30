@@ -343,77 +343,89 @@
             <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100" x-data="{ isUploadingGallery: false, progress: 0 }">
                 <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest border-b border-gray-100 pb-2 mb-4">Project Gallery</h3>
 
-                {{-- A. EXISTING GALLERY GRID --}}
+                {{-- A. EXISTING GALLERY (Database Items) --}}
                 @if(count($galleryInputs) > 0)
-                    <div class="grid grid-cols-2 gap-4 mb-6">
+                    <h4 class="text-[10px] font-bold uppercase text-gray-400 mb-2">Existing Photos</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                         @foreach($galleryInputs as $index => $item)
-                            <div class="relative group bg-gray-50 rounded-lg border border-gray-200 p-2">
-                                {{-- Delete Button --}}
-                                <button wire:click="deleteGalleryItem({{ $item['id'] }})" type="button" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-md hover:bg-red-600 z-10">
+                            <div class="flex gap-3 p-2 border border-gray-200 rounded-lg bg-gray-50 relative group">
+                                <button wire:click="deleteGalleryItem({{ $item['id'] }})" type="button" class="absolute -top-2 -right-2 bg-red-100 text-red-500 rounded-full p-1 shadow hover:bg-red-600 hover:text-white transition z-10">
                                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                                 </button>
-
-                                {{-- Thumbnail --}}
-                                <div class="aspect-video w-full overflow-hidden rounded-md mb-2 bg-gray-200">
+                                {{-- Image --}}
+                                <div class="w-20 h-20 flex-shrink-0 bg-gray-200 rounded-md overflow-hidden">
                                     <img src="{{ asset('storage/'.$item['image_path']) }}" class="w-full h-full object-cover">
                                 </div>
-
                                 {{-- Inputs --}}
-                                <div class="space-y-1">
-                                    <input wire:model="galleryInputs.{{ $index }}.title" type="text" class="w-full text-[10px] font-bold border-transparent bg-transparent focus:bg-white focus:border-gray-200 rounded px-1 placeholder-gray-400" placeholder="Image Title...">
-                                    <textarea wire:model="galleryInputs.{{ $index }}.description" rows="1" class="w-full text-[10px] border-transparent bg-transparent focus:bg-white focus:border-gray-200 rounded px-1 resize-none placeholder-gray-400" placeholder="Description..."></textarea>
+                                <div class="flex-1 space-y-2">
+                                    <input wire:model="galleryInputs.{{ $index }}.title" type="text" class="w-full text-xs font-bold border-gray-200 rounded px-2 py-1 placeholder-gray-400 focus:ring-yellow-400" placeholder="Photo Title">
+                                    <textarea wire:model="galleryInputs.{{ $index }}.description" rows="2" class="w-full text-xs border-gray-200 rounded px-2 py-1 resize-none placeholder-gray-400 focus:ring-yellow-400" placeholder="Description..."></textarea>
                                 </div>
                             </div>
                         @endforeach
                     </div>
                 @endif
 
-                {{-- B. MULTI-UPLOAD DROP ZONE --}}
+                {{-- B. PENDING UPLOADS (The Staging Area) --}}
+                @if(count($pendingGalleryItems) > 0)
+                    <h4 class="text-[10px] font-bold uppercase text-green-600 mb-2">New Uploads (Add Details)</h4>
+                    <div class="space-y-3 mb-6">
+                        @foreach($pendingGalleryItems as $index => $item)
+                            <div class="flex gap-3 p-3 border-2 border-green-100 rounded-xl bg-green-50/30 relative" wire:key="pending-{{ $item['temp_id'] }}">
+                                
+                                {{-- Remove Button --}}
+                                <button wire:click="removePendingItem({{ $index }})" class="absolute top-2 right-2 text-gray-400 hover:text-red-500 transition">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                </button>
+
+                                {{-- Image Preview --}}
+                                <div class="w-24 h-24 flex-shrink-0 bg-gray-200 rounded-lg overflow-hidden shadow-sm">
+                                    <img src="{{ $item['temp_file']->temporaryUrl() }}" class="w-full h-full object-cover">
+                                </div>
+
+                                {{-- Inputs --}}
+                                <div class="flex-1 pr-6 space-y-2">
+                                    <div>
+                                        <label class="block text-[9px] font-bold uppercase text-gray-500 mb-0.5">Title</label>
+                                        <input wire:model="pendingGalleryItems.{{ $index }}.title" type="text" class="w-full text-xs font-bold border-gray-200 rounded-lg focus:border-green-400 focus:ring-green-400 bg-white" placeholder="e.g. Community Gathering">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[9px] font-bold uppercase text-gray-500 mb-0.5">Description</label>
+                                        <input wire:model="pendingGalleryItems.{{ $index }}.description" type="text" class="w-full text-xs border-gray-200 rounded-lg focus:border-green-400 focus:ring-green-400 bg-white" placeholder="e.g. Volunteers distributing goods...">
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
+
+                {{-- C. DROP ZONE --}}
                 <div 
                     x-on:livewire-upload-start="isUploadingGallery = true"
                     x-on:livewire-upload-finish="isUploadingGallery = false"
                     x-on:livewire-upload-error="isUploadingGallery = false"
                     x-on:livewire-upload-progress="progress = $event.detail.progress"
-                    class="relative"
+                    class="relative mt-4"
                 >
-                    <label class="block text-xs font-bold text-gray-700 mb-1">Upload Photos</label>
-                    
-                    <label class="relative flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:bg-gray-50 hover:border-yellow-400 transition-all">
+                    <label class="relative flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:bg-gray-50 hover:border-yellow-400 transition-all group">
                         
                         {{-- Uploading State --}}
-                        <div x-show="isUploadingGallery" class="absolute inset-0 z-20 flex flex-col items-center justify-center bg-white/90">
-                            <svg class="animate-spin h-6 w-6 text-yellow-500 mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <div x-show="isUploadingGallery" class="absolute inset-0 z-20 flex flex-col items-center justify-center bg-white/90 rounded-xl">
+                            <svg class="animate-spin h-5 w-5 text-yellow-500 mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                             </svg>
-                            <div class="w-1/2 bg-gray-200 rounded-full h-1">
-                                <div class="bg-yellow-500 h-1 rounded-full transition-all" :style="'width: ' + progress + '%'"></div>
-                            </div>
+                            <span class="text-[10px] font-bold uppercase text-gray-500">Processing...</span>
                         </div>
 
-                        {{-- Empty State / Prompt --}}
-                        <div class="flex flex-col items-center justify-center pt-5 pb-6 text-gray-400">
-                            <svg class="w-6 h-6 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                            <p class="text-[10px]">Drag & drop multiple photos here</p>
+                        {{-- Empty State --}}
+                        <div class="flex flex-col items-center justify-center pt-5 pb-6 text-gray-400 group-hover:text-yellow-600">
+                            <svg class="w-6 h-6 mb-1 transition-transform group-hover:-translate-y-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4v16m8-8H4"></path></svg>
+                            <p class="text-[10px] font-bold">Add More Photos</p>
                         </div>
 
-                        {{-- Input (Note: 'multiple' attribute) --}}
                         <input type="file" wire:model="newGalleryImages" multiple class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
                     </label>
-
-                    {{-- C. PREVIEW OF PENDING UPLOADS --}}
-                    @if($newGalleryImages)
-                        <div class="mt-4">
-                            <p class="text-[10px] font-bold text-green-600 mb-2">Ready to Upload:</p>
-                            <div class="flex gap-2 overflow-x-auto pb-2">
-                                @foreach($newGalleryImages as $img)
-                                    <div class="flex-shrink-0 w-16 h-16 rounded overflow-hidden border border-gray-200">
-                                        <img src="{{ $img->temporaryUrl() }}" class="w-full h-full object-cover">
-                                    </div>
-                                @endforeach
-                            </div>
-                        </div>
-                    @endif
                     
                     @error('newGalleryImages.*') <span class="text-red-500 text-[10px]">{{ $message }}</span> @enderror
                 </div>

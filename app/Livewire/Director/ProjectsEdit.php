@@ -57,6 +57,7 @@ class ProjectsEdit extends Component
     public $availableLinkages = [];
 
     public $newGalleryImages = []; // For the file upload (TemporaryUploadedFile[])
+    public $pendingGalleryItems = [];
     public $galleryInputs = [];    // For editing existing titles/descriptions
 
     // ==========================================
@@ -130,6 +131,35 @@ class ProjectsEdit extends Component
         $this->categories = ProjectCategory::orderBy('name')->get();
         $this->availableLinkages = Linkage::orderBy('name')->get();
         $this->refreshGalleryInputs();
+    }
+
+    public function updatedNewGalleryImages()
+    {
+        $this->validate([
+            'newGalleryImages.*' => 'image|max:10240', // 10MB Max
+        ]);
+
+        foreach ($this->newGalleryImages as $file) {
+            // Move file into our structured array
+            $this->pendingGalleryItems[] = [
+                'temp_file'   => $file,
+                'title'       => '',
+                'description' => '',
+                // We create a temporary ID for the loop key
+                'temp_id'     => md5($file->temporaryUrl() . microtime()), 
+            ];
+        }
+
+        // Reset the input so the user can drop MORE files if they want
+        $this->newGalleryImages = [];
+    }
+
+    // 3. REMOVE PENDING ITEM
+    public function removePendingItem($index)
+    {
+        unset($this->pendingGalleryItems[$index]);
+        // Re-index array so the view doesn't get confused
+        $this->pendingGalleryItems = array_values($this->pendingGalleryItems);
     }
 
     public function refreshGalleryInputs()
@@ -239,22 +269,24 @@ class ProjectsEdit extends Component
                 'impact_stats' => array_filter($this->impact_stats, fn($i) => !empty($i['value'])),
             ]);
 
-            foreach ($this->galleryInputs as $input) {
-                \App\Models\ProjectGallery::where('id', $input['id'])->update([
-                    'title' => $input['title'],
-                    'description' => $input['description'],
+            // A. Save NEW Pending Images
+            foreach ($this->pendingGalleryItems as $item) {
+                // Store the file from the array
+                $path = $item['temp_file']->store('projects/gallery', 'public');
+                
+                \App\Models\ProjectGallery::create([
+                    'project_id'  => $this->project->id,
+                    'image_path'  => $path,
+                    'title'       => $item['title'],       // Save user input
+                    'description' => $item['description'], // Save user input
                 ]);
             }
 
-            // B. Save NEW Images
-            foreach ($this->newGalleryImages as $photo) {
-                $path = $photo->store('projects/gallery', 'public');
-                
-                \App\Models\ProjectGallery::create([
-                    'project_id' => $this->project->id,
-                    'image_path' => $path,
-                    'title' => '',       // Default empty, they can edit later
-                    'description' => '', 
+            // B. Update Existing Items (Same as before)
+            foreach ($this->galleryInputs as $input) {
+                \App\Models\ProjectGallery::where('id', $input['id'])->update([
+                    'title'       => $input['title'],
+                    'description' => $input['description'],
                 ]);
             }
             // C. Refresh Relationships (Delete & Re-create Strategy)
@@ -308,7 +340,7 @@ class ProjectsEdit extends Component
             $this->project->sdgs()->sync($this->selectedSdgs);
         });
 
-        $this->newGalleryImages = [];
+        $this->pendingGalleryItems = [];
 
         session()->flash('message', 'Project successfully updated!');
         return redirect()->route('projects.index');

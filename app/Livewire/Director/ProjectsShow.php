@@ -19,6 +19,7 @@ class ProjectsShow extends Component
         $this->project->load([
             'category', 
             'objectives', 
+            'galleries',
             'sdgs',
             'academicYear',           // For the "AY 2024-2025" badge
             'proponents',             // For the lead proponents list
