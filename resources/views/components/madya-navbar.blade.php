@@ -17,7 +17,7 @@
             </div>
 
             {{-- 2. CENTER: Desktop Navigation --}}
-            <div class="hidden md:flex items-center space-x-1 lg:space-x-6">
+            <div class="hidden xl:flex items-center space-x-1 lg:space-x-6">
                 @foreach([
                     ['name' => 'Home', 'route' => 'open.home', 'active' => 'open.home.*'],
                     ['name' => 'Projects', 'route' => 'projects.index', 'active' => 'projects.*'],
@@ -49,7 +49,7 @@
             <div class="flex items-center gap-4">
                 
                 {{-- Auth Buttons (Desktop) --}}
-                <div class="hidden md:flex items-center gap-3">
+                <div class="hidden hidden xl:flex items-center gap-3">
                     @auth
                         {{-- Dashboard Link --}}
                         <a href="{{ route('dashboard') }}" class="text-xs font-bold uppercase tracking-widest text-gray-500 hover:text-red-600 transition">
@@ -99,7 +99,7 @@
                 </div>
 
                 {{-- Mobile Hamburger --}}
-                <div class="flex items-center md:hidden">
+                <div class="flex items-center xl:hidden">
                     <button @click="open = ! open" class="inline-flex items-center justify-center p-2 rounded-lg text-gray-400 hover:text-gray-900 hover:bg-gray-100 focus:outline-none transition">
                         <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                             <path :class="{'hidden': open, 'inline-flex': ! open }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
@@ -119,7 +119,7 @@
          x-transition:leave="transition ease-in duration-150"
          x-transition:leave-start="opacity-100 translate-y-0"
          x-transition:leave-end="opacity-0 -translate-y-2"
-         class="md:hidden bg-white border-b border-gray-200 shadow-xl relative z-40">
+         class="xl:hidden bg-white border-b border-gray-200 shadow-xl relative z-40">
         
         <div class="px-4 py-6 space-y-2">
             
@@ -130,6 +130,7 @@
                     ['name' => 'Projects', 'route' => 'projects.index', 'active' => 'projects.*', 'icon' => 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10'],
                     ['name' => 'Directory', 'route' => 'open.directory', 'active' => 'open.directory.*', 'icon' => 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z'],
                     ['name' => 'Linkages', 'route' => 'linkages.index', 'active' => 'linkages.*', 'icon' => 'M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1'],
+                    ['name' => 'The Pillars', 'route' => 'pillars.index', 'active' => 'pillars.*', 'icon' => 'M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z'],
                     ['name' => 'News', 'route' => 'news.index', 'active' => 'news.*', 'icon' => 'M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z'],
                 ];
             @endphp
