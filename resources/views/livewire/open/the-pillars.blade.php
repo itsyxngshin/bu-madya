@@ -57,7 +57,7 @@
             {{-- Questions Loop --}}
             <div class="p-8 space-y-10">
                 @foreach($pillar->mapped_questions as $q)
-                {{-- KEY FIX: wire:key prevents polling from breaking charts --}}
+                {{-- FIX 1: wire:key added here to prevent polling glitches --}}
                 <div wire:key="question-{{ $q['id'] }}" class="relative">
                     
                     {{-- Question Text --}}
@@ -79,6 +79,8 @@
                                     default=>'#374151' 
                                 })),
                                 chartInstance: null,
+                                showVotersModal: false,
+                                activeOption: null,
 
                                 initChart() {
                                     setTimeout(() => {
@@ -99,7 +101,7 @@
                                                 type: 'donut', 
                                                 height: 250, 
                                                 fontFamily: 'Inter, sans-serif',
-                                                animations: { enabled: false },
+                                                animations: { enabled: false }, // Keep false for smooth polling
                                                 width: '100%'
                                             },
                                             legend: { position: 'bottom', show: total > 0 },
@@ -131,6 +133,11 @@
                                             dataLabels: { enabled: true }, tooltip: { enabled: true }
                                         });
                                     }
+                                },
+
+                                openModal(option) {
+                                    this.activeOption = option;
+                                    this.showVotersModal = true;
                                 }
                             }" 
                             x-init="initChart(); $watch('counts', () => updateChart())" 
@@ -163,21 +170,11 @@
                                         
                                         <div class="flex items-center gap-3">
                                             <span class="text-sm font-bold">{{ $opt['percent'] }}%</span>
-                                            
-                                            {{-- SEE WHO BUTTON --}}
-                                            {{-- FIX: Dispatches event to GLOBAL modal instead of local --}}
-                                            @if(Auth::check() && Auth::user()->role->role_name === 'director' && count($opt['voters']) > 0)
-                                                <button @click="$dispatch('open-voters-modal', @js($opt))" 
-                                                        class="text-[10px] text-blue-500 font-bold hover:underline cursor-pointer opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
-                                                    See who
-                                                </button>
-                                            @endif 
                                         </div>
                                     </div>
                                     @endforeach
                                 </div>
                             </div>
-
                         </div>
                     @else
                         
@@ -207,48 +204,4 @@
         </div>
         @endforelse
     </div>
-
-    {{-- 4. GLOBAL VOTERS MODAL (Lives OUTSIDE the card loops) --}}
-    {{-- This fixes the Z-Index issue permanently by detaching it from the card's stacking context --}}
-    <div x-data="{ open: false, activeOption: null }"
-         @open-voters-modal.window="open = true; activeOption = $event.detail"
-         x-show="open"
-         style="display: none;"
-         class="fixed inset-0 z-[9999] flex items-center justify-center px-4 bg-gray-900/60 backdrop-blur-sm"
-         x-transition.opacity>
-
-        <div @click.away="open = false" 
-             class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[80vh] animate-scale-in relative">
-            
-            {{-- Header --}}
-            <div class="p-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center z-10">
-                <div>
-                    <p class="text-[10px] font-bold text-gray-400 uppercase">Voters for</p>
-                    <h3 class="font-bold text-gray-900 text-lg" x-text="activeOption?.label"></h3>
-                </div>
-                <button @click="open = false" class="text-gray-400 hover:text-red-500 transition">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </button>
-            </div>
-
-            {{-- List --}}
-            <div class="overflow-y-auto p-4 space-y-3 bg-white">
-                <template x-for="voter in activeOption?.voters" :key="voter.name">
-                    <div class="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg transition border border-transparent hover:border-gray-100">
-                        <img :src="voter.avatar" class="w-8 h-8 rounded-full bg-gray-200 object-cover border border-gray-100 shrink-0">
-                        <div>
-                            <p class="text-sm font-bold text-gray-900 leading-tight" x-text="voter.name"></p>
-                            <p class="text-[10px] text-gray-400" x-text="voter.date"></p>
-                        </div>
-                    </div>
-                </template>
-                
-                {{-- Empty State --}}
-                <div x-show="!activeOption?.voters || activeOption?.voters.length === 0" class="text-center py-4 text-gray-400 text-xs">
-                    No voters to display.
-                </div>
-            </div>
-        </div>
-    </div>
-
 </div>

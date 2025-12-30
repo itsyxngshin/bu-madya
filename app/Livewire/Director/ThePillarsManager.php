@@ -5,7 +5,8 @@ namespace App\Livewire\Director;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use App\Models\Pillar;
-use App\Models\PillarVote;
+use App\Models\PillarOption; // Import this
+use App\Models\PillarVote;   // Import this
 use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Layout; 
 
@@ -24,6 +25,10 @@ class ThePillarsManager extends Component
     // Nested Structure: [ ['id'=>null, 'text'=>'?', 'options'=>[ ['id'=>null, 'label'=>'Yes', 'color'=>'green'] ]] ]
     public $questions = []; 
 
+    public $isVotersModalOpen = false;
+    public $selectedOptionLabel = '';
+    public $selectedOptionVoters = [];
+
     public function mount()
     {
         $this->loadPillars();
@@ -33,6 +38,28 @@ class ThePillarsManager extends Component
     {
         // Eager load nested relationships for efficiency
         $this->pillars = Pillar::with('questions.options')->latest()->get();
+    }
+
+    public function viewVoters($optionId)
+    {
+        $option = PillarOption::with('votes.user')->find($optionId);
+        
+        if ($option) {
+            $this->selectedOptionLabel = $option->label;
+            
+            // Map the voters to a clean array
+            $this->selectedOptionVoters = $option->votes
+                ->whereNotNull('user_id') // Filter out guest votes
+                ->map(function ($vote) {
+                    return [
+                        'name' => $vote->user->name ?? 'Unknown User',
+                        'avatar' => $vote->user->profile_photo_url ?? null, // Assuming Jetstream
+                        'date' => $vote->created_at->format('M d, h:i A'),
+                    ];
+                });
+
+            $this->isVotersModalOpen = true;
+        }
     }
 
     public function resetForm()

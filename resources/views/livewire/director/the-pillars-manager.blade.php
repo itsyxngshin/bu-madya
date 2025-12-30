@@ -42,13 +42,31 @@
                     <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">
                         {{ $pillar->questions->count() }} Questions
                     </p>
-                    <div class="flex flex-col gap-1">
-                        @foreach($pillar->questions->take(2) as $q)
-                            <span class="text-xs text-gray-600 truncate">• {{ $q->question_text }}</span>
+                    <div class="mt-4 space-y-4">
+                        @foreach($pillar->questions as $q)
+                        <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
+                            <p class="text-xs font-bold text-gray-700 mb-2 truncate">{{ $q->question_text }}</p>
+                            
+                            {{-- OPTIONS LIST (Clickable for Voters) --}}
+                            <div class="space-y-1">
+                                @foreach($q->options as $opt)
+                                <div class="flex justify-between items-center text-[10px]">
+                                    <span class="flex items-center gap-1 text-gray-500">
+                                        <span class="w-2 h-2 rounded-full {{ match($opt->color) { 'green'=>'bg-green-500', 'red'=>'bg-red-500', default=>'bg-gray-400' } }}"></span>
+                                        {{ $opt->label }}
+                                    </span>
+                                    
+                                    {{-- CLICKABLE VOTE COUNT --}}
+                                    <button wire:click="viewVoters({{ $opt->id }})" 
+                                            class="font-bold px-2 py-0.5 rounded bg-white border border-gray-200 hover:border-blue-500 hover:text-blue-600 transition cursor-pointer"
+                                            title="View Voters">
+                                        {{ $opt->votes->count() }} Votes
+                                    </button>
+                                </div>
+                                @endforeach
+                            </div>
+                        </div>
                         @endforeach
-                        @if($pillar->questions->count() > 2)
-                            <span class="text-[10px] text-gray-400 italic">+ {{ $pillar->questions->count() - 2 }} more</span>
-                        @endif
                     </div>
                 </div>
             </div>
@@ -227,6 +245,43 @@
                 </button>
             </div>
 
+        </div>
+    </div>
+    @endif
+
+    @if($isVotersModalOpen)
+    <div class="fixed inset-0 z-[60] flex items-center justify-center px-4 bg-gray-900/60 backdrop-blur-sm">
+        <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[80vh] animate-scale-in">
+            
+            <div class="p-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
+                <div>
+                    <p class="text-[10px] font-bold text-gray-400 uppercase">Voters for</p>
+                    <h3 class="font-bold text-gray-900 text-lg">{{ $selectedOptionLabel }}</h3>
+                </div>
+                <button wire:click="$set('isVotersModalOpen', false)" class="text-gray-400 hover:text-red-500">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <div class="overflow-y-auto p-4 space-y-3">
+                @forelse($selectedOptionVoters as $voter)
+                <div class="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg transition border border-transparent hover:border-gray-100">
+                    <img src="{{ $voter['avatar'] }}" class="w-8 h-8 rounded-full bg-gray-200 object-cover border border-gray-100 shrink-0">
+                    <div>
+                        <p class="text-sm font-bold text-gray-900 leading-tight">{{ $voter['name'] }}</p>
+                        <p class="text-[10px] text-gray-400">{{ $voter['date'] }}</p>
+                    </div>
+                </div>
+                @empty
+                <div class="text-center py-8">
+                    <p class="text-gray-400 text-xs italic">No registered users have voted for this option yet.</p>
+                </div>
+                @endforelse
+            </div>
+
+            <div class="p-4 bg-gray-50 border-t border-gray-100 text-center">
+                <button wire:click="$set('isVotersModalOpen', false)" class="text-xs font-bold text-gray-500 hover:text-gray-900 uppercase">Close</button>
+            </div>
         </div>
     </div>
     @endif
