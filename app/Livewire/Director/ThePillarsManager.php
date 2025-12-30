@@ -5,6 +5,7 @@ namespace App\Livewire\Director;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use App\Models\Pillar;
+use App\Models\PillarVote;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Layout; 
 
@@ -49,6 +50,21 @@ class ThePillarsManager extends Component
                 ]
             ]
         ];
+    }
+
+    public function resetVotes($id)
+    {
+        $pillar = Pillar::find($id);
+        
+        // 1. Get all question IDs for this pillar
+        $questionIds = $pillar->questions()->pluck('id');
+
+        // 2. Delete all votes linked to these questions
+        PillarVote::whereIn('pillar_question_id', $questionIds)->delete();
+
+        // 3. Refresh UI
+        $this->loadPillars();
+        session()->flash('message', 'Votes have been reset to zero.');
     }
 
     public function create()
