@@ -178,12 +178,12 @@
                                             <span class="text-sm font-bold">{{ $opt['percent'] }}%</span>
                                             
                                             {{-- SEE WHO BUTTON --}}
-                                            @if(Auth::check() && Auth::user()->role_id === 1 && count($opt['voters']) > 0)
+                                            @if(Auth::check() && Auth::user()->role->role_name === 'director' && count($opt['voters']) > 0)
                                                 <button @click="openModal(@js($opt))" 
                                                         class="text-[10px] text-blue-500 font-bold hover:underline cursor-pointer opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                                                     See who
                                                 </button>
-                                            @endif
+                                            @endif 
                                         </div>
                                     </div>
                                     @endforeach
