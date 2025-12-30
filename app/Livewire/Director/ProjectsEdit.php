@@ -63,51 +63,62 @@ class ProjectsEdit extends Component
     {
         $this->project = $project;
         $this->authorize('update', $this->project);
-        
+
+        // 1. FIX: Eager Load Relationships
+        // This ensures these properties are populated before we access them.
+        // We use 'load' to fetch the related data from the database.
+        $this->project->load(['objectives', 'sdgs', 'proponents', 'projectLinkages']);
+
         // A. Basic Fields
         $this->title = $project->title;
         $this->slug = $project->slug;
         $this->project_category_id = $project->project_category_id;
         $this->status = $project->status;
-        $this->date = $project->implementation_date?->format('Y-m-d'); // Format for date input
+        $this->date = $project->implementation_date?->format('Y-m-d');
         $this->location = $project->location;
         $this->beneficiaries = $project->beneficiaries;
         $this->description = $project->description;
         $this->academic_year_id = $project->academic_year_id;
-        $this->oldCoverImg = $project->cover_img; // Store existing path
+        $this->oldCoverImg = $project->cover_img;
 
         // B. JSON Fields
         $this->impact_stats = $project->impact_stats ?? [['label' => '', 'value' => '']];
 
         // C. Relationships (Map to array structure)
-        
-        // Objectives
-        $this->objectives = $project->objectives->pluck('objective')->toArray();
+
+        // Objectives (FIXED: Added safety check)
+        // We use the null coalescing operator (??) to default to an empty array if null
+        $this->objectives = $project->objectives ? $project->objectives->pluck('objective')->toArray() : [];
         if(empty($this->objectives)) $this->objectives = [''];
 
         // SDGs
-        $this->selectedSdgs = $project->sdgs->pluck('id')->toArray();
+        $this->selectedSdgs = $project->sdgs ? $project->sdgs->pluck('id')->toArray() : [];
 
         // Proponents
-        $this->proponents = $project->proponents->map(function($p) {
-            return [
-                'type' => $p->user_id ? 'user' : 'custom',
-                'id'   => $p->user_id,
-                'name' => $p->name 
-            ];
-        })->toArray();
+        // Check if proponents exist before mapping
+        if ($project->proponents) {
+            $this->proponents = $project->proponents->map(function($p) {
+                return [
+                    'type' => $p->user_id ? 'user' : 'custom',
+                    'id'   => $p->user_id,
+                    'name' => $p->name 
+                ];
+            })->toArray();
+        }
         if(empty($this->proponents)) $this->proponents = [['type' => 'user', 'id' => '', 'name' => '']];
 
         // Partners (Linkages)
-        // Note: We use the helper relationship 'projectLinkages' (HasMany) defined in previous steps
-        $this->partners = $project->projectLinkages->map(function($l) {
-            return [
-                'type' => $l->linkage_id ? 'database' : 'custom',
-                'id'   => $l->linkage_id,
-                'name' => $l->manual_name,
-                'role' => $l->role
-            ];
-        })->toArray();
+        // Check if projectLinkages exist before mapping
+        if ($project->projectLinkages) {
+            $this->partners = $project->projectLinkages->map(function($l) {
+                return [
+                    'type' => $l->linkage_id ? 'database' : 'custom',
+                    'id'   => $l->linkage_id,
+                    'name' => $l->manual_name,
+                    'role' => $l->role
+                ];
+            })->toArray();
+        }
         if(empty($this->partners)) $this->partners = [['type' => 'database', 'id' => '', 'name' => '', 'role' => 'Partner']];
 
         // D. Load Dropdowns

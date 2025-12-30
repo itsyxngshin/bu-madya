@@ -11,40 +11,35 @@ class ProjectPolicy
     /**
      * Bypasses checks for Super Admins ONLY.
      */
-    public function before($user, $ability)
-    {
-        // Only Role 1 (Admin) gets to bypass everything.
-        // Directors (Role 2) must go through the 'update' checks so we can enforce Academic Year locks.
-        if ($user->role_id === 1) {
-            return true;
-        }
-        
-        return null; // Fall through to specific methods
-    }
-    
-    /**
-     * Determine whether the user can update the project.
-     */
     public function update(User $user, Project $project)
     {
-        // 1. GET CURRENT ACADEMIC YEAR
+        // ----------------------------------------------------
+        // 1. SUPER USER OVERRIDE (Admins & Directors)
+        // ----------------------------------------------------
+        // We check this FIRST. If they are an Admin or Director, 
+        // we approve immediately. They bypass the "Year Lock".
+        
+        // Note: Using role_name is safer than 'role_id === 2'
+        if (in_array($user->role->role_name, ['administrator', 'director'])) {
+            return true;
+        }
+
+        // ----------------------------------------------------
+        // 2. CHECK: IS THE PROJECT LOCKED?
+        // ----------------------------------------------------
+        // Now we check the lock. If it's an old project, regular 
+        // users (owners) get blocked here.
         $currentYear = AcademicYear::current();
 
-        // 2. CHECK: IS THE PROJECT LOCKED?
-        // If project belongs to a past year, NO ONE (except Admin) can edit it.
         if ($project->academic_year_id && $project->academic_year_id !== $currentYear?->id) {
             return false; 
         }
-        // 3. CHECK: AUTHORIZATION
-        // Allow if User is the Proponent (Owner)
-        // Check if relationship exists to avoid crash
-        if ($project->project_proponent && $user->id === $project->project_proponent->user_id) {
-            return true;
-        }
 
-        // 4. CHECK: DIRECTOR OVERRIDE
-        // Allow if User is an Active Director (Optional: Check if assigned to this specific project category?)
-        if ($user->role_id === 2 && $user->directorAssignment?->is_active) {
+        // ----------------------------------------------------
+        // 3. CHECK: OWNER (PROPONENT) AUTHORIZATION
+        // ----------------------------------------------------
+        // If it's the current year, allow the owner to edit.
+        if ($project->project_proponent && $user->id === $project->project_proponent->user_id) {
             return true;
         }
 
