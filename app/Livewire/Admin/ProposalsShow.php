@@ -6,7 +6,7 @@ use Livewire\Component;
 use App\Models\Proposal;
 use Livewire\Attributes\Layout;
 
-#[Layout('layouts.madya-template')] // Assuming you have an admin layout
+#[Layout('layouts.madya-admin')] // Assuming you have an admin layout
 class ProposalsShow extends Component
 {
     public Proposal $proposal;

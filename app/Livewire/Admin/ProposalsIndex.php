@@ -7,7 +7,7 @@ use Livewire\WithPagination;
 use App\Models\Proposal;
 use Livewire\Attributes\Layout;
 
-#[Layout('layouts.madya-admin-deck')] 
+#[Layout('layouts.madya-admin')] 
 class ProposalsIndex extends Component
 {
     use WithPagination;
