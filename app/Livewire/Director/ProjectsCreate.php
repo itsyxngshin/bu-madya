@@ -82,6 +82,9 @@ class ProjectsCreate extends Component
         if ($activeYear) {
             $this->academic_year_id = $activeYear->id;
         }
+        if (request()->has('date')) {
+            $this->implementation_date = request()->query('date');
+        }
 
         $this->availableLinkages = Linkage::orderBy('name')->get();
     }
