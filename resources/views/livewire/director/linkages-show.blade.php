@@ -6,6 +6,7 @@
         ? (Str::startsWith($linkage->cover_img_path, 'http') ? $linkage->cover_img_path : asset('storage/' . $linkage->cover_img_path))
         : asset('images/default_news.jpg');
 @endphp
+@section('meta_image', $ogImage)
 
 <div class="min-h-screen bg-stone-50 font-sans text-gray-900">
     

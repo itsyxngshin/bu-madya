@@ -6,6 +6,7 @@
         ? (Str::startsWith($project->cover_img, 'http') ? $project->cover_img : asset('storage/' . $project->cover_img))
         : asset('images/default_news.jpg');
 @endphp
+@section('meta_image', $ogImage)
 
 <div class="min-h-screen bg-stone-50 font-sans text-gray-900">
     
