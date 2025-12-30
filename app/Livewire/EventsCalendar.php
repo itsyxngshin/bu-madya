@@ -6,6 +6,7 @@ use Livewire\Component;
 use Carbon\Carbon;
 use App\Models\Project; // Assuming this is your model
 use Livewire\Attributes\Layout;
+use App\Services\HolidayService;
 
 #[Layout('layouts.madya-template')]
 class EventsCalendar extends Component
@@ -23,15 +24,49 @@ class EventsCalendar extends Component
 
     public function loadEvents()
     {
-        $this->events = Project::query()
+        // 1. Fetch Projects
+        // FIX: Add ->toBase() after get() to convert Eloquent Collection to a standard Collection
+        $projects = Project::query()
             ->whereMonth('implementation_date', $this->currentMonth)
             ->whereYear('implementation_date', $this->currentYear)
             ->get()
-            ->groupBy(function ($event) {
-                // Force integer so it matches the loop ($day) in the view
-                return (int) \Carbon\Carbon::parse($event->implementation_date)->format('j');
+            ->toBase() // <--- CRITICAL FIX: Drops Eloquent behavior so merge() works with arrays
+            ->map(function ($project) {
+                return [
+                    'id' => $project->id,
+                    'title' => $project->title,
+                    'slug' => $project->slug,
+                    'status' => $project->status,
+                    'date' => \Carbon\Carbon::parse($project->implementation_date),
+                    'is_holiday' => false,
+                ];
+            });
+
+        // 2. Fetch Holidays
+        $allHolidays = \App\Services\HolidayService::getHolidaysForYear($this->currentYear);
+        
+        $monthHolidays = collect($allHolidays)
+            ->filter(function ($details, $dateString) {
+                return \Carbon\Carbon::parse($dateString)->month == $this->currentMonth;
             })
-            ->toArray(); // <--- [IMPORTANT FIX] Convert to array
+            ->map(function ($details, $dateString) {
+                return [
+                    'id' => 'holiday-' . $dateString,
+                    'title' => $details['title'],
+                    'slug' => '#',
+                    'status' => $details['type'],
+                    'date' => \Carbon\Carbon::parse($dateString),
+                    'is_holiday' => true,
+                ];
+            })->values();
+
+        // 3. Merge & Group
+        // Now both $projects and $monthHolidays are standard Collections of arrays.
+        $this->events = $projects->merge($monthHolidays)
+            ->groupBy(function ($event) {
+                return (int) $event['date']->format('j');
+            })
+            ->toArray();
     }
 
     public function previousMonth()
