@@ -11,13 +11,6 @@
     {{-- MAIN CONTENT --}}
     <div class="py-6 md:py-12 bg-stone-50 min-h-screen font-sans">
         <div class="max-w-7xl mx-auto space-y-6 md:space-y-8">
-            <h2 class="font-heading font-black text-xl md:text-2xl text-gray-800 leading-tight">
-                Director's <span class="text-red-600">Center</span>
-            </h2>
-            <p class="text-[10px] md:text-xs text-gray-400 font-bold uppercase tracking-widest mt-1">
-                Overview & Administration
-            </p>
-            
             {{-- 1. WELCOME BANNER --}}
             <div class="relative bg-gray-900 rounded-[2rem] p-6 md:p-8 overflow-hidden shadow-xl flex flex-col md:flex-row md:items-center justify-between text-white gap-6">
                 {{-- Background Effects --}}
