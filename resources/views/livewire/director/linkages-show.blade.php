@@ -1,3 +1,12 @@
+@section('meta_title', $linkage->title)
+@section('meta_description', $linkage->description ?? Str::limit(strip_tags($linkage->description), 150))
+@php
+    // 1. Determine the image URL using PHP logic
+    $ogImage = $linkage->cover_img_path 
+        ? (Str::startsWith($linkage->cover_img_path, 'http') ? $linkage->cover_img_path : asset('storage/' . $linkage->cover_img_path))
+        : asset('images/default_news.jpg');
+@endphp
+
 <div class="min-h-screen bg-stone-50 font-sans text-gray-900">
     
     {{-- 1. STICKY NAV --}}

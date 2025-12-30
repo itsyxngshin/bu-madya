@@ -1,3 +1,12 @@
+@section('meta_title', $project->title)
+@section('meta_description', $project->description ?? Str::limit(strip_tags($project->description), 150)) 
+@php
+    // 1. Determine the image URL using PHP logic
+    $ogImage = $article->cover_img 
+        ? (Str::startsWith($project->cover_img, 'http') ? $project->cover_img : asset('storage/' . $project->cover_img))
+        : asset('images/default_news.jpg');
+@endphp
+
 <div class="min-h-screen bg-stone-50 font-sans text-gray-900">
     
     {{-- 1. NAVIGATION BAR --}}
