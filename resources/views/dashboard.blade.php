@@ -101,7 +101,7 @@
 
             {{-- 3. CALENDAR SECTION (Inserted Here) --}}
             {{-- This uses the Custom Scratch Calendar Component --}}
-            <div class="grid grid-cols-7">
+            <div class="grid grid-cols-1">
                 <livewire:events-calendar />
             </div>
 

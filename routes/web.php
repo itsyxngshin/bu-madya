@@ -96,7 +96,7 @@ Route::middleware(['auth', 'role:administrator,director'])->group(function () {
   
 });
 
-
+/*
 Route::middleware(['auth', 'role:administrator,director'])->group(function () {
     Route::get('/project/create', ProjectsCreate::class)->name('projects.create');
     Route::get('/projects/{project:slug}/edit', ProjectsEdit::class)->name('projects.edit');
@@ -106,7 +106,7 @@ Route::middleware(['auth', 'role:administrator,director'])->group(function () {
     Route::get('/news/{slug}/edit', NewsEdit::class)->name('news.edit');  
     Route::get('/linkage/{linkage:slug}/edit', LinkagesEdit::class)->name('linkages.edit');
 });
-
+*/
 
 // Public view blades with access control on parts of the navigation
 Route::get('/', LandingPage::class)->name('open.home');  
