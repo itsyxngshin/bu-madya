@@ -85,7 +85,6 @@
                                         legend: { position: 'bottom' },
                                         dataLabels: { enabled: true },
                                         plotOptions: { pie: { donut: { size: '65%' } } }
-                                        animations: { enabled: false }
                                     };
                                     let chart = new ApexCharts(this.$refs.chart, options);
                                     chart.render();
