@@ -174,12 +174,28 @@
                                 
                                 {{-- Color Select (Compact) --}}
                                 <div class="relative w-10 shrink-0">
-                                    <select wire:model="questions.{{ $qIndex }}.options.{{ $oIndex }}.color" class="appearance-none w-full border-gray-200 rounded-lg text-xs py-2 px-0 text-center cursor-pointer focus:ring-red-500 
-                                        {{ match($questions[$qIndex]['options'][$oIndex]['color'] ?? 'gray') { 'green'=>'bg-green-100 text-green-700', 'red'=>'bg-red-100 text-red-700', 'yellow'=>'bg-yellow-100 text-yellow-700', default=>'bg-gray-100 text-gray-500' } }}">
+                                    <select wire:model="questions.{{ $qIndex }}.options.{{ $oIndex }}.color" 
+                                            class="appearance-none w-full border-gray-200 rounded-lg text-xs py-2 px-0 text-center cursor-pointer focus:ring-gray-400 font-bold
+                                            {{ match($questions[$qIndex]['options'][$oIndex]['color'] ?? 'gray') { 
+                                                'green' => 'bg-green-100 text-green-700',
+                                                'red' => 'bg-red-100 text-red-700',
+                                                'yellow' => 'bg-yellow-100 text-yellow-700',
+                                                'blue' => 'bg-blue-100 text-blue-700',
+                                                'purple' => 'bg-purple-100 text-purple-700',
+                                                'orange' => 'bg-orange-100 text-orange-700',
+                                                'teal' => 'bg-teal-100 text-teal-700',
+                                                'pink' => 'bg-pink-100 text-pink-700',
+                                                default => 'bg-gray-100 text-gray-500' 
+                                            } }}">
                                         <option value="gray">⚪</option>
                                         <option value="green">🟢</option>
                                         <option value="red">🔴</option>
                                         <option value="yellow">🟡</option>
+                                        <option value="blue">🔵</option>
+                                        <option value="purple">🟣</option>
+                                        <option value="orange">🟠</option>
+                                        <option value="teal">💠</option>
+                                        <option value="pink">🌸</option>
                                     </select>
                                 </div>
 

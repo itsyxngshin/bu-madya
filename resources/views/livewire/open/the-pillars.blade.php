@@ -77,40 +77,77 @@
                                 showVotersModal: false,
                                 activeOption: null,
                                 initChart() {
+                                    // 1. Get the data
+                                    let counts = @js($q['options']->pluck('count'));
+                                    let labels = @js($q['options']->pluck('label'));
+                                    let colors = @js($q['options']->map(fn($o) => match($o['color']) { 
+                                        'green'=>'#22c55e', 'red'=>'#ef4444', 'yellow'=>'#eab308', 'blue'=>'#3b82f6', 
+                                        'purple'=>'#a855f7', 'orange'=>'#f97316', 'teal'=>'#14b8a6', 'pink'=>'#ec4899', 
+                                        default=>'#374151' 
+                                    }));
+
+                                    // Handle Zero Votes Case (Prevents invisible chart)
+                                    let total = counts.reduce((a, b) => a + b, 0);
+                                    if (total === 0) {
+                                        counts = [1]; // Fake data for placeholder
+                                        labels = ['No votes yet'];
+                                        colors = ['#e5e7eb']; // Light gray
+                                    }
+
                                     let options = {
-                                        series: @js($q['options']->pluck('count')),
-                                        labels: @js($q['options']->pluck('label')),
-                                        chart: { type: 'donut', height: 250, fontFamily: 'Inter, sans-serif' },
-                                        colors: @js($q['options']->map(fn($o) => match($o['color']) { 'green'=>'#22c55e', 'red'=>'#ef4444', 'yellow'=>'#eab308', default=>'#374151' })),
-                                        legend: { position: 'bottom' },
-                                        dataLabels: { enabled: true },
-                                        plotOptions: { pie: { donut: { size: '65%' } } }
-                                        animations: {
-                                            enabled: true,
-                                            easing: 'linear',
-                                            speed: 0,
-                                            animateGradually: {
-                                                enabled: false,
-                                                delay: 0
-                                            },
-                                            dynamicAnimation: {
-                                                enabled: false,
-                                                speed: 0
+                                        series: counts,
+                                        labels: labels,
+                                        colors: colors,
+                                        chart: { 
+                                            type: 'donut', 
+                                            height: 250, 
+                                            fontFamily: 'Inter, sans-serif',
+                                            
+                                            // 3. THE FIX: Enable animation but make it super fast (10ms)
+                                            // This tricks the engine to render, but finishes instantly.
+                                            animations: {
+                                                enabled: true,
+                                                easing: 'linear',
+                                                speed: 10, 
+                                                animateGradually: { enabled: false },
+                                                dynamicAnimation: { enabled: false }
                                             }
-                                        }
+                                        },
+                                        legend: { position: 'bottom', show: total > 0 }, // Hide legend if no votes
+                                        dataLabels: { enabled: total > 0 }, // Hide percentages if no votes
+                                        plotOptions: { 
+                                            pie: { 
+                                                donut: { 
+                                                    size: '65%',
+                                                    labels: {
+                                                        show: total > 0, // Only show center text if votes exist
+                                                        total: {
+                                                            show: true,
+                                                            label: 'Total',
+                                                            color: '#9ca3af',
+                                                            formatter: function (w) {
+                                                                return w.globals.seriesTotals.reduce((a, b) => a + b, 0)
+                                                            }
+                                                        }
+                                                    }
+                                                } 
+                                            } 
+                                        },
+                                        tooltip: { enabled: total > 0 } // Disable tooltip on placeholder
                                     };
+
                                     let chart = new ApexCharts(this.$refs.chart, options);
                                     chart.render();
                                 }
                             }" 
-                            x-init="initChart()"
+                            x-init="initChart()"  
                             class="animate-fade-in bg-gray-50/50 rounded-2xl p-6 border border-gray-100 relative">
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
                                 
                                 {{-- 1. THE CHART --}}
                                 <div class="flex justify-center">
-                                    <div x-ref="chart" class="w-full max-w-[300px]"></div>
+                                    <div x-ref="chart" class="w-full max-w-[300px] min-h-[250px]"></div>
                                 </div>
 
                                 {{-- 2. BREAKDOWN & VOTER LIST BUTTONS --}}
@@ -120,7 +157,17 @@
                                     @foreach($q['options'] as $opt)
                                     <div class="flex justify-between items-center group">
                                         <div class="flex items-center gap-2">
-                                            <span class="w-3 h-3 rounded-full {{ match($opt['color']) { 'green'=>'bg-green-500', 'red'=>'bg-red-500', 'yellow'=>'bg-yellow-400', default=>'bg-gray-800' } }}"></span>
+                                            <span class="w-3 h-3 rounded-full {{ match($opt['color']) { 
+                                                'green' => 'bg-green-500', 
+                                                'red' => 'bg-red-500', 
+                                                'yellow' => 'bg-yellow-400', 
+                                                'blue' => 'bg-blue-500',
+                                                'purple' => 'bg-purple-500',
+                                                'orange' => 'bg-orange-500',
+                                                'teal' => 'bg-teal-500',
+                                                'pink' => 'bg-pink-500',
+                                                default => 'bg-gray-800' 
+                                            } }}"></span>
                                             <span class="text-sm font-bold text-gray-700">{{ $opt['label'] }}</span>
                                             @if($q['voted_option_id'] == $opt['id'])
                                                 <span class="text-[10px] bg-gray-200 text-gray-600 px-1.5 py-0.5 rounded">You</span>
