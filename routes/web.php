@@ -68,7 +68,8 @@ Route::middleware(['auth', 'role:director'])
     Route::get('/news/create', NewsCreate::class)->name('news.create');
     Route::get('/linkage/create', LinkagesCreate::class)->name('linkages.create');
     Route::get('/director/the-pillars', ThePillarsManager::class)->name('director.pillars.index');
-    
+    Route::get('/proposals/{proposal}', ProposalsShow::class)->name('proposals.show');
+    Route::get('/proposals', ProposalsIndex::class)->name('proposals.index');
     Route::get('/news/{slug}/edit', NewsEdit::class)->name('news.edit');  
     Route::get('/linkage/{linkage:slug}/edit', LinkagesEdit::class)->name('linkages.edit');
 });
@@ -83,8 +84,6 @@ Route::middleware(['auth'])
 
 Route::middleware(['auth', 'role:administrator'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/projects', ProjectRoster::class)->name('projects.index');
-    Route::get('/proposals/{proposal}', ProposalsShow::class)->name('proposals.show');
-    Route::get('/proposals', ProposalsIndex::class)->name('proposals.index');
     Route::get('/linkages', LinkagesRoster::class)->name('linkages.index');
     Route::get('/news', NewsRoster::class)->name('news.index');
     Route::get('/user', UserRoster::class)->name('user.index');
