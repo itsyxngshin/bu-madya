@@ -68,8 +68,6 @@ Route::middleware(['auth', 'role:director'])
     Route::get('/news/create', NewsCreate::class)->name('news.create');
     Route::get('/linkage/create', LinkagesCreate::class)->name('linkages.create');
     Route::get('/director/the-pillars', ThePillarsManager::class)->name('director.pillars.index');
-    Route::get('/proposals/{proposal}', ProposalsShow::class)->name('admin.proposals.show');
-    Route::get('/proposals', ProposalsIndex::class)->name('admin.proposals.index');
     Route::get('/news/{slug}/edit', NewsEdit::class)->name('news.edit');  
     Route::get('/linkage/{linkage:slug}/edit', LinkagesEdit::class)->name('linkages.edit');
 });
@@ -91,7 +89,9 @@ Route::middleware(['auth', 'role:administrator'])->prefix('admin')->name('admin.
     Route::get('/dashboard', AdminDashboard::class)->name('dashboard');
 });
 
-Route::middleware(['auth', 'role:administrator', 'role:director'])->group(function () {
+Route::middleware(['auth', 'role:administrator,director'])->group(function () {
+    Route::get('/proposals/{proposal}', ProposalsShow::class)->name('admin.proposals.show');
+    Route::get('/proposals', ProposalsIndex::class)->name('admin.proposals.index');
     Route::get('/project/create', ProjectsCreate::class)->name('projects.create');
     Route::get('/projects/{project:slug}/edit', ProjectsEdit::class)->name('projects.edit');
     Route::get('/profile/edit', EditProfile::class)->name('profile.edit');
