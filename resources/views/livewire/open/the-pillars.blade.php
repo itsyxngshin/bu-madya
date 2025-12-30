@@ -74,83 +74,83 @@
 
                         {{-- RESULTS AREA (Chart + List) --}}
                         <div x-data="{ 
-                                showVotersModal: false,
-                                activeOption: null,
-                                initChart() {
-                                    // 1. Get the data
-                                    let counts = @js($q['options']->pluck('count'));
-                                    let labels = @js($q['options']->pluck('label'));
-                                    let colors = @js($q['options']->map(fn($o) => match($o['color']) { 
-                                        'green'=>'#22c55e', 'red'=>'#ef4444', 'yellow'=>'#eab308', 'blue'=>'#3b82f6', 
-                                        'purple'=>'#a855f7', 'orange'=>'#f97316', 'teal'=>'#14b8a6', 'pink'=>'#ec4899', 
-                                        default=>'#374151' 
-                                    }));
+                                {{-- 1. DATA: Livewire updates these values every 5 seconds --}}
+                                counts: @js($q['options']->pluck('count')),
+                                labels: @js($q['options']->pluck('label')),
+                                colors: @js($q['options']->map(fn($o) => match($o['color']) { 
+                                    'green'=>'#22c55e', 'red'=>'#ef4444', 'yellow'=>'#eab308', 'blue'=>'#3b82f6', 
+                                    'purple'=>'#a855f7', 'orange'=>'#f97316', 'teal'=>'#14b8a6', 'pink'=>'#ec4899', 
+                                    default=>'#374151' 
+                                })),
+                                chartInstance: null,
 
-                                    // Handle Zero Votes Case (Prevents invisible chart)
-                                    let total = counts.reduce((a, b) => a + b, 0);
+                                initChart() {
+                                    // Handle Zero Votes
+                                    let data = this.counts;
+                                    let palette = this.colors;
+                                    let total = data.reduce((a, b) => a + b, 0);
+
                                     if (total === 0) {
-                                        counts = [1]; // Fake data for placeholder
-                                        labels = ['No votes yet'];
-                                        colors = ['#e5e7eb']; // Light gray
+                                        data = [1]; 
+                                        palette = ['#e5e7eb'];
                                     }
 
                                     let options = {
-                                        series: counts,
-                                        labels: labels,
-                                        colors: colors,
+                                        series: data,
+                                        labels: this.labels,
+                                        colors: palette,
                                         chart: { 
                                             type: 'donut', 
                                             height: 250, 
                                             fontFamily: 'Inter, sans-serif',
-                                            
-                                            // 3. THE FIX: Enable animation but make it super fast (10ms)
-                                            // This tricks the engine to render, but finishes instantly.
-                                            animations: {
-                                                enabled: true,
-                                                easing: 'linear',
-                                                speed: 10, 
-                                                animateGradually: { enabled: false },
-                                                dynamicAnimation: { enabled: false }
-                                            }
+                                            animations: { enabled: false } // Disable initial animation
                                         },
-                                        legend: { position: 'bottom', show: total > 0 }, // Hide legend if no votes
-                                        dataLabels: { enabled: total > 0 }, // Hide percentages if no votes
-                                        plotOptions: { 
-                                            pie: { 
-                                                donut: { 
-                                                    size: '65%',
-                                                    labels: {
-                                                        show: total > 0, // Only show center text if votes exist
-                                                        total: {
-                                                            show: true,
-                                                            label: 'Total',
-                                                            color: '#9ca3af',
-                                                            formatter: function (w) {
-                                                                return w.globals.seriesTotals.reduce((a, b) => a + b, 0)
-                                                            }
-                                                        }
-                                                    }
-                                                } 
-                                            } 
-                                        },
-                                        tooltip: { enabled: total > 0 } // Disable tooltip on placeholder
+                                        legend: { position: 'bottom', show: total > 0 },
+                                        dataLabels: { enabled: total > 0 },
+                                        tooltip: { enabled: total > 0 },
+                                        plotOptions: { pie: { donut: { size: '65%' } } }
                                     };
 
-                                    let chart = new ApexCharts(this.$refs.chart, options);
-                                    chart.render();
+                                    this.chartInstance = new ApexCharts(this.$refs.chart, options);
+                                    this.chartInstance.render();
+                                },
+
+                                updateChart() {
+                                    // This runs whenever Livewire updates the 'counts' variable
+                                    let total = this.counts.reduce((a, b) => a + b, 0);
+                                    
+                                    // Logic to toggle between 'Real Data' and 'Gray Placeholder'
+                                    if (total === 0) {
+                                        this.chartInstance.updateOptions({
+                                            series: [1],
+                                            colors: ['#e5e7eb'],
+                                            legend: { show: false },
+                                            dataLabels: { enabled: false },
+                                            tooltip: { enabled: false }
+                                        });
+                                    } else {
+                                        this.chartInstance.updateOptions({
+                                            series: this.counts,
+                                            colors: this.colors,
+                                            legend: { show: true },
+                                            dataLabels: { enabled: true },
+                                            tooltip: { enabled: true }
+                                        });
+                                    }
                                 }
                             }" 
-                            x-init="initChart()"  
-                            class="animate-fade-in bg-gray-50/50 rounded-2xl p-6 border border-gray-100 relative">
+                            x-init="initChart(); $watch('counts', () => updateChart())" 
+                            class="bg-gray-50/50 rounded-2xl p-6 border border-gray-100 relative">
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
                                 
-                                {{-- 1. THE CHART --}}
+                                {{-- THE CHART --}}
                                 <div class="flex justify-center">
-                                    <div x-ref="chart" class="w-full max-w-[300px] min-h-[250px]"></div>
+                                    {{-- 2. WIRE:IGNORE - Crucial! Prevents Livewire from destroying the chart --}}
+                                    <div wire:ignore x-ref="chart" class="w-full max-w-[300px] min-h-[250px]"></div>
                                 </div>
 
-                                {{-- 2. BREAKDOWN & VOTER LIST BUTTONS --}}
+                                {{-- BREAKDOWN LIST (Livewire updates this normally) --}}
                                 <div class="space-y-4">
                                     <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest border-b border-gray-200 pb-2">Results Breakdown</h4>
                                     
@@ -194,49 +194,47 @@
                                         </p>
                                     </div>
                                 </div>
-                            </div>
-
-                            {{-- 3. VOTERS MODAL (Nested Alpine) --}}
-                            <template x-teleport="body">
-                                <div x-show="showVotersModal" 
-                                    class="fixed inset-0 z-50 flex items-center justify-center px-4 bg-gray-900/60 backdrop-blur-sm"
-                                    x-transition.opacity
-                                    style="display: none;">
-                                    
-                                    <div @click.away="showVotersModal = false" 
-                                        class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[80vh] animate-scale-in">
+                                {{-- 3. VOTERS MODAL (Nested Alpine) --}}
+                                <template x-teleport="body">
+                                    <div x-show="showVotersModal" 
+                                        class="fixed inset-0 z-50 flex items-center justify-center px-4 bg-gray-900/60 backdrop-blur-sm"
+                                        x-transition.opacity
+                                        style="display: none;">
                                         
-                                        {{-- Modal Header --}}
-                                        <div class="p-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
-                                            <div>
-                                                <p class="text-[10px] font-bold text-gray-400 uppercase">Voters for</p>
-                                                <h3 class="font-bold text-gray-900 text-lg" x-text="activeOption?.label"></h3>
-                                            </div>
-                                            <button @click="showVotersModal = false" class="text-gray-400 hover:text-red-500">
-                                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                                            </button>
-                                        </div>
-
-                                        {{-- Voters List --}}
-                                        <div class="overflow-y-auto p-4 space-y-3">
-                                            <template x-for="voter in activeOption?.voters" :key="voter.name">
-                                                <div class="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg transition">
-                                                    <img :src="voter.avatar" class="w-8 h-8 rounded-full bg-gray-200 object-cover border border-gray-100">
-                                                    <div>
-                                                        <p class="text-sm font-bold text-gray-900" x-text="voter.name"></p>
-                                                        <p class="text-[10px] text-gray-400" x-text="voter.date"></p>
-                                                    </div>
-                                                </div>
-                                            </template>
+                                        <div @click.away="showVotersModal = false" 
+                                            class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[80vh] animate-scale-in">
                                             
-                                            {{-- Empty State fallback handled by count check above --}}
+                                            {{-- Modal Header --}}
+                                            <div class="p-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
+                                                <div>
+                                                    <p class="text-[10px] font-bold text-gray-400 uppercase">Voters for</p>
+                                                    <h3 class="font-bold text-gray-900 text-lg" x-text="activeOption?.label"></h3>
+                                                </div>
+                                                <button @click="showVotersModal = false" class="text-gray-400 hover:text-red-500">
+                                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                                </button>
+                                            </div>
+
+                                            {{-- Voters List --}}
+                                            <div class="overflow-y-auto p-4 space-y-3">
+                                                <template x-for="voter in activeOption?.voters" :key="voter.name">
+                                                    <div class="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg transition">
+                                                        <img :src="voter.avatar" class="w-8 h-8 rounded-full bg-gray-200 object-cover border border-gray-100">
+                                                        <div>
+                                                            <p class="text-sm font-bold text-gray-900" x-text="voter.name"></p>
+                                                            <p class="text-[10px] text-gray-400" x-text="voter.date"></p>
+                                                        </div>
+                                                    </div>
+                                                </template>
+                                                
+                                                {{-- Empty State fallback handled by count check above --}}
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            </template>
+                                </template>
 
+                            </div>
                         </div>
-
                     @else
                         
                         {{-- VOTING BUTTONS --}}
