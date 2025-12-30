@@ -2,10 +2,7 @@
 
     {{-- 1. ATMOSPHERE: SIGNATURE BLOBS --}}
     <div class="fixed inset-0 z-0 overflow-hidden pointer-events-none">
-        {{-- Base Overlay --}}
         <div class="absolute top-0 left-0 w-full h-full bg-stone-50/80"></div>
-        
-        {{-- Animated Orbs --}}
         <div class="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-red-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob"></div>
         <div class="absolute top-[20%] left-[-10%] w-[500px] h-[500px] bg-yellow-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob animation-delay-2000"></div>
         <div class="absolute bottom-[-10%] right-[20%] w-[500px] h-[500px] bg-green-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob animation-delay-4000"></div>
@@ -13,7 +10,6 @@
 
     {{-- 2. HERO HEADER --}}
     <div class="relative z-10 pt-16 pb-12 px-6 text-center max-w-2xl mx-auto">
-        
         @if(Auth::check() && Auth::user()->role->role_name === 'director') 
             <div class="mb-6 animate-fade-in-down">
                 <a href="{{ route('director.pillars.index') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-gray-900 text-white text-[10px] font-bold uppercase tracking-widest rounded-full shadow-lg hover:bg-red-600 hover:scale-105 transition-all">
@@ -61,7 +57,8 @@
             {{-- Questions Loop --}}
             <div class="p-8 space-y-10">
                 @foreach($pillar->mapped_questions as $q)
-                <div class="relative">
+                {{-- FIX 1: wire:key added here to prevent polling glitches --}}
+                <div wire:key="question-{{ $q['id'] }}" class="relative">
                     
                     {{-- Question Text --}}
                     <h3 class="font-bold text-gray-900 text-lg mb-4 flex items-start gap-3 leading-snug">
@@ -74,7 +71,6 @@
 
                         {{-- RESULTS AREA (Chart + List) --}}
                         <div x-data="{ 
-                                {{-- 1. DATA: Holds Chart AND Modal state --}}
                                 counts: @js($q['options']->pluck('count')),
                                 labels: @js($q['options']->pluck('label')),
                                 colors: @js($q['options']->map(fn($o) => match($o['color']) { 
@@ -83,10 +79,9 @@
                                     default=>'#374151' 
                                 })),
                                 chartInstance: null,
-                                showVotersModal: false,  // <--- RESTORED THIS
-                                activeOption: null,      // <--- RESTORED THIS
+                                showVotersModal: false,
+                                activeOption: null,
 
-                                {{-- 2. CHART FUNCTIONS --}}
                                 initChart() {
                                     setTimeout(() => {
                                         let data = this.counts;
@@ -106,7 +101,7 @@
                                                 type: 'donut', 
                                                 height: 250, 
                                                 fontFamily: 'Inter, sans-serif',
-                                                animations: { enabled: false },
+                                                animations: { enabled: false }, // Keep false for smooth polling
                                                 width: '100%'
                                             },
                                             legend: { position: 'bottom', show: total > 0 },
@@ -140,7 +135,6 @@
                                     }
                                 },
 
-                                {{-- 3. MODAL HELPER --}}
                                 openModal(option) {
                                     this.activeOption = option;
                                     this.showVotersModal = true;
@@ -191,33 +185,33 @@
                             </div>
 
                             {{-- MODAL MARKUP --}}
+                            {{-- FIX 2: Teleport ensures it breaks out of the stacking context --}}
                             <template x-teleport="body">
-        
+                                {{-- FIX 3: Z-Index 9999 ensures it is on top of navbars and blobs --}}
                                 <div x-show="showVotersModal" 
-                                    class="fixed inset-0 z-[999] flex items-center justify-center px-4 bg-gray-900/60 backdrop-blur-sm"
+                                    class="fixed inset-0 z-[9999] flex items-center justify-center px-4 bg-gray-900/60 backdrop-blur-sm"
                                     x-transition.opacity
                                     style="display: none;">
                                     
-                                    {{-- Modal Content --}}
                                     <div @click.away="showVotersModal = false" 
-                                        class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[80vh] animate-scale-in">
+                                        class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[80vh] animate-scale-in relative">
                                         
                                         {{-- Header --}}
-                                        <div class="p-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
+                                        <div class="p-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center z-10">
                                             <div>
                                                 <p class="text-[10px] font-bold text-gray-400 uppercase">Voters for</p>
                                                 <h3 class="font-bold text-gray-900 text-lg" x-text="activeOption?.label"></h3>
                                             </div>
-                                            <button @click="showVotersModal = false" class="text-gray-400 hover:text-red-500">
+                                            <button @click="showVotersModal = false" class="text-gray-400 hover:text-red-500 transition">
                                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                                             </button>
                                         </div>
 
                                         {{-- List --}}
-                                        <div class="overflow-y-auto p-4 space-y-3">
+                                        <div class="overflow-y-auto p-4 space-y-3 bg-white">
                                             <template x-for="voter in activeOption?.voters" :key="voter.name">
-                                                <div class="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg transition">
-                                                    <img :src="voter.avatar" class="w-8 h-8 rounded-full bg-gray-200 object-cover border border-gray-100">
+                                                <div class="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg transition border border-transparent hover:border-gray-100">
+                                                    <img :src="voter.avatar" class="w-8 h-8 rounded-full bg-gray-200 object-cover border border-gray-100 shrink-0">
                                                     <div>
                                                         <p class="text-sm font-bold text-gray-900" x-text="voter.name"></p>
                                                         <p class="text-[10px] text-gray-400" x-text="voter.date"></p>
@@ -225,10 +219,8 @@
                                                 </div>
                                             </template>
                                         </div>
-
                                     </div>
                                 </div>
-
                             </template>
 
                         </div>
