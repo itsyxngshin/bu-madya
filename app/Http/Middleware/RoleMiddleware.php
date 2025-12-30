@@ -14,19 +14,19 @@ class RoleMiddleware
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
-    public function handle(Request $request, Closure $next, string $role): Response
+    public function handle(Request $request, Closure $next, ...$roles): Response
     {
         $user = $request->user();
 
-        // Define the roles that are allowed
-        $roles = ['administrator', 'director', 'member', 'alumni'];
-
-        // Check if user is authenticated and has a role
-        if (!$user || !in_array($user->role->role_name, $roles)) {
+        // (Keep your existing check ensuring user has a valid role generally)
+        $validSystemRoles = ['administrator', 'director', 'member', 'alumni'];
+        if (!$user || !in_array($user->role->role_name, $validSystemRoles)) {
             abort(403, 'Unauthorized action.');
         }
 
-        if (Auth::user()->role->role_name !== $role) {
+        // 2. THE FIX: Check if the user's role is in the list of ALLOWED roles for this specific route
+        // This replaces the strict "!==" check
+        if (!in_array($user->role->role_name, $roles)) {
             abort(403, 'Unauthorized action.');
         }
 
