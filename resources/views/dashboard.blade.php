@@ -3,7 +3,9 @@
     <x-slot name="header">
         <div class="flex items-center justify-between">
             <div>
-                
+                <h2 class="font-heading font-black text-xl md:text-2xl text-gray-800 leading-tight">
+                    Director's <span class="text-red-600">Center</span>
+                </h2>
             </div>
         </div>
     </x-slot>
@@ -11,6 +13,7 @@
     {{-- MAIN CONTENT --}}
     <div class="py-6 md:py-12 bg-stone-50 min-h-screen font-sans">
         <div class="max-w-7xl mx-auto space-y-6 md:space-y-8">
+            
             {{-- 1. WELCOME BANNER --}}
             <div class="relative bg-gray-900 rounded-[2rem] p-6 md:p-8 overflow-hidden shadow-xl flex flex-col md:flex-row md:items-center justify-between text-white gap-6">
                 {{-- Background Effects --}}
@@ -96,7 +99,13 @@
                 </div>
             </div>
 
-            {{-- 3. RECENT ACTIVITY --}}
+            {{-- 3. CALENDAR SECTION (Inserted Here) --}}
+            {{-- This uses the Custom Scratch Calendar Component --}}
+            <div class="grid grid-cols-1">
+                <livewire:events-calendar />
+            </div>
+
+            {{-- 4. RECENT ACTIVITY --}}
             <div class="grid lg:grid-cols-3 gap-6 md:gap-8">
                 
                 {{-- Left: Pending Reviews List --}}
@@ -130,10 +139,11 @@
                     </div>
                 </div>
 
-                {{-- Right: Upcoming Projects --}}
+                {{-- Right: Upcoming Projects (Simple List View) --}}
+                {{-- Kept as a quick-glance list alongside the main calendar --}}
                 <div class="bg-gray-900 text-white rounded-[2rem] shadow-lg p-6 relative overflow-hidden">
                     <div class="absolute top-0 right-0 w-32 h-32 bg-red-600 rounded-full blur-3xl opacity-20 -mr-10 -mt-10 pointer-events-none"></div>
-                    <h3 class="font-bold text-white uppercase tracking-widest text-xs mb-6 relative z-10">Upcoming Projects</h3>
+                    <h3 class="font-bold text-white uppercase tracking-widest text-xs mb-6 relative z-10">Next Up</h3>
                     
                     <div class="space-y-4 relative z-10">
                         @forelse($upcomingProjects as $proj)
@@ -155,12 +165,12 @@
                         @endforelse
                     </div>
                     <a href="{{ route('projects.index') }}" class="block mt-6 text-center text-[10px] font-bold uppercase text-gray-400 hover:text-white transition relative z-10">
-                        View Calendar &rarr;
+                        View Full List &rarr;
                     </a>
                 </div>
             </div>
 
-            {{-- 4. SECTION: MY LED PROJECTS --}}
+            {{-- 5. SECTION: MY LED PROJECTS --}}
             <div>
                 <h3 class="font-heading font-black text-lg md:text-xl text-gray-800 mb-6 flex items-center gap-3">
                     <span class="w-2 h-6 md:h-8 bg-red-600 rounded-full"></span>

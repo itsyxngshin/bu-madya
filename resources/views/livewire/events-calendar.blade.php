@@ -69,7 +69,7 @@
                 </div>
 
                 {{-- Add Button (Only visible on hover for Admins) --}}
-                @if(Auth::check() && Auth::user()->role_id === 1) 
+                @if(Auth::check() && Auth::user()->role->role_name === 'director') 
                     <a href="{{ route('projects.create') }}?date={{ $currentYear }}-{{ $currentMonth }}-{{ $day }}" 
                        class="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition p-1 bg-gray-900 text-white rounded-lg hover:bg-red-600">
                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
