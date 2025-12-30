@@ -68,8 +68,8 @@ Route::middleware(['auth', 'role:director'])
     Route::get('/news/create', NewsCreate::class)->name('news.create');
     Route::get('/linkage/create', LinkagesCreate::class)->name('linkages.create');
     Route::get('/director/the-pillars', ThePillarsManager::class)->name('director.pillars.index');
-    Route::get('/admin/proposals/{proposal}', ProposalsShow::class)->name('proposals.show');
-    Route::get('/admin/proposals', ProposalsIndex::class)->name('proposals.index');
+    Route::get('/proposals/{proposal}', ProposalsShow::class)->name('admin.proposals.show');
+    Route::get('/proposals', ProposalsIndex::class)->name('admin.proposals.index');
     Route::get('/news/{slug}/edit', NewsEdit::class)->name('news.edit');  
     Route::get('/linkage/{linkage:slug}/edit', LinkagesEdit::class)->name('linkages.edit');
 });
