@@ -151,34 +151,34 @@
                         x-on:livewire-upload-finish="isUploading = false"
                         x-on:livewire-upload-error="isUploading = false"
                         x-on:livewire-upload-progress="progress = $event.detail.progress"
-                        class="w-full"
+                        class="w-full space-y-2" {{-- Added space-y-2 for breathing room --}}
                     >
-                        <label class="block text-xs font-bold text-gray-700 mb-1">
+                        <label class="block text-xs font-bold text-gray-700">
                             Cover Image 
                         </label>
 
-                        {{-- PARENT CONTAINER: Enforce Fixed Height (h-40) so it never collapses --}}
-                        <div class="relative w-full h-40 rounded-xl overflow-hidden bg-gray-50 border-2 border-dashed transition-all duration-200 group"
+                        {{-- PARENT CONTAINER: Added 'min-h-[12rem]' style to FORCE height --}}
+                        <div class="relative w-full h-48 bg-gray-50 rounded-xl overflow-hidden border-2 border-dashed transition-all duration-200 group"
+                            style="min-height: 12rem;" 
                             :class="{'border-yellow-400 bg-yellow-50 ring-4 ring-yellow-100': isDropping, 'border-gray-300 hover:bg-gray-100': !isDropping}"
                         >
                             
-                            {{-- 1. THE INVISIBLE INPUT (The "Click & Drag" Layer) --}}
-                            {{-- Z-Index 50 ensures this is ALWAYS on top to catch the drop --}}
+                            {{-- 1. INVISIBLE INPUT (The Interaction Layer) --}}
+                            {{-- Z-Index 50 ensures this catches drops/clicks --}}
                             <input type="file" 
                                 wire:model="coverImg" 
                                 accept="image/*" 
                                 class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-50"
-                                {{-- EVENTS: Attached directly to input to ensure sync --}}
                                 x-on:dragover.prevent="isDropping = true"
                                 x-on:dragleave="isDropping = false"
                                 x-on:drop="isDropping = false"
                             >
 
-                            {{-- 2. LOADING OVERLAY (Z-Index 40) --}}
+                            {{-- 2. LOADING STATE (Z-Index 40) --}}
                             <div x-show="isUploading" 
                                 x-transition.opacity
                                 class="absolute inset-0 z-40 flex flex-col items-center justify-center bg-white/90 backdrop-blur-sm"
-                                style="display: none;"> {{-- Default hidden --}}
+                                style="display: none;"> 
                                 
                                 <svg class="animate-spin h-8 w-8 text-yellow-500 mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -190,8 +190,7 @@
                                 <p class="text-[10px] font-bold text-gray-500 mt-2 uppercase tracking-wider">Uploading...</p>
                             </div>
 
-                            {{-- 3. VISUAL LAYER (Z-Index 10) --}}
-                            {{-- This sits underneath the input and just looks pretty --}}
+                            {{-- 3. VISUAL PREVIEW LAYER (Z-Index 10) --}}
                             <div class="absolute inset-0 w-full h-full z-10 flex flex-col items-center justify-center pointer-events-none">
                                 
                                 {{-- A. New Upload Preview --}}
@@ -217,7 +216,7 @@
                                 {{-- C. Empty State --}}
                                 @else
                                     <div class="flex flex-col items-center justify-center pt-5 pb-6 text-gray-400 group-hover:text-yellow-600 transition-colors">
-                                        <svg class="w-8 h-8 mb-2 transform group-hover:-translate-y-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                                        <svg class="w-10 h-10 mb-3 text-gray-300 group-hover:text-yellow-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                                         <p class="text-xs font-medium"><span class="font-bold underline decoration-yellow-400">Click to upload</span> or drag & drop</p>
                                     </div>
                                 @endif
