@@ -1,13 +1,28 @@
-<div class="min-h-screen bg-stone-50 font-sans text-gray-900">
+<div class="min-h-screen bg-stone-50 font-sans text-gray-900 overflow-x-hidden relative">
     
+    {{-- 1. ATMOSPHERE: SIGNATURE BLOBS --}}
+    <div class="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+        {{-- Base Overlay --}}
+        <div class="absolute top-0 left-0 w-full h-full bg-stone-50/80"></div>
+        
+        {{-- Animated Orbs --}}
+        <div class="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-red-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob"></div>
+        <div class="absolute top-[20%] left-[-10%] w-[500px] h-[500px] bg-yellow-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob animation-delay-2000"></div>
+        <div class="absolute bottom-[-10%] right-[20%] w-[500px] h-[500px] bg-green-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob animation-delay-4000"></div>
+    </div>
+
     {{-- 2. HERO HEADER --}}
     <header class="relative min-h-[400px] flex items-center justify-center text-white overflow-hidden rounded-b-[3rem] md:rounded-3xl shadow-2xl mx-0 md:mx-6 md:-mt-20 z-10 pb-10 pt-20 md:py-0">
-        {{-- Background Image --}}
+        
+        {{-- Background Image & Gradient --}}
         <div class="absolute inset-0 z-0">
             <img src="https://images.unsplash.com/photo-1521737604893-d14cc237f11d?q=80&w=2084&auto=format&fit=crop" 
                  class="w-full h-full object-cover transform scale-105" alt="Handshake Background">
-            <div class="absolute inset-0 bg-gradient-to-tr from-blue-900/95 via-red-900/80 to-stone-900/50 mix-blend-multiply"></div>
-            {{-- Noise Texture Overlay (Optional for polish) --}}
+            
+            {{-- RESTORED COLOR: Blue to Red Gradient --}}
+            <div class="absolute inset-0 bg-gradient-to-r from-blue-900/90 to-red-900/80 mix-blend-multiply"></div>
+            
+            {{-- Noise Texture (Optional) --}}
             <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')]"></div>
         </div>
 
@@ -19,11 +34,11 @@
                 External Linkages
             </h1>
             
-            <p class="text-sm md:text-lg text-gray-200 font-light max-w-xl mx-auto italic mb-8 px-4 leading-relaxed opacity-90">
+            <p class="text-sm md:text-lg text-gray-100 font-light max-w-xl mx-auto italic mb-8 px-4 leading-relaxed opacity-90">
                 Building bridges with government, NGOs, and civil society to amplify our impact.
             </p>
 
-            {{-- [MOVED] ADD LINKAGE BUTTON --}}
+            {{-- ADD LINKAGE BUTTON (Moved here) --}}
             @auth
             <div class="mb-8">
                 <a href="{{ route('linkages.create') }}" 
@@ -36,22 +51,21 @@
             </div>
             @endauth
 
-            {{-- [FIXED] Dynamic Stats (Mobile Optimized) --}}
-            {{-- Switched to flex on mobile for better centering, grid on desktop --}}
+            {{-- Dynamic Stats (Mobile Optimized Flex) --}}
             <div class="w-full max-w-2xl bg-black/20 backdrop-blur-xl border border-white/10 rounded-2xl p-4 md:p-6 shadow-2xl">
-                <div class="grid grid-cols-3 gap-2 md:gap-8 divide-x divide-white/10">
+                <div class="flex flex-wrap justify-center md:grid md:grid-cols-3 gap-4 md:gap-8 md:divide-x divide-white/10">
                     
-                    <div class="text-center px-1 md:px-4">
+                    <div class="text-center px-4 min-w-[30%]">
                         <span class="block text-2xl md:text-4xl font-black text-white tracking-tighter">{{ $this->stats['active_count'] }}</span>
                         <span class="text-[9px] md:text-xs font-bold uppercase tracking-widest text-gray-300 block mt-1">Partners</span>
                     </div>
                     
-                    <div class="text-center px-1 md:px-4">
+                    <div class="text-center px-4 min-w-[30%] border-l border-white/10 md:border-l-0">
                         <span class="block text-2xl md:text-4xl font-black text-yellow-400 tracking-tighter">{{ $this->stats['moa_count'] }}</span>
                         <span class="text-[9px] md:text-xs font-bold uppercase tracking-widest text-gray-300 block mt-1">MOAs</span>
                     </div>
                     
-                    <div class="text-center px-1 md:px-4">
+                    <div class="text-center px-4 min-w-[30%] border-l border-white/10 md:border-l-0">
                         <span class="block text-2xl md:text-4xl font-black text-green-400 tracking-tighter">{{ $this->stats['intl_count'] }}</span>
                         <span class="text-[9px] md:text-xs font-bold uppercase tracking-widest text-gray-300 block mt-1">Global</span>
                     </div>
@@ -63,14 +77,14 @@
     </header>
 
     {{-- 3. MAIN CONTENT --}}
-    <div class="relative min-h-screen px-4 md:px-6 pb-24 mt-8 md:mt-12 max-w-[1800px] w-full mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12">
+    <div class="relative z-10 min-h-screen px-4 md:px-6 pb-24 mt-8 md:mt-12 max-w-[1800px] w-full mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12">
         
         {{-- LEFT: PARTNER DIRECTORY (8 Cols) --}}
         <main class="lg:col-span-8 order-1">
             <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 md:mb-8 gap-4">
                 <h3 class="font-heading font-bold text-xl md:text-2xl text-gray-900">Partner Directory</h3>
                 
-                {{-- [UPDATED] Filters only (Add button moved to Hero) --}}
+                {{-- Filter Tabs --}}
                 <div class="w-full md:w-auto overflow-x-auto pb-2 md:pb-0 scrollbar-hide mask-fade-right">
                     <div class="flex gap-2">
                         <button wire:click="setCategory('All')"
@@ -97,7 +111,7 @@
             {{-- Partners Grid --}}
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 @forelse($this->partners as $partner)
-                <div class="group bg-white rounded-2xl p-5 md:p-6 shadow-sm border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition duration-300 relative overflow-hidden">
+                <div class="group bg-white/90 backdrop-blur-sm rounded-2xl p-5 md:p-6 shadow-sm border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition duration-300 relative overflow-hidden">
                     
                     {{-- Top Color Line --}}
                     <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-500 to-yellow-500 transform scale-x-0 group-hover:scale-x-100 transition duration-500 origin-left"></div>
@@ -149,7 +163,7 @@
                     </div>
                 </div>
                 @empty
-                <div class="col-span-1 md:col-span-2 text-center py-12 text-gray-400 bg-white rounded-2xl border border-dashed border-gray-200">
+                <div class="col-span-1 md:col-span-2 text-center py-12 text-gray-400 bg-white/80 rounded-2xl border border-dashed border-gray-200">
                     <p class="text-sm">No partners found in this category.</p>
                 </div>
                 @endforelse
@@ -158,7 +172,7 @@
 
         {{-- RIGHT: ENGAGEMENTS TIMELINE (4 Cols) --}}
         <aside class="lg:col-span-4 order-2">
-            <div class="bg-white rounded-3xl p-6 shadow-lg border border-gray-100 lg:sticky lg:top-24">
+            <div class="bg-white/90 backdrop-blur-md rounded-3xl p-6 shadow-lg border border-gray-100 lg:sticky lg:top-24">
                 <h3 class="font-heading font-bold text-lg md:text-xl text-gray-900 mb-6 flex items-center gap-2">
                     <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     Recent Engagements
@@ -207,7 +221,7 @@
     </div>
 
     {{-- FOOTER --}}
-    <footer class="mt-12 md:mt-20 border-t border-gray-200 py-8 px-6 text-center text-[10px] md:text-xs text-gray-500 bg-white">
+    <footer class="mt-12 md:mt-20 border-t border-gray-200 py-8 px-6 text-center text-[10px] md:text-xs text-gray-500 bg-white/80 backdrop-blur">
         &copy; {{ date('Y') }} BU MADYA. All Rights Reserved.
     </footer>
 </div>
