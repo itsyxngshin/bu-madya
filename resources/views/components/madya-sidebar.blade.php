@@ -6,9 +6,17 @@
     {{-- LOGO AREA --}}
     <div class="h-16 flex items-center justify-between px-6 border-b border-gray-100 shrink-0 bg-white">
         <div class="flex items-center gap-3">
-            {{-- Ensure this logo path is correct --}}
-            <img src="{{ asset('images/official_logo.png') }}" alt="Logo" class="w-8 h-8 object-contain">
-            <span class="font-heading font-bold text-gray-800 tracking-tight">BU MADYA</span>
+           <a href="{{ route('open.home') }}" class="flex items-center gap-3 group">
+                <div class="w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-md p-1 border border-gray-100 group-hover:scale-105 transition">
+                    <img src="{{ asset('images/official_logo.png') }}" alt="Logo" class="w-full h-full object-contain">
+                </div>
+                <div class="flex flex-col">
+                    <span class="font-heading font-black text-lg tracking-tighter text-gray-900 leading-none">
+                    BU <span class="text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-yellow-500">MADYA</span>
+                    </span>
+                    <span class="text-[9px] font-bold text-red-600 uppercase tracking-widest">Director Panel</span>
+                </div>
+            </a>
         </div>
         
         {{-- Close Button (Mobile Only) --}}
