@@ -7,7 +7,7 @@ use App\Models\MembershipWave;
 use App\Models\AcademicYear;
 use Livewire\Attributes\Layout;
 
-#[Layout('layouts.madya-template')]
+#[Layout('layouts.madya-admin-deck')]
 class MembershipSetting extends Component
 {
     public $academic_year_id;

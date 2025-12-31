@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Mail;
 use App\Mail\ApplicationApproved;
 use Livewire\Attributes\Layout;
 
-#[Layout('layouts.madya-template')]
+#[Layout('layouts.madya-admin-deck')]
 class MembershipRequests extends Component
 {
     use WithPagination;
