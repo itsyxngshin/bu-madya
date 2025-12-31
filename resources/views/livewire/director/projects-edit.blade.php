@@ -14,16 +14,16 @@
             </span>
         </div>
         
-        {{-- Center: Mobile Toggle --}}
+        {{-- Center: Mobile Toggle (Fixed Positioning) --}}
         <div class="md:hidden absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
             <button @click="mobilePreview = !mobilePreview" 
-                    class="flex items-center gap-2 bg-gray-100 border border-gray-200 rounded-full p-1 pr-4 transition-all">
-                <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase transition-colors"
-                      :class="!mobilePreview ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-400'">
+                    class="flex items-center bg-gray-100 border border-gray-200 rounded-full p-1 transition-all shadow-inner">
+                <span class="px-4 py-1.5 rounded-full text-[10px] font-bold uppercase transition-all duration-300"
+                      :class="!mobilePreview ? 'bg-white text-gray-900 shadow-sm transform scale-105' : 'text-gray-400'">
                     Edit
                 </span>
-                <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase transition-colors"
-                      :class="mobilePreview ? 'bg-red-600 text-white shadow-sm' : 'text-gray-400'">
+                <span class="px-4 py-1.5 rounded-full text-[10px] font-bold uppercase transition-all duration-300"
+                      :class="mobilePreview ? 'bg-red-600 text-white shadow-sm transform scale-105' : 'text-gray-400'">
                     Preview
                 </span>
             </button>
@@ -53,9 +53,11 @@
             {{-- 1. BASIC INFO --}}
             <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
                 <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest border-b border-gray-100 pb-2 mb-4">Core Details</h3>
+                
                 <div class="space-y-4">
-                    <div class="grid grid-cols-3 gap-4">
-                        <div class="col-span-1">
+                    {{-- FIXED: Stacks vertically on mobile (grid-cols-1), 3 cols on Desktop --}}
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="md:col-span-1">
                             <label class="block text-xs font-bold text-gray-700 mb-1">Academic Year</label>
                             <select wire:model.live="academic_year_id" class="w-full text-xs border-gray-200 rounded-lg focus:ring-yellow-400 focus:border-yellow-400 bg-yellow-50/50">
                                 @foreach($academic_years as $year)
@@ -63,7 +65,7 @@
                                 @endforeach
                             </select>
                         </div>
-                        <div class="col-span-2">
+                        <div class="md:col-span-2">
                             <label class="block text-xs font-bold text-gray-700 mb-1">Project Title</label>
                             <input wire:model.live="title" type="text" class="w-full text-sm border-gray-200 rounded-lg focus:ring-yellow-400 focus:border-yellow-400">
                         </div>
@@ -77,7 +79,8 @@
                         </div>
                     </div>
                     
-                    <div class="grid grid-cols-2 gap-4">
+                    {{-- FIXED: Stacks on mobile --}}
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-bold text-gray-700 mb-1">Category</label>
                             <select wire:model.live="project_category_id" class="w-full text-xs border-gray-200 rounded-lg focus:ring-yellow-400">
@@ -92,7 +95,7 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-bold text-gray-700 mb-1">Date</label>
                             <input wire:model.live="date" type="date" class="w-full text-xs border-gray-200 rounded-lg">
@@ -390,7 +393,7 @@
                     {{-- MAIN CONTENT (Right) --}}
                     <div class="lg:col-span-8 space-y-12">
                         
-                        {{-- 1. OBJECTIVES (Black Gradient Card) --}}
+                        {{-- 1. OBJECTIVES (RESTORED BLACK GRADIENT CARD) --}}
                         @if(count($objectives) > 0 && !empty($objectives[0]))
                         <div class="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-8 rounded-[2rem] shadow-lg relative overflow-hidden">
                             <div class="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full blur-3xl -mr-10 -mt-10"></div>
