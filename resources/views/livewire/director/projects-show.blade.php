@@ -242,18 +242,16 @@
         <main class="lg:col-span-8 space-y-12">
             
             {{-- 4. OBJECTIVES SECTION (For Project Show Page) --}}
-            @if($project->objectives && $project->objectives->isNotEmpty())
-            <div class="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-8 rounded-[2rem] shadow-lg relative overflow-hidden">
-                {{-- Decorative Blob --}}
+            {{-- OBJECTIVES SECTION --}}
+            @if($project->objectives->isNotEmpty())
+            <div class="mt-12 bg-gradient-to-br from-gray-900 to-gray-800 text-white p-8 rounded-[2rem] shadow-lg relative overflow-hidden">
                 <div class="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full blur-3xl -mr-10 -mt-10"></div>
                 
-                {{-- Header --}}
                 <h3 class="font-bold uppercase tracking-widest text-sm mb-6 text-yellow-400 relative z-10 flex items-center gap-2">
                     <span class="w-2 h-2 bg-yellow-400 rounded-full"></span>
                     Project Objectives
                 </h3>
                 
-                {{-- List --}}
                 <ul class="space-y-4 relative z-10">
                     @foreach($project->objectives as $obj)
                     <li class="flex items-start gap-3 group">
@@ -264,7 +262,7 @@
                         
                         {{-- Text --}}
                         <span class="text-gray-200 text-sm md:text-base leading-relaxed group-hover:text-white transition-colors">
-                            {{-- DATABASE ACCESSOR: --}}
+                            {{-- THIS IS THE CORRECT COLUMN NAME FROM YOUR SCREENSHOT --}}
                             {{ $obj->objective }}
                         </span>
                     </li>
