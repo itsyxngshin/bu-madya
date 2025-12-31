@@ -115,7 +115,7 @@
                         <div class="md:col-span-1">
                             <label class="block text-xs sm:text-sm font-medium text-gray-700">College / Institute</label>
                             {{-- Update wire:model --}}
-                            <select wire:model="college_id" class="...">
+                            <select wire:model="college_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 text-base sm:text-sm">
                                 <option value="">Select College</option>
                                 @foreach($colleges as $c) 
                                     {{-- Update value to ID --}}
@@ -128,7 +128,7 @@
                             <label class="block text-xs sm:text-sm font-medium text-gray-700">Year Level</label>
                             <select wire:model="year_level" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 text-base sm:text-sm">
                                 <option value="">Select Year</option>
-                                <option>1st Year</option><option>2nd Year</option><option>3rd Year</option><option>4th Year</option>
+                                <option>1st Year</option><option>2nd Year</option><option>3rd Year</option><option>4th Year</option><option>5th Year</option>
                             </select>
                         </div>
                         <div class="md:col-span-1">
@@ -232,7 +232,7 @@
                         {{-- 1st Choice --}}
                         <div>
                             <label class="block text-xs sm:text-sm font-medium text-gray-700">1st Choice Committee</label>
-                            <select wire:model="committee_1_id" class="...">
+                            <select wire:model="committee_1_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 text-base sm:text-sm">
                                 <option value="">Select...</option>
                                 @foreach($committees as $comm) 
                                     <option value="{{ $comm->id }}">{{ $comm->name }}</option> 
@@ -243,7 +243,7 @@
                         {{-- 2nd Choice --}}
                         <div>
                             <label class="block text-xs sm:text-sm font-medium text-gray-700">2nd Choice Committee</label>
-                            <select wire:model="committee_2_id" class="...">
+                            <select wire:model="committee_2_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 text-base sm:text-sm">
                                 <option value="">Select...</option>
                                 @foreach($committees as $comm) 
                                     <option value="{{ $comm->id }}">{{ $comm->name }}</option> 
