@@ -6,9 +6,9 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\MembershipApplication;
 use App\Models\MembershipWave;
-use Illuminate\Support\Facades\Mail;
-use App\Mail\ApplicationApproved;
 use Livewire\Attributes\Layout;
+use Illuminate\Support\Facades\Mail; 
+use App\Mail\ApplicationApproved;
 
 #[Layout('layouts.madya-admin-deck')]
 class MembershipRequests extends Component
@@ -23,7 +23,7 @@ class MembershipRequests extends Component
     // Properties for Modal
     public $selectedApplication = null;
     public $showDetailsModal = false;
-
+    public $assign_committee_id = null;
     // Reset pagination when filtering
     public function updatedSearch() { $this->resetPage(); }
     public function updatedStatusFilter() { $this->resetPage(); }
@@ -32,6 +32,7 @@ class MembershipRequests extends Component
     public function viewDetails($id)
     {
         $this->selectedApplication = MembershipApplication::find($id);
+        $this->assign_committee_id = $this->selectedApplication->committee_1_id;
         $this->showDetailsModal = true;
     }
 
@@ -40,14 +41,24 @@ class MembershipRequests extends Component
         $app = MembershipApplication::find($id);
         
         if ($app) {
-            $app->update(['status' => 'approved']);
+            $app->update(['status' => 'approved',
+        'assigned_committee_id' => $this->assign_committee_id]);
             
-            // SEND EMAIL
             try {
                 Mail::to($app->email)->send(new ApplicationApproved($app));
-                session()->flash('message', 'Application approved and welcome email sent!');
+                
+                // SUCCESS TOAST
+                $this->dispatch('swal:toast', [
+                    'icon' => 'success',
+                    'title' => 'Approved & Email Sent!'
+                ]);
+
             } catch (\Exception $e) {
-                session()->flash('error', 'Approved, but failed to send email: ' . $e->getMessage());
+                // WARNING TOAST (Email failed)
+                $this->dispatch('swal:toast', [
+                    'icon' => 'warning',
+                    'title' => 'Approved, but Email Failed.'
+                ]);
             }
         }
         $this->showDetailsModal = false;
@@ -57,7 +68,10 @@ class MembershipRequests extends Component
     {
         MembershipApplication::where('id', $id)->update(['status' => 'rejected']);
         $this->showDetailsModal = false;
-        session()->flash('message', 'Application rejected.');
+        $this->dispatch('swal:toast', [
+            'icon' => 'info',
+            'title' => 'Application Rejected'
+        ]);  
     }
 
     public function render()
@@ -84,7 +98,8 @@ class MembershipRequests extends Component
 
         return view('livewire.admin.membership-requests', [
             'applications' => $applications,
-            'waves' => $waves
+            'waves' => $waves, 
+            'all_committees' => \App\Models\Committee::orderBy('name')->get()
         ]);
     }
 }

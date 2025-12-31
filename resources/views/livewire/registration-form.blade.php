@@ -1,8 +1,56 @@
-<div class="max-w-4xl mx-auto py-6 px-4 sm:px-6 sm:py-12 lg:px-8"> {{-- Adjusted py-12 to py-6 for mobile --}}
+<div class="max-w-4xl mx-auto py-6 px-4 sm:px-6 sm:py-12 lg:px-8"
+     x-data="{
+        cacheKey: 'bu_madya_draft_v1',
+        
+        init() {
+            // 1. RESTORE: Check if we have saved data in browser
+            let saved = localStorage.getItem(this.cacheKey);
+            
+            if (saved) {
+                // Send data to Livewire to fill the PHP properties
+                // We use $wire.restoreFromCache() which you added to the component
+                $wire.restoreFromCache(JSON.parse(saved));
+            }
+
+            // 2. CLEAR: Listen for successful submission to wipe cache
+            Livewire.on('form-submitted', () => {
+                localStorage.removeItem(this.cacheKey);
+            });
+        },
+
+        saveProgress() {
+            // 3. SAVE: Construct object matching your wire:models
+            let data = {
+                privacy_consent: $wire.privacy_consent,
+                last_name: $wire.last_name,
+                first_name: $wire.first_name,
+                middle_initial: $wire.middle_initial,
+                home_address: $wire.home_address,
+                birthday: $wire.birthday,
+                contact_number: $wire.contact_number,
+                email: $wire.email,
+                facebook_link: $wire.facebook_link,
+                college_id: $wire.college_id,
+                year_level: $wire.year_level,
+                course: $wire.course,
+                political_affiliation: $wire.political_affiliation,
+                committee_1_id: $wire.committee_1_id,
+                committee_2_id: $wire.committee_2_id,
+                essay_1_community: $wire.essay_1_community,
+                essay_2_action: $wire.essay_2_action,
+                essay_3_experience: $wire.essay_3_experience,
+                essay_4_reason: $wire.essay_4_reason,
+                essay_5_suggestion: $wire.essay_5_suggestion,
+                willing_to_pay: $wire.willing_to_pay
+            };
+            
+            localStorage.setItem(this.cacheKey, JSON.stringify(data));
+        }
+     }">
     
     {{-- CASE 1: NO ACTIVE WAVE --}}
     @if(!$activeWave)
-        <div class="text-center py-12 sm:py-20 bg-white rounded-2xl shadow-xl"> {{-- Reduced vertical padding --}}
+        <div class="text-center py-12 sm:py-20 bg-white rounded-2xl shadow-xl">
             <div class="bg-gray-100 w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6">
                 <svg class="w-8 h-8 sm:w-10 sm:h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
             </div>
@@ -34,8 +82,33 @@
                 </div>
             @endif
 
-            {{-- FORM CONTAINER: Reduced padding p-4 for mobile --}}
-            <form wire:submit="submit" class="space-y-6 sm:space-y-8 divide-y divide-gray-200 bg-white p-4 sm:p-8 rounded-2xl shadow-xl text-left">
+            {{-- CACHE RESTORED ALERT --}}
+            {{-- This only shows if data exists in localStorage --}}
+            <div x-show="localStorage.getItem(cacheKey)" 
+                 x-transition 
+                 style="display: none;"
+                 class="mb-6 bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg flex justify-between items-start text-left shadow-sm">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/></svg>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm text-blue-700">
+                            <span class="font-bold">Welcome back!</span> We restored your saved progress. 
+                        </p>
+                        <p class="text-xs text-blue-600 mt-1 italic">
+                            Note: For security reasons, please <strong>re-upload your Photo and Signature</strong>.
+                        </p>
+                    </div>
+                </div>
+                <button @click="localStorage.removeItem(cacheKey); location.reload();" class="text-xs text-blue-500 underline hover:text-blue-800 whitespace-nowrap ml-4">
+                    Clear & Restart
+                </button>
+            </div>
+
+            {{-- FORM CONTAINER --}}
+            {{-- Added @input.debounce to trigger auto-save --}}
+            <form wire:submit="submit" @input.debounce.1000ms="saveProgress" class="space-y-6 sm:space-y-8 divide-y divide-gray-200 bg-white p-4 sm:p-8 rounded-2xl shadow-xl text-left">
                 
                 {{-- SECTION 1: PRIVACY ACT --}}
                 <div class="space-y-4 sm:space-y-6 pt-2">
@@ -45,7 +118,8 @@
                     </div>
                     <div class="flex items-start">
                         <div class="flex items-center h-5">
-                            <input wire:model="privacy_consent" id="consent" type="checkbox" class="focus:ring-red-500 h-4 w-4 text-red-600 border-gray-300 rounded">
+                            {{-- Triggers save on change --}}
+                            <input wire:model="privacy_consent" @change="saveProgress" id="consent" type="checkbox" class="focus:ring-red-500 h-4 w-4 text-red-600 border-gray-300 rounded">
                         </div>
                         <div class="ml-3 text-sm">
                             <label for="consent" class="font-medium text-gray-700 text-sm">I Consent</label>
@@ -62,10 +136,8 @@
                     </div>
                     
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
-                        {{-- Name --}}
                         <div class="md:col-span-1">
                             <label class="block text-xs sm:text-sm font-medium text-gray-700">Surname</label>
-                            {{-- Added text-base for mobile to prevent iOS Zoom --}}
                             <input wire:model="last_name" type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 text-base sm:text-sm">
                             @error('last_name') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                         </div>
@@ -79,7 +151,6 @@
                             <input wire:model="middle_initial" type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 text-base sm:text-sm">
                         </div>
 
-                        {{-- Address & Bday --}}
                         <div class="md:col-span-2">
                             <label class="block text-xs sm:text-sm font-medium text-gray-700">Home Address</label>
                             <input wire:model="home_address" type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 text-base sm:text-sm">
@@ -91,7 +162,6 @@
                             @error('birthday') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                         </div>
 
-                        {{-- Contacts --}}
                         <div class="md:col-span-1">
                             <label class="block text-xs sm:text-sm font-medium text-gray-700">Contact No.</label>
                             <input wire:model="contact_number" type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 text-base sm:text-sm">
@@ -114,11 +184,10 @@
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
                         <div class="md:col-span-1">
                             <label class="block text-xs sm:text-sm font-medium text-gray-700">College / Institute</label>
-                            {{-- Update wire:model --}}
-                            <select wire:model="college_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 text-base sm:text-sm">
+                            {{-- Add @change to select inputs to ensure instant save --}}
+                            <select wire:model="college_id" @change="saveProgress" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 text-base sm:text-sm">
                                 <option value="">Select College</option>
                                 @foreach($colleges as $c) 
-                                    {{-- Update value to ID --}}
                                     <option value="{{ $c->id }}">{{ $c->name }}</option> 
                                 @endforeach
                             </select>
@@ -126,7 +195,7 @@
                         </div>
                         <div class="md:col-span-1">
                             <label class="block text-xs sm:text-sm font-medium text-gray-700">Year Level</label>
-                            <select wire:model="year_level" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 text-base sm:text-sm">
+                            <select wire:model="year_level" @change="saveProgress" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 text-base sm:text-sm">
                                 <option value="">Select Year</option>
                                 <option>1st Year</option><option>2nd Year</option><option>3rd Year</option><option>4th Year</option><option>5th Year</option>
                             </select>
@@ -142,26 +211,21 @@
                 <div class="pt-6 sm:pt-8 space-y-4 sm:space-y-6">
                     <h3 class="text-base sm:text-lg leading-6 font-medium text-gray-900">Affiliations & Documents</h3>
                     
-                    {{-- Politics --}}
                     <div>
                         <label class="block text-xs sm:text-sm font-medium text-gray-700">Political Affiliations</label>
                         <p class="text-[10px] sm:text-xs text-gray-500 mb-2">NOTE: BU MADYA is nonpartisan. We encourage non-affiliation to any political parties.</p>
                         <textarea wire:model="political_affiliation" rows="2" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 text-base sm:text-sm" placeholder="List affiliations or type 'None'"></textarea>
                     </div>
 
-                    {{-- File Uploads (Grid) --}}
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-            
                         {{-- A. FORMAL PHOTO --}}
                         <div x-data="{ isDropping: false, isUploading: false, progress: 0 }"
-                            x-on:livewire-upload-start="isUploading = true"
-                            x-on:livewire-upload-finish="isUploading = false"
-                            x-on:livewire-upload-error="isUploading = false"
-                            x-on:livewire-upload-progress="progress = $event.detail.progress">
+                             x-on:livewire-upload-start="isUploading = true"
+                             x-on:livewire-upload-finish="isUploading = false"
+                             x-on:livewire-upload-error="isUploading = false"
+                             x-on:livewire-upload-progress="progress = $event.detail.progress">
                             
                             <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Formal Picture (White BG)</label>
-
-                            {{-- Reduced height to h-32 on mobile --}}
                             <label class="relative flex flex-col items-center justify-center w-full h-32 sm:h-48 border-2 border-dashed rounded-lg cursor-pointer transition-all hover:bg-gray-50 group overflow-hidden"
                                 :class="{'border-red-500 bg-red-50 ring-2 ring-red-200': isDropping, 'border-gray-300': !isDropping}"
                                 @dragover.prevent="isDropping = true"
@@ -196,7 +260,6 @@
                             x-on:livewire-upload-progress="progress = $event.detail.progress">
                             
                             <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">E-Signature</label>
-
                             <label class="relative flex flex-col items-center justify-center w-full h-32 sm:h-48 border-2 border-dashed rounded-lg cursor-pointer transition-all hover:bg-gray-50 group overflow-hidden"
                                 :class="{'border-red-500 bg-red-50 ring-2 ring-red-200': isDropping, 'border-gray-300': !isDropping}"
                                 @dragover.prevent="isDropping = true"
@@ -229,21 +292,18 @@
                     <h3 class="text-base sm:text-lg leading-6 font-medium text-gray-900">Committees & Insights</h3>
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-                        {{-- 1st Choice --}}
                         <div>
                             <label class="block text-xs sm:text-sm font-medium text-gray-700">1st Choice Committee</label>
-                            <select wire:model="committee_1_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 text-base sm:text-sm">
+                            <select wire:model="committee_1_id" @change="saveProgress" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 text-base sm:text-sm">
                                 <option value="">Select...</option>
                                 @foreach($committees as $comm) 
                                     <option value="{{ $comm->id }}">{{ $comm->name }}</option> 
                                 @endforeach
                             </select>
                         </div>
-
-                        {{-- 2nd Choice --}}
                         <div>
                             <label class="block text-xs sm:text-sm font-medium text-gray-700">2nd Choice Committee</label>
-                            <select wire:model="committee_2_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 text-base sm:text-sm">
+                            <select wire:model="committee_2_id" @change="saveProgress" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 text-base sm:text-sm">
                                 <option value="">Select...</option>
                                 @foreach($committees as $comm) 
                                     <option value="{{ $comm->id }}">{{ $comm->name }}</option> 
@@ -252,34 +312,25 @@
                         </div>
                     </div>
 
-                    {{-- Essay 1 --}}
                     <div>
                         <label class="block text-xs sm:text-sm font-medium text-gray-700">1. In your perspective, what can you observe about your community?</label>
                         <textarea wire:model="essay_1_community" rows="4" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 text-base sm:text-sm"></textarea>
                         @error('essay_1_community') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                     </div>
-
-                    {{-- Essay 2 --}}
                     <div>
                         <label class="block text-xs sm:text-sm font-medium text-gray-700">2. As advocates, what can we do to help address and confront our present societal issues?</label>
                         <textarea wire:model="essay_2_action" rows="4" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 text-base sm:text-sm"></textarea>
                         @error('essay_2_action') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                     </div>
-
-                    {{-- Essay 3 --}}
                     <div>
                         <label class="block text-xs sm:text-sm font-medium text-gray-700">3. Briefly cite your experience with advocacy, leadership, or outreach.</label>
                         <textarea wire:model="essay_3_experience" rows="4" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 text-base sm:text-sm"></textarea>
                     </div>
-
-                    {{-- Essay 4 --}}
                     <div>
                         <label class="block text-xs sm:text-sm font-medium text-gray-700">4. Why do you want to take part as a member-advocate of BU MADYA?</label>
                         <textarea wire:model="essay_4_reason" rows="4" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 text-base sm:text-sm"></textarea>
                         @error('essay_4_reason') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                     </div>
-
-                    {{-- Essay 5 --}}
                     <div>
                         <label class="block text-xs sm:text-sm font-medium text-gray-700">5. Provide suggestions on engagement, platforms, or projects.</label>
                         <textarea wire:model="essay_5_suggestion" rows="4" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 text-base sm:text-sm"></textarea>
@@ -300,7 +351,7 @@
 
                     <div class="flex items-start">
                         <div class="flex items-center h-5">
-                            <input wire:model="willing_to_pay" id="pay" type="checkbox" class="focus:ring-red-500 h-4 w-4 text-red-600 border-gray-300 rounded">
+                            <input wire:model="willing_to_pay" @change="saveProgress" id="pay" type="checkbox" class="focus:ring-red-500 h-4 w-4 text-red-600 border-gray-300 rounded">
                         </div>
                         <div class="ml-3 text-sm">
                             <label for="pay" class="font-medium text-gray-700 text-sm">I am willing to pay the membership fee.</label>
@@ -316,6 +367,32 @@
                     </div>
                 </div>
             </form>
+        </div>
     @endif
-    
 </div>
+
+@script
+<script>
+    Livewire.on('registration-success', () => {
+        
+        // 1. Trigger SweetAlert2
+        Swal.fire({
+            title: 'Application Submitted!',
+            text: 'Thank you for joining BU MADYA. Please wait for the email regarding your application status.',
+            icon: 'success',
+            confirmButtonText: 'Okay, got it!',
+            confirmButtonColor: '#dc2626', // Matches your Red-600 theme
+            allowOutsideClick: false
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // 2. CLEAR THE BROWSER CACHE (Crucial!)
+                // This ensures the form doesn't auto-refill with old data
+                localStorage.removeItem('bu_madya_draft_v1');
+
+                // 3. Reload the page to reset everything cleanly
+                window.location.reload();
+            }
+        });
+    });
+</script>
+@endscript

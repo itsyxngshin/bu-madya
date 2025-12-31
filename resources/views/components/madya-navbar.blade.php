@@ -171,10 +171,16 @@
                     </div>
                 </div>
                 <div class="grid grid-cols-2 gap-2">
+                    @if(Auth::user()->role->role_name === 'administrator')
+                        <a href="{{ route('admin.dashboard') }}" class="flex justify-center py-2 bg-white border border-gray-200 rounded-lg text-xs font-bold uppercase tracking-wide text-gray-600 hover:bg-gray-100">
+                            Dashboard
+                        </a>
+                    @else
+                        <a href="{{ route('dashboard') }}" class="flex justify-center py-2 bg-white border border-gray-200 rounded-lg text-xs font-bold uppercase tracking-wide text-gray-600 hover:bg-gray-100">
+                            Dashboard
+                        </a>
+                    @endif
                     
-                    <a href="{{ route('dashboard') }}" class="flex justify-center py-2 bg-white border border-gray-200 rounded-lg text-xs font-bold uppercase tracking-wide text-gray-600 hover:bg-gray-100">
-                        Dashboard
-                    </a>
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
                         <button type="submit" class="w-full py-2 bg-red-100 border border-transparent rounded-lg text-xs font-bold uppercase tracking-wide text-red-700 hover:bg-red-200">

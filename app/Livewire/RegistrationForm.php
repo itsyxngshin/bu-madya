@@ -68,6 +68,17 @@ class RegistrationForm extends Component
                             ->first();
     }
 
+    public function restoreFromCache($data)
+    {
+        // Loop through the saved data and fill the properties
+        foreach ($data as $key => $value) {
+            // Only fill if the property exists in this class (security check)
+            if (property_exists($this, $key) && $key !== 'photo' && $key !== 'signature') {
+                $this->$key = $value;
+            }
+        }
+    }
+
     public function submit()
     {
         if (!$this->activeWave) {
@@ -106,10 +117,11 @@ class RegistrationForm extends Component
             'essay_4_reason' => $this->essay_4_reason,
             'essay_5_suggestion' => $this->essay_5_suggestion,
             'willing_to_pay' => true,
+            'status' => 'pending',
         ]);
 
-        session()->flash('message', 'Application submitted successfully! Please wait for our email regarding the next steps.');
-        $this->reset(); // Clear form
+        $this->dispatch('form-submitted');
+        $this->dispatch('registration-success');
     }
 
     public function render()
