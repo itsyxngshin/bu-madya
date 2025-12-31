@@ -36,9 +36,9 @@ class MembershipRequests extends Component
         $this->showDetailsModal = true;
     }
 
-    public function approve($id)
+    public function approve()
     {
-        $app = MembershipApplication::find($id);
+        $app = $this->selectedApplication;
         
         if ($app) {
             $app->update(['status' => 'approved',
