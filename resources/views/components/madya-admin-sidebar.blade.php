@@ -77,7 +77,7 @@
                 </a>
 
                 {{-- 2. SETTINGS (WAVES) LINK --}}
-                <a href="{{ route('admin.membership.settings') }}"
+                <a href="{{ route('admin.membership-settings') }}"
                 class="group flex items-center px-6 py-3 text-sm font-medium border-l-4 transition-all duration-200
                 {{ request()->routeIs('admin.membership-settings') 
                     ? 'border-indigo-600 text-indigo-600 bg-indigo-50' 
