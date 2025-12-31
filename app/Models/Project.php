@@ -21,10 +21,8 @@ class Project extends Model
     // Automatically convert JSON from DB into PHP Arrays
     protected $casts = [
         'implementation_date' => 'date',
-        'objectives' => 'array',
         'impact_stats' => 'array',
         'partners_list' => 'array',
-        'sdg_ids' => 'array',
     ];
 
     // Apply the Active Year Scope automatically to show only current projects

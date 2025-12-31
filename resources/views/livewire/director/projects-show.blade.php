@@ -242,7 +242,6 @@
         <main class="lg:col-span-8 space-y-12">
             
             {{-- 4. OBJECTIVES SECTION (For Project Show Page) --}}
-            {{-- OBJECTIVES SECTION --}}
             @if($project->objectives->isNotEmpty())
             <div class="mt-12 bg-gradient-to-br from-gray-900 to-gray-800 text-white p-8 rounded-[2rem] shadow-lg relative overflow-hidden">
                 <div class="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full blur-3xl -mr-10 -mt-10"></div>
