@@ -24,11 +24,13 @@ class RegistrationForm extends Component
     
     public $last_name, $first_name, $middle_initial;
     public $home_address, $birthday, $contact_number, $email, $facebook_link;
-    public $college, $year_level, $course;
+    public $year_level, $course;
     
     public $political_affiliation;
     public $photo, $signature; // Temporary file uploads
-    public $committee_1, $committee_2;
+    public $college_id;        // Was $college
+    public $committee_1_id;    // Was $committee_1
+    public $committee_2_id;    // Was $committee_2
     
     public $essay_1_community, $essay_2_action, $essay_3_experience;
     public $essay_4_reason, $essay_5_suggestion;
@@ -43,14 +45,14 @@ class RegistrationForm extends Component
         'birthday' => 'required|date',
         'contact_number' => 'required|string',
         'email' => 'required|email',
-        'college' => 'required',
+        'college_id' => 'required|exists:colleges,id',
+        'committee_1_id' => 'required|exists:committees,id',
+        'committee_2_id' => 'required|exists:committees,id|different:committee_1_id',
         'course' => 'required',
         'year_level' => 'required',
         'photo' => 'required|image|max:5120', // 5MB Max
         'signature' => 'required|image|max:5120',
         'political_affiliation' => 'nullable|string',
-        'committee_1' => 'required',
-        'committee_2' => 'required',
         'essay_1_community' => 'required|string|min:20',
         'essay_2_action' => 'required|string|min:20',
         'essay_4_reason' => 'required|string|min:20',
@@ -89,12 +91,12 @@ class RegistrationForm extends Component
             'contact_number' => $this->contact_number,
             'email' => $this->email,
             'facebook_link' => $this->facebook_link,
-            'college' => $this->college,
+            'college_id' => $this->college_id,
+            'committee_1_id' => $this->committee_1_id,
+            'committee_2_id' => $this->committee_2_id,
             'year_level' => $this->year_level,
             'course' => $this->course,
             'political_affiliation' => $this->political_affiliation,
-            'committee_1' => $this->committee_1,
-            'committee_2' => $this->committee_2,
             'photo_path' => $photoPath,
             'membership_wave_id' => $this->activeWave->id,
             'signature_path' => $sigPath,

@@ -114,13 +114,15 @@
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
                         <div class="md:col-span-1">
                             <label class="block text-xs sm:text-sm font-medium text-gray-700">College / Institute</label>
-                            <select wire:model="college" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 text-base sm:text-sm">
+                            {{-- Update wire:model --}}
+                            <select wire:model="college_id" class="...">
                                 <option value="">Select College</option>
                                 @foreach($colleges as $c) 
-                                    <option value="{{ $c->name }}">{{ $c->name }}</option> 
+                                    {{-- Update value to ID --}}
+                                    <option value="{{ $c->id }}">{{ $c->name }}</option> 
                                 @endforeach
                             </select>
-                            @error('college') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                            @error('college_id') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                         </div>
                         <div class="md:col-span-1">
                             <label class="block text-xs sm:text-sm font-medium text-gray-700">Year Level</label>
@@ -143,7 +145,7 @@
                     {{-- Politics --}}
                     <div>
                         <label class="block text-xs sm:text-sm font-medium text-gray-700">Political Affiliations</label>
-                        <p class="text-[10px] sm:text-xs text-gray-500 mb-2">NOTE: BU MADYA is nonpartisan.</p>
+                        <p class="text-[10px] sm:text-xs text-gray-500 mb-2">NOTE: BU MADYA is nonpartisan. We encourage non-affiliation to any political parties.</p>
                         <textarea wire:model="political_affiliation" rows="2" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 text-base sm:text-sm" placeholder="List affiliations or type 'None'"></textarea>
                     </div>
 
@@ -230,10 +232,10 @@
                         {{-- 1st Choice --}}
                         <div>
                             <label class="block text-xs sm:text-sm font-medium text-gray-700">1st Choice Committee</label>
-                            <select wire:model="committee_1" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 text-base sm:text-sm">
+                            <select wire:model="committee_1_id" class="...">
                                 <option value="">Select...</option>
                                 @foreach($committees as $comm) 
-                                    <option value="{{ $comm->name }}">{{ $comm->name }}</option> 
+                                    <option value="{{ $comm->id }}">{{ $comm->name }}</option> 
                                 @endforeach
                             </select>
                         </div>
@@ -241,10 +243,10 @@
                         {{-- 2nd Choice --}}
                         <div>
                             <label class="block text-xs sm:text-sm font-medium text-gray-700">2nd Choice Committee</label>
-                            <select wire:model="committee_2" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 text-base sm:text-sm">
+                            <select wire:model="committee_2_id" class="...">
                                 <option value="">Select...</option>
                                 @foreach($committees as $comm) 
-                                    <option value="{{ $comm->name }}">{{ $comm->name }}</option> 
+                                    <option value="{{ $comm->id }}">{{ $comm->name }}</option> 
                                 @endforeach
                             </select>
                         </div>
