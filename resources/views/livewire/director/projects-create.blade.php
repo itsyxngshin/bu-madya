@@ -208,7 +208,6 @@
 
             {{-- SECTION 3: PARTNERS & STATS --}}
             <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 space-y-6">
-                
                 {{-- Objectives --}}
                 <div>
                     <div class="flex justify-between items-center mb-2">

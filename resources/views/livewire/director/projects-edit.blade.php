@@ -432,9 +432,6 @@
         </div>
 
         {{-- RIGHT PANEL: LIVE PREVIEW --}}
-        {{-- ... (The Preview logic is the same as create, but ensure variable names match the updated array logic I provided earlier) ... --}}
-        
-        {{-- I will re-paste the corrected PHP logic for preview here just to be safe --}}
         @php
             // Proponents Preview
             $previewProponents = [];
@@ -463,17 +460,42 @@
         <div class="w-full md:w-7/12 h-full overflow-y-auto bg-stone-100 relative shadow-inner"
              :class="mobilePreview ? 'block' : 'hidden md:block'">
              
-             {{-- ... Preview Content (Same as Create, using $title, $description, $impact_stats, $previewPartners, $proponentLabel etc) ... --}}
-             {{-- Just ensure the COVER IMAGE in preview handles the old vs new logic --}}
              <div class="min-h-full bg-stone-50 pb-20 origin-top scale-90 md:scale-100 transition-transform pointer-events-none select-none">
+                
+                {{-- A. HERO HEADER --}}
                 <header class="relative pt-20 pb-16 px-6 max-w-5xl mx-auto">
                     <div class="grid lg:grid-cols-2 gap-12 items-center">
                         <div class="order-2 lg:order-1">
-                            {{-- ... text content ... --}}
+                            <div class="flex items-center gap-3 mb-6">
+                                <span class="px-3 py-1 bg-yellow-400 text-stone-900 text-xs font-bold uppercase tracking-wider rounded-full">
+                                    {{ $status }}
+                                </span>
+                                @if($project_category_id)
+                                    @php $cat = $categories->find($project_category_id); @endphp
+                                    @if($cat)
+                                    <span class="px-3 py-1 border border-stone-300 text-stone-500 text-xs font-bold uppercase tracking-wider rounded-full">
+                                        {{ $cat->name }}
+                                    </span>
+                                    @endif
+                                @endif
+                            </div>
                             <h1 class="font-heading text-4xl md:text-5xl font-black text-gray-900 leading-[1.1] mb-6">
                                 {{ $title ?: 'Project Title' }}
                             </h1>
-                            {{-- ... --}}
+                            <div class="flex items-start gap-4 text-stone-600 mb-8">
+                                <div class="bg-white p-3 rounded-xl shadow-sm border border-stone-100">
+                                    <span class="block text-[10px] font-bold text-stone-400 uppercase tracking-wider mb-1">When</span>
+                                    <span class="font-bold text-sm text-gray-800">{{ $date ? \Carbon\Carbon::parse($date)->format('M d, Y') : 'Date TBD' }}</span>
+                                </div>
+                                <div class="bg-white p-3 rounded-xl shadow-sm border border-stone-100">
+                                    <span class="block text-[10px] font-bold text-stone-400 uppercase tracking-wider mb-1">Where</span>
+                                    <span class="font-bold text-sm text-gray-800">{{ $location ?: 'Location TBD' }}</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2 text-sm font-medium text-stone-500">
+                                <span class="w-8 h-8 rounded-full bg-stone-200 flex items-center justify-center text-xs font-bold">BP</span>
+                                <span>By <span class="text-gray-900 font-bold border-b-2 border-yellow-400">{{ $proponentLabel }}</span></span>
+                            </div>
                         </div>
                         <div class="order-1 lg:order-2 relative">
                             <div class="relative overflow-hidden rounded-[2.5rem] shadow-2xl aspect-[4/3] border-4 border-white bg-gray-200">
@@ -485,13 +507,132 @@
                                     <div class="flex items-center justify-center h-full text-gray-400">No Image</div>
                                 @endif
                                 <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
-                                {{-- ... --}}
+                                <div class="absolute bottom-6 right-6 bg-white/90 backdrop-blur px-4 py-2 rounded-xl text-xs font-bold shadow-lg">
+                                    {{ $beneficiaries ?: 'Beneficiaries' }}
+                                </div>
                             </div>
                         </div>
                     </div>
                 </header>
-                {{-- ... --}}
-                {{-- Use $previewPartners loop for the Partners Card here --}}
+
+                {{-- B. CONTENT GRID --}}
+                <div class="px-6 max-w-5xl mx-auto grid md:grid-cols-12 gap-12">
+                    
+                    {{-- LEFT COLUMN: NARRATIVE --}}
+                    <div class="md:col-span-8 space-y-12">
+                        <div class="prose prose-lg prose-stone max-w-none">
+                            <p class="lead text-xl text-gray-600 font-medium italic">
+                                {{ $description ?: 'Project description will appear here...' }}
+                            </p>
+                        </div>
+
+                        {{-- Objectives Preview --}}
+                        @if(count($objectives) > 0 && !empty($objectives[0]))
+                        <div class="bg-white rounded-2xl shadow-sm border border-stone-100 overflow-hidden">
+                            <div class="bg-stone-50 px-6 py-3 border-b border-stone-100 flex items-center gap-2">
+                                <div class="w-2 h-2 rounded-full bg-yellow-400"></div>
+                                <h3 class="text-xs font-bold uppercase tracking-widest text-stone-500">Project Objectives</h3>
+                            </div>
+                            <div class="p-6">
+                                <ul class="space-y-3">
+                                    @foreach($objectives as $obj)
+                                        @if($obj)
+                                        <li class="flex items-start gap-3 text-stone-600">
+                                            <svg class="w-5 h-5 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                            <span class="text-sm font-medium">{{ $obj }}</span>
+                                        </li>
+                                        @endif
+                                    @endforeach
+                                </ul>
+                            </div>
+                        </div>
+                        @endif
+
+                        {{-- Gallery Preview (Existing + New) --}}
+                        @if(count($galleryInputs) > 0 || count($pendingGalleryItems) > 0)
+                        <div class="grid grid-cols-2 gap-4">
+                            {{-- Show Existing --}}
+                            @foreach($galleryInputs as $item)
+                                <div class="aspect-video bg-gray-200 rounded-xl overflow-hidden relative group">
+                                    <img src="{{ asset('storage/'.$item['image_path']) }}" class="w-full h-full object-cover">
+                                    <div class="absolute inset-0 bg-black/60 flex items-end p-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <p class="text-white text-xs font-bold">{{ $item['title'] ?: 'Untitled' }}</p>
+                                    </div>
+                                </div>
+                            @endforeach
+                            {{-- Show Pending --}}
+                            @foreach($pendingGalleryItems as $item)
+                                <div class="aspect-video bg-gray-200 rounded-xl overflow-hidden relative group border-2 border-green-400">
+                                    <img src="{{ $item['temp_file']->temporaryUrl() }}" class="w-full h-full object-cover">
+                                    <div class="absolute inset-0 bg-black/60 flex items-end p-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <p class="text-white text-xs font-bold">{{ $item['title'] ?: 'New Upload' }}</p>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                        @endif
+                    </div>
+
+                    {{-- RIGHT COLUMN: SIDEBAR --}}
+                    <div class="md:col-span-4 space-y-6">
+                        
+                        {{-- SDGs Card --}}
+                        @if(count($selectedSdgs) > 0)
+                        <div class="bg-white rounded-2xl shadow-sm border border-stone-100 p-5">
+                            <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Target SDGs</h4>
+                            <div class="grid grid-cols-3 gap-2">
+                                @foreach($selectedSdgs as $id)
+                                    @php $s = $sdgs->find($id); @endphp
+                                    @if($s)
+                                    <div style="background-color: {{ $s->color_hex }}" class="aspect-square rounded-lg flex flex-col items-center justify-center text-white p-1 shadow-sm">
+                                        <span class="text-sm font-black">{{ $s->number }}</span>
+                                    </div>
+                                    @endif
+                                @endforeach
+                            </div>
+                        </div>
+                        @endif
+
+                        {{-- Impact Stats Card --}}
+                        @if(count($impact_stats) > 0 && !empty($impact_stats[0]['value']))
+                        <div class="bg-stone-900 text-white rounded-2xl shadow-lg p-6 relative overflow-hidden">
+                            <div class="absolute top-0 right-0 w-20 h-20 bg-yellow-500 rounded-full blur-2xl opacity-20 -mr-10 -mt-10"></div>
+                            <h4 class="text-xs font-bold text-stone-400 uppercase tracking-widest mb-4 relative z-10">Impact</h4>
+                            <div class="space-y-4 relative z-10">
+                                @foreach($impact_stats as $stat)
+                                    @if(!empty($stat['value']))
+                                    <div class="flex justify-between items-end border-b border-stone-800 pb-2">
+                                        <span class="text-2xl font-black text-yellow-400">{{ $stat['value'] }}</span>
+                                        <span class="text-xs font-bold text-stone-400 uppercase">{{ $stat['label'] }}</span>
+                                    </div>
+                                    @endif
+                                @endforeach
+                            </div>
+                        </div>
+                        @endif
+
+                        {{-- Partners Card --}}
+                        @if(!empty($previewPartners))
+                        <div class="bg-white rounded-2xl shadow-sm border border-stone-100 p-5">
+                            <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">In Partnership With</h4>
+                            <div class="space-y-3">
+                                @foreach($previewPartners as $p)
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-full bg-stone-100 flex items-center justify-center text-stone-400">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs font-bold text-gray-900 leading-tight">{{ $p['name'] }}</p>
+                                        <p class="text-[10px] font-medium text-gray-500 uppercase">{{ $p['role'] }}</p>
+                                    </div>
+                                </div>
+                                @endforeach
+                            </div>
+                        </div>
+                        @endif
+
+                    </div>
+                </div>
              </div>
         </div>
 
