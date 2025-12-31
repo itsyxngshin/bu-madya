@@ -116,7 +116,7 @@ Route::middleware(['auth', 'role:administrator'])->prefix('admin')->name('admin.
     Route::get('/news', NewsRoster::class)->name('news.index');
     Route::get('/user', UserRoster::class)->name('user.index');
     Route::get('/settings', Settings::class)->name('settings');
-    Route::get('/membership/settings', MembershipSetting::class)->name('settings');
+    Route::get('/membership/settings', MembershipSetting::class)->name('membership-settings');
     Route::get('/membership/requests', MembershipRequests::class)->name('membership-requests'); 
     Route::get('/dashboard', AdminDashboard::class)->name('dashboard');
 });
