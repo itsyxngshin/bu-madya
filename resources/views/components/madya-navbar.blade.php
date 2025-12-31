@@ -52,10 +52,17 @@
                 <div class="hidden hidden xl:flex items-center gap-3">
                     @auth
                         {{-- Dashboard Link --}}
-                        <a href="{{ route('dashboard') }}" class="text-xs font-bold uppercase tracking-widest text-gray-500 hover:text-red-600 transition">
-                            Dashboard
-                        </a>
-
+                        @if(Auth::user()->role && in_array(Auth::user()->role->role_name, ['administrator', 'director']))
+                            @if(Auth::user()->role->role_name === 'administrator')
+                                <a href="{{ route('admin.dashboard') }}" class="text-xs font-bold uppercase tracking-widest text-gray-500 hover:text-red-600 transition">
+                                    Dashboard
+                                </a>
+                            @else
+                            <a href="{{ route('dashboard') }}" class="text-xs font-bold uppercase tracking-widest text-gray-500 hover:text-red-600 transition">
+                                Dashboard
+                            </a>
+                            @endif
+                        @endif
                         {{-- User Dropdown --}}
                         <div class="relative ml-3" x-data="{ dropdownOpen: false }">
                             <button @click="dropdownOpen = !dropdownOpen" type="button" class="flex text-sm border-2 border-transparent rounded-full focus:outline-none focus:border-red-300 transition hover:shadow-md">
@@ -164,6 +171,7 @@
                     </div>
                 </div>
                 <div class="grid grid-cols-2 gap-2">
+                    
                     <a href="{{ route('dashboard') }}" class="flex justify-center py-2 bg-white border border-gray-200 rounded-lg text-xs font-bold uppercase tracking-wide text-gray-600 hover:bg-gray-100">
                         Dashboard
                     </a>
