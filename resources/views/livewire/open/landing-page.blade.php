@@ -50,7 +50,7 @@
                 </p>
 
                 <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                    <a href="{{ route('register') }}" class="px-8 py-4 bg-yellow-400 text-green-900 font-bold rounded-full shadow-[0_0_20px_rgba(250,204,21,0.5)] hover:bg-yellow-300 hover:scale-105 transition transform uppercase tracking-wider text-sm">
+                    <a href="{{ route('membership-form') }}" class="px-8 py-4 bg-yellow-400 text-green-900 font-bold rounded-full shadow-[0_0_20px_rgba(250,204,21,0.5)] hover:bg-yellow-300 hover:scale-105 transition transform uppercase tracking-wider text-sm">
                         Join the Movement
                     </a>
                     <a href="#pillars" class="px-8 py-4 bg-white/10 backdrop-blur-md border border-white/30 text-white font-bold rounded-full hover:bg-white/20 transition uppercase tracking-wider text-sm">
@@ -262,7 +262,7 @@
                     </div>
                     <h3 class="font-heading text-2xl font-bold mb-2">Join the Movement</h3>
                     <p class="text-red-100 text-sm mb-6">Get exclusive access to workshops and networking events.</p>
-                    <a href="{{ route('register') }}" class="block w-full py-3 bg-white text-red-700 font-bold rounded-xl hover:bg-yellow-300 hover:text-red-900 transition shadow-lg uppercase tracking-wider text-xs">
+                    <a href="{{ route('membership-form') }}" class="block w-full py-3 bg-white text-red-700 font-bold rounded-xl hover:bg-yellow-300 hover:text-red-900 transition shadow-lg uppercase tracking-wider text-xs">
                         Apply Now
                     </a>
                 </div>

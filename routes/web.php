@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Livewire\Open\LandingPage;
 use App\Livewire\About;
 use App\Livewire\EventsCalendar;
+use App\Livewire\RegistrationForm;
 use App\Livewire\Open\Directory;
 use App\Livewire\Open\Committees;
 use App\Livewire\Open\CommitteeMembers;
@@ -37,6 +38,11 @@ use App\Livewire\Admin\ProjectRoster;
 use App\Livewire\Admin\NewsRoster;
 use App\Livewire\Admin\AdminDashboard;
 use App\Livewire\Admin\Settings;
+use App\Livewire\Admin\MembershipSetting;
+use App\Livewire\Admin\MembershipRequests;
+use App\Models\MembershipApplication; 
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Response;
 
 
 #use App\Livewire\Admin\AdminProposalsIndex;
@@ -46,6 +52,27 @@ use App\Livewire\Admin\Settings;
 Route::get('/', function () {
     return view('welcome');
 }); 
+
+Route::get('/secure-file/{application}', function (\App\Models\MembershipApplication $application) {
+    
+    // 1. Security Check: Only allow if user is logged in & authorized
+    if (!auth()->check() || !in_array(auth()->user()->role->role_name, ['administrator', 'director'])) {
+        abort(403);
+    }
+
+    // 2. Fetch the path
+    $path = $application->signature_path;
+
+    // 3. Check if file exists in the PRIVATE storage
+    if (!Storage::disk('local')->exists($path)) {
+        abort(404);
+    }
+
+    // 4. Return the file securely
+    $file = Storage::disk('local')->path($path);
+    return response()->file($file);
+
+})->name('secure.signature');
 
 /*
 Route::middleware([
@@ -89,6 +116,8 @@ Route::middleware(['auth', 'role:administrator'])->prefix('admin')->name('admin.
     Route::get('/news', NewsRoster::class)->name('news.index');
     Route::get('/user', UserRoster::class)->name('user.index');
     Route::get('/settings', Settings::class)->name('settings');
+    Route::get('/membership/settings', MembershipSetting::class)->name('settings');
+    Route::get('/membership/requests', MembershipRequests::class)->name('membership-requests'); 
     Route::get('/dashboard', AdminDashboard::class)->name('dashboard');
 });
 
@@ -124,6 +153,8 @@ Route::get('/profile/{username}', UserProfile::class)->name('profile.public');
 Route::get('/submit-proposal', ProposalsCreate::class)->name('proposals.create');
 Route::get('/the-pillars', ThePillars::class)->name('pillars.index');
 Route::get('/calendar', EventsCalendar::class)->name('event-calendar');
+// Ensure the RegistrationForm class exists in the correct namespace
+Route::get('/membership-form', RegistrationForm::class)->name('membership-form');
 
 
 
