@@ -241,8 +241,8 @@
         {{-- RIGHT CONTENT --}}
         <main class="lg:col-span-8 space-y-12">
             
-            {{-- 4. OBJECTIVES SECTION --}}
-            @if($project->objectives && $project->objectives->count() > 0)
+            {{-- 4. OBJECTIVES SECTION (Fixed for Preview) --}}
+            @if(count($objectives) > 0 && !empty($objectives[0]))
             <div class="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-8 rounded-[2rem] shadow-lg relative overflow-hidden">
                 {{-- Decorative Blob --}}
                 <div class="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full blur-3xl -mr-10 -mt-10"></div>
@@ -255,19 +255,22 @@
                 
                 {{-- List --}}
                 <ul class="space-y-4 relative z-10">
-                    @foreach($project->objectives as $obj)
-                    <li class="flex items-start gap-3 group">
-                        {{-- Icon --}}
-                        <div class="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center shrink-0 group-hover:bg-green-500 transition-colors duration-300">
-                            <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
-                        </div>
-                        
-                        {{-- Text --}}
-                        <span class="text-gray-200 text-sm md:text-base leading-relaxed group-hover:text-white transition-colors">
-                            {{-- CRITICAL: Use ->objective to get the text, not the whole object --}}
-                            {{ $obj->objective }}
-                        </span>
-                    </li>
+                    @foreach($objectives as $obj)
+                        {{-- Check if the line is not empty --}}
+                        @if(!empty($obj)) 
+                        <li class="flex items-start gap-3 group">
+                            {{-- Icon --}}
+                            <div class="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center shrink-0 group-hover:bg-green-500 transition-colors duration-300">
+                                <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                            </div>
+                            
+                            {{-- Text --}}
+                            <span class="text-gray-200 text-sm md:text-base leading-relaxed group-hover:text-white transition-colors">
+                                {{-- FIX: Output the string directly, not as an object property --}}
+                                {{ $obj }}
+                            </span>
+                        </li>
+                        @endif
                     @endforeach
                 </ul>
             </div>
