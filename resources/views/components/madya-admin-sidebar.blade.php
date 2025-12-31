@@ -53,7 +53,7 @@
             <div class="mt-2 space-y-1">
                 
                 {{-- 1. REQUESTS LINK --}}
-                <a href="{{ route('admin.membership.requests') }}"
+                <a href="{{ route('admin.membership-requests') }}"
                 class="group flex items-center px-6 py-3 text-sm font-medium border-l-4 transition-all duration-200
                 {{ request()->routeIs('admin.membership-requests') 
                     ? 'border-indigo-600 text-indigo-600 bg-indigo-50' 
