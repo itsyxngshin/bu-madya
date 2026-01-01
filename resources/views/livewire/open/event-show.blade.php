@@ -65,7 +65,7 @@
                     <div class="flex items-center gap-3 bg-white px-5 py-3 rounded-2xl shadow-sm border border-gray-100">
                         <div class="text-red-600"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg></div>
                         <div class="text-left">
-                            <p class="text-[10px] font-bold uppercase text-gray-400 tracking-wider">Date</p>
+                            <p class="text-[10px] font-bold uppercase text-gray-400 tracking-wider">Start Date</p>
                             <p class="font-bold text-sm text-gray-900">{{ $event->start_date ? $event->start_date->format('F d, Y') : 'TBA' }}</p>
                         </div>
                     </div>
@@ -73,8 +73,24 @@
                     <div class="flex items-center gap-3 bg-white px-5 py-3 rounded-2xl shadow-sm border border-gray-100">
                         <div class="text-red-600"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div>
                         <div class="text-left">
-                            <p class="text-[10px] font-bold uppercase text-gray-400 tracking-wider">Time</p>
+                            <p class="text-[10px] font-bold uppercase text-gray-400 tracking-wider">Start Time</p>
                             <p class="font-bold text-sm text-gray-900">{{ $event->start_date ? $event->start_date->format('h:i A') : 'TBA' }}</p>
+                        </div>
+                    </div>
+                    {{-- Date --}}
+                    <div class="flex items-center gap-3 bg-white px-5 py-3 rounded-2xl shadow-sm border border-gray-100">
+                        <div class="text-red-600"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg></div>
+                        <div class="text-left">
+                            <p class="text-[10px] font-bold uppercase text-gray-400 tracking-wider">End Date</p>
+                            <p class="font-bold text-sm text-gray-900">{{ $event->end_date ? $event->end_date->format('F d, Y') : 'TBA' }}</p>
+                        </div>
+                    </div>
+                    {{-- Time --}}
+                    <div class="flex items-center gap-3 bg-white px-5 py-3 rounded-2xl shadow-sm border border-gray-100">
+                        <div class="text-red-600"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div>
+                        <div class="text-left">
+                            <p class="text-[10px] font-bold uppercase text-gray-400 tracking-wider">End Time</p>
+                            <p class="font-bold text-sm text-gray-900">{{ $event->end_date ? $event->end_date->format('h:i A') : 'TBA' }}</p>
                         </div>
                     </div>
                 </div>
