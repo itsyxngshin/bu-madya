@@ -1,10 +1,9 @@
 <?php
 
-namespace App\Livewire\Public;
+namespace App\Livewire\Open;
 
 use Livewire\Component;
 use App\Models\Event;
-
 class EventShow extends Component
 {
     public Event $event;

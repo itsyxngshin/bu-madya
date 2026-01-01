@@ -13,6 +13,8 @@ use App\Livewire\Open\RoundtableShow;
 use App\Livewire\Open\News\Index as NewsIndex;
 use App\Livewire\Open\News\Show as NewsShow;
 use App\Livewire\Open\ThePillars;
+use App\Livewire\Open\EventsIndex;
+use App\Livewire\Open\EventShow;
 
 use App\Livewire\Director\NewsCreate;
 use App\Livewire\Director\NewsEdit;
@@ -40,6 +42,7 @@ use App\Livewire\Admin\AdminDashboard;
 use App\Livewire\Admin\Settings;
 use App\Livewire\Admin\MembershipSetting;
 use App\Livewire\Admin\MembershipRequests;
+use App\Livewire\Admin\CreateEvent;
 use App\Models\MembershipApplication; 
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Response;
@@ -119,6 +122,7 @@ Route::middleware(['auth', 'role:administrator'])->prefix('admin')->name('admin.
     Route::get('/membership/settings', MembershipSetting::class)->name('membership-settings');
     Route::get('/membership/requests', MembershipRequests::class)->name('membership-requests'); 
     Route::get('/dashboard', AdminDashboard::class)->name('dashboard');
+    Route::get('/events/create', CreateEvent::class)->name('events.create');
 });
 
 Route::middleware(['auth', 'role:administrator,director'])  
@@ -153,8 +157,9 @@ Route::get('/profile/{username}', UserProfile::class)->name('profile.public');
 Route::get('/submit-proposal', ProposalsCreate::class)->name('proposals.create');
 Route::get('/the-pillars', ThePillars::class)->name('pillars.index');
 Route::get('/calendar', EventsCalendar::class)->name('event-calendar');
-// Ensure the RegistrationForm class exists in the correct namespace
 Route::get('/membership-form', RegistrationForm::class)->name('membership-form');
+Route::get('/events', EventsIndex::class)->name('events.index');
+Route::get('/events/{slug}', EventShow::class)->name('events.show');
 
 
 
