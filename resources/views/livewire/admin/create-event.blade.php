@@ -165,9 +165,7 @@
                             text: this.link, width: 180, height: 180,
                             colorDark : '#d90429', colorLight : '#ffffff',
                             correctLevel : QRCode.CorrectLevel.H,
-                            logo: '{{ asset('images/official_logo.png') }}',
-                            logoWidth: 50, logoHeight: 50,
-                            dotScale: 0.8
+                            dotScale: 1.0
                         };
                         this.qrObject = new QRCode(this.$refs.qrcodeContainer, options);
                     }
