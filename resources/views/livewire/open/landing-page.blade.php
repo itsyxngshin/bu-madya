@@ -5,7 +5,7 @@
         
         {{-- Background & Overlay --}}
         <div class="absolute inset-0 z-0">
-            <img src="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=2070&auto=format&fit=crop" 
+            <img src="{{ asset('public/images/IMG_2800.jpg')}}" 
                  class="w-full h-full object-cover transform scale-105 animate-slow-pan" alt="University Background">
             
             {{-- Tri-Color Gradient Overlay --}}
