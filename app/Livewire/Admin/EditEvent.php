@@ -27,12 +27,14 @@ class EditEvent extends Component
     public $end_date;
     public $is_active;
     public $photo_upload;
-
+    public $slug;
     protected $rules = [
         'title' => 'required|string|max:255',
         'registration_link' => 'nullable|url',
         'cover_image' => 'nullable|image|max:2048',
     ];
+    // 2. Add this method
+    
 
     public function mount($id)
     {
@@ -40,6 +42,7 @@ class EditEvent extends Component
 
         // Fill the form properties with existing database data
         $this->title = $this->event->title;
+        $this->slug = $this->event->slug;
         $this->description = $this->event->description;
         $this->old_cover_image = $this->event->cover_image;
         $this->registration_link = $this->event->registration_link;
@@ -53,16 +56,12 @@ class EditEvent extends Component
     }
 
     // Add this hook
+
     public function updatedPhotoUpload()
     {
-        $this->validate([
-            'photo_upload' => 'image|max:1024', // 1MB Max
-        ]);
-
-        // Dispatch event to insert the image tag into the editor
+        $this->validate(['photo_upload' => 'image|max:3072']);
         $this->dispatch('photo-inserted', url: $this->photo_upload->temporaryUrl());
     }
-
     public function update()
     {
         $this->validate();
@@ -80,8 +79,7 @@ class EditEvent extends Component
 
         $this->event->update([
             'title' => $this->title,
-            // Only update slug if title changed (optional, but good practice)
-            'slug' => Str::slug($this->title), 
+            'slug' => Str::slug($this->slug),
             'description' => $this->description,
             'cover_image' => $imagePath,
             'registration_link' => $this->registration_link,
