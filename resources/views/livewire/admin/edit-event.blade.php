@@ -147,39 +147,76 @@
         {{-- RIGHT COLUMN: Settings & QR --}}
         <div class="md:col-span-1 space-y-6">
             
+            {{-- Registration & Pro QR (Client Side) --}}
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100"
-                 x-data="{ 
+                x-data="{ 
                     link: @entangle('registration_link'),
                     qrObject: null,
                     generateQR() {
-                        if (!this.link) { 
-                            this.$refs.qrcodeContainer.innerHTML = '';
-                            return; 
-                        }
-                        this.$refs.qrcodeContainer.innerHTML = '';
-                        new QRCode(this.$refs.qrcodeContainer, {
-                            text: this.link, width: 180, height: 180,
-                            colorDark : '#d90429', colorLight : '#ffffff',
-                            correctLevel : QRCode.CorrectLevel.H,
-                            logoWidth: 50, logoHeight: 50, dotScale: 0.8
+                        // Wait for next tick to ensure DOM element exists
+                        this.$nextTick(() => {
+                            const container = this.$refs.qrcodeContainer;
+                            if (!container) return;
+
+                            // Clear previous QR
+                            container.innerHTML = '';
+
+                            if (!this.link) return;
+
+                            // Generate New QR
+                            try {
+                                this.qrObject = new QRCode(container, {
+                                    text: this.link,
+                                    width: 180,
+                                    height: 180,
+                                    colorDark : '#d90429',
+                                    colorLight : '#ffffff',
+                                    correctLevel : QRCode.CorrectLevel.H,
+                                    // Remove logo momentarily if it causes issues, or ensure path is correct
+                                    logo: '{{ asset('images/official_logo.png') }}', 
+                                    logoWidth: 50,
+                                    logoHeight: 50,
+                                    dotScale: 0.8
+                                });
+                            } catch (e) {
+                                console.error('QR Generation Failed', e);
+                            }
                         });
                     }
-                 }" 
-                 x-init="generateQR(); $watch('link', () => generateQR())"
-                 >
+                }" 
+                x-init="generateQR(); $watch('link', () => generateQR())"
+                >
+
                 <h3 class="text-sm font-bold text-gray-900 uppercase tracking-widest mb-4">Registration</h3>
+                
                 <div class="mb-4">
                     <label class="block text-xs font-bold text-gray-500 mb-1">Target URL</label>
-                    <input x-model="link" type="url" class="w-full rounded-lg border-gray-200 text-sm focus:ring-red-500 transition">
+                    <input x-model="link" type="url" class="w-full rounded-lg border-gray-200 text-sm focus:ring-red-500 transition" placeholder="https://...">
                 </div>
+
                 <div class="bg-gray-50 p-6 rounded-xl border border-gray-200 flex flex-col items-center text-center">
-                    <div class="bg-white p-3 rounded-2xl shadow-md mb-3" x-show="link">
+                    {{-- QR Container --}}
+                    <div class="bg-white p-3 rounded-2xl shadow-md mb-3" x-show="link" x-cloak>
                         <div x-ref="qrcodeContainer"></div>
                     </div>
-                    <div x-show="!link" class="h-20 flex items-center justify-center text-gray-400 text-xs italic">
-                        No link provided
+                    
+                    {{-- Empty State --}}
+                    <div x-show="!link" class="h-40 flex items-center justify-center text-gray-400 text-xs italic" x-cloak>
+                        Paste a link above to generate<br>your custom QR code.
+                    </div>
+
+                    {{-- Download Button --}}
+                    <div x-show="link" class="mt-2" x-cloak>
+                        <p class="text-[10px] font-bold text-gray-400 uppercase">Live Preview</p>
+                        <button @click="qrObject._el.querySelector('img').src && ((link = document.createElement('a')), (link.href = qrObject._el.querySelector('img').src), (link.download = 'event_qr.png'), link.click())" 
+                                type="button" 
+                                class="mt-3 text-xs flex items-center gap-1 text-red-600 font-bold hover:underline transition">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                            Download PNG
+                        </button>
                     </div>
                 </div>
+
                 <div class="mt-4">
                     <label class="block text-xs font-bold text-gray-500 mb-1">Button Label</label>
                     <input wire:model="registration_button_text" type="text" class="w-full rounded-lg border-gray-200 text-sm focus:ring-red-500">
