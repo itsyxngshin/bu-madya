@@ -141,11 +141,11 @@
 
                 {{-- Right: Upcoming Projects (Simple List View) --}}
                 {{-- Kept as a quick-glance list alongside the main calendar --}}
-                <div class="bg-gray-900 text-white rounded-[2rem] shadow-lg p-6 relative overflow-hidden">
+                <div class="bg-gray-900 text-white rounded-[2rem] z-50 shadow-lg p-6 relative overflow-hidden">
                     <div class="absolute top-0 right-0 w-32 h-32 bg-red-600 rounded-full blur-3xl opacity-20 -mr-10 -mt-10 pointer-events-none"></div>
-                    <h3 class="font-bold text-white uppercase tracking-widest text-xs mb-6 relative z-10">Next Up</h3>
+                    <h3 class="font-bold text-white uppercase tracking-widest text-xs mb-6 relative">Next Up</h3>
                     
-                    <div class="space-y-4 relative z-10">
+                    <div class="space-y-4 relative">
                         @forelse($upcomingProjects as $proj)
                         <div class="p-4 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/5 hover:bg-white/15 transition">
                             <div class="flex justify-between items-start">
