@@ -173,4 +173,55 @@
             </div>
         </div>
     </div>
+    {{-- 3. NEW SECTION: ACCOUNT SECURITY --}}
+    <div class="mt-12">
+        <h3 class="text-xl font-bold text-gray-900 mb-6 px-2">Account Security</h3>
+
+        <div class="space-y-8">
+            
+            {{-- A. CHANGE PASSWORD --}}
+            @if (Laravel\Fortify\Features::enabled(Laravel\Fortify\Features::updatePasswords()))
+                <div class="bg-white rounded-3xl shadow-xl overflow-hidden p-8">
+                    <div class="mb-4">
+                        <h4 class="text-lg font-bold text-gray-900">Update Password</h4>
+                        <p class="text-xs text-gray-500">Ensure your account is using a long, random password to stay secure.</p>
+                    </div>
+                    {{-- This renders the standard Jetstream Password Form --}}
+                    @livewire('profile.update-password-form')
+                </div>
+            @endif
+
+            {{-- B. TWO FACTOR AUTHENTICATION --}}
+            @if (Laravel\Fortify\Features::canManageTwoFactorAuthentication())
+                <div class="bg-white rounded-3xl shadow-xl overflow-hidden p-8">
+                    <div class="mb-4">
+                        <h4 class="text-lg font-bold text-gray-900">Two-Factor Authentication</h4>
+                        <p class="text-xs text-gray-500">Add additional security to your account using mobile authenticator apps.</p>
+                    </div>
+                    @livewire('profile.two-factor-authentication-form')
+                </div>
+            @endif
+
+            {{-- C. BROWSER SESSIONS --}}
+            <div class="bg-white rounded-3xl shadow-xl overflow-hidden p-8">
+                <div class="mb-4">
+                    <h4 class="text-lg font-bold text-gray-900">Browser Sessions</h4>
+                    <p class="text-xs text-gray-500">Manage and log out your active sessions on other devices.</p>
+                </div>
+                @livewire('profile.logout-other-browser-sessions-form')
+            </div>
+
+            {{-- D. DELETE ACCOUNT --}}
+            @if (Laravel\Jetstream\Jetstream::hasAccountDeletionFeatures())
+                <div class="bg-white rounded-3xl shadow-xl overflow-hidden p-8 border-l-4 border-red-500">
+                    <div class="mb-4">
+                        <h4 class="text-lg font-bold text-red-600">Delete Account</h4>
+                        <p class="text-xs text-gray-500">Permanently remove your account and data.</p>
+                    </div>
+                    @livewire('profile.delete-user-form')
+                </div>
+            @endif
+
+        </div>
+    </div>
 </div>
