@@ -5,6 +5,12 @@
     @section('meta_description', Str::limit(strip_tags($event->description), 150)) 
     @section('meta_image', $event->cover_image ? (Str::startsWith($event->cover_image, 'http') ? $event->cover_image : asset('storage/' . $event->cover_image)) : asset('images/official_logo.png'))
 
+    <div class="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+        <div class="absolute top-0 left-0 w-full h-full bg-gray-50/80"></div>
+        <div class="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-red-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob"></div>
+        <div class="absolute top-[20%] left-[-10%] w-[500px] h-[500px] bg-yellow-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob animation-delay-2000"></div>
+        <div class="absolute bottom-[-10%] right-[20%] w-[500px] h-[500px] bg-green-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob animation-delay-4000"></div>
+    </div>
     {{-- 1. HERO SECTION (Split Layout) --}}
     <header class="relative pt-32 pb-16 px-6 max-w-7xl mx-auto">
         <div class="grid lg:grid-cols-2 gap-12 items-center">
