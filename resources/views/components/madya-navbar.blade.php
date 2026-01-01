@@ -17,7 +17,7 @@
             </div>
 
             {{-- 2. CENTER: Desktop Navigation --}}
-            <div class="hidden xl:flex items-center space-x-1 lg:space-x-6">
+            <div class="hidden lg:flex items-center space-x-1 lg:space-x-6">
                 @foreach([
                     ['name' => 'Home', 'route' => 'open.home', 'active' => 'open.home.*'],
                     ['name' => 'Projects', 'route' => 'projects.index', 'active' => 'projects.*'],
