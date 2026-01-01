@@ -199,71 +199,79 @@
                     </div>
 
                     <div class="grid md:grid-cols-2 gap-6">
-                        @forelse($latestNews as $news)
-                            <article class="bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-xl transition group border border-gray-100 flex flex-col h-full">
+                    @forelse($latestNews as $news)
+                        <article class="bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-xl transition group border border-gray-100 flex flex-col h-full">
+                            
+                            {{-- Image & Badge Section --}}
+                            <div class="h-48 overflow-hidden relative shrink-0">
+                                @php
+                                    // 1. FIX JSON ISSUE: Get the name string, not the object
+                                    // We check if it's an object (relationship) or string just to be safe
+                                    $catName = is_object($news->category) ? $news->category->name : $news->category;
+
+                                    // 2. Define Badge Color
+                                    $badgeColor = match($catName) {
+                                        'Event' => 'bg-red-600',
+                                        'Achievement' => 'bg-yellow-400 text-green-900',
+                                        'Announcement' => 'bg-blue-600',
+                                        default => 'bg-gray-800'
+                                    };
+
+                                    // 3. Robust Cover Photo Logic
+                                    $coverUrl = null;
+                                    if ($news->cover_img) {
+                                        $coverUrl = Str::startsWith($news->cover_img, ['http', 'https']) 
+                                            ? $news->cover_img
+                                            : asset('storage/' . $news->cover_img);
+                                    }
+                                @endphp
+
+                                {{-- BADGE: Uses $catName instead of the raw object --}}
+                                <span class="absolute top-4 left-4 {{ $badgeColor }} text-white text-xs font-bold px-3 py-1 rounded-full z-10 shadow-md">
+                                    {{ $catName }}
+                                </span>
                                 
-                                {{-- Image Section --}}
-                                <div class="h-48 overflow-hidden relative shrink-0">
-                                    @php
-                                        // 1. Define Badge Color
-                                        $badgeColor = match($news->category) {
-                                            'Event' => 'bg-red-600',
-                                            'Achievement' => 'bg-yellow-400 text-green-900',
-                                            'Announcement' => 'bg-blue-600',
-                                            default => 'bg-gray-800'
-                                        };
-
-                                        // 2. Define Robust Image URL Logic
-                                        $coverUrl = null;
-                                        if ($news->cover_photo) {
-                                            $coverUrl = Str::startsWith($news->cover_photo, ['http', 'https']) 
-                                                ? $news->cover_photo 
-                                                : asset('storage/' . $news->cover_photo);
-                                        }
-                                    @endphp
-
-                                    <span class="absolute top-4 left-4 {{ $badgeColor }} text-white text-xs font-bold px-3 py-1 rounded-full z-10 shadow-md">
-                                        {{ $news->category }}
-                                    </span>
-                                    
-                                    @if($coverUrl)
-                                        <img src="{{ $coverUrl }}" alt="{{ $news->title }}" class="w-full h-full object-cover group-hover:scale-110 transition duration-700">
-                                    @else
-                                        {{-- Fallback if no image --}}
-                                        <div class="w-full h-full bg-gray-50 flex items-center justify-center">
-                                            <img src="{{ asset('images/official_logo.png') }}" class="h-16 opacity-20 grayscale">
-                                        </div>
-                                    @endif
-                                </div>
-
-                                {{-- Content --}}
-                                <div class="p-6 flex flex-col flex-1">
-                                    <div class="text-xs text-gray-400 mb-2 flex items-center gap-2">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                                        {{ $news->published_at ? $news->published_at->format('M d, Y') : 'Date TBA' }}
+                                {{-- COVER IMAGE --}}
+                                @if($coverUrl)
+                                    <img src="{{ $coverUrl }}" alt="{{ $news->title }}" class="w-full h-full object-cover group-hover:scale-110 transition duration-700">
+                                @else
+                                    {{-- Fallback Pattern if no image --}}
+                                    <div class="w-full h-full bg-gray-50 flex items-center justify-center relative overflow-hidden">
+                                        {{-- Subtle background pattern --}}
+                                        <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(#000 1px, transparent 1px); background-size: 20px 20px;"></div>
+                                        <img src="{{ asset('images/official_logo.png') }}" class="h-16 opacity-20 grayscale relative z-10">
                                     </div>
-                                    
-                                    <h3 class="font-bold text-xl text-gray-900 mb-2 group-hover:text-red-600 transition leading-tight line-clamp-2">
-                                        <a href="{{ route('news.show', $news->slug) }}">
-                                            {{ $news->title }}
-                                        </a>
-                                    </h3>
-                                    
-                                    <p class="text-gray-600 text-sm line-clamp-3 mb-4 flex-1">
-                                        {{ $news->summary ?? Str::limit(strip_tags($news->content), 100) }}
-                                    </p>
-                                    
-                                    <a href="{{ route('news.show', $news->slug) }}" class="text-xs font-bold text-gray-400 uppercase tracking-wider hover:text-red-600 transition self-start flex items-center gap-1">
-                                        Read More <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                                    </a>
-                                </div>
-                            </article>
-                        @empty
-                            <div class="col-span-2 text-center py-12 bg-white rounded-2xl border-2 border-dashed border-gray-300">
-                                <p class="text-gray-400 font-bold">No updates posted yet.</p>
+                                @endif
                             </div>
-                        @endforelse
-                    </div>
+
+                            {{-- Content Section --}}
+                            <div class="p-6 flex flex-col flex-1">
+                                <div class="text-xs text-gray-400 mb-2 flex items-center gap-2">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                    {{ $news->published_at ? $news->published_at->format('M d, Y') : 'Date TBA' }}
+                                </div>
+                                
+                                <h3 class="font-bold text-xl text-gray-900 mb-2 group-hover:text-red-600 transition leading-tight line-clamp-2">
+                                    <a href="{{ route('news.show', $news->slug) }}">
+                                        {{ $news->title }}
+                                    </a>
+                                </h3>
+                                
+                                <p class="text-gray-600 text-sm line-clamp-3 mb-4 flex-1">
+                                    {{ $news->summary ?? Str::limit(strip_tags($news->content), 100) }}
+                                </p>
+                                
+                                <a href="{{ route('news.show', $news->slug) }}" class="text-xs font-bold text-gray-400 uppercase tracking-wider hover:text-red-600 transition self-start flex items-center gap-1">
+                                    Read More <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                                </a>
+                            </div>
+                        </article>
+                    @empty
+                        <div class="col-span-2 text-center py-12 bg-white rounded-2xl border-2 border-dashed border-gray-300">
+                            <p class="text-gray-400 font-bold">No updates posted yet.</p>
+                        </div>
+                    @endforelse
+                </div>
                 </section>
             </div>
 
