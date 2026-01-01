@@ -250,7 +250,7 @@
     @endif
 
     @if($isVotersModalOpen)
-    <div class="fixed inset-0 z-[60] flex items-center justify-center px-4 bg-gray-900/60 backdrop-blur-sm">
+    <div class="fixed inset-0 z-[100] flex items-center justify-center px-4 bg-gray-900/60 backdrop-blur-sm">
         <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[80vh] animate-scale-in">
             
             <div class="p-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
