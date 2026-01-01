@@ -60,39 +60,51 @@
                     {{ $event->title }}
                 </h1>
 
-                <div class="flex flex-wrap justify-center gap-4 md:gap-8 text-stone-600 mb-8">
-                    {{-- Date --}}
-                    <div class="flex items-center gap-3 bg-white px-5 py-3 rounded-2xl shadow-sm border border-gray-100">
-                        <div class="text-red-600"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg></div>
+                <div class="flex flex-wrap justify-center gap-4 text-stone-600 mb-8">
+                    {{-- START BLOCK --}}
+                    <div class="flex items-center gap-4 bg-white px-6 py-3 rounded-2xl shadow-sm border border-gray-100 min-w-[200px]">
+                        {{-- Icon --}}
+                        <div class="w-10 h-10 rounded-full bg-green-50 text-green-600 flex items-center justify-center shrink-0">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        </div>
+                        
+                        {{-- Details --}}
                         <div class="text-left">
-                            <p class="text-[10px] font-bold uppercase text-gray-400 tracking-wider">Start Date</p>
-                            <p class="font-bold text-sm text-gray-900">{{ $event->start_date ? $event->start_date->format('F d, Y') : 'TBA' }}</p>
+                            <p class="text-[10px] font-bold uppercase text-gray-400 tracking-wider mb-0.5">Starts</p>
+                            <div class="flex flex-col leading-tight">
+                                <span class="font-bold text-gray-900 text-sm">
+                                    {{ $event->start_date ? $event->start_date->format('F d, Y') : 'TBA' }}
+                                </span>
+                                <span class="text-xs font-medium text-gray-500">
+                                    {{ $event->start_date ? $event->start_date->format('h:i A') : '' }}
+                                </span>
+                            </div>
                         </div>
                     </div>
-                    {{-- Time --}}
-                    <div class="flex items-center gap-3 bg-white px-5 py-3 rounded-2xl shadow-sm border border-gray-100">
-                        <div class="text-red-600"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div>
+
+                    {{-- END BLOCK (Only show if end_date exists) --}}
+                    @if($event->end_date)
+                    <div class="flex items-center gap-4 bg-white px-6 py-3 rounded-2xl shadow-sm border border-gray-100 min-w-[200px]">
+                        {{-- Icon --}}
+                        <div class="w-10 h-10 rounded-full bg-red-50 text-red-600 flex items-center justify-center shrink-0">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        </div>
+
+                        {{-- Details --}}
                         <div class="text-left">
-                            <p class="text-[10px] font-bold uppercase text-gray-400 tracking-wider">Start Time</p>
-                            <p class="font-bold text-sm text-gray-900">{{ $event->start_date ? $event->start_date->format('h:i A') : 'TBA' }}</p>
+                            <p class="text-[10px] font-bold uppercase text-gray-400 tracking-wider mb-0.5">Ends</p>
+                            <div class="flex flex-col leading-tight">
+                                <span class="font-bold text-gray-900 text-sm">
+                                    {{ $event->end_date->format('F d, Y') }}
+                                </span>
+                                <span class="text-xs font-medium text-gray-500">
+                                    {{ $event->end_date->format('h:i A') }}
+                                </span>
+                            </div>
                         </div>
                     </div>
-                    {{-- Date --}}
-                    <div class="flex items-center gap-3 bg-white px-5 py-3 rounded-2xl shadow-sm border border-gray-100">
-                        <div class="text-red-600"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg></div>
-                        <div class="text-left">
-                            <p class="text-[10px] font-bold uppercase text-gray-400 tracking-wider">End Date</p>
-                            <p class="font-bold text-sm text-gray-900">{{ $event->end_date ? $event->end_date->format('F d, Y') : 'TBA' }}</p>
-                        </div>
-                    </div>
-                    {{-- Time --}}
-                    <div class="flex items-center gap-3 bg-white px-5 py-3 rounded-2xl shadow-sm border border-gray-100">
-                        <div class="text-red-600"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div>
-                        <div class="text-left">
-                            <p class="text-[10px] font-bold uppercase text-gray-400 tracking-wider">End Time</p>
-                            <p class="font-bold text-sm text-gray-900">{{ $event->end_date ? $event->end_date->format('h:i A') : 'TBA' }}</p>
-                        </div>
-                    </div>
+                    @endif
+
                 </div>
 
                 {{-- Primary CTA Button --}}
