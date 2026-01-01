@@ -1,5 +1,5 @@
 
-@section('meta_title', $event->title)
+@section('meta_title', $event->title) 
 @section('meta_description', Str::limit(strip_tags($event->description), 150)) 
 @php
     // 1. Determine the image URL using PHP logic
