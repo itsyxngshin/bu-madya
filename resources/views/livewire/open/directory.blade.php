@@ -118,7 +118,7 @@
                                 
                                 <div class="mb-1 md:mb-2">
                                     {{-- UPDATED: Position Name Text Size --}}
-                                    <h3 class="font-heading font-bold leading-tight mb-0.5 md:mb-1 line-clamp-2
+                                    <h3 class="font-heading font-bold leading-tight mb-0.5 md:mb-1
                                                  {{ $isVacant ? 'text-gray-400 italic' : 'text-gray-900 group-hover:text-red-700 transition-colors' }}
                                                  {{ $isDG ? 'text-[10px] md:text-base' : 'text-[9px] md:text-sm' }}">
                                         {{ $isVacant ? 'Unfilled' : $user->name }}
