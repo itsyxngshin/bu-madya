@@ -87,7 +87,7 @@
                             <div class="h-56 overflow-hidden relative bg-gray-200">
                                 <a href="{{ route('events.show', $event->slug) }}">
                                     @if($event->cover_image)
-                                        <img src="{{ asset('storage/'.$event->cover_image) }}" class="w-full h-full object-cover group-hover:scale-110 transition duration-700">
+                                        <img src="{{ asset(path: 'storage/'.$event->cover_image) }}" class="w-full h-full object-cover group-hover:scale-110 transition duration-700">
                                     @else
                                         <div class="w-full h-full flex flex-col items-center justify-center text-gray-300 bg-gray-100">
                                             <span class="text-4xl mb-2 opacity-50">📅</span>

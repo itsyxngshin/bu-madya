@@ -1,25 +1,32 @@
 <div class="min-h-screen bg-stone-50 font-sans text-gray-900 pb-20">
 
-    {{-- SEO Setup --}}
+    {{-- SEO (Keep this as is) --}}
     @section('meta_title', $event->title) 
     @section('meta_description', Str::limit(strip_tags($event->description), 150)) 
-    @php
-        $ogImage = $event->cover_image
-            ? (Str::startsWith($event->cover_image, 'http') ? $event->cover_image : asset('storage/' . $event->cover_image))
-            : asset('images/official_logo.png');
-    @endphp
-    @section('meta_image', $ogImage)
+    @section('meta_image', $event->cover_image ? asset('storage/'.$event->cover_image) : asset('images/official_logo.png'))
 
-    {{-- 1. HERO SECTION (Full Width Cover - Cinematic) --}}
+    <div class="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+        <div class="absolute top-0 left-0 w-full h-full bg-gray-50/80"></div>
+        <div class="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-red-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob"></div>
+        <div class="absolute top-[20%] left-[-10%] w-[500px] h-[500px] bg-yellow-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob animation-delay-2000"></div>
+        <div class="absolute bottom-[-10%] right-[20%] w-[500px] h-[500px] bg-green-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob animation-delay-4000"></div>
+    </div>
+    {{-- 1. HERO SECTION (Fixed Cover Photo) --}}
     <div class="relative w-full h-[60vh] min-h-[450px] bg-gray-900 group overflow-hidden">
         
-        {{-- Background Image --}}
-        <img src="{{ $ogImage }}" class="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-105 transition duration-[2000ms] ease-out">
+        {{-- IMAGE LOGIC: Check directly here instead of using a variable --}}
+        @if($event->cover_image)
+            <img src="{{ Str::startsWith($event->cover_image, 'http') ? $event->cover_image : asset('storage/'.$event->cover_image) }}" 
+                 class="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-105 transition duration-[2000ms] ease-out">
+        @else
+            {{-- Fallback Gradient if no image --}}
+            <div class="absolute inset-0 w-full h-full bg-gradient-to-br from-gray-800 to-gray-900 opacity-60"></div>
+        @endif
         
-        {{-- Gradient Overlay (Text Readability) --}}
+        {{-- Gradient Overlay --}}
         <div class="absolute inset-0 bg-gradient-to-t from-stone-900 via-transparent to-stone-900/50"></div>
 
-        {{-- Navigation (Floating Top) --}}
+        {{-- Navigation --}}
         <div class="absolute top-0 left-0 right-0 p-6 flex justify-between items-start z-20">
             <a href="{{ route('events.index') }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-black/20 backdrop-blur-md border border-white/20 text-white/90 hover:bg-black/40 transition text-xs font-bold uppercase tracking-widest">
                 &larr; Back
@@ -35,10 +42,9 @@
             @endauth
         </div>
 
-        {{-- Hero Text Content --}}
+        {{-- Hero Text --}}
         <div class="absolute bottom-0 left-0 w-full p-6 md:p-12 z-20">
             <div class="max-w-7xl mx-auto">
-                {{-- Status Badge --}}
                 <div class="mb-4">
                     @if($event->isOpen())
                         <span class="inline-flex items-center gap-2 px-3 py-1 bg-green-500/80 backdrop-blur text-white text-[10px] font-black uppercase tracking-widest rounded-full shadow-lg border border-green-400/50">
@@ -71,13 +77,11 @@
         </div>
     </div>
 
-    {{-- 2. MAIN CONTENT (Overlapping the Hero) --}}
+    {{-- 2. MAIN CONTENT (Overlap) --}}
     <div class="max-w-7xl mx-auto px-6 py-12 grid lg:grid-cols-12 gap-12 -mt-12 relative z-30">
         
-        {{-- LEFT: Details & QR --}}
+        {{-- LEFT SIDEBAR --}}
         <aside class="lg:col-span-4 space-y-6">
-            
-            {{-- Quick Actions Card --}}
             <div class="bg-white p-6 rounded-3xl shadow-xl border border-gray-100">
                 <h3 class="font-bold text-gray-900 uppercase tracking-widest text-xs border-b border-gray-100 pb-3 mb-4">
                     Actions
@@ -90,7 +94,6 @@
                     </a>
                 @endif
 
-                {{-- QR Code Section (Safe Container) --}}
                 <div class="text-center">
                     <p class="text-[10px] font-bold text-gray-400 uppercase mb-3">Scan to Share</p>
                     <div class="flex justify-center mb-3">
@@ -101,10 +104,9 @@
                     </button>
                 </div>
             </div>
-
         </aside>
 
-        {{-- RIGHT: Content --}}
+        {{-- RIGHT CONTENT --}}
         <main class="lg:col-span-8 space-y-12 pt-4">
             <div class="prose prose-lg prose-stone max-w-none 
                 prose-headings:font-heading prose-headings:font-black prose-headings:text-gray-900 
@@ -118,7 +120,7 @@
         </main>
     </div>
 
-    {{-- Sticky Mobile CTA --}}
+    {{-- STICKY MOBILE CTA --}}
     @if($event->isOpen() && $event->registration_link)
     <div class="fixed bottom-0 left-0 right-0 p-4 bg-white/90 backdrop-blur-lg border-t border-gray-200 shadow-2xl md:hidden z-50">
         <a href="{{ $event->registration_link }}" target="_blank" class="block w-full text-center px-6 py-4 bg-red-600 text-white font-bold uppercase rounded-xl shadow-lg active:scale-95 transition-transform">
@@ -129,38 +131,27 @@
 
 </div>
 
-{{-- 3. QR SCRIPT (Safe Version) --}}
+{{-- QR Script (Robust) --}}
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/easyqrcodejs@4.5.0/dist/easy.qrcode.min.js"></script>
 <script>
-    // Run on Livewire navigation and initial load
     document.addEventListener('livewire:navigated', initShareQR);
     window.addEventListener('load', initShareQR);
 
     function initShareQR() {
         var container = document.getElementById('share-qr');
-        // Prevent running if container is missing or already has QR
         if(!container || container.innerHTML.trim() !== '') return;
 
-        var options = {
-            text: "{{ route('events.show', $event->slug) }}",
-            width: 120, height: 120,
-            colorDark : "#1f2937", colorLight : "#ffffff",
-            correctLevel : QRCode.CorrectLevel.H,
-            dotScale: 0.8,
-            onRenderingEnd: function(qrCodeOptions, blob) {
-                container.classList.remove('animate-pulse'); // Stop loading animation if you add one
-            }
-        };
-
-        // Attempt to generate
         try {
-            new QRCode(container, options);
-        } catch (e) {
-            console.error("QR Error:", e);
-            // Fallback: Generate without logo if logo causes CORS/Loading issues
-            delete options.logo;
-            new QRCode(container, options);
-        }
+            new QRCode(container, {
+                text: "{{ route('events.show', $event->slug) }}",
+                width: 120, height: 120,
+                colorDark : "#1f2937", colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H,
+                dotScale: 0.8,
+                // Removed logo option temporarily to ensure QR generation works first
+            });
+        } catch (e) { console.error("QR Error", e); }
     }
 </script>
-@endpush 
+@endpush
