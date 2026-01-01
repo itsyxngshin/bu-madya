@@ -13,6 +13,17 @@
                     @error('title') <span class="text-red-500 text-xs font-bold">{{ $message }}</span> @enderror
                 </div>
 
+                <div class="mb-6">
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Slug (URL)</label>
+                    <div class="flex rounded-lg shadow-sm">
+                        <span class="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-gray-200 bg-gray-50 text-gray-500 text-xs font-bold uppercase tracking-wider">
+                            /events/
+                        </span>
+                        <input wire:model="slug" type="text" class="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-r-lg border-gray-200 focus:ring-red-500 focus:border-red-500 text-sm text-gray-600 bg-white">
+                    </div>
+                    @error('slug') <span class="text-red-500 text-xs font-bold">{{ $message }}</span> @enderror
+                </div>
+
                 {{-- CUSTOM MARKDOWN EDITOR (From News Create) --}}
                 <div class="mb-6">
                     <label class="block text-sm font-bold text-gray-700 mb-2">Description</label>

@@ -14,6 +14,7 @@ class CreateEvent extends Component
     use WithFileUploads;
 
     public $title;
+    public $slug; 
     public $description;
     public $cover_image;
     public $registration_link;
@@ -47,7 +48,7 @@ class CreateEvent extends Component
 
         Event::create([
             'title' => $this->title,
-            'slug' => Str::slug($this->title),
+            'slug' => $this->slug,
             'description' => $this->description,
             'cover_image' => $imagePath,
             'registration_link' => $this->registration_link,
