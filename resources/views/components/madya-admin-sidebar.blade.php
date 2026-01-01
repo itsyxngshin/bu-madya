@@ -114,6 +114,21 @@
             Linkages
         </a>
 
+        <a href="{{ route('admin.events.index') }}" 
+            class="group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors duration-150 ease-in-out
+            {{ request()->routeIs('admin.events.*') 
+                ? 'bg-red-50 text-red-600' 
+                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                
+                {{-- Calendar Icon --}}
+                <svg class="h-5 w-5 {{ request()->routeIs('admin.events.*') ? 'text-red-500' : 'text-gray-400 group-hover:text-gray-500' }}" 
+                    xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                
+                Events & Campaigns
+        </a>
+
         {{-- SEPARATOR: SYSTEM --}}
         <div class="pt-4 pb-2 px-3 mt-2 border-t border-gray-100">
             <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">System</p>

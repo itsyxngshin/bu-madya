@@ -32,6 +32,7 @@ use App\Livewire\Director\EditProfile;
 use App\Livewire\Director\Dashboard;
 use App\Livewire\Director\ThePillarsManager;
 use App\Livewire\Open\ProposalsCreate;
+
 use App\Livewire\Admin\ProposalsShow;
 use App\Livewire\Admin\ProposalsIndex;
 use App\Livewire\Admin\LinkagesRoster;
@@ -42,7 +43,10 @@ use App\Livewire\Admin\AdminDashboard;
 use App\Livewire\Admin\Settings;
 use App\Livewire\Admin\MembershipSetting;
 use App\Livewire\Admin\MembershipRequests;
+use App\Livewire\Admin\EventIndex as AdminEventIndex;
 use App\Livewire\Admin\CreateEvent;
+use App\Livewire\Admin\EditEvent;
+
 use App\Models\MembershipApplication; 
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Response;
@@ -122,7 +126,9 @@ Route::middleware(['auth', 'role:administrator'])->prefix('admin')->name('admin.
     Route::get('/membership/settings', MembershipSetting::class)->name('membership-settings');
     Route::get('/membership/requests', MembershipRequests::class)->name('membership-requests'); 
     Route::get('/dashboard', AdminDashboard::class)->name('dashboard');
+    Route::get('/events', AdminEventIndex::class)->name('events.index');
     Route::get('/events/create', CreateEvent::class)->name('events.create');
+    Route::get('/events/{id}/edit', EditEvent::class)->name('events.edit'); 
 });
 
 Route::middleware(['auth', 'role:administrator,director'])  
