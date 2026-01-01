@@ -6,7 +6,7 @@
         {{-- Background & Overlay --}}
         <div class="absolute inset-0 z-0">
             {{-- UPDATED IMAGE SOURCE HERE --}}
-            <img src="{{ asset('images/IMG_2800.jpg') }}" 
+            <img src="{{ asset('images/1760712981522.JPG') }}" 
                  class="w-full h-full object-cover transform scale-105 animate-slow-pan" 
                  alt="BU MADYA Team">
             
