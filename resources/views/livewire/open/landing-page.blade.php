@@ -5,8 +5,10 @@
         
         {{-- Background & Overlay --}}
         <div class="absolute inset-0 z-0">
-            <img src="{{ asset('storage/images/IMG_2800.jpg') }}"
-                 class="w-full h-full object-cover transform scale-105 animate-slow-pan" alt="University Background">
+            {{-- UPDATED IMAGE SOURCE HERE --}}
+            <img src="{{ asset('images/IMG_2800.jpg') }}" 
+                 class="w-full h-full object-cover transform scale-105 animate-slow-pan" 
+                 alt="BU MADYA Team">
             
             {{-- Tri-Color Gradient Overlay --}}
             <div class="absolute inset-0 bg-gradient-to-b from-green-900/90 via-green-800/50 to-gray-900/95 mix-blend-multiply"></div>
