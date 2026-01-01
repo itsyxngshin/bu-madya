@@ -114,19 +114,10 @@
             Linkages
         </a>
 
-        <a href="{{ route('admin.events.index') }}" 
-            class="group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors duration-150 ease-in-out
-            {{ request()->routeIs('admin.events.*') 
-                ? 'bg-red-50 text-red-600' 
-                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
-                
-                {{-- Calendar Icon --}}
-                <svg class="h-5 w-5 {{ request()->routeIs('admin.events.*') ? 'text-red-500' : 'text-gray-400 group-hover:text-gray-500' }}" 
-                    xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-                
-                Events & Campaigns
+        <a href="{{ route('admin.event.index') }}" 
+           class="{{ $linkClass }} {{ request()->routeIs('admin.event.*') ? $activeClass : $inactiveClass }}">
+            <svg class="w-5 h-5 {{ request()->routeIs('admin.event.*') ? $iconActive : $iconInactive }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+            Event & Campaign Portal
         </a>
 
         {{-- SEPARATOR: SYSTEM --}}
