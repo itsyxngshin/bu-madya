@@ -172,10 +172,6 @@
                                     colorDark : '#d90429',
                                     colorLight : '#ffffff',
                                     correctLevel : QRCode.CorrectLevel.H,
-                                    // Remove logo momentarily if it causes issues, or ensure path is correct
-                                    logo: '{{ asset('images/official_logo.png') }}', 
-                                    logoWidth: 50,
-                                    logoHeight: 50,
                                     dotScale: 0.8
                                 });
                             } catch (e) {
