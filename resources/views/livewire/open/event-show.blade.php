@@ -10,15 +10,8 @@
     @endphp
     @section('meta_image', $ogImage)
 
-    <div class="fixed inset-0 z-0 overflow-hidden pointer-events-none">
-        <div class="absolute top-0 left-0 w-full h-full bg-gray-50/80"></div>
-        <div class="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-red-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob"></div>
-        <div class="absolute top-[20%] left-[-10%] w-[500px] h-[500px] bg-yellow-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob animation-delay-2000"></div>
-        <div class="absolute bottom-[-10%] right-[20%] w-[500px] h-[500px] bg-green-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob animation-delay-4000"></div>
-    </div>
-    
-    {{-- 1. HERO SECTION (Full Width Cover) --}}
-    <div class="relative w-full h-[50vh] min-h-[400px] bg-gray-900 group overflow-hidden">
+    {{-- 1. HERO SECTION (Full Width Cover - Cinematic) --}}
+    <div class="relative w-full h-[60vh] min-h-[450px] bg-gray-900 group overflow-hidden">
         
         {{-- Background Image --}}
         <img src="{{ $ogImage }}" class="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-105 transition duration-[2000ms] ease-out">
@@ -58,7 +51,7 @@
                     @endif
                 </div>
 
-                <h1 class="font-heading font-black text-4xl md:text-6xl text-white leading-tight mb-4 drop-shadow-xl max-w-4xl">
+                <h1 class="font-heading font-black text-4xl md:text-6xl lg:text-7xl text-white leading-tight mb-4 drop-shadow-xl max-w-4xl">
                     {{ $event->title }}
                 </h1>
 
@@ -78,11 +71,11 @@
         </div>
     </div>
 
-    {{-- 2. MAIN CONTENT --}}
-    <div class="max-w-7xl mx-auto px-6 py-12 grid lg:grid-cols-12 gap-12 -mt-8">
+    {{-- 2. MAIN CONTENT (Overlapping the Hero) --}}
+    <div class="max-w-7xl mx-auto px-6 py-12 grid lg:grid-cols-12 gap-12 -mt-12 relative z-30">
         
-        {{-- LEFT: Details & QR (Overlapping the Hero) --}}
-        <aside class="lg:col-span-4 space-y-6 relative z-30">
+        {{-- LEFT: Details & QR --}}
+        <aside class="lg:col-span-4 space-y-6">
             
             {{-- Quick Actions Card --}}
             <div class="bg-white p-6 rounded-3xl shadow-xl border border-gray-100">
@@ -97,12 +90,11 @@
                     </a>
                 @endif
 
-                {{-- QR Code Section --}}
+                {{-- QR Code Section (Safe Container) --}}
                 <div class="text-center">
                     <p class="text-[10px] font-bold text-gray-400 uppercase mb-3">Scan to Share</p>
                     <div class="flex justify-center mb-3">
-                        {{-- Added explicit dimensions to container to prevent collapse --}}
-                        <div id="share-qr" class="p-2 bg-white rounded-xl shadow-[inset_0_2px_4px_rgba(0,0,0,0.05)] border border-gray-100 w-[140px] h-[140px] flex items-center justify-center"></div>
+                        <div id="share-qr" class="bg-white rounded-xl shadow-[inset_0_2px_4px_rgba(0,0,0,0.05)] border border-gray-100 w-[140px] h-[140px] flex items-center justify-center p-2"></div>
                     </div>
                     <button onclick="navigator.clipboard.writeText('{{ url()->current() }}'); this.innerText = 'Copied!';" class="text-xs font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-lg hover:bg-blue-100 transition">
                         Copy Link
@@ -112,8 +104,8 @@
 
         </aside>
 
-        {{-- RIGHT: Markdown Content --}}
-        <main class="lg:col-span-8 space-y-12 pt-8">
+        {{-- RIGHT: Content --}}
+        <main class="lg:col-span-8 space-y-12 pt-4">
             <div class="prose prose-lg prose-stone max-w-none 
                 prose-headings:font-heading prose-headings:font-black prose-headings:text-gray-900 
                 prose-p:text-gray-600 prose-p:leading-relaxed 
@@ -137,46 +129,38 @@
 
 </div>
 
-{{-- QR SCRIPT --}}
+{{-- 3. QR SCRIPT (Safe Version) --}}
 @push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/easyqrcodejs@4.5.0/dist/easy.qrcode.min.js"></script>
 <script>
-    // Run on Livewire navigation
-    document.addEventListener('livewire:navigated', () => { initShareQR(); });
-    // Run on standard load
+    // Run on Livewire navigation and initial load
+    document.addEventListener('livewire:navigated', initShareQR);
     window.addEventListener('load', initShareQR);
 
     function initShareQR() {
         var container = document.getElementById('share-qr');
-        
-        // Check if container exists and is empty (to prevent duplicates)
-        if(container && container.innerHTML.trim() === '') {
-            
-            var options = {
-                text: "{{ route('events.show', $event->slug) }}",
-                width: 120,
-                height: 120,
-                colorDark : "#1f2937",
-                colorLight : "#ffffff",
-                correctLevel : QRCode.CorrectLevel.H,
-                dotScale: 0.8,
-                logoWidth: 30,
-                logoHeight: 30,
-            };
+        // Prevent running if container is missing or already has QR
+        if(!container || container.innerHTML.trim() !== '') return;
 
-            // Only add logo if it exists, otherwise the QR might break
-            // We use a JS check or fallback here 
-            var logoPath = "{{ asset('images/official_logo.png') }}";
-            if(logoPath) {
-                options.logo = logoPath;
+        var options = {
+            text: "{{ route('events.show', $event->slug) }}",
+            width: 120, height: 120,
+            colorDark : "#1f2937", colorLight : "#ffffff",
+            correctLevel : QRCode.CorrectLevel.H,
+            dotScale: 0.8,
+            onRenderingEnd: function(qrCodeOptions, blob) {
+                container.classList.remove('animate-pulse'); // Stop loading animation if you add one
             }
+        };
 
-            try {
-                new QRCode(container, options);
-            } catch (e) {
-                console.error("QR Code failed to load", e);
-            }
+        // Attempt to generate
+        try {
+            new QRCode(container, options);
+        } catch (e) {
+            console.error("QR Error:", e);
+            // Fallback: Generate without logo if logo causes CORS/Loading issues
+            delete options.logo;
+            new QRCode(container, options);
         }
     }
 </script>
-@endpush
+@endpush 
