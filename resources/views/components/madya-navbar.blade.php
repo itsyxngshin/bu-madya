@@ -57,7 +57,6 @@
 
             {{-- 3. RIGHT SIDE: Auth & Mobile Toggle --}}
             <div class="flex items-center gap-4">
-                {{-- Auth Buttons (Desktop) --}}
                 <div class="hidden md:flex items-center gap-3">
                     @auth
                         @if(Auth::user()->role && in_array(Auth::user()->role->role_name, ['administrator', 'director']))
@@ -74,12 +73,6 @@
 
                             <div x-show="dropdownOpen" 
                                  @click.away="dropdownOpen = false"
-                                 x-transition:enter="transition ease-out duration-100"
-                                 x-transition:enter-start="transform opacity-0 scale-95"
-                                 x-transition:enter-end="transform opacity-100 scale-100"
-                                 x-transition:leave="transition ease-in duration-75"
-                                 x-transition:leave-start="transform opacity-100 scale-100"
-                                 x-transition:leave-end="transform opacity-0 scale-95"
                                  class="absolute right-0 mt-2 w-48 rounded-xl shadow-xl py-1 bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-50" 
                                  style="display: none;">
                                 <div class="px-4 py-3 border-b border-gray-100">
@@ -112,7 +105,7 @@
         </div>
     </div>
 
-    {{-- 4. MOBILE MENU (GRID STYLE) --}}
+    {{-- 4. COMPACT MOBILE MENU (4-COLUMN GRID) --}}
     <div x-show="open" 
          x-transition:enter="transition ease-out duration-200"
          x-transition:enter-start="opacity-0 -translate-y-2"
@@ -120,69 +113,70 @@
          x-transition:leave="transition ease-in duration-150"
          x-transition:leave-start="opacity-100 translate-y-0"
          x-transition:leave-end="opacity-0 -translate-y-2"
-         class="md:hidden bg-white/95 backdrop-blur-xl border-b border-gray-200 shadow-2xl relative z-40 max-h-[calc(100vh-80px)] overflow-y-auto">
+         class="md:hidden bg-white/95 backdrop-blur-xl border-b border-gray-200 shadow-2xl relative z-40 max-h-[85vh] overflow-y-auto">
         
-        <div class="px-4 pt-6 pb-2">
-            <span class="text-[10px] font-black uppercase tracking-widest text-gray-400 pl-1 mb-3 block">Navigation</span>
+        <div class="px-4 py-6">
+            <span class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-4 block text-center">Navigation</span>
             
-            {{-- GRID CONTAINER --}}
-            <div class="grid grid-cols-2 gap-3">
+            {{-- 4-COLUMN COMPACT GRID --}}
+            <div class="grid grid-cols-4 gap-y-6 gap-x-2">
                 @foreach($navLinks as $link)
                     <a href="{{ route($link['route']) }}" 
-                       class="flex flex-col items-center justify-center p-4 rounded-2xl border transition-all duration-200
-                       {{ request()->routeIs($link['active']) 
-                          ? 'bg-red-50 border-red-100 text-red-700 shadow-sm' 
-                          : 'bg-gray-50 border-transparent text-gray-600 hover:bg-white hover:border-gray-200 hover:shadow-sm' }}">
+                       class="flex flex-col items-center justify-center group">
                         
-                        <svg class="w-6 h-6 mb-2 {{ request()->routeIs($link['active']) ? 'text-red-600' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $link['icon'] }}"></path>
-                        </svg>
+                        {{-- Icon Circle --}}
+                        <div class="w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-200 mb-2 shadow-sm
+                            {{ request()->routeIs($link['active']) 
+                               ? 'bg-red-50 text-red-600 shadow-red-100 ring-2 ring-red-100' 
+                               : 'bg-white text-gray-500 border border-gray-100 hover:border-red-200 hover:text-red-500' }}">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $link['icon'] }}"></path></svg>
+                        </div>
                         
-                        <span class="text-xs font-bold uppercase tracking-wider text-center">
+                        {{-- Tiny Text Label --}}
+                        <span class="text-[9px] font-bold uppercase tracking-wider text-center leading-tight {{ request()->routeIs($link['active']) ? 'text-red-600' : 'text-gray-500 group-hover:text-gray-900' }}">
                             {{ $link['name'] }}
                         </span>
                     </a>
                 @endforeach
             </div>
 
-            {{-- ROUNDTABLE LINK --}}
+            {{-- SPECIAL ROUNDTABLE LINK --}}
             @auth
                 <a href="{{ route('roundtable.index') }}" 
-                   class="flex items-center justify-center gap-3 px-4 py-4 rounded-2xl transition text-sm font-bold mt-3 border border-dashed border-yellow-400 bg-yellow-50 text-yellow-800 hover:bg-yellow-100">
-                    <svg class="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"></path></svg>
+                   class="flex items-center justify-center gap-2 px-4 py-3 rounded-xl transition text-xs font-bold mt-6 border border-dashed border-yellow-400 bg-yellow-50 text-yellow-800 hover:bg-yellow-100 uppercase tracking-wider">
+                    <svg class="w-4 h-4 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"></path></svg>
                     The Roundtable
                 </a>
             @endauth
         </div>
         
-        {{-- Mobile Auth Section --}}
-        <div class="p-4 bg-gray-50 border-t border-gray-100 mt-2">
+        {{-- Mobile Auth Footer --}}
+        <div class="px-4 pb-6 pt-2 bg-gray-50/50 border-t border-gray-100">
             @auth
                 <div class="flex items-center gap-3 mb-4">
                     <img class="h-10 w-10 rounded-full object-cover border-2 border-white shadow-sm" src="{{ Auth::user()->profile_photo_path ? (filter_var(Auth::user()->profile_photo_path, FILTER_VALIDATE_URL) ? Auth::user()->profile_photo_path : asset(Auth::user()->profile_photo_path)) : 'https://ui-avatars.com/api/?name='.urlencode(Auth::user()->name).'&color=7F9CF5&background=EBF4FF' }}" />
                     <div class="overflow-hidden">
-                        <div class="font-bold text-gray-900 leading-tight truncate">{{ Auth::user()->name }}</div>
+                        <div class="font-bold text-gray-900 leading-tight truncate text-sm">{{ Auth::user()->name }}</div>
                         <div class="text-[10px] text-gray-500 font-bold uppercase tracking-wider">{{ Auth::user()->email }}</div>
                     </div>
                 </div>
-                <div class="grid grid-cols-2 gap-2">
-                    <a href="{{ (Auth::user()->role && Auth::user()->role->role_name === 'administrator') ? route('admin.dashboard') : route('dashboard') }}" class="flex justify-center py-3 bg-white border border-gray-200 rounded-xl text-xs font-bold uppercase tracking-wide text-gray-600 hover:bg-gray-100 shadow-sm">
+                <div class="grid grid-cols-2 gap-3">
+                    <a href="{{ (Auth::user()->role && Auth::user()->role->role_name === 'administrator') ? route('admin.dashboard') : route('dashboard') }}" class="flex justify-center py-2.5 bg-white border border-gray-200 rounded-lg text-xs font-bold uppercase tracking-wide text-gray-600 hover:bg-gray-100 shadow-sm">
                         Dashboard
                     </a>
-                    
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
-                        <button type="submit" class="w-full py-3 bg-red-100 border border-transparent rounded-xl text-xs font-bold uppercase tracking-wide text-red-700 hover:bg-red-200 shadow-sm">
+                        <button type="submit" class="w-full py-2.5 bg-red-100 border border-transparent rounded-lg text-xs font-bold uppercase tracking-wide text-red-700 hover:bg-red-200 shadow-sm">
                             Log Out
                         </button>
                     </form>
                 </div>
             @else
                 <div class="grid grid-cols-2 gap-3">
-                     <a href="{{ route('login') }}" class="flex justify-center items-center py-3 bg-white border border-gray-200 rounded-xl text-sm font-bold text-gray-700 hover:bg-gray-50">
+                     <a href="{{ route('login') }}" class="flex justify-center items-center py-2.5 bg-white border border-gray-200 rounded-lg text-xs font-bold uppercase tracking-wide text-gray-700 hover:bg-gray-50">
                          Log In
                      </a>
-                     <a href="{{ route('register') }}" class="flex justify-center items-center py-3 bg-gray-900 text-white rounded-xl text-sm font-bold hover:bg-red-600 transition shadow-lg">
+                     <a href="{{ route('register') }}" class="flex justify-center items-center py-2.5 bg-gray-900 text-white rounded-lg text-xs font-bold uppercase tracking-wide hover:bg-red-600 transition shadow-lg">
                          Join Us
                      </a>
                 </div>
