@@ -94,19 +94,46 @@
             
             {{-- LEFT COLUMN: Sidebar (QR & Extra Info) --}}
             <aside class="lg:col-span-4 space-y-8 order-2">
-                {{-- QR Card --}}
+                {{-- QR Card with Alpine.js Handler --}}
                 @if($event->isOpen() && $event->registration_link)
-                <div class="bg-white/80 backdrop-blur-md p-6 rounded-3xl shadow-sm border border-gray-100 text-center sticky top-24">
+                <div 
+                    x-data="{
+                        showQr: false,
+                        generate() {
+                            this.showQr = true;
+                            // Wait for Alpine to render the div before drawing
+                            this.$nextTick(() => {
+                                const container = this.$refs.qrTarget;
+                                // Only generate if empty to prevent duplicates
+                                if (container.innerHTML === '') {
+                                    try {
+                                        new QRCode(container, {
+                                            text: '{{ $event->registration_link }}',
+                                            width: 120, 
+                                            height: 120,
+                                            colorDark : '#1f2937', 
+                                            colorLight : '#ffffff',
+                                            correctLevel : QRCode.CorrectLevel.H,
+                                            dotScale: 0.8
+                                        });
+                                    } catch(e) { console.error(e); }
+                                }
+                            });
+                        }
+                    }"
+                    class="bg-white/80 backdrop-blur-md p-6 rounded-3xl shadow-sm border border-gray-100 text-center sticky top-24"
+                >
                     <h3 class="font-bold text-gray-400 uppercase tracking-widest text-[10px] mb-4">Scan to Register</h3>
                     
-                    {{-- Container with wire:ignore to prevent Livewire from removing the canvas once generated --}}
-                    <div wire:ignore class="flex flex-col items-center justify-center min-h-[140px] mb-4">
+                    {{-- QR Container --}}
+                    <div class="flex flex-col items-center justify-center min-h-[140px] mb-4">
                         
-                        {{-- The Target Div for the QR Code --}}
-                        <div id="share-qr" class="hidden p-2 bg-white rounded-xl shadow-inner border border-gray-100"></div>
+                        {{-- Target Div (Hidden until clicked) --}}
+                        {{-- wire:ignore prevents Livewire from deleting the canvas --}}
+                        <div x-show="showQr" x-ref="qrTarget" wire:ignore class="p-2 bg-white rounded-xl shadow-inner border border-gray-100"></div>
 
-                        {{-- The Trigger Button --}}
-                        <button id="qr-trigger-btn" onclick="generateQR()" class="flex flex-col items-center gap-2 group">
+                        {{-- Trigger Button (Hidden after click) --}}
+                        <button x-show="!showQr" @click="generate()" class="flex flex-col items-center gap-2 group">
                             <div class="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center group-hover:bg-red-50 group-hover:scale-110 transition duration-300 shadow-sm border border-gray-200">
                                 <svg class="w-8 h-8 text-gray-400 group-hover:text-red-500 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
                             </div>
@@ -144,42 +171,5 @@
 
 {{-- QR SCRIPT (Same as before) --}}
 @push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/easyqrcodejs@4.5.0/dist/easy.qrcode.min.js"></script>
-<script>
-    function generateQR() {
-        var container = document.getElementById('share-qr');
-        var btn = document.getElementById('qr-trigger-btn');
-        var qrText = "{{ $event->registration_link }}";
-
-        if(!qrText) return;
-
-        // 1. Hide the button
-        if(btn) btn.style.display = 'none';
-
-        // 2. Show the container
-        if(container) {
-            container.classList.remove('hidden');
-            // Clear any existing content just in case
-            container.innerHTML = '';
-        }
-
-        // 3. Generate QR
-        try {
-            new QRCode(container, {
-                text: qrText,
-                width: 120, 
-                height: 120,
-                colorDark : "#1f2937", 
-                colorLight : "#ffffff",
-                correctLevel : QRCode.CorrectLevel.H,
-                dotScale: 0.8,
-                logoBackgroundTransparent: true
-            });
-        } catch(e) { 
-            console.error("QR Error", e);
-            // If error, show button again
-            if(btn) btn.style.display = 'flex';
-        }
-    }
-</script>
+    <script src="https://cdn.jsdelivr.net/npm/easyqrcodejs@4.5.0/dist/easy.qrcode.min.js"></script>
 @endpush
