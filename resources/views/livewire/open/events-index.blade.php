@@ -3,9 +3,13 @@
     {{-- SEO --}}
     @section('meta_title', 'Events & Campaigns')
     @section('meta_description', 'Join the movement. Participate in upcoming advocacies, contests, and gatherings.')
-    
-    <div class="absolute top-0 right-0 w-[800px] h-[800px] bg-red-100/50 rounded-full blur-[150px] -translate-y-1/2 translate-x-1/3 mix-blend-multiply"></div> 
-    <div class="absolute bottom-0 left-0 w-[600px] h-[600px] bg-yellow-100/40 rounded-full blur-[150px] translate-y-1/3 -translate-x-1/4 mix-blend-multiply"></div>  
+
+    <div class="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+        <div class="absolute top-0 left-0 w-full h-full bg-gray-50/80"></div>
+        <div class="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-red-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob"></div>
+        <div class="absolute top-[20%] left-[-10%] w-[500px] h-[500px] bg-yellow-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob animation-delay-2000"></div>
+        <div class="absolute bottom-[-10%] right-[20%] w-[500px] h-[500px] bg-green-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob animation-delay-4000"></div>
+    </div>
 
     {{-- HERO HEADER (Newsroom Style) --}}
     <header class="relative h-[350px] flex items-center justify-center text-white overflow-hidden rounded-3xl shadow-xl mx-4 md:mx-6 mt-6 z-10">
