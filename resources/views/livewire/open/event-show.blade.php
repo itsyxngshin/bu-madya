@@ -1,8 +1,20 @@
+
+@section('meta_title', $event->title)
+@section('meta_description', Str::limit(strip_tags($event->description), 150)) 
+@php
+    // 1. Determine the image URL using PHP logic
+    $ogImage = $event->cover_image
+        ? (Str::startsWith($event->cover_image, 'http') ? $event->cover_image : asset('storage/' . $event->cover_image))
+        : asset('images/official_logo.png');
+@endphp
+
+{{-- 2. Pass the CLEAN variable to the layout --}}
+@section('meta_image', $ogImage)
+
 <div class="min-h-screen bg-stone-50 font-sans text-gray-900">
 
     {{-- SEO Meta Tags (Optional: You can use a package like 'artesaos/seotools' later) --}}
-    @section('meta_title', $event->title)
-    @section('meta_description', Str::limit(strip_tags($event->description), 150))
+
 
     {{-- 1. HERO SECTION --}}
     <header class="relative pt-32 pb-16 px-6 max-w-7xl mx-auto">
