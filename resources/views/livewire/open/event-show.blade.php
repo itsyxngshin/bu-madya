@@ -11,17 +11,18 @@
     @section('meta_image', $ogImage)
 
     {{-- 1. GLOBAL BACKGROUND BLOBS --}}
-    <div class="fixed inset-0 z-0 pointer-events-none">
-        <div class="absolute top-0 right-0 w-[600px] h-[600px] bg-red-100/60 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/3 mix-blend-multiply"></div>
-        <div class="absolute bottom-0 left-0 w-[500px] h-[500px] bg-yellow-100/50 rounded-full blur-[100px] translate-y-1/3 -translate-x-1/4 mix-blend-multiply"></div>
+    <div class="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+        <div class="absolute top-0 left-0 w-full h-full bg-gray-50/80"></div>
+        <div class="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-red-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob"></div>
+        <div class="absolute top-[20%] left-[-10%] w-[500px] h-[500px] bg-yellow-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob animation-delay-2000"></div>
+        <div class="absolute bottom-[-10%] right-[20%] w-[500px] h-[500px] bg-green-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob animation-delay-4000"></div>
     </div>
 
     {{-- 2. EXPANDED HERO HEADER --}}
     <header class="relative w-full h-[50vh] min-h-[450px] bg-gray-900 overflow-hidden group relative z-10">
-        
         {{-- Cover Image --}}
         @if($event->cover_image)
-            <img src="{{ asset('storage/'.$event->cover_image) }}" class="absolute inset-0 w-full h-full object-cover transform group-hover:scale-105 transition duration-[2000ms] ease-out opacity-80">
+            <img src="{{ asset(path: 'storage/'.$event->cover_image)}}" class="absolute inset-0 w-full h-full object-cover transform group-hover:scale-105 transition duration-[2000ms] ease-out opacity-80">
         @else
             {{-- Fallback Pattern --}}
             <div class="absolute inset-0 w-full h-full bg-gray-800 opacity-50" style="background-image: radial-gradient(#333 1px, transparent 1px); background-size: 30px 30px;"></div>
