@@ -21,7 +21,7 @@
                 <div class="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
                 <div class="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-green-500 via-yellow-400 to-red-600"></div>
 
-                <div class="relative z-10">
+                <div class="relative">
                     <h1 class="text-2xl md:text-3xl font-black font-heading mb-2">Welcome back, {{ Auth::user()->name }}!</h1>
                     <p class="text-gray-300 text-sm max-w-xl leading-relaxed">
                         You have <strong class="text-yellow-400">{{ $pendingProposals }} new proposals</strong> waiting for your review. 
@@ -29,7 +29,7 @@
                     </p>
                 </div>
                 
-                <div class="relative z-10 flex flex-wrap gap-3">
+                <div class="relative flex flex-wrap gap-3">
                     {{-- 1. Create News --}}
                     <a href="{{ route('news.create') }}" 
                        class="px-4 py-3 bg-white/10 border border-white/20 text-white text-[10px] md:text-xs font-bold uppercase rounded-xl hover:bg-white/20 transition flex items-center gap-2 backdrop-blur-sm">
@@ -141,7 +141,7 @@
 
                 {{-- Right: Upcoming Projects (Simple List View) --}}
                 {{-- Kept as a quick-glance list alongside the main calendar --}}
-                <div class="bg-gray-900 text-white rounded-[2rem] z-50 shadow-lg p-6 relative overflow-hidden">
+                <div class="bg-gray-900 text-white rounded-[2rem] shadow-lg p-6 relative overflow-hidden">
                     <div class="absolute top-0 right-0 w-32 h-32 bg-red-600 rounded-full blur-3xl opacity-20 -mr-10 -mt-10 pointer-events-none"></div>
                     <h3 class="font-bold text-white uppercase tracking-widest text-xs mb-6 relative">Next Up</h3>
                     

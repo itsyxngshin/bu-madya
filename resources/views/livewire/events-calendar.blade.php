@@ -114,7 +114,7 @@
     <template x-teleport="body">
         <div x-show="showModal" 
              style="display: none;"
-             class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm"
+             class="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm"
              x-transition.opacity>
             
             <div @click.away="showModal = false"
