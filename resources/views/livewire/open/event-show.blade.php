@@ -109,8 +109,8 @@
                                     try {
                                         new QRCode(container, {
                                             text: '{{ $event->registration_link }}',
-                                            width: 120, 
-                                            height: 120,
+                                            width: 220, 
+                                            height: 220,
                                             colorDark : '#1f2937', 
                                             colorLight : '#ffffff',
                                             correctLevel : QRCode.CorrectLevel.H,
@@ -171,5 +171,5 @@
 
 {{-- QR SCRIPT (Same as before) --}}
 @push('scripts')
-    <script src="https://cdn.jsdelivr.net/npm/easyqrcodejs@4.5.0/dist/easy.qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/easyqrcodejs@4.5.0/dist/easy.qrcode.min.js"></script>
 @endpush
