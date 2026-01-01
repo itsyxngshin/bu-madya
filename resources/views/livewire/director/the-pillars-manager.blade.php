@@ -91,7 +91,7 @@
 
     {{-- MODAL FORM --}}
     @if($isModalOpen)
-    <div class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/60 backdrop-blur-sm md:p-6"
+    <div class="fixed inset-0 z-150 flex items-center justify-center bg-gray-900/60 backdrop-blur-sm md:p-6"
         x-transition:enter="transition ease-out duration-200"
         x-transition:enter-start="opacity-0"
         x-transition:enter-end="opacity-100"
