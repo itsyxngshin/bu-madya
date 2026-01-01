@@ -164,7 +164,7 @@
                         </div>
                         @endforelse
                     </div>
-                    <a href="{{ route('projects.index') }}" class="block mt-6 text-center text-[10px] font-bold uppercase text-gray-400 hover:text-white transition relative z-10">
+                    <a href="{{ route('projects.index') }}" class="block mt-6 text-center text-[10px] font-bold uppercase text-gray-400 hover:text-white transition relative">
                         View Full List &rarr;
                     </a>
                 </div>
