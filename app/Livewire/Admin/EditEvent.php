@@ -89,7 +89,7 @@ class EditEvent extends Component
             'is_active' => $this->is_active,
         ]);
 
-        return redirect()->route('admin.event-index')->with('message', 'Event updated successfully!');
+        return redirect()->route('admin.events.index')->with('message', 'Event updated successfully!');
     }
 
     public function render()
