@@ -1,14 +1,14 @@
 <div class="min-h-screen bg-stone-50 font-sans text-gray-900 pb-20">
 
-    {{-- SEO Setup --}}
+    {{-- SEO --}}
     @section('meta_title', $event->title) 
     @section('meta_description', Str::limit(strip_tags($event->description), 150)) 
     @section('meta_image', $event->cover_image ? asset('storage/'.$event->cover_image) : asset('images/official_logo.png'))
 
-    {{-- 1. HERO SECTION (Full Width & Spanning Out) --}}
+    {{-- 1. HERO SECTION (Full Width Cinematic) --}}
     <div class="relative w-full h-[60vh] min-h-[450px] bg-gray-900 group overflow-hidden">
         
-        {{-- Cover Image Logic (Direct check to ensure display) --}}
+        {{-- Cover Image --}}
         @if($event->cover_image)
             <img src="{{ Str::startsWith($event->cover_image, 'http') ? $event->cover_image : asset('storage/'.$event->cover_image) }}" 
                  class="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-105 transition duration-[2000ms] ease-out">
@@ -38,7 +38,7 @@
                 <div class="mb-4">
                     @if($event->isOpen())
                         <span class="inline-flex items-center gap-2 px-3 py-1 bg-green-500/80 backdrop-blur text-white text-[10px] font-black uppercase tracking-widest rounded-full shadow-lg border border-green-400/50">
-                            <span class="w-2 h-2 bg-white rounded-full animate-pulse"></span> Open
+                            <span class="w-2 h-2 bg-white rounded-full animate-pulse"></span> Registration Open
                         </span>
                     @else
                         <span class="inline-flex items-center gap-2 px-3 py-1 bg-red-600/80 backdrop-blur text-white text-[10px] font-black uppercase tracking-widest rounded-full shadow-lg">
@@ -51,10 +51,10 @@
                     {{ $event->title }}
                 </h1>
 
+                {{-- Hero Date (Simplified) --}}
                 <div class="flex flex-wrap items-center gap-6 text-white/90 text-sm font-bold">
                     <div class="flex items-center gap-2">
                         <svg class="w-5 h-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                        {{-- Show Date Only in Hero --}}
                         <span>{{ $event->start_date ? $event->start_date->format('F d, Y') : 'TBA' }}</span>
                     </div>
                 </div>
@@ -68,31 +68,36 @@
         {{-- LEFT SIDEBAR --}}
         <aside class="lg:col-span-4 space-y-6">
             
-            {{-- Quick Info Card --}}
+            {{-- Details Card --}}
             <div class="bg-white p-6 rounded-3xl shadow-xl border border-gray-100">
                 <h3 class="font-bold text-gray-900 uppercase tracking-widest text-xs border-b border-gray-100 pb-3 mb-4">
                     Event Details
                 </h3>
 
                 <ul class="space-y-4 mb-6">
+                    {{-- Start Time --}}
                     <li class="flex items-start gap-4">
                         <div class="mt-1 text-gray-400"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div>
                         <div>
-                            <span class="block text-[10px] font-bold text-gray-400 uppercase">Start</span>
+                            <span class="block text-[10px] font-bold text-gray-400 uppercase">Starts</span>
                             <span class="text-sm font-bold text-gray-800">
                                 {{ $event->start_date ? $event->start_date->format('M d, Y • h:i A') : 'TBA' }}
                             </span>
                         </div>
                     </li>
+
+                    {{-- End Time --}}
+                    @if($event->end_date)
                     <li class="flex items-start gap-4">
                         <div class="mt-1 text-gray-400"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div>
                         <div>
-                            <span class="block text-[10px] font-bold text-gray-400 uppercase">End</span>
+                            <span class="block text-[10px] font-bold text-gray-400 uppercase">Ends</span>
                             <span class="text-sm font-bold text-gray-800">
-                                {{ $event->end_date ? $event->end_date->format('M d, Y • h:i A') : 'TBA' }}
+                                {{ $event->end_date->format('M d, Y • h:i A') }}
                             </span>
                         </div>
                     </li>
+                    @endif
                 </ul>
 
                 @if($event->isOpen() && $event->registration_link)
@@ -100,18 +105,18 @@
                         {{ $event->registration_button_text ?? 'Register Now' }}
                         <svg class="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                     </a>
-                @endif
-
-                {{-- QR Code --}}
-                <div class="text-center pt-4 border-t border-gray-100">
-                    <p class="text-[10px] font-bold text-gray-400 uppercase mb-3">Scan to Share</p>
-                    <div class="flex justify-center mb-3">
-                        <div id="share-qr" class="bg-white rounded-xl p-2 border border-gray-100 w-[140px] h-[140px] flex items-center justify-center"></div>
+                
+                    {{-- QR Code (Registration) --}}
+                    <div class="text-center pt-4 border-t border-gray-100">
+                        <p class="text-[10px] font-bold text-gray-400 uppercase mb-3">Scan to Register</p>
+                        <div class="flex justify-center mb-3">
+                            <div id="share-qr" class="bg-white rounded-xl p-2 border border-gray-100 w-[140px] h-[140px] flex items-center justify-center"></div>
+                        </div>
+                        <button onclick="navigator.clipboard.writeText('{{ $event->registration_link }}'); alert('Registration Link Copied!');" class="text-xs font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-lg hover:bg-blue-100 transition">
+                            Copy Link
+                        </button>
                     </div>
-                    <button onclick="navigator.clipboard.writeText('{{ url()->current() }}'); alert('Link Copied!');" class="text-xs font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-lg hover:bg-blue-100 transition">
-                        Copy Link
-                    </button>
-                </div>
+                @endif
             </div>
         </aside>
 
@@ -140,6 +145,7 @@
 
 </div>
 
+{{-- SCRIPT: QR Code --}}
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/easyqrcodejs@4.5.0/dist/easy.qrcode.min.js"></script>
 <script>
@@ -148,19 +154,29 @@
 
     function initShareQR() {
         var container = document.getElementById('share-qr');
-        // Prevent duplicate QRs
-        if(!container || container.innerHTML.trim() !== '') return;
+        // 1. Check if container exists (only exists if registration link exists)
+        // 2. Check if empty to prevent duplicates
+        if(container && container.innerHTML.trim() === '') {
+            
+            // 3. IMPORTANT: Use the REGISTRATION LINK, not the current URL
+            var qrText = "{{ $event->registration_link }}";
 
-        try {
-            new QRCode(container, {
-                text: "{{ route('events.show', $event->slug) }}",
-                width: 120, height: 120,
-                colorDark : "#1f2937", colorLight : "#ffffff",
-                correctLevel : QRCode.CorrectLevel.H,
-                dotScale: 0.8,
-                // Removed Logo to ensure QR generates reliably
-            });
-        } catch (e) { console.error("QR Error", e); }
+            // Fallback if link is somehow empty
+            if(!qrText) return;
+
+            try {
+                new QRCode(container, {
+                    text: qrText,
+                    width: 120, height: 120,
+                    colorDark : "#1f2937", colorLight : "#ffffff",
+                    correctLevel : QRCode.CorrectLevel.H,
+                    dotScale: 0.8,
+                    // Try adding logo, fallback handles errors internally in library usually, 
+                });
+            } catch(e) {
+                console.error("QR Generation Error:", e);
+            }
+        }
     }
 </script>
 @endpush 
