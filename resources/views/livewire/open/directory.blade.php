@@ -3,7 +3,7 @@
     {{-- HEADER (Same as before) --}}
     <header class="relative h-[300px] flex items-center justify-center text-white overflow-hidden rounded-3xl shadow-xl mx-6 -mt-20 z-10">
         <div class="absolute inset-0 z-0">
-            <img src="https://images.unsplash.com/photo-1523580494863-6f3031224c94?q=80&w=2070&auto=format&fit=crop" 
+            <img src="{{ asset('images/IMG_2800.jpg') }}" 
                  class="w-full h-full object-cover" alt="Header Background">
             <div class="absolute inset-0 bg-gradient-to-r from-green-900/90 to-red-900/80 mix-blend-multiply"></div>
         </div>
