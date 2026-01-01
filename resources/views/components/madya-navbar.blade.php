@@ -17,18 +17,20 @@
             </div>
 
             {{-- 2. CENTER: Desktop Navigation --}}
-            <div class="hidden lg:flex items-center space-x-1 lg:space-x-6">
+            {{-- CHANGE: Ensure this uses 'lg:flex', not 'xl:flex' --}}
+            <div class="hidden lg:flex items-center space-x-1">
                 @foreach([
                     ['name' => 'Home', 'route' => 'open.home', 'active' => 'open.home.*'],
                     ['name' => 'Projects', 'route' => 'projects.index', 'active' => 'projects.*'],
+                    // ['name' => 'Events', 'route' => 'events.index', 'active' => 'events.*'], 
                     ['name' => 'Directory', 'route' => 'open.directory', 'active' => 'open.directory.*'],
                     ['name' => 'Linkages', 'route' => 'linkages.index', 'active' => 'linkages.*'],
                     ['name' => 'News', 'route' => 'news.index', 'active' => 'news.*'],
                     ['name' => 'About', 'route' => 'about', 'active' => 'about.*'],
-                    ['name' => 'The Pillars', 'route' => 'pillars.index', 'active' => 'pillars.*'],
+                    ['name' => 'Pillars', 'route' => 'pillars.index', 'active' => 'pillars.*'],
                 ] as $link)
                     <a href="{{ route($link['route']) }}" 
-                       class="px-3 py-2 text-sm font-bold rounded-lg transition-all duration-200 
+                       class="px-2 py-2 text-xs font-bold uppercase tracking-wide rounded-lg transition-all duration-200 whitespace-nowrap
                        {{ request()->routeIs($link['active']) 
                           ? 'text-red-600 bg-red-50' 
                           : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50' }}">
@@ -38,7 +40,7 @@
 
                 @auth
                     <a href="{{ route('roundtable.index') }}" 
-                       class="px-3 py-2 text-sm font-bold rounded-lg transition-all duration-200 border border-dashed border-yellow-400
+                       class="px-2 py-2 text-xs font-bold uppercase tracking-wide rounded-lg transition-all duration-200 border border-dashed border-yellow-400 whitespace-nowrap
                        {{ request()->routeIs('roundtable.*') ? 'text-yellow-700 bg-yellow-50' : 'text-gray-500 hover:text-yellow-700 hover:bg-yellow-50' }}">
                         Roundtable
                     </a>
@@ -49,26 +51,23 @@
             <div class="flex items-center gap-4">
                 
                 {{-- Auth Buttons (Desktop) --}}
-                <div class="hidden hidden xl:flex items-center gap-3">
+                {{-- FIX: Changed 'hidden xl:flex' to 'hidden lg:flex' --}}
+                <div class="hidden lg:flex items-center gap-3">
                     @auth
-                        {{-- Dashboard Link --}}
                         @if(Auth::user()->role && in_array(Auth::user()->role->role_name, ['administrator', 'director']))
-                            @if(Auth::user()->role->role_name === 'administrator')
-                                <a href="{{ route('admin.dashboard') }}" class="text-xs font-bold uppercase tracking-widest text-gray-500 hover:text-red-600 transition">
-                                    Dashboard
-                                </a>
-                            @else
-                            <a href="{{ route('dashboard') }}" class="text-xs font-bold uppercase tracking-widest text-gray-500 hover:text-red-600 transition">
+                            <a href="{{ Auth::user()->role->role_name === 'administrator' ? route('admin.dashboard') : route('dashboard') }}" 
+                               class="text-xs font-bold uppercase tracking-widest text-gray-500 hover:text-red-600 transition">
                                 Dashboard
                             </a>
-                            @endif
                         @endif
+                        
                         {{-- User Dropdown --}}
                         <div class="relative ml-3" x-data="{ dropdownOpen: false }">
                             <button @click="dropdownOpen = !dropdownOpen" type="button" class="flex text-sm border-2 border-transparent rounded-full focus:outline-none focus:border-red-300 transition hover:shadow-md">
                                 <img class="h-8 w-8 rounded-full object-cover" src="{{ Auth::user()->profile_photo_path ? (filter_var(Auth::user()->profile_photo_path, FILTER_VALIDATE_URL) ? Auth::user()->profile_photo_path : asset(Auth::user()->profile_photo_path)) : 'https://ui-avatars.com/api/?name='.urlencode(Auth::user()->name).'&color=7F9CF5&background=EBF4FF' }}" alt="{{ Auth::user()->name }}" />
                             </button>
 
+                            {{-- Dropdown Menu --}}
                             <div x-show="dropdownOpen" 
                                  @click.away="dropdownOpen = false"
                                  x-transition:enter="transition ease-out duration-100"
@@ -106,7 +105,8 @@
                 </div>
 
                 {{-- Mobile Hamburger --}}
-                <div class="flex items-center xl:hidden">
+                {{-- FIX: Changed 'xl:hidden' to 'lg:hidden' --}}
+                <div class="flex items-center lg:hidden">
                     <button @click="open = ! open" class="inline-flex items-center justify-center p-2 rounded-lg text-gray-400 hover:text-gray-900 hover:bg-gray-100 focus:outline-none transition">
                         <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                             <path :class="{'hidden': open, 'inline-flex': ! open }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
@@ -119,6 +119,7 @@
     </div>
 
     {{-- 4. MOBILE MENU (Animated Sheet) --}}
+    {{-- FIX: Changed 'xl:hidden' to 'lg:hidden' --}}
     <div x-show="open" 
          x-transition:enter="transition ease-out duration-200"
          x-transition:enter-start="opacity-0 -translate-y-2"
@@ -126,15 +127,14 @@
          x-transition:leave="transition ease-in duration-150"
          x-transition:leave-start="opacity-100 translate-y-0"
          x-transition:leave-end="opacity-0 -translate-y-2"
-         class="xl:hidden bg-white border-b border-gray-200 shadow-xl relative z-40">
+         class="lg:hidden bg-white border-b border-gray-200 shadow-xl relative z-40">
         
         <div class="px-4 py-6 space-y-2">
-            
-            {{-- Navigation Links with Icons --}}
             @php
                 $mobileLinks = [
                     ['name' => 'Home', 'route' => 'open.home', 'active' => 'open.home.*', 'icon' => 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6'],
                     ['name' => 'Projects', 'route' => 'projects.index', 'active' => 'projects.*', 'icon' => 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10'],
+                    // ['name' => 'Events', 'route' => 'events.index', 'active' => 'events.*', 'icon' => 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'],
                     ['name' => 'Directory', 'route' => 'open.directory', 'active' => 'open.directory.*', 'icon' => 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z'],
                     ['name' => 'Linkages', 'route' => 'linkages.index', 'active' => 'linkages.*', 'icon' => 'M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1'],
                     ['name' => 'The Pillars', 'route' => 'pillars.index', 'active' => 'pillars.*', 'icon' => 'M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z'],
@@ -171,15 +171,9 @@
                     </div>
                 </div>
                 <div class="grid grid-cols-2 gap-2">
-                    @if(Auth::user()->role->role_name === 'administrator')
-                        <a href="{{ route('admin.dashboard') }}" class="flex justify-center py-2 bg-white border border-gray-200 rounded-lg text-xs font-bold uppercase tracking-wide text-gray-600 hover:bg-gray-100">
-                            Dashboard
-                        </a>
-                    @else
-                        <a href="{{ route('dashboard') }}" class="flex justify-center py-2 bg-white border border-gray-200 rounded-lg text-xs font-bold uppercase tracking-wide text-gray-600 hover:bg-gray-100">
-                            Dashboard
-                        </a>
-                    @endif
+                    <a href="{{ (Auth::user()->role && Auth::user()->role->role_name === 'administrator') ? route('admin.dashboard') : route('dashboard') }}" class="flex justify-center py-2 bg-white border border-gray-200 rounded-lg text-xs font-bold uppercase tracking-wide text-gray-600 hover:bg-gray-100">
+                        Dashboard
+                    </a>
                     
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
