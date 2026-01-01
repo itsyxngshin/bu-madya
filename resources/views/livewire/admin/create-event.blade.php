@@ -13,32 +13,74 @@
                     @error('title') <span class="text-red-500 text-xs font-bold">{{ $message }}</span> @enderror
                 </div>
 
-                {{-- MARKDOWN EDITOR --}}
-                <div class="mb-6" 
-                     x-data="{
-                        value: @entangle('description'),
-                        init() {
-                            let editor = new EasyMDE({
-                                element: this.$refs.editor,
-                                spellChecker: false,
-                                placeholder: 'Describe the event mechanics, location, and other details...',
-                                toolbar: ['bold', 'italic', 'heading', '|', 'quote', 'unordered-list', 'ordered-list', '|', 'link', 'preview', 'guide'],
-                                status: false, // Hide the status bar
-                                minHeight: '300px',
-                            });
-
-                            // Sync changes to Livewire
-                            editor.codemirror.on('change', () => {
-                                this.value = editor.value();
-                            });
-                        }
-                     }"
-                     wire:ignore>
+                {{-- CUSTOM MARKDOWN EDITOR (From News Create) --}}
+                <div class="mb-6">
                     <label class="block text-sm font-bold text-gray-700 mb-2">Description</label>
-                    <textarea x-ref="editor" class="w-full rounded-lg border-gray-200 focus:ring-red-500"></textarea>
+                    
+                    <div class="relative border border-gray-200 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-red-500 focus-within:border-transparent transition bg-white"
+                         x-data="{ 
+                            insert(start, end) {
+                                let el = $refs.editor;
+                                if(!el) return;
+                                let text = el.value;
+                                let s = el.selectionStart;
+                                let e = el.selectionEnd;
+                                el.value = text.substring(0, s) + start + text.substring(s, e) + end + text.substring(e);
+                                el.dispatchEvent(new Event('input'));
+                                setTimeout(() => { el.focus(); el.setSelectionRange(s + start.length, e + start.length); }, 50);
+                            }
+                         }"
+                         x-on:photo-inserted.window="insert('\n<figure>\n  <img src=\'' + $event.detail.url + '\' alt=\'Image\'>\n  <figcaption>Caption...</figcaption>\n</figure>\n', '');"
+                    >
+                        {{-- Hidden File Input for Toolbar --}}
+                        <input type="file" wire:model="photo_upload" class="hidden" x-ref="photoUploader" accept="image/*">
+
+                        {{-- TOOLBAR --}}
+                        <div class="flex items-center gap-1 bg-gray-50 border-b border-gray-200 p-2 overflow-x-auto">
+                            
+                            {{-- Basic Formatting --}}
+                            <button @click="insert('**', '**')" class="p-1.5 text-gray-500 hover:text-gray-900 hover:bg-gray-200 rounded transition font-bold text-xs w-8" title="Bold">B</button>
+                            <button @click="insert('*', '*')" class="p-1.5 text-gray-500 hover:text-gray-900 hover:bg-gray-200 rounded transition italic text-xs w-8" title="Italic">I</button>
+                            <button @click="insert('~~', '~~')" class="p-1.5 text-gray-500 hover:text-gray-900 hover:bg-gray-200 rounded transition line-through text-xs w-8" title="Strike">S</button>
+                            
+                            <div class="w-px h-4 bg-gray-300 mx-1"></div>
+                            
+                            {{-- Headings & Quotes --}}
+                            <button @click="insert('### ', '')" class="p-1.5 text-gray-500 hover:text-gray-900 hover:bg-gray-200 rounded text-xs font-bold w-8">H3</button>
+                            <button @click="insert('> ', '')" class="p-1.5 text-gray-500 hover:text-gray-900 hover:bg-gray-200 rounded w-8" title="Quote">&ldquo;</button>
+                            
+                            {{-- Link --}}
+                            <button @click="insert('[', '](http://)')" class="p-1.5 text-gray-500 hover:text-gray-900 hover:bg-gray-200 rounded transition w-8 flex justify-center" title="Link">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+                            </button>
+
+                            <div class="w-px h-4 bg-gray-300 mx-1"></div>
+
+                            {{-- Lists --}}
+                            <button @click="insert('- ', '')" class="p-1.5 text-gray-500 hover:text-gray-900 hover:bg-gray-200 rounded transition w-8 flex justify-center" title="Bullet List"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg></button>
+                            <button @click="insert('1. ', '')" class="p-1.5 text-gray-500 hover:text-gray-900 hover:bg-gray-200 rounded transition w-8 flex justify-center" title="Numbered List"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h12M7 12h12M7 17h12M3 7h.01M3 12h.01M3 17h.01"></path></svg></button>
+                            
+                            <div class="w-px h-4 bg-gray-300 mx-1"></div>
+
+                            {{-- Image Upload Button --}}
+                            <button @click="$refs.photoUploader.click()" class="p-1.5 hover:bg-gray-200 rounded text-xs font-bold relative group w-8 flex justify-center text-gray-500 hover:text-red-600 transition" title="Insert Image">
+                                <span wire:loading.remove wire:target="photo_upload">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                </span>
+                                <span wire:loading wire:target="photo_upload" class="animate-spin block w-3 h-3 border-2 border-gray-300 border-t-red-600 rounded-full"></span>
+                            </button>
+                        </div>
+
+                        {{-- Text Area --}}
+                        <textarea x-ref="editor"
+                                  wire:model.live="description" 
+                                  rows="15" 
+                                  class="w-full text-sm leading-relaxed text-gray-700 bg-transparent border-none p-4 focus:ring-0 resize-y font-sans placeholder-gray-300"
+                                  placeholder="Start writing the event details here..."></textarea>
+                    </div>
                 </div>
 
-                {{-- DRAG AND DROP IMAGE UPLOAD --}}
+                {{-- DRAG AND DROP IMAGE UPLOAD (Red/Gray Style) --}}
                 <div>
                     <label class="block text-sm font-bold text-gray-700 mb-2">Cover Poster</label>
                     
@@ -94,7 +136,7 @@
             </div>
         </div>
 
-        {{-- RIGHT COLUMN: Settings & QR Code --}}
+        {{-- RIGHT COLUMN: Settings & QR Code (Same as previous) --}}
         <div class="md:col-span-1 space-y-6">
             
             {{-- Registration Link & Pro QR --}}
@@ -107,19 +149,15 @@
                              this.$refs.qrcodeContainer.innerHTML = '';
                              return;
                         }
-                        
                         this.$refs.qrcodeContainer.innerHTML = '';
-
                         var options = {
-                            text: this.link,
-                            width: 180, height: 180,
+                            text: this.link, width: 180, height: 180,
                             colorDark : '#d90429', colorLight : '#ffffff',
                             correctLevel : QRCode.CorrectLevel.H,
                             logo: '{{ asset('images/official_logo.png') }}',
                             logoWidth: 50, logoHeight: 50,
                             dotScale: 0.8
                         };
-
                         this.qrObject = new QRCode(this.$refs.qrcodeContainer, options);
                     }
                  }" 
@@ -139,13 +177,10 @@
                     <div class="bg-white p-3 rounded-2xl shadow-md mb-3" x-show="link">
                         <div x-ref="qrcodeContainer"></div>
                     </div>
-                    
                     <div x-show="!link" class="h-40 flex items-center justify-center text-gray-400 text-xs italic">
                         Paste a link above to generate<br>your custom QR code.
                     </div>
-
                     <div x-show="link" class="mt-2">
-                        <p class="text-[10px] font-bold text-gray-400 uppercase">Live Preview</p>
                         <button @click="qrObject.download('event_qr.png')" type="button" class="mt-3 text-xs flex items-center gap-1 text-red-600 font-bold hover:underline transition">
                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                             Download PNG
@@ -162,7 +197,6 @@
             {{-- Timing --}}
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
                 <h3 class="text-sm font-bold text-gray-900 uppercase tracking-widest mb-4">Schedule</h3>
-                
                 <div class="space-y-3">
                     <div>
                         <label class="block text-xs font-bold text-gray-500 mb-1">Start Date</label>
@@ -186,13 +220,3 @@
         </div>
     </div>
 </div>
-
-@push('styles')
-    {{-- EASY MDE STYLES (Make sure you have this CDN) --}}
-    
-    <style>
-        .EasyMDEContainer .CodeMirror { border-radius: 0.5rem; border-color: #e5e7eb; }
-        .EasyMDEContainer .editor-toolbar { border-radius: 0.5rem 0.5rem 0 0; border-color: #e5e7eb; background: #f9fafb; opacity: 1; }
-        .EasyMDEContainer .editor-statusbar { display: none; }
-    </style>
-@endpush

@@ -26,6 +26,7 @@ class EditEvent extends Component
     public $start_date;
     public $end_date;
     public $is_active;
+    public $photo_upload;
 
     protected $rules = [
         'title' => 'required|string|max:255',
@@ -49,6 +50,17 @@ class EditEvent extends Component
         $this->end_date = $this->event->end_date ? $this->event->end_date->format('Y-m-d\TH:i') : null;
         
         $this->is_active = (bool) $this->event->is_active;
+    }
+
+    // Add this hook
+    public function updatedPhotoUpload()
+    {
+        $this->validate([
+            'photo_upload' => 'image|max:1024', // 1MB Max
+        ]);
+
+        // Dispatch event to insert the image tag into the editor
+        $this->dispatch('photo-inserted', url: $this->photo_upload->temporaryUrl());
     }
 
     public function update()

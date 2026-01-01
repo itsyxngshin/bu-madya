@@ -21,6 +21,7 @@ class CreateEvent extends Component
     public $start_date;
     public $end_date;
     public $is_active = true;
+    public $photo_upload;
 
     protected $rules = [
         'title' => 'required|string|max:255',
@@ -57,6 +58,17 @@ class CreateEvent extends Component
         ]);
 
         return redirect()->route('admin.events.index')->with('message', 'Event created successfully!');
+    }
+
+    // Add this hook
+    public function updatedPhotoUpload()
+    {
+        $this->validate([
+            'photo_upload' => 'image|max:3072', // 3MB Max
+        ]);
+
+        // Dispatch event to insert the image tag into the editor
+        $this->dispatch('photo-inserted', url: $this->photo_upload->temporaryUrl());
     }
 
     public function render()
