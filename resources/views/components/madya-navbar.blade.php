@@ -160,16 +160,38 @@
                         <div class="text-[10px] text-gray-500 font-bold uppercase tracking-wider">{{ Auth::user()->email }}</div>
                     </div>
                 </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <a href="{{ (Auth::user()->role && Auth::user()->role->role_name === 'administrator') ? route('admin.dashboard') : route('dashboard') }}" class="flex justify-center py-2.5 bg-white border border-gray-200 rounded-lg text-xs font-bold uppercase tracking-wide text-gray-600 hover:bg-gray-100 shadow-sm">
-                        Dashboard
-                    </a>
+                @php
+                    $userRole = Auth::user()->role->role_name ?? '';
+                    $canViewDashboard = in_array($userRole, ['administrator', 'director']);
+                @endphp
+
+                {{-- LAYOUT: Use 2 columns if Dashboard is visible, otherwise 1 column --}}
+                <div class="grid {{ $canViewDashboard ? 'grid-cols-2' : 'grid-cols-1' }} gap-3">
+
+                    {{-- 1. DASHBOARD BUTTON (Conditionally Rendered) --}}
+                    @if($canViewDashboard)
+                        @php
+                            // Optional: Send them to different dashboards if needed
+                            $dashboardRoute = match($userRole) {
+                                'administrator' => route('admin.dashboard'),
+                                'director'      => route('dashboard'), // Or route('director.dashboard')
+                                default         => route('open.home'),
+                            };
+                        @endphp
+
+                        <a href="{{ $dashboardRoute }}" class="flex justify-center py-2.5 bg-white border border-gray-200 rounded-lg text-xs font-bold uppercase tracking-wide text-gray-600 hover:bg-gray-100 shadow-sm transition">
+                            Dashboard
+                        </a>
+                    @endif
+
+                    {{-- 2. LOGOUT BUTTON (Always Visible) --}}
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
-                        <button type="submit" class="w-full py-2.5 bg-red-100 border border-transparent rounded-lg text-xs font-bold uppercase tracking-wide text-red-700 hover:bg-red-200 shadow-sm">
+                        <button type="submit" class="w-full py-2.5 bg-red-100 border border-transparent rounded-lg text-xs font-bold uppercase tracking-wide text-red-700 hover:bg-red-200 shadow-sm transition">
                             Log Out
                         </button>
                     </form>
+
                 </div>
             @else
                 <div class="grid grid-cols-2 gap-3">
