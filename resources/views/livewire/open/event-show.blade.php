@@ -27,7 +27,7 @@
             </div>
 
             {{-- B. Panoramic Cover Image --}}
-            <div class="relative w-full h-64 md:h-96 lg:h-[500px] rounded-[2.5rem] overflow-hidden shadow-2xl border-4 border-white bg-gray-200 group mb-12">
+            <div class="relative w-full h-128 md:h-96 lg:h-[500px] rounded-[2.5rem] overflow-hidden shadow-2xl border-4 border-white bg-gray-200 group mb-12">
                 @if($event->cover_image)
                     <img src="{{ Str::startsWith($event->cover_image, 'http') ? $event->cover_image : asset('storage/'.$event->cover_image) }}" 
                          class="w-full h-full object-cover transform group-hover:scale-105 transition duration-1000">
@@ -99,9 +99,20 @@
                 <div class="bg-white/80 backdrop-blur-md p-6 rounded-3xl shadow-sm border border-gray-100 text-center sticky top-24">
                     <h3 class="font-bold text-gray-400 uppercase tracking-widest text-[10px] mb-4">Scan to Register</h3>
                     
-                    {{-- FIX: Added wire:ignore here --}}
-                    <div class="flex justify-center mb-4">
-                        <div id="share-qr" wire:ignore class="p-2 bg-white rounded-xl shadow-inner border border-gray-100 w-[140px] h-[140px] flex items-center justify-center"></div>
+                    {{-- Container with wire:ignore to prevent Livewire from removing the canvas once generated --}}
+                    <div wire:ignore class="flex flex-col items-center justify-center min-h-[140px] mb-4">
+                        
+                        {{-- The Target Div for the QR Code --}}
+                        <div id="share-qr" class="hidden p-2 bg-white rounded-xl shadow-inner border border-gray-100"></div>
+
+                        {{-- The Trigger Button --}}
+                        <button id="qr-trigger-btn" onclick="generateQR()" class="flex flex-col items-center gap-2 group">
+                            <div class="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center group-hover:bg-red-50 group-hover:scale-110 transition duration-300 shadow-sm border border-gray-200">
+                                <svg class="w-8 h-8 text-gray-400 group-hover:text-red-500 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
+                            </div>
+                            <span class="text-xs font-bold text-gray-500 group-hover:text-red-600 uppercase tracking-wide">Show QR Code</span>
+                        </button>
+
                     </div>
 
                     <div class="flex justify-center gap-2">
@@ -135,25 +146,39 @@
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/easyqrcodejs@4.5.0/dist/easy.qrcode.min.js"></script>
 <script>
-    document.addEventListener('livewire:navigated', initShareQR);
-    window.addEventListener('load', initShareQR);
-
-    function initShareQR() {
+    function generateQR() {
         var container = document.getElementById('share-qr');
-        // Only generate if container exists and is empty
-        if(container && container.innerHTML.trim() === '') {
-            var qrText = "{{ $event->registration_link }}";
-            if(!qrText) return;
+        var btn = document.getElementById('qr-trigger-btn');
+        var qrText = "{{ $event->registration_link }}";
 
-            try {
-                new QRCode(container, {
-                    text: qrText,
-                    width: 120, height: 120,
-                    colorDark : "#1f2937", colorLight : "#ffffff",
-                    correctLevel : QRCode.CorrectLevel.H,
-                    dotScale: 0.8
-                });
-            } catch(e) { console.error("QR Error", e); }
+        if(!qrText) return;
+
+        // 1. Hide the button
+        if(btn) btn.style.display = 'none';
+
+        // 2. Show the container
+        if(container) {
+            container.classList.remove('hidden');
+            // Clear any existing content just in case
+            container.innerHTML = '';
+        }
+
+        // 3. Generate QR
+        try {
+            new QRCode(container, {
+                text: qrText,
+                width: 120, 
+                height: 120,
+                colorDark : "#1f2937", 
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H,
+                dotScale: 0.8,
+                logoBackgroundTransparent: true
+            });
+        } catch(e) { 
+            console.error("QR Error", e);
+            // If error, show button again
+            if(btn) btn.style.display = 'flex';
         }
     }
 </script>
