@@ -39,16 +39,19 @@
             </p>
 
             {{-- ADD LINKAGE BUTTON (Moved here) --}}
-            @auth
-            <div class="mb-8">
-                <a href="{{ route('linkages.create') }}" 
-                   class="group relative inline-flex items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/30 text-white text-xs font-bold uppercase tracking-widest rounded-full transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-red-500/20 ring-1 ring-white/20">
-                    <span class="w-5 h-5 bg-white/20 rounded-full flex items-center justify-center group-hover:bg-red-500 group-hover:text-white transition-colors">
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                    </span>
-                    <span>Add New Linkage</span>
-                </a>
-            </div>
+           @auth
+                {{-- CHECK ROLE: Only allow Administrator or Director --}}
+                @if(in_array(Auth::user()->role->role_name ?? '', ['administrator', 'director']))
+                    <div class="mb-8">
+                        <a href="{{ route('linkages.create') }}" 
+                        class="group relative inline-flex items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/30 text-white text-xs font-bold uppercase tracking-widest rounded-full transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-red-500/20 ring-1 ring-white/20">
+                            <span class="w-5 h-5 bg-white/20 rounded-full flex items-center justify-center group-hover:bg-red-500 group-hover:text-white transition-colors">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                            </span>
+                            <span>Add New Linkage</span>
+                        </a>
+                    </div>
+                @endif
             @endauth
 
             {{-- Dynamic Stats (Mobile Optimized Flex) --}}

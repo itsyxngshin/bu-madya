@@ -11,7 +11,7 @@
             
             @auth
                 {{-- Only show "Write" button if authorized (e.g., Director) --}}
-                @if(in_array(Auth::user()?->role?->role_name, ['director', 'member']))
+                @if(in_array(Auth::user()?->role?->role_name, ['director', 'member', 'administrator']))
                 <div class="animate-fade-in-up">
                     <a href="{{ route('news.create') }}" 
                     class="inline-flex items-center gap-2 px-6 py-3 bg-white text-red-600 rounded-full font-bold text-xs uppercase tracking-widest hover:bg-yellow-400 hover:text-green-900 transition shadow-lg transform hover:-translate-y-1">

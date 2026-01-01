@@ -17,13 +17,15 @@
             </h1>
             {{-- ... --}}
             @auth
-                <div class="mt-8">
-                    {{-- Make sure this route exists in your web.php --}}
-                    <a href="{{ route('projects.create') }}" class="inline-flex items-center gap-2 px-6 py-3 bg-white/20 backdrop-blur-md border border-white/40 rounded-full text-white text-xs font-bold uppercase tracking-widest hover:bg-white hover:text-red-600 transition shadow-lg">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                        Add Project
-                    </a>
-                </div>
+                @if(in_array(Auth::user()->role->role_name ?? '', ['administrator', 'director', 'member']))
+                    <div class="mt-8">
+                        {{-- Make sure this route exists in your web.php --}}
+                        <a href="{{ route('projects.create') }}" class="inline-flex items-center gap-2 px-6 py-3 bg-white/20 backdrop-blur-md border border-white/40 rounded-full text-white text-xs font-bold uppercase tracking-widest hover:bg-white hover:text-red-600 transition shadow-lg">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                            Add Project
+                        </a>
+                    </div>
+                @endif
             @endauth
         </div>
     </header>
