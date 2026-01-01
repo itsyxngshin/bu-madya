@@ -112,7 +112,7 @@
         </div>
     </div>
 
-    {{-- 4. MOBILE MENU (CATEGORIZED LIST - "Discover" & "Synergize") --}}
+    {{-- 4. MOBILE MENU (GRID STYLE) --}}
     <div x-show="open" 
          x-transition:enter="transition ease-out duration-200"
          x-transition:enter-start="opacity-0 -translate-y-2"
@@ -122,57 +122,37 @@
          x-transition:leave-end="opacity-0 -translate-y-2"
          class="md:hidden bg-white/95 backdrop-blur-xl border-b border-gray-200 shadow-2xl relative z-40 max-h-[calc(100vh-80px)] overflow-y-auto">
         
-        <div class="px-2 py-4 space-y-6">
-
-            {{-- GROUP 1: DISCOVER (Primary Content) --}}
-            <div>
-                <span class="px-4 text-[10px] font-black uppercase tracking-widest text-red-500 mb-2 block pl-5">Discover</span>
-                <div class="space-y-1">
-                    @foreach(['Home', 'Projects', 'Events', 'News'] as $name)
-                        @php $link = collect($navLinks)->firstWhere('name', $name); @endphp
-                        <a href="{{ route($link['route']) }}" 
-                           class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-bold transition-colors
-                           {{ request()->routeIs($link['active']) ? 'bg-red-50 text-red-700' : 'text-gray-700 hover:bg-gray-50 hover:text-red-600' }}">
-                            
-                            {{-- Icon --}}
-                            <div class="w-8 h-8 rounded-full flex items-center justify-center bg-white border border-gray-100 shadow-sm shrink-0">
-                                <svg class="w-4 h-4 {{ request()->routeIs($link['active']) ? 'text-red-500' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $link['icon'] }}"></path></svg>
-                            </div>
-                            
+        <div class="px-4 pt-6 pb-2">
+            <span class="text-[10px] font-black uppercase tracking-widest text-gray-400 pl-1 mb-3 block">Navigation</span>
+            
+            {{-- GRID CONTAINER --}}
+            <div class="grid grid-cols-2 gap-3">
+                @foreach($navLinks as $link)
+                    <a href="{{ route($link['route']) }}" 
+                       class="flex flex-col items-center justify-center p-4 rounded-2xl border transition-all duration-200
+                       {{ request()->routeIs($link['active']) 
+                          ? 'bg-red-50 border-red-100 text-red-700 shadow-sm' 
+                          : 'bg-gray-50 border-transparent text-gray-600 hover:bg-white hover:border-gray-200 hover:shadow-sm' }}">
+                        
+                        <svg class="w-6 h-6 mb-2 {{ request()->routeIs($link['active']) ? 'text-red-600' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $link['icon'] }}"></path>
+                        </svg>
+                        
+                        <span class="text-xs font-bold uppercase tracking-wider text-center">
                             {{ $link['name'] }}
-                        </a>
-                    @endforeach
-                </div>
-            </div>
-
-            {{-- GROUP 2: SYNERGIZE (Community & Info) --}}
-            <div>
-                <span class="px-4 text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 block pl-5">Synergize</span>
-                <div class="space-y-1">
-                    @foreach(['Directory', 'Linkages', 'Pillars', 'About'] as $name)
-                        @php $link = collect($navLinks)->firstWhere('name', $name); @endphp
-                        <a href="{{ route($link['route']) }}" 
-                           class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-bold transition-colors
-                           {{ request()->routeIs($link['active']) ? 'bg-gray-100 text-gray-900' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900' }}">
-                            
-                            {{-- Icon (Simpler style for secondary items) --}}
-                            <svg class="w-5 h-5 ml-1.5 {{ request()->routeIs($link['active']) ? 'text-gray-900' : 'text-gray-300' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $link['icon'] }}"></path></svg>
-                            
-                            {{ $link['name'] }}
-                        </a>
-                    @endforeach
-
-                    {{-- Roundtable (Special Item in Synergize) --}}
-                    @auth
-                    <a href="{{ route('roundtable.index') }}" 
-                       class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-bold text-yellow-700 hover:bg-yellow-50 transition-colors mt-2">
-                        <svg class="w-5 h-5 ml-1.5 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"></path></svg>
-                        The Roundtable
+                        </span>
                     </a>
-                    @endauth
-                </div>
+                @endforeach
             </div>
 
+            {{-- ROUNDTABLE LINK --}}
+            @auth
+                <a href="{{ route('roundtable.index') }}" 
+                   class="flex items-center justify-center gap-3 px-4 py-4 rounded-2xl transition text-sm font-bold mt-3 border border-dashed border-yellow-400 bg-yellow-50 text-yellow-800 hover:bg-yellow-100">
+                    <svg class="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"></path></svg>
+                    The Roundtable
+                </a>
+            @endauth
         </div>
         
         {{-- Mobile Auth Section --}}
