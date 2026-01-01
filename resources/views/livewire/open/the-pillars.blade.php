@@ -39,20 +39,39 @@
             
             {{-- Cover Image --}}
             @if($pillar->image_path)
-            <div class="h-56 w-full relative">
-                <img src="{{ asset('storage/'.$pillar->image_path) }}" class="w-full h-full object-cover">
-                <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+            {{-- A. IMAGE HEADER (Contains Title Only) --}}
+            <div class="h-64 w-full relative group overflow-hidden">
+                <img src="{{ asset('storage/'.$pillar->image_path) }}" 
+                    class="w-full h-full object-cover transform group-hover:scale-105 transition duration-700">
+                
+                {{-- Darker gradient to ensure title is readable --}}
+                <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
+                
                 <div class="absolute bottom-6 left-8 right-8">
-                    <h2 class="font-heading font-black text-2xl md:text-3xl text-white mb-2 leading-tight drop-shadow-md">{{ $pillar->title }}</h2>
-                    <p class="text-white/90 text-sm line-clamp-2 font-medium">{{ $pillar->description }}</p>
+                    <h2 class="font-heading font-black text-2xl md:text-3xl text-white leading-tight drop-shadow-lg">
+                        {{ $pillar->title }}
+                    </h2>
                 </div>
             </div>
-            @else
-            <div class="p-8 pb-0">
-                <h2 class="font-heading font-black text-2xl md:text-3xl text-gray-900 mb-2">{{ $pillar->title }}</h2>
-                <p class="text-gray-500 text-sm font-medium">{{ $pillar->description }}</p>
+
+            {{-- B. DESCRIPTION BODY (Outside image, auto-expanding) --}}
+            <div class="p-8 bg-white border-b border-gray-100">
+                <div class="prose prose-stone text-gray-600 text-sm md:text-base leading-relaxed font-medium">
+                    {{ $pillar->description }}
+                </div>
             </div>
-            @endif
+
+        @else
+            {{-- NO IMAGE FALLBACK --}}
+            <div class="p-8 bg-white border-b border-gray-100">
+                <h2 class="font-heading font-black text-2xl md:text-3xl text-gray-900 mb-4 leading-tight">
+                    {{ $pillar->title }}
+                </h2>
+                <div class="prose prose-stone text-gray-600 text-sm md:text-base leading-relaxed font-medium">
+                    {{ $pillar->description }}
+                </div>
+            </div>
+        @endif
 
             {{-- Questions Loop --}}
             <div class="p-8 space-y-10">
