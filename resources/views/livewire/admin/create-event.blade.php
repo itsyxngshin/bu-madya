@@ -7,16 +7,35 @@
                 <h3 class="text-lg font-bold text-gray-900 mb-6">Event Details</h3>
                 
                 {{-- Title --}}
-                <div class="mb-4">
+                <div class="mb-6">
                     <label class="block text-sm font-bold text-gray-700 mb-1">Event Title</label>
-                    <input wire:model.live="title" type="text" class="w-full rounded-lg border-gray-200 focus:ring-red-500 focus:border-red-500 transition">
+                    <input wire:model.live="title" type="text" class="w-full rounded-lg border-gray-200 focus:ring-red-500 focus:border-red-500 transition font-bold text-lg placeholder-gray-300" placeholder="e.g. Annual Charity Gala 2025">
                     @error('title') <span class="text-red-500 text-xs font-bold">{{ $message }}</span> @enderror
                 </div>
 
-                {{-- Description --}}
-                <div class="mb-6">
-                    <label class="block text-sm font-bold text-gray-700 mb-1">Description</label>
-                    <textarea wire:model="description" rows="10" class="w-full rounded-lg border-gray-200 focus:ring-red-500 focus:border-red-500 transition" placeholder="Event mechanics, details, etc..."></textarea>
+                {{-- MARKDOWN EDITOR --}}
+                <div class="mb-6" 
+                     x-data="{
+                        value: @entangle('description'),
+                        init() {
+                            let editor = new EasyMDE({
+                                element: this.$refs.editor,
+                                spellChecker: false,
+                                placeholder: 'Describe the event mechanics, location, and other details...',
+                                toolbar: ['bold', 'italic', 'heading', '|', 'quote', 'unordered-list', 'ordered-list', '|', 'link', 'preview', 'guide'],
+                                status: false, // Hide the status bar
+                                minHeight: '300px',
+                            });
+
+                            // Sync changes to Livewire
+                            editor.codemirror.on('change', () => {
+                                this.value = editor.value();
+                            });
+                        }
+                     }"
+                     wire:ignore>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Description</label>
+                    <textarea x-ref="editor" class="w-full rounded-lg border-gray-200 focus:ring-red-500"></textarea>
                 </div>
 
                 {{-- DRAG AND DROP IMAGE UPLOAD --}}
@@ -167,3 +186,13 @@
         </div>
     </div>
 </div>
+
+@push('styles')
+    {{-- EASY MDE STYLES (Make sure you have this CDN) --}}
+    
+    <style>
+        .EasyMDEContainer .CodeMirror { border-radius: 0.5rem; border-color: #e5e7eb; }
+        .EasyMDEContainer .editor-toolbar { border-radius: 0.5rem 0.5rem 0 0; border-color: #e5e7eb; background: #f9fafb; opacity: 1; }
+        .EasyMDEContainer .editor-statusbar { display: none; }
+    </style>
+@endpush
