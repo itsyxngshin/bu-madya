@@ -124,7 +124,7 @@
                                         {{ $isVacant ? 'Unfilled' : $user->name }}
                                     </h3>
                                     {{-- UPDATED: User Name Text Size --}}
-                                    <p class="font-bold uppercase tracking-wide leading-snug truncate
+                                    <p class="font-bold uppercase tracking-wide leading-tight break-words
                                               {{ $isVacant ? 'text-[8px] text-gray-400' : ($isDG ? 'text-[9px] md:text-xs text-yellow-700 font-black' : 'text-[8px] md:text-[10px] text-green-700') }}">
                                         {{ $director->name }}
                                     </p>
