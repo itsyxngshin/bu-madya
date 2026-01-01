@@ -97,8 +97,81 @@ class UserRoster extends Component
         ]);
     }
 
-    // ... [saveUser method remains same as before] ...
-    public function saveUser() { /* ... see previous response ... */ }
+    public function saveUser()
+    {
+        // 1. SINGLE USER CREATION
+        if ($this->createMode === 'single') {
+            $this->validate([
+                'newUser.name' => 'required|string|max:255',
+                'newUser.email' => 'required|email|unique:users,email',
+                'newUser.password' => 'required|min:6',
+                'newUser.role_id' => 'required|exists:roles,id',
+            ]);
+
+            $user = User::create([
+                'name' => $this->newUser['name'],
+                'email' => $this->newUser['email'],
+                'password' => Hash::make($this->newUser['password']),
+                'role_id' => $this->newUser['role_id'],
+                'status' => 'active',
+                'profile_photo_path' => null, // or default path
+            ]);
+
+            // Create an empty profile to prevent null errors in the table view
+            // (Since your table checks $user->profile->college)
+            $user->profile()->create([]);
+
+            session()->flash('message', 'User created successfully.');
+        } 
+        
+        // 2. BULK USER CREATION
+        else {
+            $this->validate([
+                'bulkEmails' => 'required|string',
+            ]);
+
+            // Attempt to find a default "Member" role, or fallback to the lowest ID role
+            // You might want to hardcode this ID if your roles are static (e.g., 3 for Member)
+            $defaultRole = Role::where('role_name', 'regular')->first() 
+                           ?? Role::where('role_name', 'member')->first() 
+                           ?? Role::latest()->first(); 
+
+            $emails = explode("\n", $this->bulkEmails);
+            $count = 0;
+
+            foreach ($emails as $email) {
+                $email = trim($email);
+
+                // Check if valid email and doesn't already exist
+                if (!empty($email) && filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                    if (!User::where('email', $email)->exists()) {
+                        
+                        // Use the part before @ as the temporary name
+                        $tempName = str($email)->before('@')->title()->replace('.', ' ');
+
+                        $user = User::create([
+                            'name' => $tempName,
+                            'email' => $email,
+                            'password' => Hash::make('MadyaRegular2025!'), // Default password
+                            'role_id' => $defaultRole->id,
+                            'status' => 'active',
+                        ]);
+
+                        // Create empty profile
+                        $user->profile()->create([]);
+                        
+                        $count++;
+                    }
+                }
+            }
+
+            session()->flash('message', "$count users imported successfully.");
+        }
+
+        // 3. CLEANUP
+        $this->reset(['newUser', 'bulkEmails']);
+        $this->isCreateModalOpen = false;
+    }
 
     // =========================================================
     // ASSIGNMENT LOGIC (Updated for Multiple/Simultaneous)
