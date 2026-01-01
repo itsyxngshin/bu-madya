@@ -3,7 +3,7 @@
      :class="{ 'bg-white/90 backdrop-blur-xl shadow-sm border-b border-gray-200': scrolled, 'bg-white/50 backdrop-blur-md border-b border-transparent': !scrolled }"
      class="sticky top-0 z-50 transition-all duration-300">
 
-    {{-- DEFINING LINKS WITH ICONS HERE TO REUSE --}}
+    {{-- DEFINING LINKS --}}
     @php
         $navLinks = [
             ['name' => 'Home', 'route' => 'open.home', 'active' => 'open.home.*', 'icon' => 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6'],
@@ -18,7 +18,7 @@
     @endphp
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-20"> {{-- Increased height slightly for icons --}}
+        <div class="flex justify-between h-20"> 
             
             {{-- 1. LEFT SIDE: Logo --}}
             <div class="flex items-center gap-3">
@@ -30,20 +30,16 @@
                 </a>
             </div>
 
-            {{-- 2. CENTER: Desktop Navigation (Icon + Text) --}}
+            {{-- 2. CENTER: Desktop Navigation --}}
             <div class="hidden md:flex items-center justify-center space-x-6 lg:space-x-8">
                 @foreach($navLinks as $link)
                     <a href="{{ route($link['route']) }}" 
                        class="group flex flex-col items-center justify-center transition-all duration-200
                        {{ request()->routeIs($link['active']) ? 'text-red-600' : 'text-gray-400 hover:text-gray-900' }}">
-                        
-                        {{-- Icon --}}
                         <svg class="w-6 h-6 mb-1 transition-transform group-hover:-translate-y-1 {{ request()->routeIs($link['active']) ? 'text-red-600' : 'text-gray-400 group-hover:text-red-500' }}" 
                              fill="none" stroke="currentColor" viewBox="0 0 24 24">
                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $link['icon'] }}"></path>
                         </svg>
-                        
-                        {{-- Tiny Text --}}
                         <span class="text-[10px] font-bold uppercase tracking-wider {{ request()->routeIs($link['active']) ? 'text-red-600' : 'text-gray-500 group-hover:text-gray-900' }}">
                             {{ $link['name'] }}
                         </span>
@@ -61,7 +57,6 @@
 
             {{-- 3. RIGHT SIDE: Auth & Mobile Toggle --}}
             <div class="flex items-center gap-4">
-                
                 {{-- Auth Buttons (Desktop) --}}
                 <div class="hidden md:flex items-center gap-3">
                     @auth
@@ -72,7 +67,6 @@
                             </a>
                         @endif
                         
-                        {{-- User Dropdown --}}
                         <div class="relative ml-2" x-data="{ dropdownOpen: false }">
                             <button @click="dropdownOpen = !dropdownOpen" type="button" class="flex text-sm border-2 border-transparent rounded-full focus:outline-none focus:border-red-300 transition hover:shadow-md">
                                 <img class="h-9 w-9 rounded-full object-cover" src="{{ Auth::user()->profile_photo_path ? (filter_var(Auth::user()->profile_photo_path, FILTER_VALIDATE_URL) ? Auth::user()->profile_photo_path : asset(Auth::user()->profile_photo_path)) : 'https://ui-avatars.com/api/?name='.urlencode(Auth::user()->name).'&color=7F9CF5&background=EBF4FF' }}" alt="{{ Auth::user()->name }}" />
@@ -88,29 +82,20 @@
                                  x-transition:leave-end="transform opacity-0 scale-95"
                                  class="absolute right-0 mt-2 w-48 rounded-xl shadow-xl py-1 bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-50" 
                                  style="display: none;">
-                                
                                 <div class="px-4 py-3 border-b border-gray-100">
                                     <p class="text-xs text-gray-500 uppercase font-bold">Signed in as</p>
                                     <p class="text-sm font-bold text-gray-900 truncate">{{ Auth::user()->name }}</p>
                                 </div>
-
-                                <a href="{{ route('profile.public', Auth::user()->username) }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-red-600">
-                                    Your Profile
-                                </a>
-
+                                <a href="{{ route('profile.public', Auth::user()->username) }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-red-600">Your Profile</a>
                                 <form method="POST" action="{{ route('logout') }}">
                                     @csrf
-                                    <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 font-bold">
-                                        Log Out
-                                    </button>
+                                    <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 font-bold">Log Out</button>
                                 </form>
                             </div>
                         </div>
                     @else
                         <a href="{{ route('login') }}" class="text-xs font-bold text-gray-500 hover:text-gray-900 transition whitespace-nowrap">Log in</a>
-                        <a href="{{ route('register') }}" class="px-4 py-2 bg-gray-900 text-white text-[10px] font-bold uppercase tracking-widest rounded-xl hover:bg-red-600 hover:shadow-lg transition transform hover:-translate-y-0.5 whitespace-nowrap">
-                            Join Us
-                        </a>
+                        <a href="{{ route('register') }}" class="px-4 py-2 bg-gray-900 text-white text-[10px] font-bold uppercase tracking-widest rounded-xl hover:bg-red-600 hover:shadow-lg transition transform hover:-translate-y-0.5 whitespace-nowrap">Join Us</a>
                     @endauth
                 </div>
 
@@ -127,7 +112,7 @@
         </div>
     </div>
 
-    {{-- 4. MOBILE MENU (Uses the same $navLinks array) --}}
+    {{-- 4. MOBILE MENU (CATEGORIZED LIST - "Discover" & "Synergize") --}}
     <div x-show="open" 
          x-transition:enter="transition ease-out duration-200"
          x-transition:enter-start="opacity-0 -translate-y-2"
@@ -135,54 +120,86 @@
          x-transition:leave="transition ease-in duration-150"
          x-transition:leave-start="opacity-100 translate-y-0"
          x-transition:leave-end="opacity-0 -translate-y-2"
-         class="md:hidden bg-white border-b border-gray-200 shadow-xl relative z-40">
+         class="md:hidden bg-white/95 backdrop-blur-xl border-b border-gray-200 shadow-2xl relative z-40 max-h-[calc(100vh-80px)] overflow-y-auto">
         
-        <div class="px-4 py-6 space-y-2">
-            
-            @foreach($navLinks as $link)
-                <a href="{{ route($link['route']) }}" 
-                   class="flex items-center gap-3 px-4 py-3 rounded-xl transition text-sm font-bold
-                   {{ request()->routeIs($link['active']) ? 'bg-red-50 text-red-700' : 'text-gray-600 hover:bg-gray-50' }}">
-                    <svg class="w-5 h-5 {{ request()->routeIs($link['active']) ? 'text-red-500' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $link['icon'] }}"></path></svg>
-                    {{ $link['name'] }}
-                </a>
-            @endforeach
+        <div class="px-2 py-4 space-y-6">
 
-            @auth
-                <a href="{{ route('roundtable.index') }}" 
-                   class="flex items-center gap-3 px-4 py-3 rounded-xl transition text-sm font-bold mt-2 border border-dashed border-yellow-300
-                   {{ request()->routeIs('roundtable.*') ? 'bg-yellow-50 text-yellow-800' : 'text-gray-600 hover:bg-yellow-50 hover:text-yellow-800' }}">
-                    <svg class="w-5 h-5 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"></path></svg>
-                    The Roundtable
-                </a>
-            @endauth
+            {{-- GROUP 1: DISCOVER (Primary Content) --}}
+            <div>
+                <span class="px-4 text-[10px] font-black uppercase tracking-widest text-red-500 mb-2 block pl-5">Discover</span>
+                <div class="space-y-1">
+                    @foreach(['Home', 'Projects', 'Events', 'News'] as $name)
+                        @php $link = collect($navLinks)->firstWhere('name', $name); @endphp
+                        <a href="{{ route($link['route']) }}" 
+                           class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-bold transition-colors
+                           {{ request()->routeIs($link['active']) ? 'bg-red-50 text-red-700' : 'text-gray-700 hover:bg-gray-50 hover:text-red-600' }}">
+                            
+                            {{-- Icon --}}
+                            <div class="w-8 h-8 rounded-full flex items-center justify-center bg-white border border-gray-100 shadow-sm shrink-0">
+                                <svg class="w-4 h-4 {{ request()->routeIs($link['active']) ? 'text-red-500' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $link['icon'] }}"></path></svg>
+                            </div>
+                            
+                            {{ $link['name'] }}
+                        </a>
+                    @endforeach
+                </div>
+            </div>
+
+            {{-- GROUP 2: SYNERGIZE (Community & Info) --}}
+            <div>
+                <span class="px-4 text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 block pl-5">Synergize</span>
+                <div class="space-y-1">
+                    @foreach(['Directory', 'Linkages', 'Pillars', 'About'] as $name)
+                        @php $link = collect($navLinks)->firstWhere('name', $name); @endphp
+                        <a href="{{ route($link['route']) }}" 
+                           class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-bold transition-colors
+                           {{ request()->routeIs($link['active']) ? 'bg-gray-100 text-gray-900' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900' }}">
+                            
+                            {{-- Icon (Simpler style for secondary items) --}}
+                            <svg class="w-5 h-5 ml-1.5 {{ request()->routeIs($link['active']) ? 'text-gray-900' : 'text-gray-300' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $link['icon'] }}"></path></svg>
+                            
+                            {{ $link['name'] }}
+                        </a>
+                    @endforeach
+
+                    {{-- Roundtable (Special Item in Synergize) --}}
+                    @auth
+                    <a href="{{ route('roundtable.index') }}" 
+                       class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-bold text-yellow-700 hover:bg-yellow-50 transition-colors mt-2">
+                        <svg class="w-5 h-5 ml-1.5 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"></path></svg>
+                        The Roundtable
+                    </a>
+                    @endauth
+                </div>
+            </div>
+
         </div>
         
         {{-- Mobile Auth Section --}}
-        <div class="p-4 bg-gray-50 border-t border-gray-100">
+        <div class="p-4 bg-gray-50 border-t border-gray-100 mt-2">
             @auth
-                <div class="flex items-center gap-4 mb-4">
-                    <img class="h-10 w-10 rounded-full object-cover border border-white shadow-sm" src="{{ Auth::user()->profile_photo_path ? (filter_var(Auth::user()->profile_photo_path, FILTER_VALIDATE_URL) ? Auth::user()->profile_photo_path : asset(Auth::user()->profile_photo_path)) : 'https://ui-avatars.com/api/?name='.urlencode(Auth::user()->name).'&color=7F9CF5&background=EBF4FF' }}" />
-                    <div>
-                        <div class="font-bold text-gray-900 leading-tight">{{ Auth::user()->name }}</div>
-                        <div class="text-xs text-gray-500 font-medium">{{ Auth::user()->email }}</div>
+                <div class="flex items-center gap-3 mb-4">
+                    <img class="h-10 w-10 rounded-full object-cover border-2 border-white shadow-sm" src="{{ Auth::user()->profile_photo_path ? (filter_var(Auth::user()->profile_photo_path, FILTER_VALIDATE_URL) ? Auth::user()->profile_photo_path : asset(Auth::user()->profile_photo_path)) : 'https://ui-avatars.com/api/?name='.urlencode(Auth::user()->name).'&color=7F9CF5&background=EBF4FF' }}" />
+                    <div class="overflow-hidden">
+                        <div class="font-bold text-gray-900 leading-tight truncate">{{ Auth::user()->name }}</div>
+                        <div class="text-[10px] text-gray-500 font-bold uppercase tracking-wider">{{ Auth::user()->email }}</div>
                     </div>
                 </div>
                 <div class="grid grid-cols-2 gap-2">
-                    <a href="{{ (Auth::user()->role && Auth::user()->role->role_name === 'administrator') ? route('admin.dashboard') : route('dashboard') }}" class="flex justify-center py-2 bg-white border border-gray-200 rounded-lg text-xs font-bold uppercase tracking-wide text-gray-600 hover:bg-gray-100">
+                    <a href="{{ (Auth::user()->role && Auth::user()->role->role_name === 'administrator') ? route('admin.dashboard') : route('dashboard') }}" class="flex justify-center py-3 bg-white border border-gray-200 rounded-xl text-xs font-bold uppercase tracking-wide text-gray-600 hover:bg-gray-100 shadow-sm">
                         Dashboard
                     </a>
                     
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
-                        <button type="submit" class="w-full py-2 bg-red-100 border border-transparent rounded-lg text-xs font-bold uppercase tracking-wide text-red-700 hover:bg-red-200">
+                        <button type="submit" class="w-full py-3 bg-red-100 border border-transparent rounded-xl text-xs font-bold uppercase tracking-wide text-red-700 hover:bg-red-200 shadow-sm">
                             Log Out
                         </button>
                     </form>
                 </div>
             @else
                 <div class="grid grid-cols-2 gap-3">
-                     <a href="{{ route('login') }}" class="flex justify-center items-center py-3 border border-gray-300 rounded-xl text-sm font-bold text-gray-700 hover:bg-gray-100">
+                     <a href="{{ route('login') }}" class="flex justify-center items-center py-3 bg-white border border-gray-200 rounded-xl text-sm font-bold text-gray-700 hover:bg-gray-50">
                          Log In
                      </a>
                      <a href="{{ route('register') }}" class="flex justify-center items-center py-3 bg-gray-900 text-white rounded-xl text-sm font-bold hover:bg-red-600 transition shadow-lg">
