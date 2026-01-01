@@ -285,7 +285,7 @@
 
                     <div class="pt-6">
                         {{-- Green Button for "Go/Action" --}}
-                        <a href="{{ route('registration-form') }}" class="inline-block bg-green-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-green-500 transition shadow-lg shadow-green-900/50 transform hover:-translate-y-1">
+                        <a href="{{ route('membership-form') }}" class="inline-block bg-green-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-green-500 transition shadow-lg shadow-green-900/50 transform hover:-translate-y-1">
                             Register Now
                         </a>
                     </div>
