@@ -25,7 +25,7 @@ class LoginResponses implements LoginResponseContract
         // Assuming 'member' is the role, or if they have no specific role
         if (in_array($user->role->role_name, ['member', 'regular'])) {
             // Option A: Redirect to the public home page
-            return redirect()->route('home'); 
+            return redirect()->route('open.home'); 
             
             // Option B: Redirect to a specific "Member Area" if you have one
             // return redirect()->route('member.area');
