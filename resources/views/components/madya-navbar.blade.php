@@ -116,7 +116,7 @@
          class="md:hidden bg-white/95 backdrop-blur-xl border-b border-gray-200 shadow-2xl relative z-40 max-h-[85vh] overflow-y-auto">
         
         <div class="px-4 py-6">
-            <span class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-4 block text-center">Navigation</span>
+            <span class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-4 block text-center">Discover and Synergize</span>
             
             {{-- 4-COLUMN COMPACT GRID --}}
             <div class="grid grid-cols-4 gap-y-6 gap-x-2">
