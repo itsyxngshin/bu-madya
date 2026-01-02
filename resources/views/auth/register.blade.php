@@ -62,15 +62,12 @@
                             <label for="college_id" class="block text-[10px] sm:text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">College</label>
                             <div class="relative">
                                 <select id="college_id" name="college_id" required 
-                                    class="appearance-none block w-full px-3 py-2.5 sm:px-4 sm:py-3 border border-gray-200 rounded-xl bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:bg-white transition-all text-sm">
+                                    class="block w-full px-3 py-2.5 sm:px-4 sm:py-3 border border-gray-200 rounded-xl bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:bg-white transition-all text-sm">
                                     <option value="" disabled selected>Select your College</option>
                                     @foreach(\App\Models\College::all() as $college)
                                         <option value="{{ $college->id }}">{{ $college->name }}</option>
                                     @endforeach
                                 </select>
-                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-500">
-                                    <svg class="h-4 w-4 fill-current" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/></svg>
-                                </div>
                             </div>
                         </div>
 
@@ -78,7 +75,7 @@
                         <div>
                             <label for="course" class="block text-[10px] sm:text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Course</label>
                             <input id="course" type="text" name="course" :value="old('course')" required 
-                                class="appearance-none block w-full px-3 py-2.5 sm:px-4 sm:py-3 border border-gray-200 rounded-xl bg-gray-50 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:bg-white transition-all text-sm"
+                                class="block w-full px-3 py-2.5 sm:px-4 sm:py-3 border border-gray-200 rounded-xl bg-gray-50 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:bg-white transition-all text-sm"
                                 placeholder="e.g. BS IT">
                         </div>
 
