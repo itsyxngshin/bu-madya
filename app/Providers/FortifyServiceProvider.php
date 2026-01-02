@@ -15,6 +15,9 @@ use Laravel\Fortify\Actions\RedirectIfTwoFactorAuthenticatable;
 use Laravel\Fortify\Fortify;
 use App\Http\Responses\LoginResponses;
 use Laravel\Fortify\Contracts\LoginResponse as LoginResponseContract;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\ValidationException;
+use App\Models\User;
 
 class FortifyServiceProvider extends ServiceProvider
 {
@@ -47,5 +50,23 @@ class FortifyServiceProvider extends ServiceProvider
             return Limit::perMinute(5)->by($request->session()->get('login.id'));
         });
         $this->app->singleton(LoginResponseContract::class, LoginResponses::class);
+
+        // Override authentication to check status
+        Fortify::authenticateUsing(function (Request $request) {
+            $user = User::where('email', $request->email)->first();
+
+            if ($user &&
+                Hash::check($request->password, $user->password)) {
+                
+                // CHECK STATUS HERE
+                if ($user->status !== 'active') {
+                    throw ValidationException::withMessages([
+                        'email' => ['This account has been suspended.'],
+                    ]);
+                }
+
+                return $user;
+            }
+        });
     }
 }

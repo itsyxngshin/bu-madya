@@ -129,8 +129,8 @@
                         <button wire:click="viewProfile({{ $user->id }})" class="p-2 text-gray-400 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition" title="Edit Profile">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                         </button>
-                        <button wire:click="deleteUser({{ $user->id }})" 
-                                wire:confirm="Are you sure you want to delete {{ $user->name }}? This creates permanent data loss." 
+                        <button type="button" 
+                                onclick="confirmDelete('{{ $user->id }}', '{{ addslashes($user->name) }}')"
                                 class="p-2 text-red-300 hover:text-red-600 hover:bg-red-50 rounded-lg transition" 
                                 title="Delete Permanently">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
@@ -516,3 +516,33 @@
     </div>
     @endif
 </div>
+
+@push('scripts') {{-- Or just <script> if you aren't using stacks --}}
+<script>
+    function confirmDelete(id, name) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: `You are about to delete ${name}. This action cannot be undone.`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete it!',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Call the Livewire method "deleteUser" with the ID
+                @this.call('deleteUser', id);
+                
+                // Optional: Show a "Deleted!" success alert immediately 
+                // or let the Livewire flash message handle it.
+                Swal.fire(
+                    'Deleted!',
+                    'The user has been removed.',
+                    'success'
+                )
+            }
+        })
+    }
+</script>
+@endpush  

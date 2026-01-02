@@ -12,6 +12,7 @@
     <script src="https://cdn.jsdelivr.net/npm/easyqrcodejs@4.5.0/dist/easy.qrcode.min.js"></script>
     <script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 
     <style>
