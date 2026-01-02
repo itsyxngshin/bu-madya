@@ -1,4 +1,21 @@
 <div class="min-h-screen font-sans text-gray-900 pb-20">
+
+    {{-- SUCCESS TOAST NOTIFICATION --}}
+    @if (session()->has('message'))
+        <div x-data="{ show: true }" 
+             x-init="setTimeout(() => show = false, 3000)" 
+             x-show="show"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 transform translate-x-8"
+             x-transition:enter-end="opacity-100 transform translate-x-0"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 transform translate-x-0"
+             x-transition:leave-end="opacity-0 transform translate-x-8"
+             class="fixed top-4 right-4 z-50 bg-gray-900 text-white px-6 py-3 rounded-xl shadow-2xl flex items-center gap-3 border-l-4 border-green-500">
+            <svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+            <span class="text-sm font-bold">{{ session('message') }}</span>
+        </div>
+    @endif
     
     {{-- HEADER & TOOLBAR (Same as before) --}}
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
@@ -51,7 +68,7 @@
                     {{-- User --}}
                     <td class="px-6 py-4 whitespace-nowrap">
                         <div class="flex items-center gap-3">
-                            <img class="h-10 w-10 rounded-full object-cover border border-gray-200" src="{{ asset($user->profile_photo_path) }}" alt="{{ $user->name }}" />
+                            <img class="h-10 w-10 rounded-full object-cover border border-gray-200" src="{{ $user->profile_photo_path ? asset($user->profile_photo_path) : 'https://ui-avatars.com/api/?name='.urlencode($user->name).'&color=7F9CF5&background=EBF4FF' }}" />
                             <div>
                                 <div class="text-sm font-bold text-gray-900">{{ $user->name }}</div>
                                 <div class="text-[10px] text-gray-500">{{ $user->email }}</div>
@@ -228,7 +245,7 @@
             {{-- Header --}}
             <div class="flex justify-between items-start mb-6">
                 <div class="flex items-center gap-4">
-                    <img class="h-16 w-16 rounded-full border-2 border-red-100" src="{{ $viewingUser->profile_photo_url }}">
+                    <img class="h-16 w-16 rounded-full border-2 border-red-100" src="{{ $viewingUser->profile_photo_path ? asset($viewingUser->profile_photo_path) : 'https://ui-avatars.com/api/?name='.urlencode($viewingUser->name).'&color=7F9CF5&background=EBF4FF' }}">
                     <div>
                         <h2 class="font-heading font-black text-2xl text-gray-900">{{ $viewingUser->name }}</h2>
                         <span class="px-2 py-0.5 bg-gray-100 text-gray-600 text-[10px] font-bold uppercase rounded">{{ $viewingUser->email }}</span>

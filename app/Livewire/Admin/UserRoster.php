@@ -108,17 +108,19 @@ class UserRoster extends Component
                 'newUser.role_id' => 'required|exists:roles,id',
             ]);
 
+            // Generate Username
+            $username = Str::slug($this->newUser['name']) . '-' . strtolower(Str::random(4));
+
             $user = User::create([
                 'name' => $this->newUser['name'],
                 'email' => $this->newUser['email'],
+                'username' => $username, // <--- Added
                 'password' => Hash::make($this->newUser['password']),
                 'role_id' => $this->newUser['role_id'],
                 'status' => 'active',
-                'profile_photo_path' => null, // or default path
+                'profile_photo_path' => null, 
             ]);
 
-            // Create an empty profile to prevent null errors in the table view
-            // (Since your table checks $user->profile->college)
             $user->profile()->create([]);
 
             session()->flash('message', 'User created successfully.');
@@ -130,8 +132,6 @@ class UserRoster extends Component
                 'bulkEmails' => 'required|string',
             ]);
 
-            // Attempt to find a default "Member" role, or fallback to the lowest ID role
-            // You might want to hardcode this ID if your roles are static (e.g., 3 for Member)
             $defaultRole = Role::where('role_name', 'regular')->first() 
                            ?? Role::where('role_name', 'member')->first() 
                            ?? Role::latest()->first(); 
@@ -142,22 +142,23 @@ class UserRoster extends Component
             foreach ($emails as $email) {
                 $email = trim($email);
 
-                // Check if valid email and doesn't already exist
                 if (!empty($email) && filter_var($email, FILTER_VALIDATE_EMAIL)) {
                     if (!User::where('email', $email)->exists()) {
                         
-                        // Use the part before @ as the temporary name
                         $tempName = str($email)->before('@')->title()->replace('.', ' ');
+                        
+                        // Generate Username for Bulk
+                        $username = Str::slug($tempName) . '-' . strtolower(Str::random(4));
 
                         $user = User::create([
                             'name' => $tempName,
                             'email' => $email,
-                            'password' => Hash::make('MadyaRegular2025!'), // Default password
+                            'username' => $username, // <--- Added
+                            'password' => Hash::make('MadyaRegular2025!'), 
                             'role_id' => $defaultRole->id,
                             'status' => 'active',
                         ]);
 
-                        // Create empty profile
                         $user->profile()->create([]);
                         
                         $count++;
@@ -168,7 +169,6 @@ class UserRoster extends Component
             session()->flash('message', "$count users imported successfully.");
         }
 
-        // 3. CLEANUP
         $this->reset(['newUser', 'bulkEmails']);
         $this->isCreateModalOpen = false;
     }
