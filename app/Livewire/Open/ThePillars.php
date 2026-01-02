@@ -10,7 +10,6 @@ use Illuminate\Support\Facades\Session;
 use Illuminate\Http\Request;
 use Livewire\Attributes\Layout;
 use App\Models\SiteStat;
-use Illuminate\Support\Facades\Session;
 
 #[Layout('layouts.madya-template')] 
 class ThePillars extends Component 
