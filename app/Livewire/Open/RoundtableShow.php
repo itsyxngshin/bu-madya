@@ -67,6 +67,20 @@ class RoundtableShow extends Component
         $reply->delete();
     }
 
+    public function deleteTopic()
+    {
+        // Authorization: Allow if user is Owner OR has 'is_admin' flag
+        // Adjust '!auth()->user()->is_admin' to match your actual admin logic
+        if ($this->topic->user_id !== auth()->id() && !auth()->user()->role->role_name === 'administrator') {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $this->topic->delete();
+
+        // Redirect back to the main hall
+        return redirect()->route('roundtable.index');
+    }
+
     // 2. Create a helper function to clean text
     protected function sanitize($text)
     {

@@ -34,9 +34,31 @@
     <div class="max-w-4xl mx-auto px-4 pt-4 md:pt-6 relative z-10">
         
         {{-- A. ORIGINAL TOPIC CARD --}}
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200/60 overflow-hidden mb-6 md:mb-8">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200/60 overflow-hidden mb-6 md:mb-8 relative group">
+            
+            {{-- ADMIN/OWNER ACTION MENU (Top Right) --}}
+            @if(auth()->id() === $topic->user_id || auth()->user()->is_admin)
+                <div class="absolute top-3 right-3 z-20" x-data="{ open: false }">
+                    <button @click="open = !open" @click.away="open = false" class="p-1 text-gray-400 hover:text-gray-900 bg-white/50 hover:bg-white rounded-full transition backdrop-blur-sm">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"></path></svg>
+                    </button>
+
+                    <div x-show="open" style="display: none;" 
+                        class="absolute right-0 mt-1 w-40 bg-white border border-gray-100 rounded-lg shadow-xl py-1 overflow-hidden animate-fade-in-up origin-top-right">
+                        
+                        {{-- Delete Button --}}
+                        <button wire:click="deleteTopic" 
+                                wire:confirm="Are you sure you want to delete this entire topic? This cannot be undone."
+                                class="w-full text-left px-4 py-3 text-xs font-bold text-red-600 hover:bg-red-50 flex items-center gap-2 transition">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                            Delete Topic
+                        </button>
+                    </div>
+                </div>
+            @endif
+
             <div class="flex">
-                {{-- Left Sidebar (HIDDEN ON MOBILE to save space) --}}
+                {{-- Left Sidebar (Hidden on mobile) --}}
                 <div class="hidden md:flex w-12 bg-gray-50/50 border-r border-gray-100 flex-col items-center py-4 gap-1">
                     <div class="text-gray-300 p-1"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg></div>
                     <span class="text-xs font-bold text-gray-400">OP</span>
@@ -46,7 +68,7 @@
                 {{-- Topic Content --}}
                 <div class="flex-1 p-4 md:p-6">
                     {{-- Header Meta --}}
-                    <div class="flex flex-wrap items-center gap-2 mb-3 text-xs text-gray-500">
+                    <div class="flex flex-wrap items-center gap-2 mb-3 text-xs text-gray-500 pr-8"> {{-- Added pr-8 to avoid overlap with menu --}}
                         <img src="{{ asset($topic->user->profile_photo_path) }}" class="w-6 h-6 md:w-5 md:h-5 rounded-full object-cover ring-2 ring-gray-100 md:ring-0">
                         <span class="flex items-center gap-1">
                             <span class="font-bold text-gray-700">{{ $topic->user->name }}</span>
