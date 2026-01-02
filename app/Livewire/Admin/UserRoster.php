@@ -97,6 +97,27 @@ class UserRoster extends Component
         ]);
     }
 
+    public function deleteUser($id)
+    {
+        // 1. Prevent deleting self
+        if ($id === auth()->id()) {
+            session()->flash('error', 'You cannot delete your own account while logged in.');
+            return;
+        }
+
+        // 2. Find and Delete
+        $user = User::find($id);
+
+        if ($user) {
+            // Note: Ensure your database migrations for profiles/assignments 
+            // have ->onDelete('cascade') so related data is removed automatically.
+            // If not, manually delete related records here first.
+            $user->delete();
+            
+            session()->flash('message', 'User account permanently deleted.');
+        }
+    }
+
     public function saveUser()
     {
         // 1. SINGLE USER CREATION
