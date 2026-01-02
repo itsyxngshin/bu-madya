@@ -2,78 +2,69 @@
     
     {{-- 1. ATMOSPHERE: SIGNATURE BLOBS --}}
     <div class="fixed inset-0 z-0 overflow-hidden pointer-events-none">
-        {{-- Base Overlay --}}
         <div class="absolute top-0 left-0 w-full h-full bg-stone-50/80"></div>
-        
-        {{-- Animated Orbs --}}
         <div class="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-red-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob"></div>
         <div class="absolute top-[20%] left-[-10%] w-[500px] h-[500px] bg-yellow-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob animation-delay-2000"></div>
         <div class="absolute bottom-[-10%] right-[20%] w-[500px] h-[500px] bg-green-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob animation-delay-4000"></div>
     </div>
 
-    {{-- 2. HERO HEADER --}}
-    {{-- Modified header classes for rounded corners and margins --}}
-    <header class="relative min-h-[400px] flex items-center justify-center text-white overflow-hidden rounded-[3rem] shadow-2xl mx-4 md:mx-6 mt-6 md:mt-10 z-10 pb-10 pt-20 md:py-0">
+    {{-- 2. HERO HEADER (Updated to match your Newsroom reference) --}}
+    {{-- Applied: rounded-3xl, shadow-xl, mx-6, -mt-20, and min-h-[350px] --}}
+    <header class="relative min-h-[350px] flex items-center justify-center text-white overflow-hidden rounded-3xl shadow-xl mx-6 -mt-20 z-10 pt-24 pb-12">
         
         {{-- Background Image & Gradient --}}
         <div class="absolute inset-0 z-0">
             <img src="https://images.unsplash.com/photo-1521737604893-d14cc237f11d?q=80&w=2084&auto=format&fit=crop" 
                  class="w-full h-full object-cover transform scale-105" alt="Handshake Background">
             
-            {{-- RESTORED COLOR: Blue to Red Gradient --}}
+            {{-- Gradient --}}
             <div class="absolute inset-0 bg-gradient-to-r from-blue-900/90 to-red-900/80 mix-blend-multiply"></div>
             
-            {{-- Noise Texture (Optional) --}}
+            {{-- Texture --}}
             <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')]"></div>
         </div>
 
-        <div class="relative z-10 text-center px-4 w-full max-w-4xl mx-auto flex flex-col items-center justify-center h-full"> {{-- Added justify-center and h-full --}}
+        <div class="relative z-10 text-center px-4 w-full max-w-4xl mx-auto flex flex-col items-center justify-center">
             
-            <h2 class="text-yellow-300 font-bold tracking-[0.3em] text-[10px] md:text-xs uppercase mb-3 animate-fade-in-down">Our Network</h2>
-            
-            <h1 class="font-heading text-4xl md:text-6xl font-black uppercase tracking-tight mb-4 drop-shadow-2xl leading-none">
-                External Linkages
-            </h1>
-            
-            <p class="text-sm md:text-lg text-gray-100 font-light max-w-xl mx-auto italic mb-8 px-4 leading-relaxed opacity-90">
-                Building bridges with government, NGOs, and civil society to amplify our impact.
-            </p>
+            {{-- Title Section --}}
+            <div class="mt-8 mb-8">
+                <h2 class="text-yellow-300 font-bold tracking-[0.3em] text-[10px] md:text-xs uppercase mb-2 animate-fade-in-down">Our Network</h2>
+                <h1 class="font-heading text-3xl md:text-5xl font-black uppercase tracking-tight mb-3 drop-shadow-lg leading-none">
+                    External Linkages
+                </h1>
+                <p class="text-xs md:text-base text-gray-100 font-light max-w-lg mx-auto italic leading-relaxed opacity-90">
+                    Building bridges with government, NGOs, and civil society to amplify our impact.
+                </p>
+            </div>
 
-            {{-- ADD LINKAGE BUTTON (Moved here) --}}
+            {{-- ADD LINKAGE BUTTON (Auth Check) --}}
            @auth
-                {{-- CHECK ROLE: Only allow Administrator or Director --}}
                 @if(in_array(Auth::user()->role->role_name ?? '', ['administrator', 'director']))
                     <div class="mb-8">
                         <a href="{{ route('linkages.create') }}" 
-                        class="group relative inline-flex items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/30 text-white text-xs font-bold uppercase tracking-widest rounded-full transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-red-500/20 ring-1 ring-white/20">
-                            <span class="w-5 h-5 bg-white/20 rounded-full flex items-center justify-center group-hover:bg-red-500 group-hover:text-white transition-colors">
-                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                            </span>
+                        class="group relative inline-flex items-center gap-2 px-6 py-2.5 bg-white text-red-600 font-bold text-xs uppercase tracking-widest rounded-full hover:bg-yellow-400 hover:text-red-900 transition shadow-lg transform hover:-translate-y-1">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                             <span>Add New Linkage</span>
                         </a>
                     </div>
                 @endif
             @endauth
 
-            {{-- Dynamic Stats (Mobile Optimized Flex) --}}
-            <div class="w-full max-w-2xl bg-black/20 backdrop-blur-xl border border-white/10 rounded-2xl p-4 md:p-6 shadow-2xl mt-auto md:mt-0"> {{-- Added mt-auto md:mt-0 for positioning --}}
-                <div class="flex flex-wrap justify-center md:grid md:grid-cols-3 gap-4 md:gap-8 md:divide-x divide-white/10">
-                    
-                    <div class="text-center px-4 min-w-[30%]">
-                        <span class="block text-2xl md:text-4xl font-black text-white tracking-tighter">{{ $this->stats['active_count'] }}</span>
-                        <span class="text-[9px] md:text-xs font-bold uppercase tracking-widest text-gray-300 block mt-1">Partners</span>
+            {{-- Dynamic Stats (Compact Version to fit inside header) --}}
+            <div class="w-full max-w-xl bg-black/20 backdrop-blur-md border border-white/10 rounded-2xl p-4 shadow-lg">
+                <div class="grid grid-cols-3 gap-4 divide-x divide-white/10">
+                    <div class="text-center">
+                        <span class="block text-2xl font-black text-white tracking-tighter">{{ $this->stats['active_count'] }}</span>
+                        <span class="text-[8px] font-bold uppercase tracking-widest text-gray-300 block">Partners</span>
                     </div>
-                    
-                    <div class="text-center px-4 min-w-[30%] border-l border-white/10 md:border-l-0">
-                        <span class="block text-2xl md:text-4xl font-black text-yellow-400 tracking-tighter">{{ $this->stats['moa_count'] }}</span>
-                        <span class="text-[9px] md:text-xs font-bold uppercase tracking-widest text-gray-300 block mt-1">MOAs</span>
+                    <div class="text-center">
+                        <span class="block text-2xl font-black text-yellow-400 tracking-tighter">{{ $this->stats['moa_count'] }}</span>
+                        <span class="text-[8px] font-bold uppercase tracking-widest text-gray-300 block">MOAs</span>
                     </div>
-                    
-                    <div class="text-center px-4 min-w-[30%] border-l border-white/10 md:border-l-0">
-                        <span class="block text-2xl md:text-4xl font-black text-green-400 tracking-tighter">{{ $this->stats['intl_count'] }}</span>
-                        <span class="text-[9px] md:text-xs font-bold uppercase tracking-widest text-gray-300 block mt-1">Global</span>
+                    <div class="text-center">
+                        <span class="block text-2xl font-black text-green-400 tracking-tighter">{{ $this->stats['intl_count'] }}</span>
+                        <span class="text-[8px] font-bold uppercase tracking-widest text-gray-300 block">Global</span>
                     </div>
-
                 </div>
             </div>
 
@@ -81,7 +72,8 @@
     </header>
 
     {{-- 3. MAIN CONTENT --}}
-    <div class="relative z-10 min-h-screen px-4 md:px-6 pb-24 mt-8 md:mt-12 max-w-[1800px] w-full mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12">
+    {{-- Adjusted top margin to account for the new header height/position --}}
+    <div class="relative z-10 min-h-screen px-4 md:px-6 pb-24 mt-12 max-w-7xl w-full mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12">
         
         {{-- LEFT: PARTNER DIRECTORY (8 Cols) --}}
         <main class="lg:col-span-8 order-1">
