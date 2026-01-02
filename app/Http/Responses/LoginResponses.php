@@ -23,7 +23,7 @@ class LoginResponses implements LoginResponseContract
 
         // 3. MEMBERS -> Member/Home Page
         // Assuming 'member' is the role, or if they have no specific role
-        if ($user->role === 'member') {
+        if (in_array($user->role->role_name, ['member', 'regular'])) {
             // Option A: Redirect to the public home page
             return redirect()->route('home'); 
             
@@ -32,6 +32,6 @@ class LoginResponses implements LoginResponseContract
         }
 
         // 4. FALLBACK (Default)
-        return redirect()->intended(config('fortify.home'));
+        return redirect()->route('open.home');
     }
 }
