@@ -21,4 +21,22 @@ class RoundtableReply extends Model
     {
         return $this->belongsTo(RoundtableTopic::class);
     }
+
+    public function votes()
+    {
+        return $this->hasMany(RoundtableVote::class);
+    }
+
+    // Helper to get the score quickly
+    public function getScoreAttribute()
+    {
+        // Caches the sum to avoid heavy queries on every page load
+        return $this->votes()->sum('vote');
+    }
+
+    // Helper to check if current user voted (for UI highlighting)
+    public function userVote($userId)
+    {
+        return $this->votes->where('user_id', $userId)->first()?->vote ?? 0;
+    }
 }
