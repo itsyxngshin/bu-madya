@@ -8,6 +8,8 @@ use App\Models\News;
 use App\Models\NewsCategory;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout; 
+use App\Models\SiteStat;
+use Illuminate\Support\Facades\Session;
 
 #[Layout('layouts.madya-template')]
 class Index extends Component
