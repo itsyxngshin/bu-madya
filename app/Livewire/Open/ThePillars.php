@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Http\Request;
 use Livewire\Attributes\Layout;
+use App\Models\SiteStat;
+use Illuminate\Support\Facades\Session;
 
 #[Layout('layouts.madya-template')] 
 class ThePillars extends Component 
@@ -30,7 +32,7 @@ class ThePillars extends Component
         // We remember it for 10 minutes, or fetch directly if you want instant real-time
         $this->visitorCount = SiteStat::where('key', 'visitor_count')->value('value');
     }
-    
+
     public function vote($questionId, $optionId)
     {
         $userId = Auth::id();

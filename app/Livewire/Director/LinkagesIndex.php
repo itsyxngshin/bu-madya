@@ -9,6 +9,8 @@ use App\Models\LinkageType;
 use App\Models\LinkageActivity;
 use App\Models\AgreementLevel;
 use Livewire\Attributes\Layout; 
+use App\Models\SiteStat;
+use Illuminate\Support\Facades\Session;
 
 #[Layout('layouts.madya-template')]
 class LinkagesIndex extends Component
