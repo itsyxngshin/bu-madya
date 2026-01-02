@@ -12,19 +12,19 @@
         <div class="absolute bottom-[-10%] right-[20%] w-[500px] h-[500px] bg-green-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob animation-delay-4000"></div>
     </div>
 
-    {{-- 2. HERO HEADER (Updated to Newsroom Style) --}}
-    {{-- Applied: h-[350px], rounded-3xl, shadow-xl, mx-6, -mt-20 overlap --}}
-    <header class="relative h-[350px] flex items-center justify-center text-white overflow-hidden rounded-3xl shadow-xl mx-4 md:mx-6 -mt-20 z-10 pt-24 pb-12">
+    {{-- 2. HERO HEADER (Newsroom Reference Style) --}}
+    {{-- Fixed h-[350px], -mt-20 overlap, rounded-3xl, shadow-xl --}}
+    <header class="relative h-[350px] flex items-center justify-center text-white overflow-hidden rounded-3xl shadow-xl mx-4 md:mx-6 -mt-20 z-10">
+        
         {{-- Background Image & Gradient --}}
         <div class="absolute inset-0 z-0">
             <img src="https://images.unsplash.com/photo-1523580494863-6f3031224c94?q=80&w=2070" class="w-full h-full object-cover">
-            
             {{-- Gradient: Red to Yellow Mix --}}
             <div class="absolute inset-0 bg-gradient-to-r from-red-900/90 to-yellow-700/80 mix-blend-multiply"></div>
         </div>
         
-        {{-- Content --}}
-        <div class="relative z-10 text-center px-4 mt-8">
+        {{-- Content (with mt-16 offset as requested) --}}
+        <div class="relative z-10 text-center px-4 mt-16">
             <h2 class="text-yellow-300 font-bold tracking-[0.3em] text-xs uppercase mb-2 animate-fade-in-down">Opportunities & Activities</h2>
             <h1 class="font-heading text-3xl md:text-5xl font-black uppercase tracking-tight mb-4 drop-shadow-lg animate-fade-in-up leading-none">
                 Events & Campaigns
@@ -46,7 +46,6 @@
     </header>
 
     {{-- 3. MAIN CONTENT --}}
-    {{-- Adjusted top margin (mt-12) to create space after the overlapped header --}}
     <div class="relative min-h-screen px-6 pb-24 mt-12 max-w-[1800px] w-[95%] mx-auto">
         
         {{-- SEARCH & FILTER BAR --}}
@@ -98,7 +97,7 @@
                                     @endif
                                 </a>
                                 
-                                {{-- Status Badge (Floating Top Right) --}}
+                                {{-- Status Badge --}}
                                 <div class="absolute top-4 right-4 z-20">
                                     @if($event->isOpen())
                                         <span class="px-3 py-1 bg-green-500/90 backdrop-blur text-white text-[10px] font-black uppercase tracking-widest rounded-full shadow-sm">
@@ -111,7 +110,7 @@
                                     @endif
                                 </div>
 
-                                {{-- Date Badge (Floating Bottom Left) --}}
+                                {{-- Date Badge --}}
                                 <div class="absolute bottom-4 left-4 z-20">
                                     <span class="px-3 py-1 bg-white/90 backdrop-blur text-gray-900 text-[10px] font-bold uppercase tracking-widest rounded-lg shadow-sm flex items-center gap-2">
                                         <span class="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span>
