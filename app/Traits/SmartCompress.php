@@ -52,7 +52,9 @@ trait SmartCompress
             $command = "gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/ebook -dNOPAUSE -dQUIET -dBATCH -sOutputFile='{$absoluteOutput}' '{$absoluteInput}'";
             
             // Execute command
-            shell_exec($command);
+            if (function_exists('shell_exec')) {
+                \shell_exec($command);
+            }
 
             // Cleanup temp file
             @unlink($absoluteInput);
