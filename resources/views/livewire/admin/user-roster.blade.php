@@ -209,21 +209,28 @@
                             <option value="">Select Position</option>
                             @foreach($directors as $d) <option value="{{ $d->id }}">{{ $d->name }}</option> @endforeach
                         </select>
+                        {{-- ADD ERROR MESSAGE --}}
+                        @error('assignDirectorId') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
                     </div>
                 @endif
 
-                <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Committee (Optional for Directors)</label>
+                {{-- Committee Dropdown --}}
+              <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Committee</label>
                     <select wire:model="assignCommitteeId" class="w-full border-gray-200 rounded-lg text-sm">
                         <option value="">Select Committee</option>
                         @foreach($committees as $c) <option value="{{ $c->id }}">{{ $c->name }}</option> @endforeach
                     </select>
+                    {{-- ADD ERROR MESSAGE --}}
+                    @error('assignCommitteeId') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
                 </div>
 
                 @if($assignType === 'committee')
                     <div>
                         <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Title</label>
                         <input wire:model="assignTitle" type="text" placeholder="e.g. Member, Co-Head" class="w-full border-gray-200 rounded-lg text-sm">
+                        {{-- ADD ERROR MESSAGE --}}
+                        @error('assignTitle') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
                     </div>
                 @endif
                 
