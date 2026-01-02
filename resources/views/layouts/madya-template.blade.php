@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     {{-- 1. Dynamic Page Title --}}
     <title>@yield('meta_title', 'BU MADYA Web')</title>
+    <link rel="icon" href="{{ asset('images/official_logo.png') }}">
 
     {{-- 2. Standard Description --}}
     <meta name="description" content="@yield('meta_description', 'Advocating for youth empowerment and social change.')">
