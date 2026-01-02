@@ -183,11 +183,13 @@
                 </div>
             @endforelse
         </div>
+        <div class="h-40 md:h-48 w-full"></div>
     </div>
 
     {{-- 4. FLOATING FOOTER INPUT --}}
-    <div class="fixed bottom-0 left-0 w-full z-50 border-t border-gray-200 bg-white/95 backdrop-blur-xl shadow-[0_-5px_20px_rgb(0,0,0,0.05)] pb-safe">
-        <div class="max-w-4xl mx-auto px-3 py-2 md:px-4 md:py-3">
+    <div class="fixed bottom-0 left-0 w-full z-50 border-t border-gray-200 bg-white/95 backdrop-blur-xl shadow-[0_-5px_20px_rgb(0,0,0,0.05)] pb-safe pl-safe pr-safe">
+        {{-- Added pb-2 here to the inner container for extra lift --}}
+        <div class="max-w-4xl mx-auto px-3 py-2 pb-4 md:py-3"> 
             <div class="flex gap-2 md:gap-4 items-end">
                 <div class="relative flex-1">
                     <textarea 
@@ -203,13 +205,25 @@
                 </div>
 
                 <button wire:click="postReply" 
-                    class="h-11 w-11 md:w-auto md:px-6 bg-gray-900 text-white rounded-lg font-bold text-xs uppercase tracking-widest hover:bg-red-600 active:scale-95 transition-all shadow-md flex items-center justify-center gap-2 shrink-0">
-                    <span class="hidden md:inline">Post</span>
-                    <svg class="w-4 h-4 md:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                    <svg class="w-4 h-4 hidden md:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+                    class="group h-12 w-12 md:w-auto md:h-11 md:px-6 bg-gradient-to-br from-red-600 to-red-500 text-white rounded-full md:rounded-xl shadow-lg shadow-red-200 hover:shadow-red-300 hover:scale-105 active:scale-95 transition-all flex items-center justify-center shrink-0">
+                    
+                    {{-- Desktop Text --}}
+                    <span class="hidden md:inline text-xs font-bold uppercase tracking-widest">Post Reply</span>
+                    
+                    {{-- Mobile Icon (Paper Plane) --}}
+                    {{-- Note: Added translate classes to center the icon visually since paper planes are often off-center --}}
+                    <svg class="w-5 h-5 md:hidden -ml-0.5 mt-0.5 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                    </svg>
+                    
+                    {{-- Desktop Icon --}}
+                    <svg class="w-4 h-4 hidden md:block ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                    </svg>
                 </button>
             </div>
         </div>
     </div>
+
 
 </div>
