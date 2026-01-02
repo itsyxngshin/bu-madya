@@ -6,8 +6,10 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\TransparencyDocument;
 use App\Models\TransparencyCategory;
+use App\Models\SiteStat;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Session;
 
 class TransparencyIndex extends Component
 {
@@ -17,6 +19,23 @@ class TransparencyIndex extends Component
     public $filter_category = 'all'; // Stores Category ID
     public $filter_year = 'all';     // Stores Year String
     public $search = '';
+    public $visitorCount = 1;
+    public function mount()
+    {
+        // 1. Check if this specific user has already been counted in this session
+        if (!Session::has('has_visited_site')) {
+            
+            // 2. Increment the database value securely
+            SiteStat::where('key', 'visitor_count')->increment('value');
+            
+            // 3. Mark this user as counted for this browser session
+            Session::put('has_visited_site', true);
+        }
+
+        // 4. Retrieve the current total (cache it briefly to reduce DB queries on high traffic)
+        // We remember it for 10 minutes, or fetch directly if you want instant real-time
+        $this->visitorCount = SiteStat::where('key', 'visitor_count')->value('value');
+    }
 
     // Reset pagination when filters change to avoid empty pages
     public function updatedSearch() { $this->resetPage(); }
