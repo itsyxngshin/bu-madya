@@ -1,34 +1,30 @@
 <x-guest-layout>
-    {{-- Main Container: Reduced vertical padding for mobile --}}
     <div class="min-h-screen bg-stone-50 flex flex-col justify-center py-6 sm:py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
         
-        {{-- Background Blobs (Unchanged) --}}
+        {{-- Background Blobs --}}
         <div class="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
             <div class="absolute top-[-10%] left-[-10%] w-96 h-96 bg-green-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
             <div class="absolute top-[-10%] right-[-10%] w-96 h-96 bg-yellow-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
             <div class="absolute bottom-[-20%] left-[20%] w-96 h-96 bg-red-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-4000"></div>
         </div>
 
-        {{-- Branding Header --}}
+        {{-- Header --}}
         <div class="sm:mx-auto sm:w-full sm:max-w-md text-center mb-6">
             <a href="/" class="inline-block transition-transform hover:scale-105">
-                {{-- Reduced logo size for mobile --}}
                 <img src="{{ asset('images/official_logo.png') }}" class="h-12 sm:h-16 w-auto mx-auto" alt="BU MADYA Logo">
             </a>
             <h2 class="mt-4 sm:mt-6 text-2xl sm:text-3xl font-heading font-black text-gray-900 tracking-tight">
                 Welcome <span class="text-transparent bg-clip-text bg-gradient-to-r from-green-600 via-yellow-500 to-red-600">Back</span>
             </h2>
-            <p class="mt-2 text-[10px] sm:text-xs font-bold uppercase tracking-widest text-gray-500"> {{-- Darkened text for visibility --}}
+            <p class="mt-2 text-[10px] sm:text-xs font-bold uppercase tracking-widest text-gray-500">
                 Sign in to your account
             </p>
         </div>
 
         {{-- Login Card --}}
         <div class="sm:mx-auto sm:w-full sm:max-w-md">
-            {{-- Reduced padding inside card --}}
             <div class="bg-white py-6 px-4 sm:py-8 sm:px-10 shadow-xl rounded-2xl sm:rounded-[2rem] border border-gray-100 relative overflow-hidden">
                 
-                {{-- Tricolor Gradient Decoration --}}
                 <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-green-600 via-yellow-400 to-red-600"></div>
 
                 <x-validation-errors class="mb-4" />
@@ -46,8 +42,9 @@
                     <div>
                         <label for="email" class="block text-[10px] sm:text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Email Address</label>
                         <div class="relative">
+                            {{-- ADDED: text-gray-900 --}}
                             <input id="email" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" 
-                                class="appearance-none block w-full px-3 py-2.5 sm:px-4 sm:py-3 border border-gray-200 rounded-xl bg-gray-50 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:bg-white focus:border-transparent transition-all text-sm"
+                                class="appearance-none block w-full px-3 py-2.5 sm:px-4 sm:py-3 border border-gray-200 rounded-xl bg-gray-50 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:bg-white focus:border-transparent transition-all text-sm"
                                 placeholder="you@bumadya.space">
                         </div>
                     </div>
@@ -63,13 +60,13 @@
                             @endif
                         </div>
                         <div class="relative">
+                            {{-- ADDED: text-gray-900 --}}
                             <input id="password" type="password" name="password" required autocomplete="current-password" 
-                                class="appearance-none block w-full px-3 py-2.5 sm:px-4 sm:py-3 border border-gray-200 rounded-xl bg-gray-50 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:bg-white focus:border-transparent transition-all text-sm"
+                                class="appearance-none block w-full px-3 py-2.5 sm:px-4 sm:py-3 border border-gray-200 rounded-xl bg-gray-50 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:bg-white focus:border-transparent transition-all text-sm"
                                 placeholder="••••••••">
                         </div>
                     </div>
 
-                    {{-- Remember Me --}}
                     <div class="flex items-center">
                         <label class="flex items-center cursor-pointer group">
                             <input id="remember_me" name="remember" type="checkbox" 
@@ -78,7 +75,6 @@
                         </label>
                     </div>
 
-                    {{-- Submit Button --}}
                     <div>
                         <button type="submit" 
                             class="w-full flex justify-center py-2.5 sm:py-3 px-4 border border-transparent rounded-xl shadow-lg text-xs sm:text-sm font-bold text-white bg-gradient-to-r from-gray-900 to-gray-800 hover:from-red-600 hover:to-red-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transform transition hover:-translate-y-0.5 uppercase tracking-widest">
@@ -87,7 +83,6 @@
                     </div>
                 </form>
 
-                {{-- Register Link --}}
                 <div class="mt-4 sm:mt-6 text-center pt-4 sm:pt-6 border-t border-gray-50">
                     <p class="text-[10px] sm:text-xs text-gray-500">
                         Don't have an account? 
@@ -99,7 +94,6 @@
 
             </div>
             
-            {{-- Footer Text --}}
             <div class="mt-6 sm:mt-8 text-center">
                 <p class="text-[10px] text-gray-400 font-medium">
                     &copy; {{ date('Y') }} BU MADYA. All rights reserved.
@@ -108,7 +102,6 @@
         </div>
     </div>
 
-    {{-- Tailwind Custom Animation Style --}}
     <style>
         @keyframes blob { 0% { transform: translate(0px, 0px) scale(1); } 33% { transform: translate(30px, -50px) scale(1.1); } 66% { transform: translate(-20px, 20px) scale(0.9); } 100% { transform: translate(0px, 0px) scale(1); } }
         .animate-blob { animation: blob 7s infinite; }
