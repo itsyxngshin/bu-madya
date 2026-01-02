@@ -6,17 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class CommitteeMember extends Model
 {
-    protected $guarded = [];
     protected $fillable = [
         'committee_id', 
         'academic_year_id',
+        'title', 
         'user_id', // Optional: if linking to a registered user
-        'name', 
-        'role', // e.g., "Senior Graphic Designer"
-        'college_id', 
-        'course', 
-        'year_level',
-        'photo_url'
     ];
 
 
