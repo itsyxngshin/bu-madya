@@ -1,0 +1,181 @@
+<div class="min-h-screen bg-stone-50 font-sans text-gray-900 relative overflow-x-hidden">
+
+    {{-- SEO --}}
+    @section('meta_title', 'Transparency Board - BU MADYA')
+    @section('meta_description', 'Access our financial reports, memorandums, and accomplishment reports.')
+
+    {{-- 1. BACKGROUND BLOBS (Consistent Style) --}}
+    <div class="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+        <div class="absolute top-0 left-0 w-full h-full bg-gray-50/80"></div>
+        <div class="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-red-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob"></div>
+        <div class="absolute top-[20%] left-[-10%] w-[500px] h-[500px] bg-yellow-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob animation-delay-2000"></div>
+        <div class="absolute bottom-[-10%] right-[20%] w-[500px] h-[500px] bg-green-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob animation-delay-4000"></div>
+    </div>
+
+    {{-- 2. HERO HEADER --}}
+    <header class="relative z-10 pt-32 pb-12 px-6">
+        <div class="max-w-7xl mx-auto text-center">
+            <span class="inline-block py-1 px-3 rounded-full bg-red-50 border border-red-100 text-red-600 font-bold tracking-widest uppercase text-[10px] mb-4 shadow-sm">
+                Public Disclosure
+            </span>
+            <h1 class="font-heading font-black text-4xl md:text-6xl text-gray-900 mb-6 drop-shadow-sm">
+                Transparency <span class="text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-yellow-500">Board</span>
+            </h1>
+            <p class="text-gray-500 text-lg max-w-2xl mx-auto leading-relaxed">
+                Review our official financial statements, memorandums, and accomplishment reports. We believe in open governance.
+            </p>
+        </div>
+    </header>
+
+    {{-- 3. FILTERS & CONTROLS --}}
+    <div class="sticky top-20 z-30 bg-stone-50/90 backdrop-blur-xl border-y border-gray-200/50 py-4 mb-12 shadow-sm">
+        <div class="max-w-7xl mx-auto px-6 flex flex-col lg:flex-row justify-between items-center gap-4">
+            
+            {{-- Category Tabs --}}
+            <div class="flex gap-2 overflow-x-auto pb-2 lg:pb-0 max-w-full no-scrollbar w-full lg:w-auto">
+                <button wire:click="setCategory('all')" 
+                        class="whitespace-nowrap px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all border
+                        {{ $filter_category === 'all' 
+                            ? 'bg-gray-900 text-white border-gray-900 shadow-lg scale-105' 
+                            : 'bg-white text-gray-500 border-gray-200 hover:border-gray-300 hover:text-gray-900' }}">
+                    All Files
+                </button>
+
+                @foreach($categories as $cat)
+                    <button wire:click="setCategory({{ $cat->id }})" 
+                            class="whitespace-nowrap px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all border
+                            {{ $filter_category === $cat->id 
+                                ? 'bg-red-600 text-white border-red-600 shadow-red-200 shadow-lg scale-105' 
+                                : 'bg-white text-gray-500 border-gray-200 hover:border-gray-300 hover:text-gray-900' }}">
+                        {{ $cat->name }}
+                    </button>
+                @endforeach
+            </div>
+
+            <div class="flex gap-3 w-full lg:w-auto">
+                {{-- Year Dropdown --}}
+                <div class="relative min-w-[140px]">
+                    <select wire:model.live="filter_year" class="w-full appearance-none pl-4 pr-10 py-2.5 rounded-xl border-gray-200 bg-white text-sm focus:ring-red-500 focus:border-red-500 shadow-sm font-bold text-gray-600 cursor-pointer hover:border-gray-300 transition">
+                        <option value="all">All Years</option>
+                        @foreach($years as $year)
+                            <option value="{{ $year }}">A.Y. {{ $year }}</option>
+                        @endforeach
+                    </select>
+                    <svg class="w-4 h-4 text-gray-400 absolute right-3 top-3 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </div>
+
+                {{-- Search --}}
+                <div class="relative w-full lg:w-64 group">
+                    <input wire:model.live.debounce.300ms="search" type="text" placeholder="Search files..." 
+                           class="w-full pl-10 pr-4 py-2.5 rounded-xl border-gray-200 bg-white text-sm focus:ring-red-500 focus:border-red-500 shadow-sm transition">
+                    <svg class="w-4 h-4 text-gray-400 absolute left-3 top-3 group-hover:text-red-500 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- 4. DOCUMENTS GRID --}}
+    <div class="relative z-10 max-w-7xl mx-auto px-6 pb-24">
+        
+        {{-- Loading State --}}
+        <div wire:loading class="w-full text-center py-12">
+            <div class="inline-flex items-center gap-2 text-gray-400 text-sm font-bold animate-pulse">
+                <svg class="animate-spin h-5 w-5 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                Fetching documents...
+            </div>
+        </div>
+
+        <div wire:loading.remove>
+            @if($documents->count() > 0)
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    @foreach($documents as $doc)
+                        <div class="group bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 relative flex flex-col h-full">
+                            
+                            {{-- Color Bar (Dynamic based on Category Color) --}}
+                            <div class="absolute top-0 left-0 w-1.5 h-full rounded-l-2xl 
+                                bg-{{ $doc->category->color ?? 'gray' }}-500 transition-colors"></div>
+
+                            {{-- Card Header --}}
+                            <div class="flex justify-between items-start mb-4 pl-3">
+                                {{-- Category Badge --}}
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg 
+                                    bg-{{ $doc->category->color ?? 'gray' }}-50 
+                                    text-{{ $doc->category->color ?? 'gray' }}-600 
+                                    text-[10px] font-black uppercase tracking-widest border border-{{ $doc->category->color ?? 'gray' }}-100">
+                                    {{ $doc->category->name }}
+                                </span>
+                                
+                                {{-- Year Badge --}}
+                                <span class="bg-gray-50 text-gray-500 text-[10px] font-bold px-2 py-1 rounded-lg border border-gray-200">
+                                    {{ $doc->academic_year }}
+                                </span>
+                            </div>
+
+                            {{-- Card Content --}}
+                            <div class="pl-3 flex-grow">
+                                <h3 class="font-heading font-bold text-lg text-gray-900 mb-2 leading-tight group-hover:text-red-600 transition line-clamp-2" title="{{ $doc->title }}">
+                                    {{ $doc->title }}
+                                </h3>
+                                <div class="flex items-center gap-2 text-xs text-gray-400 mb-3 font-mono">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                    {{ $doc->published_date->format('M d, Y') }}
+                                </div>
+                                <p class="text-sm text-gray-500 line-clamp-2 mb-4">
+                                    {{ $doc->description ?? 'No description provided.' }}
+                                </p>
+                            </div>
+
+                            {{-- Card Footer & Actions --}}
+                            <div class="pl-3 pt-4 mt-auto border-t border-gray-100 flex items-center justify-between">
+                                <div class="flex flex-col">
+                                    <span class="text-[10px] font-bold uppercase tracking-widest text-gray-400">
+                                        {{ strtoupper(pathinfo($doc->file_path, PATHINFO_EXTENSION)) }} FILE
+                                    </span>
+                                    
+                                    {{-- Visibility Badge (Optional: helps users know why they see it) --}}
+                                    @if($doc->visibility === 'auth')
+                                        <span class="text-[9px] font-bold text-blue-600 flex items-center gap-1 mt-0.5">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                                            Members Only
+                                        </span>
+                                    @endif
+                                </div>
+                                
+                                {{-- LIVEWIRE DOWNLOAD BUTTON --}}
+                                {{-- 'wire:loading.attr="disabled"' prevents double clicks --}}
+                                <button wire:click="download({{ $doc->id }})" 
+                                        wire:loading.attr="disabled"
+                                        class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-900 text-white text-xs font-bold uppercase tracking-widest hover:bg-red-600 hover:shadow-lg hover:-translate-y-0.5 transition-all shadow-md group-hover:shadow-xl disabled:opacity-50 disabled:cursor-wait">
+                                    
+                                    {{-- Normal Icon --}}
+                                    <svg wire:loading.remove wire:target="download({{ $doc->id }})" class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                    
+                                    {{-- Loading Spinner (Shows only when clicking THIS specific button) --}}
+                                    <svg wire:loading wire:target="download({{ $doc->id }})" class="animate-spin w-3 h-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                    
+                                    Download
+                                </button>
+                            </div>
+
+                        </div>
+                    @endforeach
+                </div>
+
+                {{-- Pagination --}}
+                <div class="mt-12">
+                    {{ $documents->links() }}
+                </div>
+            @else
+                {{-- Empty State --}}
+                <div class="flex flex-col items-center justify-center py-24 bg-white/50 backdrop-blur-sm rounded-[2rem] border-2 border-dashed border-gray-200">
+                    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center text-gray-300 mb-4">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-1">No documents found</h3>
+                    <p class="text-gray-500 text-sm">Try adjusting your filters or check back later.</p>
+                    <button wire:click="$set('filter_category', 'all')" class="mt-4 text-red-600 text-xs font-bold uppercase tracking-widest hover:underline">Clear Filters</button>
+                </div>
+            @endif
+        </div>
+    </div>
+</div>

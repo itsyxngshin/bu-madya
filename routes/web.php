@@ -46,7 +46,9 @@ use App\Livewire\Admin\MembershipRequests;
 use App\Livewire\Admin\EventIndex as AdminEventIndex;
 use App\Livewire\Admin\CreateEvent;
 use App\Livewire\Admin\EditEvent;
-
+use App\Livewire\Admin\Transparency\DocumentForm;
+use App\Livewire\Admin\Transparency\DocumentIndex;
+use App\Livewire\Open\TransparencyIndex;
 use App\Models\MembershipApplication; 
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Response;
@@ -129,6 +131,9 @@ Route::middleware(['auth', 'role:administrator'])->prefix('admin')->name('admin.
     Route::get('/events', AdminEventIndex::class)->name('events.index');
     Route::get('/events/create', CreateEvent::class)->name('events.create');
     Route::get('/events/{id}/edit', EditEvent::class)->name('events.edit'); 
+    Route::get('/transparency', DocumentIndex::class)->name('transparency.index');
+    Route::get('/transparency/create', DocumentForm::class)->name('transparency.create');
+    Route::get('/transparency/{document}/edit', DocumentForm::class)->name('transparency.edit');
 });
 
 Route::middleware(['auth', 'role:administrator,director'])  
@@ -166,6 +171,7 @@ Route::get('/calendar', EventsCalendar::class)->name('event-calendar');
 Route::get('/membership-form', RegistrationForm::class)->name('membership-form');
 Route::get('/events', EventsIndex::class)->name('events.index');
 Route::get('/events/{slug}', EventShow::class)->name('events.show');
+Route::get('/transparency', TransparencyIndex::class)->name('transparency.index');
 
 
 
