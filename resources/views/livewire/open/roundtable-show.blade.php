@@ -1,137 +1,177 @@
-<div class="min-h-screen bg-gray-50 font-sans text-gray-900 pb-24 relative overflow-x-hidden" wire:poll.10s>
+<div class="min-h-screen bg-gray-100 font-sans text-gray-900 pb-32 relative overflow-x-hidden" wire:poll.10s>
     
-    {{-- 1. BACKGROUND BLOBS (The Atmosphere) --}}
+    {{-- 1. BACKGROUND BLOBS (The Atmosphere - Kept Subtle) --}}
     <div class="fixed inset-0 z-0 overflow-hidden pointer-events-none">
-        <div class="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-red-200/40 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob"></div>
-        <div class="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-yellow-200/40 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob animation-delay-2000"></div>
-        <div class="absolute bottom-[-10%] left-[20%] w-[500px] h-[500px] bg-blue-200/40 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob animation-delay-4000"></div>
+        <div class="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-red-200/40 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
+        <div class="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-yellow-200/40 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
+        <div class="absolute bottom-[-10%] left-[20%] w-[500px] h-[500px] bg-blue-200/40 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-4000"></div>
     </div>
 
-    {{-- NAVIGATION (Floating Header) --}}
-    <div class="relative top-0 left-0 w-full z-40 px-4 pt-4 pointer-events-none">
-        <div class="max-w-3xl mx-auto flex justify-between items-center pointer-events-auto">
-            {{-- Back Button --}}
+    {{-- NAVIGATION (Sticky Header) --}}
+    <div class="sticky top-0 w-full z-40 bg-gray-100/90 backdrop-blur-md border-b border-white/50 px-4 py-3 shadow-sm">
+        <div class="max-w-4xl mx-auto flex justify-between items-center">
             <a href="{{ route('roundtable.index') }}" 
-               class="bg-white/80 backdrop-blur-md border border-white/60 shadow-sm px-4 py-2.5 rounded-full flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-gray-600 hover:bg-gray-900 hover:text-white transition group">
-                <svg class="w-4 h-4 text-gray-400 group-hover:text-white transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-                <span class="hidden sm:inline">Return to Hall</span>
-                <span class="sm:hidden">Exit</span>
+               class="flex items-center gap-2 text-sm font-bold text-gray-600 hover:text-gray-900 transition group">
+                <div class="bg-white p-1.5 rounded-full shadow-sm group-hover:bg-gray-200 transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                </div>
+                <span class="hidden sm:inline uppercase tracking-wider text-xs">Return to Hall</span>
             </a>
             
-            {{-- Live Indicator --}}
-            <div class="bg-white/80 backdrop-blur-md border border-white/60 px-4 py-1.5 rounded-full shadow-sm flex items-center gap-2">
-                <span class="relative flex h-2 w-2">
-                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                  <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-                </span>
-                <span class="text-[10px] font-black uppercase tracking-widest text-gray-500">Live</span>
+            <div class="flex items-center gap-3">
+                 {{-- Live Indicator --}}
+                 <div class="bg-red-50 border border-red-100 px-3 py-1 rounded-full flex items-center gap-2">
+                    <span class="relative flex h-2 w-2">
+                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                      <span class="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                    </span>
+                    <span class="text-[10px] font-black uppercase tracking-widest text-red-600">Roundtable Live</span>
+                </div>
             </div>
         </div>
     </div>
 
     {{-- MAIN CONTENT --}}
-    <div class="max-w-3xl mx-auto px-4 pt-24 relative z-10">
+    <div class="max-w-4xl mx-auto px-4 pt-6 relative z-10">
         
-        {{-- TOPIC CENTERPIECE (The Document) --}}
-        <div class="bg-white/90 backdrop-blur-xl rounded-[2.5rem] shadow-xl border border-white relative mb-12 overflow-hidden">
-            
-            {{-- Decorative Header Bar --}}
-            <div class="h-2 w-full bg-gradient-to-r from-red-500 via-yellow-500 to-red-500 opacity-80"></div>
-
-            <div class="p-8 md:p-10 text-center">
-                {{-- Host Avatar --}}
-                <div class="relative inline-block mb-6">
-                    <div class="p-1.5 rounded-full border-2 border-dashed border-red-300">
-                        <img src="{{ asset($topic->user->profile_photo_path) }}" class="w-20 h-20 rounded-full object-cover shadow-sm">
-                    </div>
-                    <div class="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-[9px] font-black uppercase px-3 py-1 rounded-full tracking-widest border-4 border-white shadow-sm">
-                        Host
-                    </div>
+        {{-- ORIGINAL POST (Reddit Style Card) --}}
+        <div class="bg-white rounded-xl shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] border border-gray-200/60 overflow-hidden mb-8">
+            <div class="flex">
+                {{-- Left Sidebar (Vote Rail - Visual Only) --}}
+                <div class="w-12 bg-gray-50/50 border-r border-gray-100 flex flex-col items-center py-4 gap-1">
+                    <button class="text-gray-400 hover:text-red-500 hover:bg-gray-100 p-1 rounded"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg></button>
+                    <span class="text-xs font-bold text-gray-700">Topic</span>
+                    <button class="text-gray-400 hover:text-blue-500 hover:bg-gray-100 p-1 rounded"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button>
                 </div>
 
-                <p class="text-xs font-bold text-gray-400 mb-2 uppercase tracking-wide">Discussion opened by {{ $topic->user->name }}</p>
-                
-                <h1 class="font-heading font-black text-2xl md:text-4xl text-gray-900 leading-tight mb-6">
-                    {{ $topic->headline }}
-                </h1>
-                
-                <div class="prose prose-red prose-sm max-w-none text-gray-600 leading-relaxed mx-auto bg-gray-50/50 p-6 rounded-2xl border border-gray-100/50">
-                    {!! nl2br(e($topic->content)) !!}
-                </div>
-                
-                <div class="mt-6 flex justify-center items-center gap-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    Started {{ $topic->created_at->diffForHumans() }}
+                {{-- Main Content --}}
+                <div class="flex-1 p-4 md:p-6">
+                    {{-- Header Meta --}}
+                    <div class="flex items-center gap-2 mb-3 text-xs text-gray-500">
+                        <img src="{{ asset($topic->user->profile_photo_path) }}" class="w-5 h-5 rounded-full object-cover">
+                        <span>Posted by <span class="font-bold text-gray-700">{{ $topic->user->name }}</span></span>
+                        <span class="text-red-500 font-bold bg-red-50 px-1.5 py-0.5 rounded border border-red-100 uppercase text-[10px] tracking-wider">Host</span>
+                        <span>•</span>
+                        <span>{{ $topic->created_at->diffForHumans() }}</span>
+                    </div>
+
+                    <h1 class="font-heading font-black text-xl md:text-2xl text-gray-900 leading-tight mb-4">
+                        {{ $topic->headline }}
+                    </h1>
+
+                    <div class="prose prose-red prose-sm max-w-none text-gray-800 leading-relaxed mb-6">
+                        {!! nl2br(e($topic->content)) !!}
+                    </div>
+
+                    {{-- Footer Actions --}}
+                    <div class="flex items-center gap-4 border-t border-gray-100 pt-3">
+                        <div class="flex items-center gap-1 text-gray-500 text-xs font-bold uppercase tracking-wide">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"></path></svg>
+                            {{ count($topic->roundtable_replies) }} Comments
+                        </div>
+                        <div class="flex items-center gap-1 text-gray-400 text-xs font-bold uppercase tracking-wide cursor-not-allowed">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg>
+                            Share
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        {{-- DISCUSSION STREAM --}}
-        <div class="space-y-8 relative z-10 pb-4">
+        {{-- DISCUSSION THREADS --}}
+        <div class="space-y-4">
             
+            {{-- Sort/Filter Bar (Visual Only) --}}
+            <div class="flex items-center gap-2 mb-4 px-2">
+                <span class="text-xs font-bold uppercase tracking-widest text-gray-400">Discussion Log</span>
+                <div class="h-px bg-gray-200 flex-1"></div>
+            </div>
+
             @forelse($topic->roundtable_replies as $reply)
-                <div class="flex items-end gap-3 {{ $reply->user_id === auth()->id() ? 'flex-row-reverse' : '' }} group animate-fade-in-up">
+                <div class="group relative transition-all duration-300 animate-fade-in-up">
                     
-                    {{-- Avatar --}}
-                    <div class="shrink-0">
-                        <img src="{{ asset($reply->user->profile_photo_path) }}" class="w-10 h-10 rounded-full border-2 border-white shadow-sm object-cover bg-gray-100">
-                    </div>
-                    
-                    {{-- Message Bubble --}}
-                    <div class="max-w-[85%] sm:max-w-[75%] flex flex-col {{ $reply->user_id === auth()->id() ? 'items-end' : 'items-start' }}">
-                        
-                        {{-- Meta (Name & Time) --}}
-                        <div class="text-[10px] font-bold text-gray-400 mb-1 px-2 flex gap-1 items-center">
-                            @if($reply->user_id === $topic->user_id)
-                                <span class="text-red-500 flex items-center gap-0.5">
-                                    <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z"></path></svg>
-                                    Host
-                                </span>
-                                <span class="opacity-50">•</span>
-                            @endif
-                            <span>{{ $reply->user->name }}</span>
-                            <span class="opacity-50">•</span>
-                            <span class="opacity-70">{{ $reply->created_at->format('g:i A') }}</span>
+                    {{-- Thread Line --}}
+                    @if(!$loop->last)
+                        <div class="absolute left-6 top-10 bottom-[-20px] w-px bg-gray-200 group-hover:bg-gray-300 transition-colors z-0"></div>
+                    @endif
+
+                    <div class="flex gap-3 relative z-10">
+                        {{-- Avatar Column --}}
+                        <div class="shrink-0 flex flex-col items-center">
+                            <img src="{{ asset($reply->user->profile_photo_path) }}" class="w-8 h-8 md:w-10 md:h-10 rounded-full border border-gray-200 shadow-sm bg-gray-100 object-cover">
                         </div>
 
-                        {{-- The Bubble --}}
-                        <div class="px-6 py-4 shadow-sm text-sm leading-relaxed relative backdrop-blur-md border
-                            {{ $reply->user_id === auth()->id() 
-                                ? 'bg-yellow-500/95 text-gray-800 border-transparent rounded-[2rem] rounded-br-sm' 
-                                : 'bg-white/90 text-gray-800 border-white/60 rounded-[2rem] rounded-bl-sm' }}">
-                            {{ $reply->content }}
+                        {{-- Comment Card --}}
+                        <div class="flex-1">
+                            <div class="bg-white border rounded-xl p-3 md:p-4 shadow-sm
+                                {{ $reply->user_id === $topic->user_id 
+                                    ? 'border-red-100 bg-red-50/30' 
+                                    : ($reply->user_id === auth()->id() ? 'border-yellow-200 bg-yellow-50/30' : 'border-gray-200') }}">
+                                
+                                {{-- Meta --}}
+                                <div class="flex justify-between items-start mb-2">
+                                    <div class="flex items-center gap-2 text-xs">
+                                        <span class="font-bold text-gray-800">{{ $reply->user->name }}</span>
+                                        
+                                        @if($reply->user_id === $topic->user_id)
+                                            <span class="text-[9px] font-black uppercase tracking-wider text-red-600 bg-red-100 px-1.5 rounded">Host</span>
+                                        @elseif($reply->user_id === auth()->id())
+                                            <span class="text-[9px] font-black uppercase tracking-wider text-yellow-600 bg-yellow-100 px-1.5 rounded">You</span>
+                                        @endif
+
+                                        <span class="text-gray-400 text-[10px]">{{ $reply->created_at->format('g:i A') }}</span>
+                                    </div>
+                                </div>
+
+                                {{-- Content --}}
+                                <div class="text-sm text-gray-800 leading-relaxed">
+                                    {{ $reply->content }}
+                                </div>
+
+                                {{-- Actions --}}
+                                <div class="flex items-center gap-3 mt-3 pt-2 border-t {{ $reply->user_id === $topic->user_id ? 'border-red-100' : 'border-gray-100' }}">
+                                    <div class="flex items-center gap-1 text-gray-400 hover:text-red-500 cursor-pointer transition">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
+                                    </div>
+                                    <div class="flex items-center gap-1 text-gray-400 hover:text-blue-500 cursor-pointer transition">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                    </div>
+                                    <span class="text-xs font-bold text-gray-500 ml-2">Reply</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             @empty
-                <div class="text-center py-12 opacity-60">
-                    <p class="text-gray-500 text-sm font-bold">No replies yet. Break the ice!</p>
+                <div class="text-center py-12">
+                    <div class="inline-block p-4 rounded-full bg-gray-100 mb-3">
+                        <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+                    </div>
+                    <p class="text-gray-500 text-sm font-bold">The floor is open.</p>
+                    <p class="text-gray-400 text-xs">Be the first to share your perspective.</p>
                 </div>
             @endforelse
-
         </div>
-        
-        {{-- Spacer for floating bar --}}
-        <div class="h-28"></div>
     </div>
 
-    {{-- FLOATING REPLY BAR --}}
-    <div class="fixed bottom-0 left-0 w-full z-50 px-4 pb-4 md:pb-6">
-        <div class="max-w-3xl mx-auto">
-            <div class="bg-white/90 backdrop-blur-xl rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-white/50 p-2 pl-5 flex gap-3 items-end transition-all focus-within:shadow-[0_8px_40px_rgb(220,38,38,0.15)] focus-within:border-red-100">
-                
-                <div class="flex-1 py-3">
+    {{-- FLOATING INPUT (Updated to look more like a footer editor) --}}
+    <div class="fixed bottom-0 left-0 w-full z-50 border-t border-gray-200 bg-white/95 backdrop-blur-xl shadow-[0_-5px_20px_rgb(0,0,0,0.05)]">
+        <div class="max-w-4xl mx-auto px-4 py-3">
+            <div class="flex gap-4 items-end">
+                <div class="relative flex-1">
                     <textarea wire:model="newReply" rows="1" 
-                        class="w-full bg-transparent border-none p-0 text-sm focus:ring-0 resize-none max-h-28 placeholder-gray-400 text-gray-800" 
-                        placeholder="Type your thought here..."></textarea>
+                        class="w-full bg-gray-100 border-transparent focus:bg-white focus:border-red-300 focus:ring focus:ring-red-200 rounded-lg py-3 px-4 text-sm resize-none max-h-32 placeholder-gray-500 transition-all" 
+                        placeholder="Contribute to the roundtable..."></textarea>
                 </div>
 
                 <button wire:click="postReply" 
-                    class="h-12 px-6 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-full font-bold text-xs uppercase tracking-widest shadow-lg hover:shadow-red-200/50 hover:scale-105 active:scale-95 transition-all flex items-center gap-2 mb-0.5">
-                    <span class="hidden md:inline">Send</span>
-                    <svg class="w-4 h-4 md:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                    <svg class="w-4 h-4 hidden md:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
+                    class="h-11 px-6 bg-gray-900 text-white rounded-lg font-bold text-xs uppercase tracking-widest hover:bg-red-600 active:scale-95 transition-all shadow-md flex items-center gap-2 shrink-0">
+                    <span>Post</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
                 </button>
+            </div>
+            <div class="text-center mt-2">
+                <p class="text-[9px] text-gray-400 uppercase tracking-widest">Constructive discourse only</p>
             </div>
         </div>
     </div>
