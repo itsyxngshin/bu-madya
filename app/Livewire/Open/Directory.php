@@ -163,44 +163,45 @@ class Directory extends Component
         // We map the array into actual Objects so the Blade view works without changes.
         return collect($legacyData[$yearId])->map(function ($item, $index) {
             
-            // A. Mock the College Model
+            // A. Mock the College
+            // FIX: Don't pass ID in the array. Set it manually.
             $college = new \App\Models\College([
-                'id'   => 99900 + $index,
                 'slug' => $item['college_slug']
             ]);
+            $college->id = 99900 + $index; // Manually set ID
 
-            // B. Mock the Profile Model
+            // B. Mock the Profile
             $profile = new \App\Models\Profile([
-                'id'         => 99900 + $index,
                 'course'     => $item['course'],
                 'year_level' => $item['year_level'],
             ]);
+            $profile->id = 99900 + $index; // Manually set ID
             $profile->setRelation('college', $college);
 
-            // C. Mock the User Model
+            // C. Mock the User
             $user = new \App\Models\User([
-                'id'                 => 99900 + $index,
                 'name'               => $item['name'],
                 'profile_photo_path' => $item['photo'],
-                'username'           => 'legacy-user-' . $index, // Dummy username
+                'username'           => 'legacy-user-' . $index,
             ]);
+            $user->id = 99900 + $index; // Manually set ID
             $user->setRelation('profile', $profile);
 
-            // D. Mock the Assignment Model (Pivot)
+            // D. Mock the Assignment
             $assignment = new \App\Models\DirectorAssignment([
-                'id'    => 99900 + $index,
-                'title' => $item['position_name'], // Default title
+                'title' => $item['position_name'],
             ]);
+            $assignment->id = 99900 + $index; // Manually set ID
             $assignment->setRelation('user', $user);
 
-            // E. Mock the Director Model (The Position)
+            // E. Mock the Director (Position)
             $director = new \App\Models\Director([
-                'id'    => 88800 + $index,
                 'name'  => $item['position_name'],
                 'order' => $item['order'],
             ]);
+            $director->id = 88800 + $index; // Manually set ID 
 
-            // Attach the assignment to the director
+            // Link them
             $director->setRelation('assignments', collect([$assignment]));
 
             return $director;
