@@ -95,33 +95,66 @@
     
                 {{-- A. PORTFOLIO CARDS --}}
                 <section>
-                    <h3 class="flex items-center gap-3 text-xl font-bold text-gray-800 mb-5">
-                        <span class="w-8 h-8 rounded-full bg-red-100 text-red-600 flex items-center justify-center">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
-                        </span>
-                        Portfolio & Experiences
-                    </h3>
-                    
-                    <div class="grid md:grid-cols-2 gap-4">
-                        @forelse($portfolios as $item)
-                        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition">
-                            <div class="flex justify-between items-start mb-2">
-                                <span class="px-2 py-1 rounded text-xs font-bold 
-                                    {{ $item->status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600' }}">
-                                    {{ $item->status }}
-                                </span>
-                                <span class="text-xs text-gray-400 font-mono">{{ $item->duration }}</span>
-                            </div>
-                            <h4 class="font-bold text-gray-900 text-lg">{{ $item->designation }}</h4>
-                            <p class="text-sm text-red-600 font-medium mb-3">{{ $item->place }}</p>
-                            <p class="text-sm text-gray-500 leading-relaxed">{{ $item->description }}</p>
-                        </div>
-                        @empty
-                        <div class="col-span-2 text-center py-8 text-gray-400 bg-white rounded-xl border border-dashed border-gray-300">
-                            No portfolios added yet.
-                        </div>
-                        @endforelse
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="flex items-center gap-3 text-xl font-bold text-gray-800">
+                            <span class="w-8 h-8 rounded-full bg-red-100 text-red-600 flex items-center justify-center">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                            </span>
+                            Portfolio & Experiences
+                        </h3>
                     </div>
+                    
+                    @if($portfolios->isNotEmpty())
+                        {{-- THE RAIL CONTAINER --}}
+                        <div class="relative border-l-2 border-gray-200 ml-3 md:ml-4 space-y-8 my-2">
+                            
+                            @foreach($portfolios as $item)
+                            <div class="relative pl-6 md:pl-8 group">
+                                {{-- 1. THE MARKER DOT --}}
+                                <span class="absolute -left-[9px] top-1.5 h-4 w-4 rounded-full border-[3px] border-white shadow-sm transition-colors duration-300
+                                    {{ $item->status === 'Active' ? 'bg-green-500 ring-4 ring-green-50' : 'bg-gray-300 group-hover:bg-red-400' }}">
+                                </span>
+
+                                {{-- 2. HEADER: Title & Duration --}}
+                                <div class="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-1 mb-1">
+                                    <h4 class="font-bold text-gray-900 text-base md:text-lg leading-tight group-hover:text-red-600 transition-colors">
+                                        {{ $item->designation }}
+                                    </h4>
+                                    
+                                    {{-- Mobile Optimized Duration Badge --}}
+                                    <span class="text-xs font-mono text-gray-400 bg-gray-50 px-2 py-0.5 rounded self-start sm:self-auto border border-gray-100">
+                                        {{ $item->duration }}
+                                    </span>
+                                </div>
+                                
+                                {{-- 3. SUB-HEADER: Place & Status --}}
+                                <div class="mb-2 flex items-center gap-2">
+                                     <span class="text-sm text-red-600 font-medium">{{ $item->place }}</span>
+                                     @if($item->status === 'Active')
+                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold uppercase bg-green-100 text-green-700 tracking-wider">
+                                            Current
+                                        </span>
+                                     @endif
+                                </div>
+
+                                {{-- 4. BODY: Description --}}
+                                <p class="text-sm text-gray-500 leading-relaxed text-justify group-hover:text-gray-600 transition-colors">
+                                    {{ $item->description }}
+                                </p>
+                            </div>
+                            @endforeach
+
+                        </div>
+                    @else
+                        {{-- Empty State --}}
+                        <div class="text-center py-10 px-6 rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50/50">
+                            <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gray-100 mb-3 text-gray-400">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path></svg>
+                            </div>
+                            <h3 class="text-sm font-bold text-gray-900">No experience listed</h3>
+                            <p class="text-xs text-gray-500 mt-1">This user hasn't added any portfolio items yet.</p>
+                        </div>
+                    @endif
                 </section>
 
                 {{-- B. ENGAGEMENT TABLE --}}
