@@ -106,41 +106,45 @@
                     
                     @if($portfolios->isNotEmpty())
                         {{-- THE RAIL CONTAINER --}}
-                        <div class="relative border-l-2 border-gray-200 ml-3 md:ml-4 space-y-8 my-2">
+                        {{-- Added 'ml-2' to give the rail itself some breathing room from the card edge --}}
+                        <div class="relative border-l-2 border-gray-200 ml-4 md:ml-6 space-y-10 my-4">
                             
                             @foreach($portfolios as $item)
-                            <div class="relative pl-6 md:pl-8 group">
+                            {{-- Increased padding from pl-6 to pl-10/12 to Fix Overlap --}}
+                            <div class="relative pl-10 md:pl-12 group">
+                                
                                 {{-- 1. THE MARKER DOT --}}
-                                <span class="absolute -left-[9px] top-1.5 h-4 w-4 rounded-full border-[3px] border-white shadow-sm transition-colors duration-300
-                                    {{ $item->status === 'Active' ? 'bg-green-500 ring-4 ring-green-50' : 'bg-gray-300 group-hover:bg-red-400' }}">
+                                {{-- Centered on border: border is at left:0. Dot is w-4 (1rem). -left-[0.55rem] centers it nicely --}}
+                                <span class="absolute -left-[9px] top-1.5 h-4 w-4 rounded-full border-[3px] border-white shadow-sm transition-all duration-300 z-10
+                                    {{ $item->status === 'Active' ? 'bg-green-500 ring-2 ring-green-100 scale-110' : 'bg-gray-300 group-hover:bg-red-400 group-hover:scale-110' }}">
                                 </span>
 
                                 {{-- 2. HEADER: Title & Duration --}}
                                 <div class="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-1 mb-1">
-                                    <h4 class="font-bold text-gray-900 text-base md:text-lg leading-tight group-hover:text-red-600 transition-colors">
+                                    <h4 class="font-bold text-gray-900 text-lg leading-tight group-hover:text-red-600 transition-colors">
                                         {{ $item->designation }}
                                     </h4>
                                     
-                                    {{-- Mobile Optimized Duration Badge --}}
+                                    {{-- Duration Badge --}}
                                     <span class="text-xs font-mono text-gray-400 bg-gray-50 px-2 py-0.5 rounded self-start sm:self-auto border border-gray-100">
                                         {{ $item->duration }}
                                     </span>
                                 </div>
                                 
                                 {{-- 3. SUB-HEADER: Place & Status --}}
-                                <div class="mb-2 flex items-center gap-2">
-                                     <span class="text-sm text-red-600 font-medium">{{ $item->place }}</span>
+                                <div class="mb-3 flex flex-wrap items-center gap-2">
+                                     <span class="text-sm text-red-600 font-bold">{{ $item->place }}</span>
                                      @if($item->status === 'Active')
-                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold uppercase bg-green-100 text-green-700 tracking-wider">
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-green-100 text-green-700 tracking-wider shadow-sm">
                                             Current
                                         </span>
                                      @endif
                                 </div>
 
                                 {{-- 4. BODY: Description --}}
-                                <p class="text-sm text-gray-500 leading-relaxed text-justify group-hover:text-gray-600 transition-colors">
+                                <div class="text-sm text-gray-500 leading-relaxed text-justify group-hover:text-gray-700 transition-colors bg-gray-50/50 p-3 rounded-xl border border-transparent group-hover:border-gray-100 group-hover:bg-white group-hover:shadow-sm">
                                     {{ $item->description }}
-                                </p>
+                                </div>
                             </div>
                             @endforeach
 
