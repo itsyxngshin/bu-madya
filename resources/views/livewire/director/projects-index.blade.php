@@ -31,7 +31,6 @@
     </header>
 
     {{-- MAIN CONTENT --}}
-    {{-- MAIN CONTENT --}}
     <div class="relative min-h-screen px-6 pb-24 mt-12 max-w-[1800px] w-[95%] mx-auto">
         
         {{-- Background Blobs --}}
@@ -40,7 +39,7 @@
             <div class="absolute bottom-40 right-0 w-96 h-96 bg-green-100 rounded-full mix-blend-multiply filter blur-3xl opacity-50"></div>
         </div>
 
-        {{-- NEW FILTER BAR (Dropdowns) --}}
+        {{-- FILTER BAR --}}
         <div class="relative z-10 mb-12 bg-white/40 backdrop-blur-md border border-white/50 rounded-2xl p-4 shadow-sm max-w-4xl mx-auto">
             <div class="flex flex-col md:flex-row gap-4 items-center justify-center">
                 
@@ -59,22 +58,22 @@
                             <option value="{{ $cat }}">{{ $cat }}</option>
                         @endforeach
                     </select>
-                    {{-- Custom Chevron --}}
                     <div class="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-gray-500">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                     </div>
                 </div>
 
-                {{-- 2. Academic Year Dropdown --}}
+                {{-- 2. Academic Year Dropdown (FIXED) --}}
                 <div class="relative w-full md:w-48 group">
-                    <select wire:model.live="academicYear" 
+                    <select wire:model.live="academicYearId" 
                         class="w-full bg-white/80 border-0 rounded-xl px-4 py-2.5 text-sm font-bold text-gray-700 focus:ring-2 focus:ring-red-500 shadow-sm cursor-pointer hover:bg-white transition appearance-none">
                         <option value="All">All Years</option>
-                        @foreach($this->years as $year)
-                            <option value="{{ $year }}">{{ $year }}</option>
+                        {{-- Iterate through the relationship models --}}
+                        @foreach($this->academicYears as $ay)
+                            {{-- Assuming 'year' is the name of the column e.g. "2024-2025" --}}
+                            <option value="{{ $ay->id }}">{{ $ay->year }}</option>
                         @endforeach
                     </select>
-                    {{-- Custom Chevron --}}
                     <div class="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-gray-500">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                     </div>
@@ -83,13 +82,13 @@
             </div>
         </div>
 
-        {{-- PROJECTS GRID (No changes needed here, keeping logic the same) --}}
+        {{-- PROJECTS GRID --}}
         <div class="relative z-10 grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             
             @forelse($projects as $project)
             <div class="group bg-white/60 backdrop-blur-md border border-white/60 rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl hover:-translate-y-2 transition duration-300 flex flex-col h-full">
                 
-                {{-- ... (Rest of your Project Card HTML stays exactly the same) ... --}}
+                {{-- Image Header --}}
                 <div class="h-56 overflow-hidden relative">
                     <img src="{{ $project->cover_img ? asset('storage/' . $project->cover_img) : 'https://ui-avatars.com/api/?name='.urlencode($project->title).'&background=random' }}" 
                         class="w-full h-full object-cover group-hover:scale-110 transition duration-700"
@@ -133,9 +132,10 @@
                             {{ $project->implementation_date ? $project->implementation_date->format('M d, Y') : 'TBA' }}
                         </div>
                         <div class="flex items-center gap-1">
-                             {{-- Added Academic Year display here since we are filtering by it --}}
+                            {{-- FIXED: Accessing the Relationship --}}
                             <span class="bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-[10px] font-bold">
-                                A.Y. {{ $project->academic_year }}
+                                {{-- Ensure we safely access the 'year' property of the relationship --}}
+                                A.Y. {{ $project->academicYear->year ?? 'N/A' }}
                             </span>
                         </div>
                     </div>
@@ -164,11 +164,14 @@
                 </div>
                 <h3 class="font-bold text-gray-800">No Projects Found</h3>
                 <p class="text-sm text-gray-500">
-                    No results for category "<strong>{{ $category }}</strong>" in A.Y. "<strong>{{ $academicYear }}</strong>".
+                    No results for this specific filter combination.
                 </p>
             </div>
             @endforelse
 
+        </div>
+        <div class="mt-12 relative z-10">
+            {{ $projects->links() }} 
         </div>
     </div>
 
