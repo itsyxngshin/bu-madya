@@ -122,6 +122,15 @@ class Directory extends Component
                     'college_slug'  => 'bu-cs',
                 ],
                 [
+                    'position_name' => 'Deputy Secretary-General',
+                    'order'         => 9,
+                    'name'          => 'Glenda Ante',
+                    'photo'         => null, 
+                    'course'        => 'N/A',
+                    'year_level'    => 'N/A',
+                    'college_slug'  => 'bu-cal',
+                ],
+                [
                     // DIRECTOR (Position Details)
                     'position_name' => 'Vice President for Education',
                     'order'         => 6, // Lower number = appears first
