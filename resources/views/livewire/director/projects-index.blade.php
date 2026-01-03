@@ -71,7 +71,7 @@
                         {{-- Iterate through the relationship models --}}
                         @foreach($this->academicYears as $ay)
                             {{-- Assuming 'year' is the name of the column e.g. "2024-2025" --}}
-                            <option value="{{ $ay->id }}">{{ $ay->year }}</option>
+                            <option value="{{ $ay->id }}">{{ $ay->name }}</option>
                         @endforeach
                     </select>
                     <div class="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-gray-500">
@@ -135,7 +135,7 @@
                             {{-- FIXED: Accessing the Relationship --}}
                             <span class="bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-[10px] font-bold">
                                 {{-- Ensure we safely access the 'year' property of the relationship --}}
-                                A.Y. {{ $project->academicYear->year ?? 'N/A' }}
+                                A.Y. {{ $project->academicYear->name ?? 'N/A' }}
                             </span>
                         </div>
                     </div>
