@@ -31,6 +31,7 @@
     </header>
 
     {{-- MAIN CONTENT --}}
+    {{-- MAIN CONTENT --}}
     <div class="relative min-h-screen px-6 pb-24 mt-12 max-w-[1800px] w-[95%] mx-auto">
         
         {{-- Background Blobs --}}
@@ -39,36 +40,60 @@
             <div class="absolute bottom-40 right-0 w-96 h-96 bg-green-100 rounded-full mix-blend-multiply filter blur-3xl opacity-50"></div>
         </div>
 
-        {{-- LIVEWIRE FILTER BAR --}}
-        <div class="relative z-10 flex flex-wrap justify-center gap-3 mb-12">
-            {{-- 
-            TIP: Instead of hardcoded strings, pass $categories from your Livewire component.
-            Example: public $categories = ['All', 'Community Outreach', ...]; 
-            --}}
-            @foreach($categories ?? ['All', 'Community Outreach', 'Capacity Building', 'Environmental', 'Policy Advocacy', 'Partnership'] as $filter)
-            <button wire:click="setCategory('{{ $filter }}')"
-                    class="px-5 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 border border-white/40 backdrop-blur-sm
-                        {{ $category === $filter 
-                            ? 'bg-red-600 text-white shadow-lg scale-105' 
-                            : 'bg-white/60 text-gray-600 hover:bg-white hover:text-red-500' }}">
-                {{ $filter }}
-            </button>
-            @endforeach
+        {{-- NEW FILTER BAR (Dropdowns) --}}
+        <div class="relative z-10 mb-12 bg-white/40 backdrop-blur-md border border-white/50 rounded-2xl p-4 shadow-sm max-w-4xl mx-auto">
+            <div class="flex flex-col md:flex-row gap-4 items-center justify-center">
+                
+                {{-- Label --}}
+                <div class="flex items-center gap-2 text-gray-500 uppercase text-[10px] font-bold tracking-widest mr-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
+                    Filter By:
+                </div>
+
+                {{-- 1. Category Dropdown --}}
+                <div class="relative w-full md:w-64 group">
+                    <select wire:model.live="category" 
+                        class="w-full bg-white/80 border-0 rounded-xl px-4 py-2.5 text-sm font-bold text-gray-700 focus:ring-2 focus:ring-red-500 shadow-sm cursor-pointer hover:bg-white transition appearance-none">
+                        <option value="All">All Categories</option>
+                        @foreach($categories as $cat)
+                            <option value="{{ $cat }}">{{ $cat }}</option>
+                        @endforeach
+                    </select>
+                    {{-- Custom Chevron --}}
+                    <div class="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-gray-500">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </div>
+                </div>
+
+                {{-- 2. Academic Year Dropdown --}}
+                <div class="relative w-full md:w-48 group">
+                    <select wire:model.live="academicYear" 
+                        class="w-full bg-white/80 border-0 rounded-xl px-4 py-2.5 text-sm font-bold text-gray-700 focus:ring-2 focus:ring-red-500 shadow-sm cursor-pointer hover:bg-white transition appearance-none">
+                        <option value="All">All Years</option>
+                        @foreach($this->years as $year)
+                            <option value="{{ $year }}">{{ $year }}</option>
+                        @endforeach
+                    </select>
+                    {{-- Custom Chevron --}}
+                    <div class="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-gray-500">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </div>
+                </div>
+
+            </div>
         </div>
 
-        {{-- PROJECTS GRID --}}
+        {{-- PROJECTS GRID (No changes needed here, keeping logic the same) --}}
         <div class="relative z-10 grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             
             @forelse($projects as $project)
             <div class="group bg-white/60 backdrop-blur-md border border-white/60 rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl hover:-translate-y-2 transition duration-300 flex flex-col h-full">
                 
-                {{-- Image Header --}}
+                {{-- ... (Rest of your Project Card HTML stays exactly the same) ... --}}
                 <div class="h-56 overflow-hidden relative">
-                    {{-- DYNAMIC IMAGE LOGIC --}}
                     <img src="{{ $project->cover_img ? asset('storage/' . $project->cover_img) : 'https://ui-avatars.com/api/?name='.urlencode($project->title).'&background=random' }}" 
                         class="w-full h-full object-cover group-hover:scale-110 transition duration-700"
                         alt="{{ $project->title }}">
-                    
                     <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                     
                     {{-- Status Badge --}}
@@ -88,10 +113,9 @@
                         @endif
                     </div>
 
-                    {{-- Category Badge (RELATIONSHIP) --}}
+                    {{-- Category Badge --}}
                     <div class="absolute bottom-4 left-4">
                         <span class="px-3 py-1 bg-white/20 backdrop-blur-md border border-white/30 text-white text-[10px] font-bold uppercase tracking-wider rounded-lg">
-                            {{-- Safely access category name --}}
                             {{ $project->category?->name ?? 'Uncategorized' }}
                         </span>
                     </div>
@@ -103,25 +127,23 @@
                         {{ $project->title }}
                     </h3>
                     
-                    {{-- Meta Data Row --}}
                     <div class="flex items-center gap-4 text-xs text-gray-500 mb-4 border-b border-gray-200/50 pb-4">
                         <div class="flex items-center gap-1">
                             <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                            {{-- Date Formatting --}}
                             {{ $project->implementation_date ? $project->implementation_date->format('M d, Y') : 'TBA' }}
                         </div>
                         <div class="flex items-center gap-1">
-                            <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                            {{ $project->location ?? 'Various Locations' }}
+                             {{-- Added Academic Year display here since we are filtering by it --}}
+                            <span class="bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-[10px] font-bold">
+                                A.Y. {{ $project->academic_year }}
+                            </span>
                         </div>
                     </div>
 
                     <p class="text-sm text-gray-600 mb-6 flex-grow leading-relaxed">
-                        {{-- Limit text length --}}
                         {{ Str::limit($project->description, 120) }}
                     </p>
 
-                    {{-- Impact & Action Footer --}}
                     <div class="flex items-center justify-between mt-auto pt-2">
                         <div class="flex flex-col">
                             <span class="text-[10px] text-gray-400 font-bold uppercase">Impact</span>
@@ -129,8 +151,6 @@
                                 {{ $project->beneficiaries ?? 'Community' }}
                             </span>
                         </div>
-                        
-                        {{-- Link to details page (assuming you have a show route) --}}
                         <a href="{{ route('projects.show', $project->slug ?? $project->id) }}" class="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center text-gray-400 group-hover:bg-red-600 group-hover:text-white group-hover:border-red-600 transition duration-300 shadow-sm">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                         </a>
@@ -143,7 +163,9 @@
                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 </div>
                 <h3 class="font-bold text-gray-800">No Projects Found</h3>
-                <p class="text-sm text-gray-500">There are no projects listed under the "{{ $category }}" category yet.</p>
+                <p class="text-sm text-gray-500">
+                    No results for category "<strong>{{ $category }}</strong>" in A.Y. "<strong>{{ $academicYear }}</strong>".
+                </p>
             </div>
             @endforelse
 

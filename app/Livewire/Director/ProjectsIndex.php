@@ -35,20 +35,39 @@ class ProjectsIndex extends Component
         $this->category = $cat;
     }
 
+    public function getYearsProperty()
+    {
+        // Grabs all unique academic years currently in the database
+        return Project::query()
+            ->select('academic_year')
+            ->distinct()
+            ->orderBy('academic_year', 'desc')
+            ->pluck('academic_year');
+    }
+
     public function render()
     {
-        $query = Project::query()
-            ->with('category'); // Eager load category for performance
- 
+        $query = Project::query()->with('category');
+
+        // 1. Category Filter
         if ($this->category !== 'All') {
-            // Filter where the RELATED category name matches
             $query->whereHas('category', function ($q) {
                 $q->where('name', $this->category);
             });
         }
 
+        // 2. Academic Year Filter
+        if ($this->academicYear !== 'All') {
+            $query->where('academic_year', $this->academicYear);
+        }
+
+        // 3. Sorting: Latest Implementation Date Onwards
+        $query->orderBy('implementation_date', 'desc');
+
         return view('livewire.director.projects-index', [
-            'projects' => $query->latest()->get()
+            'projects' => $query->get(),
+            // Pass categories here if you want them dynamic, or keep hardcoded in view
+            'categories' => ['Community Outreach', 'Capacity Building', 'Environmental', 'Policy Advocacy', 'Partnership']
         ]);
-    } 
+    }
 }
