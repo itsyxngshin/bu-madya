@@ -83,104 +83,89 @@
         </div>
 
         {{-- PROJECTS GRID --}}
-        <div class="relative z-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
+        <div class="relative z-10 grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             
             @forelse($projects as $project)
-            {{-- 
-            WRAPPER:
-            - Mobile: 'flex-row' (Side by Side) & 'h-32' (Fixed short height)
-            - Desktop: 'md:flex-col' (Stacked) & 'md:h-auto' (Let content dictate height)
-            --}}
-            <div class="group bg-white rounded-2xl md:rounded-3xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-100 flex flex-row md:flex-col h-32 md:h-auto">
+            <div class="group bg-white/60 backdrop-blur-md border border-white/60 rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl hover:-translate-y-2 transition duration-300 flex flex-col h-full">
                 
-                {{-- 
-                IMAGE AREA:
-                - Mobile: 'w-32' (Fixed width thumbnail)
-                - Desktop: 'md:w-full md:h-56' (Full width banner image)
-                --}}
-                <div class="relative w-32 md:w-full h-full md:h-56 shrink-0 overflow-hidden">
+                {{-- Image Header --}}
+                <div class="h-56 overflow-hidden relative">
                     <img src="{{ $project->cover_img ? asset('storage/' . $project->cover_img) : 'https://ui-avatars.com/api/?name='.urlencode($project->title).'&background=random' }}" 
-                        class="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+                        class="w-full h-full object-cover group-hover:scale-110 transition duration-700"
                         alt="{{ $project->title }}">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                     
-                    {{-- Dark Gradient (Desktop Only) --}}
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 md:opacity-100 transition-opacity"></div>
-
-                    {{-- Status Badge (Top Right) --}}
-                    <div class="absolute top-2 left-2 md:top-4 md:right-4 md:left-auto">
-                        {{-- Mobile: Simple Dot --}}
-                        <div class="md:hidden w-2.5 h-2.5 rounded-full border border-white shadow-sm
-                            {{ $project->status === 'Completed' ? 'bg-green-500' : ($project->status === 'Ongoing' ? 'bg-red-500 animate-pulse' : 'bg-yellow-400') }}">
-                        </div>
-
-                        {{-- Desktop: Full Badge --}}
-                        <span class="hidden md:inline-flex px-3 py-1 text-[10px] font-bold uppercase tracking-widest rounded-full shadow-sm items-center gap-1 bg-white/90 backdrop-blur-sm
-                            {{ $project->status === 'Completed' ? 'text-green-700' : ($project->status === 'Ongoing' ? 'text-red-600' : 'text-yellow-600') }}">
-                            @if($project->status === 'Ongoing') <span class="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span> @endif
-                            {{ $project->status }}
-                        </span>
+                    {{-- Status Badge --}}
+                    <div class="absolute top-4 right-4">
+                        @if($project->status === 'Completed')
+                            <span class="px-3 py-1 bg-green-500 text-white text-[10px] font-bold uppercase tracking-widest rounded-full shadow-sm flex items-center gap-1">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg> Completed
+                            </span>
+                        @elseif($project->status === 'Ongoing')
+                            <span class="px-3 py-1 bg-red-600 text-white text-[10px] font-bold uppercase tracking-widest rounded-full shadow-sm flex items-center gap-1 animate-pulse">
+                                <span class="w-2 h-2 bg-white rounded-full"></span> Ongoing
+                            </span>
+                        @else
+                            <span class="px-3 py-1 bg-yellow-400 text-green-900 text-[10px] font-bold uppercase tracking-widest rounded-full shadow-sm">
+                                Upcoming
+                            </span>
+                        @endif
                     </div>
 
-                    {{-- Category Badge (Desktop Only - Bottom Left) --}}
-                    <div class="absolute bottom-4 left-4 hidden md:block">
-                        <span class="px-3 py-1 bg-black/50 backdrop-blur-md border border-white/20 text-white text-[10px] font-bold uppercase tracking-wider rounded-lg">
-                            {{ $project->category?->name ?? 'General' }}
+                    {{-- Category Badge --}}
+                    <div class="absolute bottom-4 left-4">
+                        <span class="px-3 py-1 bg-white/20 backdrop-blur-md border border-white/30 text-white text-[10px] font-bold uppercase tracking-wider rounded-lg">
+                            {{ $project->category?->name ?? 'Uncategorized' }}
                         </span>
                     </div>
                 </div>
 
-                {{-- 
-                CONTENT AREA:
-                - Mobile: Compact padding, no description
-                - Desktop: Spacious padding, full description
-                --}}
-                <div class="flex-1 p-3 md:p-6 flex flex-col justify-between bg-white">
-                    <div>
-                        {{-- Date / Meta --}}
-                        <div class="flex items-center gap-2 mb-1 md:mb-3 text-[10px] md:text-xs font-medium text-gray-400">
-                            <div class="flex items-center gap-1">
-                                <svg class="w-3 h-3 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                                <span>{{ $project->implementation_date ? $project->implementation_date->format('M d, Y') : 'TBA' }}</span>
-                            </div>
-                            @if($project->academicYear)
-                                <span class="hidden md:inline-block px-1.5 py-0.5 rounded bg-gray-100 text-gray-600 font-bold">A.Y. {{ $project->academicYear->year }}</span>
-                            @endif
+                {{-- Card Content --}}
+                <div class="p-6 flex flex-col flex-grow">
+                    <h3 class="font-heading font-bold text-xl text-gray-900 mb-2 leading-tight group-hover:text-red-600 transition">
+                        {{ $project->title }}
+                    </h3>
+                    
+                    <div class="flex items-center gap-4 text-xs text-gray-500 mb-4 border-b border-gray-200/50 pb-4">
+                        <div class="flex items-center gap-1">
+                            <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                            {{ $project->implementation_date ? $project->implementation_date->format('M d, Y') : 'TBA' }}
                         </div>
-
-                        {{-- Title --}}
-                        <h3 class="font-heading font-bold text-sm md:text-xl text-gray-900 leading-tight md:leading-snug mb-1 md:mb-3 line-clamp-2 group-hover:text-red-600 transition-colors">
-                            {{ $project->title }}
-                        </h3>
-
-                        {{-- Description (Hidden on Mobile) --}}
-                        <p class="hidden md:block text-sm text-gray-500 leading-relaxed line-clamp-3 mb-4">
-                            {{ Str::limit($project->description, 100) }}
-                        </p>
+                        <div class="flex items-center gap-1">
+                            {{-- FIXED: Accessing the Relationship --}}
+                            <span class="bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-[10px] font-bold">
+                                {{-- Ensure we safely access the 'year' property of the relationship --}}
+                                A.Y. {{ $project->academicYear->name ?? 'N/A' }}
+                            </span>
+                        </div>
                     </div>
 
-                    {{-- Footer / Impact --}}
-                    <div class="flex items-center justify-between mt-auto pt-2 border-t border-gray-50 md:border-none">
+                    <p class="text-sm text-gray-600 mb-6 flex-grow leading-relaxed">
+                        {{ Str::limit($project->description, 120) }}
+                    </p>
+
+                    <div class="flex items-center justify-between mt-auto pt-2">
                         <div class="flex flex-col">
-                            <span class="text-[8px] md:text-[10px] text-gray-400 font-bold uppercase tracking-wider">Beneficiaries</span>
-                            <span class="text-xs md:text-sm font-bold text-gray-800 truncate max-w-[100px] md:max-w-none">
+                            <span class="text-[10px] text-gray-400 font-bold uppercase">Impact</span>
+                            <span class="text-sm font-bold text-green-600">
                                 {{ $project->beneficiaries ?? 'Community' }}
                             </span>
                         </div>
-                        
-                        <a href="{{ route('projects.show', $project->slug ?? $project->id) }}" 
-                        class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 group-hover:bg-red-600 group-hover:text-white transition-colors duration-300">
-                            <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                        <a href="{{ route('projects.show', $project->slug ?? $project->id) }}" class="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center text-gray-400 group-hover:bg-red-600 group-hover:text-white group-hover:border-red-600 transition duration-300 shadow-sm">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                         </a>
                     </div>
                 </div>
             </div>
             @empty
-            <div class="col-span-1 md:col-span-3 text-center py-20 bg-white/50 rounded-3xl border border-dashed border-gray-300">
-                <div class="inline-block p-4 rounded-full bg-gray-100 text-gray-400 mb-4">
-                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+            <div class="col-span-3 text-center py-20">
+                <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-400">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 </div>
-                <h3 class="font-bold text-gray-900 text-lg">No Projects Found</h3>
-                <p class="text-sm text-gray-500 mt-1">Try adjusting your filters.</p>
+                <h3 class="font-bold text-gray-800">No Projects Found</h3>
+                <p class="text-sm text-gray-500">
+                    No results for this specific filter combination.
+                </p>
             </div>
             @endforelse
 
