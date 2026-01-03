@@ -20,7 +20,7 @@
                     class="appearance-none bg-white/20 hover:bg-white/30 backdrop-blur-md border border-white/30 text-white font-bold py-2 pl-10 pr-10 rounded-full text-sm focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 transition cursor-pointer">
                     @foreach($this->academicYears as $year)
                         <option value="{{ $year->id }}" class="text-gray-900 font-medium">
-                            A.Y. {{ $year->year }} {{ $year->is_active ? '(Current)' : '' }}
+                            A.Y. {{ $year->name }} {{ $year->is_active ? '(Current)' : '' }}
                         </option>
                     @endforeach
                 </select>
