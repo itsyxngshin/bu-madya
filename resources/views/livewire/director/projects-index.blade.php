@@ -3,7 +3,7 @@
     <header class="relative h-[400px] flex items-center justify-center text-white overflow-hidden rounded-3xl shadow-xl mx-6 -mt-20 z-10">
         <div class="absolute inset-0 z-0">
             {{-- Use a static background for the header, or a featured project image --}}
-            <img src="https://images.unsplash.com/photo-1559027615-cd4628902d4a?q=80&w=2074&auto=format&fit=crop" 
+            <img src="{{ asset('images/IMG_4095.JPG') }}"
                 class="w-full h-full object-cover" alt="Projects Background">
             <div class="absolute inset-0 bg-gradient-to-r from-green-900/90 to-blue-900/80 mix-blend-multiply"></div>
         </div>

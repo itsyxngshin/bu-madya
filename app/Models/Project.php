@@ -26,10 +26,12 @@ class Project extends Model
     ];
 
     // Apply the Active Year Scope automatically to show only current projects
+    /*
     protected static function booted()
     {
         static::addGlobalScope(new ActiveYearScope);
     }
+        */
 
     public function academicYear()
     {
