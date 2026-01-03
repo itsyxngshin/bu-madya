@@ -66,8 +66,8 @@ class Directory extends Component
                     'photo'         =>  null, // Path in public/
                     
                     // PROFILE (Academic Details)
-                    'course'        =>  'N/A',
-                    'year_level'    => '4th Year',
+                    'course'        =>  'AB Journalism',
+                    'year_level'    => '3rd Year',
                     'college_slug'  => 'bu-cal', // Used for badge text (CSSP)
                 ],
                 [
@@ -126,7 +126,7 @@ class Directory extends Component
                     'order'         => 9,
                     'name'          => 'Glenda Ante',
                     'photo'         => null, 
-                    'course'        => 'N/A',
+                    'course'        => 'AB Journalism',
                     'year_level'    => 'N/A',
                     'college_slug'  => 'bu-cal',
                 ],
@@ -160,6 +160,192 @@ class Directory extends Component
                 ],
 
             ],
+            7 => [
+                [
+                    // DIRECTOR (Position Details)
+                    'position_name' => 'President',
+                    'order'         => 1, // Lower number = appears first
+                    
+                    // USER (Person Details)
+                    'name'          => 'Patrick Anthony Nota',
+                    'photo'         =>  null, // Path in public/
+                    
+                    // PROFILE (Academic Details)
+                    'course'        =>  'BS Mining Engineering',
+                    'year_level'    => '4th Year',
+                    'college_slug'  => 'bu-ceng', // Used for badge text (CSSP)
+                ],
+                [
+                    // DIRECTOR (Position Details)
+                    'position_name' => 'Vice President for Education',
+                    'order'         => 2, // Lower number = appears first
+                    
+                    // USER (Person Details)
+                    'name'          => 'Mariz Anne Columna',
+                    'photo'         =>  null, // Path in public/
+                    
+                    // PROFILE (Academic Details)
+                    'course'        =>  'BSBA Human Resource Management',
+                    'year_level'    => 'N/A',
+                    'college_slug'  => 'bu-cbem', // Used for badge text (CSSP)
+                ], 
+                [
+                    // DIRECTOR (Position Details)
+                    'position_name' => 'Vice President for Science and Technology',
+                    'order'         => 3, // Lower number = appears first
+                    
+                    // USER (Person Details)
+                    'name'          => 'Edric Ian Vargas',
+                    'photo'         =>  null, // Path in public/
+                    
+                    // PROFILE (Academic Details)
+                    'course'        =>  'BS Biology',
+                    'year_level'    => 'N/A',
+                    'college_slug'  => 'bu-cbem', // Used for badge text (CSSP)
+                ], 
+                [
+                    // DIRECTOR (Position Details)
+                    'position_name' => 'Vice President for Culture',
+                    'order'         => 4, // Lower number = appears first
+                    
+                    // USER (Person Details)
+                    'name'          => 'Sharmaine Granatin',
+                    'photo'         =>  null, // Path in public/
+                    
+                    // PROFILE (Academic Details)
+                    'course'        =>  'AB Political Science',
+                    'year_level'    => 'N/A',
+                    'college_slug'  => 'bu-cssp', 
+                ], 
+                [
+                    // DIRECTOR (Position Details)
+                    'position_name' => 'Vice President for Social Sciences',
+                    'order'         => 5, // Lower number = appears first
+                    
+                    // USER (Person Details)
+                    'name'          => 'Jesica Rico',
+                    'photo'         =>  null, // Path in public/
+                    
+                    // PROFILE (Academic Details)
+                    'course'        =>  'AB Political Science',
+                    'year_level'    => 'N/A',
+                    'college_slug'  => 'bu-cssp', 
+                ],
+                [
+                    // DIRECTOR (Position Details)
+                    'position_name' => 'Vice President for Communication',
+                    'order'         => 6, // Lower number = appears first
+                    
+                    // USER (Person Details)
+                    'name'          => 'Glenda Ante',
+                    'photo'         =>  null, // Path in public/
+                    
+                    // PROFILE (Academic Details)
+                    'course'        =>  'AB Journalism',
+                    'year_level'    => 'N/A',
+                    'college_slug'  => 'bu-cal', 
+                ],
+                [
+                    // DIRECTOR (Position Details)
+                    'position_name' => 'Secretary-General',
+                    'order'         => 7, // Lower number = appears first
+                    
+                    // USER (Person Details)
+                    'name'          => 'John Cyril L. Yee',
+                    'photo'         =>  null, // Path in public/
+                    
+                    // PROFILE (Academic Details)
+                    'course'        =>  'AB Journalism',
+                    'year_level'    => 'N/A',
+                    'college_slug'  => 'bu-cal', 
+                ],
+                [
+                    // DIRECTOR (Position Details)
+                    'position_name' => 'Deputy Secretary-General',
+                    'order'         => 8, // Lower number = appears first
+                    
+                    // USER (Person Details)
+                    'name'          => 'Carl Andre Bongalos',
+                    'photo'         =>  null, // Path in public/
+                    
+                    // PROFILE (Academic Details)
+                    'course'        =>  'BS Computer Science',
+                    'year_level'    => 'N/A',
+                    'college_slug'  => 'bu-cs', 
+                ],
+                [
+                    // DIRECTOR (Position Details)
+                    'position_name' => 'Finance Officer',
+                    'order'         => 9, // Lower number = appears first
+                    
+                    // USER (Person Details)
+                    'name'          => 'Jennilyn Santos',
+                    'photo'         =>  null, // Path in public/
+                    
+                    // PROFILE (Academic Details)
+                    'course'        =>  'BSBA Human Resource Management',
+                    'year_level'    => 'N/A',
+                    'college_slug'  => 'bu-cbem', 
+                ],
+                [
+                    // DIRECTOR (Position Details)
+                    'position_name' => 'Audit',
+                    'order'         => 10, // Lower number = appears first
+                    
+                    // USER (Person Details)
+                    'name'          => 'Karl Renz Llana',
+                    'photo'         =>  null, // Path in public/
+                    
+                    // PROFILE (Academic Details)
+                    'course'        =>  'BS Chemistry',
+                    'year_level'    => 'N/A',
+                    'college_slug'  => 'bu-cs', 
+                ],
+                [
+                    // DIRECTOR (Position Details)
+                    'position_name' => 'Auditor',
+                    'order'         => 10, // Lower number = appears first
+                    
+                    // USER (Person Details)
+                    'name'          => 'Ronald Jude Arroyo',
+                    'photo'         =>  null, // Path in public/
+                    
+                    // PROFILE (Academic Details)
+                    'course'        =>  'BSBA Human Resource Management',
+                    'year_level'    => 'N/A',
+                    'college_slug'  => 'bu-cbem', 
+                ],
+                [
+                    // DIRECTOR (Position Details)
+                    'position_name' => 'Business Manager',
+                    'order'         => 11, // Lower number = appears first
+                    
+                    // USER (Person Details)
+                    'name'          => 'Ronald Jude Arroyo',
+                    'photo'         =>  null, // Path in public/
+                    
+                    // PROFILE (Academic Details)
+                    'course'        =>  'BSBA Human Resource Management',
+                    'year_level'    => 'N/A',
+                    'college_slug'  => 'bu-cbem', 
+                ],
+                [
+                    // DIRECTOR (Position Details)
+                    'position_name' => 'Jesus Andrew Balmas',
+                    'order'         => 12, // Lower number = appears first
+                    
+                    // USER (Person Details)
+                    'name'          => 'Public Information Officer',
+                    'photo'         =>  null, // Path in public/
+                    
+                    // PROFILE (Academic Details)
+                    'course'        =>  'AB Political Science',
+                    'year_level'    => 'N/A',
+                    'college_slug'  => 'bu-cssp', 
+                ],
+
+
+            ]
             // Add other years as needed...
         ];
 
