@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Session;
 class ProjectsIndex extends Component
 {
     public $category = 'All';
+    public $academicYear = 'All';
     public $visitorCount = 1;
     public function mount()
     {
