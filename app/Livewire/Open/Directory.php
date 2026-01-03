@@ -66,7 +66,7 @@ class Directory extends Component
                     'photo'         =>  null, // Path in public/
                     
                     // PROFILE (Academic Details)
-                    'course'        =>  null,
+                    'course'        =>  'N/A',
                     'year_level'    => '4th Year',
                     'college_slug'  => 'bu-cal', // Used for badge text (CSSP)
                 ],
@@ -80,7 +80,7 @@ class Directory extends Component
                     'photo'         =>  null, // Path in public/
                     
                     // PROFILE (Academic Details)
-                    'course'        =>  null,
+                    'course'        =>  'N/A',
                     'year_level'    => '3rd Year',
                     'college_slug'  => 'bu-cssp', // Used for badge text (CSSP)
                 ],
@@ -94,7 +94,7 @@ class Directory extends Component
                     'photo'         =>  null, // Path in public/
                     
                     // PROFILE (Academic Details)
-                    'course'        =>  null,
+                    'course'        =>  'N/A',
                     'year_level'    => '3rd Year',
                     'college_slug'  => 'bu-cs', // Used for badge text (CSSP)
                 ],
@@ -108,7 +108,7 @@ class Directory extends Component
                     'photo'         =>  null, // Path in public/
                     
                     // PROFILE (Academic Details)
-                    'course'        =>  null,
+                    'course'        =>  'N/A',
                     'year_level'    => '4th Year',
                     'college_slug'  => 'bu-cs', // Used for badge text (CSSP)
                 ],
@@ -118,7 +118,7 @@ class Directory extends Component
                     'name'          => 'Dick Harrence Dela Vega',
                     'photo'         => null, 
                     'course'        => 'BS Biology',
-                    'year_level'    => '4th Year',
+                    'year_level'    => 'N/A',
                     'college_slug'  => 'bu-cs',
                 ],
                 [
@@ -135,7 +135,7 @@ class Directory extends Component
                     'year_level'    => '4th Year',
                     'college_slug'  => 'bu-cs', // Used for badge text (CSSP)
                 ],
-                                [
+                [
                     // DIRECTOR (Position Details)
                     'position_name' => 'Vice President for Social Sciences',
                     'order'         => 7, // Lower number = appears first
@@ -146,7 +146,7 @@ class Directory extends Component
                     
                     // PROFILE (Academic Details)
                     'course'        =>  'BS Biology',
-                    'year_level'    => '4th Year',
+                    'year_level'    => 'N/A',
                     'college_slug'  => 'bu-cssp', // Used for badge text (CSSP)
                 ],
 
