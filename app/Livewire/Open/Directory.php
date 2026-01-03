@@ -59,7 +59,7 @@ class Directory extends Component
                 [
                     // DIRECTOR (Position Details)
                     'position_name' => 'President',
-                    'order'         => 0, // Lower number = appears first
+                    'order'         => 1, // Lower number = appears first
                     
                     // USER (Person Details)
                     'name'          => 'John Cyril L. Yee',
@@ -71,14 +71,85 @@ class Directory extends Component
                     'college_slug'  => 'bu-cal', // Used for badge text (CSSP)
                 ],
                 [
+                    // DIRECTOR (Position Details)
+                    'position_name' => 'Vice President for Culture',
+                    'order'         => 2, // Lower number = appears first
+                    
+                    // USER (Person Details)
+                    'name'          => 'Xyra B. Belen',
+                    'photo'         =>  null, // Path in public/
+                    
+                    // PROFILE (Academic Details)
+                    'course'        =>  null,
+                    'year_level'    => '3rd Year',
+                    'college_slug'  => 'bu-cssp', // Used for badge text (CSSP)
+                ],
+                [
+                    // DIRECTOR (Position Details)
+                    'position_name' => 'Vice President for Communications',
+                    'order'         => 3, // Lower number = appears first
+                    
+                    // USER (Person Details)
+                    'name'          => 'Darlene Fabul',
+                    'photo'         =>  null, // Path in public/
+                    
+                    // PROFILE (Academic Details)
+                    'course'        =>  null,
+                    'year_level'    => '3rd Year',
+                    'college_slug'  => 'bu-cs', // Used for badge text (CSSP)
+                ],
+                [
+                    // DIRECTOR (Position Details)
+                    'position_name' => 'Vice President for Science and Technology',
+                    'order'         => 4, // Lower number = appears first
+                    
+                    // USER (Person Details)
+                    'name'          => 'John Vincent Dy',
+                    'photo'         =>  null, // Path in public/
+                    
+                    // PROFILE (Academic Details)
+                    'course'        =>  null,
+                    'year_level'    => '4th Year',
+                    'college_slug'  => 'bu-cs', // Used for badge text (CSSP)
+                ],
+                [
                     'position_name' => 'Secretary-General',
-                    'order'         => 5,
+                    'order'         => 8,
                     'name'          => 'Dick Harrence Dela Vega',
                     'photo'         => null, 
-                    'course'        => 'BS Bilogy',
+                    'course'        => 'BS Biology',
                     'year_level'    => '4th Year',
                     'college_slug'  => 'bu-cs',
                 ],
+                [
+                    // DIRECTOR (Position Details)
+                    'position_name' => 'Vice President for Education',
+                    'order'         => 6, // Lower number = appears first
+                    
+                    // USER (Person Details)
+                    'name'          => 'Erwin Banares',
+                    'photo'         =>  null, // Path in public/
+                    
+                    // PROFILE (Academic Details)
+                    'course'        =>  'BS Biology',
+                    'year_level'    => '4th Year',
+                    'college_slug'  => 'bu-cs', // Used for badge text (CSSP)
+                ],
+                                [
+                    // DIRECTOR (Position Details)
+                    'position_name' => 'Vice President for Social Sciences',
+                    'order'         => 7, // Lower number = appears first
+                    
+                    // USER (Person Details)
+                    'name'          => 'Jesica Mae Rico',
+                    'photo'         =>  null, // Path in public/
+                    
+                    // PROFILE (Academic Details)
+                    'course'        =>  'BS Biology',
+                    'year_level'    => '4th Year',
+                    'college_slug'  => 'bu-cssp', // Used for badge text (CSSP)
+                ],
+
             ],
             // Add other years as needed...
         ];
@@ -139,22 +210,25 @@ class Directory extends Component
     public function render()
     {
         $displayYear = AcademicYear::find($this->selectedYearId);
+        
+        // Check if we are viewing the "Active/Current" year
+        // (Assumes you have an 'is_active' column, or you can check against the latest ID)
+        $isViewingCurrentYear = $displayYear?->is_active;
 
-        // 1. Query REAL Directors from DB
+        // 1. Get Real Data from DB
         $query = Director::query()
             ->with(['assignments' => function ($q) {
                 $q->where('academic_year_id', $this->selectedYearId)
                   ->with('user.profile.college');
             }]);
 
-        // ... (Existing Filters) ...
+        // ... (Filters & Search logic remains the same) ...
         if ($this->filter === 'Executive') {
             $query->where('order', '<=', 30);
         } elseif ($this->filter === 'Envoys') {
             $query->where('order', '>', 30);
         }
 
-        // ... (Existing Search) ...
         if (!empty($this->search)) {
             $query->where(function (Builder $q) {
                 $q->where('name', 'like', '%' . $this->search . '%')
@@ -162,24 +236,30 @@ class Directory extends Component
             });
         }
 
-        // 2. Get Real Results
         $realResults = $query->orderBy('order', 'asc')->get();
 
-        // 3. Get Hardcoded Results
+        // 2. Get Legacy Data
         $legacyResults = $this->getLegacyDirectors($this->selectedYearId);
 
-        // 4. Merge Both Collections
-        // We merge legacy items into real items
-        $allResults = $realResults->merge($legacyResults);
+        // 3. Merge Both
+        $allResults = $realResults->merge($legacyResults)->sortBy('order');
 
-        // 5. Re-Sort based on 'order' to ensure hardcoded ones appear in correct slots
-        $sortedResults = $allResults->sortBy('order');
+        // ---------------------------------------------------------
+        // 4. THE FIX: Hide "Vacant" positions for Past Years
+        // ---------------------------------------------------------
+        if (!$isViewingCurrentYear) {
+            $allResults = $allResults->filter(function ($director) {
+                // Keep only if there is someone assigned (Real or Legacy)
+                return $director->assignments->isNotEmpty();
+            });
+        }
 
-        // 6. Split Filled/Vacant (Same logic as before)
-        $filled = $sortedResults->filter(fn($d) => $d->assignments->isNotEmpty());
-        $vacant = $sortedResults->filter(fn($d) => $d->assignments->isEmpty());
+        // 5. Separate Filled vs Vacant (For current year display logic)
+        $filled = $allResults->filter(fn($d) => $d->assignments->isNotEmpty());
+        $vacant = $allResults->filter(fn($d) => $d->assignments->isEmpty());
 
         return view('livewire.open.directory', [
+            // If past year, $vacant will be empty, effectively hiding the positions
             'officers' => $filled->merge($vacant),
             'currentYearLabel' => $displayYear?->year ?? 'N/A'
         ]);
