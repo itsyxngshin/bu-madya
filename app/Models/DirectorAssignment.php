@@ -43,10 +43,12 @@ class DirectorAssignment extends Model
         return $this->belongsTo(AcademicYear::class);
     }
 
+    /* 
      protected static function booted()
     {
         static::addGlobalScope(new ActiveYearScope);
     }
+        */ 
 
     
 }

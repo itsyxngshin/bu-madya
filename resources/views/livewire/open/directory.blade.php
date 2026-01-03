@@ -3,18 +3,30 @@
     {{-- HEADER (Same as before) --}}
     <header class="relative h-[300px] flex items-center justify-center text-white overflow-hidden rounded-3xl shadow-xl mx-6 -mt-20 z-10">
         <div class="absolute inset-0 z-0">
-            <img src="{{ asset('images/IMG_2800.jpg') }}" 
-                 class="w-full h-full object-cover" alt="Header Background">
+            <img src="{{ asset('images/IMG_2800.jpg') }}" class="w-full h-full object-cover" alt="Header Background">
             <div class="absolute inset-0 bg-gradient-to-r from-green-900/90 to-red-900/80 mix-blend-multiply"></div>
         </div>
         <div class="relative z-10 text-center px-4 mt-16">
             <h2 class="text-yellow-300 font-bold tracking-[0.3em] text-xs uppercase mb-2">Our Leadership</h2>
-            <h1 class="font-heading text-3xl md:text-5xl font-black uppercase tracking-tight mb-2 drop-shadow-lg">
+            <h1 class="font-heading text-3xl md:text-5xl font-black uppercase tracking-tight mb-4 drop-shadow-lg">
                 The Board of Directors
             </h1>
-            <p class="text-sm md:text-base text-gray-100 font-light max-w-xl mx-auto italic">
-                A.Y. {{ $currentYear }}
-            </p>
+            
+            {{-- ACADEMIC YEAR DROPDOWN --}}
+            <div class="inline-flex items-center relative group">
+                <svg class="w-4 h-4 absolute left-3 text-white/70 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                
+                <select wire:model.live="selectedYearId" 
+                    class="appearance-none bg-white/20 hover:bg-white/30 backdrop-blur-md border border-white/30 text-white font-bold py-2 pl-10 pr-10 rounded-full text-sm focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 transition cursor-pointer">
+                    @foreach($this->academicYears as $year)
+                        <option value="{{ $year->id }}" class="text-gray-900 font-medium">
+                            A.Y. {{ $year->year }} {{ $year->is_active ? '(Current)' : '' }}
+                        </option>
+                    @endforeach
+                </select>
+                
+                <svg class="w-4 h-4 absolute right-3 text-white/70 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+            </div>
         </div>
     </header>
 
