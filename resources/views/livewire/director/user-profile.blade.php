@@ -95,9 +95,9 @@
     
                 {{-- A. PORTFOLIO CARDS --}}
                 <section>
-                    <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center justify-between mb-8">
                         <h3 class="flex items-center gap-3 text-xl font-bold text-gray-800">
-                            <span class="w-8 h-8 rounded-full bg-red-100 text-red-600 flex items-center justify-center">
+                            <span class="w-8 h-8 rounded-full bg-red-100 text-red-600 flex items-center justify-center shadow-sm">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
                             </span>
                             Portfolio & Experiences
@@ -105,49 +105,54 @@
                     </div>
                     
                     @if($portfolios->isNotEmpty())
-                        {{-- THE RAIL CONTAINER --}}
-                        {{-- Added 'ml-2' to give the rail itself some breathing room from the card edge --}}
-                        <div class="relative border-l-2 border-gray-200 ml-4 md:ml-6 space-y-10 my-4">
-                            
+                        <div class="space-y-0">
                             @foreach($portfolios as $item)
-                            {{-- Increased padding from pl-6 to pl-10/12 to Fix Overlap --}}
-                            <div class="relative pl-10 md:pl-12 group">
+                            <div class="flex gap-4 md:gap-6 group relative">
                                 
-                                {{-- 1. THE MARKER DOT --}}
-                                {{-- Centered on border: border is at left:0. Dot is w-4 (1rem). -left-[0.55rem] centers it nicely --}}
-                                <span class="absolute -left-[9px] top-1.5 h-4 w-4 rounded-full border-[3px] border-white shadow-sm transition-all duration-300 z-10
-                                    {{ $item->status === 'Active' ? 'bg-green-500 ring-2 ring-green-100 scale-110' : 'bg-gray-300 group-hover:bg-red-400 group-hover:scale-110' }}">
-                                </span>
-
-                                {{-- 2. HEADER: Title & Duration --}}
-                                <div class="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-1 mb-1">
-                                    <h4 class="font-bold text-gray-900 text-lg leading-tight group-hover:text-red-600 transition-colors">
-                                        {{ $item->designation }}
-                                    </h4>
+                                {{-- 1. LEFT COLUMN: THE VISUAL RAIL --}}
+                                <div class="flex flex-col items-center shrink-0 relative">
+                                    {{-- The Dot --}}
+                                    <div class="w-4 h-4 rounded-full border-[3px] border-white shadow-sm z-10 transition-transform duration-300
+                                        {{ $item->status === 'Active' ? 'bg-green-500 ring-2 ring-green-100 scale-110' : 'bg-gray-300 group-hover:bg-red-400 group-hover:scale-110' }}">
+                                    </div>
                                     
-                                    {{-- Duration Badge --}}
-                                    <span class="text-xs font-mono text-gray-400 bg-gray-50 px-2 py-0.5 rounded self-start sm:self-auto border border-gray-100">
-                                        {{ $item->duration }}
-                                    </span>
-                                </div>
-                                
-                                {{-- 3. SUB-HEADER: Place & Status --}}
-                                <div class="mb-3 flex flex-wrap items-center gap-2">
-                                     <span class="text-sm text-red-600 font-bold">{{ $item->place }}</span>
-                                     @if($item->status === 'Active')
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-green-100 text-green-700 tracking-wider shadow-sm">
-                                            Current
-                                        </span>
-                                     @endif
+                                    {{-- The Line (Draws only if NOT the last item) --}}
+                                    @if(!$loop->last)
+                                        <div class="w-0.5 bg-gray-200 absolute top-4 bottom-[-4px] group-hover:bg-gray-300 transition-colors"></div>
+                                    @endif
                                 </div>
 
-                                {{-- 4. BODY: Description --}}
-                                <div class="text-sm text-gray-500 leading-relaxed text-justify group-hover:text-gray-700 transition-colors bg-gray-50/50 p-3 rounded-xl border border-transparent group-hover:border-gray-100 group-hover:bg-white group-hover:shadow-sm">
-                                    {{ $item->description }}
+                                {{-- 2. RIGHT COLUMN: THE CONTENT --}}
+                                {{-- pb-10 adds space between items visually --}}
+                                <div class="flex-1 pb-10 min-w-0">
+                                    
+                                    {{-- Header Row --}}
+                                    <div class="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-1 mb-1 -mt-1">
+                                        <h4 class="font-bold text-gray-900 text-lg leading-tight group-hover:text-red-600 transition-colors">
+                                            {{ $item->designation }}
+                                        </h4>
+                                        <span class="text-xs font-mono text-gray-400 bg-gray-50 px-2 py-0.5 rounded self-start sm:self-auto border border-gray-100 whitespace-nowrap">
+                                            {{ $item->duration }}
+                                        </span>
+                                    </div>
+                                    
+                                    {{-- Sub-Header Row --}}
+                                    <div class="mb-3 flex flex-wrap items-center gap-2">
+                                         <span class="text-sm text-red-600 font-bold">{{ $item->place }}</span>
+                                         @if($item->status === 'Active')
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-green-100 text-green-700 tracking-wider shadow-sm">
+                                                Current
+                                            </span>
+                                         @endif
+                                    </div>
+
+                                    {{-- Description Box --}}
+                                    <div class="text-sm text-gray-500 leading-relaxed text-justify bg-gray-50/50 p-4 rounded-xl border border-transparent group-hover:bg-white group-hover:shadow-sm group-hover:border-gray-100 transition-all">
+                                        {{ $item->description }}
+                                    </div>
                                 </div>
                             </div>
                             @endforeach
-
                         </div>
                     @else
                         {{-- Empty State --}}
