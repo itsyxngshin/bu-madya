@@ -109,12 +109,12 @@
                                     </div>
                                 @else
                                     <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition duration-300 z-10"></div>
-                                   <img src="{{ $user->profile_photo_path 
+                                    <img src="{{ $user->profile_photo_path 
                                                 ? (filter_var($user->profile_photo_path, FILTER_VALIDATE_URL) ? $user->profile_photo_path : asset($user->profile_photo_path)) 
-                                                : 'https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=1000&auto=format&fit=crop' }}" 
-                                        alt="{{ $user->name }}"
-                                        class="w-full h-full object-cover {{ $isDG ? 'object-center' : 'object-top' }} transition duration-500 group-hover:scale-110" 
-                                        loading="lazy">
+                                                : 'https://ui-avatars.com/api/?name=' . urlencode($user->name) . '&color=7F9CF5&background=EBF4FF&size=512' }}" 
+                                         alt="{{ $user->name }}"
+                                         class="w-full h-full object-cover {{ $isDG ? 'object-center' : 'object-top' }} transition duration-500 group-hover:scale-110" 
+                                         loading="lazy">
                                 @endif
 
                                 {{-- UPDATED: Smaller DG Badge --}}
