@@ -304,20 +304,38 @@
                             
                             {{-- Preview SDGs --}}
                             @if(count($selectedSdgs) > 0)
-                            <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
-                                <h3 class="font-bold text-gray-900 uppercase tracking-widest text-xs border-b border-gray-100 pb-3 mb-4">Shared Goals</h3>
-                                <div class="flex flex-col gap-3">
-                                    @foreach($selectedSdgs as $id)
-                                        @php $sdg = $this->allSdgs->find($id); @endphp
-                                        @if($sdg)
-                                        <div class="flex items-center gap-3 p-2 rounded-lg border border-transparent bg-gray-50">
-                                            <div class="w-8 h-8 {{ $sdg->color_hex }} rounded-md text-white font-black text-xs flex items-center justify-center shadow-sm">{{ $sdg->id }}</div>
-                                            <span class="text-[10px] font-bold text-gray-700 uppercase tracking-wide">{{ $sdg->name }}</span>
-                                        </div>
-                                        @endif
-                                    @endforeach
+                                <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
+                                    <h3 class="font-bold text-gray-900 uppercase tracking-widest text-xs border-b border-gray-100 pb-3 mb-4">
+                                        Shared Goals
+                                    </h3>
+                                    
+                                    <div class="flex flex-col gap-3">
+                                        @foreach($selectedSdgs as $id)
+                                            @php 
+                                                $sdg = $this->allSdgs->find($id); 
+                                            @endphp
+
+                                            @if($sdg)
+                                                {{-- CONTAINER: Tinted Background + Subtle Border --}}
+                                                <div class="flex items-center gap-3 p-2 rounded-lg border transition-all hover:shadow-sm"
+                                                    style="background-color: {{ $sdg->color_hex }}15; border-color: {{ $sdg->color_hex }}30;">
+                                                    
+                                                    {{-- SWATCH: Solid Color Box --}}
+                                                    <div class="w-8 h-8 shrink-0 rounded-md text-white font-black text-xs flex items-center justify-center shadow-sm"
+                                                        style="background-color: {{ $sdg->color_hex }}">
+                                                        {{ $sdg->id }}
+                                                    </div>
+                                                    
+                                                    {{-- TEXT: Matches the SDG Color --}}
+                                                    <span class="text-[10px] font-bold uppercase tracking-wide leading-tight"
+                                                        style="color: {{ $sdg->color_hex }}">
+                                                        {{ $sdg->name }}
+                                                    </span>
+                                                </div>
+                                            @endif
+                                        @endforeach
+                                    </div>
                                 </div>
-                            </div>
                             @endif
                         </aside>
 
