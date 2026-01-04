@@ -98,150 +98,157 @@
         </div>
 
         {{-- B. DISCUSSION STREAM --}}
-        <div class="space-y-4">
+        <div class="space-y-6 mt-8">
+        
+        {{-- Header Separator --}}
+        <div class="flex items-center justify-between px-1">
+            <h3 class="text-sm font-bold uppercase tracking-widest text-gray-500">
+                {{ count($topic->roundtable_replies) }} Responses
+            </h3>
             
-            {{-- Visual Separator --}}
-            <div class="flex items-center gap-2 mb-4 px-2">
-                <span class="text-xs font-bold uppercase tracking-widest text-gray-400">Discussion</span>
-                <div class="h-px bg-gray-200 flex-1"></div>
+            {{-- Optional Sort Dropdown could go here --}}
+            <div class="text-xs text-gray-400">
+                Sorted by: <span class="font-bold text-gray-600">Time</span>
             </div>
+        </div>
 
-            @forelse($topic->roundtable_replies as $reply)
-                @php 
-                    $myVote = $reply->userVote(auth()->id()); 
-                @endphp
+        @forelse($topic->roundtable_replies as $reply)
+            @php 
+                $myVote = $reply->userVote(auth()->id()); 
+                $isHost = $reply->user_id === $topic->user_id;
+                $isMe = $reply->user_id === auth()->id();
+            @endphp
 
-                <div class="group relative transition-all duration-300 animate-fade-in-up">
-                    
-                    {{-- Thread Guide Line (Adjusted for mobile avatar size) --}}
-                    @if(!$loop->last)
-                        <div class="absolute left-[15px] md:left-6 top-10 bottom-[-20px] w-px bg-gray-200 group-hover:bg-gray-300 transition-colors z-0"></div>
-                    @endif
-
-                    <div class="flex gap-2 md:gap-3 relative z-10">
+            {{-- FORUM POST CARD --}}
+            <div id="reply-{{ $reply->id }}" 
+                 class="group bg-white border rounded-lg shadow-sm overflow-hidden transition-all duration-300 hover:shadow-md
+                 {{ $isHost ? 'border-red-200 ring-1 ring-red-50' : ($isMe ? 'border-yellow-300' : 'border-gray-200') }}">
+                
+                {{-- 1. POST HEADER (User Info) --}}
+                <div class="px-4 py-3 bg-gray-50/80 border-b border-gray-100 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
                         {{-- Avatar --}}
-                        <div class="shrink-0 flex flex-col items-center">
-                            <img src="{{ asset($reply->user->profile_photo_path) }}" class="w-8 h-8 md:w-10 md:h-10 rounded-full border border-gray-200 shadow-sm bg-gray-100 object-cover">
-                        </div>
-
-                        {{-- Comment Body --}}
-                        <div class="flex-1 min-w-0"> {{-- min-w-0 prevents flex overflow --}}
-                            <div class="bg-white border rounded-xl p-3 md:p-4 shadow-sm relative group/card
-                                {{ $reply->user_id === $topic->user_id ? 'border-red-100 bg-red-50/30' : ($reply->user_id === auth()->id() ? 'border-yellow-200 bg-yellow-50/30' : 'border-gray-200') }}">
-                                
-                                {{-- Comment Header --}}
-                                <div class="flex justify-between items-start mb-2">
-                                    <div class="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs">
-                                        <span class="font-bold text-gray-800">{{ $reply->user->name }}</span>
-                                        
-                                        @if($reply->user_id === $topic->user_id)
-                                            <span class="text-[9px] font-black uppercase tracking-wider text-red-600 bg-red-100 px-1.5 rounded">Host</span>
-                                        @elseif($reply->user_id === auth()->id())
-                                            <span class="text-[9px] font-black uppercase tracking-wider text-yellow-600 bg-yellow-100 px-1.5 rounded">You</span>
-                                        @endif
-
-                                        <span class="text-gray-400 text-[10px]">{{ $reply->created_at->format('g:i A') }}</span>
-                                    </div>
-
-                                    {{-- Kebab Menu --}}
-                                    @if($reply->user_id === auth()->id())
-                                        <div x-data="{ open: false }" class="relative">
-                                            <button @click="open = !open" @click.away="open = false" class="text-gray-300 hover:text-gray-600 p-1.5 -mr-2 -mt-2 md:mr-0 md:mt-0">
-                                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"></path></svg>
-                                            </button>
-                                            {{-- Dropdown content... --}}
-                                            <div x-show="open" style="display: none;" class="absolute right-0 mt-1 w-32 bg-white border border-gray-100 rounded-lg shadow-lg z-20 py-1">
-                                                <button wire:click="editReply({{ $reply->id }})" @click="open = false" class="block w-full text-left px-4 py-3 md:py-2 text-xs text-gray-700">Edit</button>
-                                                <button wire:click="deleteReply({{ $reply->id }})" wire:confirm="Are you sure?" @click="open = false" class="block w-full text-left px-4 py-3 md:py-2 text-xs text-red-600">Delete</button>
-                                            </div>
-                                        </div>
-                                    @endif
-                                </div>
-
-                                {{-- CONTENT --}}
-                                @if($editingReplyId === $reply->id)
-                                    <div class="mt-2 animate-fade-in">
-                                        <textarea wire:model.defer="editingContent" class="w-full text-sm border-gray-300 rounded-md shadow-sm" rows="3"></textarea>
-                                        <div class="flex gap-2 mt-2 justify-end">
-                                            <button wire:click="cancelEdit" class="text-xs text-gray-500 px-3 py-2">Cancel</button>
-                                            <button wire:click="updateReply" class="text-xs bg-gray-900 text-white px-3 py-2 rounded">Save</button>
-                                        </div>
-                                    </div>
-                                @else
-                                    <div class="text-sm text-gray-800 leading-relaxed break-words">
-                                        {!! nl2br(e($reply->content)) !!}
-                                    </div>
+                        <img src="{{ asset($reply->user->profile_photo_path) }}" 
+                             class="w-8 h-8 rounded-full object-cover border border-gray-200 shadow-sm">
+                        
+                        <div class="flex flex-col md:flex-row md:items-baseline md:gap-2">
+                            <span class="text-sm font-bold text-gray-900">{{ $reply->user->name }}</span>
+                            
+                            {{-- Badges --}}
+                            <div class="flex items-center gap-1">
+                                @if($isHost)
+                                    <span class="text-[9px] font-black uppercase tracking-wider text-red-700 bg-red-100 px-1.5 py-0.5 rounded border border-red-200">Host</span>
                                 @endif
-
-                                {{-- ACTIONS --}}
-                                <div class="flex items-center justify-between md:justify-start md:gap-4 mt-3 pt-2 border-t {{ $reply->user_id === $topic->user_id ? 'border-red-200' : 'border-gray-100' }}">
-                                    
-                                    {{-- Votes --}}
-                                    <div class="flex items-center gap-1 bg-gray-50 rounded-lg p-0.5 border border-gray-100">
-                                        <button wire:click="vote({{ $reply->id }}, 1)" class="p-1.5 md:p-1 rounded {{ $myVote === 1 ? 'text-red-600 bg-white shadow-sm' : 'text-gray-400' }}">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
-                                        </button>
-                                        <span class="text-xs font-bold w-5 text-center {{ $myVote !== 0 ? 'text-gray-900' : 'text-gray-500' }}">{{ $reply->score }}</span>
-                                        <button wire:click="vote({{ $reply->id }}, -1)" class="p-1.5 md:p-1 rounded {{ $myVote === -1 ? 'text-blue-600 bg-white shadow-sm' : 'text-gray-400' }}">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                                        </button>
-                                    </div>
-
-                                    {{-- Reply --}}
-                                    <button @click="$wire.set('newReply', '@' + '{{ $reply->user->name }} ' + $wire.get('newReply')); document.getElementById('replyInput').focus()"
-                                        class="flex items-center gap-1 text-gray-400 hover:text-gray-900 px-2 py-1">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path></svg>
-                                        <span class="text-xs font-bold">Reply</span>
-                                    </button>
-                                </div>
+                                @if($isMe)
+                                    <span class="text-[9px] font-black uppercase tracking-wider text-yellow-700 bg-yellow-100 px-1.5 py-0.5 rounded border border-yellow-200">You</span>
+                                @endif
                             </div>
                         </div>
                     </div>
-                </div>
-            @empty
-                {{-- Empty State --}}
-                <div class="text-center py-12">
-                    <p class="text-gray-500 text-sm font-bold">The floor is open.</p>
-                </div>
-            @endforelse
-        </div>
-        <div class="h-40 md:h-48 w-full"></div>
-    </div>
 
-    {{-- 4. FLOATING FOOTER INPUT --}}
-    <div class="fixed bottom-0 left-0 w-full z-50 border-t border-gray-200 bg-white/95 backdrop-blur-xl shadow-[0_-5px_20px_rgb(0,0,0,0.05)] pb-safe pl-safe pr-safe">
-        {{-- Added pb-2 here to the inner container for extra lift --}}
-        <div class="max-w-4xl mx-auto px-3 py-2 pb-4 md:py-3"> 
-            <div class="flex gap-2 md:gap-4 items-end">
-                <div class="relative flex-1">
+                    {{-- Meta / Actions --}}
+                    <div class="flex items-center gap-3">
+                        <span class="text-xs text-gray-400 font-mono" title="{{ $reply->created_at }}">
+                            {{ $reply->created_at->diffForHumans() }}
+                        </span>
+
+                        {{-- Kebab Menu --}}
+                        @if($isMe)
+                            <div x-data="{ open: false }" class="relative">
+                                <button @click="open = !open" @click.away="open = false" class="text-gray-300 hover:text-gray-600 transition">
+                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"></path></svg>
+                                </button>
+                                <div x-show="open" style="display: none;" class="absolute right-0 mt-1 w-32 bg-white border border-gray-100 rounded-lg shadow-lg z-20 py-1">
+                                    <button wire:click="editReply({{ $reply->id }})" @click="open = false" class="block w-full text-left px-4 py-2 text-xs text-gray-700 hover:bg-gray-50">Edit Post</button>
+                                    <button wire:click="deleteReply({{ $reply->id }})" wire:confirm="Delete this post?" @click="open = false" class="block w-full text-left px-4 py-2 text-xs text-red-600 hover:bg-red-50">Delete</button>
+                                </div>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+
+                {{-- 2. POST BODY --}}
+                <div class="px-4 py-4 md:px-5 md:py-5 min-h-[80px]">
+                    @if($editingReplyId === $reply->id)
+                        <div class="animate-fade-in">
+                            <textarea wire:model.defer="editingContent" class="w-full text-sm border-gray-300 rounded-md shadow-sm focus:border-red-300 focus:ring focus:ring-red-200 focus:ring-opacity-50" rows="4"></textarea>
+                            <div class="flex gap-2 mt-3 justify-end">
+                                <button wire:click="cancelEdit" class="text-xs font-bold text-gray-500 uppercase tracking-wide hover:underline">Cancel</button>
+                                <button wire:click="updateReply" class="text-xs font-bold bg-gray-900 text-white px-4 py-2 rounded shadow hover:bg-black transition">Update Post</button>
+                            </div>
+                        </div>
+                    @else
+                        <div class="prose prose-sm max-w-none text-gray-800 leading-relaxed">
+                            {!! nl2br(e($reply->content)) !!}
+                        </div>
+                    @endif
+                </div>
+
+                {{-- 3. POST FOOTER (Action Bar) --}}
+                <div class="px-4 py-2 bg-gray-50/50 border-t border-gray-100 flex items-center justify-between">
+                    
+                    {{-- Left: Voting --}}
+                    <div class="flex items-center border border-gray-200 rounded bg-white shadow-sm overflow-hidden">
+                        <button wire:click="vote({{ $reply->id }}, 1)" 
+                            class="px-2 py-1 hover:bg-gray-50 border-r border-gray-100 transition {{ $myVote === 1 ? 'text-red-600 bg-red-50' : 'text-gray-400' }}">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
+                        </button>
+                        
+                        <div class="px-3 text-xs font-bold text-gray-700 min-w-[30px] text-center">
+                            {{ $reply->score }}
+                        </div>
+                        
+                        <button wire:click="vote({{ $reply->id }}, -1)" 
+                            class="px-2 py-1 hover:bg-gray-50 border-l border-gray-100 transition {{ $myVote === -1 ? 'text-blue-600 bg-blue-50' : 'text-gray-400' }}">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                    </div>
+
+                    {{-- Right: Reply --}}
+                    <button @click="$wire.set('newReply', '@' + '{{ $reply->user->name }} ' + $wire.get('newReply')); document.getElementById('replyInput').focus()"
+                            class="text-xs font-bold text-gray-500 uppercase tracking-wider hover:text-red-600 transition flex items-center gap-1 group/btn">
+                        <span>Reply</span>
+                        <svg class="w-3 h-3 group-hover/btn:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                    </button>
+                </div>
+
+            </div>
+        @empty
+            <div class="text-center py-16 bg-white border border-dashed border-gray-300 rounded-xl">
+                <svg class="w-12 h-12 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+                <p class="text-gray-500 font-medium">No responses yet.</p>
+                <p class="text-xs text-gray-400">Be the first to share your thoughts on this topic.</p>
+            </div>
+        @endforelse
+    </div>
+    
+    {{-- Bottom Spacer to allow scrolling past the fixed input --}}
+    <div class="h-32"></div>
+
+    {{-- 4. FLOATING FOOTER INPUT (Refined to look less like chat, more like "Quick Reply") --}}
+    <div class="fixed bottom-0 left-0 w-full z-50 bg-white border-t border-gray-200 shadow-[0_-5px_25px_rgba(0,0,0,0.05)]">
+        <div class="max-w-4xl mx-auto px-4 py-4">
+            <div class="flex items-start gap-4">
+                {{-- User Avatar (Tiny) --}}
+                <img src="{{ auth()->user()->profile_photo_url }}" class="w-8 h-8 rounded-full border border-gray-200 hidden md:block mt-1">
+                
+                <div class="flex-1 relative">
                     <textarea 
                         id="replyInput"
                         wire:model="newReply" 
                         rows="1" 
-                        class="w-full bg-gray-100 border-transparent focus:bg-white focus:border-red-300 focus:ring focus:ring-red-200 rounded-lg py-3 px-4 text-sm resize-none max-h-32 placeholder-gray-500 transition-all" 
-                        placeholder="Type here..."></textarea>
+                        class="w-full bg-gray-50 border-gray-300 focus:bg-white focus:border-red-500 focus:ring-1 focus:ring-red-500 rounded-lg py-3 px-4 text-sm shadow-sm transition-all resize-none min-h-[46px] max-h-32" 
+                        placeholder="Write a response..."></textarea>
                     
                     @error('newReply') 
-                        <span class="absolute -top-8 left-0 text-xs text-white font-bold bg-red-500 px-2 py-1 rounded shadow-sm">{{ $message }}</span> 
+                        <span class="text-xs text-red-500 font-bold mt-1 block">{{ $message }}</span> 
                     @enderror
                 </div>
 
                 <button wire:click="postReply" 
-                    class="group h-12 w-12 md:w-auto md:h-11 md:px-6 bg-gradient-to-br from-red-600 to-red-500 text-white rounded-full md:rounded-xl shadow-lg shadow-red-200 hover:shadow-red-300 hover:scale-105 active:scale-95 transition-all flex items-center justify-center shrink-0">
-                    
-                    {{-- Desktop Text --}}
-                    <span class="hidden md:inline text-xs font-bold uppercase tracking-widest">Post Reply</span>
-                    
-                    {{-- Mobile Icon (Paper Plane) --}}
-                    {{-- Note: Added translate classes to center the icon visually since paper planes are often off-center --}}
-                    <svg class="w-5 h-5 md:hidden -ml-0.5 mt-0.5 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
-                    </svg>
-                    
-                    {{-- Desktop Icon --}}
-                    <svg class="w-4 h-4 hidden md:block ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
-                    </svg>
+                    class="h-[46px] px-6 bg-gray-900 text-white font-bold text-xs uppercase tracking-widest rounded-lg hover:bg-red-600 transition shadow-md flex items-center gap-2 shrink-0">
+                    <span>Post</span>
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                 </button>
             </div>
         </div>
