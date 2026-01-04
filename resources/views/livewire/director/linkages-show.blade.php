@@ -213,7 +213,7 @@
                     
                     <div class="grid sm:grid-cols-2 gap-6">
                         @foreach($linkage->projects as $proj)
-                        <a href="{{ route('director.projects.show', $proj->slug) }}" class="group relative aspect-video rounded-2xl overflow-hidden shadow-md">
+                        <a href="{{ route('projects.show', $proj->slug) }}" class="group relative aspect-video rounded-2xl overflow-hidden shadow-md">
                             @if($proj->cover_img)
                                 <img src="{{ asset('storage/'.$proj->cover_img) }}" class="w-full h-full object-cover group-hover:scale-110 transition duration-700">
                             @else
