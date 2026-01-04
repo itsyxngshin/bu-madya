@@ -291,17 +291,17 @@
                 <div class="flex items-center gap-4">
                     {{-- PROFILE PHOTO UPLOAD AREA --}}
                     <div class="absolute -top-16 left-1/2 transform -translate-x-1/2 w-32 h-32">
-                        <label for="photoUpload" class="cursor-pointer relative block w-full h-full rounded-full overflow-hidden border-4 border-white shadow-lg bg-white group-hover:border-gray-200 transition">
+                        <label for="photoUpload" class="cursor-pointer relative block w-full h-full rounded-full overflow-hidden border-4 border-white shadow-lg bg-white group-hover:border-gray-200 transition z-10">
                             
-                            {{-- 1. PREVIEW: Check if user just selected a photo --}}
+                            {{-- 1. PREVIEW: New Upload --}}
                             @if ($newPhoto)
-                                <img src="{{ $newPhoto->temporaryUrl() }}" class="w-full h-full object-cover">
+                                <img src="{{ $newPhoto->temporaryUrl() }}" class="w-full h-full object-cover block">
                             
-                            {{-- 2. EXISTING: Show current photo if no new one selected --}}
+                            {{-- 2. EXISTING: Current Database Photo --}}
                             @else
                                 @php
                                     $path = $viewingUser->profile_photo_path;
-                                    // Logic to determine correct URL (External vs Local vs Legacy)
+                                    
                                     if (!$path) {
                                         $url = 'https://ui-avatars.com/api/?name='.urlencode($viewingUser->name).'&color=7F9CF5&background=EBF4FF';
                                     } elseif (Str::startsWith($path, 'http')) {
@@ -312,26 +312,25 @@
                                         $url = asset('storage/' . $path);
                                     }
                                 @endphp
-                                <img src="{{ $url }}" class="w-full h-full object-cover">
+                                <img src="{{ $url }}" class="w-full h-full object-cover block">
                             @endif
 
-                            {{-- HOVER OVERLAY (Camera Icon) --}}
+                            {{-- HOVER OVERLAY --}}
                             <div class="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-200">
                                 <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                             </div>
                         </label>
                         
-                        {{-- HIDDEN FILE INPUT --}}
+                        {{-- HIDDEN INPUT --}}
                         <input type="file" id="photoUpload" wire:model="newPhoto" class="hidden" accept="image/*">
                     </div>
 
-                    {{-- LOADING STATE (Optional Visual Feedback) --}}
-                    <div wire:loading wire:target="newPhoto" class="text-xs text-blue-500 font-bold mt-16 mb-2 animate-pulse">
-                        Processing Image...
+                    {{-- LOADING INDICATOR (Outside the circle to not mess up layout) --}}
+                    <div wire:loading wire:target="newPhoto" class="absolute top-16 left-1/2 transform -translate-x-1/2 w-full text-center">
+                        <span class="inline-block bg-black/75 text-white text-[10px] px-2 py-1 rounded-full animate-pulse">
+                            Processing...
+                        </span>
                     </div>
-
-                    {{-- ERROR MESSAGE --}}
-                    @error('newPhoto') <span class="text-xs text-red-500 block mt-16 mb-2">{{ $message }}</span> @enderror
 
                     {{-- Validation Error --}}
                     @error('newPhoto') <span class="text-xs text-red-500 block mt-16">{{ $message }}</span> @enderror
