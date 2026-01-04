@@ -69,7 +69,7 @@
 
                         // 2. Define exactly what to hide
                         $positionsToHide = [
-                            'Deputy Director-General',
+                            'Deputy Director General',
                             'Deputy Director for Audit',
                             'Deputy Director for Communications',
                             'Deputy Director for Documentations',
