@@ -246,7 +246,7 @@
                 </div>
 
                 <button wire:click="postReply" 
-                    class="h-[46px] px-6 bg-gray-900 text-white font-bold text-xs uppercase tracking-widest rounded-lg hover:bg-red-600 transition shadow-md flex items-center gap-2 shrink-0">
+                    class="h-[80px] px-6 bg-gray-900 text-white font-bold text-xs uppercase tracking-widest rounded-lg hover:bg-red-600 transition shadow-md flex items-center gap-2 shrink-0">
                     <span>Post</span>
                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                 </button>
