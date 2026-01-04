@@ -133,7 +133,20 @@
                 <div class="px-4 py-3 bg-gray-50/80 border-b border-gray-100 flex items-center justify-between">
                     <div class="flex items-center gap-3">
                         {{-- Avatar --}}
-                        <img src="{{ asset($reply->user->profile_photo_path) }}" 
+                        <img src="{{ 
+                                    auth()->user()->profile_photo_path 
+                                        ? (
+                                            Str::startsWith(auth()->user()->profile_photo_path, 'http') 
+                                                ? auth()->user()->profile_photo_path 
+                                                : (
+                                                    Str::startsWith(auth()->user()->profile_photo_path, 'images/') 
+                                                        ? asset(auth()->user()->profile_photo_path) 
+                                                        : asset('storage/' . auth()->user()->profile_photo_path)
+                                                )
+                                        ) 
+                                        : 'https://ui-avatars.com/api/?name='.urlencode(auth()->user()->name).'&color=7F9CF5&background=EBF4FF' 
+                                }}" 
+                                alt="{{ auth()->user()->name }}"
                              class="w-8 h-8 rounded-full object-cover border border-gray-200 shadow-sm">
                         
                         <div class="flex flex-col md:flex-row md:items-baseline md:gap-2">
@@ -246,7 +259,21 @@
             <div class="flex items-end gap-4"> {{-- Changed items-start to items-end for better alignment if text wraps --}}
                 
                 {{-- User Avatar --}}
-                <img src="{{ auth()->user()->profile_photo_url }}" class="w-10 h-10 rounded-full border border-gray-200 hidden md:block mb-2">
+                <img class="w-10 h-10 rounded-full border border-gray-200 hidden md:block mb-2 object-cover bg-gray-100" 
+                    src="{{ 
+                        auth()->user()->profile_photo_path 
+                            ? (
+                                Str::startsWith(auth()->user()->profile_photo_path, 'http') 
+                                    ? auth()->user()->profile_photo_path 
+                                    : (
+                                        Str::startsWith(auth()->user()->profile_photo_path, 'images/') 
+                                            ? asset(auth()->user()->profile_photo_path) 
+                                            : asset('storage/' . auth()->user()->profile_photo_path)
+                                    )
+                            ) 
+                            : 'https://ui-avatars.com/api/?name='.urlencode(auth()->user()->name).'&color=7F9CF5&background=EBF4FF' 
+                    }}" 
+                    alt="{{ auth()->user()->name }}">
                 
                 <div class="flex-1 relative">
                     <textarea 
