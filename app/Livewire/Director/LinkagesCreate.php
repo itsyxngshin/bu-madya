@@ -172,6 +172,7 @@ class LinkagesCreate extends Component
             'logo_path' => $logoPath,
             'cover_img_path' => $coverPath,
             'description' => $this->description,
+            'tags' => $this->scope,
             'email' => $this->email,
             'website' => $this->website,
             'address' => $this->address,

@@ -206,6 +206,7 @@ class LinkagesEdit extends Component
             'scope' => $this->scope,
             'logo_path' => $logoPath,
             'cover_img_path' => $coverPath,
+            'tags' => $this->scope,
             'description' => $this->description,
             'email' => $this->email,
             'website' => $this->website,
