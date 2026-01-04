@@ -290,18 +290,22 @@
             {{-- Header --}}
             <div class="flex justify-between items-start mb-6">
                 <div class="flex items-center gap-4">
-                    <div class="absolute -top-16 left-1/2 transform -translate-x-1/2 w-32 h-32">
-                        <label for="photoUpload" class="cursor-pointer relative block w-full h-full rounded-full overflow-hidden border-4 border-white shadow-lg bg-white group-hover:border-gray-200 transition z-10">
+        
+                    {{-- PROFILE PHOTO CONTAINER --}}
+                    {{-- FIX: Removed 'absolute -top-16 left-1/2...' which caused the floating --}}
+                    {{-- ADDED: 'relative shrink-0' to keep it in flow and correct size --}}
+                    <div class="relative shrink-0 w-20 h-20"> {{-- Adjusted to w-20 h-20 (80px) for a nice modal size --}}
+                        
+                        <label for="photoUpload" class="cursor-pointer group relative block w-full h-full rounded-full overflow-hidden border-2 border-white shadow-md bg-white hover:border-gray-200 transition z-10">
                             
-                            {{-- 1. PREVIEW: New Upload --}}
+                            {{-- 1. PREVIEW --}}
                             @if ($newPhoto)
                                 <img src="{{ $newPhoto->temporaryUrl() }}" class="w-full h-full object-cover block">
                             
-                            {{-- 2. EXISTING: Current Database Photo --}}
+                            {{-- 2. EXISTING --}}
                             @else
                                 @php
                                     $path = $viewingUser->profile_photo_path;
-                                    
                                     if (!$path) {
                                         $url = 'https://ui-avatars.com/api/?name='.urlencode($viewingUser->name).'&color=7F9CF5&background=EBF4FF';
                                     } elseif (Str::startsWith($path, 'http')) {
@@ -317,19 +321,17 @@
 
                             {{-- HOVER OVERLAY --}}
                             <div class="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-200">
-                                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                             </div>
                         </label>
                         
-                        {{-- HIDDEN INPUT --}}
+                        {{-- INPUT --}}
                         <input type="file" id="photoUpload" wire:model="newPhoto" class="hidden" accept="image/*">
-                    </div>
-
-                    {{-- LOADING INDICATOR (Outside the circle to not mess up layout) --}}
-                    <div wire:loading wire:target="newPhoto" class="absolute top-16 left-1/2 transform -translate-x-1/2 w-full text-center">
-                        <span class="inline-block bg-black/75 text-white text-[10px] px-2 py-1 rounded-full animate-pulse">
-                            Processing...
-                        </span>
+                        
+                        {{-- LOADING (Centered inside the circle) --}}
+                        <div wire:loading wire:target="newPhoto" class="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full z-20">
+                            <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                        </div>
                     </div>
                     <div>
                         <h2 class="font-heading font-black text-2xl text-gray-900">{{ $viewingUser->name }}</h2>
