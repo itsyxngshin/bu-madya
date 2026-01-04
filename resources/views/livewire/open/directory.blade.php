@@ -63,9 +63,11 @@
                 
                 @forelse($officers as $director)
                     @php
-                    // 1. Parse the Start Year from the label (e.g., gets 2023 from "2023-2024")
-                        $startYear = (int) substr($currentYearLabel, 0, 4);
+                    // 1. ROBUST PARSING: Find the first 4 consecutive digits in the string
+                        preg_match('/\d{4}/', $currentYearLabel, $matches);
+                        $startYear = isset($matches[0]) ? (int)$matches[0] : 0;
 
+                        // 2. Define exactly what to hide
                         $positionsToHide = [
                             'Deputy Director-General',
                             'Deputy Director for Audit',
@@ -83,8 +85,9 @@
                             '4th Year Representative',
                         ];
 
-                        // Check if the current name is exactly in that list
-                        if (in_array($director->name, $positionsToHide) && $startYear > 2023) {
+                        // 3. THE CHECK:
+                        // trim() removes invisible spaces that might cause the match to fail
+                        if (in_array(trim($director->name), $positionsToHide) && $startYear > 2023) {
                             continue;
                         }
                         
