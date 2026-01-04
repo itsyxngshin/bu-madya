@@ -78,26 +78,27 @@
                     {{-- User --}}
                     <td class="px-6 py-4 whitespace-nowrap">
                         <div class="flex items-center gap-3">
-                            <img class="h-10 w-10 rounded-full object-cover border border-gray-200" src="{{ 
-                                    $user->profile_photo_path 
-                                        ? (
-                                            // 1. External Link (Google/Facebook)
-                                            Str::startsWith($user->profile_photo_path, 'http') 
-                                                ? $user->profile_photo_path 
-                                                : (
-                                                    // 2. Seeded/Legacy Image (Directly in public/images)
-                                                    Str::startsWith($user->profile_photo_path, 'images/') 
-                                                        ? asset($user->profile_photo_path) 
-                                                        : (
-                                                            // 3. User Upload (Needs 'storage/' prefix)
-                                                            asset('storage/' . $user->profile_photo_path)
-                                                        )
-                                                )
-                                        ) 
-                                        // 4. Fallback (Initials Avatar)
-                                        : 'https://ui-avatars.com/api/?name='.urlencode($user->name).'&color=7F9CF5&background=EBF4FF' 
-                                }}" 
-                                alt="{{ $user->name }}" />
+                            <img class="h-10 w-10 rounded-full object-cover border border-gray-200"
+                                    src="{{ 
+                                        $user->profile_photo_path 
+                                            ? (
+                                                // 1. External Link (Google/Facebook)
+                                                Str::startsWith($user->profile_photo_path, 'http') 
+                                                    ? $user->profile_photo_path 
+                                                    : (
+                                                        // 2. Seeded/Legacy Image (Directly in public/images)
+                                                        Str::startsWith($user->profile_photo_path, 'images/') 
+                                                            ? asset($user->profile_photo_path) 
+                                                            : (
+                                                                // 3. User Upload (Needs 'storage/' prefix)
+                                                                asset('storage/' . $user->profile_photo_path)
+                                                            )
+                                                    )
+                                            ) 
+                                            // 4. Fallback (Initials Avatar)
+                                            : 'https://ui-avatars.com/api/?name='.urlencode($user->name).'&color=7F9CF5&background=EBF4FF' 
+                                    }}" 
+                                    alt="{{ $user->name }}" />
                             <div>
                                 <div class="text-sm font-bold text-gray-900">{{ $user->name }}</div>
                                 <div class="text-[10px] text-gray-500">{{ $user->email }}</div>
@@ -289,7 +290,6 @@
             {{-- Header --}}
             <div class="flex justify-between items-start mb-6">
                 <div class="flex items-center gap-4">
-                    {{-- PROFILE PHOTO UPLOAD AREA --}}
                     <div class="absolute -top-16 left-1/2 transform -translate-x-1/2 w-32 h-32">
                         <label for="photoUpload" class="cursor-pointer relative block w-full h-full rounded-full overflow-hidden border-4 border-white shadow-lg bg-white group-hover:border-gray-200 transition z-10">
                             
@@ -331,9 +331,6 @@
                             Processing...
                         </span>
                     </div>
-
-                    {{-- Validation Error --}}
-                    @error('newPhoto') <span class="text-xs text-red-500 block mt-16">{{ $message }}</span> @enderror
                     <div>
                         <h2 class="font-heading font-black text-2xl text-gray-900">{{ $viewingUser->name }}</h2>
                         <span class="px-2 py-0.5 bg-gray-100 text-gray-600 text-[10px] font-bold uppercase rounded">{{ $viewingUser->email }}</span>
