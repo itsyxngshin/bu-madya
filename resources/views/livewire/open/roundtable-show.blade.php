@@ -48,7 +48,7 @@
                         
                         {{-- Delete Button --}}
                         <button @click="confirmAction('deleteTopic', null, 'Delete this Topic?', 'This will remove the entire discussion permanently.')" 
-                                class="w-full text-left px-4 py-3 text-xs font-bold text-red-600 hover:bg-red-50 flex items-center gap-2 transition">
+                            class="w-full text-left px-4 py-3 text-xs font-bold text-red-600 hover:bg-red-50 flex items-center gap-2 transition">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                             Delete Topic
                         </button>
@@ -198,7 +198,7 @@
                                     @endif
 
                                     {{-- Delete: Show for both Owner AND Admin --}}
-                                    <button @click="open = false; confirmAction('deleteReply', {{ $reply->id }}, 'Delete Post?', 'Are you sure you want to remove this reply?')" 
+                                    <button @click="open = false; confirmAction('deleteReply', {{ $reply->id }}, 'Delete Post?', 'Are you sure you want to remove this reply?')"  
                                             class="block w-full text-left px-4 py-2 text-xs text-red-600 hover:bg-red-50">
                                         Delete
                                     </button>
@@ -315,7 +315,6 @@
 </div>
 
 @push('scripts') 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
     function confirmAction(method, params, title = 'Are you sure?', text = "You won't be able to revert this!") {
