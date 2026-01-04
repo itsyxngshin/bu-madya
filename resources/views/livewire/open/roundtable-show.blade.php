@@ -9,7 +9,7 @@
 
     {{-- 2. STICKY HEADER --}}
     <div class="sticky top-0 w-full z-40 bg-gray-100/95 backdrop-blur-md border-b border-white/50 px-4 py-3 shadow-sm transition-all">
-        <div class="max-w-4xl mx-auto flex justify-between items-center">
+        <div class="max-w-6xl mx-auto flex justify-between items-center">
             {{-- Back Button (Icon only on mobile) --}}
             <a href="{{ route('roundtable.index') }}" 
                class="flex items-center gap-2 text-sm font-bold text-gray-600 hover:text-gray-900 transition group">
@@ -31,7 +31,7 @@
     </div>
 
     {{-- 3. MAIN CONTENT AREA --}}
-    <div class="max-w-4xl mx-auto px-4 pt-4 md:pt-6 relative z-10">
+    <div class="max-w-6xl mx-auto px-4 pt-4 md:pt-6 relative z-10">
         
         {{-- A. ORIGINAL TOPIC CARD --}}
         <div class="bg-white rounded-xl shadow-sm border border-gray-200/60 overflow-hidden mb-6 md:mb-8 relative group">
@@ -227,7 +227,7 @@
 
     {{-- 4. FLOATING FOOTER INPUT (Refined to look less like chat, more like "Quick Reply") --}}
     <div class="fixed bottom-0 left-0 w-full z-50 bg-white border-t border-gray-200 shadow-[0_-5px_25px_rgba(0,0,0,0.05)]">
-        <div class="max-w-4xl mx-auto px-4 py-4">
+        <div class="max-w-6xl mx-auto px-4 py-4">
             <div class="flex items-start gap-4">
                 {{-- User Avatar (Tiny) --}}
                 <img src="{{ auth()->user()->profile_photo_url }}" class="w-8 h-8 rounded-full border border-gray-200 hidden md:block mt-1">
