@@ -69,20 +69,21 @@
                 <div class="flex-1 p-4 md:p-6">
                     {{-- Header Meta --}}
                     <div class="flex flex-wrap items-center gap-2 mb-3 text-xs text-gray-500 pr-8"> {{-- Added pr-8 to avoid overlap with menu --}}
-                        <img src="{{ 
+                        <img class="w-6 h-6 md:w-5 md:h-5 rounded-full object-cover ring-2 ring-gray-100 md:ring-0 bg-gray-100"
+                            src="{{ 
                                 $topic->user->profile_photo_path 
                                     ? (
                                         Str::startsWith($topic->user->profile_photo_path, 'http') 
                                             ? $topic->user->profile_photo_path 
                                             : (
                                                 Str::startsWith($topic->user->profile_photo_path, 'images/') 
-                                                    ? asset($topic->user()->profile_photo_path) 
-                                                    : asset('storage/' . $topic->user()->profile_photo_path)
+                                                    ? asset($topic->user->profile_photo_path) 
+                                                    : asset('storage/' . $topic->user->profile_photo_path)
                                             )
                                     ) 
-                                    : 'https://ui-avatars.com/api/?name='.urlencode($topic->user()->name).'&color=7F9CF5&background=EBF4FF' 
+                                    : 'https://ui-avatars.com/api/?name='.urlencode($topic->user->name).'&color=7F9CF5&background=EBF4FF' 
                             }}" 
-                            alt="{{ $topic->user()->name }}" class="w-6 h-6 md:w-5 md:h-5 rounded-full object-cover ring-2 ring-gray-100 md:ring-0">
+                            alt="{{ $topic->user->name }}">
                         <span class="flex items-center gap-1">
                             <span class="font-bold text-gray-700">{{ $topic->user->name }}</span>
                             <span class="text-red-500 font-bold bg-red-50 px-1.5 py-0.5 rounded border border-red-100 uppercase text-[9px] tracking-wider">Host</span>
@@ -159,7 +160,7 @@
                                     ) 
                                     : 'https://ui-avatars.com/api/?name='.urlencode($reply->user()->name).'&color=7F9CF5&background=EBF4FF' 
                             }}" 
-                            alt="{{ $reply->user()->name }}"
+                            alt="{{ auth()->user()->name }}"
                              class="w-8 h-8 rounded-full object-cover border border-gray-200 shadow-sm">
                         
                         <div class="flex flex-col md:flex-row md:items-baseline md:gap-2">
