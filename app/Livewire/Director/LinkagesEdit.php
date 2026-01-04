@@ -203,7 +203,6 @@ class LinkagesEdit extends Component
             'linkage_type_id' => $this->type_id,
             'linkage_status_id' => $this->status_id,
             'established_at' => $this->established_at,
-            'scope' => $this->scope,
             'logo_path' => $logoPath,
             'cover_img_path' => $coverPath,
             'tags' => $this->scope,
