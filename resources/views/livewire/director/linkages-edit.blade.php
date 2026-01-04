@@ -189,22 +189,37 @@
                 <div class="grid grid-cols-2 gap-2">
                     @foreach($this->allSdgs as $sdg)
                         @php
-                            $baseColor = str_replace('bg-', '', $sdg->color); 
-                            $activeBorder = "border-$baseColor"; 
-                            $activeBg = "bg-" . explode('-', $baseColor)[0] . "-50";
-                            $activeText = "text-" . explode('-', $baseColor)[0] . "-700";
+                            // Use the hex code from your database (e.g., #E5243B)
+                            // Adjust property name if needed: $sdg->color_hex or $sdg->color
+                            $hex = $sdg->color_hex ?? '#000000'; 
+                            
+                            $isSelected = in_array($sdg->id, $selectedSdgs);
                         @endphp
+
                         <button wire:click="toggleSdg({{ $sdg->id }})" 
-                                class="group flex items-center gap-2 p-1.5 rounded-lg border transition-all text-left
-                                {{ in_array($sdg->id, $selectedSdgs) 
-                                    ? "$activeBorder $activeBg shadow-sm ring-1 ring-offset-0" 
-                                    : 'border-transparent hover:bg-gray-50' }}"
-                                style="{{ in_array($sdg->id, $selectedSdgs) ? 'border-color: var(--tw-color-' . str_replace('-', '-', $baseColor) . ')' : '' }}">
-                            <span class="w-8 h-8 shrink-0 flex items-center justify-center rounded text-white font-black text-[10px] shadow-sm {{ $sdg->color }}">
+                                class="group flex items-center gap-2 p-1.5 rounded-lg border transition-all text-left hover:bg-gray-50"
+                                
+                                {{-- DYNAMIC STYLES --}}
+                                {{-- 
+                                1. Border: Uses solid hex.
+                                2. Background: Uses hex + '1A' (approx 10% opacity) for the tint.
+                                3. Color: Sets the text color for the button (inherited by child span).
+                                --}}
+                                style="{{ $isSelected 
+                                    ? "border-color: {$hex}; background-color: {$hex}1A; color: {$hex};" 
+                                    : "border-color: transparent;" 
+                                }}"
+                        >
+                            {{-- Color Swatch --}}
+                            <span class="w-8 h-8 shrink-0 flex items-center justify-center rounded text-white font-black text-[10px] shadow-sm"
+                                style="background-color: {{ $hex }};">
                                 {{ $sdg->id }}
                             </span>
-                            <span class="text-[10px] font-bold leading-tight line-clamp-2
-                                {{ in_array($sdg->id, $selectedSdgs) ? $activeText : 'text-gray-500 group-hover:text-gray-700' }}">
+
+                            {{-- Text Display --}}
+                            <span class="text-[10px] font-bold leading-tight line-clamp-2 transition-colors"
+                                {{-- If selected, it inherits the button's color. If not, it uses gray. --}}
+                                class="{{ $isSelected ? '' : 'text-gray-500 group-hover:text-gray-700' }}">
                                 {{ $sdg->name }}
                             </span>
                         </button>
@@ -296,7 +311,7 @@
                                         @php $sdg = $this->allSdgs->find($id); @endphp
                                         @if($sdg)
                                         <div class="flex items-center gap-3 p-2 rounded-lg border border-transparent bg-gray-50">
-                                            <div class="w-8 h-8 {{ $sdg->color }} rounded-md text-white font-black text-xs flex items-center justify-center shadow-sm">{{ $sdg->id }}</div>
+                                            <div class="w-8 h-8 {{ $sdg->color_hex }} rounded-md text-white font-black text-xs flex items-center justify-center shadow-sm">{{ $sdg->id }}</div>
                                             <span class="text-[10px] font-bold text-gray-700 uppercase tracking-wide">{{ $sdg->name }}</span>
                                         </div>
                                         @endif

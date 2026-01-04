@@ -238,38 +238,37 @@
                 {{-- Changed to 2 columns to fit the names --}}
                 <div class="grid grid-cols-2 gap-2">
                     @foreach($this->allSdgs as $sdg)
-                        {{-- 
-                        1. Get the base color name (e.g., 'red-500' from 'bg-red-500') 
-                        We assume your DB stores 'bg-color-shade'
-                        --}}
                         @php
-                            // Extract 'red-500' from 'bg-red-500'
-                            $baseColor = str_replace('bg-', '', $sdg->color_hex); 
-                            
-                            // Create dynamic classes
-                            $activeBorder = "border-$baseColor"; // border-red-500
-                            $activeBg = "bg-" . explode('-', $baseColor)[0] . "-50"; // bg-red-50
-                            $activeText = "text-" . explode('-', $baseColor)[0] . "-700"; // text-red-700
+                            $hex = $sdg->color_hex; // e.g., #E5243B
+                            $isSelected = in_array($sdg->id, $selectedSdgs);
                         @endphp
 
                         <button wire:click="toggleSdg({{ $sdg->id }})" 
-                                class="group flex items-center gap-2 p-1.5 rounded-lg border transition-all text-left
-                                {{ in_array($sdg->id, $selectedSdgs) 
-                                    ? "$activeBorder $activeBg shadow-sm ring-1 ring-offset-0" 
-                                    : 'border-transparent hover:bg-gray-50' }}"
+                                class="group flex items-center gap-2 p-1.5 rounded-lg border transition-all text-left hover:bg-gray-50"
                                 
-                                {{-- Valid inline style for the ring color if needed --}}
-                                style="{{ in_array($sdg->id, $selectedSdgs) ? 'border-color: var(--tw-color-' . str_replace('-', '-', $baseColor) . ')' : '' }}"
+                                {{-- DYNAMIC INLINE STYLES --}}
+                                {{-- 
+                                    1. Border: Uses the solid hex.
+                                    2. Background: Uses hex + '1A' (creates ~10% opacity tint).
+                                    3. Color: Uses solid hex for text.
+                                --}}
+                                style="{{ $isSelected 
+                                    ? "border-color: {$hex}; background-color: {$hex}1A; color: {$hex};" 
+                                    : "border-color: transparent;" 
+                                }}"
                         >
                             
-                            {{-- Color Swatch (The Box) --}}
-                            <span class="w-8 h-8 shrink-0 flex items-center justify-center rounded text-white font-black text-[10px] shadow-sm {{ $sdg->color_hex }}">
+                            {{-- Color Swatch Box --}}
+                            <span class="w-8 h-8 shrink-0 flex items-center justify-center rounded text-white font-black text-[10px] shadow-sm"
+                                style="background-color: {{ $hex }};"
+                            >
                                 {{ $sdg->id }}
                             </span>
                             
                             {{-- Name Display --}}
-                            <span class="text-[10px] font-bold leading-tight line-clamp-2
-                                {{ in_array($sdg->id, $selectedSdgs) ? $activeText : 'text-gray-500 group-hover:text-gray-700' }}">
+                            <span class="text-[10px] font-bold leading-tight line-clamp-2 transition-colors"
+                                {{-- If NOT selected, revert to gray. If selected, it inherits the color from the button parent --}}
+                                class="{{ $isSelected ? '' : 'text-gray-500 group-hover:text-gray-700' }}">
                                 {{ $sdg->name }}
                             </span>
                         </button>
@@ -451,27 +450,23 @@
                                 <div class="flex flex-col gap-3">
                                     @foreach($selectedSdgs as $id)
                                         @php 
-                                            // 1. Find the SDG object from the collection
-                                            $sdg = $this->allSdgs->find($id);; // Assuming $sdgs is passed to the view, or use $this->allSdgs->find($id)
+                                            // Find the SDG object from the collection
+                                            // Make sure $this->allSdgs is available (Livewire computed property or public property)
+                                            $sdg = $this->allSdgs->find($id);
                                         @endphp
 
                                         @if($sdg)
-                                            {{-- 
-                                                STRATEGY:
-                                                1. Background: Use the Hex Code + '15' (approx 8% opacity) to simulate a 'bg-50' look.
-                                                2. Border: Use Hex + '30' (approx 20% opacity) for a subtle border.
-                                            --}}
-                                            <div class="flex items-center gap-3 p-2 rounded-lg border"
+                                            <div class="flex items-center gap-3 p-2 rounded-lg border transition-all hover:shadow-sm"
                                                 style="background-color: {{ $sdg->color_hex }}15; border-color: {{ $sdg->color_hex }}30;">
                                                 
                                                 {{-- Color Swatch (Solid Color) --}}
-                                                <div class="w-8 h-8 rounded-md text-white font-black text-xs flex items-center justify-center shadow-sm"
+                                                <div class="w-8 h-8 shrink-0 rounded-md text-white font-black text-xs flex items-center justify-center shadow-sm"
                                                     style="background-color: {{ $sdg->color_hex }}">
-                                                    {{ $sdg->number }}
+                                                    {{ $sdg->id }} {{-- Or $sdg->number if distinct --}}
                                                 </div>
                                                 
-                                                {{-- Name Label (Text Color matches SDG Color) --}}
-                                                <span class="text-[10px] font-bold uppercase tracking-wide"
+                                                {{-- Name Label --}}
+                                                <span class="text-[10px] font-bold uppercase tracking-wide leading-tight"
                                                     style="color: {{ $sdg->color_hex }}">
                                                     {{ $sdg->name }}
                                                 </span>
