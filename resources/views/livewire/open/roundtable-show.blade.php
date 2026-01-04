@@ -116,7 +116,12 @@
             @php 
                 $myVote = $reply->userVote(auth()->id()); 
                 $isHost = $reply->user_id === $topic->user_id;
+                
+                // Check if user is owner OR admin (assuming 'is_admin' boolean or role check)
                 $isMe = $reply->user_id === auth()->id();
+                $isAdmin = auth()->user()->is_admin; // Or auth()->user()->role_id === 1, etc.
+                
+                $canModerate = $isMe || $isAdmin;
             @endphp
 
             {{-- FORUM POST CARD --}}
@@ -153,14 +158,24 @@
                         </span>
 
                         {{-- Kebab Menu --}}
-                        @if($isMe)
+                        @if($canModerate)
                             <div x-data="{ open: false }" class="relative">
                                 <button @click="open = !open" @click.away="open = false" class="text-gray-300 hover:text-gray-600 transition">
                                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"></path></svg>
                                 </button>
+                                
                                 <div x-show="open" style="display: none;" class="absolute right-0 mt-1 w-32 bg-white border border-gray-100 rounded-lg shadow-lg z-20 py-1">
-                                    <button wire:click="editReply({{ $reply->id }})" @click="open = false" class="block w-full text-left px-4 py-2 text-xs text-gray-700 hover:bg-gray-50">Edit Post</button>
-                                    <button @click="open = false; confirmAction('deleteReply', {{ $reply->id }}, 'Delete Post?', 'Are you sure you want to remove this reply?')"  class="block w-full text-left px-4 py-2 text-xs text-red-600 hover:bg-red-50">Delete</button>
+                                    
+                                    {{-- Edit: Only show if it's actually their own post (Admins shouldn't edit others' words usually) --}}
+                                    @if($isMe)
+                                        <button wire:click="editReply({{ $reply->id }})" @click="open = false" class="block w-full text-left px-4 py-2 text-xs text-gray-700 hover:bg-gray-50">Edit Post</button>
+                                    @endif
+
+                                    {{-- Delete: Show for both Owner AND Admin --}}
+                                    <button @click="open = false; confirmAction('deleteReply', {{ $reply->id }}, 'Delete Post?', 'Are you sure you want to remove this reply?')" 
+                                            class="block w-full text-left px-4 py-2 text-xs text-red-600 hover:bg-red-50">
+                                        Delete
+                                    </button>
                                 </div>
                             </div>
                         @endif
