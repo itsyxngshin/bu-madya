@@ -53,6 +53,7 @@ class UserRoster extends Component
     public $assignCommitteeId;
     public $assignTitle;
     public $editingRoleId;
+    public $newPhoto;
 
     // -- Profile Editing Data --
     public $editingProfile = [
@@ -334,9 +335,24 @@ class UserRoster extends Component
             'editingProfile.first_name' => 'required|string',
             'editingProfile.last_name' => 'required|string',
             'editingRoleId' => 'required|exists:roles,id', // ADD VALIDATION
+            'newPhoto' => 'nullable|image|max:4096',
         ]);
 
         $profile = $this->viewingUser->profile;
+
+        // 1. Handle Photo Upload
+        if ($this->newPhoto) {
+            // Delete old photo if exists (optional cleanup)
+            if ($this->viewingUser->profile_photo_path) {
+                // Storage::delete($this->viewingUser->profile_photo_path);
+            }
+
+            // Store new photo in 'profile-photos' folder in 'public' disk
+            $path = $this->newPhoto->store('profile-photos', 'public');
+            
+            // Update User record directly
+            $this->viewingUser->update(['profile_photo_path' => $path]);
+        }
         
         // Update Profile Table
         $this->viewingUser->profile()->updateOrCreate(
@@ -349,6 +365,8 @@ class UserRoster extends Component
             'name' => trim($this->editingProfile['first_name'] . ' ' . $this->editingProfile['last_name']),
             'role_id' => $this->editingRoleId // <--- SAVE THE NEW ROLE
         ]);
+
+        $this->reset('newPhoto');
 
         session()->flash('message', 'Profile and Role updated successfully.');
         $this->viewProfile($this->viewingUser->id);
