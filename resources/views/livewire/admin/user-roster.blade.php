@@ -271,7 +271,7 @@
             <div class="flex justify-between items-start mb-6">
                 <div class="flex items-center gap-4">
                     {{-- PROFILE PHOTO UPLOAD AREA --}}
-                    <div class="absolute -top-16 left-1/2 transform -translate-x-1/2 w-32 h-32">
+                    <div class="p-6 text-center pt-12 relative group">
                         <label for="photoUpload" class="cursor-pointer relative block w-full h-full rounded-full overflow-hidden border-4 border-white shadow-lg bg-white group-hover:border-gray-200 transition">
                             
                             {{-- 1. Show PREVIEW if a new file is selected --}}
