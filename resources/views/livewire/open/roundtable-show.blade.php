@@ -316,6 +316,8 @@
 </div>
 
 @push('scripts') 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
     function confirmAction(method, params, title = 'Are you sure?', text = "You won't be able to revert this!") {
         Swal.fire({
