@@ -78,7 +78,26 @@
                     {{-- User --}}
                     <td class="px-6 py-4 whitespace-nowrap">
                         <div class="flex items-center gap-3">
-                            <img class="h-10 w-10 rounded-full object-cover border border-gray-200" src="{{ $user->profile_photo_path ? asset($user->profile_photo_path) : 'https://ui-avatars.com/api/?name='.urlencode($user->name).'&color=7F9CF5&background=EBF4FF' }}" />
+                            <img class="h-10 w-10 rounded-full object-cover border border-gray-200" src="{{ 
+                                    $user->profile_photo_path 
+                                        ? (
+                                            // 1. External Link (Google/Facebook)
+                                            Str::startsWith($user->profile_photo_path, 'http') 
+                                                ? $user->profile_photo_path 
+                                                : (
+                                                    // 2. Seeded/Legacy Image (Directly in public/images)
+                                                    Str::startsWith($user->profile_photo_path, 'images/') 
+                                                        ? asset($user->profile_photo_path) 
+                                                        : (
+                                                            // 3. User Upload (Needs 'storage/' prefix)
+                                                            asset('storage/' . $user->profile_photo_path)
+                                                        )
+                                                )
+                                        ) 
+                                        // 4. Fallback (Initials Avatar)
+                                        : 'https://ui-avatars.com/api/?name='.urlencode($user->name).'&color=7F9CF5&background=EBF4FF' 
+                                }}" 
+                                alt="{{ $user->name }}" />
                             <div>
                                 <div class="text-sm font-bold text-gray-900">{{ $user->name }}</div>
                                 <div class="text-[10px] text-gray-500">{{ $user->email }}</div>

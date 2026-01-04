@@ -139,10 +139,26 @@
                                     </div>
                                 @else
                                     <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition duration-300 z-10"></div>
-                                    <img src="{{ $user->profile_photo_path 
-                                                ? (filter_var($user->profile_photo_path, FILTER_VALIDATE_URL) ? $user->profile_photo_path : asset($user->profile_photo_path)) 
-                                                : 'https://ui-avatars.com/api/?name=' . urlencode($user->name) . '&color=7F9CF5&background=EBF4FF&size=512' }}" 
-                                         alt="{{ $user->name }}"
+                                    <img src="{{ 
+                                            $user->profile_photo_path 
+                                                ? (
+                                                    // 1. External Link (Google/Facebook)
+                                                    Str::startsWith($user->profile_photo_path, 'http') 
+                                                        ? $user->profile_photo_path 
+                                                        : (
+                                                            // 2. Seeded/Legacy Image (Directly in public/images)
+                                                            Str::startsWith($user->profile_photo_path, 'images/') 
+                                                                ? asset($user->profile_photo_path) 
+                                                                : (
+                                                                    // 3. User Upload (Needs 'storage/' prefix)
+                                                                    asset('storage/' . $user->profile_photo_path)
+                                                                )
+                                                        )
+                                                ) 
+                                                // 4. Fallback (Initials Avatar)
+                                                : 'https://ui-avatars.com/api/?name='.urlencode($user->name).'&color=7F9CF5&background=EBF4FF' 
+                                        }}" 
+                                        alt="{{ $user->name }}"
                                          class="w-full h-full object-cover {{ $isDG ? 'object-center' : 'object-top' }} transition duration-500 group-hover:scale-110" 
                                          loading="lazy">
                                 @endif
