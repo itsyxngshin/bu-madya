@@ -63,8 +63,34 @@
                 
                 @forelse($officers as $director)
                     @php
+                    // 1. Parse the Start Year from the label (e.g., gets 2023 from "2023-2024")
+                        $startYear = (int) substr($currentYearLabel, 0, 4);
+
+                        $positionsToHide = [
+                            'Deputy Director-General',
+                            'Deputy Director for Audit',
+                            'Deputy Director for Communications',
+                            'Deputy Director for Documentations',
+                            'Deputy Director for Multimedia and Creatives',
+                            'Deputy Director for Public Affairs',
+                            'Deputy Director for Marketing and Logistics',
+                            'Deputy Director for Culture and Heritage',
+                            'Deputy Director for Social Studies',
+                            'Deputy Director for Education',
+                            '1st Year Representative',
+                            '2nd Year Representative',
+                            '3rd Year Representative',
+                            '4th Year Representative',
+                        ];
+
+                        // Check if the current name is exactly in that list
+                        if (in_array($director->name, $positionsToHide) && $startYear > 2023) {
+                            continue;
+                        }
+                        
                         $assignments = $director->assignments;
                         $cardsToRender = $assignments->isEmpty() ? [null] : $assignments;
+                        
                     @endphp
 
                     @foreach($cardsToRender as $assignment)
@@ -72,7 +98,7 @@
                             $isVacant = is_null($assignment);
                             $user = $assignment?->user;
                             $profile = $user?->profile;
-                            $isDG = $director->name === 'Director General';
+                            $isDG = $director->name === 'Director General' || $director->name === 'Presidents';
                             
                             $collegeDisplay = 'N/A';
                             if ($profile?->college) {
