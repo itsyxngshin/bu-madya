@@ -147,21 +147,21 @@
                 <div class="px-4 py-3 bg-gray-50/80 border-b border-gray-100 flex items-center justify-between">
                     <div class="flex items-center gap-3">
                         {{-- Avatar --}}
-                        <img src="{{ 
+                        <img class="w-8 h-8 rounded-full object-cover border border-gray-200 shadow-sm bg-gray-100" 
+                            src="{{ 
                                 $reply->user->profile_photo_path 
                                     ? (
                                         Str::startsWith($reply->user->profile_photo_path, 'http') 
                                             ? $reply->user->profile_photo_path 
                                             : (
                                                 Str::startsWith($reply->user->profile_photo_path, 'images/') 
-                                                    ? asset($reply->user()->profile_photo_path) 
-                                                    : asset('storage/' . $reply->user()->profile_photo_path)
+                                                    ? asset($reply->user->profile_photo_path) 
+                                                    : asset('storage/' . $reply->user->profile_photo_path)
                                             )
                                     ) 
-                                    : 'https://ui-avatars.com/api/?name='.urlencode($reply->user()->name).'&color=7F9CF5&background=EBF4FF' 
-                            }}" 
-                            alt="{{ auth()->user()->name }}"
-                             class="w-8 h-8 rounded-full object-cover border border-gray-200 shadow-sm">
+                                    : 'https://ui-avatars.com/api/?name='.urlencode($reply->user->name).'&color=7F9CF5&background=EBF4FF' 
+                            }}"
+                            alt="{{ $reply->user->name }}">
                         
                         <div class="flex flex-col md:flex-row md:items-baseline md:gap-2">
                             <span class="text-sm font-bold text-gray-900">{{ $reply->user->name }}</span>
