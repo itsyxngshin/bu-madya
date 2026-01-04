@@ -457,7 +457,7 @@ class Directory extends Component
         return view('livewire.open.directory', [
             // If past year, $vacant will be empty, effectively hiding the positions
             'officers' => $filled->merge($vacant),
-            'currentYearLabel' => $displayYear?->year ?? 'N/A'
+            'currentYearLabel' => $displayYear?->name ?? 'N/A'
         ]);
     }
 }
