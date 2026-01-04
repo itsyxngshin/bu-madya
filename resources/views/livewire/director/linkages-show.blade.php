@@ -214,8 +214,8 @@
                     <div class="grid sm:grid-cols-2 gap-6">
                         @foreach($linkage->projects as $proj)
                         <a href="#" class="group relative aspect-video rounded-2xl overflow-hidden shadow-md">
-                            @if($proj->cover_image)
-                                <img src="{{ asset('storage/'.$proj->cover_image) }}" class="w-full h-full object-cover group-hover:scale-110 transition duration-700">
+                            @if($proj->cover_img)
+                                <img src="{{ asset('storage/'.$proj->cover_img) }}" class="w-full h-full object-cover group-hover:scale-110 transition duration-700">
                             @else
                                 <div class="w-full h-full bg-gray-200 flex items-center justify-center text-gray-400">No Image</div>
                             @endif

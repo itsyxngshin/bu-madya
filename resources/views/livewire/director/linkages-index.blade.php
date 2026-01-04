@@ -124,12 +124,17 @@
                         
                         {{-- Info --}}
                         <div class="flex-grow min-w-0">
-                            <div class="flex flex-col md:flex-row md:justify-between md:items-start mb-1">
-                                <h4 class="font-bold text-gray-900 text-sm md:text-base leading-tight group-hover:text-red-700 transition line-clamp-1 pr-2">
+                            {{-- Changed: Removed 'md:flex-row' so the badge always sits below the title. This gives the title full width to expand. --}}
+                            <div class="flex flex-col mb-1 gap-1">
+                                
+                                {{-- Changed: Removed 'line-clamp-1' so text wraps to multiple lines if needed --}}
+                                <h4 class="font-bold text-gray-900 text-sm md:text-base leading-tight group-hover:text-red-700 transition pr-2">
                                     {{ $partner->name }}
                                 </h4>
+                                
                                 @if($partner->type)
-                                    <span class="text-[8px] md:text-[9px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full w-fit mt-1 md:mt-0 {{ $partner->type->color ?? 'bg-gray-100 text-gray-500' }}">
+                                    {{-- Changed: Removed 'md:mt-0' since we are stacking them now --}}
+                                    <span class="text-[8px] md:text-[9px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full w-fit {{ $partner->type->color ?? 'bg-gray-100 text-gray-500' }}">
                                         {{ $partner->type->name }}
                                     </span>
                                 @endif
