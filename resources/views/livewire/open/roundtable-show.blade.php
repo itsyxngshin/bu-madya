@@ -227,28 +227,30 @@
 
     {{-- 4. FLOATING FOOTER INPUT (Refined to look less like chat, more like "Quick Reply") --}}
     <div class="fixed bottom-0 left-0 w-full z-50 bg-white border-t border-gray-200 shadow-[0_-5px_25px_rgba(0,0,0,0.05)]">
-        <div class="max-w-6xl mx-auto px-4 py-4">
-            <div class="flex items-start gap-4">
-                {{-- User Avatar (Tiny) --}}
-                <img src="{{ auth()->user()->profile_photo_url }}" class="w-8 h-8 rounded-full border border-gray-200 hidden md:block mt-1">
+        <div class="max-w-7xl mx-auto px-4 py-4">
+            <div class="flex items-end gap-4"> {{-- Changed items-start to items-end for better alignment if text wraps --}}
+                
+                {{-- User Avatar --}}
+                <img src="{{ auth()->user()->profile_photo_url }}" class="w-10 h-10 rounded-full border border-gray-200 hidden md:block mb-2">
                 
                 <div class="flex-1 relative">
                     <textarea 
                         id="replyInput"
                         wire:model="newReply" 
                         rows="1" 
-                        class="w-full bg-gray-50 border-gray-300 focus:bg-white focus:border-red-500 focus:ring-1 focus:ring-red-500 rounded-lg py-3 px-4 text-sm shadow-sm transition-all resize-none min-h-[46px] max-h-32" 
+                        class="w-full bg-gray-50 border-gray-300 focus:bg-white focus:border-red-500 focus:ring-1 focus:ring-red-500 rounded-xl py-4 px-5 text-sm shadow-sm transition-all resize-none min-h-[56px] max-h-40 placeholder-gray-400" 
                         placeholder="Write a response..."></textarea>
                     
                     @error('newReply') 
-                        <span class="text-xs text-red-500 font-bold mt-1 block">{{ $message }}</span> 
+                        <span class="text-xs text-red-500 font-bold mt-1 block pl-1">{{ $message }}</span> 
                     @enderror
                 </div>
 
+                {{-- "POST" BUTTON (Bulked Up) --}}
                 <button wire:click="postReply" 
-                    class="h-[80px] px-6 bg-gray-900 text-white font-bold text-xs uppercase tracking-widest rounded-lg hover:bg-red-600 transition shadow-md flex items-center gap-2 shrink-0">
+                    class="h-14 px-8 bg-gray-900 text-white font-bold text-sm uppercase tracking-widest rounded-xl hover:bg-red-600 transition shadow-lg flex items-center gap-2 shrink-0 mb-[1px]">
                     <span>Post</span>
-                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                 </button>
             </div>
         </div>
