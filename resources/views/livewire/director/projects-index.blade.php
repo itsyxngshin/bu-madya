@@ -43,6 +43,21 @@
         <div class="relative z-10 mb-12 bg-white/40 backdrop-blur-md border border-white/50 rounded-2xl p-4 shadow-sm max-w-4xl mx-auto">
             <div class="flex flex-col md:flex-row gap-4 items-center justify-center">
                 
+                {{-- 1. Search Input (NEW) --}}
+                <div class="relative w-full md:w-64 group">
+                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    </div>
+                    <input type="text" 
+                        wire:model.live.debounce.300ms="search" 
+                        placeholder="Search projects..." 
+                        class="w-full bg-white/80 border-0 rounded-xl pl-10 pr-4 py-2.5 text-sm font-bold text-gray-700 focus:ring-2 focus:ring-red-500 shadow-sm placeholder-gray-400 hover:bg-white transition"
+                    >
+                </div>
+
+                {{-- Divider for aesthetics (Optional) --}}
+                <div class="hidden md:block w-px h-8 bg-gray-300/50 mx-2"></div>
+                
                 {{-- Label --}}
                 <div class="flex items-center gap-2 text-gray-500 uppercase text-[10px] font-bold tracking-widest mr-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>

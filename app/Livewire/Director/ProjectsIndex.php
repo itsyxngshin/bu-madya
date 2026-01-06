@@ -17,8 +17,10 @@ class ProjectsIndex extends Component
 
     public $category = 'All';
     public $academicYearId = 'All'; // Changed to track ID
+    public $search = ''; 
     public $visitorCount = 1;
 
+    public function updatedSearch() { $this->resetPage(); }
     public function updatedCategory() { $this->resetPage(); }
     public function updatedAcademicYearId() { $this->resetPage(); }
 
@@ -40,8 +42,15 @@ class ProjectsIndex extends Component
 
     public function render()
     {
-        // Eager load 'category' AND 'academicYear' to prevent N+1 queries
         $query = Project::query()->with(['category', 'academicYear']);
+
+        // 3. Add Search Logic (Checks Title or Description)
+        if (!empty($this->search)) {
+            $query->where(function($q) {
+                $q->where('title', 'like', '%' . $this->search . '%')
+                  ->orWhere('description', 'like', '%' . $this->search . '%');
+            });
+        }
 
         // 1. Category Filter
         if ($this->category !== 'All') {
