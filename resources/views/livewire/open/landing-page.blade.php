@@ -28,7 +28,7 @@
                  x-transition:enter-start="opacity-0 -translate-y-10 scale-50"
                  x-transition:enter-end="opacity-100 translate-y-0 scale-100"
                  class="w-24 h-24 md:w-32 md:h-32 mx-auto mb-8 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center border border-white/20 shadow-2xl p-4 ring-4 ring-white/5">
-                <img src="{{ asset('images/official_logo.png') }}" alt="Logo" class="w-full h-full object-contain drop-shadow-lg">
+                <img src="{{ asset('images/MADYA Web Logo1.png') }}" alt="Logo" class="w-full h-full object-contain drop-shadow-lg">
             </div>
 
             <div x-show="show"
