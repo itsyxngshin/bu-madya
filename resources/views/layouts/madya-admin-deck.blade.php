@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BU MADYA Admin</title>
-    <link rel="icon" href="{{ asset('images/official_logo.png') }}">
+    <link rel="icon" href="{{ asset('images/MADYA Web Logo1.png') }}">
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
