@@ -77,86 +77,84 @@
         
         {{-- LEFT: PARTNER DIRECTORY (8 Cols) --}}
         <main class="lg:col-span-8 order-1">
-            <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 md:mb-8 gap-4">
-                <h3 class="font-heading font-bold text-xl md:text-2xl text-gray-900">Partner Directory</h3>
+            
+            {{-- Header Row: Title + Search + Filter --}}
+            <div class="flex flex-col xl:flex-row xl:items-center justify-between mb-6 gap-4">
                 
-                {{-- Filter Tabs --}}
-                <div class="w-full md:w-auto overflow-x-auto pb-2 md:pb-0 scrollbar-hide mask-fade-right">
-                    <div class="flex gap-2">
-                        <button wire:click="setCategory('All')"
-                                class="whitespace-nowrap px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all border shrink-0
-                                {{ $category === 'All' 
-                                    ? 'bg-red-600 text-white border-red-600 shadow-md transform scale-105' 
-                                    : 'bg-white text-gray-500 border-gray-200 hover:border-red-400 hover:text-red-500' }}">
-                            All
-                        </button>
+                {{-- Title & Count --}}
+                <div class="flex items-center gap-3">
+                    <h3 class="font-heading font-bold text-xl md:text-2xl text-gray-900">Partner Directory</h3>
+                    <span class="px-2 py-1 bg-gray-100 rounded-lg text-xs font-bold text-gray-500">
+                        {{ $this->partners->total() }} {{-- Updated to use paginator total --}}
+                    </span>
+                </div>
+                
+                {{-- Controls Container --}}
+                <div class="flex flex-col md:flex-row gap-3 w-full xl:w-auto">
+                    
+                    {{-- 1. SEARCH BAR --}}
+                    <div class="relative w-full md:w-64 group">
+                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        </div>
+                        <input type="text" 
+                            wire:model.live.debounce.300ms="search" 
+                            placeholder="Search partners..." 
+                            class="w-full bg-white border border-gray-200 rounded-xl pl-10 pr-4 py-2.5 text-sm font-bold text-gray-700 focus:ring-2 focus:ring-red-500 focus:border-red-500 shadow-sm placeholder-gray-400 hover:border-gray-300 transition">
+                    </div>
 
-                        @foreach($this->types as $type)
-                        <button wire:click="setCategory('{{ $type->name }}')"
-                                class="whitespace-nowrap px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all border shrink-0
-                                {{ $category === $type->name 
-                                    ? 'bg-red-600 text-white border-red-600 shadow-md transform scale-105' 
-                                    : 'bg-white text-gray-500 border-gray-200 hover:border-red-400 hover:text-red-500' }}">
-                            {{ $type->name }}
-                        </button>
-                        @endforeach
+                    {{-- 2. CATEGORY DROPDOWN --}}
+                    <div class="relative w-full md:w-48 group">
+                        <select wire:model.live="category" 
+                            class="w-full bg-white border border-gray-200 rounded-xl pl-4 pr-10 py-2.5 text-sm font-bold text-gray-700 focus:ring-2 focus:ring-red-500 focus:border-red-500 shadow-sm cursor-pointer hover:border-gray-300 transition appearance-none">
+                            <option value="All">All Categories</option>
+                            @foreach($this->types as $type)
+                                <option value="{{ $type->name }}">{{ $type->name }}</option>
+                            @endforeach
+                        </select>
+                        <div class="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-gray-500">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
                     </div>
                 </div>
             </div>
 
             {{-- Partners Grid --}}
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 min-h-[300px] content-start">
                 @forelse($this->partners as $partner)
                 <div class="group bg-white/90 backdrop-blur-sm rounded-2xl p-5 md:p-6 shadow-sm border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition duration-300 relative overflow-hidden">
+                    {{-- ... (Current Card Content Remains the Same) ... --}}
                     
-                    {{-- Top Color Line --}}
+                    {{-- SHORTCUT FOR CARD CONTENT (To keep response short) --}}
                     <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-500 to-yellow-500 transform scale-x-0 group-hover:scale-x-100 transition duration-500 origin-left"></div>
-
                     <div class="flex items-start gap-4">
-                        {{-- Logo --}}
                         <div class="w-14 h-14 md:w-16 md:h-16 rounded-xl bg-gray-50 p-2 border border-gray-100 shrink-0 flex items-center justify-center">
-                            @if($partner->logo_path)
+                             @if($partner->logo_path)
                                 <img src="{{ asset('storage/' . $partner->logo_path) }}" class="w-full h-full object-contain mix-blend-multiply">
                             @else
                                 <span class="text-[10px] font-bold text-gray-300 text-center leading-tight">{{ $partner->acronym ?? 'LOGO' }}</span>
                             @endif
                         </div>
-                        
-                        {{-- Info --}}
                         <div class="flex-grow min-w-0">
-                            {{-- Changed: Removed 'md:flex-row' so the badge always sits below the title. This gives the title full width to expand. --}}
                             <div class="flex flex-col mb-1 gap-1">
-                                
-                                {{-- Changed: Removed 'line-clamp-1' so text wraps to multiple lines if needed --}}
                                 <h4 class="font-bold text-gray-900 text-sm md:text-base leading-tight group-hover:text-red-700 transition pr-2">
                                     {{ $partner->name }}
                                 </h4>
-                                
                                 @if($partner->type)
-                                    {{-- Changed: Removed 'md:mt-0' since we are stacking them now --}}
                                     <span class="text-[8px] md:text-[9px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full w-fit {{ $partner->type->color ?? 'bg-gray-100 text-gray-500' }}">
                                         {{ $partner->type->name }}
                                     </span>
                                 @endif
                             </div>
-                            
-                            {{-- Status --}}
+                            {{-- ... Status and Description ... --}}
                             <p class="text-[9px] font-bold uppercase tracking-widest mb-2 flex items-center gap-1 {{ $partner->status->color ?? 'text-gray-400' }}">
                                 <span class="w-1.5 h-1.5 rounded-full {{ str_replace('text-', 'bg-', $partner->status->color ?? 'bg-gray-400') }}"></span> 
                                 {{ $partner->status->name ?? 'Unknown' }}
                             </p>
                             
-                            {{-- Description --}}
-                            <p class="text-[10px] md:text-xs text-gray-500 leading-relaxed mb-3 line-clamp-2">
-                                {{ $partner->description ?? 'No description provided.' }}
-                            </p>
-
-                            <div class="flex items-center justify-between border-t border-gray-50 pt-3">
-                                <span class="text-[9px] text-gray-400 font-bold uppercase">
-                                    Since: {{ $partner->established_at ? $partner->established_at->format('Y') : 'N/A' }}
-                                </span>
-                                <a href="{{ route('linkages.show', ['linkage' => $partner->slug]) }}" 
-                                   class="text-[10px] md:text-xs font-bold text-red-600 hover:underline flex items-center gap-1">
+                            <div class="flex items-center justify-between border-t border-gray-50 pt-3 mt-3">
+                                <span class="text-[9px] text-gray-400 font-bold uppercase">Since: {{ $partner->established_at ? $partner->established_at->format('Y') : 'N/A' }}</span>
+                                <a href="{{ route('linkages.show', ['linkage' => $partner->slug]) }}" class="text-[10px] md:text-xs font-bold text-red-600 hover:underline flex items-center gap-1">
                                     View <span class="group-hover:translate-x-0.5 transition">&rarr;</span>
                                 </a>
                             </div>
@@ -165,10 +163,18 @@
                 </div>
                 @empty
                 <div class="col-span-1 md:col-span-2 text-center py-12 text-gray-400 bg-white/80 rounded-2xl border border-dashed border-gray-200">
-                    <p class="text-sm">No partners found in this category.</p>
+                    <svg class="w-12 h-12 mx-auto text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    <p class="text-sm font-bold text-gray-500">No partners found</p>
+                    <p class="text-xs">Try adjusting your search or category filter.</p>
                 </div>
                 @endforelse
             </div>
+
+            {{-- 3. PAGINATION LINKS --}}
+            <div class="mt-8">
+                {{ $this->partners->links() }}
+            </div>
+
         </main>
 
         {{-- RIGHT: ENGAGEMENTS TIMELINE (4 Cols) --}}

@@ -19,6 +19,10 @@ class LinkagesIndex extends Component
 
     public $category = 'All';
     public $visitorCount = 1;
+    public $search = '';
+
+    public function updatedCategory() { $this->resetPage(); }
+    public function updatedSearch() { $this->resetPage(); }
     public function mount()
     {
         // 1. Check if this specific user has already been counted in this session
@@ -35,14 +39,6 @@ class LinkagesIndex extends Component
         // We remember it for 10 minutes, or fetch directly if you want instant real-time
         $this->visitorCount = SiteStat::where('key', 'visitor_count')->value('value');
     }
-
-    // 1. Filter Action
-    public function setCategory($categoryName)
-    {
-        $this->category = $categoryName;
-        $this->resetPage(); // Reset pagination if used
-    }
-
     // 2. Computed Property: Linkage Types (for filter buttons)
     public function getTypesProperty()
     {
@@ -53,14 +49,23 @@ class LinkagesIndex extends Component
     public function getPartnersProperty()
     {
         return Linkage::query()
-            ->with(['type', 'status']) // Eager load relationships
+            ->with(['type', 'status'])
+            // Filter by Category
             ->when($this->category !== 'All', function ($query) {
                 $query->whereHas('type', function ($q) {
                     $q->where('name', $this->category);
                 });
             })
+            // Filter by Search (Name, Acronym, or Description)
+            ->when($this->search, function ($query) {
+                $query->where(function ($q) {
+                    $q->where('name', 'like', '%' . $this->search . '%')
+                      ->orWhere('acronym', 'like', '%' . $this->search . '%')
+                      ->orWhere('description', 'like', '%' . $this->search . '%');
+                });
+            })
             ->orderBy('name')
-            ->get();
+            ->paginate(10); // Changed from get() to paginate()
     }
 
     // 4. Computed Property: Recent Engagements (Timeline)
