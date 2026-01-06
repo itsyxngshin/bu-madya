@@ -23,7 +23,7 @@
             {{-- 1. LEFT SIDE: Logo --}}
             <div class="flex items-center gap-3">
                 <a href="{{ url('/') }}" class="shrink-0 flex items-center gap-2 group">
-                    <img src="{{ asset('images/MADYA Web Logo.png') }}" class="block h-10 w-auto drop-shadow-sm group-hover:scale-105 transition transform" alt="BU MADYA Logo" />
+                    <img src="{{ asset('images/MADYA Web Logo1.png') }}" class="block h-10 w-auto drop-shadow-sm group-hover:scale-105 transition transform" alt="BU MADYA Logo" />
                     <div class="flex flex-col">
                         <span class="font-heading font-black text-lg lg:text-xl text-gray-900 leading-none tracking-tighter group-hover:text-red-600 transition">BU <span class="text-red-600">MADYA</span></span>
                     </div>
