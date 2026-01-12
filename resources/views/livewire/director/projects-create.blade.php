@@ -349,6 +349,34 @@
         {{-- ======================== --}}
         {{-- RIGHT PANEL: LIVE PREVIEW--}}
         {{-- ======================== --}}
+
+        @php
+            // Construct Preview Data using your Logic
+            $previewProponents = [];
+            foreach($proponents as $prop) {
+                if ($prop['type'] === 'user' && $prop['id']) {
+                    $u = $users->find($prop['id']);
+                    if($u) $previewProponents[] = $u->name;
+                } 
+                elseif ($prop['name']) {
+                    $previewProponents[] = $prop['name'];
+                }
+            }
+            $proponentLabel = empty($previewProponents) ? 'Select Proponent' : implode(', ', $previewProponents);
+
+            $previewPartners = [];
+            foreach($partners as $p) {
+                if ($p['type'] === 'database' && !empty($p['id'])) {
+                    $link = $availableLinkages->find($p['id']);
+                    if($link) $previewPartners[] = ['name' => $link->name, 'role' => $p['role'] ?? 'Partner', 'is_official' => true];
+                } 
+                
+                elseif ($p['type'] === 'custom' && !empty($p['name'])) {
+                    $previewPartners[] = ['name' => $p['name'], 'role' => $p['role'] ?? 'Partner', 'is_official' => false];
+                }
+            }
+        @endphp
+
         <div class="w-full md:w-7/12 h-full overflow-y-auto bg-stone-100 relative shadow-inner"
              :class="mobilePreview ? 'block' : 'hidden md:block'">
             
@@ -426,6 +454,55 @@
                                 </li>
                             </ul>
                         </div>
+
+                        @if(!empty($previewPartners))
+                        <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
+                            <h3 class="font-bold text-gray-900 uppercase tracking-widest text-xs border-b border-gray-100 pb-3 mb-4">In Partnership With</h3>
+                            <div class="flex flex-wrap gap-2">
+                                @foreach($previewPartners as $p)
+                                <div class="inline-flex items-center rounded-lg border overflow-hidden {{ $p['is_official'] ? 'border-blue-100 bg-blue-50' : 'border-gray-200 bg-gray-50' }}">
+                                    <span class="px-2 py-1 text-xs font-bold text-gray-700">{{ $p['name'] }}</span>
+                                </div>
+                                @endforeach
+                            </div>
+                        </div>
+                        @endif
+
+                        @if(count($selectedSdgs) > 0)
+                            <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 relative">
+                                <h3 class="font-bold text-gray-900 uppercase tracking-widest text-xs border-b border-gray-100 pb-3 mb-4">
+                                    Sustainable Development Goals
+                                </h3>
+                                
+                                <div class="space-y-3">
+                                    @foreach($selectedSdgs as $id)
+                                        @php 
+                                            // Find the SDG model from the collection passed to the view
+                                            $sdg = $sdgs->find($id); 
+                                        @endphp
+
+                                        @if($sdg)
+                                            {{-- SDG PILL --}}
+                                            <div class="flex items-center gap-3 p-2 rounded-xl border transition-all"
+                                                style="background-color: {{ $sdg->color_hex }}10; border-color: {{ $sdg->color_hex }}30;">
+                                                
+                                                {{-- Solid Color Box --}}
+                                                <div class="w-8 h-8 shrink-0 rounded-lg text-white font-black text-xs flex items-center justify-center shadow-sm"
+                                                    style="background-color: {{ $sdg->color_hex }}">
+                                                    {{ $sdg->number }}
+                                                </div>
+                                                
+                                                {{-- Text --}}
+                                                <span class="text-[10px] font-bold uppercase tracking-wide leading-tight"
+                                                    style="color: {{ $sdg->color_hex }}">
+                                                    {{ $sdg->name }}
+                                                </span>
+                                            </div>
+                                        @endif
+                                    @endforeach
+                                </div>
+                            </div>
+                            @endif
                     </aside>
 
                     <main class="lg:col-span-8">

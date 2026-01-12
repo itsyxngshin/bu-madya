@@ -129,17 +129,64 @@
                     </div>
 
                     {{-- IMAGE UPLOAD --}}
-                    <div x-data="{ isDropping: false, isUploading: false, progress: 0 }" x-on:livewire-upload-start="isUploading = true" x-on:livewire-upload-finish="isUploading = false" x-on:livewire-upload-error="isUploading = false" x-on:livewire-upload-progress="progress = $event.detail.progress" class="w-full space-y-2">
+                    <div class="w-full space-y-2">
                         <label class="block text-xs font-bold text-gray-700">Cover Image</label>
-                        <div class="relative w-full h-48 bg-gray-50 rounded-xl overflow-hidden border-2 border-dashed transition-all duration-200 group" style="min-height: 12rem;" :class="{'border-yellow-400 bg-yellow-50 ring-4 ring-yellow-100': isDropping, 'border-gray-300 hover:bg-gray-100': !isDropping}">
-                            <input type="file" wire:model="coverImg" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-50" x-on:dragover.prevent="isDropping = true" x-on:dragleave="isDropping = false" x-on:drop="isDropping = false">
-                            <div x-show="isUploading" class="absolute inset-0 z-40 flex flex-col items-center justify-center bg-white/90 backdrop-blur-sm" style="display: none;"><svg class="animate-spin h-8 w-8 text-yellow-500 mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><div class="w-1/2 bg-gray-200 rounded-full h-1.5"><div class="bg-yellow-500 h-1.5 rounded-full transition-all duration-300" :style="'width: ' + progress + '%'"></div></div><p class="text-[10px] font-bold text-gray-500 mt-2 uppercase tracking-wider">Uploading...</p></div>
-                            <div class="absolute inset-0 w-full h-full z-10 flex flex-col items-center justify-center pointer-events-none">
-                                @if($coverImg) <img src="{{ $coverImg->temporaryUrl() }}" class="absolute inset-0 w-full h-full object-cover"><div class="absolute inset-0 bg-black/40"></div><div class="relative bg-white/90 backdrop-blur px-3 py-1.5 rounded-full shadow-lg flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span><span class="text-[10px] font-bold uppercase text-gray-800">New Image Ready</span></div>
-                                @elseif($oldCoverImg) <img src="{{ asset('storage/'.$oldCoverImg) }}" class="absolute inset-0 w-full h-full object-cover grayscale opacity-50 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-500"><div class="relative flex flex-col items-center text-gray-600 group-hover:text-white transition-colors"><div class="bg-white/80 p-2 rounded-full shadow-sm mb-2 group-hover:scale-110 transition-transform"><svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg></div><span class="text-[10px] font-bold uppercase tracking-wider bg-white/30 px-2 py-1 rounded backdrop-blur-sm">Replace Image</span></div>
-                                @else <div class="flex flex-col items-center justify-center pt-5 pb-6 text-gray-400 group-hover:text-yellow-600 transition-colors"><svg class="w-10 h-10 mb-3 text-gray-300 group-hover:text-yellow-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg><p class="text-xs font-medium"><span class="font-bold underline decoration-yellow-400">Click to upload</span></p></div> @endif
-                            </div>
+                        
+                        <div x-data="{ isDropping: false, isFocused: false, isUploading: false, progress: 0 }" 
+                            x-on:livewire-upload-start="isUploading = true" 
+                            x-on:livewire-upload-finish="isUploading = false" 
+                            x-on:livewire-upload-error="isUploading = false" 
+                            x-on:livewire-upload-progress="progress = $event.detail.progress"
+                            class="relative group">
+                            
+                            <label 
+                                x-on:dragover.prevent="isDropping = true" 
+                                x-on:dragleave.prevent="isDropping = false" 
+                                {{-- DRAG & DROP LOGIC --}}
+                                x-on:drop.prevent="isDropping = false; $refs.fileInput.files = $event.dataTransfer.files; $refs.fileInput.dispatchEvent(new Event('change', { bubbles: true }));"
+                                :class="{'border-yellow-400 bg-yellow-50 ring-4 ring-yellow-100': isDropping || isFocused, 'border-gray-300 hover:bg-gray-50': !isDropping && !isFocused}"
+                                class="relative flex flex-col items-center justify-center w-full h-48 bg-gray-50 rounded-xl overflow-hidden border-2 border-dashed transition-all duration-200 cursor-pointer">
+                                
+                                {{-- Loading State --}}
+                                <div x-show="isUploading" class="absolute inset-0 z-50 flex flex-col items-center justify-center bg-white/90 backdrop-blur-sm">
+                                    <svg class="animate-spin h-8 w-8 text-yellow-500 mb-2" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                    <div class="w-1/2 bg-gray-200 rounded-full h-1.5"><div class="bg-yellow-500 h-1.5 rounded-full transition-all duration-300" :style="'width: ' + progress + '%'"></div></div>
+                                    <p class="text-[10px] font-bold text-gray-500 mt-2 uppercase tracking-wider">Uploading...</p>
+                                </div>
+
+                                {{-- Image Preview Logic --}}
+                                <div class="absolute inset-0 w-full h-full z-10 flex flex-col items-center justify-center pointer-events-none">
+                                    @if($coverImg) 
+                                        {{-- 1. New Upload --}}
+                                        <img src="{{ $coverImg->temporaryUrl() }}" class="absolute inset-0 w-full h-full object-cover">
+                                        <div class="absolute inset-0 bg-black/40"></div>
+                                        <div class="relative bg-white/90 backdrop-blur px-3 py-1.5 rounded-full shadow-lg flex items-center gap-2">
+                                            <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                                            <span class="text-[10px] font-bold uppercase text-gray-800">New Image Ready</span>
+                                        </div>
+                                    @elseif($oldCoverImg) 
+                                        {{-- 2. Existing Image --}}
+                                        <img src="{{ asset('storage/'.$oldCoverImg) }}" class="absolute inset-0 w-full h-full object-cover grayscale opacity-50 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-500">
+                                        <div class="relative flex flex-col items-center text-gray-600 group-hover:text-white transition-colors">
+                                            <div class="bg-white/80 p-2 rounded-full shadow-sm mb-2 group-hover:scale-110 transition-transform">
+                                                <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                            </div>
+                                            <span class="text-[10px] font-bold uppercase tracking-wider bg-white/30 px-2 py-1 rounded backdrop-blur-sm">Replace Image</span>
+                                        </div>
+                                    @else 
+                                        {{-- 3. No Image --}}
+                                        <div class="flex flex-col items-center justify-center pt-5 pb-6 text-gray-400 group-hover:text-yellow-600 transition-colors">
+                                            <svg class="w-10 h-10 mb-3 text-gray-300 group-hover:text-yellow-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                            <p class="text-xs font-medium"><span class="font-bold underline decoration-yellow-400">Click to upload</span> or drag here</p>
+                                        </div> 
+                                    @endif
+                                </div>
+
+                                {{-- Input with x-ref --}}
+                                <input type="file" x-ref="fileInput" wire:model="coverImg" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-30" @focus="isFocused = true" @blur="isFocused = false">
+                            </label>
                         </div>
+                        @error('coverImg') <span class="text-red-500 text-[10px] mt-1 block">{{ $message }}</span> @enderror
                     </div>
                 </div>
             </div>
@@ -189,8 +236,19 @@
                 <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest border-b border-gray-100 pb-2 mb-4">Target SDGs</h3>
                 <div class="grid grid-cols-4 gap-2">
                     @foreach($sdgs as $sdg)
-                    <button wire:click="toggleSdg({{ $sdg->id }})" style="background-color: {{ in_array($sdg->id, $selectedSdgs) ? $sdg->color_hex : '#f3f4f6' }}; color: {{ in_array($sdg->id, $selectedSdgs) ? 'white' : '#9ca3af' }};" class="aspect-square flex flex-col items-center justify-center p-1 rounded-lg transition-all transform hover:scale-105 border border-transparent shadow-sm hover:shadow-md">
-                        <span class="text-sm font-black leading-none">{{ $sdg->number }}</span><span class="text-[7px] font-bold uppercase leading-tight text-center mt-1 line-clamp-2">{{ $sdg->name }}</span>
+                    <button wire:click="toggleSdg({{ $sdg->id }})" 
+                            style="background-color: {{ in_array($sdg->id, $selectedSdgs) ? $sdg->color_hex : '#f3f4f6' }};
+                                color: {{ in_array($sdg->id, $selectedSdgs) ? 'white' : '#9ca3af' }};"
+                            class="h-20 flex flex-col items-center justify-center p-1 rounded-lg transition-all transform hover:scale-105 border border-transparent shadow-sm hover:shadow-md text-center">
+                        
+                        {{-- Number --}}
+                        <span class="text-sm font-black leading-none mb-1">{{ $sdg->number }}</span>
+                        
+                        {{-- Name (Added) --}}
+                        <span class="text-[7px] font-bold uppercase leading-tight line-clamp-2 px-1"
+                            style="color: {{ in_array($sdg->id, $selectedSdgs) ? 'rgba(255,255,255,0.9)' : '#6b7280' }}">
+                            {{ $sdg->name }}
+                        </span>
                     </button>
                     @endforeach
                 </div>
@@ -373,21 +431,39 @@
 
                         {{-- SDGs --}}
                         @if(count($selectedSdgs) > 0)
-                        <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
-                            <h3 class="font-bold text-gray-900 uppercase tracking-widest text-xs border-b border-gray-100 pb-3 mb-4">Target SDGs</h3>
-                            <div class="flex flex-col gap-2">
-                                @foreach($selectedSdgs as $id)
-                                    @php $s = $sdgs->find($id); @endphp
-                                    @if($s)
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-8 h-8 rounded text-white font-bold text-xs flex items-center justify-center" style="background-color: {{ $s->color_hex }}">{{ $s->number }}</div>
-                                        <span class="text-xs font-bold text-gray-700 uppercase">{{ $s->name }}</span>
-                                    </div>
-                                    @endif
-                                @endforeach
+                            <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 relative">
+                                <h3 class="font-bold text-gray-900 uppercase tracking-widest text-xs border-b border-gray-100 pb-3 mb-4">
+                                    Target SDGs
+                                </h3>
+                                
+                                <div class="space-y-3">
+                                    @foreach($selectedSdgs as $id)
+                                        @php 
+                                            $sdg = $sdgs->find($id); 
+                                        @endphp
+
+                                        @if($sdg)
+                                            {{-- SDG PILL --}}
+                                            <div class="flex items-center gap-3 p-2 rounded-xl border transition-all"
+                                                style="background-color: {{ $sdg->color_hex }}10; border-color: {{ $sdg->color_hex }}30;">
+                                                
+                                                {{-- Solid Color Box --}}
+                                                <div class="w-8 h-8 shrink-0 rounded-lg text-white font-black text-xs flex items-center justify-center shadow-sm"
+                                                    style="background-color: {{ $sdg->color_hex }}">
+                                                    {{ $sdg->number }}
+                                                </div>
+                                                
+                                                {{-- Text --}}
+                                                <span class="text-[10px] font-bold uppercase tracking-wide leading-tight"
+                                                    style="color: {{ $sdg->color_hex }}">
+                                                    {{ $sdg->name }}
+                                                </span>
+                                            </div>
+                                        @endif
+                                    @endforeach
+                                </div>
                             </div>
-                        </div>
-                        @endif
+                            @endif
                     </aside>
 
                     {{-- MAIN CONTENT (Right) --}}
