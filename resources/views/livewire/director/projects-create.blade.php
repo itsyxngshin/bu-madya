@@ -172,8 +172,14 @@
                     {{-- IMAGE UPLOAD --}}
                     <div>
                         <label class="block text-xs font-bold text-gray-700 mb-1">Cover Image</label>
+                        
+                        {{-- Updated x-data and drop handler --}}
                         <div x-data="{ isDropping: false, isFocused: false }" class="relative group">
-                            <label @dragover.prevent="isDropping = true" @dragleave.prevent="isDropping = false" @drop.prevent="isDropping = false"
+                            <label 
+                                x-on:dragover.prevent="isDropping = true" 
+                                x-on:dragleave.prevent="isDropping = false" 
+                                {{-- MAGIC HERE: Manually transfer dropped files to the input --}}
+                                x-on:drop.prevent="isDropping = false; $refs.fileInput.files = $event.dataTransfer.files; $refs.fileInput.dispatchEvent(new Event('change', { bubbles: true }));"
                                 :class="{'border-yellow-400 bg-yellow-50 ring-2 ring-yellow-200': isDropping || isFocused, 'border-gray-300 bg-white hover:bg-gray-50': !isDropping && !isFocused}"
                                 class="flex flex-col items-center justify-center w-full h-36 border-2 border-dashed rounded-xl transition-all duration-200 cursor-pointer overflow-hidden relative">
                                 
@@ -189,10 +195,14 @@
                                 @else
                                     <div class="flex flex-col items-center justify-center pt-5 pb-6 text-gray-400">
                                         <svg class="w-10 h-10 mb-3 text-gray-300 group-hover:text-yellow-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
-                                        <p class="mb-1 text-xs font-bold text-gray-700 text-center"><span class="text-yellow-600 hover:underline">Tap to upload</span></p>
+                                        <p class="mb-1 text-xs font-bold text-gray-700 text-center">
+                                            <span class="text-yellow-600 hover:underline">Tap to upload</span> or drag here
+                                        </p>
                                     </div>
                                 @endif
-                                <input type="file" wire:model="coverImg" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-30" @focus="isFocused = true" @blur="isFocused = false">
+
+                                {{-- Added x-ref="fileInput" here --}}
+                                <input type="file" x-ref="fileInput" wire:model="coverImg" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-30" @focus="isFocused = true" @blur="isFocused = false">
                             </label>
                         </div>
                         @error('coverImg') <span class="text-red-500 text-[10px] mt-1 block">{{ $message }}</span> @enderror
@@ -306,9 +316,17 @@
                     @foreach($sdgs as $sdg)
                     <button wire:click="toggleSdg({{ $sdg->id }})" 
                             style="background-color: {{ in_array($sdg->id, $selectedSdgs) ? $sdg->color_hex : '#f3f4f6' }};
-                                   color: {{ in_array($sdg->id, $selectedSdgs) ? 'white' : '#9ca3af' }};"
-                            class="aspect-square flex flex-col items-center justify-center p-1 rounded-lg transition-all transform hover:scale-105 border border-transparent shadow-sm hover:shadow-md">
-                        <span class="text-sm font-black leading-none">{{ $sdg->number }}</span>
+                                color: {{ in_array($sdg->id, $selectedSdgs) ? 'white' : '#9ca3af' }};"
+                            class="h-20 flex flex-col items-center justify-center p-1 rounded-lg transition-all transform hover:scale-105 border border-transparent shadow-sm hover:shadow-md text-center">
+                        
+                        {{-- Number --}}
+                        <span class="text-sm font-black leading-none mb-1">{{ $sdg->number }}</span>
+                        
+                        {{-- Name (Added) --}}
+                        <span class="text-[7px] font-bold uppercase leading-tight line-clamp-2 px-1"
+                            style="color: {{ in_array($sdg->id, $selectedSdgs) ? 'rgba(255,255,255,0.9)' : '#6b7280' }}">
+                            {{ $sdg->name }}
+                        </span>
                     </button>
                     @endforeach
                 </div>
