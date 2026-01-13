@@ -29,21 +29,38 @@
         
         {{-- SEARCH & FILTER --}}
         <div class="relative z-10 flex flex-col md:flex-row justify-between items-center mb-12 gap-4">
-            <div class="flex gap-2 overflow-x-auto pb-2 max-w-full">
-                @foreach($categories as $cat)
-                <button wire:click="setCategory('{{ $cat }}')"
-                        class="whitespace-nowrap px-4 py-1.5 rounded-full text-xs font-bold shadow-md transition-all
-                               {{ $category === $cat ? 'bg-red-600 text-white' : 'bg-white/60 text-gray-700 hover:bg-white' }}">
-                    {{ $cat }}
-                </button>
-                @endforeach
+            {{-- 1. CATEGORY FILTER (Dropdown) --}}
+            <div class="relative w-full md:w-64 group">
+                {{-- Filter Icon (Left) --}}
+                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400 group-focus-within:text-red-500 transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
+                </div>
+
+                <select wire:model.live="category" 
+                        class="w-full pl-10 pr-10 py-2.5 rounded-full border-none bg-white/80 backdrop-blur-sm shadow-sm focus:ring-2 focus:ring-yellow-400 text-sm font-bold text-gray-700 appearance-none cursor-pointer hover:bg-white transition">
+                    <option value="">All News</option>
+                    @foreach($categories as $cat)
+                        <option value="{{ $cat }}">{{ $cat }}</option>
+                    @endforeach
+                </select>
+
+                {{-- Chevron Icon (Right) --}}
+                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-400 group-hover:text-red-500 transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </div>
             </div>
 
-            <div class="relative w-full md:w-80">
-                <input wire:model.live.debounce.300ms="search" type="text" placeholder="Search news..." 
-                       class="w-full pl-10 pr-4 py-2 rounded-full border-none bg-white/80 backdrop-blur-sm shadow-sm focus:ring-2 focus:ring-yellow-400 text-sm">
-                <svg class="absolute left-3.5 top-2.5 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            {{-- 2. SEARCH INPUT --}}
+            <div class="relative w-full md:w-80 group">
+                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400 group-focus-within:text-red-500 transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                </div>
+                <input wire:model.live.debounce.300ms="search" 
+                    type="text" 
+                    placeholder="Search news..." 
+                    class="w-full pl-10 pr-4 py-2.5 rounded-full border-none bg-white/80 backdrop-blur-sm shadow-sm focus:ring-2 focus:ring-yellow-400 text-sm font-bold text-gray-700 placeholder-gray-400 hover:bg-white transition">
             </div>
+
         </div>
 
         {{-- FEATURED ARTICLE (Remains same) --}}
