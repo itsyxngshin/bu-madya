@@ -203,7 +203,7 @@
                             <div class="group bg-white rounded-2xl p-4 shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-200">
                                 <div class="relative overflow-hidden rounded-xl aspect-video bg-gray-800 mb-4 group-hover:ring-4 ring-orange-100 transition">
                                     {{-- Placeholder Image (You can replace this with a real screenshot of the Mayon map) --}}
-                                    <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEj7h84yXVxuGGD_Y_2ybv902u37yTym_Qz-D4QJOJv-XQKiCdP8VlG5hV4Q6zX7X9Qy5Qz9Qy5Qz9Qy5Qz9Qy5Qz9Qy5Q/s1600/Mayon+Volcano+Hazard+Map.jpg" 
+                                    <img src="https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?q=80&w=2021&auto=format&fit=crop" 
                                         class="w-full h-full object-cover opacity-90 group-hover:opacity-100 group-hover:scale-110 transition duration-700" 
                                         alt="Mayon Hazard Map">
                                     <div class="absolute top-2 right-2 bg-black/60 backdrop-blur text-white text-[10px] font-bold px-2 py-1 rounded shadow-sm">PHIVOLCS</div>
