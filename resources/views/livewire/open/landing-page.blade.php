@@ -1,70 +1,79 @@
 <div class="min-h-screen bg-neutral-50 font-sans text-gray-900 selection:bg-red-600 selection:text-white overflow-x-hidden">
 
-    {{-- 1. IMMERSIVE HERO SECTION --}}
-    <header class="relative h-screen min-h-[700px] flex items-center justify-center text-white overflow-hidden">
+    {{-- 1. HERO SECTION (Cinematic Redesign) --}}
+    <header class="relative min-h-[80vh] flex items-center text-white overflow-hidden bg-gray-900">
         
-        {{-- Background Image with Parallax Effect --}}
+        {{-- Background Image & Professional Overlay --}}
         <div class="absolute inset-0 z-0">
+            {{-- IMAGE --}}
             <img src="{{ asset('images/1760712981522.JPG') }}" 
-                 class="w-full h-full object-cover object-center scale-105 animate-slow-pan" 
-                 alt="BU MADYA Team">
-            {{-- Professional Gradient Overlay (Darker at bottom for text readability) --}}
-            <div class="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-neutral-900"></div>
+                class="w-full h-full object-cover object-center scale-105 animate-slow-pan opacity-60" 
+                alt="BU MADYA Team">
+            
+            {{-- OVERLAY 1: Darkening Gradient (Bottom-up for text contrast) --}}
+            <div class="absolute inset-0 bg-gradient-to-t from-gray-950 via-gray-900/70 to-gray-900/30"></div>
+            
+            {{-- OVERLAY 2: Brand Color Tint (Subtle Green/Red mix) --}}
             <div class="absolute inset-0 bg-gradient-to-r from-green-900/40 to-red-900/40 mix-blend-overlay"></div>
+            
+            {{-- Optional Subtle Texture Pattern (mesh) --}}
+            <div class="absolute inset-0 opacity-[0.03]" style="background-image: url('data:image/svg+xml,%3Csvg width=\'20\' height=\'20\' viewBox=\'0 0 20 20\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'1\' fill-rule=\'evenodd\'%3E%3Ccircle cx=\'3\' cy=\'3\' r=\'3\'/%3E%3Ccircle cx=\'13\' cy=\'13\' r=\'3\'/%3E%3C/g%3E%3C/svg%3E');"></div>
         </div>
 
         {{-- Hero Content --}}
         <div x-data="{ show: false }" x-init="setTimeout(() => show = true, 200)" 
-             class="relative z-10 container mx-auto px-6 h-full flex flex-col justify-center items-center text-center pt-20">
+            class="relative z-10 container mx-auto px-6 pt-20">
             
-            {{-- Logo Mark --}}
-            <div x-show="show" 
-                 x-transition:enter="transition ease-out duration-1000"
-                 x-transition:enter-start="opacity-0 scale-90"
-                 x-transition:enter-end="opacity-100 scale-100"
-                 class="mb-8 p-4 bg-white/5 backdrop-blur-sm rounded-full border border-white/10 shadow-2xl">
-                <img src="{{ asset('images/MADYA Web Logo1.png') }}" alt="Logo" class="w-20 h-20 md:w-24 md:h-24 object-contain drop-shadow-lg">
-            </div>
+            <div class="max-w-4xl mx-auto text-center">
+                {{-- Logo --}}
+                <div x-show="show" 
+                    x-transition:enter="transition ease-out duration-1000"
+                    x-transition:enter-start="opacity-0 scale-90"
+                    x-transition:enter-end="opacity-100 scale-100"
+                    class="inline-block mb-8 p-3 bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 shadow-2xl">
+                    <img src="{{ asset('images/MADYA Web Logo1.png') }}" alt="Logo" class="w-20 h-20 md:w-24 md:h-24 object-contain drop-shadow-lg">
+                </div>
 
-            {{-- Main Typography --}}
-            <div x-show="show"
-                 x-transition:enter="transition ease-out duration-1000 delay-300"
-                 x-transition:enter-start="opacity-0 translate-y-8"
-                 x-transition:enter-end="opacity-100 translate-y-0"
-                 class="max-w-4xl mx-auto">
-                
-                <h2 class="text-yellow-400 font-bold tracking-[0.4em] text-xs md:text-sm mb-6 uppercase drop-shadow-md">
-                    Bicol University
-                </h2>
-                
-                <h1 class="font-heading text-5xl md:text-7xl lg:text-8xl font-black uppercase tracking-tighter leading-none mb-8 text-white drop-shadow-xl">
-                    Youth-Led<br>
-                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-red-500">Advocacy</span>
-                </h1>
-                
-                <p class="text-lg md:text-2xl text-gray-200 max-w-2xl mx-auto mb-12 font-light leading-relaxed">
-                    Fostering sustainable development through active dialogue, cultural preservation, and social innovation.
-                </p>
-
-                {{-- Action Buttons --}}
-                <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                    <a href="{{ route('membership-form') }}" class="group relative px-8 py-4 bg-red-600 text-white font-bold rounded-full overflow-hidden shadow-lg hover:shadow-red-600/50 transition-all duration-300">
-                        <span class="absolute inset-0 w-full h-full bg-gradient-to-r from-red-500 to-red-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
-                        <span class="relative flex items-center gap-2 uppercase tracking-widest text-xs">
-                            Join The Movement <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+                <div x-show="show"
+                    x-transition:enter="transition ease-out duration-1000 delay-300"
+                    x-transition:enter-start="opacity-0 translate-y-8"
+                    x-transition:enter-end="opacity-100 translate-y-0">
+                    
+                    <h2 class="text-yellow-400 font-bold tracking-[0.3em] text-xs md:text-sm mb-6 uppercase drop-shadow-md flex items-center justify-center gap-3">
+                        <span class="w-8 h-px bg-yellow-400/50"></span>
+                        Bicol University
+                        <span class="w-8 h-px bg-yellow-400/50"></span>
+                    </h2>
+                    
+                    <h1 class="font-heading text-4xl md:text-6xl lg:text-7xl font-black uppercase tracking-tight leading-none mb-8 drop-shadow-2xl text-white">
+                        Movement for the <br class="hidden md:block">
+                        {{-- Gradient Text Effect --}}
+                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-orange-300 to-red-400">
+                            Advancement of Youth-led Advocacy
                         </span>
-                    </a>
-                    <a href="#about" class="px-8 py-4 bg-white/5 backdrop-blur-md border border-white/20 text-white font-bold rounded-full hover:bg-white/10 transition uppercase tracking-widest text-xs">
-                        Learn More
-                    </a>
+                    </h1>
+                    
+                    <p class="text-lg md:text-2xl text-gray-300 max-w-2xl mx-auto mb-12 font-light leading-relaxed drop-shadow">
+                        Empowering youth-led advocacy and fostering sustainable development through active dialogue.
+                    </p>
+
+                    <div class="flex flex-col sm:flex-row gap-5 justify-center items-center">
+                        <a href="{{ route('membership-form') }}" class="group relative px-8 py-4 bg-yellow-500 text-gray-900 font-bold rounded-full shadow-lg hover:shadow-yellow-500/50 transition-all duration-300 overflow-hidden">
+                            <span class="absolute inset-0 w-full h-full bg-gradient-to-r from-yellow-400 to-yellow-600 opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                            <span class="relative flex items-center gap-2 uppercase tracking-wider text-xs">
+                                Join the Movement <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+                            </span>
+                        </a>
+                        <a href="#pillars" class="px-8 py-4 bg-transparent border-2 border-white/30 text-white font-bold rounded-full hover:bg-white hover:text-gray-900 transition-all duration-300 uppercase tracking-wider text-xs hover:border-transparent">
+                            Learn More
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
-
-        {{-- Scroll Indicator --}}
-        <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 animate-bounce text-white/50">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
-        </div>
+        
+        {{-- Subtle bottom fade to connect to next section smoothly --}}
+        <div class="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-neutral-50 to-transparent z-0"></div>
     </header>
 
     {{-- MAIN CONTENT CONTAINER --}}
