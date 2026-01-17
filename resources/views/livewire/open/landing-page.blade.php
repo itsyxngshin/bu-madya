@@ -20,7 +20,7 @@
                         <img src="{{ asset('images/MADYA Web Logo1.png') }}" alt="Logo" class="w-20 h-20 object-contain drop-shadow-lg">
                         {{-- Green Tag for balance --}}
                         <span class="px-4 py-1.5 bg-green-100 text-green-800 text-[11px] font-bold uppercase tracking-widest rounded-full border border-green-200">
-                            Bicol University Accredited
+                            Bicol University
                         </span>
                     </div>
 
@@ -45,7 +45,7 @@
                             Join the Movement <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
                         </a>
                         {{-- Yellow/Gold Border Button --}}
-                        <a href="#about" class="px-8 py-4 bg-transparent border-2 border-yellow-500 text-gray-900 font-bold rounded-xl hover:bg-yellow-50 transition-all duration-300 uppercase tracking-widest text-sm">
+                        <a href="{{ route('about') }}" class="px-8 py-4 bg-transparent border-2 border-yellow-500 text-gray-900 font-bold rounded-xl hover:bg-yellow-50 transition-all duration-300 uppercase tracking-widest text-sm">
                             Learn More
                         </a>
                     </div>
@@ -69,7 +69,7 @@
                             </div>
                             <div>
                                 <p class="text-xs font-bold text-gray-900 uppercase leading-none mb-1">DAUNTLESS</p>
-                                <p class="text-[10px] text-gray-500 font-medium uppercase tracking-wider">Batch 2024-2025</p>
+                                <p class="text-[10px] text-gray-500 font-medium uppercase tracking-wider">2025-2026</p>
                             </div>
                         </div>
                     </div>
