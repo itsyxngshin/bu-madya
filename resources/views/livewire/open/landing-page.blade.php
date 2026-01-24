@@ -1,83 +1,64 @@
 <div class="min-h-screen bg-stone-50 font-sans text-gray-900 selection:bg-red-600 selection:text-white overflow-x-hidden">
     
     {{-- 1. HERO SECTION (Redesigned) --}}
-    <header class="relative bg-stone-50 pt-28 pb-20 lg:pt-32 lg:pb-28 overflow-hidden">
-    
-        {{-- Decorative Brand Color Background Elements (Subtle Glows) --}}
-        {{-- Green/Yellow tinted shape on top right --}}
-        <div class="absolute top-0 right-0 w-3/4 h-full bg-gradient-to-bl from-green-100/40 via-yellow-50/40 to-stone-50 skew-x-12 origin-top transform translate-x-32 z-0"></div>
-        {{-- Red tinted blur on bottom left --}}
-        <div class="absolute bottom-0 left-0 w-96 h-96 bg-red-500/10 rounded-full blur-3xl z-0"></div>
+    <header class="relative min-h-[85vh] md:min-h-[800px] flex items-center justify-center text-white overflow-hidden rounded-b-[50px] md:rounded-b-[80px] shadow-2xl">
+        
+        {{-- Background & Overlay --}}
+        <div class="absolute inset-0 z-0">
+            {{-- UPDATED IMAGE SOURCE HERE --}}
+            <img src="{{ asset('images/1760712981522.JPG') }}" 
+                 class="w-full h-full object-cover transform scale-105 animate-slow-pan" 
+                 alt="BU MADYA Team">
+            
+            {{-- Tri-Color Gradient Overlay --}}
+            <div class="absolute inset-0 bg-gradient-to-b from-green-900/90 via-green-800/50 to-gray-900/95 mix-blend-multiply"></div>
+            
+            {{-- Decorative Glows --}}
+            <div class="absolute top-1/3 left-1/4 w-96 h-96 bg-yellow-400/20 rounded-full blur-[120px] animate-pulse"></div>
+            <div class="absolute bottom-1/3 right-1/4 w-96 h-96 bg-red-600/20 rounded-full blur-[120px] animate-pulse delay-1000"></div>
+        </div>
 
-        <div class="container mx-auto px-6 relative z-10">
-            <div class="flex flex-col lg:flex-row items-center gap-12 lg:gap-24">
+        {{-- Hero Content --}}
+        <div x-data="{ show: false }" x-init="setTimeout(() => show = true, 100)" 
+             class="relative z-10 container mx-auto px-6 text-center mt-10 pb-20 md:pb-32">
+            
+            {{-- Logo Animation --}}
+            <div x-show="show" 
+                 x-transition:enter="transition ease-out duration-1000"
+                 x-transition:enter-start="opacity-0 -translate-y-10 scale-50"
+                 x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                 class="w-24 h-24 md:w-32 md:h-32 mx-auto mb-8 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center border border-white/20 shadow-2xl p-4 ring-4 ring-white/5">
+                <img src="{{ asset('images/MADYA Web Logo1.png') }}" alt="Logo" class="w-full h-full object-contain drop-shadow-lg">
+            </div>
+
+            <div x-show="show"
+                 x-transition:enter="transition ease-out duration-1000 delay-300"
+                 x-transition:enter-start="opacity-0 translate-y-4"
+                 x-transition:enter-end="opacity-100 translate-y-0">
                 
-                {{-- COLUMN 1: TEXT & CONTENT --}}
-                <div class="w-full lg:w-1/2 text-center lg:text-left space-y-8">
-                    
-                    {{-- Logo & Label --}}
-                    <div class="flex flex-col lg:flex-row items-center gap-4 justify-center lg:justify-start">
-                        <img src="{{ asset('images/MADYA Web Logo1.png') }}" alt="Logo" class="w-20 h-20 object-contain drop-shadow-lg">
-                        {{-- Green Tag for balance --}}
-                        <span class="px-4 py-1.5 bg-green-100 text-green-800 text-[11px] font-bold uppercase tracking-widest rounded-full border border-green-200">
-                            Bicol University
-                        </span>
-                    </div>
+                <h2 class="text-yellow-300 font-bold tracking-[0.3em] text-xs md:text-sm mb-4 uppercase drop-shadow-md">
+                    Bicol University
+                </h2>
+                
+                <h1 class="font-heading text-4xl md:text-6xl lg:text-7xl font-black uppercase tracking-tight leading-none mb-6 drop-shadow-2xl text-white">
+                    Movement for the <br class="hidden md:block">
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-orange-400 to-red-500 drop-shadow-sm">
+                        Advancement of Youth-led Advocacy
+                    </span>
+                </h1>
+                
+                <p class="text-base md:text-xl text-green-50 max-w-2xl mx-auto mb-10 font-light drop-shadow-md bg-black/20 backdrop-blur-sm py-2 px-4 rounded-xl border border-white/5">
+                    Empowering youth-led advocacy and fostering sustainable development through active dialogue.
+                </p>
 
-                    {{-- Main Heading with Tri-Color Gradient --}}
-                    <h1 class="font-heading text-5xl md:text-6xl lg:text-7xl font-black uppercase leading-none text-gray-900">
-                        Movement for the <br>
-                        {{-- The full Red-Yellow-Green spectrum gradient --}}
-                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-red-600 via-yellow-500 to-green-600 drop-shadow-sm">
-                            Advancement of Youth-led Advocacy
-                        </span>
-                    </h1>
-
-                    {{-- Subtext --}}
-                    <p class="text-lg text-gray-700 font-medium leading-relaxed max-w-2xl mx-auto lg:mx-0">
-                        Empowering students to foster sustainable development through active dialogue, cultural preservation, and social innovation.
-                    </p>
-
-                    {{-- Actions (Red Primary, Yellow Secondary) --}}
-                    <div class="flex flex-col sm:flex-row gap-5 justify-center lg:justify-start pt-4">
-                        {{-- Red Button --}}
-                        <a href="{{ route('membership-form') }}" class="group px-8 py-4 bg-red-600 text-white font-bold rounded-xl shadow-lg hover:bg-red-700 hover:shadow-red-600/30 hover:-translate-y-1 transition-all duration-300 uppercase tracking-widest text-sm flex items-center justify-center gap-2">
-                            Join the Movement <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
-                        </a>
-                        {{-- Yellow/Gold Border Button --}}
-                        <a href="{{ route('about') }}" class="px-8 py-4 bg-transparent border-2 border-yellow-500 text-gray-900 font-bold rounded-xl hover:bg-yellow-50 transition-all duration-300 uppercase tracking-widest text-sm">
-                            Learn More
-                        </a>
-                    </div>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <a href="{{ route('membership-form') }}" class="px-8 py-4 bg-yellow-400 text-green-900 font-bold rounded-full shadow-[0_0_20px_rgba(250,204,21,0.5)] hover:bg-yellow-300 hover:scale-105 transition transform uppercase tracking-wider text-sm">
+                        Join the Movement
+                    </a>
+                    <a href="#pillars" class="px-8 py-4 bg-white/10 backdrop-blur-md border border-white/30 text-white font-bold rounded-full hover:bg-white/20 transition uppercase tracking-wider text-sm">
+                        Learn More
+                    </a>
                 </div>
-
-                {{-- COLUMN 2: IMAGE (Separated with Tri-Color Accent) --}}
-                <div class="w-full lg:w-1/2 relative group perspective-1000">
-                    {{-- Image Frame --}}
-                    <div class="relative rounded-[2.5rem] overflow-hidden shadow-2xl border-[6px] border-white aspect-[4/3] transform transition duration-700 group-hover:rotate-y-2 group-hover:scale-[1.02] z-20">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent z-10 pointer-events-none"></div>
-                        
-                        <img src="{{ asset('images/1760712981522.JPG') }}" 
-                            class="w-full h-full object-cover object-center" 
-                            alt="BU MADYA Team">
-                        
-                        {{-- Floating Badge (Green Accent) --}}
-                        <div class="absolute bottom-6 left-6 z-20 bg-white/95 backdrop-blur-md px-5 py-3 rounded-2xl border border-green-100 shadow-sm flex items-center gap-3">
-                            <div class="relative flex h-4 w-4">
-                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                            <span class="relative inline-flex rounded-full h-4 w-4 bg-green-500"></span>
-                            </div>
-                            <div>
-                                <p class="text-xs font-bold text-gray-900 uppercase leading-none mb-1">DAUNTLESS</p>
-                                <p class="text-[10px] text-gray-500 font-medium uppercase tracking-wider">2025-2026</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    {{-- Decorative Tri-Color blurred border behind image --}}
-                    <div class="absolute -bottom-5 -right-5 w-full h-full rounded-[2.5rem] z-10 hidden md:block bg-gradient-to-tr from-red-500 via-yellow-500 to-green-500 opacity-30 blur-2xl group-hover:opacity-50 transition-opacity duration-500"></div>
-                </div>
-
             </div>
         </div>
     </header>
