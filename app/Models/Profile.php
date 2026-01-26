@@ -14,6 +14,7 @@ class Profile extends Model
         'last_name',
         'college_id', 
         'course', 
+        'bio', 
         'year_level'
     ];
 
