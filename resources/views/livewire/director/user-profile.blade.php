@@ -126,35 +126,74 @@
 
             <div class="flex-1 space-y-8 mt-16 md:mt-40"> 
     
-                {{-- A. PORTFOLIO CARDS --}}
-                <section>
-                    <h3 class="flex items-center gap-3 text-xl font-bold text-gray-800 mb-5 relative z-10">
-                        <span class="w-8 h-8 rounded-full bg-red-100 text-red-600 flex items-center justify-center shadow-sm">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
-                        </span>
-                        Portfolio & Experiences
-                    </h3>
+                {{-- A. PORTFOLIO CARDS (COLLAPSIBLE) --}}
+                <section x-data="{ showAll: false }">
+                    <div class="flex items-center justify-between mb-5">
+                        <h3 class="flex items-center gap-3 text-xl font-bold text-gray-800 relative z-10">
+                            <span class="w-8 h-8 rounded-full bg-red-100 text-red-600 flex items-center justify-center shadow-sm">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                            </span>
+                            Portfolio & Experiences
+                        </h3>
+                        
+                        {{-- Counter Badge (Optional) --}}
+                        @if($portfolios->count() > 0)
+                            <span class="text-xs font-bold text-gray-400 bg-white px-2 py-1 rounded-md border border-gray-100">
+                                {{ $portfolios->count() }} Total
+                            </span>
+                        @endif
+                    </div>
                     
                     <div class="grid md:grid-cols-2 gap-4">
                         @forelse($portfolios as $item)
-                        <div class="bg-white/90 backdrop-blur-sm p-5 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition">
-                            <div class="flex justify-between items-start mb-2">
-                                <span class="px-2 py-1 rounded text-xs font-bold 
-                                    {{ $item->status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600' }}">
-                                    {{ $item->status }}
-                                </span>
-                                <span class="text-xs text-gray-400 font-mono">{{ $item->duration }}</span>
+                            {{-- Logic: Items after the 4th one (index 3) are hidden by default --}}
+                            <div 
+                                class="bg-white/90 backdrop-blur-sm p-5 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition duration-300"
+                                @if($loop->index >= 4) 
+                                    x-show="showAll" 
+                                    x-cloak 
+                                    x-transition:enter="transition ease-out duration-300"
+                                    x-transition:enter-start="opacity-0 transform scale-95"
+                                    x-transition:enter-end="opacity-100 transform scale-100"
+                                @endif
+                            >
+                                <div class="flex justify-between items-start mb-2">
+                                    <span class="px-2 py-1 rounded text-xs font-bold 
+                                        {{ $item->status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600' }}">
+                                        {{ $item->status }}
+                                    </span>
+                                    <span class="text-xs text-gray-400 font-mono">{{ $item->duration }}</span>
+                                </div>
+                                <h4 class="font-bold text-gray-900 text-lg">{{ $item->designation }}</h4>
+                                <p class="text-sm text-red-600 font-medium mb-3">{{ $item->place }}</p>
+                                <p class="text-sm text-gray-500 leading-relaxed">{{ $item->description }}</p>
                             </div>
-                            <h4 class="font-bold text-gray-900 text-lg">{{ $item->designation }}</h4>
-                            <p class="text-sm text-red-600 font-medium mb-3">{{ $item->place }}</p>
-                            <p class="text-sm text-gray-500 leading-relaxed">{{ $item->description }}</p>
-                        </div>
                         @empty
-                        <div class="col-span-2 text-center py-8 text-gray-400 bg-white/50 rounded-xl border border-dashed border-gray-300">
-                            No portfolios added yet.
-                        </div>
+                            <div class="col-span-2 text-center py-8 text-gray-400 bg-white/50 rounded-xl border border-dashed border-gray-300">
+                                No portfolios added yet.
+                            </div>
                         @endforelse
                     </div>
+
+                    {{-- SHOW MORE BUTTON --}}
+                    {{-- Only shows if there are more than 4 items --}}
+                    @if($portfolios->count() > 4)
+                        <div class="mt-6 text-center relative z-20">
+                            <button 
+                                @click="showAll = !showAll"
+                                class="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-white border border-gray-200 text-sm font-bold text-gray-600 hover:bg-gray-50 hover:text-gray-900 shadow-sm transition group"
+                            >
+                                <span x-text="showAll ? 'Show Less' : 'See All Experiences'"></span>
+                                
+                                {{-- Dynamic Arrow Icon --}}
+                                <svg class="w-4 h-4 transition-transform duration-300" 
+                                    :class="showAll ? 'rotate-180' : ''"
+                                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    @endif
                 </section>
 
                 {{-- B. ENGAGEMENT TABLE --}}
