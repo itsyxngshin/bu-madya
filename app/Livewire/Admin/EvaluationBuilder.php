@@ -16,7 +16,6 @@ class EvaluationBuilder extends Component
 
     // 1. Defined Rules clearly
     protected $rules = [
-        'evaluation.title' => 'required|string|max:255',
         'evaluation.project_id' => 'nullable|integer',
         'evaluation.description' => 'nullable|string',
         'evaluation.is_active' => 'boolean',
