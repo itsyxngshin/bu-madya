@@ -3,32 +3,34 @@
 namespace App\Livewire\Open;
 
 use Livewire\Component;
+use Livewire\WithPagination; // <--- REQUIRED for ->links() to work
 use App\Models\Evaluation;
 use App\Models\EvaluationResponse;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
 
-#[Layout('layouts.madya-template')] // Ensure this matches your public layout name
+#[Layout('layouts.madya-public')]
 class EvaluationList extends Component
 {
+    use WithPagination; // <--- Don't forget to include this trait
+
     public function render()
     {
-        // Use paginate() instead of get()
         $evaluations = Evaluation::where('is_active', true)
             ->latest()
-            ->paginate(9) // <--- Returns a Paginator, not a Collection
-            ->through(function ($evaluation) { // <--- Use 'through' to map over paginated items
+            ->paginate(9) // <--- Returns a Paginator object
+            ->through(function ($evaluation) { // <--- 'through' keeps pagination working while editing data
                 
-                // Check if the logged-in user has already submitted a response
                 $hasResponded = false;
                 
+                // Check if user already submitted
                 if (Auth::check()) {
                     $hasResponded = EvaluationResponse::where('evaluation_id', $evaluation->id)
                         ->where('user_id', Auth::id())
                         ->exists();
                 }
 
-                // Add the temporary status property
+                // Append status dynamically
                 $evaluation->status = $hasResponded ? 'Completed' : 'Pending';
                 
                 return $evaluation;

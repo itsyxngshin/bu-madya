@@ -1,96 +1,89 @@
-<div class="min-h-screen bg-gray-100 p-6 font-sans text-gray-900">
+<div class="min-h-screen bg-gray-50 pb-20 font-sans text-gray-900">
     
-    <div class="max-w-7xl mx-auto">
+    {{-- 1. PUBLIC HERO SECTION --}}
+    <div class="bg-gray-900 h-64 relative overflow-hidden flex flex-col justify-center px-6 lg:px-12">
+        {{-- Background Decoration --}}
+        <div class="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-red-600 to-orange-500 rounded-full blur-3xl opacity-20 -mr-16 -mt-16"></div>
+        <div class="absolute bottom-0 left-0 w-40 h-40 bg-blue-600 rounded-full blur-3xl opacity-10 -ml-10 -mb-10"></div>
         
-        {{-- HEADER & ACTIONS --}}
-        <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
-            <div>
-                <h1 class="text-3xl font-black text-gray-900">Evaluation Manager</h1>
-                <p class="text-sm text-gray-500 mt-1">Manage feedback forms and view responses.</p>
-            </div>
-
-            <div class="flex items-center gap-3 w-full md:w-auto">
-                {{-- Search Bar --}}
-                <div class="relative w-full md:w-64">
-                    <input wire:model.live="search" type="text" class="w-full pl-10 pr-4 py-2 rounded-xl border-gray-200 focus:border-orange-500 focus:ring-orange-500 text-sm transition" placeholder="Search forms...">
-                    <svg class="w-4 h-4 text-gray-400 absolute left-3 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                </div>
-
-                <a href="{{ route('admin.evaluations.create') }}" class="px-5 py-2 bg-gray-900 text-white font-bold rounded-xl shadow-lg hover:bg-orange-600 transition flex items-center gap-2 text-sm whitespace-nowrap">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                    Create New
-                </a>
-            </div>
+        <div class="relative z-10 max-w-5xl mx-auto w-full">
+            <span class="text-orange-500 font-bold tracking-widest uppercase text-xs mb-2 block">Feedback Portal</span>
+            <h1 class="text-3xl md:text-5xl font-black text-white tracking-tight mb-2">
+                Open Evaluations
+            </h1>
+            <p class="text-gray-400 text-sm md:text-base max-w-2xl">
+                Share your thoughts and help us improve. Select an active evaluation form below to get started.
+            </p>
         </div>
+    </div>
 
-        {{-- GRID LAYOUT --}}
+    {{-- 2. CARDS GRID --}}
+    <div class="max-w-5xl mx-auto px-6 -mt-16 relative z-20">
+        
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            
             @forelse($evaluations as $eval)
-                <div class="bg-white rounded-[2rem] p-6 shadow-sm border border-gray-200 relative group hover:-translate-y-1 hover:shadow-md transition duration-300">
+                <div class="bg-white rounded-[2rem] p-6 shadow-xl shadow-gray-200/50 border border-gray-100 flex flex-col h-full hover:-translate-y-2 transition-transform duration-300 relative overflow-hidden group">
                     
-                    {{-- Status Badge (Uses ID for internal action - Safe & Fast) --}}
-                    <div class="absolute top-6 right-6">
-                        <button wire:click="toggleStatus({{ $eval->id }})" 
-                                class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide transition border
-                                {{ $eval->is_active ? 'bg-green-100 text-green-700 border-green-200 hover:bg-green-200' : 'bg-gray-100 text-gray-500 border-gray-200 hover:bg-gray-200' }}">
-                            {{ $eval->is_active ? 'Active' : 'Draft' }}
-                        </button>
-                    </div>
+                    {{-- Status Color Bar (Top) --}}
+                    <div class="absolute top-0 left-0 w-full h-1.5 {{ $eval->status === 'Completed' ? 'bg-green-500' : 'bg-orange-500' }}"></div>
 
-                    {{-- Card Content --}}
-                    <div class="mt-2 mb-6">
-                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-red-500 to-orange-500 text-white flex items-center justify-center mb-4 shadow-lg shadow-orange-200">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
-                        </div>
+                    {{-- Card Header --}}
+                    <div class="mb-4 mt-2 flex justify-between items-start">
+                        <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide border
+                            {{ $eval->status === 'Completed' ? 'bg-green-50 text-green-700 border-green-100' : 'bg-orange-50 text-orange-600 border-orange-100' }}">
+                            {{ $eval->status }}
+                        </span>
                         
-                        <h3 class="text-xl font-bold text-gray-900 leading-tight mb-2 line-clamp-1" title="{{ $eval->title }}">
-                            {{ $eval->title }}
-                        </h3>
-                        <p class="text-xs text-gray-500 mb-4 font-mono">
-                            Updated {{ $eval->updated_at->diffForHumans() }}
-                        </p>
-                        
-                        <div class="flex items-center gap-4 text-sm text-gray-600">
-                            <span class="flex items-center gap-1 font-bold">
-                                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-                                {{ $eval->responses_count }} Responses
+                        {{-- Project Label (Optional, if linked) --}}
+                        @if($eval->project)
+                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg>
+                                Project
                             </span>
-                        </div>
+                        @endif
                     </div>
 
-                    {{-- Actions Footer --}}
-                    <div class="border-t border-gray-100 pt-4 flex items-center justify-between">
-                        
-                        {{-- [SLUG ADOPTION] Use $eval object so Laravel uses the slug --}}
-                        <a href="{{ route('admin.evaluations.results', $eval) }}" class="text-xs font-bold text-orange-600 hover:text-orange-700 uppercase tracking-wider flex items-center gap-1">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
-                            Results
-                        </a>
+                    {{-- Title & Desc --}}
+                    <h3 class="text-xl font-black text-gray-900 mb-2 leading-tight group-hover:text-orange-600 transition-colors">
+                        {{ $eval->title }}
+                    </h3>
+                    <p class="text-sm text-gray-500 mb-6 line-clamp-3 flex-grow">
+                        {{ $eval->description ?: 'No description provided.' }}
+                    </p>
 
-                        <div class="flex items-center gap-3">
-                            {{-- [SLUG ADOPTION] Use $eval object --}}
-                            <a href="{{ route('admin.evaluations.edit', $eval) }}" class="text-gray-400 hover:text-gray-900 transition" title="Edit Form">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                    {{-- Action Footer --}}
+                    <div class="pt-4 mt-auto border-t border-gray-50">
+                        @if($eval->status === 'Pending')
+                            {{-- Start Button --}}
+                            <a href="{{ route('evaluations.show', $eval) }}" class="w-full flex items-center justify-center gap-2 py-3 bg-gray-900 text-white font-bold rounded-xl shadow-md hover:bg-orange-600 transition-colors text-xs uppercase tracking-wider">
+                                Start Now 
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
                             </a>
-                            
-                            {{-- Delete (Uses ID for internal action) --}}
-                            <button onclick="confirm('Are you sure?') || event.stopImmediatePropagation()" wire:click="delete({{ $eval->id }})" class="text-gray-400 hover:text-red-600 transition" title="Delete">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        @else
+                            {{-- Submitted State --}}
+                            <button disabled class="w-full flex items-center justify-center gap-2 py-3 bg-green-50 text-green-600 font-bold rounded-xl border border-green-100 cursor-default text-xs uppercase tracking-wider">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                Response Submitted
                             </button>
-                        </div>
+                        @endif
                     </div>
 
                 </div>
             @empty
-                <div class="col-span-full py-12 text-center text-gray-400 border-2 border-dashed border-gray-200 rounded-[2rem]">
-                    <p>No evaluation forms found.</p>
+                {{-- Empty State --}}
+                <div class="col-span-full py-20 text-center bg-white rounded-[2rem] border-2 border-dashed border-gray-200">
+                    <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-300">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900">No Active Evaluations</h3>
+                    <p class="text-gray-500 text-sm mt-1">Check back later for new feedback forms.</p>
                 </div>
             @endforelse
 
         </div>
         
-        <div class="mt-8">
+        {{-- 3. PAGINATION LINKS --}}
+        <div class="mt-12">
             {{ $evaluations->links() }}
         </div>
 
