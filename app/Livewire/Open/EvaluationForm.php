@@ -34,6 +34,24 @@ class EvaluationForm extends Component
         }
     }
 
+    public function getProgressProperty()
+    {
+        // Filter out 'sections' as they don't need answers
+        $requiredQuestions = $this->evaluation->questions
+            ->where('type', '!=', 'section')
+            ->where('is_required', true)
+            ->count();
+
+        if ($requiredQuestions == 0) return 0;
+
+        // Count how many required answers are filled
+        $filled = collect($this->answers)
+            ->filter(fn($val) => !empty($val))
+            ->count();
+
+        return min(100, round(($filled / $requiredQuestions) * 100));
+    }
+
     public function submit() 
     {
         // 1. Dynamic Validation Logic
