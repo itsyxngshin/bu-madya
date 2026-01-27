@@ -11,7 +11,7 @@
         {{-- Header --}}
         <div class="sm:mx-auto sm:w-full sm:max-w-md text-center mb-6">
             <a href="/" class="inline-block transition-transform hover:scale-105">
-                <img src="{{ asset('images/official_logo.png') }}" class="h-12 sm:h-16 w-auto mx-auto" alt="BU MADYA Logo">
+                <img src="{{ asset('images/MADYA Web Logo1.png') }}" class="h-12 sm:h-16 w-auto mx-auto" alt="BU MADYA Logo">
             </a>
             <h2 class="mt-4 sm:mt-6 text-2xl sm:text-3xl font-heading font-black text-gray-900 tracking-tight">
                 Welcome <span class="text-transparent bg-clip-text bg-gradient-to-r from-green-600 via-yellow-500 to-red-600">Back</span>
