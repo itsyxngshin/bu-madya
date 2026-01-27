@@ -15,22 +15,18 @@ class EvaluationBuilder extends Component
     public $questions = [];
 
     // 1. Defined Rules clearly
-    protected function rules() 
-    {
-        return [
-            'evaluation.title' => 'required|string|max:255',
-            'evaluation.project_id' => 'nullable|integer',
-            'evaluation.description' => 'nullable|string',
-            'evaluation.is_active' => 'boolean',
-            'questions' => 'array',
-            'questions.*.question_text' => 'required|string',
-            'questions.*.type' => 'required|in:text,textarea,radio,likert',
-            'questions.*.options' => 'nullable|array',
-            'questions.*.is_required' => 'boolean',
-        ];
-    }
+    protected $rules = [
+        'evaluation.title' => 'required|string|max:255',
+        'evaluation.project_id' => 'nullable|integer',
+        'evaluation.description' => 'nullable|string',
+        'evaluation.is_active' => 'boolean',
+        'questions.*.question_text' => 'required|string',
+        'questions.*.type' => 'required|in:text,textarea,radio,likert',
+        'questions.*.options' => 'nullable|array',
+        'questions.*.is_required' => 'boolean',
+    ];
 
-    // 2. Custom Attributes for cleaner error messages
+    // Keep this to make error messages look nice
     protected $validationAttributes = [
         'evaluation.title' => 'Title',
         'questions.*.question_text' => 'Question text',
