@@ -11,45 +11,57 @@ use Livewire\Attributes\Layout;
 #[Layout('layouts.madya-admin-deck')]
 class EvaluationBuilder extends Component
 {
+    // The Model (Used for loading/saving, NOT for direct binding)
     public Evaluation $evaluation;
+
+    // 1. Primitive Properties (These catch your form input 100% of the time)
+    public $title = '';
+    public $description = '';
+    public $project_id = null;
+    public $is_active = true;
+    
+    // Questions Array
     public $questions = [];
 
-    // 1. Defined Rules clearly
+    // 2. Rules defined as a PROPERTY (Crucial for Livewire security)
     protected $rules = [
-        'evaluation.title' => 'required|string|max:255',
-        'evaluation.project_id' => 'nullable|integer',
-        'evaluation.description' => 'nullable|string',
-        'evaluation.is_active' => 'boolean',
+        'title' => 'required|string|max:255', // Validates $this->title
+        'project_id' => 'nullable|integer',
+        'description' => 'nullable|string',
+        'is_active' => 'boolean',
+        'questions' => 'array',
         'questions.*.question_text' => 'required|string',
-        'questions.*.type' => 'required|in:text,textarea,radio,likert',
+        // Note: added 'section' to the allowed types
+        'questions.*.type' => 'required|in:text,textarea,radio,likert,section',
         'questions.*.options' => 'nullable|array',
         'questions.*.is_required' => 'boolean',
     ];
 
-    // Keep this to make error messages look nice
     protected $validationAttributes = [
-        'evaluation.title' => 'Title',
         'questions.*.question_text' => 'Question text',
     ];
 
     public function mount(Evaluation $evaluation = null)
     {
-        // Handle "Create" vs "Edit" mode
+        // 1. Setup the Model
         $this->evaluation = $evaluation ?? new Evaluation();
-        
-        // Default to active for new forms
-        if (!$this->evaluation->exists) {
-            $this->evaluation->is_active = true;
-        }
 
-        // Load questions if editing
+        // 2. Fill the Primitive Properties from the Model (if editing)
         if ($this->evaluation->exists) {
+            $this->title = $this->evaluation->title;
+            $this->description = $this->evaluation->description;
+            $this->project_id = $this->evaluation->project_id;
+            $this->is_active = $this->evaluation->is_active;
+
+            // Load existing questions
             $this->questions = $this->evaluation->questions()
                 ->orderBy('order')
                 ->get()
                 ->toArray();
         } else {
-            // Start with one default text question
+            // Defaults for a new form
+            $this->title = ''; 
+            $this->is_active = true;
             $this->questions[] = [
                 'id' => null,
                 'type' => 'text',
@@ -75,7 +87,7 @@ class EvaluationBuilder extends Component
             'type' => $type,
             'question_text' => '',
             'options' => $defaultOptions,
-            'is_required' => true,
+            'is_required' => ($type !== 'section'), // Sections don't need to be required
             'order' => count($this->questions)
         ];
     }
@@ -110,16 +122,24 @@ class EvaluationBuilder extends Component
 
     public function save()
     {
+        // 1. Validate the local properties
         $this->validate();
 
-        // Generate Slug if missing
+        // 2. Transfer data from Properties -> Model
+        $this->evaluation->title = $this->title;
+        $this->evaluation->description = $this->description;
+        $this->evaluation->project_id = $this->project_id;
+        $this->evaluation->is_active = $this->is_active;
+
+        // 3. Generate Slug logic
         if (empty($this->evaluation->slug)) {
-            $this->evaluation->slug = Str::slug($this->evaluation->title);
+            $this->evaluation->slug = Str::slug($this->title);
         }
 
+        // 4. Save the Header
         $this->evaluation->save();
 
-        // Sync Questions (Delete old, create new)
+        // 5. Sync Questions (Delete old, create new)
         $this->evaluation->questions()->delete();
 
         foreach ($this->questions as $index => $q) {
@@ -134,6 +154,14 @@ class EvaluationBuilder extends Component
 
         session()->flash('success', 'Evaluation form saved successfully!');
         return redirect()->route('admin.evaluations.index');
+    }
+
+    public function delete()
+    {
+        if($this->evaluation->exists) {
+            $this->evaluation->delete();
+            return redirect()->route('admin.evaluations.index');
+        }
     }
 
     public function render()
