@@ -15,6 +15,9 @@ use App\Livewire\Open\News\Show as NewsShow;
 use App\Livewire\Open\ThePillars;
 use App\Livewire\Open\EventsIndex;
 use App\Livewire\Open\EventShow;
+use App\Livewire\Admin\EvaluationBuilder; 
+use App\Livewire\Open\EvaluationList; 
+use App\Livewire\Open\EvaluationForm;
 
 use App\Livewire\Director\NewsCreate;
 use App\Livewire\Director\NewsEdit;
@@ -49,6 +52,7 @@ use App\Livewire\Admin\EditEvent;
 use App\Livewire\Admin\Transparency\DocumentForm;
 use App\Livewire\Admin\Transparency\DocumentIndex;
 use App\Livewire\Open\TransparencyIndex;
+use App\Livewire\Admin\EvaluationResults;
 use App\Models\MembershipApplication; 
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Response;
@@ -95,6 +99,8 @@ Route::middleware([
 });
 */
 
+
+
 // Middleware accessible to both members and directors
 Route::middleware(['auth', 'role:director']) 
     ->group(function () {
@@ -115,6 +121,11 @@ Route::middleware(['auth'])
     ->group(function () {
     Route::get('/roundtable', RoundtableIndex::class)->name('roundtable.index');
     Route::get('/roundtable/{id}', RoundtableShow::class)->name('roundtable.show');
+    // 1. The Dashboard (List of pending evaluations)
+    Route::get('/evaluations', EvaluationList::class)->name('evaluations.index');
+
+    // 2. The Actual Form
+    Route::get('/evaluations/{evaluation}', EvaluationForm::class)->name('evaluations.show');
 });
 
 
@@ -134,6 +145,9 @@ Route::middleware(['auth', 'role:administrator'])->prefix('admin')->name('admin.
     Route::get('/transparency', DocumentIndex::class)->name('transparency.index');
     Route::get('/transparency/create', DocumentForm::class)->name('transparency.create');
     Route::get('/transparency/{document}/edit', DocumentForm::class)->name('transparency.edit');
+    Route::get('/admin/evaluations/create', EvaluationBuilder::class)->name('admin.evaluations.create');
+    Route::get('/admin/evaluations/{evaluation}/edit', EvaluationBuilder::class)->name('admin.evaluations.edit');
+    Route::get('/admin/evaluations/{evaluation}/results', EvaluationResults::class)->name('admin.evaluations.results');
 });
 
 Route::middleware(['auth', 'role:administrator,director'])  

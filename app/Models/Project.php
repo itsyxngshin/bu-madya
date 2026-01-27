@@ -118,4 +118,10 @@ class Project extends Model
     {
         return $this->hasMany(ProjectGallery::class);
     }
+
+    public function evaluations()
+    {
+        // Get all evaluation responses linked to this project
+        return $this->hasMany(EvaluationResponse::class);
+    }
 }
