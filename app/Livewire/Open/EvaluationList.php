@@ -9,7 +9,7 @@ use App\Models\EvaluationResponse;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
 
-#[Layout('layouts.madya-public')]
+#[Layout('layouts.madya-template')]
 class EvaluationList extends Component
 {
     use WithPagination; // <--- Don't forget to include this trait
