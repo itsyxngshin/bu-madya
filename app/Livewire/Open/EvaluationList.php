@@ -7,6 +7,8 @@ use App\Models\Evaluation;
 use App\Models\EvaluationResponse;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
+
+#[Layout('layouts.madya-template')]
 class EvaluationList extends Component
 {
     public function render()
@@ -32,6 +34,6 @@ class EvaluationList extends Component
         return view('livewire.open.evaluation-list', [
             'pending' => $pending,
             'completed' => $completed
-        ])->layout('layouts.madya-template');
+        ]);
     }
 }
