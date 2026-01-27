@@ -7,7 +7,9 @@ use App\Models\Evaluation;
 use App\Models\EvaluationResponse;
 use App\Models\EvaluationAnswer;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\Layout;
 
+#[Layout('layouts.madya-template')]
 class EvaluationForm extends Component
 {
     public Evaluation $evaluation;
