@@ -13,12 +13,13 @@ class EvaluationList extends Component
 {
     public function render()
     {
-        // 1. Fetch only ACTIVE evaluations
+        // Use paginate() instead of get()
         $evaluations = Evaluation::where('is_active', true)
             ->latest()
-            ->get()
-            ->map(function ($evaluation) {
-                // 2. Check if the logged-in user has already submitted a response
+            ->paginate(9) // <--- Returns a Paginator, not a Collection
+            ->through(function ($evaluation) { // <--- Use 'through' to map over paginated items
+                
+                // Check if the logged-in user has already submitted a response
                 $hasResponded = false;
                 
                 if (Auth::check()) {
@@ -27,13 +28,12 @@ class EvaluationList extends Component
                         ->exists();
                 }
 
-                // Add a temporary 'status' property to the object for the view
+                // Add the temporary status property
                 $evaluation->status = $hasResponded ? 'Completed' : 'Pending';
                 
                 return $evaluation;
             });
 
-        // 3. Pass '$evaluations' to the view
         return view('livewire.open.evaluation-list', [
             'evaluations' => $evaluations
         ]);
