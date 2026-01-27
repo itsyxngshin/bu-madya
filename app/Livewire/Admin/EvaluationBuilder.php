@@ -6,7 +6,9 @@ use Livewire\Component;
 use App\Models\Evaluation;
 use App\Models\EvaluationQuestion;
 use Illuminate\Support\Str;
+use Livewire\Attributes\Layout;
 
+#[Layout('layouts.madya-admin-deck')]
 class EvaluationBuilder extends Component
 {
     public Evaluation $evaluation;

@@ -53,6 +53,7 @@ use App\Livewire\Admin\Transparency\DocumentForm;
 use App\Livewire\Admin\Transparency\DocumentIndex;
 use App\Livewire\Open\TransparencyIndex;
 use App\Livewire\Admin\EvaluationResults;
+use App\Livewire\Admin\EvaluationList as AdminEvaluationIndex;
 use App\Models\MembershipApplication; 
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Response;
@@ -145,9 +146,10 @@ Route::middleware(['auth', 'role:administrator'])->prefix('admin')->name('admin.
     Route::get('/transparency', DocumentIndex::class)->name('transparency.index');
     Route::get('/transparency/create', DocumentForm::class)->name('transparency.create');
     Route::get('/transparency/{document}/edit', DocumentForm::class)->name('transparency.edit');
-    Route::get('/admin/evaluations/create', EvaluationBuilder::class)->name('admin.evaluations.create');
-    Route::get('/admin/evaluations/{evaluation}/edit', EvaluationBuilder::class)->name('admin.evaluations.edit');
-    Route::get('/admin/evaluations/{evaluation}/results', EvaluationResults::class)->name('admin.evaluations.results');
+    Route::get('/evaluations/create', EvaluationBuilder::class)->name('evaluations.create');
+    Route::get('/evaluations/{evaluation}/edit', EvaluationBuilder::class)->name('evaluations.edit');
+    Route::get('/evaluations/{evaluation}/results', EvaluationResults::class)->name('evaluations.results');
+    Route::get('/evaluations', AdminEvaluationIndex::class)->name('evaluations.index');
 });
 
 Route::middleware(['auth', 'role:administrator,director'])  

@@ -5,7 +5,9 @@ namespace App\Livewire\Admin;
 use Livewire\Component;
 use App\Models\Evaluation;
 use App\Models\EvaluationQuestion;
+use Livewire\Attributes\Layout;
 
+#[Layout('layouts.madya-admin-deck')]
 class EvaluationResults extends Component
 {
     public Evaluation $evaluation;

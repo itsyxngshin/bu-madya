@@ -113,6 +113,18 @@
             Event & Campaign Portal 
         </a>
 
+        {{-- [NEW] SEPARATOR: SERVICES --}}
+        <div class="pt-4 pb-2 px-3 mt-2 border-t border-gray-100">
+            <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Services</p>
+        </div>
+
+        {{-- [NEW] 6. EVALUATION PORTAL --}}
+        <a href="{{ route('admin.evaluations.index') }}" 
+           class="{{ $linkClass }} {{ request()->routeIs('admin.evaluations.*') ? $activeClass : $inactiveClass }}">
+            <svg class="w-5 h-5 {{ request()->routeIs('admin.evaluations.*') ? $iconActive : $iconInactive }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+            Evaluation Manager
+        </a>
+
         {{-- [NEW] 6. TRANSPARENCY BOARD --}}
         <a href="{{ route('admin.transparency.index') }}" 
            class="{{ $linkClass }} {{ request()->routeIs('admin.transparency.*') ? $activeClass : $inactiveClass }}">
