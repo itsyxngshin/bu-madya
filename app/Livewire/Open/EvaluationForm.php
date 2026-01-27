@@ -5,78 +5,37 @@ namespace App\Livewire\Open;
 use Livewire\Component;
 use App\Models\Evaluation;
 use App\Models\EvaluationResponse;
-use App\Models\EvaluationAnswer;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
 
-#[Layout('layouts.madya-template')]
-class EvaluationForm extends Component
+#[Layout('layouts.madya-public')] // Ensure this matches your public layout name
+class EvaluationList extends Component
 {
-    public Evaluation $evaluation;
-    public $project_id = null; // Store the project ID from URL
-    public $answers = []; // Stores user's answers: [question_id => value]
-
-    // Capture project_id from the Query String (?project_id=1)
-    protected $queryString = ['project_id'];
-
-    public function mount(Evaluation $evaluation)
-    {
-        $this->evaluation = $evaluation;
-        
-        // Capture project ID if passed in URL
-        if (request()->has('project_id')) {
-            $this->project_id = request()->query('project_id');
-        }
-
-        // Initialize empty answers for the UI
-        foreach($evaluation->questions as $q) {
-            $this->answers[$q->id] = '';
-        }
-    }
-
-    public function submit() 
-    {
-        // 1. Dynamic Validation Logic
-        $rules = [];
-        $messages = [];
-
-        foreach($this->evaluation->questions as $q) {
-            if($q->is_required) {
-                $rules["answers.{$q->id}"] = 'required';
-                $messages["answers.{$q->id}.required"] = "This question is required.";
-            }
-        }
-        
-        $this->validate($rules, $messages);
-
-        // 2. Create the Response Header (Who submitted it?)
-        $response = EvaluationResponse::create([
-            'evaluation_id' => $this->evaluation->id,
-            'user_id' => Auth::id(), // Can be null if allowing anonymous
-            'project_id' => $this->project_id, // Link to specific project if available
-        ]);
-
-        // 3. Save the Individual Answers
-        foreach($this->answers as $questionId => $value) {
-            // Handle arrays (like checkboxes) by converting to JSON
-            $finalValue = is_array($value) ? json_encode($value) : $value;
-
-            EvaluationAnswer::create([
-                'evaluation_response_id' => $response->id,
-                'evaluation_question_id' => $questionId,
-                'answer_value' => $finalValue
-            ]);
-        }
-
-        // 4. Reset & Notify
-        session()->flash('success', 'Thank you! Your evaluation has been submitted.');
-        
-        // Optional: Redirect to a thank you page or back to the index
-        return redirect()->route('home'); 
-    }
-
     public function render()
     {
-        return view('livewire.open.evaluation-form');
+        // 1. Fetch only ACTIVE evaluations
+        $evaluations = Evaluation::where('is_active', true)
+            ->latest()
+            ->get()
+            ->map(function ($evaluation) {
+                // 2. Check if the logged-in user has already submitted a response
+                $hasResponded = false;
+                
+                if (Auth::check()) {
+                    $hasResponded = EvaluationResponse::where('evaluation_id', $evaluation->id)
+                        ->where('user_id', Auth::id())
+                        ->exists();
+                }
+
+                // Add a temporary 'status' property to the object for the view
+                $evaluation->status = $hasResponded ? 'Completed' : 'Pending';
+                
+                return $evaluation;
+            });
+
+        // 3. Pass '$evaluations' to the view
+        return view('livewire.open.evaluation-list', [
+            'evaluations' => $evaluations
+        ]);
     }
-} 
+}
