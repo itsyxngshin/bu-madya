@@ -14,33 +14,54 @@ class EvaluationBuilder extends Component
     public Evaluation $evaluation;
     public $questions = [];
 
-    protected $rules = [
-        'evaluation.title' => 'required|string|max:255',
-        'evaluation.description' => 'nullable|string',
-        'evaluation.is_active' => 'boolean',
-        'evaluation.project_id' => 'nullable|integer', // [FIX] Added validation for project link
-        'questions.*.question_text' => 'required|string',
-        'questions.*.type' => 'required|in:text,textarea,radio,likert',
-        'questions.*.options' => 'nullable|array',
-        'questions.*.is_required' => 'boolean',
+    // 1. Defined Rules clearly
+    protected function rules() 
+    {
+        return [
+            'evaluation.title' => 'required|string|max:255',
+            'evaluation.project_id' => 'nullable|integer',
+            'evaluation.description' => 'nullable|string',
+            'evaluation.is_active' => 'boolean',
+            'questions' => 'array',
+            'questions.*.question_text' => 'required|string',
+            'questions.*.type' => 'required|in:text,textarea,radio,likert',
+            'questions.*.options' => 'nullable|array',
+            'questions.*.is_required' => 'boolean',
+        ];
+    }
+
+    // 2. Custom Attributes for cleaner error messages
+    protected $validationAttributes = [
+        'evaluation.title' => 'Title',
+        'questions.*.question_text' => 'Question text',
     ];
 
     public function mount(Evaluation $evaluation = null)
     {
+        // Handle "Create" vs "Edit" mode
         $this->evaluation = $evaluation ?? new Evaluation();
         
-        // Ensure default active state is true for new forms
+        // Default to active for new forms
         if (!$this->evaluation->exists) {
             $this->evaluation->is_active = true;
         }
 
+        // Load questions if editing
         if ($this->evaluation->exists) {
             $this->questions = $this->evaluation->questions()
                 ->orderBy('order')
                 ->get()
                 ->toArray();
         } else {
-            $this->questions = [];
+            // Start with one default text question
+            $this->questions[] = [
+                'id' => null,
+                'type' => 'text',
+                'question_text' => '',
+                'options' => [],
+                'is_required' => true,
+                'order' => 0
+            ];
         }
     }
 
@@ -95,18 +116,14 @@ class EvaluationBuilder extends Component
     {
         $this->validate();
 
-        // [FIX] Generate Slug BEFORE saving
+        // Generate Slug if missing
         if (empty($this->evaluation->slug)) {
             $this->evaluation->slug = Str::slug($this->evaluation->title);
         }
 
-        // [FIX] Warning: If editing an active form with responses, 
-        // using delete() on questions will orphan existing answers.
-        // For a simple builder, this is acceptable, but be aware.
-        
         $this->evaluation->save();
 
-        // Sync Questions
+        // Sync Questions (Delete old, create new)
         $this->evaluation->questions()->delete();
 
         foreach ($this->questions as $index => $q) {
@@ -121,14 +138,6 @@ class EvaluationBuilder extends Component
 
         session()->flash('success', 'Evaluation form saved successfully!');
         return redirect()->route('admin.evaluations.index');
-    }
-    
-    public function delete()
-    {
-        if($this->evaluation->exists) {
-            $this->evaluation->delete();
-            return redirect()->route('admin.evaluations.index');
-        }
     }
 
     public function render()
