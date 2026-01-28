@@ -96,6 +96,8 @@
                                 <div class="pl-8 flex items-center gap-4">
                                     <input type="text" wire:model="questions.{{ $index }}.question_text" class="w-full text-xl font-black text-gray-800 border-0 bg-transparent placeholder-orange-300 focus:ring-0 p-0" placeholder="Type Section Title">
                                     <button wire:click="removeQuestion({{ $index }})" class="text-orange-300 hover:text-red-500">&times;</button>
+                                    {{-- NEW: Section Description --}}
+                                    <input type="text" wire:model="questions.{{ $index }}.description" class="w-full text-sm text-gray-600 border-0 bg-transparent placeholder-orange-300/50 focus:ring-0 p-0" placeholder="Add a description for this section (optional)...">      
                                 </div>
                             </div>
                         @else
@@ -121,6 +123,7 @@
                                     </div>
 
                                     <input type="text" wire:model="questions.{{ $index }}.question_text" class="w-full text-lg font-bold border-0 border-b-2 border-gray-100 focus:border-orange-500 focus:ring-0 bg-transparent transition mb-4" placeholder="Enter question...">
+                                    <input type="text" wire:model="questions.{{ $index }}.description" class="w-full text-xs text-gray-500 border-0 border-b border-gray-50 focus:border-orange-300 focus:ring-0 bg-transparent transition mb-4 placeholder-gray-300" placeholder="Add help text or description (optional)">
 
                                     {{-- QUESTION IMAGE UPLOADER --}}
                                     <div class="mb-4 bg-gray-50 p-3 rounded-lg border border-dashed border-gray-200">

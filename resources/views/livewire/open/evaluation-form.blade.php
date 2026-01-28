@@ -63,6 +63,12 @@
                                 <h2 class="text-sm font-black text-gray-800 uppercase tracking-tight px-2">{{ $question->question_text }}</h2>
                                 <div class="h-px bg-gray-200 flex-1"></div>
                             </div>
+                            <div class="w-full h-1 bg-orange-600 rounded-r-full mb-2"></div>
+            
+                            {{-- NEW: Show Section Description --}}
+                            @if($question->description)
+                                <p class="text-sm text-gray-600 italic ml-1 max-w-xl">{{ $question->description }}</p>
+                            @endif
                         </div>
                     @else
                         <div class="group bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md hover:border-orange-100 transition-all duration-300 relative overflow-hidden">
@@ -76,6 +82,11 @@
                                     @if($question->is_required) <span class="text-[10px] font-bold text-red-500 uppercase tracking-widest bg-red-50 px-2 py-0.5 rounded">Required</span> @endif
                                 </div>
                                 <span class="text-base font-bold text-gray-900 block leading-snug">{{ $question->question_text }}</span>
+                                @if($question->description)
+                                    <span class="text-xs text-gray-500 block mt-1 leading-relaxed">
+                                        {{ $question->description }}
+                                    </span>
+                                @endif
                             </label>
 
                             {{-- QUESTION IMAGE DISPLAY --}}

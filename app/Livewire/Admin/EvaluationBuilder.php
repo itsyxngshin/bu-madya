@@ -40,6 +40,7 @@ class EvaluationBuilder extends Component
         'questions.*.new_image' => 'nullable|image|max:2048', // For question images
         'questions.*.options' => 'nullable|array',
         'questions.*.is_required' => 'boolean',
+        'questions.*.description' => 'nullable|string|max:1000',
         
     ];
 
@@ -72,6 +73,7 @@ class EvaluationBuilder extends Component
                 'id' => null,
                 'type' => 'text',
                 'question_text' => '',
+                'description' => '',
                 'options' => [],
                 'is_required' => true,
                 'order' => 0, 
@@ -94,6 +96,7 @@ class EvaluationBuilder extends Component
             'id' => null,
             'type' => $type,
             'question_text' => '',
+            'description' => '',
             'options' => $defaultOptions,
             'is_required' => ($type !== 'section'), // Sections don't need to be required
             'order' => count($this->questions)
@@ -167,6 +170,7 @@ class EvaluationBuilder extends Component
             $this->evaluation->questions()->create([
                 'type' => $q['type'],
                 'question_text' => $q['question_text'],
+                'description' => $q['description'],
                 'options' => $q['options'], // Casts to JSON automatically
                 'is_required' => $q['is_required'],
                 'order' => $index,
