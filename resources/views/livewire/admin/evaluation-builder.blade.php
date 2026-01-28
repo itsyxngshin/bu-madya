@@ -48,34 +48,19 @@
                         @error('title') <span class="text-xs text-red-500 font-bold block mt-1">{{ $message }}</span> @enderror
                     </div>
 
-                    {{-- SLUG / ACCESS KEY INPUT --}}
+                    {{-- SLUG INPUT --}}
                     <div class="mb-4">
                         <label class="block text-sm font-bold text-gray-700 mb-1">
-                            URL Slug / Access Key
-                            <span class="text-[10px] font-normal text-gray-400 ml-1">(Optional - Auto-generated if empty)</span>
+                            URL Slug
+                            <span class="text-[10px] font-normal text-gray-400 ml-1">(Auto-generated if empty)</span>
                         </label>
-                        
                         <div class="flex gap-2">
-                            <div class="relative flex-1">
-                                <input wire:model="slug" type="text" 
-                                    class="w-full rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-orange-500 text-sm font-mono text-gray-600 pl-3 pr-10" 
-                                    placeholder="e.g. my-custom-form-name">
-                                
-                                <div class="absolute right-3 top-2.5 text-gray-300">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
-                                </div>
-                            </div>
-
-                            <button wire:click="generateRandomSlug" type="button" class="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl border border-gray-200 transition" title="Generate Random Key">
+                            <input wire:model="slug" type="text" class="w-full rounded-xl border-gray-200 bg-gray-50 text-sm font-mono pl-3 pr-10">
+                            <button wire:click="generateRandomSlug" type="button" class="px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-xl border border-gray-200">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
                             </button>
                         </div>
-                        
                         @error('slug') <span class="text-xs text-red-500 font-bold block mt-1">{{ $message }}</span> @enderror
-                        
-                        <p class="text-[10px] text-gray-400 mt-1">
-                            Result: <span class="font-mono">{{ url('/eval/') }}/<span class="text-orange-500">{{ $slug ?: '...' }}</span></span>
-                        </p>
                     </div>
 
                     <div class="mb-4">
@@ -99,23 +84,19 @@
                 {{-- Toolbar --}}
                 <div class="bg-gray-900 text-white p-4 rounded-t-[2rem] flex flex-wrap gap-2 items-center shadow-md">
                     <span class="font-bold ml-2 mr-auto text-sm">Add Content:</span>
-                    
-                    <button wire:click="addQuestion('text')" class="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-bold transition flex items-center gap-1">Text</button>
-                    <button wire:click="addQuestion('radio')" class="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-bold transition flex items-center gap-1">Choice</button>
-                    <button wire:click="addQuestion('likert')" class="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-bold transition flex items-center gap-1">Scale</button>
-                    
-                    <button wire:click="addQuestion('file')" class="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-bold transition flex items-center gap-1 border border-white/30">
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
-                        Upload Bin
-                    </button>
-                    
-                    <button wire:click="addQuestion('section')" class="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-bold transition flex items-center gap-1 border-l border-white/20 ml-2">Separator</button>
+                    <button wire:click="addQuestion('text')" class="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-bold transition">Text</button>
+                    <button wire:click="addQuestion('radio')" class="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-bold transition">Choice</button>
+                    <button wire:click="addQuestion('likert')" class="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-bold transition">Scale</button>
+                    <button wire:click="addQuestion('file')" class="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-bold transition border border-white/30">Upload Bin</button>
+                    <button wire:click="addQuestion('section')" class="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-bold transition border-l border-white/20 ml-2">Separator</button>
                 </div>
 
                 {{-- Questions List --}}
                 <div class="bg-white rounded-b-[2rem] p-6 shadow-sm border border-t-0 border-gray-200 min-h-[400px] space-y-4" wire:sortable="updateQuestionOrder">
                     
                     @foreach($questions as $index => $question)
+                        {{-- NOTE: We use array syntax $question['type'] because this is the Builder --}}
+                        
                         @if($question['type'] === 'section')
                             {{-- SECTION HEADER --}}
                             <div wire:sortable.item="{{ $index }}" wire:key="question-{{ $index }}" class="group relative bg-orange-50 border-2 border-dashed border-orange-200 rounded-xl p-4 my-6">
@@ -127,7 +108,7 @@
                                         <input type="text" wire:model="questions.{{ $index }}.question_text" class="w-full text-xl font-black text-gray-800 border-0 bg-transparent placeholder-orange-300 focus:ring-0 p-0" placeholder="Type Section Title">
                                         <button wire:click="removeQuestion({{ $index }})" class="text-orange-300 hover:text-red-500">&times;</button>
                                     </div>
-                                    <input type="text" wire:model="questions.{{ $index }}.description" class="w-full text-sm text-gray-600 border-0 bg-transparent placeholder-orange-300/50 focus:ring-0 p-0" placeholder="Add a description for this section (optional)...">
+                                    <input type="text" wire:model="questions.{{ $index }}.description" class="w-full text-sm text-gray-600 border-0 bg-transparent placeholder-orange-300/50 focus:ring-0 p-0" placeholder="Add description (optional)...">
                                 </div>
                             </div>
                         @else
@@ -141,14 +122,14 @@
                                 <div class="pl-6">
                                     <div class="flex justify-between items-center mb-3">
                                         <span class="text-[10px] font-bold uppercase tracking-wide text-gray-400 bg-gray-100 px-2 py-1 rounded">
-                                            {{ ucfirst($question['type']) }} Question
+                                            {{ ucfirst($question['type']) }}
                                         </span>
                                         <div class="flex items-center gap-2">
                                             <label class="flex items-center gap-2 cursor-pointer">
                                                 <span class="text-[10px] font-bold uppercase text-gray-400">Required</span>
                                                 <input type="checkbox" wire:model="questions.{{ $index }}.is_required" class="rounded text-orange-500 w-4 h-4">
                                             </label>
-                                            <button wire:click="removeQuestion({{ $index }})" class="text-gray-300 hover:text-red-500 p-1 transition"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
+                                            <button wire:click="removeQuestion({{ $index }})" class="text-gray-300 hover:text-red-500 p-1 transition">&times;</button>
                                         </div>
                                     </div>
 
@@ -172,34 +153,20 @@
                                         </label>
                                     </div>
 
-                                    {{-- 4. LIKERT SCALE --}}
-                                    @if($question->type === 'likert')
-                                        <div class="bg-gray-50 rounded-xl p-4 border border-gray-100">
-                                            <div class="flex justify-between text-[10px] font-bold text-gray-400 uppercase tracking-widest px-1 mb-2">
-                                                {{-- Use array access [0] for the first item --}}
-                                                <span>{{ $question->options[0] ?? 'Disagree' }}</span>
-                                                
-                                                {{-- Use last() helper to safely get the last item --}}
-                                                <span>{{ last($question->options) ?? 'Agree' }}</span>
-                                            </div>
-                                            <div class="flex justify-between gap-1">
-                                                @foreach($question->options as $idx => $label)
-                                                    <label class="cursor-pointer group/likert text-center relative flex-1">
-                                                        <input type="radio" wire:model.live="answers.{{ $question->id }}" value="{{ $label }}" class="peer sr-only">
-                                                        
-                                                        {{-- Tile --}}
-                                                        <div class="w-full aspect-square rounded-lg bg-white shadow-sm border-2 border-transparent flex flex-col items-center justify-center gap-1 group-hover/likert:border-orange-200 peer-checked:border-orange-500 peer-checked:bg-orange-500 peer-checked:text-white transition-all duration-200">
-                                                            <span class="text-sm font-black text-gray-300 group-hover/likert:text-orange-300 peer-checked:text-white/90">{{ $idx + 1 }}</span>
-                                                        </div>
-                                                        
-                                                        {{-- Label --}}
-                                                        <span class="hidden md:block text-[9px] text-gray-400 mt-1 peer-checked:text-orange-600 truncate px-1">{{ $label }}</span>
-                                                    </label>
+                                    {{-- LIKERT SCALE EDITOR (Using Array Syntax) --}}
+                                    @if($question['type'] === 'likert')
+                                        <div class="bg-gray-50 p-4 rounded-xl border border-gray-100 mt-2">
+                                            <p class="text-[10px] text-gray-400 font-bold uppercase mb-2 text-center">Scale Labels (Left to Right)</p>
+                                            <div class="grid grid-cols-2 md:grid-cols-5 gap-2">
+                                                @foreach($question['options'] as $optIndex => $option)
+                                                    <input type="text" wire:model="questions.{{ $index }}.options.{{ $optIndex }}" 
+                                                           class="text-xs text-center border-gray-200 rounded-lg focus:border-orange-500" 
+                                                           placeholder="Label">
                                                 @endforeach
                                             </div>
                                         </div>
 
-                                    {{-- RADIO EDITOR --}}
+                                    {{-- RADIO EDITOR (Using Array Syntax) --}}
                                     @elseif(in_array($question['type'], ['radio', 'checkbox']))
                                         <div class="pl-4 border-l-2 border-gray-100 space-y-2 mt-2">
                                             @foreach($question['options'] as $optIndex => $opt)
@@ -213,7 +180,6 @@
                                         </div>
                                     @elseif($question['type'] === 'file')
                                         <div class="bg-blue-50 border border-blue-100 p-3 rounded-lg text-xs text-blue-600 font-bold flex items-center gap-2">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
                                             User will see a file upload bin here.
                                         </div>
                                     @endif
