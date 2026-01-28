@@ -147,9 +147,6 @@ Route::middleware(['auth', 'role:administrator'])->prefix('admin')->name('admin.
     Route::get('/transparency/create', DocumentForm::class)->name('transparency.create');
     Route::get('/transparency/{document}/edit', DocumentForm::class)->name('transparency.edit');
     Route::get('/evaluations/create', EvaluationBuilder::class)->name('evaluations.create');
-    Route::get('/evaluations/{evaluation}/edit', EvaluationBuilder::class)->name('evaluations.edit');
-    Route::get('/evaluations/{evaluation}/results', EvaluationResults::class)->name('evaluations.results');
-    Route::get('/evaluations', AdminEvaluationIndex::class)->name('evaluations.index');
 });
 
 Route::middleware(['auth', 'role:administrator,director'])  
@@ -165,6 +162,9 @@ Route::middleware(['auth', 'role:administrator,director'])
     Route::get('/proposals', ProposalsIndex::class)->name('admin.proposals.index');
     Route::get('/news/{slug}/edit', NewsEdit::class)->name('news.edit');  
     Route::get('/linkage/{linkage:slug}/edit', LinkagesEdit::class)->name('linkages.edit');
+    Route::get('/evaluations/{evaluation}/edit', EvaluationBuilder::class)->name('evaluations.edit');
+    Route::get('/evaluations/{evaluation}/results', EvaluationResults::class)->name('evaluations.results');
+    Route::get('/evaluations', AdminEvaluationIndex::class)->name('evaluations.index');
 });
 
 // Public view blades with access control on parts of the navigation
