@@ -14,6 +14,7 @@ class EvaluationQuestion extends Model
         'type',
         'question_text',
         'options',
+        'description',
         'is_required',
         'order'
     ];

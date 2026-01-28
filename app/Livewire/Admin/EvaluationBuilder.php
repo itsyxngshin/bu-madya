@@ -64,8 +64,16 @@ class EvaluationBuilder extends Component
             $this->questions = $this->evaluation->questions()
                 ->orderBy('order')
                 ->get()
-                ->toArray();
-        } else {
+                ->map(function($q) {
+                $arr = $q->toArray();
+                    $arr['new_image'] = null;
+                    // [FIX] Ensure description key exists
+                    $arr['description'] = $arr['description'] ?? ''; 
+                    return $arr;
+                })
+            ->toArray();
+        } 
+        else {
             // Defaults for a new form
             $this->title = ''; 
             $this->is_active = true;
@@ -170,7 +178,7 @@ class EvaluationBuilder extends Component
             $this->evaluation->questions()->create([
                 'type' => $q['type'],
                 'question_text' => $q['question_text'],
-                'description' => $q['description'],
+                'description' => $q['description'] ?? null,
                 'options' => $q['options'], // Casts to JSON automatically
                 'is_required' => $q['is_required'],
                 'order' => $index,
