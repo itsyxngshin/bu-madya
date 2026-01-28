@@ -48,6 +48,38 @@
                         @error('title') <span class="text-xs text-red-500 font-bold block mt-1">{{ $message }}</span> @enderror
                     </div>
 
+                    {{-- [NEW] SLUG / ACCESS KEY INPUT --}}
+                    <div class="mb-4">
+                        <label class="block text-sm font-bold text-gray-700 mb-1">
+                            URL Slug / Access Key
+                            <span class="text-[10px] font-normal text-gray-400 ml-1">(Optional - Auto-generated if empty)</span>
+                        </label>
+                        
+                        <div class="flex gap-2">
+                            <div class="relative flex-1">
+                                <input wire:model="slug" type="text" 
+                                    class="w-full rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-orange-500 text-sm font-mono text-gray-600 pl-3 pr-10" 
+                                    placeholder="e.g. my-custom-form-name">
+                                
+                                {{-- Copy Hint (Optional Visual) --}}
+                                <div class="absolute right-3 top-2.5 text-gray-300">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+                                </div>
+                            </div>
+
+                            {{-- Randomize Button --}}
+                            <button wire:click="generateRandomSlug" type="button" class="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl border border-gray-200 transition" title="Generate Random Key">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                            </button>
+                        </div>
+                        
+                        @error('slug') <span class="text-xs text-red-500 font-bold block mt-1">{{ $message }}</span> @enderror
+                        
+                        <p class="text-[10px] text-gray-400 mt-1">
+                            Result: <span class="font-mono">{{ url('/eval/') }}/<span class="text-orange-500">{{ $slug ?: '...' }}</span></span>
+                        </p>
+                    </div>
+
                     <div class="mb-4">
                         <label class="block text-sm font-bold text-gray-700 mb-1">Description</label>
                         <textarea wire:model="description" rows="3" class="w-full rounded-xl border-gray-200 bg-gray-50 text-sm resize-none"></textarea>
