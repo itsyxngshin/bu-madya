@@ -32,4 +32,9 @@ class EvaluationQuestion extends Model
     {
         return $this->belongsTo(Evaluation::class);
     }
+
+    public function answers()
+    {
+        return $this->hasMany(EvaluationAnswer::class);
+    }
 }
