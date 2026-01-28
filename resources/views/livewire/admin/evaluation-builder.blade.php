@@ -48,7 +48,7 @@
                         @error('title') <span class="text-xs text-red-500 font-bold block mt-1">{{ $message }}</span> @enderror
                     </div>
 
-                    {{-- [NEW] SLUG / ACCESS KEY INPUT --}}
+                    {{-- SLUG / ACCESS KEY INPUT --}}
                     <div class="mb-4">
                         <label class="block text-sm font-bold text-gray-700 mb-1">
                             URL Slug / Access Key
@@ -61,13 +61,11 @@
                                     class="w-full rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-orange-500 text-sm font-mono text-gray-600 pl-3 pr-10" 
                                     placeholder="e.g. my-custom-form-name">
                                 
-                                {{-- Copy Hint (Optional Visual) --}}
                                 <div class="absolute right-3 top-2.5 text-gray-300">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
                                 </div>
                             </div>
 
-                            {{-- Randomize Button --}}
                             <button wire:click="generateRandomSlug" type="button" class="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl border border-gray-200 transition" title="Generate Random Key">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
                             </button>
@@ -106,7 +104,6 @@
                     <button wire:click="addQuestion('radio')" class="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-bold transition flex items-center gap-1">Choice</button>
                     <button wire:click="addQuestion('likert')" class="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-bold transition flex items-center gap-1">Scale</button>
                     
-                    {{-- NEW FILE UPLOAD BUTTON --}}
                     <button wire:click="addQuestion('file')" class="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-bold transition flex items-center gap-1 border border-white/30">
                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
                         Upload Bin
@@ -125,17 +122,23 @@
                                 <div class="absolute left-0 top-0 bottom-0 w-8 flex items-center justify-center cursor-move text-orange-300 rounded-l-xl" wire:sortable.handle>
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"></path></svg>
                                 </div>
-                                <div class="pl-8 flex items-center gap-4">
-                                    <input type="text" wire:model="questions.{{ $index }}.question_text" class="w-full text-xl font-black text-gray-800 border-0 bg-transparent placeholder-orange-300 focus:ring-0 p-0" placeholder="Type Section Title">
-                                    <button wire:click="removeQuestion({{ $index }})" class="text-orange-300 hover:text-red-500">&times;</button>
-                                    {{-- NEW: Section Description --}}
-                                    <input type="text" wire:model="questions.{{ $index }}.description" class="w-full text-sm text-gray-600 border-0 bg-transparent placeholder-orange-300/50 focus:ring-0 p-0" placeholder="Add a description for this section (optional)...">      
+                                <div class="pl-8">
+                                    <div class="flex items-center gap-4 mb-2">
+                                        <input type="text" wire:model="questions.{{ $index }}.question_text" class="w-full text-xl font-black text-gray-800 border-0 bg-transparent placeholder-orange-300 focus:ring-0 p-0" placeholder="Type Section Title">
+                                        <button wire:click="removeQuestion({{ $index }})" class="text-orange-300 hover:text-red-500">&times;</button>
+                                    </div>
+                                    <input type="text" wire:model="questions.{{ $index }}.description" class="w-full text-sm text-gray-600 border-0 bg-transparent placeholder-orange-300/50 focus:ring-0 p-0" placeholder="Add a description for this section (optional)...">
                                 </div>
                             </div>
                         @else
                             {{-- STANDARD QUESTION CARD --}}
                             <div wire:sortable.item="{{ $index }}" wire:key="question-{{ $index }}" class="group relative bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-lg transition-all duration-300">
                                 
+                                <div class="absolute left-0 top-0 bottom-0 w-8 flex items-center justify-center cursor-move text-gray-300 hover:text-gray-500 hover:bg-gray-50 rounded-l-2xl" wire:sortable.handle>
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"></path></svg>
+                                </div>
+
+                                <div class="pl-6">
                                     <div class="flex justify-between items-center mb-3">
                                         <span class="text-[10px] font-bold uppercase tracking-wide text-gray-400 bg-gray-100 px-2 py-1 rounded">
                                             {{ ucfirst($question['type']) }} Question
@@ -150,7 +153,7 @@
                                     </div>
 
                                     <input type="text" wire:model="questions.{{ $index }}.question_text" class="w-full text-lg font-bold border-0 border-b-2 border-gray-100 focus:border-orange-500 focus:ring-0 bg-transparent transition mb-4" placeholder="Enter question...">
-                                    <input type="text" wire:model="questions.{{ $index }}.description" class="w-full text-xs text-gray-500 border-0 border-b border-gray-50 focus:border-orange-300 focus:ring-0 bg-transparent transition mb-4 placeholder-gray-300" placeholder="Add help text or description (optional)">
+                                    <input type="text" wire:model="questions.{{ $index }}.description" class="w-full text-xs text-gray-500 border-0 border-b border-gray-50 focus:border-orange-300 focus:ring-0 bg-transparent transition mb-4 placeholder-gray-300" placeholder="Description (optional)">
 
                                     {{-- QUESTION IMAGE UPLOADER --}}
                                     <div class="mb-4 bg-gray-50 p-3 rounded-lg border border-dashed border-gray-200">
@@ -169,16 +172,15 @@
                                         </label>
                                     </div>
 
-                                    {{-- OPTIONS LOGIC (Radio/Likert) --}}
-                                    {{-- LIKERT SCALE EDITOR (Restored) --}}
+                                    {{-- LIKERT SCALE EDITOR --}}
                                     @if($question['type'] === 'likert')
                                         <div class="bg-gray-50 p-4 rounded-xl border border-gray-100 mt-2">
                                             <p class="text-[10px] text-gray-400 font-bold uppercase mb-2 text-center">Scale Labels (Left to Right)</p>
                                             <div class="grid grid-cols-2 md:grid-cols-5 gap-2">
                                                 @foreach($question['options'] as $optIndex => $option)
                                                     <input type="text" wire:model="questions.{{ $index }}.options.{{ $optIndex }}" 
-                                                        class="text-xs text-center border-gray-200 rounded-lg focus:border-orange-500 focus:ring-orange-500" 
-                                                        placeholder="Label">
+                                                           class="text-xs text-center border-gray-200 rounded-lg focus:border-orange-500 focus:ring-orange-500" 
+                                                           placeholder="Label">
                                                 @endforeach
                                             </div>
                                         </div>
@@ -198,7 +200,7 @@
                                     @elseif($question['type'] === 'file')
                                         <div class="bg-blue-50 border border-blue-100 p-3 rounded-lg text-xs text-blue-600 font-bold flex items-center gap-2">
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
-                                            User will see a file upload bin here.
+                                            File Upload Bin
                                         </div>
                                     @endif
 
