@@ -99,8 +99,21 @@
                         {{-- [FIX] Use 'temp_id' for both item value and key --}}
                         @if($question['type'] === 'section')
                             <div wire:sortable.item="{{ $question['temp_id'] }}" wire:key="q-{{ $question['temp_id'] }}" class="group relative bg-orange-50 border-2 border-dashed border-orange-200 rounded-xl p-4 my-6">
-                                <div class="absolute left-0 top-0 bottom-0 w-8 flex items-center justify-center cursor-move text-orange-300 rounded-l-xl" wire:sortable.handle>
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"></path></svg>
+                                <div class="absolute left-0 top-0 bottom-0 w-10 flex flex-col items-center justify-center gap-1 bg-gray-50 border-r border-gray-100 rounded-l-2xl">
+                                    {{-- Move Up Button --}}
+                                    @if($index > 0)
+                                        <button wire:click="moveQuestionUp({{ $index }})" class="p-1 text-gray-400 hover:text-orange-500 hover:bg-orange-50 rounded transition" title="Move Up">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
+                                        </button>
+                                    @endif
+
+                                    {{-- Move Down Button --}}
+                                    @if($index < count($this->questions) - 1)
+                                        <button wire:click="moveQuestionDown({{ $index }})" class="p-1 text-gray-400 hover:text-orange-500 hover:bg-orange-50 rounded transition" title="Move Down">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                        </button>
+                                    @endif
+                                    
                                 </div>
                                 <div class="pl-8">
                                     <div class="flex items-center gap-4 mb-2">

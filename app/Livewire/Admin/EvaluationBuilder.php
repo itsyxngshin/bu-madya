@@ -99,6 +99,40 @@ class EvaluationBuilder extends Component
         $this->slug = Str::random(16); // Generates a random 16-char string
     }
 
+    public function moveQuestionUp($index)
+    {
+        if ($index > 0) {
+            // Swap items in the array
+            $temp = $this->questions[$index];
+            $this->questions[$index] = $this->questions[$index - 1];
+            $this->questions[$index - 1] = $temp;
+            
+            // Update their internal order numbers
+            $this->reindexQuestions();
+        }
+    }
+
+    public function moveQuestionDown($index)
+    {
+        if ($index < count($this->questions) - 1) {
+            // Swap items
+            $temp = $this->questions[$index];
+            $this->questions[$index] = $this->questions[$index + 1];
+            $this->questions[$index + 1] = $temp;
+            
+            // Update order numbers
+            $this->reindexQuestions();
+        }
+    }
+
+    private function reindexQuestions()
+    {
+        // Reset the 'order' property for all items based on their new array position
+        foreach ($this->questions as $idx => &$question) {
+            $question['order'] = $idx;
+        }
+    }
+
     public function addQuestion($type)
     {
         // 1. Define Default Options strictly
