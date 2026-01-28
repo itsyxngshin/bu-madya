@@ -66,8 +66,8 @@ use Illuminate\Support\Facades\Response;
 Route::get('/', function () {
     return view('welcome');
 }); 
+Route::get('/evaluations/{evaluation}', EvaluationForm::class)->name('evaluations.show');
 
-Route::get('/evaluations', EvaluationList::class)->name('evaluations.index');
 Route::get('/secure-file/{application}', function (\App\Models\MembershipApplication $application) {
     
     // 1. Security Check: Only allow if user is logged in & authorized
@@ -127,7 +127,8 @@ Route::middleware(['auth'])
     
 
     // 2. The Actual Form
-    Route::get('/evaluations/{evaluation}', EvaluationForm::class)->name('evaluations.show');
+    Route::get('/evaluations', EvaluationList::class)->name('evaluations.index');
+    
 });
 
 
