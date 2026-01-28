@@ -136,11 +136,6 @@
                             {{-- STANDARD QUESTION CARD --}}
                             <div wire:sortable.item="{{ $index }}" wire:key="question-{{ $index }}" class="group relative bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-lg transition-all duration-300">
                                 
-                                <div class="absolute left-0 top-0 bottom-0 w-8 flex items-center justify-center cursor-move text-gray-300 hover:text-gray-500 hover:bg-gray-50 rounded-l-2xl" wire:sortable.handle>
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"></path></svg>
-                                </div>
-
-                                <div class="pl-6">
                                     <div class="flex justify-between items-center mb-3">
                                         <span class="text-[10px] font-bold uppercase tracking-wide text-gray-400 bg-gray-100 px-2 py-1 rounded">
                                             {{ ucfirst($question['type']) }} Question
@@ -175,8 +170,22 @@
                                     </div>
 
                                     {{-- OPTIONS LOGIC (Radio/Likert) --}}
-                                    @if(in_array($question['type'], ['radio', 'checkbox']))
-                                        <div class="pl-4 border-l-2 border-gray-100 space-y-2">
+                                    {{-- LIKERT SCALE EDITOR (Restored) --}}
+                                    @if($question['type'] === 'likert')
+                                        <div class="bg-gray-50 p-4 rounded-xl border border-gray-100 mt-2">
+                                            <p class="text-[10px] text-gray-400 font-bold uppercase mb-2 text-center">Scale Labels (Left to Right)</p>
+                                            <div class="grid grid-cols-2 md:grid-cols-5 gap-2">
+                                                @foreach($question['options'] as $optIndex => $option)
+                                                    <input type="text" wire:model="questions.{{ $index }}.options.{{ $optIndex }}" 
+                                                        class="text-xs text-center border-gray-200 rounded-lg focus:border-orange-500 focus:ring-orange-500" 
+                                                        placeholder="Label">
+                                                @endforeach
+                                            </div>
+                                        </div>
+
+                                    {{-- RADIO EDITOR --}}
+                                    @elseif(in_array($question['type'], ['radio', 'checkbox']))
+                                        <div class="pl-4 border-l-2 border-gray-100 space-y-2 mt-2">
                                             @foreach($question['options'] as $optIndex => $opt)
                                                 <div class="flex items-center gap-2">
                                                     <div class="w-3 h-3 rounded-full border border-gray-300"></div>

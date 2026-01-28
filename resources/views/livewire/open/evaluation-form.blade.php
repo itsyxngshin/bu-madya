@@ -78,7 +78,6 @@
 
                             <label class="block mb-4 relative z-10">
                                 <div class="flex justify-between items-start mb-1">
-                                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest bg-gray-50 px-2 py-0.5 rounded">Q{{ $index + 1 }}</span>
                                     @if($question->is_required) <span class="text-[10px] font-bold text-red-500 uppercase tracking-widest bg-red-50 px-2 py-0.5 rounded">Required</span> @endif
                                 </div>
                                 <span class="text-base font-bold text-gray-900 block leading-snug">{{ $question->question_text }}</span>
@@ -99,7 +98,30 @@
                             {{-- INPUT TYPES --}}
                             <div class="relative z-10">
                                 
-                                @if($question->type === 'text')
+                                {{-- LIKERT SCALE RENDERER --}}
+                                @if($question->type === 'likert')
+                                    <div class="bg-gray-50 rounded-xl p-4 border border-gray-100">
+                                        <div class="flex justify-between text-[10px] font-bold text-gray-400 uppercase tracking-widest px-1 mb-2">
+                                            <span>{{ $question->options[0] ?? 'Disagree' }}</span>
+                                            <span>{{ end($question->options) ?? 'Agree' }}</span>
+                                        </div>
+                                        <div class="flex justify-between gap-1">
+                                            @foreach($question->options as $idx => $label)
+                                                <label class="cursor-pointer group/likert text-center relative flex-1">
+                                                    <input type="radio" wire:model.live="answers.{{ $question->id }}" value="{{ $label }}" class="peer sr-only">
+                                                    
+                                                    {{-- Tile --}}
+                                                    <div class="w-full aspect-square rounded-lg bg-white shadow-sm border-2 border-transparent flex flex-col items-center justify-center gap-1 group-hover/likert:border-orange-200 peer-checked:border-orange-500 peer-checked:bg-orange-500 peer-checked:text-white transition-all duration-200">
+                                                        <span class="text-sm font-black text-gray-300 group-hover/likert:text-orange-300 peer-checked:text-white/90">{{ $idx + 1 }}</span>
+                                                    </div>
+                                                    
+                                                    {{-- Mobile Label (Optional, visible on check) --}}
+                                                    <span class="hidden md:block text-[9px] text-gray-400 mt-1 peer-checked:text-orange-600 truncate px-1">{{ $label }}</span>
+                                                </label>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @elseif($question->type === 'text')
                                     <input type="text" wire:model.live="answers.{{ $question->id }}" class="w-full border-0 border-b-2 border-gray-200 bg-transparent py-2 text-sm focus:border-orange-500 focus:ring-0 placeholder-gray-300" placeholder="Type your answer...">
                                 
                                 @elseif($question->type === 'textarea')

@@ -110,7 +110,9 @@ class EvaluationBuilder extends Component
 
     public function addQuestion($type)
     {
+        // 1. Define Default Options strictly
         $defaultOptions = [];
+        
         if ($type === 'likert') {
             $defaultOptions = ['Strongly Disagree', 'Disagree', 'Neutral', 'Agree', 'Strongly Agree'];
         } elseif ($type === 'radio') {
@@ -122,9 +124,11 @@ class EvaluationBuilder extends Component
             'type' => $type,
             'question_text' => '',
             'description' => '',
-            'options' => $defaultOptions,
-            'is_required' => ($type !== 'section'), // Sections don't need to be required
-            'order' => count($this->questions)
+            'options' => $defaultOptions, // Ensure this array is passed
+            'is_required' => ($type !== 'section'),
+            'order' => count($this->questions),
+            'image_path' => null,
+            'new_image' => null
         ];
     }
 

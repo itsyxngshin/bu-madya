@@ -11,53 +11,79 @@ use Livewire\Attributes\Layout;
 class EvaluationResults extends Component
 {
     public Evaluation $evaluation;
+    public $stats = [];
 
     public function mount(Evaluation $evaluation)
     {
         $this->evaluation = $evaluation;
+        $this->calculateStats();
     }
 
-    /**
-     * Calculate statistics for a specific question.
-     * Returns an array of options with their counts and percentages.
-     */
-    public function getQuestionStats($questionId)
+    public function calculateStats()
     {
-        $question = EvaluationQuestion::find($questionId);
-        
-        // 1. Get all answers for this question
-        $answers = $question->hasMany(\App\Models\EvaluationAnswer::class)->get();
-        $total = $answers->count();
+        // Eager load questions with their answers
+        $this->evaluation->load(['questions.answers']);
 
-        if ($total === 0) return [];
+        foreach ($this->evaluation->questions as $question) {
+            
+            $totalResponses = $question->answers->count();
+            
+            // Skip if no responses to avoid division by zero
+            if ($totalResponses === 0) {
+                $this->stats[$question->id] = [
+                    'count' => 0,
+                    'average' => 0,
+                    'breakdown' => []
+                ];
+                continue;
+            }
 
-        // 2. Count frequencies
-        $counts = $answers->groupBy('answer_value')->map->count();
+            // A. LIKERT SCALE LOGIC
+            if ($question->type === 'likert') {
+                $sum = 0;
+                $counts = array_fill(0, count($question->options), 0); // Initialize counts [0,0,0,0,0]
 
-        // 3. Map to options format (preserving original option order)
-        // We look at the defined options for the question to ensure 0-count options appear too
-        $stats = collect($question->options)->map(function ($option) use ($counts, $total) {
-            $count = $counts->get($option, 0);
-            return [
-                'label' => $option,
-                'count' => $count,
-                'percentage' => round(($count / $total) * 100, 1)
-            ];
-        });
+                foreach ($question->answers as $answer) {
+                    // Find which option index this answer matches (e.g., "Strongly Agree" might be index 4)
+                    $index = array_search($answer->answer_value, $question->options);
+                    
+                    if ($index !== false) {
+                        $weight = $index + 1; // Index 0 = 1 point, Index 4 = 5 points
+                        $sum += $weight;
+                        $counts[$index]++;
+                    }
+                }
 
-        return $stats;
-    }
+                $this->stats[$question->id] = [
+                    'count' => $totalResponses,
+                    'average' => round($sum / $totalResponses, 2), // The "Weighted Mean"
+                    'breakdown' => $counts // Counts per choice
+                ];
+            } 
+            
+            // B. RADIO / CHOICE LOGIC
+            elseif ($question->type === 'radio') {
+                $counts = array_fill_keys($question->options, 0); // ['Yes' => 0, 'No' => 0]
 
-    /**
-     * Get text responses for a specific question
-     */
-    public function getTextResponses($questionId)
-    {
-        return \App\Models\EvaluationAnswer::where('evaluation_question_id', $questionId)
-            ->whereNotNull('answer_value')
-            ->latest()
-            ->take(20) // Limit to last 20 for preview
-            ->get();
+                foreach ($question->answers as $answer) {
+                    if (isset($counts[$answer->answer_value])) {
+                        $counts[$answer->answer_value]++;
+                    }
+                }
+
+                $this->stats[$question->id] = [
+                    'count' => $totalResponses,
+                    'breakdown' => $counts
+                ];
+            }
+            
+            // C. TEXT / FILE (Just counts)
+            else {
+                $this->stats[$question->id] = [
+                    'count' => $totalResponses,
+                ];
+            }
+        }
     }
 
     public function render()

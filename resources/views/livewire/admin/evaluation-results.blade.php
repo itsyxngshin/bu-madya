@@ -1,110 +1,125 @@
-<div class="min-h-screen bg-gray-100 p-6 font-sans text-gray-900">
+<div class="min-h-screen bg-gray-50 p-6 font-sans text-gray-900">
     
-    <div class="max-w-6xl mx-auto">
+    <div class="max-w-5xl mx-auto">
         
-        {{-- 1. HEADER --}}
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-            <div>
-                <div class="flex items-center gap-2 text-sm text-gray-500 mb-1">
-                    <a href="{{ route('admin.evaluations.index') }}" class="hover:text-orange-500 transition">Evaluations</a>
-                    <span>/</span>
-                    <span>Results</span>
-                </div>
-                <h1 class="text-3xl font-black text-gray-900">{{ $evaluation->title }}</h1>
-            </div>
-
-            <div class="flex items-center gap-3">
-                {{-- Export Button Placeholder --}}
-                <button onclick="alert('Export logic (CSV/PDF) goes here!')" class="px-4 py-2 bg-white border border-gray-300 text-gray-600 font-bold rounded-xl text-xs uppercase tracking-wider hover:bg-gray-50 transition shadow-sm flex items-center gap-2">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                    Export Data
-                </button>
-            </div>
+        {{-- HEADER --}}
+        <div class="mb-8">
+            <a href="{{ route('admin.evaluations.index') }}" class="flex items-center gap-2 text-xs font-bold text-gray-400 hover:text-orange-600 mb-2 uppercase tracking-widest transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                Back to List
+            </a>
+            <h1 class="text-3xl font-black text-gray-900">{{ $evaluation->title }}</h1>
+            <p class="text-sm text-gray-500 mt-1">
+                Analysis of <strong class="text-gray-900">{{ $evaluation->responses()->count() }}</strong> total responses.
+            </p>
         </div>
 
-        {{-- 2. OVERVIEW CARDS --}}
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100 flex items-center gap-4">
-                <div class="w-12 h-12 rounded-2xl bg-orange-100 text-orange-600 flex items-center justify-center">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-                </div>
-                <div>
-                    <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Respondents</p>
-                    <p class="text-3xl font-black text-gray-900">{{ $evaluation->responses()->count() }}</p>
-                </div>
-            </div>
-            
-            <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100 flex items-center gap-4">
-                <div class="w-12 h-12 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
-                </div>
-                <div>
-                    <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Questions</p>
-                    <p class="text-3xl font-black text-gray-900">{{ $evaluation->questions()->count() }}</p>
-                </div>
-            </div>
-
-            <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100 flex items-center gap-4">
-                <div class="w-12 h-12 rounded-2xl {{ $evaluation->is_active ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600' }} flex items-center justify-center">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.636 18.364a9 9 0 010-12.728m12.728 0a9 9 0 010 12.728m-9.9-2.829a5 5 0 010-7.07m7.072 0a5 5 0 010 7.07M13 12a1 1 0 11-2 0 1 1 0 012 0z"></path></svg>
-                </div>
-                <div>
-                    <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Status</p>
-                    <p class="text-xl font-black text-gray-900">{{ $evaluation->is_active ? 'Active' : 'Closed' }}</p>
-                </div>
-            </div>
-        </div>
-
-        {{-- 3. RESULTS FEED --}}
-        <div class="space-y-8">
+        {{-- QUESTIONS LOOP --}}
+        <div class="space-y-6">
             @foreach($evaluation->questions as $index => $question)
-                <div class="bg-white rounded-[2rem] p-8 shadow-sm border border-gray-200">
-                    
-                    {{-- Question Header --}}
-                    <div class="mb-6 border-b border-gray-100 pb-4">
-                        <span class="text-xs font-bold text-gray-400 uppercase tracking-wide bg-gray-50 px-2 py-1 rounded inline-block mb-2">
-                            Question {{ $index + 1 }} • {{ ucfirst($question->type) }}
-                        </span>
-                        <h3 class="text-xl font-bold text-gray-900 leading-tight">{{ $question->question_text }}</h3>
+                
+                @php $stat = $stats[$question->id] ?? null; @endphp
+
+                {{-- Skip Sections --}}
+                @if($question->type === 'section')
+                    <div class="pt-8 pb-2 border-b-2 border-orange-100">
+                        <h2 class="text-lg font-black text-orange-600 uppercase tracking-tight">{{ $question->question_text }}</h2>
+                    </div>
+                
+                {{-- LIKERT SCALE RESULT (The "Average" View) --}}
+                @elseif($question->type === 'likert')
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
+                        <div class="flex flex-col md:flex-row gap-8">
+                            
+                            {{-- Left: The Score --}}
+                            <div class="md:w-1/3 flex flex-col justify-center items-center bg-gray-50 rounded-xl p-6 border border-gray-100 text-center">
+                                <span class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Average Rating</span>
+                                <div class="text-5xl font-black text-gray-900 mb-1">{{ $stat['average'] ?? '0.0' }}</div>
+                                <div class="flex gap-1 text-orange-400 mb-2">
+                                    @for($i=1; $i<=5; $i++)
+                                        <svg class="w-4 h-4 {{ $i <= round($stat['average']) ? 'fill-current' : 'text-gray-200' }}" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                                    @endfor
+                                </div>
+                                <span class="text-[10px] text-gray-400 font-bold uppercase">{{ $stat['count'] }} Responses</span>
+                            </div>
+
+                            {{-- Right: The Breakdown --}}
+                            <div class="md:w-2/3">
+                                <h3 class="font-bold text-gray-900 mb-4">{{ $question->question_text }}</h3>
+                                <div class="space-y-3">
+                                    {{-- Loop through options in reverse (5 down to 1) --}}
+                                    @foreach(array_reverse($question->options, true) as $optIndex => $label)
+                                        @php 
+                                            $count = $stat['breakdown'][$optIndex] ?? 0;
+                                            $percent = $stat['count'] > 0 ? ($count / $stat['count']) * 100 : 0;
+                                        @endphp
+                                        <div class="flex items-center gap-3 text-sm">
+                                            <span class="w-8 font-bold text-gray-400 text-right">{{ $optIndex + 1 }}</span> <div class="flex-1 h-3 bg-gray-100 rounded-full overflow-hidden">
+                                                <div class="h-full bg-orange-500 rounded-full" style="width: {{ $percent }}%"></div>
+                                            </div>
+                                            <span class="w-12 text-right font-bold text-gray-700">{{ $count }}</span>
+                                            <span class="w-32 text-xs text-gray-400 truncate text-right">{{ $label }}</span>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    {{-- VISUALIZATION LOGIC --}}
-                    
-                    {{-- A. DATA CHARTS (Radio/Likert) --}}
-                    @if(in_array($question->type, ['radio', 'likert']))
-                        <div class="space-y-4">
-                            @foreach($this->getQuestionStats($question->id) as $stat)
-                                <div>
-                                    <div class="flex justify-between items-end mb-1">
-                                        <span class="text-sm font-bold text-gray-700">{{ $stat['label'] }}</span>
-                                        <span class="text-xs font-mono text-gray-500">
-                                            <span class="font-bold text-gray-900">{{ $stat['count'] }}</span> responses ({{ $stat['percentage'] }}%)
-                                        </span>
+                {{-- RADIO / CHOICE RESULT --}}
+                @elseif($question->type === 'radio')
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
+                        <h3 class="font-bold text-gray-900 mb-4">{{ $question->question_text }}</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            @foreach($question->options as $label)
+                                @php 
+                                    $count = $stat['breakdown'][$label] ?? 0;
+                                    $percent = $stat['count'] > 0 ? ($count / $stat['count']) * 100 : 0;
+                                @endphp
+                                <div class="bg-gray-50 rounded-xl p-3 border border-gray-100 relative overflow-hidden">
+                                    {{-- Background Bar --}}
+                                    <div class="absolute bottom-0 left-0 h-1 bg-green-500 transition-all duration-500" style="width: {{ $percent }}%"></div>
+                                    
+                                    <div class="flex justify-between items-center relative z-10">
+                                        <span class="font-bold text-gray-700 text-sm">{{ $label }}</span>
+                                        <span class="font-black text-gray-900">{{ $count }}</span>
                                     </div>
-                                    {{-- CSS Progress Bar --}}
-                                    <div class="w-full bg-gray-100 rounded-full h-3 overflow-hidden">
-                                        <div class="h-full bg-gradient-to-r from-orange-400 to-red-500 rounded-full transition-all duration-1000" 
-                                             style="width: {{ $stat['percentage'] }}%"></div>
-                                    </div>
+                                    <span class="text-[10px] text-gray-400 font-bold uppercase">{{ round($percent) }}%</span>
                                 </div>
                             @endforeach
                         </div>
+                    </div>
 
-                    {{-- B. TEXT RESPONSES --}}
-                    @elseif(in_array($question->type, ['text', 'textarea']))
-                        <div class="bg-gray-50 rounded-xl p-4 border border-gray-100 max-h-80 overflow-y-auto space-y-3">
-                            @forelse($this->getTextResponses($question->id) as $answer)
-                                <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-                                    <p class="text-gray-700 text-sm leading-relaxed">"{{ $answer->answer_value }}"</p>
-                                    <p class="text-[10px] text-gray-400 mt-2 font-mono text-right">{{ $answer->created_at->diffForHumans() }}</p>
-                                </div>
-                            @empty
-                                <p class="text-center text-gray-400 text-sm italic py-4">No text responses yet.</p>
-                            @endforelse
+                {{-- TEXT / FILE (List View) --}}
+                @else
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
+                        <div class="flex justify-between items-start mb-4">
+                            <h3 class="font-bold text-gray-900">{{ $question->question_text }}</h3>
+                            <span class="bg-gray-100 text-gray-500 text-[10px] font-bold px-2 py-1 rounded uppercase">Text / File</span>
                         </div>
-                    @endif
+                        
+                        <div class="max-h-48 overflow-y-auto space-y-2 pr-2 custom-scrollbar">
+                            @foreach($question->answers->take(10) as $answer)
+                                <div class="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg border border-gray-100">
+                                    @if($question->type == 'file')
+                                        <a href="{{ asset('storage/'.$answer->answer_value) }}" target="_blank" class="text-blue-600 hover:underline flex items-center gap-1 font-bold text-xs">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                            View File
+                                        </a>
+                                    @else
+                                        "{{ $answer->answer_value }}"
+                                    @endif
+                                </div>
+                            @endforeach
+                        </div>
+                        @if($question->answers->count() > 10)
+                            <button class="w-full mt-2 text-center text-xs font-bold text-orange-500 hover:text-orange-600 uppercase tracking-wide">
+                                Load All {{ $question->answers->count() }} Responses
+                            </button>
+                        @endif
+                    </div>
+                @endif
 
-                </div>
             @endforeach
         </div>
 
