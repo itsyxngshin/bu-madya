@@ -48,4 +48,9 @@ class Evaluation extends Model
     {
         return $this->hasMany(EvaluationResponse::class);
     }
+
+    public function project()
+    {
+        return $this->hasOne(Project::class);
+    }
 }

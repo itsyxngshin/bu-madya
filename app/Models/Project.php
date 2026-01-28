@@ -119,9 +119,9 @@ class Project extends Model
         return $this->hasMany(ProjectGallery::class);
     }
 
-    public function evaluations()
+    public function evaluation()
     {
         // Get all evaluation responses linked to this project
-        return $this->hasMany(EvaluationResponse::class);
+        return $this->belongsTo(Evaluation::class);
     }
 }
