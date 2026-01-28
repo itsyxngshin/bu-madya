@@ -41,8 +41,9 @@
                 <div class="p-6 {{ $evaluation->header_image ? '-mt-12 relative z-10' : '' }}">
                     <h1 class="text-2xl font-black {{ $evaluation->header_image ? 'text-black drop-shadow-md' : 'text-gray-900' }} mb-2 leading-tight">{{ $evaluation->title }}</h1>
                     @if($evaluation->description)
-                        <div class="prose prose-sm {{ $evaluation->header_image ? 'text-gray-900' : 'text-gray-500' }} max-w-none text-sm">
-                            <p>{{ $evaluation->description }}</p>
+                        {{-- [FIX] Added whitespace-pre-line --}}
+                        <div class="prose prose-sm {{ $evaluation->header_image ? 'text-gray-900' : 'text-gray-500' }} max-w-none text-sm whitespace-pre-line">
+                            {{ $evaluation->description }}
                         </div>
                     @endif
                 </div>
@@ -62,7 +63,8 @@
                             </div>
                             <div class="w-full h-1 bg-orange-600 rounded-r-full mb-2"></div>
                             @if($question->description)
-                                <p class="text-sm text-gray-600 italic ml-1 max-w-xl">{{ $question->description }}</p>
+                                {{-- [FIX] Added whitespace-pre-line --}}
+                                <p class="text-sm text-gray-600 italic ml-1 max-w-xl whitespace-pre-line">{{ $question->description }}</p>
                             @endif
                         </div>
 
@@ -81,7 +83,8 @@
                                 </div>
                                 <span class="text-base font-bold text-gray-900 block leading-snug">{{ $question->question_text }}</span>
                                 @if($question->description)
-                                    <span class="text-xs text-gray-500 block mt-1 leading-relaxed">{{ $question->description }}</span>
+                                    {{-- [FIX] Added whitespace-pre-line --}}
+                                    <span class="text-xs text-gray-500 block mt-1 leading-relaxed whitespace-pre-line">{{ $question->description }}</span>
                                 @endif
                             </label>
 
@@ -102,12 +105,11 @@
                                 @elseif($question->type === 'textarea')
                                     <textarea wire:model.live="answers.{{ $question->id }}" rows="2" class="w-full rounded-xl border-gray-200 bg-gray-50 p-3 focus:bg-white focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 text-sm" placeholder="Share your thoughts..."></textarea>
                                 
-                                {{-- 3. RADIO (Fixed Highlight) --}}
+                                {{-- 3. RADIO (With Highlight Logic) --}}
                                 @elseif($question->type === 'radio')
                                     <div class="space-y-2">
                                         @foreach($question->options as $optIndex => $option)
                                             @php
-                                                // Check if this specific option is selected
                                                 $isSelected = isset($answers[$question->id]) && $answers[$question->id] == $option;
                                             @endphp
                                             <label class="relative flex items-center p-3 rounded-xl border cursor-pointer transition-all group/option 
@@ -115,13 +117,11 @@
                                                 
                                                 <input type="radio" wire:model.live="answers.{{ $question->id }}" value="{{ $option }}" class="peer sr-only" wire:key="q-{{ $question->id }}-opt-{{ $optIndex }}">
                                                 
-                                                {{-- Circle Indicator --}}
                                                 <div class="w-4 h-4 rounded-full border-2 mr-3 flex items-center justify-center transition-all
                                                     {{ $isSelected ? 'border-orange-500 bg-orange-500' : 'border-gray-300' }}">
                                                     <div class="w-1.5 h-1.5 bg-white rounded-full {{ $isSelected ? 'opacity-100' : 'opacity-0' }}"></div>
                                                 </div>
                                                 
-                                                {{-- Label Text --}}
                                                 <span class="text-sm font-medium {{ $isSelected ? 'text-gray-900 font-bold' : 'text-gray-600' }}">
                                                     {{ $option }}
                                                 </span>
@@ -129,7 +129,7 @@
                                         @endforeach
                                     </div>
                                 
-                                {{-- 4. LIKERT SCALE (Fixed Highlight) --}}
+                                {{-- 4. LIKERT SCALE (With Highlight Logic) --}}
                                 @elseif($question->type === 'likert')
                                     <div class="bg-gray-50 rounded-xl p-4 border border-gray-100">
                                         <div class="flex justify-between text-[10px] font-bold text-gray-400 uppercase tracking-widest px-1 mb-2">
