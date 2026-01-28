@@ -68,13 +68,12 @@
 
                     {{-- STANDARD QUESTION --}}
                     @else
-                        <div class="group bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md hover:border-orange-100 transition-all duration-300 relative overflow-hidden">
+                        <div class="group bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md hover:border-orange-100 transition-all duration-300 relative overflow-hidden" wire:key="question-card-{{ $question->id }}">
                             
                             {{-- Focus Line --}}
                             <div class="absolute left-0 top-0 bottom-0 w-1 bg-orange-500 opacity-0 group-focus-within:opacity-100 transition-opacity"></div>
 
                             <label class="block mb-4 relative z-10">
-                                {{-- [FIX] Removed "Question X" Label --}}
                                 <div class="flex justify-end items-start mb-1">
                                     @if($question->is_required) 
                                         <span class="text-[10px] font-bold text-red-500 uppercase tracking-widest bg-red-50 px-2 py-0.5 rounded">Required</span> 
@@ -103,39 +102,61 @@
                                 @elseif($question->type === 'textarea')
                                     <textarea wire:model.live="answers.{{ $question->id }}" rows="2" class="w-full rounded-xl border-gray-200 bg-gray-50 p-3 focus:bg-white focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 text-sm" placeholder="Share your thoughts..."></textarea>
                                 
-                                {{-- 3. RADIO --}}
+                                {{-- 3. RADIO (Fixed Highlight) --}}
                                 @elseif($question->type === 'radio')
                                     <div class="space-y-2">
-                                        @foreach($question->options as $option)
-                                            <label class="relative flex items-center p-3 rounded-xl border border-gray-200 cursor-pointer hover:bg-orange-50 hover:border-orange-200 transition-all group/option">
-                                                <input type="radio" wire:model.live="answers.{{ $question->id }}" value="{{ $option }}" class="peer sr-only">
-                                                <div class="w-4 h-4 rounded-full border-2 border-gray-300 mr-3 flex items-center justify-center peer-checked:border-orange-500 peer-checked:bg-orange-500"><div class="w-1.5 h-1.5 bg-white rounded-full opacity-0 peer-checked:opacity-100"></div></div>
-                                                <span class="text-sm font-medium text-gray-600 peer-checked:text-gray-900 peer-checked:font-bold">{{ $option }}</span>
+                                        @foreach($question->options as $optIndex => $option)
+                                            @php
+                                                // Check if this specific option is selected
+                                                $isSelected = isset($answers[$question->id]) && $answers[$question->id] == $option;
+                                            @endphp
+                                            <label class="relative flex items-center p-3 rounded-xl border cursor-pointer transition-all group/option 
+                                                {{ $isSelected ? 'bg-orange-50 border-orange-500' : 'border-gray-200 hover:bg-orange-50 hover:border-orange-200' }}">
+                                                
+                                                <input type="radio" wire:model.live="answers.{{ $question->id }}" value="{{ $option }}" class="peer sr-only" wire:key="q-{{ $question->id }}-opt-{{ $optIndex }}">
+                                                
+                                                {{-- Circle Indicator --}}
+                                                <div class="w-4 h-4 rounded-full border-2 mr-3 flex items-center justify-center transition-all
+                                                    {{ $isSelected ? 'border-orange-500 bg-orange-500' : 'border-gray-300' }}">
+                                                    <div class="w-1.5 h-1.5 bg-white rounded-full {{ $isSelected ? 'opacity-100' : 'opacity-0' }}"></div>
+                                                </div>
+                                                
+                                                {{-- Label Text --}}
+                                                <span class="text-sm font-medium {{ $isSelected ? 'text-gray-900 font-bold' : 'text-gray-600' }}">
+                                                    {{ $option }}
+                                                </span>
                                             </label>
                                         @endforeach
                                     </div>
                                 
-                                {{-- 4. LIKERT SCALE (Corrected) --}}
+                                {{-- 4. LIKERT SCALE (Fixed Highlight) --}}
                                 @elseif($question->type === 'likert')
                                     <div class="bg-gray-50 rounded-xl p-4 border border-gray-100">
                                         <div class="flex justify-between text-[10px] font-bold text-gray-400 uppercase tracking-widest px-1 mb-2">
-                                            {{-- [FIX] Check if array exists before accessing --}}
                                             <span>{{ $question->options[0] ?? 'Disagree' }}</span>
-                                            {{-- [FIX] Use 'last()' helper instead of 'end()' to prevent crash --}}
                                             <span>{{ last($question->options) ?? 'Agree' }}</span>
                                         </div>
                                         <div class="flex justify-between gap-1">
                                             @foreach($question->options as $idx => $label)
+                                                @php
+                                                    $isSelected = isset($answers[$question->id]) && $answers[$question->id] == $label;
+                                                @endphp
                                                 <label class="cursor-pointer group/likert text-center relative flex-1">
-                                                    <input type="radio" wire:model.live="answers.{{ $question->id }}" value="{{ $label }}" class="peer sr-only">
+                                                    <input type="radio" wire:model.live="answers.{{ $question->id }}" value="{{ $label }}" class="peer sr-only" wire:key="q-{{ $question->id }}-likert-{{ $idx }}">
                                                     
                                                     {{-- Tile --}}
-                                                    <div class="w-full aspect-square rounded-lg bg-white shadow-sm border-2 border-transparent flex flex-col items-center justify-center gap-1 group-hover/likert:border-orange-200 peer-checked:border-orange-500 peer-checked:bg-orange-500 peer-checked:text-white transition-all duration-200">
-                                                        <span class="text-sm font-black text-gray-300 group-hover/likert:text-orange-300 peer-checked:text-white/90">{{ $idx + 1 }}</span>
+                                                    <div class="w-full aspect-square rounded-lg shadow-sm border-2 flex flex-col items-center justify-center gap-1 transition-all duration-200
+                                                        {{ $isSelected 
+                                                            ? 'bg-orange-500 border-orange-500 text-white' 
+                                                            : 'bg-white border-transparent text-gray-300 group-hover/likert:border-orange-200' 
+                                                        }}">
+                                                        <span class="text-sm font-black {{ $isSelected ? 'text-white' : '' }}">{{ $idx + 1 }}</span>
                                                     </div>
                                                     
-                                                    {{-- Label (Hidden on small screens) --}}
-                                                    <span class="hidden md:block text-[9px] text-gray-400 mt-1 peer-checked:text-orange-600 truncate px-1">{{ $label }}</span>
+                                                    {{-- Mobile Label --}}
+                                                    <span class="hidden md:block text-[9px] mt-1 truncate px-1 {{ $isSelected ? 'text-orange-600 font-bold' : 'text-gray-400' }}">
+                                                        {{ $label }}
+                                                    </span>
                                                 </label>
                                             @endforeach
                                         </div>
