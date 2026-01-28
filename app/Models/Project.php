@@ -121,7 +121,8 @@ class Project extends Model
 
     public function evaluation()
     {
-        // Get all evaluation responses linked to this project
-        return $this->belongsTo(Evaluation::class);
+        // A project can have one evaluation form
+        // Assuming 'project_id' exists on the 'evaluations' table (Option A from our previous discussion)
+        return $this->hasOne(Evaluation::class);
     }
 }
