@@ -97,7 +97,7 @@ class EvaluationForm extends Component
         session()->flash('success', 'Thank you! Your evaluation has been submitted.');
         
         // Optional: Redirect to a thank you page or back to the index
-        return redirect()->route('home'); 
+        return redirect()->route('welcome'); 
     }
 
     public function render()
