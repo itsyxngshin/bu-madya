@@ -70,12 +70,15 @@
                     @else
                         <div class="group bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md hover:border-orange-100 transition-all duration-300 relative overflow-hidden">
                             
+                            {{-- Focus Line --}}
                             <div class="absolute left-0 top-0 bottom-0 w-1 bg-orange-500 opacity-0 group-focus-within:opacity-100 transition-opacity"></div>
 
                             <label class="block mb-4 relative z-10">
-                                {{-- REMOVED Q1/Q2 LABEL --}}
+                                {{-- [FIX] Removed "Question X" Label --}}
                                 <div class="flex justify-end items-start mb-1">
-                                    @if($question->is_required) <span class="text-[10px] font-bold text-red-500 uppercase tracking-widest bg-red-50 px-2 py-0.5 rounded">Required</span> @endif
+                                    @if($question->is_required) 
+                                        <span class="text-[10px] font-bold text-red-500 uppercase tracking-widest bg-red-50 px-2 py-0.5 rounded">Required</span> 
+                                    @endif
                                 </div>
                                 <span class="text-base font-bold text-gray-900 block leading-snug">{{ $question->question_text }}</span>
                                 @if($question->description)
@@ -112,22 +115,26 @@
                                         @endforeach
                                     </div>
                                 
-                                {{-- 4. LIKERT SCALE (ADDED BACK) --}}
+                                {{-- 4. LIKERT SCALE (Corrected) --}}
                                 @elseif($question->type === 'likert')
                                     <div class="bg-gray-50 rounded-xl p-4 border border-gray-100">
                                         <div class="flex justify-between text-[10px] font-bold text-gray-400 uppercase tracking-widest px-1 mb-2">
+                                            {{-- [FIX] Check if array exists before accessing --}}
                                             <span>{{ $question->options[0] ?? 'Disagree' }}</span>
-                                            <span>{{ end($question->options) ?? 'Agree' }}</span>
+                                            {{-- [FIX] Use 'last()' helper instead of 'end()' to prevent crash --}}
+                                            <span>{{ last($question->options) ?? 'Agree' }}</span>
                                         </div>
                                         <div class="flex justify-between gap-1">
                                             @foreach($question->options as $idx => $label)
                                                 <label class="cursor-pointer group/likert text-center relative flex-1">
                                                     <input type="radio" wire:model.live="answers.{{ $question->id }}" value="{{ $label }}" class="peer sr-only">
+                                                    
                                                     {{-- Tile --}}
                                                     <div class="w-full aspect-square rounded-lg bg-white shadow-sm border-2 border-transparent flex flex-col items-center justify-center gap-1 group-hover/likert:border-orange-200 peer-checked:border-orange-500 peer-checked:bg-orange-500 peer-checked:text-white transition-all duration-200">
                                                         <span class="text-sm font-black text-gray-300 group-hover/likert:text-orange-300 peer-checked:text-white/90">{{ $idx + 1 }}</span>
                                                     </div>
-                                                    {{-- Label --}}
+                                                    
+                                                    {{-- Label (Hidden on small screens) --}}
                                                     <span class="hidden md:block text-[9px] text-gray-400 mt-1 peer-checked:text-orange-600 truncate px-1">{{ $label }}</span>
                                                 </label>
                                             @endforeach
