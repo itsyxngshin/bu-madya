@@ -172,29 +172,15 @@
                                         </label>
                                     </div>
 
-                                    {{-- 4. LIKERT SCALE --}}
-                                    @elseif($question->type === 'likert')
-                                        <div class="bg-gray-50 rounded-xl p-4 border border-gray-100">
-                                            <div class="flex justify-between text-[10px] font-bold text-gray-400 uppercase tracking-widest px-1 mb-2">
-                                                {{-- Use array access for first item --}}
-                                                <span>{{ $question->options[0] ?? 'Disagree' }}</span>
-                                                
-                                                {{-- Use 'last()' helper instead of 'end()' --}}
-                                                <span>{{ last($question->options) ?? 'Agree' }}</span>
-                                            </div>
-                                            <div class="flex justify-between gap-1">
-                                                @foreach($question->options as $idx => $label)
-                                                    <label class="cursor-pointer group/likert text-center relative flex-1">
-                                                        <input type="radio" wire:model.live="answers.{{ $question->id }}" value="{{ $label }}" class="peer sr-only">
-                                                        
-                                                        {{-- Tile --}}
-                                                        <div class="w-full aspect-square rounded-lg bg-white shadow-sm border-2 border-transparent flex flex-col items-center justify-center gap-1 group-hover/likert:border-orange-200 peer-checked:border-orange-500 peer-checked:bg-orange-500 peer-checked:text-white transition-all duration-200">
-                                                            <span class="text-sm font-black text-gray-300 group-hover/likert:text-orange-300 peer-checked:text-white/90">{{ $idx + 1 }}</span>
-                                                        </div>
-                                                        
-                                                        {{-- Label --}}
-                                                        <span class="hidden md:block text-[9px] text-gray-400 mt-1 peer-checked:text-orange-600 truncate px-1">{{ $label }}</span>
-                                                    </label>
+                                    {{-- LIKERT SCALE EDITOR --}}
+                                    @if($question['type'] === 'likert')
+                                        <div class="bg-gray-50 p-4 rounded-xl border border-gray-100 mt-2">
+                                            <p class="text-[10px] text-gray-400 font-bold uppercase mb-2 text-center">Scale Labels (Left to Right)</p>
+                                            <div class="grid grid-cols-2 md:grid-cols-5 gap-2">
+                                                @foreach($question['options'] as $optIndex => $option)
+                                                    <input type="text" wire:model="questions.{{ $index }}.options.{{ $optIndex }}" 
+                                                           class="text-xs text-center border-gray-200 rounded-lg focus:border-orange-500 focus:ring-orange-500" 
+                                                           placeholder="Label">
                                                 @endforeach
                                             </div>
                                         </div>
@@ -214,7 +200,7 @@
                                     @elseif($question['type'] === 'file')
                                         <div class="bg-blue-50 border border-blue-100 p-3 rounded-lg text-xs text-blue-600 font-bold flex items-center gap-2">
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
-                                            File Upload Bin
+                                            User will see a file upload bin here.
                                         </div>
                                     @endif
 
