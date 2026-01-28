@@ -173,7 +173,7 @@
                                     </div>
 
                                     {{-- 4. LIKERT SCALE --}}
-                                    @elseif($question->type === 'likert')
+                                    @if($question->type === 'likert')
                                         <div class="bg-gray-50 rounded-xl p-4 border border-gray-100">
                                             <div class="flex justify-between text-[10px] font-bold text-gray-400 uppercase tracking-widest px-1 mb-2">
                                                 {{-- Use array access [0] for the first item --}}
