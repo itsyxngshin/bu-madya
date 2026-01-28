@@ -67,6 +67,7 @@ Route::get('/', function () {
     return view('welcome');
 }); 
 
+Route::get('/evaluations', EvaluationList::class)->name('evaluations.index');
 Route::get('/secure-file/{application}', function (\App\Models\MembershipApplication $application) {
     
     // 1. Security Check: Only allow if user is logged in & authorized
@@ -123,7 +124,7 @@ Route::middleware(['auth'])
     Route::get('/roundtable', RoundtableIndex::class)->name('roundtable.index');
     Route::get('/roundtable/{id}', RoundtableShow::class)->name('roundtable.show');
     // 1. The Dashboard (List of pending evaluations)
-    Route::get('/evaluations', EvaluationList::class)->name('evaluations.index');
+    
 
     // 2. The Actual Form
     Route::get('/evaluations/{evaluation}', EvaluationForm::class)->name('evaluations.show');
@@ -162,9 +163,9 @@ Route::middleware(['auth', 'role:administrator,director'])
     Route::get('/proposals', ProposalsIndex::class)->name('admin.proposals.index');
     Route::get('/news/{slug}/edit', NewsEdit::class)->name('news.edit');  
     Route::get('/linkage/{linkage:slug}/edit', LinkagesEdit::class)->name('linkages.edit');
-    Route::get('/evaluations/{evaluation}/edit', EvaluationBuilder::class)->name('evaluations.edit');
-    Route::get('/evaluations/{evaluation}/results', EvaluationResults::class)->name('evaluations.results');
-    Route::get('/evaluations', AdminEvaluationIndex::class)->name('evaluations.index');
+    Route::get('/manage/evaluations/{evaluation}/edit', EvaluationBuilder::class)->name('admin.evaluations.edit');
+    Route::get('/manage/evaluations/{evaluation}/results', EvaluationResults::class)->name('admin.evaluations.results');
+    Route::get('/manage/evaluations', AdminEvaluationIndex::class)->name('admin.evaluations.index');
 });
 
 // Public view blades with access control on parts of the navigation
