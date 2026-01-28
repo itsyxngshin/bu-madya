@@ -76,30 +76,21 @@ class EvaluationBuilder extends Component
                 ->orderBy('order')
                 ->get()
                 ->map(function($q) {
-                $arr = $q->toArray();
+                    $arr = $q->toArray();
                     $arr['new_image'] = null;
-                    // [FIX] Ensure description key exists
-                    $arr['description'] = $arr['description'] ?? ''; 
+                    $arr['description'] = $arr['description'] ?? '';
+                    // [FIX] Assign a unique temporary ID for the frontend builder
+                    $arr['temp_id'] = (string) Str::uuid(); 
                     return $arr;
                 })
-            ->toArray();
+                ->toArray();
         } 
         else {
             // Defaults for a new form
             $this->title = ''; 
             $this->slug = '';
             $this->is_active = true;
-            $this->questions[] = [
-                'id' => null,
-                'type' => 'text',
-                'question_text' => '',
-                'description' => '',
-                'options' => [],
-                'is_required' => true,
-                'order' => 0, 
-                'image_path' => null,
-                'new_image' => null
-            ];
+            $this->questions = [];
         }
     }
 // [NEW] Helper to generate random secure key
@@ -121,10 +112,11 @@ class EvaluationBuilder extends Component
 
         $this->questions[] = [
             'id' => null,
+            'temp_id' => (string) Str::uuid(), // [FIX] Generate UUID for new items
             'type' => $type,
             'question_text' => '',
             'description' => '',
-            'options' => $defaultOptions, // Ensure this array is passed
+            'options' => $defaultOptions,
             'is_required' => ($type !== 'section'),
             'order' => count($this->questions),
             'image_path' => null,
@@ -152,12 +144,19 @@ class EvaluationBuilder extends Component
     public function updateQuestionOrder($list)
     {
         foreach ($list as $item) {
-            $this->questions[$item['value']]['order'] = $item['order'];
+            $value = $item['value']; // This is the temp_id
+            $order = $item['order'];
+
+            // Find the question with this temp_id and update its order
+            foreach ($this->questions as $key => $q) {
+                if ($q['temp_id'] === $value) {
+                    $this->questions[$key]['order'] = $order;
+                    break; 
+                }
+            }
         }
         
-        usort($this->questions, function($a, $b) {
-            return $a['order'] <=> $b['order'];
-        });
+        usort($this->questions, fn($a, $b) => $a['order'] <=> $b['order']);
     }
 
     public function save()

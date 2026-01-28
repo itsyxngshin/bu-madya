@@ -95,11 +95,10 @@
                 <div class="bg-white rounded-b-[2rem] p-6 shadow-sm border border-t-0 border-gray-200 min-h-[400px] space-y-4" wire:sortable="updateQuestionOrder">
                     
                     @foreach($questions as $index => $question)
-                        {{-- NOTE: We use array syntax $question['type'] because this is the Builder --}}
                         
+                        {{-- [FIX] Use 'temp_id' for both item value and key --}}
                         @if($question['type'] === 'section')
-                            {{-- SECTION HEADER --}}
-                            <div wire:sortable.item="{{ $index }}" wire:key="question-{{ $index }}" class="group relative bg-orange-50 border-2 border-dashed border-orange-200 rounded-xl p-4 my-6">
+                            <div wire:sortable.item="{{ $question['temp_id'] }}" wire:key="q-{{ $question['temp_id'] }}" class="group relative bg-orange-50 border-2 border-dashed border-orange-200 rounded-xl p-4 my-6">
                                 <div class="absolute left-0 top-0 bottom-0 w-8 flex items-center justify-center cursor-move text-orange-300 rounded-l-xl" wire:sortable.handle>
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"></path></svg>
                                 </div>
@@ -112,8 +111,7 @@
                                 </div>
                             </div>
                         @else
-                            {{-- STANDARD QUESTION CARD --}}
-                            <div wire:sortable.item="{{ $index }}" wire:key="question-{{ $index }}" class="group relative bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-lg transition-all duration-300">
+                            <div wire:sortable.item="{{ $question['temp_id'] }}" wire:key="q-{{ $question['temp_id'] }}" class="group relative bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-lg transition-all duration-300">
                                 
                                 <div class="absolute left-0 top-0 bottom-0 w-8 flex items-center justify-center cursor-move text-gray-300 hover:text-gray-500 hover:bg-gray-50 rounded-l-2xl" wire:sortable.handle>
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"></path></svg>
@@ -153,20 +151,16 @@
                                         </label>
                                     </div>
 
-                                    {{-- LIKERT SCALE EDITOR (Using Array Syntax) --}}
+                                    {{-- OPTIONS LOGIC --}}
                                     @if($question['type'] === 'likert')
                                         <div class="bg-gray-50 p-4 rounded-xl border border-gray-100 mt-2">
                                             <p class="text-[10px] text-gray-400 font-bold uppercase mb-2 text-center">Scale Labels (Left to Right)</p>
                                             <div class="grid grid-cols-2 md:grid-cols-5 gap-2">
                                                 @foreach($question['options'] as $optIndex => $option)
-                                                    <input type="text" wire:model="questions.{{ $index }}.options.{{ $optIndex }}" 
-                                                           class="text-xs text-center border-gray-200 rounded-lg focus:border-orange-500" 
-                                                           placeholder="Label">
+                                                    <input type="text" wire:model="questions.{{ $index }}.options.{{ $optIndex }}" class="text-xs text-center border-gray-200 rounded-lg focus:border-orange-500" placeholder="Label">
                                                 @endforeach
                                             </div>
                                         </div>
-
-                                    {{-- RADIO EDITOR (Using Array Syntax) --}}
                                     @elseif(in_array($question['type'], ['radio', 'checkbox']))
                                         <div class="pl-4 border-l-2 border-gray-100 space-y-2 mt-2">
                                             @foreach($question['options'] as $optIndex => $opt)
