@@ -4,6 +4,7 @@ namespace App\Livewire\Admin;
 
 use Livewire\Component;
 use App\Models\Evaluation;
+use Livewire\WithFileUploads;
 use App\Models\EvaluationQuestion;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Layout;
@@ -11,6 +12,7 @@ use Livewire\Attributes\Layout;
 #[Layout('layouts.madya-admin-deck')]
 class EvaluationBuilder extends Component
 {
+    use WithFileUploads;
     // The Model (Used for loading/saving, NOT for direct binding)
     public Evaluation $evaluation;
 
@@ -19,6 +21,8 @@ class EvaluationBuilder extends Component
     public $description = '';
     public $project_id = null;
     public $is_active = true;
+    public $header_image; // Temporary upload for header
+    public $existing_header_image; // To show existing header
     
     // Questions Array
     public $questions = [];
@@ -32,9 +36,11 @@ class EvaluationBuilder extends Component
         'questions' => 'array',
         'questions.*.question_text' => 'required|string',
         // Note: added 'section' to the allowed types
-        'questions.*.type' => 'required|in:text,textarea,radio,likert,section',
+        'questions.*.type' => 'required|in:text,textarea,radio,likert,section,file', 
+        'questions.*.new_image' => 'nullable|image|max:2048', // For question images
         'questions.*.options' => 'nullable|array',
         'questions.*.is_required' => 'boolean',
+        
     ];
 
     protected $validationAttributes = [
@@ -68,7 +74,9 @@ class EvaluationBuilder extends Component
                 'question_text' => '',
                 'options' => [],
                 'is_required' => true,
-                'order' => 0
+                'order' => 0, 
+                'image_path' => null,
+                'new_image' => null
             ];
         }
     }
@@ -125,6 +133,11 @@ class EvaluationBuilder extends Component
         // 1. Validate the local properties
         $this->validate();
 
+        if ($this->header_image) {
+            $headerPath = $this->header_image->store('evaluation-headers', 'public');
+            $this->evaluation->header_image = $headerPath;
+        }
+
         // 2. Transfer data from Properties -> Model
         $this->evaluation->title = $this->title;
         $this->evaluation->description = $this->description;
@@ -143,12 +156,21 @@ class EvaluationBuilder extends Component
         $this->evaluation->questions()->delete();
 
         foreach ($this->questions as $index => $q) {
+            
+            $imagePath = $q['image_path'] ?? null;
+
+            // Handle New Question Image
+            if (isset($q['new_image']) && $q['new_image']) {
+                $imagePath = $q['new_image']->store('question-images', 'public');
+            }
+
             $this->evaluation->questions()->create([
                 'type' => $q['type'],
                 'question_text' => $q['question_text'],
-                'options' => $q['options'],
+                'options' => $q['options'], // Casts to JSON automatically
                 'is_required' => $q['is_required'],
-                'order' => $index, 
+                'order' => $index,
+                'image_path' => $imagePath // Save the path
             ]);
         }
 

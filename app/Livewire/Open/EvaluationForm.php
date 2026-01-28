@@ -76,8 +76,15 @@ class EvaluationForm extends Component
 
         // 3. Save the Individual Answers
         foreach($this->answers as $questionId => $value) {
-            // Handle arrays (like checkboxes) by converting to JSON
-            $finalValue = is_array($value) ? json_encode($value) : $value;
+    
+            // Check if the answer is an UploadedFile object (from Livewire)
+            if ($value instanceof \Illuminate\Http\UploadedFile) {
+                // Store it and save the path string
+                $path = $value->store('evaluation-uploads', 'public');
+                $finalValue = $path;
+            } else {
+                $finalValue = is_array($value) ? json_encode($value) : $value;
+            }
 
             EvaluationAnswer::create([
                 'evaluation_response_id' => $response->id,
