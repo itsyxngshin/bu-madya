@@ -162,61 +162,72 @@ class EvaluationBuilder extends Component
 
     public function save()
     {
-        // 1. Validate the local properties
-        $this->validate($this->rules());
+        $this->validate();
 
+        // 1. Handle Header Image
         if ($this->header_image) {
             $headerPath = $this->header_image->store('evaluation-headers', 'public');
             $this->evaluation->header_image = $headerPath;
         }
 
-        // 2. Transfer data from Properties -> Model
+        // 2. Save Main Evaluation Details
         $this->evaluation->title = $this->title;
-        // [NEW] Slug Logic
+        // Logic to preserve existing slug or generate new one
         if (!empty($this->slug)) {
-            // Use the manual or random slug provided
-            $this->evaluation->slug = Str::slug($this->slug); // Ensure it's URL safe
-        } 
-        else {
-            // Fallback: Generate from title if empty
+            $this->evaluation->slug = Str::slug($this->slug);
+        } elseif (empty($this->evaluation->slug)) {
             $this->evaluation->slug = Str::slug($this->title);
         }
+        
         $this->evaluation->description = $this->description;
         $this->evaluation->project_id = $this->project_id;
         $this->evaluation->is_active = $this->is_active;
-
-        // 3. Generate Slug logic
-        if (empty($this->evaluation->slug)) {
-            $this->evaluation->slug = Str::slug($this->title);
-        }
-
-        // 4. Save the Header
         $this->evaluation->save();
 
-        // 5. Sync Questions (Delete old, create new)
-        $this->evaluation->questions()->delete();
+        // 3. Collect IDs of questions currently in the builder
+        // We use this to know which questions to KEEP
+        $existingIds = collect($this->questions)->pluck('id')->filter()->toArray();
 
+        // 4. SYNC QUESTIONS (The Fix)
+        
+        // A. Delete questions that were REMOVED from the builder
+        // We wrap this in a try-catch because if you try to delete a specific question 
+        // that has answers, the DB will still stop you (which is good!).
+        try {
+            $this->evaluation->questions()
+                ->whereNotIn('id', $existingIds)
+                ->delete();
+        } catch (\Illuminate\Database\QueryException $e) {
+            // Optional: Flash a warning that some questions couldn't be deleted due to existing answers
+            session()->flash('warning', 'Some removed questions could not be deleted because they already have user responses.');
+        }
+
+        // B. Update existing or Create new questions
         foreach ($this->questions as $index => $q) {
             
             $imagePath = $q['image_path'] ?? null;
 
-            // Handle New Question Image
+            // Handle New Image Upload
             if (isset($q['new_image']) && $q['new_image']) {
                 $imagePath = $q['new_image']->store('question-images', 'public');
             }
 
-            $this->evaluation->questions()->create([
-                'type' => $q['type'],
-                'question_text' => $q['question_text'],
-                'description' => $q['description'] ?? null,
-                'options' => $q['options'], // Casts to JSON automatically
-                'is_required' => $q['is_required'],
-                'order' => $index,
-                'image_path' => $imagePath // Save the path
-            ]);
+            // [CRITICAL CHANGE] Use updateOrCreate instead of create
+            $this->evaluation->questions()->updateOrCreate(
+                ['id' => $q['id'] ?? null], // Look up by ID (if null, it creates a new one)
+                [
+                    'type' => $q['type'],
+                    'question_text' => $q['question_text'],
+                    'description' => $q['description'] ?? null,
+                    'options' => $q['options'], 
+                    'is_required' => $q['is_required'],
+                    'order' => $index,
+                    'image_path' => $imagePath 
+                ]
+            );
         }
 
-        session()->flash('success', 'Evaluation form saved successfully!');
+        session()->flash('success', 'Evaluation updated successfully!');
         return redirect()->route('admin.evaluations.index');
     }
 
