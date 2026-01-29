@@ -61,6 +61,25 @@
                         <input wire:model.live="title" type="text" class="w-full rounded-xl border-gray-200 bg-gray-50 text-sm font-bold">
                         @error('title') <span class="text-xs text-red-500 font-bold block mt-1">{{ $message }}</span> @enderror
                     </div>
+                    
+                    <div class="mb-4">
+                        <label class="block text-sm font-bold text-gray-700 mb-1">
+                            Link to Project
+                            <span class="text-[10px] font-normal text-gray-400 ml-1">(Optional)</span>
+                        </label>
+                        <div class="relative">
+                            <select wire:model="project_id" class="w-full rounded-xl border-gray-200 bg-gray-50 text-sm appearance-none cursor-pointer hover:border-gray-300 transition">
+                                <option value="">-- General Evaluation (No Project) --</option>
+                                @foreach($available_projects as $proj)
+                                    <option value="{{ $proj->id }}">{{ $proj->title }}</option>
+                                @endforeach
+                            </select>
+                            <div class="absolute right-3 top-3 pointer-events-none text-gray-400">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                            </div>
+                        </div>
+                        <p class="text-[10px] text-gray-400 mt-1">If selected, this form will appear on that Project's page.</p>
+                    </div>
 
                     {{-- SLUG INPUT --}}
                     <div class="mb-4">

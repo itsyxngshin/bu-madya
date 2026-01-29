@@ -4,6 +4,7 @@ namespace App\Livewire\Admin;
 
 use Livewire\Component;
 use App\Models\Evaluation;
+use App\Models\Project; 
 use Livewire\WithFileUploads;
 use Livewire\Attributes\On;
 use App\Models\EvaluationQuestion;
@@ -29,6 +30,7 @@ class EvaluationBuilder extends Component
     
     // Questions Array
     public $questions = [];
+    public $available_projects = [];
 
     // 2. Rules defined as a METHOD (Crucial for Livewire security)
     protected function rules()
@@ -61,6 +63,11 @@ class EvaluationBuilder extends Component
 
     public function mount(Evaluation $evaluation = null)
     {
+        $this->available_projects = Project::where('status', '!=', 'Draft')
+            ->orderBy('title')
+            ->select('id', 'title') // Optimize query
+            ->get();
+
         // 1. Setup the Model
         $this->evaluation = $evaluation ?? new Evaluation();
 
