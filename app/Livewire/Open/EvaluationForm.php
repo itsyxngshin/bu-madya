@@ -14,7 +14,8 @@ class EvaluationForm extends Component
 {
     public Evaluation $evaluation;
     public $project_id = null; // Store the project ID from URL
-    public $answers = []; // Stores user's answers: [question_id => value]
+    public $answers = []; 
+    public $isSubmitted = false;
 
     // Capture project_id from the Query String (?project_id=1)
     protected $queryString = ['project_id'];
@@ -52,38 +53,35 @@ class EvaluationForm extends Component
         return min(100, round(($filled / $requiredQuestions) * 100));
     }
 
-    public function submit() 
+    public function submit()
     {
-        // 1. Dynamic Validation Logic
+        // 1. Validation Logic
         $rules = [];
-        $messages = [];
-
-        foreach($this->evaluation->questions as $q) {
-            if($q->is_required) {
+        foreach ($this->evaluation->questions as $q) {
+            if ($q->is_required && $q->type !== 'section') {
                 $rules["answers.{$q->id}"] = 'required';
-                $messages["answers.{$q->id}.required"] = "This question is required.";
             }
         }
-        
-        $this->validate($rules, $messages);
+        $this->validate($rules, ['required' => 'This question is required.']);
 
-        // 2. Create the Response Header (Who submitted it?)
+        // 2. Create Response
         $response = EvaluationResponse::create([
             'evaluation_id' => $this->evaluation->id,
-            'user_id' => Auth::id(), // Can be null if allowing anonymous
-            'project_id' => $this->project_id, // Link to specific project if available
+            'user_id' => Auth::id(), // Nullable if guest
+            'ip_address' => request()->ip(),
         ]);
 
-        // 3. Save the Individual Answers
-        foreach($this->answers as $questionId => $value) {
-    
-            // Check if the answer is an UploadedFile object (from Livewire)
+        // 3. Save Answers
+        foreach ($this->answers as $questionId => $value) {
+            $finalValue = $value;
+
+            // Handle File Uploads
             if ($value instanceof \Illuminate\Http\UploadedFile) {
-                // Store it and save the path string
-                $path = $value->store('evaluation-uploads', 'public');
-                $finalValue = $path;
-            } else {
-                $finalValue = is_array($value) ? json_encode($value) : $value;
+                $finalValue = $value->store('evaluation-uploads', 'public');
+            } 
+            // Handle Arrays (Checkboxes)
+            elseif (is_array($value)) {
+                $finalValue = json_encode($value);
             }
 
             EvaluationAnswer::create([
@@ -93,11 +91,11 @@ class EvaluationForm extends Component
             ]);
         }
 
-        // 4. Reset & Notify
-        session()->flash('success', 'Thank you! Your evaluation has been submitted.');
+        // 4. [NEW] Switch State instead of Redirecting immediately
+        $this->isSubmitted = true;
         
-        // Optional: Redirect to a thank you page or back to the index
-        return redirect()->route('open.home'); 
+        // Optional: Scroll to top of page using browser event
+        $this->dispatch('scroll-to-top'); 
     }
 
     public function render()

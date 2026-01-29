@@ -1,13 +1,50 @@
 <div class="min-h-screen bg-gray-50 pb-20 font-sans text-gray-900 selection:bg-orange-100 selection:text-orange-600">
 
-    @if(!$evaluation->is_active)
-        {{-- CLOSED STATE CODE --}}
+    {{-- STATE: FORM SUBMITTED (SUCCESS PAGE) --}}
+    @if($isSubmitted)
+        <div class="min-h-screen flex items-center justify-center p-4" x-data x-init="window.scrollTo({top: 0, behavior: 'smooth'})">
+            <div class="max-w-md w-full bg-white rounded-2xl p-10 text-center shadow-2xl shadow-green-500/10 border border-green-100 relative overflow-hidden">
+                
+                {{-- Confetti / Decoration --}}
+                <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-green-400 to-emerald-600"></div>
+                
+                <div class="w-20 h-20 bg-green-50 text-green-500 rounded-full flex items-center justify-center mx-auto mb-6 animate-bounce">
+                    <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                </div>
+                
+                <h1 class="text-3xl font-black text-gray-900 mb-2">Thank You!</h1>
+                <p class="text-gray-500 mb-8 leading-relaxed text-sm">
+                    Your response has been successfully recorded. We appreciate your feedback and time.
+                </p>
+                
+                <div class="space-y-3">
+                    <a href="{{ route('open.home') }}" class="block w-full py-3 bg-gray-900 text-white font-bold rounded-xl shadow-lg hover:bg-gray-800 transition-transform hover:-translate-y-1 text-xs uppercase tracking-widest">
+                        Return to Home
+                    </a>
+                    
+                    {{-- Optional: Allow submitting another response --}}
+                    @if(Auth::guest()) 
+                        <button wire:click="$set('isSubmitted', false); $set('answers', [])" class="block w-full py-3 bg-white text-gray-500 font-bold rounded-xl border border-gray-200 hover:bg-gray-50 hover:text-gray-900 transition-colors text-xs uppercase tracking-widest">
+                            Submit Another Response
+                        </button>
+                    @endif
+                </div>
+            </div>
+        </div>
+
+    {{-- STATE: FORM CLOSED (Existing Code) --}}
+    @elseif(!$evaluation->is_active)
         <div class="min-h-screen flex items-center justify-center p-4">
-             <div class="max-w-md w-full bg-white rounded-2xl p-8 text-center shadow-lg">
-                 <h1 class="text-2xl font-bold">Form Closed</h1>
-                 <a href="{{ route('open.home') }}" class="text-blue-600 underline text-sm mt-4 inline-block">Return Home</a>
+             <div class="max-w-md w-full bg-white rounded-2xl p-8 text-center shadow-lg border border-gray-100">
+                 <div class="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                 </div>
+                 <h1 class="text-2xl font-bold text-gray-900 mb-2">Form Closed</h1>
+                 <p class="text-sm text-gray-500 mb-6">This evaluation is no longer accepting responses.</p>
+                 <a href="{{ route('open.home') }}" class="text-blue-600 font-bold text-xs uppercase tracking-widest hover:underline">Return Home</a>
              </div>
         </div>
+        
     @else
         
         {{-- STICKY HEADER --}}
