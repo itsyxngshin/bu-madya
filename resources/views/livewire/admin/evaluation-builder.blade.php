@@ -228,7 +228,7 @@
     </div>
 </div>
 
-@push('scripts') {{-- Assuming you have a @stack('scripts') in your layout --}}
+@push('modals') {{-- Assuming you have a @stack('scripts') in your layout --}}
 <script>
     // 1. Trigger the Confirmation Modal
     function confirmReset(count) {
