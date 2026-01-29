@@ -12,6 +12,20 @@
             </div>
             <div class="flex items-center gap-3">
                 <a href="{{ route('admin.evaluations.index') }}" class="px-4 py-2 bg-white border border-gray-300 text-gray-600 font-bold rounded-xl text-xs uppercase tracking-wider hover:bg-gray-50 transition">Cancel</a>
+
+                {{-- RESET RESPONSES BUTTON --}}
+                @if($evaluation->exists && $evaluation->responses()->count() > 0)
+                    <button 
+                        type="button"
+                        onclick="confirmReset({{ $evaluation->responses()->count() }})"
+                        class="px-4 py-2 bg-red-50 border border-red-200 text-red-600 font-bold rounded-xl text-xs uppercase tracking-wider hover:bg-red-100 transition flex items-center gap-2"
+                        title="Clear all responses to unlock editing">
+                        
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        Reset Data ({{ $evaluation->responses()->count() }})
+                    </button>
+                @endif
+
                 <button wire:click="save" class="px-6 py-2 bg-gray-900 text-white font-bold rounded-xl shadow-lg hover:bg-gray-800 hover:-translate-y-1 transition text-xs uppercase tracking-wider flex items-center gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
                     Save Changes
@@ -213,3 +227,38 @@
         </div>
     </div>
 </div>
+
+@push('scripts') {{-- Assuming you have a @stack('scripts') in your layout --}}
+<script>
+    // 1. Trigger the Confirmation Modal
+    function confirmReset(count) {
+        Swal.fire({
+            title: 'Are you absolutely sure?',
+            text: `You are about to delete ${count} user responses. This action cannot be undone!`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete everything!',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Call the Livewire method "resetResponses" via the event we registered
+                Livewire.dispatch('confirmed-reset');
+            }
+        })
+    }
+
+    // 2. Listen for Success/Info messages from the Backend
+    document.addEventListener('livewire:initialized', () => {
+        Livewire.on('swal:modal', (data) => {
+            Swal.fire({
+                title: data[0].title,
+                text: data[0].text,
+                icon: data[0].type,
+                confirmButtonColor: '#1f2937' // Matches your gray-900 theme
+            });
+        });
+    });
+</script>
+@endpush 

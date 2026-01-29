@@ -5,6 +5,7 @@ namespace App\Livewire\Admin;
 use Livewire\Component;
 use App\Models\Evaluation;
 use Livewire\WithFileUploads;
+use Livewire\Attributes\On;
 use App\Models\EvaluationQuestion;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Str;
@@ -97,6 +98,35 @@ class EvaluationBuilder extends Component
     public function generateRandomSlug()
     {
         $this->slug = Str::random(16); // Generates a random 16-char string
+    }
+
+    #[On('confirmed-reset')] 
+    public function resetResponses()
+    {
+        if (!$this->evaluation->exists) return;
+
+        $responseIds = $this->evaluation->responses()->pluck('id');
+
+        if ($responseIds->isEmpty()) {
+            // Send SweetAlert warning back to frontend
+            $this->dispatch('swal:modal', [
+                'type' => 'info',
+                'title' => 'No Data',
+                'text' => 'There are no responses to clear.'
+            ]);
+            return;
+        }
+
+        // Delete logic
+        \App\Models\EvaluationAnswer::whereIn('evaluation_response_id', $responseIds)->delete();
+        $this->evaluation->responses()->delete();
+
+        // Send SweetAlert success back to frontend
+        $this->dispatch('swal:modal', [
+            'type' => 'success',
+            'title' => 'Deleted!',
+            'text' => 'All responses have been permanently cleared.'
+        ]);
     }
 
     public function moveQuestionUp($index)
