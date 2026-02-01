@@ -96,7 +96,7 @@
             <div class="lg:col-span-8 relative">
                 
                 {{-- STICKY TOOLBAR (Pushed down to top-24 to avoid header overlap) --}}
-                <div class="sticky top-24 z-100 bg-gray-900 text-white p-4 rounded-xl flex flex-wrap gap-2 items-center shadow-2xl border border-gray-800 backdrop-blur-md bg-opacity-95 mb-6">
+                <div class="sticky top-24 z-400 bg-gray-900 text-white p-4 rounded-xl flex flex-wrap gap-2 items-center shadow-2xl border border-gray-800 backdrop-blur-md bg-opacity-95 mb-6">
                     <span class="font-bold ml-2 mr-auto text-sm flex items-center gap-2">Add Content</span>
                     <button wire:click="addQuestion('text')" class="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-bold transition">Text</button>
                     <button wire:click="addQuestion('radio')" class="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-bold transition">Radio</button>
@@ -110,7 +110,7 @@
                 {{-- DRAGGABLE LIST ROOT --}}
                 {{-- QUESTIONS LIST CONTAINER --}}
                 <div 
-                    class="bg-white rounded-b-[2rem] p-6 shadow-sm border border-t-0 border-gray-200 min-h-[400px] space-y-4 pb-20"
+                    class="bg-white rounded-b-[2rem] p-6 z-40 shadow-sm border border-t-0 border-gray-200 min-h-[400px] space-y-4 pb-20"
                     
                     {{-- [NEW] Alpine Sortable Logic --}}
                     x-data="{
