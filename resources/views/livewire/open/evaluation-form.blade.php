@@ -147,14 +147,15 @@
                                         <div class="space-y-2">
                                             @foreach($question->options as $optIndex => $option)
                                                 @php
-                                                    // 1. Get Label
                                                     $label = is_array($option) ? ($option['text'] ?? '') : $option;
                                                     
-                                                    // 2. Safe Array Check (Similar to Likert but for Arrays)
-                                                    $currentVal = $answers[$question->id] ?? [];
-                                                    if (!is_array($currentVal)) $currentVal = [];
+                                                    // Get current array safely
+                                                    $currentVal = $answers[$question->id];
                                                     
-                                                    // 3. Determine State
+                                                    // Safety check: ensure it's an array (fixes the crash)
+                                                    if (!is_array($currentVal)) $currentVal = [];
+
+                                                    // Check if this specific option is in the array
                                                     $isChecked = in_array($label, $currentVal);
                                                 @endphp
 
@@ -164,20 +165,21 @@
                                                         : 'border-gray-200 hover:bg-orange-50 hover:border-orange-200' 
                                                     }}">
                                                     
+                                                    {{-- Note: wire:model will automatically push/pull from the array because we initialized it as [] --}}
                                                     <input type="checkbox" 
                                                            wire:model.live="answers.{{ $question->id }}" 
                                                            value="{{ $label }}" 
                                                            class="peer sr-only" 
                                                            wire:key="q-{{ $question->id }}-chk-{{ $optIndex }}">
                                                     
-                                                    {{-- Square Box (Visuals based on $isChecked) --}}
-                                                    <div class="w-5 h-5 rounded border-2 mr-3 flex items-center justify-center transition-all
+                                                    {{-- Custom Box UI --}}
+                                                    <div class="w-5 h-5 rounded border-2 mr-3 flex items-center justify-center transition-all 
                                                         {{ $isChecked 
                                                             ? 'border-orange-500 bg-orange-500' 
                                                             : 'border-gray-300 bg-white' 
                                                         }}">
                                                         
-                                                        {{-- Checkmark Icon --}}
+                                                        {{-- Checkmark Icon (Visible only when checked) --}}
                                                         <svg class="w-3 h-3 text-white {{ $isChecked ? 'block' : 'hidden' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
                                                     </div>
                                                     

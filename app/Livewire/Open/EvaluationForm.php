@@ -30,9 +30,15 @@ class EvaluationForm extends Component
             $this->project_id = request()->query('project_id');
         }
 
-        // Initialize empty answers
+        // [FIX] Initialize answers with correct data types
         foreach($evaluation->questions as $q) {
-            $this->answers[$q->id] = '';
+            if ($q->type === 'checkbox') {
+                // Checkboxes MUST be arrays to hold multiple values
+                $this->answers[$q->id] = []; 
+            } else {
+                // Text/Radio/Files are strings
+                $this->answers[$q->id] = ''; 
+            }
         }
     }
 
