@@ -15,12 +15,7 @@
 
                 {{-- RESET RESPONSES BUTTON --}}
                 @if($evaluation->exists && $evaluation->responses()->count() > 0)
-                    <button 
-                        type="button"
-                        onclick="confirmReset({{ $evaluation->responses()->count() }})"
-                        class="px-4 py-2 bg-red-50 border border-red-200 text-red-600 font-bold rounded-xl text-xs uppercase tracking-wider hover:bg-red-100 transition flex items-center gap-2"
-                        title="Clear all responses to unlock editing">
-                        
+                    <button type="button" onclick="confirmReset({{ $evaluation->responses()->count() }})" class="px-4 py-2 bg-red-50 border border-red-200 text-red-600 font-bold rounded-xl text-xs uppercase tracking-wider hover:bg-red-100 transition flex items-center gap-2">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                         Reset Data ({{ $evaluation->responses()->count() }})
                     </button>
@@ -35,12 +30,12 @@
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
             
-            {{-- LEFT: SETTINGS --}}
+            {{-- LEFT: CONFIGURATION --}}
             <div class="lg:col-span-4 space-y-6">
-                <div class="bg-white rounded-[2rem] p-6 shadow-sm border border-gray-200">
-                    <h2 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Configuration</h2>
+                <div class="bg-white rounded-[2rem] p-6 shadow-sm border border-gray-200 sticky top-24">
+                    <h2 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Settings</h2>
                     
-                    {{-- HEADER IMAGE UPLOAD --}}
+                    {{-- HEADER IMAGE --}}
                     <div class="mb-6">
                         <label class="block text-sm font-bold text-gray-700 mb-2">Header Image</label>
                         @if($header_image)
@@ -48,61 +43,47 @@
                         @elseif($existing_header_image)
                             <img src="{{ asset('storage/'.$existing_header_image) }}" class="w-full h-32 object-cover rounded-xl mb-2 border border-gray-100">
                         @endif
-                        
                         <label class="cursor-pointer bg-gray-50 hover:bg-gray-100 text-gray-600 px-4 py-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 border border-dashed border-gray-300">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                            Upload Header
-                            <input type="file" wire:model="header_image" class="hidden" accept="image/*">
+                            Upload Header <input type="file" wire:model="header_image" class="hidden" accept="image/*">
                         </label>
                     </div>
 
+                    {{-- TITLE --}}
                     <div class="mb-4">
                         <label class="block text-sm font-bold text-gray-700 mb-1">Title <span class="text-red-500">*</span></label>
                         <input wire:model.live="title" type="text" class="w-full rounded-xl border-gray-200 bg-gray-50 text-sm font-bold">
                         @error('title') <span class="text-xs text-red-500 font-bold block mt-1">{{ $message }}</span> @enderror
                     </div>
 
+                    {{-- PROJECT LINK --}}
                     <div class="mb-4">
-                        <label class="block text-sm font-bold text-gray-700 mb-1">
-                            Link to Project
-                            <span class="text-[10px] font-normal text-gray-400 ml-1">(Optional)</span>
-                        </label>
-                        <div class="relative">
-                            <select wire:model="project_id" class="w-full rounded-xl border-gray-200 bg-gray-50 text-sm cursor-pointer hover:border-gray-300 transition">
-                                <option value="">-- General Evaluation (No Project) --</option>
-                                @foreach($available_projects as $proj)
-                                    <option value="{{ $proj->id }}">{{ $proj->title }}</option>
-                                @endforeach
-                            </select>
-                            <div class="absolute right-3 top-3 pointer-events-none text-gray-400">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                            </div>
-                        </div>
-                        <p class="text-[10px] text-gray-400 mt-1">If selected, this form will appear on that Project's page.</p>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Link to Project</label>
+                        <select wire:model="project_id" class="w-full rounded-xl border-gray-200 bg-gray-50 text-sm">
+                            <option value="">-- No Project --</option>
+                            @foreach($available_projects as $proj)
+                                <option value="{{ $proj->id }}">{{ $proj->title }}</option>
+                            @endforeach
+                        </select>
                     </div>
 
-                    {{-- SLUG INPUT --}}
+                    {{-- SLUG --}}
                     <div class="mb-4">
-                        <label class="block text-sm font-bold text-gray-700 mb-1">
-                            URL Slug
-                            <span class="text-[10px] font-normal text-gray-400 ml-1">(Auto-generated if empty)</span>
-                        </label>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">URL Slug</label>
                         <div class="flex gap-2">
-                            <input wire:model="slug" type="text" class="w-full rounded-xl border-gray-200 bg-gray-50 text-sm font-mono pl-3 pr-10">
-                            <button wire:click="generateRandomSlug" type="button" class="px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-xl border border-gray-200">
+                            <input wire:model="slug" type="text" class="w-full rounded-xl border-gray-200 bg-gray-50 text-sm font-mono pl-3 pr-10" placeholder="Auto-generated">
+                            <button wire:click="generateRandomSlug" class="px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-xl border border-gray-200">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
                             </button>
                         </div>
-                        @error('slug') <span class="text-xs text-red-500 font-bold block mt-1">{{ $message }}</span> @enderror
                     </div>
 
+                    {{-- DESC & ACTIVE --}}
                     <div class="mb-4">
                         <label class="block text-sm font-bold text-gray-700 mb-1">Description</label>
                         <textarea wire:model="description" rows="3" class="w-full rounded-xl border-gray-200 bg-gray-50 text-sm resize-none"></textarea>
                     </div>
-
                     <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-100">
-                        <span class="text-xs font-bold text-gray-600 uppercase tracking-wide">Publish Form?</span>
+                        <span class="text-xs font-bold text-gray-600 uppercase tracking-wide">Publish?</span>
                         <label class="relative inline-flex items-center cursor-pointer">
                             <input type="checkbox" wire:model="is_active" class="sr-only peer">
                             <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:bg-green-500 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
@@ -111,185 +92,128 @@
                 </div>
             </div>
 
-            {{-- RIGHT: QUESTION BUILDER --}}
+            {{-- RIGHT: BUILDER --}}
             <div class="lg:col-span-8 relative">
                 
-                {{-- Toolbar --}}
-                <div class="sticky top-6 z-40 bg-gray-900 text-white p-4 rounded-xl flex flex-wrap gap-2 items-center shadow-2xl border border-gray-800 backdrop-blur-md bg-opacity-95 mb-6">
-                    <span class="font-bold ml-2 mr-auto text-sm flex items-center gap-2">
-                        <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
-                        Add Content
-                    </span>
-                    
+                {{-- STICKY TOOLBAR (Pushed down to top-24 to avoid header overlap) --}}
+                <div class="sticky top-24 z-40 bg-gray-900 text-white p-4 rounded-xl flex flex-wrap gap-2 items-center shadow-2xl border border-gray-800 backdrop-blur-md bg-opacity-95 mb-6">
+                    <span class="font-bold ml-2 mr-auto text-sm flex items-center gap-2">Add Content</span>
                     <button wire:click="addQuestion('text')" class="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-bold transition">Text</button>
                     <button wire:click="addQuestion('radio')" class="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-bold transition">Radio</button>
                     <button wire:click="addQuestion('checkbox')" class="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-bold transition">Checkbox</button>
                     <button wire:click="addQuestion('likert')" class="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-bold transition">Scale</button>
-                    
                     <div class="h-6 w-px bg-gray-700 mx-1"></div>
-                    
                     <button wire:click="addQuestion('file')" class="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-bold transition border border-white/30">Upload</button>
                     <button wire:click="addQuestion('section')" class="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-bold transition border-l border-white/20 ml-2">Section</button>
                 </div>
 
-                {{-- Questions List --}}
-                <div class="bg-white rounded-b-[2rem] p-6 shadow-sm border border-t-0 border-gray-200 min-h-[400px] space-y-4" wire:sortable="updateQuestionOrder">
+                {{-- DRAGGABLE LIST ROOT --}}
+                <div class="space-y-4 pb-20" wire:sortable="updateQuestionOrder">
                     
                     @foreach($questions as $index => $question)
-                        
-                        {{-- [FIX] Use 'temp_id' for both item value and key --}}
-                        @if($question['type'] === 'section')
-                            <div wire:sortable.item="{{ $question['temp_id'] }}" wire:key="q-{{ $question['temp_id'] }}" class="group relative bg-orange-50 border-2 border-dashed border-orange-200 rounded-xl p-4 my-6">
-                                <div class="absolute left-0 top-0 bottom-0 w-10 flex flex-col items-center justify-center gap-1 bg-gray-50 border-r border-gray-100 rounded-l-2xl">
-                                    {{-- Move Up Button --}}
-                                    @if($index > 0)
-                                        <button wire:click="moveQuestionUp({{ $index }})" class="p-1 text-gray-400 hover:text-orange-500 hover:bg-orange-50 rounded transition" title="Move Up">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
-                                        </button>
-                                    @endif
+                        <div wire:sortable.item="{{ $question['temp_id'] }}" wire:key="q-{{ $question['temp_id'] }}">
+                            
+                            {{-- Determine Styles --}}
+                            @php
+                                $isSection = $question['type'] === 'section';
+                                $bgClass = $isSection ? 'bg-orange-50 border-orange-200 border-dashed border-2' : 'bg-white border-gray-200 border';
+                                $handleClass = $isSection ? 'border-orange-200 text-orange-300' : 'bg-gray-50 border-gray-100 text-gray-300 hover:text-gray-500';
+                            @endphp
 
-                                    {{-- Move Down Button --}}
-                                    @if($index < count($this->questions) - 1)
-                                        <button wire:click="moveQuestionDown({{ $index }})" class="p-1 text-gray-400 hover:text-orange-500 hover:bg-orange-50 rounded transition" title="Move Down">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                                        </button>
-                                    @endif
-                                    
-                                </div>
-                                <div class="pl-8">
-                                    <div class="flex items-center gap-4 mb-2">
-                                        <input type="text" wire:model="questions.{{ $index }}.question_text" class="w-full text-xl font-black text-gray-800 border-0 bg-transparent placeholder-orange-300 focus:ring-0 p-0" placeholder="Type Section Title">
-                                        <button wire:click="removeQuestion({{ $index }})" class="text-orange-300 hover:text-red-500">&times;</button>
-                                    </div>
-                                    <input type="text" wire:model="questions.{{ $index }}.description" class="w-full text-sm text-gray-600 border-0 bg-transparent placeholder-orange-300/50 focus:ring-0 p-0" placeholder="Add description (optional)...">
-                                </div>
-                            </div>
-                        @else
-                            <div wire:sortable.item="{{ $question['temp_id'] }}" wire:key="q-{{ $question['temp_id'] }}" class="group relative bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-lg transition-all duration-300">
+                            <div class="group relative {{ $bgClass }} rounded-2xl p-6 hover:shadow-lg transition-all duration-300">
                                 
-                                <div class="absolute left-0 top-0 bottom-0 w-10 flex flex-col items-center justify-center gap-1 bg-gray-50 border-r border-gray-100 rounded-l-2xl">
-                                    {{-- Move Up Button --}}
-                                    @if($index > 0)
-                                        <button wire:click="moveQuestionUp({{ $index }})" class="p-1 text-gray-400 hover:text-orange-500 hover:bg-orange-50 rounded transition" title="Move Up">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
-                                        </button>
-                                    @endif
-
-                                    {{-- Move Down Button --}}
-                                    @if($index < count($this->questions) - 1)
-                                        <button wire:click="moveQuestionDown({{ $index }})" class="p-1 text-gray-400 hover:text-orange-500 hover:bg-orange-50 rounded transition" title="Move Down">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                                        </button>
-                                    @endif
-                                    
+                                {{-- DRAG HANDLE (Sidebar) --}}
+                                <div wire:sortable.handle class="absolute left-0 top-0 bottom-0 w-10 flex flex-col items-center justify-center gap-1 border-r rounded-l-2xl cursor-move {{ $handleClass }}">
+                                    <svg class="w-6 h-6 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path></svg>
                                 </div>
 
-                                <div class="pl-6">
+                                <div class="pl-8">
+                                    {{-- ITEM HEADER --}}
                                     <div class="flex justify-between items-center mb-3">
-                                        <span class="text-[10px] font-bold uppercase tracking-wide text-gray-400 bg-gray-100 px-2 py-1 rounded">
-                                            {{ ucfirst($question['type']) }}
-                                        </span>
-                                        <div class="flex items-center gap-2">
-                                            <label class="flex items-center gap-2 cursor-pointer">
-                                                <span class="text-[10px] font-bold uppercase text-gray-400">Required</span>
-                                                <input type="checkbox" wire:model="questions.{{ $index }}.is_required" class="rounded text-orange-500 w-4 h-4">
-                                            </label>
-                                            <button wire:click="removeQuestion({{ $index }})" class="text-gray-300 hover:text-red-500 p-1 transition">&times;</button>
-                                        </div>
-                                    </div>
-
-                                    <input type="text" wire:model="questions.{{ $index }}.question_text" class="w-full text-lg font-bold border-0 border-b-2 border-gray-100 focus:border-orange-500 focus:ring-0 bg-transparent transition mb-4" placeholder="Enter question...">
-                                    <input type="text" wire:model="questions.{{ $index }}.description" class="w-full text-xs text-gray-500 border-0 border-b border-gray-50 focus:border-orange-300 focus:ring-0 bg-transparent transition mb-4 placeholder-gray-300" placeholder="Description (optional)">
-
-                                    {{-- QUESTION IMAGE UPLOADER --}}
-                                    <div class="mb-4 bg-gray-50 p-3 rounded-lg border border-dashed border-gray-200">
-                                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Question Attachment (Optional)</p>
-                                        
-                                        @if(isset($questions[$index]['new_image']) && $questions[$index]['new_image'])
-                                            <img src="{{ $questions[$index]['new_image']->temporaryUrl() }}" class="h-24 w-auto rounded-lg mb-2 border border-orange-200">
-                                        @elseif(isset($question['image_path']) && $question['image_path'])
-                                             <img src="{{ asset('storage/'.$question['image_path']) }}" class="h-24 w-auto rounded-lg mb-2 border border-gray-200">
+                                        @if(!$isSection)
+                                            <span class="text-[10px] font-bold uppercase tracking-wide text-gray-400 bg-gray-100 px-2 py-1 rounded">{{ ucfirst($question['type']) }}</span>
+                                        @else
+                                            <div class="flex-1 mr-4"><input type="text" wire:model="questions.{{ $index }}.question_text" class="w-full text-xl font-black text-gray-800 border-0 bg-transparent placeholder-orange-300 focus:ring-0 p-0" placeholder="Type Section Title"></div>
                                         @endif
 
-                                        <label class="inline-flex items-center gap-2 text-xs font-bold text-gray-600 hover:text-orange-600 cursor-pointer">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                                            {{ (isset($question['image_path']) && $question['image_path']) ? 'Change Image' : 'Add Image' }}
-                                            <input type="file" wire:model="questions.{{ $index }}.new_image" class="hidden" accept="image/*">
-                                        </label>
+                                        <div class="flex items-center gap-2 ml-auto">
+                                            @if(!$isSection)
+                                                <label class="flex items-center gap-2 cursor-pointer text-[10px] font-bold uppercase text-gray-400">
+                                                    Required <input type="checkbox" wire:model="questions.{{ $index }}.is_required" class="rounded text-orange-500 w-4 h-4">
+                                                </label>
+                                            @endif
+                                            <button wire:click="removeQuestion({{ $index }})" class="text-gray-300 hover:text-red-500 p-1">&times;</button>
+                                        </div>
                                     </div>
 
-                                    {{-- OPTIONS LOGIC --}}
-                                    @if($question['type'] === 'likert')
-                                        <div class="bg-gray-50 p-4 rounded-xl border border-gray-100 mt-2">
-                                            <p class="text-[10px] text-gray-400 font-bold uppercase mb-2 text-center">Scale Labels (Left to Right)</p>
-                                            <div class="grid grid-cols-2 md:grid-cols-5 gap-2">
-                                                @foreach($question['options'] as $optIndex => $option)
-                                                    <input type="text" wire:model="questions.{{ $index }}.options.{{ $optIndex }}" class="text-xs text-center border-gray-200 rounded-lg focus:border-orange-500" placeholder="Label">
-                                                @endforeach
-                                            </div>
+                                    {{-- MAIN INPUTS --}}
+                                    @if(!$isSection)
+                                        <input type="text" wire:model="questions.{{ $index }}.question_text" class="w-full text-lg font-bold border-0 border-b-2 border-gray-100 focus:border-orange-500 focus:ring-0 bg-transparent transition mb-4" placeholder="Enter question...">
+                                        <input type="text" wire:model="questions.{{ $index }}.description" class="w-full text-xs text-gray-500 border-0 border-b border-gray-50 focus:border-orange-300 focus:ring-0 bg-transparent transition mb-4 placeholder-gray-300" placeholder="Description (optional)">
+                                        
+                                        {{-- Image Upload --}}
+                                        <div class="mb-4 bg-gray-50 p-3 rounded-lg border border-dashed border-gray-200">
+                                            @if(isset($questions[$index]['new_image']) && $questions[$index]['new_image'])
+                                                <img src="{{ $questions[$index]['new_image']->temporaryUrl() }}" class="h-24 w-auto rounded-lg mb-2">
+                                            @elseif(isset($question['image_path']) && $question['image_path'])
+                                                <img src="{{ asset('storage/'.$question['image_path']) }}" class="h-24 w-auto rounded-lg mb-2">
+                                            @endif
+                                            <label class="inline-flex items-center gap-2 text-xs font-bold text-gray-600 hover:text-orange-600 cursor-pointer">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                                {{ (isset($question['image_path']) || isset($questions[$index]['new_image'])) ? 'Change Image' : 'Add Image' }}
+                                                <input type="file" wire:model="questions.{{ $index }}.new_image" class="hidden" accept="image/*">
+                                            </label>
                                         </div>
-                                    {{-- RADIO & CHECKBOX EDITOR (With Skip Logic) --}}
-                                    @elseif(in_array($question['type'], ['radio', 'checkbox']))
-                                        <div class="pl-4 border-l-2 border-gray-100 space-y-3 mt-2">
-                                            
-                                            <div class="flex justify-between items-end mb-2">
-                                                <p class="text-[10px] text-gray-400 font-bold uppercase">
-                                                    {{ $question['type'] === 'checkbox' ? 'Multiple Choice' : 'Single Choice & Logic' }}
-                                                </p>
-                                                @if($question['type'] === 'radio')
-                                                    <span class="text-[10px] text-orange-500 bg-orange-50 px-2 py-1 rounded font-bold">Skip Logic Available</span>
-                                                @endif
-                                            </div>
+                                    @else
+                                        <input type="text" wire:model="questions.{{ $index }}.description" class="w-full text-sm text-gray-600 border-0 bg-transparent placeholder-orange-300/50 focus:ring-0 p-0" placeholder="Add description (optional)...">
+                                    @endif
 
+                                    {{-- RADIO / CHECKBOX --}}
+                                    @if(in_array($question['type'], ['radio', 'checkbox']))
+                                        <div class="pl-4 border-l-2 border-gray-100 space-y-3 mt-2">
+                                            <div class="flex justify-between items-end mb-2">
+                                                <p class="text-[10px] text-gray-400 font-bold uppercase">{{ $question['type'] === 'checkbox' ? 'Multiple Choice' : 'Single Choice' }}</p>
+                                                @if($question['type'] === 'radio') <span class="text-[10px] text-orange-500 bg-orange-50 px-2 py-1 rounded font-bold">Skip Logic Available</span> @endif
+                                            </div>
                                             @foreach($question['options'] as $optIndex => $opt)
                                                 <div class="flex flex-col gap-1 bg-gray-50 p-2 rounded-xl border border-gray-200">
                                                     <div class="flex items-center gap-2">
-                                                        {{-- Visual Indicator --}}
                                                         <div class="w-3 h-3 rounded-full border border-gray-300 {{ $question['type'] === 'checkbox' ? 'rounded-sm' : '' }}"></div>
-                                                        
-                                                        {{-- Option Text Input --}}
-                                                        <input type="text" 
-                                                            {{-- Handle both old (string) and new (array) formats --}}
-                                                            wire:model="questions.{{ $index }}.options.{{ $optIndex }}{{ is_array($opt) ? '.text' : '' }}" 
-                                                            class="w-full text-sm border-0 border-b border-gray-200 bg-transparent focus:ring-0 focus:border-orange-500 placeholder-gray-400" 
-                                                            placeholder="Option Label">
-                                                        
-                                                        <button wire:click="removeOption({{ $index }}, {{ $optIndex }})" class="text-gray-400 hover:text-red-500 text-lg leading-none">&times;</button>
+                                                        <input type="text" wire:model="questions.{{ $index }}.options.{{ $optIndex }}{{ is_array($opt) ? '.text' : '' }}" class="w-full text-sm border-0 border-b border-gray-200 bg-transparent focus:ring-0 placeholder-gray-400" placeholder="Option Label">
+                                                        <button wire:click="removeOption({{ $index }}, {{ $optIndex }})" class="text-gray-400 hover:text-red-500">&times;</button>
                                                     </div>
-
-                                                    {{-- Skip Logic Dropdown (Only for Radio) --}}
                                                     @if($question['type'] === 'radio' && is_array($opt))
                                                         <div class="flex items-center gap-2 mt-1 pl-5">
-                                                            <span class="text-[9px] text-gray-400 uppercase font-bold">If selected, go to:</span>
-                                                            <select wire:model="questions.{{ $index }}.options.{{ $optIndex }}.jump" class="text-xs border-gray-200 rounded-lg py-1 pr-8 bg-white focus:border-orange-500 focus:ring-0">
-                                                                <option value="">Next Question (Default)</option>
-                                                                <option value="submit">End of Form (Submit)</option>
+                                                            <span class="text-[9px] text-gray-400 uppercase font-bold">Go to:</span>
+                                                            <select wire:model="questions.{{ $index }}.options.{{ $optIndex }}.jump" class="text-xs border-gray-200 rounded-lg py-1 bg-white">
+                                                                <option value="">Next (Default)</option>
+                                                                <option value="submit">Submit Form</option>
                                                                 @foreach($this->sections as $section)
-                                                                    {{-- Don't allow jumping to sections BEFORE this question --}}
-                                                                    @if($section['order'] > $question['order'])
-                                                                        <option value="{{ $section['id'] }}">Section: {{ Str::limit($section['title'], 20) }}</option>
-                                                                    @endif
+                                                                    @if($section['order'] > $question['order']) <option value="{{ $section['id'] }}">Section: {{ Str::limit($section['title'], 20) }}</option> @endif
                                                                 @endforeach
                                                             </select>
                                                         </div>
                                                     @endif
                                                 </div>
                                             @endforeach
-
-                                            <button wire:click="addOption({{ $index }})" class="text-xs font-bold text-blue-600 hover:underline mt-2 flex items-center gap-1">
-                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                                                Add Option
-                                            </button>
+                                            <button wire:click="addOption({{ $index }})" class="text-xs font-bold text-blue-600 hover:underline mt-2 flex items-center gap-1">+ Add Option</button>
                                         </div>
-                                    @elseif($question['type'] === 'file')
-                                        <div class="bg-blue-50 border border-blue-100 p-3 rounded-lg text-xs text-blue-600 font-bold flex items-center gap-2">
-                                            User will see a file upload bin here.
+                                    
+                                    {{-- LIKERT --}}
+                                    @elseif($question['type'] === 'likert')
+                                        <div class="bg-gray-50 p-4 rounded-xl border border-gray-100 mt-2">
+                                            <p class="text-[10px] text-gray-400 font-bold uppercase mb-2 text-center">Scale Labels</p>
+                                            <div class="grid grid-cols-2 md:grid-cols-5 gap-2">
+                                                @foreach($question['options'] as $optIndex => $option)
+                                                    <input type="text" wire:model="questions.{{ $index }}.options.{{ $optIndex }}" class="text-xs text-center border-gray-200 rounded-lg">
+                                                @endforeach
+                                            </div>
                                         </div>
                                     @endif
 
                                 </div>
                             </div>
-                        @endif
+                        </div>
                     @endforeach
                 </div>
             </div>
@@ -297,37 +221,24 @@
     </div>
 </div>
 
-@push('modals') {{-- Assuming you have a @stack('scripts') in your layout --}}
+@push('scripts')
 <script>
-    // 1. Trigger the Confirmation Modal
     function confirmReset(count) {
         Swal.fire({
-            title: 'Are you absolutely sure?',
-            text: `You are about to delete ${count} user responses. This action cannot be undone!`,
+            title: 'Delete all responses?',
+            text: `You are about to delete ${count} user responses.`,
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: 'Yes, delete everything!',
-            cancelButtonText: 'Cancel'
+            confirmButtonText: 'Yes, delete!'
         }).then((result) => {
-            if (result.isConfirmed) {
-                // Call the Livewire method "resetResponses" via the event we registered
-                Livewire.dispatch('confirmed-reset');
-            }
+            if (result.isConfirmed) Livewire.dispatch('confirmed-reset');
         })
     }
-
-    // 2. Listen for Success/Info messages from the Backend
     document.addEventListener('livewire:initialized', () => {
         Livewire.on('swal:modal', (data) => {
-            Swal.fire({
-                title: data[0].title,
-                text: data[0].text,
-                icon: data[0].type,
-                confirmButtonColor: '#1f2937' // Matches your gray-900 theme
-            });
+            Swal.fire({ title: data[0].title, text: data[0].text, icon: data[0].type });
         });
     });
 </script>
-@endpush 
+@endpush
