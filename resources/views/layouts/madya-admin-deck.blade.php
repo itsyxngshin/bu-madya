@@ -6,6 +6,24 @@
     <title>BU MADYA Admin</title>
     <link rel="icon" href="{{ asset('images/MADYA Web Logo1.png') }}">
     
+    <link rel="icon" href="{{ asset('images/MADYA Web Logo1.png') }}">
+
+    {{-- 2. Standard Description --}}
+    <meta name="description" content="@yield('meta_description', 'Advocating for youth empowerment and social change.')">
+
+    {{-- 3. FACEBOOK / OPEN GRAPH META TAGS --}}
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="{{ url()->current() }}" />
+    <meta property="og:title" content="@yield('meta_title', 'BU MADYA Web')" />
+    <meta property="og:description" content="@yield('meta_description', 'Join the movement for youth-led advocacy.')" />
+    <meta property="og:image" content="@yield('meta_image', asset('images/default_share_image.jpg'))" />
+
+    {{-- 4. TWITTER CARD DATA --}}
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="@yield('meta_title', config('app.name'))">
+    <meta name="twitter:description" content="@yield('meta_description', 'Join the movement for youth-led advocacy.')">
+    <meta name="twitter:image" content="@yield('meta_image', asset('images/default_share_image.jpg'))">
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">

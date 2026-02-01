@@ -1,3 +1,10 @@
+
+@section('meta_title', $evaluation->title)
+@section('meta_description', $evaluation->description ? \Illuminate\Support\Str::limit(strip_tags($evaluation->description), 150) : 'Please participate in this evaluation.')
+@if($evaluation->header_image)
+    @section('meta_image', asset('storage/'.$evaluation->header_image))
+@endif
+
 <div class="min-h-screen bg-gray-50 pb-20 font-sans text-gray-900 selection:bg-orange-100 selection:text-orange-600">
 
     {{-- STATE: FORM SUBMITTED --}}
