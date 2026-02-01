@@ -248,7 +248,13 @@
                                                 <label class="relative flex items-center p-3 rounded-xl border cursor-pointer transition-all group/option 
                                                     {{ $isChecked ? 'bg-orange-50 border-orange-500 shadow-sm' : 'border-gray-200 hover:bg-orange-50 hover:border-orange-200' }}">
                                                     
-                                                    <input type="checkbox" wire:model.live="answers.{{ $question->id }}" value="{{ $label }}" class="peer sr-only" wire:key="q-{{ $question->id }}-chk-{{ $optIndex }}">
+                                                    <input 
+                                                        type="checkbox" 
+                                                        wire:model.live="answers.{{ $question->id }}" 
+                                                        value="{{ $label }}" 
+                                                        class="peer sr-only" 
+                                                        wire:key="q-{{ $question->id }}-chk-{{ $optIndex }}-{{ in_array($label, $answers[$question->id] ?? []) ? 'checked' : 'unchecked' }}"
+                                                    >
                                                     
                                                     {{-- Square Box --}}
                                                     <div class="w-5 h-5 rounded border-2 mr-3 flex items-center justify-center transition-all

@@ -104,12 +104,15 @@ class EvaluationForm extends Component
         $skipping = false;
         $targetSectionId = null;
 
-        // Iterate through sorted questions
-        foreach ($this->evaluation->questions as $question) {
+        // [FIX] Force sorting by the 'order' column
+        // If we don't do this, they might appear by ID (creation order)
+        $sortedQuestions = $this->evaluation->questions->sortBy('order');
+
+        // Iterate through SORTED questions
+        foreach ($sortedQuestions as $question) {
             
             // 1. Check if we should stop skipping
             if ($skipping) {
-                // If we hit a Section AND it matches the target, stop skipping
                 if ($question->type === 'section' && $question->id == $targetSectionId) {
                     $skipping = false;
                     $targetSectionId = null;
@@ -121,22 +124,17 @@ class EvaluationForm extends Component
                 $visibleIds[] = $question->id;
             }
 
-            // 3. Check for NEW skip trigger (Only if visible)
-            // (We only trigger skip if the question itself is visible)
+            // 3. Check for Skip trigger
             if (!$skipping && isset($this->answers[$question->id]) && $question->type === 'radio') {
                 $selectedAnswer = $this->answers[$question->id];
                 
                 if (is_array($question->options)) {
                     foreach ($question->options as $opt) {
-                        // Match answer text
-                        if (is_array($opt) && $opt['text'] == $selectedAnswer) {
-                            // Check for jump
+                        if (is_array($opt) && ($opt['text'] ?? '') == $selectedAnswer) {
                             if (!empty($opt['jump'])) {
                                 if ($opt['jump'] === 'submit') {
-                                    // Handle "End Form" logic later if needed
-                                    // For now, we effectively skip everything else
                                     $skipping = true; 
-                                    $targetSectionId = 9999999; // Impossible ID
+                                    $targetSectionId = 9999999; 
                                 } else {
                                     $skipping = true;
                                     $targetSectionId = $opt['jump'];
@@ -149,7 +147,11 @@ class EvaluationForm extends Component
         }
 
         return view('livewire.open.evaluation-form', [
-            'visibleQuestionIds' => $visibleIds
+            'visibleQuestionIds' => $visibleIds,
+            // [FIX] Pass sorted questions to view if you aren't using the relationship directly in view
+            // But since your view uses $evaluation->questions, we should rely on the visibleIds filter order
+            // OR strictly pass the sorted collection:
+            'sortedQuestions' => $sortedQuestions 
         ]);
     }
 
