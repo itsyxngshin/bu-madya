@@ -147,36 +147,41 @@
                                         <div class="space-y-2">
                                             @foreach($question->options as $optIndex => $option)
                                                 @php
+                                                    // 1. Get Label
                                                     $label = is_array($option) ? ($option['text'] ?? '') : $option;
-                                                @endphp
-                                                
-                                                {{-- 
-                                                    [FIX] 
-                                                    1. Removed PHP $isChecked logic.
-                                                    2. Added 'has-[:checked]:...' classes to Label (Parent) for instant border highlight.
-                                                    3. Added 'peer-checked:...' classes to children for instant box/text highlight.
-                                                --}}
-                                                <label class="relative flex items-center p-3 rounded-xl border cursor-pointer transition-all group/option 
-                                                    border-gray-200 hover:bg-orange-50 hover:border-orange-200
-                                                    has-[:checked]:bg-orange-50 has-[:checked]:border-orange-500 has-[:checked]:shadow-sm">
                                                     
-                                                    {{-- INPUT: peer class allows siblings to react to its state --}}
+                                                    // 2. Safe Array Check (Similar to Likert but for Arrays)
+                                                    $currentVal = $answers[$question->id] ?? [];
+                                                    if (!is_array($currentVal)) $currentVal = [];
+                                                    
+                                                    // 3. Determine State
+                                                    $isChecked = in_array($label, $currentVal);
+                                                @endphp
+
+                                                <label class="relative flex items-center p-3 rounded-xl border cursor-pointer transition-all group/option 
+                                                    {{ $isChecked 
+                                                        ? 'bg-orange-50 border-orange-500 shadow-sm' 
+                                                        : 'border-gray-200 hover:bg-orange-50 hover:border-orange-200' 
+                                                    }}">
+                                                    
                                                     <input type="checkbox" 
                                                            wire:model.live="answers.{{ $question->id }}" 
                                                            value="{{ $label }}" 
                                                            class="peer sr-only" 
                                                            wire:key="q-{{ $question->id }}-chk-{{ $optIndex }}">
                                                     
-                                                    {{-- SQUARE BOX --}}
-                                                    <div class="w-5 h-5 rounded border-2 mr-3 flex items-center justify-center transition-all 
-                                                        bg-white border-gray-300 
-                                                        peer-checked:bg-orange-500 peer-checked:border-orange-500">
+                                                    {{-- Square Box (Visuals based on $isChecked) --}}
+                                                    <div class="w-5 h-5 rounded border-2 mr-3 flex items-center justify-center transition-all
+                                                        {{ $isChecked 
+                                                            ? 'border-orange-500 bg-orange-500' 
+                                                            : 'border-gray-300 bg-white' 
+                                                        }}">
                                                         
-                                                        <svg class="w-3 h-3 text-white hidden peer-checked:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                                                        {{-- Checkmark Icon --}}
+                                                        <svg class="w-3 h-3 text-white {{ $isChecked ? 'block' : 'hidden' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
                                                     </div>
                                                     
-                                                    {{-- TEXT LABEL --}}
-                                                    <span class="text-sm font-medium text-gray-600 peer-checked:text-gray-900 peer-checked:font-bold">
+                                                    <span class="text-sm font-medium {{ $isChecked ? 'text-gray-900 font-bold' : 'text-gray-600' }}">
                                                         {{ $label }}
                                                     </span>
                                                 </label>
