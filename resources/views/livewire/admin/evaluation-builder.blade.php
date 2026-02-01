@@ -108,10 +108,39 @@
                 </div>
 
                 {{-- DRAGGABLE LIST ROOT --}}
-                <div class="space-y-4 pb-20" wire:sortable="updateQuestionOrder">
+                {{-- QUESTIONS LIST CONTAINER --}}
+                <div 
+                    class="bg-white rounded-b-[2rem] p-6 shadow-sm border border-t-0 border-gray-200 min-h-[400px] space-y-4 pb-20"
+                    
+                    {{-- [NEW] Alpine Sortable Logic --}}
+                    x-data="{
+                        initSortable() {
+                            // Initialize SortableJS on this element (the root root <div>)
+                            this.sortable = new Sortable(this.$el, {
+                                animation: 150,
+                                handle: '.drag-handle', // Class selector for the drag handle
+                                ghostClass: 'bg-orange-50', // Class applied to the placeholder while dragging
+                                onEnd: (evt) => {
+                                    // Get the new order of IDs
+                                    let newOrder = [];
+                                    this.$el.querySelectorAll('[data-sort-id]').forEach((el, index) => {
+                                        newOrder.push({ value: el.getAttribute('data-sort-id'), order: index });
+                                    });
+                                    
+                                    // Send to Livewire
+                                    $wire.updateQuestionOrder(newOrder);
+                                }
+                            });
+                        }
+                    }"
+                    x-init="initSortable()"
+                >
                     
                     @foreach($questions as $index => $question)
-                        <div wire:sortable.item="{{ $question['temp_id'] }}" wire:key="q-{{ $question['temp_id'] }}">
+                        
+                        {{-- DRAGGABLE ITEM WRAPPER --}}
+                        {{-- Must have a data-sort-id matching the temp_id --}}
+                        <div data-sort-id="{{ $question['temp_id'] }}" wire:key="q-{{ $question['temp_id'] }}">
                             
                             {{-- Determine Styles --}}
                             @php
@@ -122,8 +151,11 @@
 
                             <div class="group relative {{ $bgClass }} rounded-2xl p-6 hover:shadow-lg transition-all duration-300">
                                 
-                                {{-- DRAG HANDLE (Sidebar) --}}
-                                <div wire:sortable.handle class="absolute left-0 top-0 bottom-0 w-10 flex flex-col items-center justify-center gap-1 border-r rounded-l-2xl cursor-move {{ $handleClass }}">
+                                {{-- [FIXED] DRAG HANDLE --}}
+                                {{-- Added 'drag-handle' class for SortableJS target --}}
+                                {{-- Added 'z-50' to ensure it's clickable above other elements --}}
+                                <div class="drag-handle absolute left-0 top-0 bottom-0 w-10 flex flex-col items-center justify-center gap-1 border-r rounded-l-2xl cursor-move z-50 {{ $handleClass }}">
+                                    {{-- Grip Icon --}}
                                     <svg class="w-6 h-6 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path></svg>
                                 </div>
 
@@ -168,7 +200,7 @@
                                         <input type="text" wire:model="questions.{{ $index }}.description" class="w-full text-sm text-gray-600 border-0 bg-transparent placeholder-orange-300/50 focus:ring-0 p-0" placeholder="Add description (optional)...">
                                     @endif
 
-                                    {{-- RADIO / CHECKBOX --}}
+                                    {{-- RADIO / CHECKBOX (With Skip Logic) --}}
                                     @if(in_array($question['type'], ['radio', 'checkbox']))
                                         <div class="pl-4 border-l-2 border-gray-100 space-y-3 mt-2">
                                             <div class="flex justify-between items-end mb-2">
