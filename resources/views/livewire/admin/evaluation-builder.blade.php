@@ -228,24 +228,54 @@
                                                 @endforeach
                                             </div>
                                         </div>
+                                    {{-- RADIO & CHECKBOX EDITOR (With Skip Logic) --}}
                                     @elseif(in_array($question['type'], ['radio', 'checkbox']))
-                                        <div class="pl-4 border-l-2 border-gray-100 space-y-2 mt-2">
-                                            <p class="text-[10px] text-gray-400 font-bold uppercase mb-2">
-                                                {{ $question['type'] === 'checkbox' ? 'Multiple Choice Options (Checkboxes)' : 'Single Choice Options (Radio)' }}
-                                            </p>
+                                        <div class="pl-4 border-l-2 border-gray-100 space-y-3 mt-2">
+                                            
+                                            <div class="flex justify-between items-end mb-2">
+                                                <p class="text-[10px] text-gray-400 font-bold uppercase">
+                                                    {{ $question['type'] === 'checkbox' ? 'Multiple Choice' : 'Single Choice & Logic' }}
+                                                </p>
+                                                @if($question['type'] === 'radio')
+                                                    <span class="text-[10px] text-orange-500 bg-orange-50 px-2 py-1 rounded font-bold">Skip Logic Available</span>
+                                                @endif
+                                            </div>
+
                                             @foreach($question['options'] as $optIndex => $opt)
-                                                <div class="flex items-center gap-2">
-                                                    {{-- Visual Indicator --}}
-                                                    @if($question['type'] === 'radio')
-                                                        <div class="w-4 h-4 rounded-full border border-gray-300"></div>
-                                                    @else
-                                                        <div class="w-4 h-4 rounded border border-gray-300"></div>
+                                                <div class="flex flex-col gap-1 bg-gray-50 p-2 rounded-xl border border-gray-200">
+                                                    <div class="flex items-center gap-2">
+                                                        {{-- Visual Indicator --}}
+                                                        <div class="w-3 h-3 rounded-full border border-gray-300 {{ $question['type'] === 'checkbox' ? 'rounded-sm' : '' }}"></div>
+                                                        
+                                                        {{-- Option Text Input --}}
+                                                        <input type="text" 
+                                                            {{-- Handle both old (string) and new (array) formats --}}
+                                                            wire:model="questions.{{ $index }}.options.{{ $optIndex }}{{ is_array($opt) ? '.text' : '' }}" 
+                                                            class="w-full text-sm border-0 border-b border-gray-200 bg-transparent focus:ring-0 focus:border-orange-500 placeholder-gray-400" 
+                                                            placeholder="Option Label">
+                                                        
+                                                        <button wire:click="removeOption({{ $index }}, {{ $optIndex }})" class="text-gray-400 hover:text-red-500 text-lg leading-none">&times;</button>
+                                                    </div>
+
+                                                    {{-- Skip Logic Dropdown (Only for Radio) --}}
+                                                    @if($question['type'] === 'radio' && is_array($opt))
+                                                        <div class="flex items-center gap-2 mt-1 pl-5">
+                                                            <span class="text-[9px] text-gray-400 uppercase font-bold">If selected, go to:</span>
+                                                            <select wire:model="questions.{{ $index }}.options.{{ $optIndex }}.jump" class="text-xs border-gray-200 rounded-lg py-1 pr-8 bg-white focus:border-orange-500 focus:ring-0">
+                                                                <option value="">Next Question (Default)</option>
+                                                                <option value="submit">End of Form (Submit)</option>
+                                                                @foreach($this->sections as $section)
+                                                                    {{-- Don't allow jumping to sections BEFORE this question --}}
+                                                                    @if($section['order'] > $question['order'])
+                                                                        <option value="{{ $section['id'] }}">Section: {{ Str::limit($section['title'], 20) }}</option>
+                                                                    @endif
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
                                                     @endif
-                                                    
-                                                    <input type="text" wire:model="questions.{{ $index }}.options.{{ $optIndex }}" class="w-full text-sm border-gray-200 rounded-lg focus:border-orange-500 focus:ring-orange-500">
-                                                    <button wire:click="removeOption({{ $index }}, {{ $optIndex }})" class="text-gray-300 hover:text-red-500 text-lg leading-none">&times;</button>
                                                 </div>
                                             @endforeach
+
                                             <button wire:click="addOption({{ $index }})" class="text-xs font-bold text-blue-600 hover:underline mt-2 flex items-center gap-1">
                                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                                                 Add Option

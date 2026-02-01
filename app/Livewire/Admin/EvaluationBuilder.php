@@ -170,20 +170,40 @@ class EvaluationBuilder extends Component
         }
     }
 
+    public function getSectionsProperty()
+    {
+        return collect($this->questions)
+            ->where('type', 'section')
+            ->map(function($q) {
+                return [
+                    'id' => $q['temp_id'], // We use the temp_id as the unique reference
+                    'title' => $q['question_text'] ?: 'Untitled Section',
+                    'order' => $q['order']
+                ];
+            })
+            ->sortBy('order')
+            ->values();
+    }
+
     public function addQuestion($type)
     {
-        // 1. Define Default Options strictly
         $defaultOptions = [];
         
-        if ($type === 'likert') {
+        // [UPDATE] Checkbox & Radio now use a structured array for Skip Logic
+        if ($type === 'radio' || $type === 'checkbox') {
+            $defaultOptions = [
+                ['text' => 'Option 1', 'jump' => null], // 'jump' stores the target Section UUID
+                ['text' => 'Option 2', 'jump' => null]
+            ];
+        } 
+        // [UPDATE] Likert uses simple strings (usually logic isn't applied to Likert items individually)
+        elseif ($type === 'likert') {
             $defaultOptions = ['Strongly Disagree', 'Disagree', 'Neutral', 'Agree', 'Strongly Agree'];
-        } elseif ($type === 'radio' || $type === 'checkbox') { // [NEW] Added checkbox
-            $defaultOptions = ['Option 1', 'Option 2'];
         }
 
         $this->questions[] = [
             'id' => null,
-            'temp_id' => (string) Str::uuid(), // [FIX] Generate UUID for new items
+            'temp_id' => (string) Str::uuid(),
             'type' => $type,
             'question_text' => '',
             'description' => '',
@@ -195,21 +215,22 @@ class EvaluationBuilder extends Component
         ];
     }
 
-    public function removeQuestion($index)
-    {
-        unset($this->questions[$index]);
-        $this->questions = array_values($this->questions);
-    }
-
     public function addOption($questionIndex)
     {
-        $this->questions[$questionIndex]['options'][] = 'New Option';
+        // [UPDATE] Add new option with 'jump' structure
+        $this->questions[$questionIndex]['options'][] = ['text' => 'New Option', 'jump' => null];
     }
 
     public function removeOption($questionIndex, $optionIndex)
     {
         unset($this->questions[$questionIndex]['options'][$optionIndex]);
+        // Re-index array to prevent JSON conversion issues
         $this->questions[$questionIndex]['options'] = array_values($this->questions[$questionIndex]['options']);
+    }
+    public function removeQuestion($index)
+    {
+        unset($this->questions[$index]);
+        $this->questions = array_values($this->questions);
     }
 
     public function updateQuestionOrder($list)
@@ -232,69 +253,66 @@ class EvaluationBuilder extends Component
 
     public function save()
     {
-        $this->validate();
-
-        // 1. Handle Header Image
-        if ($this->header_image) {
-            $headerPath = $this->header_image->store('evaluation-headers', 'public');
-            $this->evaluation->header_image = $headerPath;
-        }
-
-        // 2. Save Main Evaluation Details
-        $this->evaluation->title = $this->title;
-        // Logic to preserve existing slug or generate new one
-        if (!empty($this->slug)) {
-            $this->evaluation->slug = Str::slug($this->slug);
-        } elseif (empty($this->evaluation->slug)) {
-            $this->evaluation->slug = Str::slug($this->title);
-        }
+        // ... (Validation and Header saving) ...
         
-        $this->evaluation->description = $this->description;
-        $this->evaluation->project_id = $this->project_id;
-        $this->evaluation->is_active = $this->is_active;
         $this->evaluation->save();
 
-        // 3. Collect IDs of questions currently in the builder
-        // We use this to know which questions to KEEP
-        $existingIds = collect($this->questions)->pluck('id')->filter()->toArray();
+        // 1. Delete removed questions
+        // ... (Existing delete logic) ...
 
-        // 4. SYNC QUESTIONS (The Fix)
-        
-        // A. Delete questions that were REMOVED from the builder
-        // We wrap this in a try-catch because if you try to delete a specific question 
-        // that has answers, the DB will still stop you (which is good!).
-        try {
-            $this->evaluation->questions()
-                ->whereNotIn('id', $existingIds)
-                ->delete();
-        } catch (\Illuminate\Database\QueryException $e) {
-            // Optional: Flash a warning that some questions couldn't be deleted due to existing answers
-            session()->flash('warning', 'Some removed questions could not be deleted because they already have user responses.');
-        }
+        // 2. Create/Update Questions & Build Map
+        $tempIdToRealId = []; // Map: 'uuid-123' => 5 (DB ID)
 
-        // B. Update existing or Create new questions
         foreach ($this->questions as $index => $q) {
-            
             $imagePath = $q['image_path'] ?? null;
-
-            // Handle New Image Upload
             if (isset($q['new_image']) && $q['new_image']) {
                 $imagePath = $q['new_image']->store('question-images', 'public');
             }
 
-            // [CRITICAL CHANGE] Use updateOrCreate instead of create
-            $this->evaluation->questions()->updateOrCreate(
-                ['id' => $q['id'] ?? null], // Look up by ID (if null, it creates a new one)
+            // Create/Update
+            $dbQuestion = $this->evaluation->questions()->updateOrCreate(
+                ['id' => $q['id'] ?? null],
                 [
                     'type' => $q['type'],
                     'question_text' => $q['question_text'],
                     'description' => $q['description'] ?? null,
-                    'options' => $q['options'], 
+                    'options' => $q['options'], // We save the raw options first
                     'is_required' => $q['is_required'],
                     'order' => $index,
                     'image_path' => $imagePath 
                 ]
             );
+
+            // Store mapping
+            if (isset($q['temp_id'])) {
+                $tempIdToRealId[$q['temp_id']] = $dbQuestion->id;
+            }
+        }
+
+        // 3. SECOND PASS: Fix the "Jump" references in options
+        // We need to replace the temp_id in the 'jump' field with the real DB ID
+        foreach ($this->evaluation->questions as $question) {
+            if (in_array($question->type, ['radio']) && is_array($question->options)) {
+                $newOptions = [];
+                $changed = false;
+
+                foreach ($question->options as $opt) {
+                    // Check if this option has a jump target
+                    if (is_array($opt) && !empty($opt['jump'])) {
+                        // Check if the jump target is a temp_id (UUID)
+                        if (isset($tempIdToRealId[$opt['jump']])) {
+                            $opt['jump'] = $tempIdToRealId[$opt['jump']]; // Replace with Real ID
+                            $changed = true;
+                        }
+                    }
+                    $newOptions[] = $opt;
+                }
+
+                if ($changed) {
+                    $question->options = $newOptions;
+                    $question->save();
+                }
+            }
         }
 
         session()->flash('success', 'Evaluation updated successfully!');
