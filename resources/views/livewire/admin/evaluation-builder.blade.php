@@ -115,14 +115,21 @@
             <div class="lg:col-span-8 relative">
                 
                 {{-- Toolbar --}}
-                <div class="sticky top-6 z-40 bg-gray-900 text-white p-4 rounded-t-[2rem] flex flex-wrap gap-2 items-center shadow-md">
-                    <span class="font-bold ml-2 mr-auto text-sm">Add Content:</span>
+                <div class="sticky top-6 z-40 bg-gray-900 text-white p-4 rounded-xl flex flex-wrap gap-2 items-center shadow-2xl border border-gray-800 backdrop-blur-md bg-opacity-95 mb-6">
+                    <span class="font-bold ml-2 mr-auto text-sm flex items-center gap-2">
+                        <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                        Add Content
+                    </span>
+                    
                     <button wire:click="addQuestion('text')" class="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-bold transition">Text</button>
-                    <button wire:click="addQuestion('radio')" class="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-bold transition">Choice</button>
-                    <button wire:click="addQuestion('likert')" class="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-bold transition">Scale</button>
+                    <button wire:click="addQuestion('radio')" class="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-bold transition">Radio</button>
                     <button wire:click="addQuestion('checkbox')" class="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-bold transition">Checkbox</button>
-                    <button wire:click="addQuestion('file')" class="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-bold transition border border-white/30">Upload Bin</button>
-                    <button wire:click="addQuestion('section')" class="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-bold transition border-l border-white/20 ml-2">Separator</button>
+                    <button wire:click="addQuestion('likert')" class="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-bold transition">Scale</button>
+                    
+                    <div class="h-6 w-px bg-gray-700 mx-1"></div>
+                    
+                    <button wire:click="addQuestion('file')" class="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-bold transition border border-white/30">Upload</button>
+                    <button wire:click="addQuestion('section')" class="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-bold transition border-l border-white/20 ml-2">Section</button>
                 </div>
 
                 {{-- Questions List --}}
