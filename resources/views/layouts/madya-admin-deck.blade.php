@@ -141,7 +141,7 @@
             </header>
             
             {{-- 2. PAGE CONTENT --}}
-            <div class="p-4 md:p-6 lg:p-8 flex-1 overflow-x-hidden">
+            <div class="p-4 md:p-6 lg:p-8 flex-1 overflow-clip">
                  {{ $slot }}
             </div>
 
