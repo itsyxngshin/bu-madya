@@ -7,29 +7,30 @@ use App\Models\Evaluation;
 use App\Models\EvaluationResponse;
 use App\Models\EvaluationAnswer;
 use Illuminate\Support\Facades\Auth;
+use Livewire\WithFileUploads;
 use Livewire\Attributes\Layout;
 
 #[Layout('layouts.madya-template')]
 class EvaluationForm extends Component
 {
+    use WithFileUploads;
+
     public Evaluation $evaluation;
-    public $project_id = null; // Store the project ID from URL
+    public $project_id = null;
     public $answers = []; 
     public $isSubmitted = false;
 
-    // Capture project_id from the Query String (?project_id=1)
     protected $queryString = ['project_id'];
 
     public function mount(Evaluation $evaluation)
     {
         $this->evaluation = $evaluation;
         
-        // Capture project ID if passed in URL
         if (request()->has('project_id')) {
             $this->project_id = request()->query('project_id');
         }
 
-        // Initialize empty answers for the UI
+        // Initialize empty answers
         foreach($evaluation->questions as $q) {
             $this->answers[$q->id] = '';
         }
@@ -37,7 +38,6 @@ class EvaluationForm extends Component
 
     public function getProgressProperty()
     {
-        // Filter out 'sections' as they don't need answers
         $requiredQuestions = $this->evaluation->questions
             ->where('type', '!=', 'section')
             ->where('is_required', true)
@@ -45,7 +45,6 @@ class EvaluationForm extends Component
 
         if ($requiredQuestions == 0) return 0;
 
-        // Count how many required answers are filled
         $filled = collect($this->answers)
             ->filter(fn($val) => !empty($val))
             ->count();
@@ -55,9 +54,11 @@ class EvaluationForm extends Component
 
     public function submit()
     {
-        // 1. Validation Logic
+        // 1. Validation
         $rules = [];
         foreach ($this->evaluation->questions as $q) {
+            // Only validate if visible (we will filter this roughly by checking if the answer is empty on a required field)
+            // Ideally, we replicate the visibility logic here, but for now standard validation:
             if ($q->is_required && $q->type !== 'section') {
                 $rules["answers.{$q->id}"] = 'required';
             }
@@ -67,19 +68,20 @@ class EvaluationForm extends Component
         // 2. Create Response
         $response = EvaluationResponse::create([
             'evaluation_id' => $this->evaluation->id,
-            'user_id' => Auth::id(), // Nullable if guest
+            'user_id' => Auth::id(),
             'ip_address' => request()->ip(),
         ]);
 
         // 3. Save Answers
         foreach ($this->answers as $questionId => $value) {
+            // Skip empty answers (optional, prevents clutter)
+            if($value === '' || $value === null || $value === []) continue;
+
             $finalValue = $value;
 
-            // Handle File Uploads
             if ($value instanceof \Illuminate\Http\UploadedFile) {
                 $finalValue = $value->store('evaluation-uploads', 'public');
             } 
-            // Handle Arrays (Checkboxes)
             elseif (is_array($value)) {
                 $finalValue = json_encode($value);
             }
@@ -91,10 +93,7 @@ class EvaluationForm extends Component
             ]);
         }
 
-        // 4. [NEW] Switch State instead of Redirecting immediately
         $this->isSubmitted = true;
-        
-        // Optional: Scroll to top of page using browser event
         $this->dispatch('scroll-to-top'); 
     }
 
@@ -104,11 +103,9 @@ class EvaluationForm extends Component
         $skipping = false;
         $targetSectionId = null;
 
-        // [FIX] Force sorting by the 'order' column
-        // If we don't do this, they might appear by ID (creation order)
+        // [FIX] Explicitly sort questions by Order
         $sortedQuestions = $this->evaluation->questions->sortBy('order');
 
-        // Iterate through SORTED questions
         foreach ($sortedQuestions as $question) {
             
             // 1. Check if we should stop skipping
@@ -119,26 +116,28 @@ class EvaluationForm extends Component
                 }
             }
 
-            // 2. Determine Visibility
+            // 2. Add to visible list if not skipping
             if (!$skipping) {
                 $visibleIds[] = $question->id;
             }
 
-            // 3. Check for Skip trigger
+            // 3. Check for Skip Logic Trigger (Radio buttons only)
             if (!$skipping && isset($this->answers[$question->id]) && $question->type === 'radio') {
                 $selectedAnswer = $this->answers[$question->id];
                 
                 if (is_array($question->options)) {
                     foreach ($question->options as $opt) {
-                        if (is_array($opt) && ($opt['text'] ?? '') == $selectedAnswer) {
-                            if (!empty($opt['jump'])) {
-                                if ($opt['jump'] === 'submit') {
-                                    $skipping = true; 
-                                    $targetSectionId = 9999999; 
-                                } else {
-                                    $skipping = true;
-                                    $targetSectionId = $opt['jump'];
-                                }
+                        // Handle array-style options from Builder
+                        $optText = is_array($opt) ? ($opt['text'] ?? '') : $opt;
+                        $jumpTarget = is_array($opt) ? ($opt['jump'] ?? null) : null;
+
+                        if ($optText == $selectedAnswer && !empty($jumpTarget)) {
+                            if ($jumpTarget === 'submit') {
+                                $skipping = true; 
+                                $targetSectionId = 9999999; 
+                            } else {
+                                $skipping = true;
+                                $targetSectionId = $jumpTarget;
                             }
                         }
                     }
@@ -148,75 +147,7 @@ class EvaluationForm extends Component
 
         return view('livewire.open.evaluation-form', [
             'visibleQuestionIds' => $visibleIds,
-            // [FIX] Pass sorted questions to view if you aren't using the relationship directly in view
-            // But since your view uses $evaluation->questions, we should rely on the visibleIds filter order
-            // OR strictly pass the sorted collection:
-            'sortedQuestions' => $sortedQuestions 
+            'sortedQuestions' => $sortedQuestions // [FIX] Pass sorted collection to view
         ]);
-    }
-
-    public function calculateVisibility()
-    {
-        $visibleIds = [];
-        $skipping = false;
-        $targetSectionId = null;
-
-        // Loop through questions in order
-        foreach ($this->evaluation->questions as $question) {
-            
-            // 1. If we are currently skipping...
-            if ($skipping) {
-                // If this is the target section, STOP skipping
-                // We compare the 'order' or a unique ID. 
-                // Since we saved 'temp_id' in the JSON but not in the DB column for ID,
-                // we assume we saved the 'jump' value as the SECTION'S DB ID or we need a match.
-                // *Simpler approach:* In the builder, we saved the temp_id. 
-                // In the frontend, we need to match it.
-                // *Fix:* Let's check if the current question is a section and if we've reached a destination.
-                
-                // For this implementation, we will assume "Jump" hides everything until it hits 
-                // a Section that matches the ID.
-                
-                // Note: This requires us to store the 'temp_id' in the DB to match perfectly, 
-                // OR we just hide everything until the Next Section if 'jump' == 'next_section'.
-                // Since mapping UUIDs from builder to DB is complex, let's use a simpler logic for now:
-                // If jump is set, we hide until we hit a section with that specific ID.
-                
-                // Ideally, you'd save "jump" as the Question ID of the section.
-                // But let's assume we are just hiding intervening questions.
-            }
-
-            // 2. Logic processing
-            // Check if this question has an answer
-            if (isset($this->answers[$question->id]) && $question->type === 'radio') {
-                $selectedOption = $this->answers[$question->id];
-                
-                // Find the option config
-                foreach ($question->options as $opt) {
-                    if (is_array($opt) && $opt['text'] == $selectedOption) {
-                        if (!empty($opt['jump'])) {
-                            $targetSectionId = $opt['jump'];
-                            $skipping = true;
-                        }
-                    }
-                }
-            }
-            
-            // 3. Logic to resume visibility
-            // If current question is a Section, check if it matches our target
-            // *CRITICAL*: In the builder we used temp_id. In the DB, questions have real IDs.
-            // This mismatch breaks the link unless we persisted temp_id.
-            // *Fallback*: For now, we will just render all questions, but rely on Alpine to hide them 
-            // if we want instant feedback, OR we accept that without the ID persistence, 
-            // the skip logic requires the 'jump' value to be the SECTION'S REAL ID.
-            
-            // *Fix for you*: When saving in Builder, we must map temp_id -> real_id.
-            
-            $visibleIds[] = $question->id;
-        }
-        
-        // Since the ID mapping is complex, let's return ALL IDs for now to prevent the form from disappearing 
-        // until we fix the ID mapping save logic.
-        return $this->evaluation->questions->pluck('id')->toArray();
     }
 } 
