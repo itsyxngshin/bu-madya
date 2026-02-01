@@ -69,7 +69,8 @@
                         <img src="{{ asset('storage/'.$evaluation->header_image) }}" class="w-full h-full object-cover">
                         <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
                     </div>
-                @else
+               @else
+                    {{-- 2. IF NO IMAGE: Show Your Gradient Code --}}
                     <div class="h-24 bg-gradient-to-r from-gray-900 to-gray-800 relative">
                         <div class="absolute inset-0 opacity-20 bg-[radial-gradient(#ffffff33_1px,transparent_1px)] [background-size:16px_16px]"></div>
                     </div>
