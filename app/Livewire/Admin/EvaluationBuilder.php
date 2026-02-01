@@ -101,7 +101,7 @@ class EvaluationBuilder extends Component
             $this->questions = [];
         }
     }
-// [NEW] Helper to generate random secure key
+//  Helper to generate random secure key
     public function generateRandomSlug()
     {
         $this->slug = Str::random(16); // Generates a random 16-char string
@@ -177,7 +177,7 @@ class EvaluationBuilder extends Component
         
         if ($type === 'likert') {
             $defaultOptions = ['Strongly Disagree', 'Disagree', 'Neutral', 'Agree', 'Strongly Agree'];
-        } elseif ($type === 'radio') {
+        } elseif ($type === 'radio' || $type === 'checkbox') { // [NEW] Added checkbox
             $defaultOptions = ['Option 1', 'Option 2'];
         }
 

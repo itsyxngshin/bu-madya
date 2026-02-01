@@ -112,7 +112,7 @@
             </div>
 
             {{-- RIGHT: QUESTION BUILDER --}}
-            <div class="lg:col-span-8">
+            <div class="lg:col-span-8 relative">
                 
                 {{-- Toolbar --}}
                 <div class="bg-gray-900 text-white p-4 rounded-t-[2rem] flex flex-wrap gap-2 items-center shadow-md">
@@ -120,6 +120,7 @@
                     <button wire:click="addQuestion('text')" class="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-bold transition">Text</button>
                     <button wire:click="addQuestion('radio')" class="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-bold transition">Choice</button>
                     <button wire:click="addQuestion('likert')" class="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-bold transition">Scale</button>
+                    <button wire:click="addQuestion('checkbox')" class="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-bold transition">Checkbox</button>
                     <button wire:click="addQuestion('file')" class="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-bold transition border border-white/30">Upload Bin</button>
                     <button wire:click="addQuestion('section')" class="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-bold transition border-l border-white/20 ml-2">Separator</button>
                 </div>
@@ -222,14 +223,26 @@
                                         </div>
                                     @elseif(in_array($question['type'], ['radio', 'checkbox']))
                                         <div class="pl-4 border-l-2 border-gray-100 space-y-2 mt-2">
+                                            <p class="text-[10px] text-gray-400 font-bold uppercase mb-2">
+                                                {{ $question['type'] === 'checkbox' ? 'Multiple Choice Options (Checkboxes)' : 'Single Choice Options (Radio)' }}
+                                            </p>
                                             @foreach($question['options'] as $optIndex => $opt)
                                                 <div class="flex items-center gap-2">
-                                                    <div class="w-3 h-3 rounded-full border border-gray-300"></div>
-                                                    <input type="text" wire:model="questions.{{ $index }}.options.{{ $optIndex }}" class="w-full text-sm border-gray-200 rounded-lg">
-                                                    <button wire:click="removeOption({{ $index }}, {{ $optIndex }})" class="text-gray-300 hover:text-red-500">&times;</button>
+                                                    {{-- Visual Indicator --}}
+                                                    @if($question['type'] === 'radio')
+                                                        <div class="w-4 h-4 rounded-full border border-gray-300"></div>
+                                                    @else
+                                                        <div class="w-4 h-4 rounded border border-gray-300"></div>
+                                                    @endif
+                                                    
+                                                    <input type="text" wire:model="questions.{{ $index }}.options.{{ $optIndex }}" class="w-full text-sm border-gray-200 rounded-lg focus:border-orange-500 focus:ring-orange-500">
+                                                    <button wire:click="removeOption({{ $index }}, {{ $optIndex }})" class="text-gray-300 hover:text-red-500 text-lg leading-none">&times;</button>
                                                 </div>
                                             @endforeach
-                                            <button wire:click="addOption({{ $index }})" class="text-xs font-bold text-blue-600 hover:underline mt-2">+ Add Option</button>
+                                            <button wire:click="addOption({{ $index }})" class="text-xs font-bold text-blue-600 hover:underline mt-2 flex items-center gap-1">
+                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                                                Add Option
+                                            </button>
                                         </div>
                                     @elseif($question['type'] === 'file')
                                         <div class="bg-blue-50 border border-blue-100 p-3 rounded-lg text-xs text-blue-600 font-bold flex items-center gap-2">
