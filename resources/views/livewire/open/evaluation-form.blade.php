@@ -229,16 +229,26 @@
                                     {{-- 6. CHECKBOXES (Multiple Choice) --}}
                                     @elseif($question->type === 'checkbox')
                                         <div class="space-y-2">
-                                            @foreach($question->options as $option)
+                                            @foreach($question->options as $optIndex => $option)
                                                 @php
-                                                    // Check if this option is in the array
-                                                    // Wire:model handles arrays automatically for checkboxes
-                                                    $isChecked = in_array($option, $answers[$question->id] ?? []);
+                                                    // 1. Handle Option Label (Array vs String format)
+                                                    $label = is_array($option) ? ($option['text'] ?? '') : $option;
+
+                                                    // 2. Safe Answer Retrieval
+                                                    $currentVal = $answers[$question->id] ?? [];
+                                                    
+                                                    // [FIX] Force it to be an array. If it's a string (from old data), treat as empty or reset.
+                                                    if (!is_array($currentVal)) {
+                                                        $currentVal = []; 
+                                                    }
+
+                                                    $isChecked = in_array($label, $currentVal);
                                                 @endphp
+
                                                 <label class="relative flex items-center p-3 rounded-xl border cursor-pointer transition-all group/option 
                                                     {{ $isChecked ? 'bg-orange-50 border-orange-500 shadow-sm' : 'border-gray-200 hover:bg-orange-50 hover:border-orange-200' }}">
                                                     
-                                                    <input type="checkbox" wire:model.live="answers.{{ $question->id }}" value="{{ $option }}" class="peer sr-only">
+                                                    <input type="checkbox" wire:model.live="answers.{{ $question->id }}" value="{{ $label }}" class="peer sr-only" wire:key="q-{{ $question->id }}-chk-{{ $optIndex }}">
                                                     
                                                     {{-- Square Box --}}
                                                     <div class="w-5 h-5 rounded border-2 mr-3 flex items-center justify-center transition-all
@@ -247,7 +257,7 @@
                                                     </div>
                                                     
                                                     <span class="text-sm font-medium {{ $isChecked ? 'text-gray-900 font-bold' : 'text-gray-600' }}">
-                                                        {{ $option }}
+                                                        {{ $label }}
                                                     </span>
                                                 </label>
                                             @endforeach
