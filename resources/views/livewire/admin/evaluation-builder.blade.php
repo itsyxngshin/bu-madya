@@ -115,7 +115,7 @@
             <div class="lg:col-span-8 relative">
                 
                 {{-- Toolbar --}}
-                <div class="bg-gray-900 text-white p-4 rounded-t-[2rem] flex flex-wrap gap-2 items-center shadow-md">
+                <div class="sticky top-6 z-40 bg-gray-900 text-white p-4 rounded-t-[2rem] flex flex-wrap gap-2 items-center shadow-md">
                     <span class="font-bold ml-2 mr-auto text-sm">Add Content:</span>
                     <button wire:click="addQuestion('text')" class="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-bold transition">Text</button>
                     <button wire:click="addQuestion('radio')" class="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-bold transition">Choice</button>
