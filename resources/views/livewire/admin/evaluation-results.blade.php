@@ -26,7 +26,7 @@
                         <h2 class="text-lg font-black text-orange-600 uppercase tracking-tight">{{ $question->question_text }}</h2>
                     </div>
                 
-                {{-- LIKERT SCALE RESULT --}}
+                {{-- LIKERT SCALE RESULT (Unchanged - uses simple strings) --}}
                 @elseif($question->type === 'likert')
                     <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
                         <div class="flex flex-col md:flex-row gap-8">
@@ -49,6 +49,8 @@
                                 <div class="space-y-3">
                                     @foreach(array_reverse($question->options, true) as $optIndex => $label)
                                         @php 
+                                            // Handle potential array structure in Likert (rare but safe)
+                                            $textLabel = is_array($label) ? ($label['text'] ?? '') : $label;
                                             $count = $stat['breakdown'][$optIndex] ?? 0;
                                             $percent = $stat['count'] > 0 ? ($count / $stat['count']) * 100 : 0;
                                         @endphp
@@ -58,7 +60,7 @@
                                                 <div class="h-full bg-orange-500 rounded-full" style="width: {{ $percent }}%"></div>
                                             </div>
                                             <span class="w-12 text-right font-bold text-gray-700">{{ $count }}</span>
-                                            <span class="w-32 text-xs text-gray-400 truncate text-right">{{ $label }}</span>
+                                            <span class="w-32 text-xs text-gray-400 truncate text-right">{{ $textLabel }}</span>
                                         </div>
                                     @endforeach
                                 </div>
@@ -74,8 +76,12 @@
                             <span class="bg-gray-100 text-gray-500 text-[10px] font-bold px-2 py-1 rounded uppercase">Single Choice</span>
                         </div>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            @foreach($question->options as $label)
+                            @foreach($question->options as $option)
                                 @php 
+                                    // [FIX] Extract text label safely
+                                    $label = is_array($option) ? ($option['text'] ?? '') : $option;
+                                    
+                                    // Use extracted label as key
                                     $count = $stat['breakdown'][$label] ?? 0;
                                     $percent = $stat['count'] > 0 ? ($count / $stat['count']) * 100 : 0;
                                 @endphp
@@ -91,7 +97,7 @@
                         </div>
                     </div>
 
-                {{-- CHECKBOX (Multi Choice) RESULT --}}
+                {{-- [NEW] CHECKBOX (Multi Choice) RESULT --}}
                 @elseif($question->type === 'checkbox')
                     <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
                         <div class="flex justify-between items-center mb-4">
@@ -99,10 +105,12 @@
                             <span class="bg-blue-50 text-blue-600 text-[10px] font-bold px-2 py-1 rounded uppercase">Multi-Select</span>
                         </div>
                         <div class="space-y-3">
-                            {{-- Check if breakdown exists to prevent crash on mixed data --}}
                             @if(isset($stat['breakdown']))
-                                @foreach($question->options as $label)
+                                @foreach($question->options as $option)
                                     @php 
+                                        // [FIX] Extract text label safely before using as key
+                                        $label = is_array($option) ? ($option['text'] ?? '') : $option;
+                                        
                                         $count = $stat['breakdown'][$label] ?? 0;
                                         $percent = $stat['count'] > 0 ? ($count / $stat['count']) * 100 : 0;
                                     @endphp
@@ -117,9 +125,10 @@
                                     </div>
                                 @endforeach
                             @else
-                                <div class="text-red-500 text-xs font-bold">Error: Data format mismatch. Please reset responses.</div>
+                                <div class="text-red-500 text-xs font-bold">Data Unavailable</div>
                             @endif
                         </div>
+                        <p class="text-[10px] text-gray-400 mt-4 italic">* Percentages may exceed 100% because respondents can select multiple options.</p>
                     </div>
 
                 {{-- TEXT / FILE (List View) --}}
