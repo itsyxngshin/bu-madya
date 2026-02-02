@@ -20,30 +20,34 @@ class EvaluationResults extends Component
 
     public function calculateStats()
     {
-        // Eager load questions with their answers
         $this->evaluation->load(['questions.answers']);
 
         foreach ($this->evaluation->questions as $question) {
             
             $totalResponses = $question->answers->count();
             
-            // Skip if no responses
             if ($totalResponses === 0) {
                 $this->stats[$question->id] = [
-                    'count' => 0,
-                    'average' => 0,
-                    'breakdown' => []
+                    'count' => 0, 'average' => 0, 'breakdown' => []
                 ];
                 continue;
             }
 
-            // A. LIKERT SCALE LOGIC
+            // --- HELPER: Extract Labels safely ---
+            // Handles both old format ("Yes") and new format (["text" => "Yes", "jump" => ...])
+            $flatOptions = collect($question->options)->map(function($opt) {
+                return is_array($opt) ? ($opt['text'] ?? '') : $opt;
+            })->toArray();
+
+
+            // A. LIKERT LOGIC (Usually simple strings, but good to be safe)
             if ($question->type === 'likert') {
                 $sum = 0;
-                $counts = array_fill(0, count($question->options), 0);
+                $counts = array_fill(0, count($flatOptions), 0);
 
                 foreach ($question->answers as $answer) {
-                    $index = array_search($answer->answer_value, $question->options);
+                    // Match answer against the flattened labels
+                    $index = array_search($answer->answer_value, $flatOptions);
                     if ($index !== false) {
                         $sum += ($index + 1);
                         $counts[$index]++;
@@ -57,13 +61,15 @@ class EvaluationResults extends Component
                 ];
             } 
             
-            // B. RADIO LOGIC
+            // B. RADIO LOGIC (Single Choice)
             elseif ($question->type === 'radio') {
-                $counts = array_fill_keys($question->options, 0);
+                // [FIX] Use flatOptions for keys to avoid Array-to-String error
+                $counts = array_fill_keys($flatOptions, 0);
 
                 foreach ($question->answers as $answer) {
-                    if (isset($counts[$answer->answer_value])) {
-                        $counts[$answer->answer_value]++;
+                    $val = $answer->answer_value;
+                    if (isset($counts[$val])) {
+                        $counts[$val]++;
                     }
                 }
 
@@ -73,19 +79,18 @@ class EvaluationResults extends Component
                 ];
             }
 
-            // C. [NEW] CHECKBOX LOGIC (THIS WAS MISSING)
+            // C. CHECKBOX LOGIC (Multi Choice)
             elseif ($question->type === 'checkbox') {
-                // Initialize counts for all options to 0
-                $counts = array_fill_keys($question->options, 0);
+                // [FIX] Use flatOptions for keys
+                $counts = array_fill_keys($flatOptions, 0);
 
                 foreach ($question->answers as $answer) {
-                    // Decode the JSON array: '["Option A", "Option B"]'
                     $selections = json_decode($answer->answer_value, true);
 
-                    // Safety check: ensure it is an array before looping
                     if (is_array($selections)) {
                         foreach ($selections as $selected) {
-                            if (isset($counts[$selected])) {
+                            // Ensure the selected option exists in our keys before counting
+                            if (array_key_exists($selected, $counts)) {
                                 $counts[$selected]++;
                             }
                         }
@@ -94,15 +99,14 @@ class EvaluationResults extends Component
 
                 $this->stats[$question->id] = [
                     'count' => $totalResponses,
-                    'breakdown' => $counts // This key is required by the view!
+                    'breakdown' => $counts
                 ];
             }
             
-            // D. TEXT / FILE (List View)
+            // D. TEXT / FILE
             else {
                 $this->stats[$question->id] = [
                     'count' => $totalResponses,
-                    // No 'breakdown' needed here as the view loops raw answers
                 ];
             }
         }
@@ -112,4 +116,4 @@ class EvaluationResults extends Component
     {
         return view('livewire.admin.evaluation-results');
     }
-}
+} 
