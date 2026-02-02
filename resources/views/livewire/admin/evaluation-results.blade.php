@@ -91,7 +91,7 @@
                         </div>
                     </div>
 
-                {{-- [NEW] CHECKBOX (Multi Choice) RESULT --}}
+                {{-- CHECKBOX (Multi Choice) RESULT --}}
                 @elseif($question->type === 'checkbox')
                     <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
                         <div class="flex justify-between items-center mb-4">
@@ -99,24 +99,27 @@
                             <span class="bg-blue-50 text-blue-600 text-[10px] font-bold px-2 py-1 rounded uppercase">Multi-Select</span>
                         </div>
                         <div class="space-y-3">
-                            @foreach($question->options as $label)
-                                @php 
-                                    $count = $stat['breakdown'][$label] ?? 0;
-                                    // Percentage is based on total respondents, not total selections (so it can sum > 100%)
-                                    $percent = $stat['count'] > 0 ? ($count / $stat['count']) * 100 : 0;
-                                @endphp
-                                <div class="relative">
-                                    <div class="flex justify-between items-center mb-1 text-sm">
-                                        <span class="font-bold text-gray-700">{{ $label }}</span>
-                                        <span class="font-bold text-gray-900">{{ $count }} <span class="text-gray-400 text-xs font-normal">({{ round($percent) }}%)</span></span>
+                            {{-- Check if breakdown exists to prevent crash on mixed data --}}
+                            @if(isset($stat['breakdown']))
+                                @foreach($question->options as $label)
+                                    @php 
+                                        $count = $stat['breakdown'][$label] ?? 0;
+                                        $percent = $stat['count'] > 0 ? ($count / $stat['count']) * 100 : 0;
+                                    @endphp
+                                    <div class="relative">
+                                        <div class="flex justify-between items-center mb-1 text-sm">
+                                            <span class="font-bold text-gray-700">{{ $label }}</span>
+                                            <span class="font-bold text-gray-900">{{ $count }} <span class="text-gray-400 text-xs font-normal">({{ round($percent) }}%)</span></span>
+                                        </div>
+                                        <div class="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+                                            <div class="h-full bg-blue-500 rounded-full" style="width: {{ $percent }}%"></div>
+                                        </div>
                                     </div>
-                                    <div class="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
-                                        <div class="h-full bg-blue-500 rounded-full" style="width: {{ $percent }}%"></div>
-                                    </div>
-                                </div>
-                            @endforeach
+                                @endforeach
+                            @else
+                                <div class="text-red-500 text-xs font-bold">Error: Data format mismatch. Please reset responses.</div>
+                            @endif
                         </div>
-                        <p class="text-[10px] text-gray-400 mt-4 italic">* Percentages may exceed 100% because respondents can select multiple options.</p>
                     </div>
 
                 {{-- TEXT / FILE (List View) --}}
