@@ -26,7 +26,7 @@
                         <h2 class="text-lg font-black text-orange-600 uppercase tracking-tight">{{ $question->question_text }}</h2>
                     </div>
                 
-                {{-- LIKERT SCALE RESULT (The "Average" View) --}}
+                {{-- LIKERT SCALE RESULT --}}
                 @elseif($question->type === 'likert')
                     <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
                         <div class="flex flex-col md:flex-row gap-8">
@@ -47,14 +47,14 @@
                             <div class="md:w-2/3">
                                 <h3 class="font-bold text-gray-900 mb-4">{{ $question->question_text }}</h3>
                                 <div class="space-y-3">
-                                    {{-- Loop through options in reverse (5 down to 1) --}}
                                     @foreach(array_reverse($question->options, true) as $optIndex => $label)
                                         @php 
                                             $count = $stat['breakdown'][$optIndex] ?? 0;
                                             $percent = $stat['count'] > 0 ? ($count / $stat['count']) * 100 : 0;
                                         @endphp
                                         <div class="flex items-center gap-3 text-sm">
-                                            <span class="w-8 font-bold text-gray-400 text-right">{{ $optIndex + 1 }}</span> <div class="flex-1 h-3 bg-gray-100 rounded-full overflow-hidden">
+                                            <span class="w-8 font-bold text-gray-400 text-right">{{ $optIndex + 1 }}</span>
+                                            <div class="flex-1 h-3 bg-gray-100 rounded-full overflow-hidden">
                                                 <div class="h-full bg-orange-500 rounded-full" style="width: {{ $percent }}%"></div>
                                             </div>
                                             <span class="w-12 text-right font-bold text-gray-700">{{ $count }}</span>
@@ -66,10 +66,13 @@
                         </div>
                     </div>
 
-                {{-- RADIO / CHOICE RESULT --}}
+                {{-- RADIO (Single Choice) RESULT --}}
                 @elseif($question->type === 'radio')
                     <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
-                        <h3 class="font-bold text-gray-900 mb-4">{{ $question->question_text }}</h3>
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-bold text-gray-900">{{ $question->question_text }}</h3>
+                            <span class="bg-gray-100 text-gray-500 text-[10px] font-bold px-2 py-1 rounded uppercase">Single Choice</span>
+                        </div>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             @foreach($question->options as $label)
                                 @php 
@@ -77,9 +80,7 @@
                                     $percent = $stat['count'] > 0 ? ($count / $stat['count']) * 100 : 0;
                                 @endphp
                                 <div class="bg-gray-50 rounded-xl p-3 border border-gray-100 relative overflow-hidden">
-                                    {{-- Background Bar --}}
                                     <div class="absolute bottom-0 left-0 h-1 bg-green-500 transition-all duration-500" style="width: {{ $percent }}%"></div>
-                                    
                                     <div class="flex justify-between items-center relative z-10">
                                         <span class="font-bold text-gray-700 text-sm">{{ $label }}</span>
                                         <span class="font-black text-gray-900">{{ $count }}</span>
@@ -88,6 +89,34 @@
                                 </div>
                             @endforeach
                         </div>
+                    </div>
+
+                {{-- [NEW] CHECKBOX (Multi Choice) RESULT --}}
+                @elseif($question->type === 'checkbox')
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-bold text-gray-900">{{ $question->question_text }}</h3>
+                            <span class="bg-blue-50 text-blue-600 text-[10px] font-bold px-2 py-1 rounded uppercase">Multi-Select</span>
+                        </div>
+                        <div class="space-y-3">
+                            @foreach($question->options as $label)
+                                @php 
+                                    $count = $stat['breakdown'][$label] ?? 0;
+                                    // Percentage is based on total respondents, not total selections (so it can sum > 100%)
+                                    $percent = $stat['count'] > 0 ? ($count / $stat['count']) * 100 : 0;
+                                @endphp
+                                <div class="relative">
+                                    <div class="flex justify-between items-center mb-1 text-sm">
+                                        <span class="font-bold text-gray-700">{{ $label }}</span>
+                                        <span class="font-bold text-gray-900">{{ $count }} <span class="text-gray-400 text-xs font-normal">({{ round($percent) }}%)</span></span>
+                                    </div>
+                                    <div class="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+                                        <div class="h-full bg-blue-500 rounded-full" style="width: {{ $percent }}%"></div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                        <p class="text-[10px] text-gray-400 mt-4 italic">* Percentages may exceed 100% because respondents can select multiple options.</p>
                     </div>
 
                 {{-- TEXT / FILE (List View) --}}

@@ -4,7 +4,6 @@ namespace App\Livewire\Admin;
 
 use Livewire\Component;
 use App\Models\Evaluation;
-use App\Models\EvaluationQuestion;
 use Livewire\Attributes\Layout;
 
 #[Layout('layouts.madya-admin-deck')]
@@ -21,14 +20,14 @@ class EvaluationResults extends Component
 
     public function calculateStats()
     {
-        // Eager load questions with their answers
+        // Eager load for performance
         $this->evaluation->load(['questions.answers']);
 
         foreach ($this->evaluation->questions as $question) {
             
             $totalResponses = $question->answers->count();
             
-            // Skip if no responses to avoid division by zero
+            // Initialize empty stat structure
             if ($totalResponses === 0) {
                 $this->stats[$question->id] = [
                     'count' => 0,
@@ -38,32 +37,29 @@ class EvaluationResults extends Component
                 continue;
             }
 
-            // A. LIKERT SCALE LOGIC
+            // A. LIKERT LOGIC
             if ($question->type === 'likert') {
                 $sum = 0;
-                $counts = array_fill(0, count($question->options), 0); // Initialize counts [0,0,0,0,0]
+                $counts = array_fill(0, count($question->options), 0);
 
                 foreach ($question->answers as $answer) {
-                    // Find which option index this answer matches (e.g., "Strongly Agree" might be index 4)
                     $index = array_search($answer->answer_value, $question->options);
-                    
                     if ($index !== false) {
-                        $weight = $index + 1; // Index 0 = 1 point, Index 4 = 5 points
-                        $sum += $weight;
+                        $sum += ($index + 1);
                         $counts[$index]++;
                     }
                 }
 
                 $this->stats[$question->id] = [
                     'count' => $totalResponses,
-                    'average' => round($sum / $totalResponses, 2), // The "Weighted Mean"
-                    'breakdown' => $counts // Counts per choice
+                    'average' => round($sum / $totalResponses, 2),
+                    'breakdown' => $counts
                 ];
             } 
             
-            // B. RADIO / CHOICE LOGIC
+            // B. RADIO LOGIC (Single Choice)
             elseif ($question->type === 'radio') {
-                $counts = array_fill_keys($question->options, 0); // ['Yes' => 0, 'No' => 0]
+                $counts = array_fill_keys($question->options, 0);
 
                 foreach ($question->answers as $answer) {
                     if (isset($counts[$answer->answer_value])) {
@@ -76,8 +72,33 @@ class EvaluationResults extends Component
                     'breakdown' => $counts
                 ];
             }
+
+            // C. [NEW] CHECKBOX LOGIC (Multi Choice)
+            elseif ($question->type === 'checkbox') {
+                // Initialize counts for all options to 0
+                $counts = array_fill_keys($question->options, 0);
+
+                foreach ($question->answers as $answer) {
+                    // 1. Decode JSON string: '["Option A","Option B"]' -> ['Option A', 'Option B']
+                    $selectedOptions = json_decode($answer->answer_value, true);
+
+                    if (is_array($selectedOptions)) {
+                        foreach ($selectedOptions as $selected) {
+                            // Increment count for each selected option
+                            if (isset($counts[$selected])) {
+                                $counts[$selected]++;
+                            }
+                        }
+                    }
+                }
+
+                $this->stats[$question->id] = [
+                    'count' => $totalResponses, // Total people who answered
+                    'breakdown' => $counts // Counts per option
+                ];
+            }
             
-            // C. TEXT / FILE (Just counts)
+            // D. TEXT / FILE
             else {
                 $this->stats[$question->id] = [
                     'count' => $totalResponses,
@@ -90,4 +111,4 @@ class EvaluationResults extends Component
     {
         return view('livewire.admin.evaluation-results');
     }
-}
+} 
