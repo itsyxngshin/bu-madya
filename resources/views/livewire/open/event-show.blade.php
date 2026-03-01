@@ -123,7 +123,6 @@
         <div class="max-w-7xl mx-auto px-6 pb-24 grid lg:grid-cols-12 gap-8 md:gap-12">
 
             {{-- LEFT COLUMN: Sidebar --}}
-            {{-- LEFT COLUMN: Sidebar --}}
             <aside class="lg:col-span-4 space-y-8 order-2">
 
                 {{-- Only show if the event is open AND it has some form of registration enabled --}}

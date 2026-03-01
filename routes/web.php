@@ -188,7 +188,7 @@ Route::get('/membership-form', RegistrationForm::class)->name('membership-form')
 Route::get('/events', EventsIndex::class)->name('events.index');
 Route::get('/events/{slug}', EventShow::class)->name('events.show');
 Route::get('/transparency', TransparencyIndex::class)->name('transparency.index');
-Route::get('/events/{event:slug}', EventRsvp::class)->name('events.rsvp');
+Route::get('/events/{event:slug}/register', EventRsvp::class)->name('events.rsvp');
 
 
 
