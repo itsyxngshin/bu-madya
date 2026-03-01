@@ -209,6 +209,7 @@
                                                 <option value="3rd Year">3rd Year</option>
                                                 <option value="4th Year">4th Year</option>
                                                 <option value="5th Year">5th Year</option>
+                                                <option value="6th Year">6th Year</option>
                                             </select>
                                             @error('year_level') <span class="text-xs text-red-500 mt-1 block">{{ $message }}</span> @enderror
                                         </div>
@@ -255,6 +256,8 @@
                         <p class="text-xs text-gray-400 text-center mt-6">
                             By registering, you agree to BU MADYA's privacy policy regarding event data collection.
                         </p>
+
+                        @endif
                     </form>
                 @endif
 
