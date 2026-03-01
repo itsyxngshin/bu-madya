@@ -12,7 +12,8 @@ class Event extends Model
     protected $fillable = [
         'title', 'slug', 'description', 'cover_image',
         'registration_link', 'registration_button_text',
-        'start_date', 'end_date', 'is_active'
+        'start_date', 'end_date', 'is_active', 'capacity',
+        'location', 'is_internal_rsvp'
     ];
 
     protected $casts = [
