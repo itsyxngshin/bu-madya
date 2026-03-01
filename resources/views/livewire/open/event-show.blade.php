@@ -132,7 +132,7 @@
                 @php
                     // Determine the correct target URL based on the mode
                     $targetUrl = $event->is_internal_rsvp
-                        ? route('open.events.rsvp', $event->slug)
+                        ? route('events.rsvp', $event->slug)
                         : $event->registration_link;
                 @endphp
 
