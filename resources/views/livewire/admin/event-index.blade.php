@@ -71,9 +71,9 @@
                                 @endif
 
                                 {{-- Standard Actions --}}
-                                <a href="{{ route('open.events.show', $event->slug) }}" target="_blank" class="text-blue-500 hover:underline text-xs font-bold">View</a>
+                                <a href="{{ route('events.show', $event->slug) }}" target="_blank" class="text-blue-500 hover:underline text-xs font-bold">View</a>
 
-                                <a href="{{ route('admin.events.edit', $event->id) }}" class="text-gray-600 hover:text-gray-900 text-xs font-bold border border-gray-300 px-3 py-1 rounded hover:bg-gray-50 transition">
+                                <a href="{{ route('events.edit', $event->id) }}" class="text-gray-600 hover:text-gray-900 text-xs font-bold border border-gray-300 px-3 py-1 rounded hover:bg-gray-50 transition">
                                     Edit
                                 </a>
 
