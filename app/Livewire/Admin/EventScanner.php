@@ -8,18 +8,13 @@ use App\Models\EventRegistration;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\EventAttendedMail;
-use Livewire\Attributes\Layout;
 
 class EventScanner extends Component
 {
     public Event $event;
-
-    // Status properties to show UI feedback
-    public $scanStatus = null; // 'success', 'warning', 'error'
+    public $scanStatus = null; 
     public $scanMessage = '';
-    public $lastScannedData = null;
-
-    // Manual entry fallback
+    public $lastScannedData = null; // [FIXED] Properly declared as an array
     public $manualCode = '';
 
     public function mount(Event $event)
@@ -27,142 +22,97 @@ class EventScanner extends Component
         $this->event = $event;
     }
 
+    // Triggered by the camera
     public function processScan($ticketCode)
     {
-        // 1. Find the registration for this specific event
-        $registration = EventRegistration::where('event_id', $this->event->id)
+        $this->verifyTicket(trim($ticketCode));
+    }
+
+    // Triggered by the manual form
+    public function manualCheckIn()
+    {
+        $this->validate([
+            'manualCode' => 'required|string'
+        ]);
+        
+        $this->verifyTicket(trim($this->manualCode));
+        $this->manualCode = ''; // Clear input after submit
+    }
+
+    // The core logic for both camera and manual entry
+    private function verifyTicket($ticketCode)
+    {
+        // 1. Find the registration for THIS event (Eager load college to prevent errors)
+        $reg = EventRegistration::with('college')
+            ->where('event_id', $this->event->id)
             ->where('ticket_code', $ticketCode)
             ->first();
 
-        // 2. State: Invalid Ticket (Not found)
-        if (!$registration) {
+        // 2. If ticket doesn't exist
+        if (!$reg) {
             $this->scanStatus = 'error';
-            $this->scanMessage = 'Invalid Ticket Code or wrong event.';
-            $detailString = '';
-            if ($registration->classification === 'BU Student') {
-                $detailString = ($registration->college ? $registration->college->name : 'Unknown College') . ' - ' . $registration->year_level;
-            } 
-            elseif (in_array($registration->classification, ['CSO/NGO Representative', 'Partner Representative'])) {
-                $detailString = $registration->organization_name . ' (' . $registration->position . ')';
-            }
-
-            $this->lastScannedData = [
-                'name' => $registration->name,
-                'classification' => $registration->classification,
-                'details' => $detailString,
-                'ticket_code' => $registration->ticket_code,
-            ];
-
-            // Play error sound via frontend event
-            $this->dispatch('play-sound', type: 'error');
+            $this->scanMessage = 'Invalid Ticket';
+            $this->lastScannedData = null;
+            $this->dispatch('play-error-sound'); // [FIXED] Specific sound event
             return;
         }
 
-        // 3. State: Already Checked In
-        if ($registration->status === 'Attended') {
-            $this->scanStatus = 'warning';
-            $this->scanMessage = 'Already Checked In!';
-            $detailString = '';
-            if ($registration->classification === 'BU Student') {
-                $detailString = ($registration->college ? $registration->college->name : 'Unknown College') . ' - ' . $registration->year_level;
-            } 
-            elseif (in_array($registration->classification, ['CSO/NGO Representative', 'Partner Representative'])) {
-                $detailString = $registration->organization_name . ' (' . $registration->position . ')';
-            }
-
-            $this->lastScannedData = [
-                'name' => $registration->name,
-                'classification' => $registration->classification,
-                'details' => $detailString,
-                'ticket_code' => $registration->ticket_code,
-            ];
-
-            $this->dispatch('play-sound', type: 'warning');
-            return;
+        // 3. Build the Digital ID Card Data
+        $detailString = '';
+        if ($reg->classification === 'BU Student') {
+            $detailString = ($reg->college ? $reg->college->name : 'Unknown College') . ' - ' . $reg->year_level;
+        } elseif (in_array($reg->classification, ['CSO/NGO Representative', 'Partner Representative'])) {
+            $detailString = $reg->organization_name . ' (' . $reg->position . ')';
         }
 
-        // 4. State: Success! Mark as attended
-        $registration->update(['status' => 'Attended']);
+        $this->lastScannedData = [
+            'name' => $reg->name,
+            'classification' => $reg->classification,
+            'details' => $detailString,
+            'ticket_code' => $reg->ticket_code,
+        ];
 
-        if ($registration->status !== 'Attended') {
+        // 4. Process Attendance
+        if ($reg->status !== 'Attended') {
             
-            $registration->update(['status' => 'Attended']);
+            $reg->update(['status' => 'Attended']);
             
-            // [NEW] Dispatch the attendance email
-                try {
-                    Mail::to($registration->email)->send(new EventAttendedMail($this->event, $registration));
-                } catch (\Exception $e) {
-                    \Log::error('Failed to send attendance email: ' . $e->getMessage());
-                }
+            // Optional: Send Email (Wrapped in try/catch so it doesn't break the scanner if mail fails)
+            try {
+                // Using ->queue() instead of ->send() speeds up the scanner dramatically!
+                Mail::to($reg->email)->queue(new EventAttendedMail($this->event, $reg));
+            } catch (\Exception $e) {
+                \Log::error('Failed to send attendance email: ' . $e->getMessage());
+            }
 
             $this->scanStatus = 'success';
             $this->scanMessage = 'Check-in Successful';
-            $this->dispatch('play-sound', ['type' => 'success']);
+            $this->dispatch('play-success-sound'); // [FIXED] Specific sound event
 
         } else {
-            // Already checked in logic...
             $this->scanStatus = 'warning';
             $this->scanMessage = 'Already Checked In';
-            $this->dispatch('play-sound', ['type' => 'warning']);
+            $this->dispatch('play-error-sound'); // [FIXED] Specific sound event
         }
-
-        $this->scanStatus = 'success';
-        $this->scanMessage = 'Successfully Checked In!';
-        $detailString = '';
-            if ($registration->classification === 'BU Student') {
-                $detailString = ($registration->college ? $registration->college->name : 'Unknown College') . ' - ' . $registration->year_level;
-            } 
-            elseif (in_array($registration->classification, ['CSO/NGO Representative', 'Partner Representative'])) {
-                $detailString = $registration->organization_name . ' (' . $registration->position . ')';
-            }
-
-            $this->lastScannedData = [
-                'name' => $registration->name,
-                'classification' => $registration->classification,
-                'details' => $detailString,
-                'ticket_code' => $registration->ticket_code,
-            ];
-
-        $this->dispatch('play-sound', type: 'success');
-
-        // Reset manual code if used
-        $this->manualCode = '';
-    }
-
-    public function manualCheckIn()
-    {
-        $this->validate(['manualCode' => 'required|string']);
-        $this->processScan(strtoupper($this->manualCode));
-    }
-
-    public function getStatsProperty()
-    {
-        $total = $this->event->registrations()->count();
-        $attended = $this->event->registrations()->where('status', 'Attended')->count();
-
-        return [
-            'total' => $total,
-            'attended' => $attended,
-            'percentage' => $total > 0 ? round(($attended / $total) * 100) : 0
-        ];
     }
 
     public function render()
     {
-        // 1. Determine if the user is a logged-in Admin/Director
+        // Dynamic Layout Check
         $isAdmin = Auth::check() && in_array(Auth::user()->role?->role_name, ['administrator', 'director']);
-
-        // 2. Set the layout dynamically!
         $layout = $isAdmin ? 'layouts.madya-admin-deck' : 'layouts.madya-template';
+
+        // Calculate Stats
+        $total = $this->event->registrations()->count();
+        $attended = $this->event->registrations()->where('status', 'Attended')->count();
+        $percentage = $total > 0 ? round(($attended / $total) * 100) : 0;
 
         return view('livewire.admin.event-scanner', [
             'stats' => [
-                'total' => $this->event->registrations()->count(),
-                'attended' => $this->event->registrations()->where('status', 'Attended')->count(),
-                'percentage' => $this->event->registrations()->count() > 0 
-                    ? round(($this->event->registrations()->where('status', 'Attended')->count() / $this->event->registrations()->count()) * 100) 
-                    : 0
+                'total' => $total,
+                'attended' => $attended,
+                'percentage' => $percentage
             ]
-        ])->layout($layout); // <-- Inject the dynamic layout here
+        ])->layout($layout);
     }
 }

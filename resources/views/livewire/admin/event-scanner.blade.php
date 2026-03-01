@@ -96,7 +96,7 @@
                 fps: 10, 
                 qrbox: {width: 250, height: 250}, 
                 aspectRatio: 1.0,
-                // Explicitly allow both Camera and File Image Upload
+                // Enable front/back camera switching and File Upload UI
                 supportedScanTypes: [
                     Html5QrcodeScanType.SCAN_TYPE_CAMERA,
                     Html5QrcodeScanType.SCAN_TYPE_FILE
@@ -112,11 +112,13 @@
             if (isProcessing) return; 
             isProcessing = true;
             
+            // Send to Livewire
             $wire.processScan(decodedText).then(() => {
+                // Wait 3 seconds so the operator can verify the ID card
                 setTimeout(() => {
                     isProcessing = false;
                     $wire.set('scanStatus', null); 
-                }, 3000); // Wait 3 seconds so the operator can read the ID card
+                }, 3000); 
             }).catch(error => {
                 console.error("Scan error:", error);
                 isProcessing = false;
@@ -124,17 +126,11 @@
         }
 
         function onScanFailure(error) {
-            // Background read failures are ignored
+            // Ignore standard frame scan failures
         }
 
-        Livewire.on('play-sound', (event) => {
-            let type = 'success';
-            if (Array.isArray(event) && event.length > 0) {
-                type = event[0].type || event[0];
-            } else if (event && event.type) {
-                type = event.type;
-            }
-
+        // --- BULLETPROOF AUDIO FEEDBACK LOGIC ---
+        function playTone(type) {
             try {
                 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 const oscillator = audioCtx.createOscillator();
@@ -144,12 +140,14 @@
                 gainNode.connect(audioCtx.destination);
 
                 if (type === 'success') {
+                    // High happy beep (800Hz)
                     oscillator.type = 'sine';
                     oscillator.frequency.setValueAtTime(800, audioCtx.currentTime);
                     gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
                     oscillator.start();
                     oscillator.stop(audioCtx.currentTime + 0.15);
                 } else {
+                    // Low error buzzer (150Hz)
                     oscillator.type = 'sawtooth';
                     oscillator.frequency.setValueAtTime(150, audioCtx.currentTime);
                     gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
@@ -157,95 +155,53 @@
                     oscillator.stop(audioCtx.currentTime + 0.3);
                 }
             } catch (e) {
-                console.warn('Audio feedback requires user interaction first.');
+                console.warn('Browser prevented audio playback. Requires user interaction.');
             }
-        });
+        }
+
+        // Listen for the separate events dispatched from the backend
+        Livewire.on('play-success-sound', () => playTone('success'));
+        Livewire.on('play-error-sound', () => playTone('error'));
     });
 </script>
 
 <style>
     /* ==============================================================
-       HEAVY CUSTOMIZATION OF HTML5-QRCODE DEFAULT UI
-       Turns ugly default elements into sleek Tailwind components
+       CUSTOM HTML5-QRCODE UI TO MATCH TAILWIND DESIGN
        ============================================================== */
-    
     #reader { border: none !important; }
     
-    /* Hide the default generic text */
     #reader__dashboard_section_csr span, 
     #reader__dashboard_section_csfa span { color: transparent !important; }
     
-    /* Top Tabs: Switch between Camera and Image File */
     #reader__dashboard_section_swaplink { 
-        display: block;
-        background-color: #f3f4f6;
-        color: #4b5563 !important; 
-        text-decoration: none !important; 
-        font-weight: bold;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        font-size: 10px;
-        padding: 12px;
-        border-radius: 12px;
-        margin-bottom: 16px;
-        text-align: center;
-        transition: all 0.3s;
+        display: block; background-color: #f3f4f6; color: #4b5563 !important; 
+        text-decoration: none !important; font-weight: bold; text-transform: uppercase;
+        letter-spacing: 1px; font-size: 10px; padding: 12px; border-radius: 12px;
+        margin-bottom: 16px; text-align: center; transition: all 0.3s;
     }
-    #reader__dashboard_section_swaplink:hover {
-        background-color: #e5e7eb;
-        color: #111827 !important;
-    }
+    #reader__dashboard_section_swaplink:hover { background-color: #e5e7eb; color: #111827 !important; }
 
-    /* Camera Selection Dropdown */
     #reader__camera_selection {
-        width: 100%;
-        padding: 12px;
-        border-radius: 12px;
-        border: 1px solid #e5e7eb;
-        background-color: white;
-        color: #111827;
-        font-size: 14px;
-        font-weight: 600;
-        margin-bottom: 12px;
-        appearance: auto;
+        width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #e5e7eb;
+        background-color: white; color: #111827; font-size: 14px; font-weight: 600;
+        margin-bottom: 12px; appearance: auto;
     }
 
-    /* Image File Upload Input */
     #reader__filescan_input {
-        width: 100%;
-        padding: 10px;
-        background: #f9fafb;
-        border: 2px dashed #d1d5db;
-        border-radius: 12px;
-        margin-bottom: 12px;
-        font-size: 12px;
-        color: #6b7280;
+        width: 100%; padding: 10px; background: #f9fafb; border: 2px dashed #d1d5db;
+        border-radius: 12px; margin-bottom: 12px; font-size: 12px; color: #6b7280;
     }
 
-    /* Start/Stop Camera Buttons */
     #reader button { 
-        width: 100%;
-        background: #111827; 
-        color: white; 
-        border-radius: 12px; 
-        padding: 14px 16px; 
-        border: none; 
-        font-weight: 800; 
-        font-size: 14px;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        cursor: pointer; 
-        transition: background 0.3s;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        width: 100%; background: #111827; color: white; border-radius: 12px; 
+        padding: 14px 16px; border: none; font-weight: 800; font-size: 14px;
+        text-transform: uppercase; letter-spacing: 1px; cursor: pointer; 
+        transition: background 0.3s; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
     }
     #reader button:hover { background: #030712; }
     
-    /* Specifically style the Stop Scanning button */
-    #reader__dashboard_section_csr button:nth-of-type(2) {
-        background: #ef4444;
-        margin-top: 8px;
-    }
-
+    #reader__dashboard_section_csr button:nth-of-type(2) { background: #ef4444; margin-top: 8px; }
     .animate-bounce-short { animation: bounce 0.5s ease-in-out 1; }
 </style>
 @endpush
