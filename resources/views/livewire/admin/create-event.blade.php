@@ -176,13 +176,16 @@
                 {{-- The Toggle --}}
                 <div class="flex items-center justify-between mb-6 p-3 bg-gray-50 rounded-xl border border-gray-200">
                     <div>
-                        <span class="block text-sm font-bold text-gray-900">Luma-Style RSVP</span>
+                        <span class="block text-sm font-bold text-gray-900">RSVP</span>
                         <span class="text-xs text-gray-500">Enable internal ticketing & QR codes</span>
                     </div>
-                    <label class="relative inline-flex items-center cursor-pointer">
-                        <input type="checkbox" wire:model.live="is_internal_rsvp" class="sr-only peer">
-                        <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
-                    </label>
+
+                    {{-- Bulletproof Livewire Toggle --}}
+                    <button type="button"
+                        wire:click="$toggle('is_internal_rsvp')"
+                        class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 {{ $is_internal_rsvp ? 'bg-red-600' : 'bg-gray-300' }}">
+                        <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out {{ $is_internal_rsvp ? 'translate-x-5' : 'translate-x-0' }}"></span>
+                    </button>
                 </div>
 
                 {{-- Mode 1: Internal RSVP Settings --}}
