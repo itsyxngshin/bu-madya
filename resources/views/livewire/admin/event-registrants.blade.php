@@ -1,5 +1,5 @@
 <div class="p-6 max-w-7xl mx-auto min-h-screen">
-    
+
     {{-- Header --}}
     <div class="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
@@ -7,7 +7,7 @@
             <h1 class="text-3xl font-black text-gray-900 leading-tight">Registrants</h1>
             <p class="text-sm font-bold text-gray-500 mt-1">{{ $event->title }}</p>
         </div>
-        
+
         <div class="flex gap-4">
             <div class="bg-white px-6 py-3 rounded-2xl shadow-sm border border-gray-100 text-center">
                 <span class="block text-2xl font-black text-gray-900">{{ $stats['total'] }}</span>
@@ -27,7 +27,7 @@
 
     {{-- Filters & Actions --}}
     <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 mb-6 flex flex-col md:flex-row gap-4 justify-between items-center">
-        
+
         <div class="flex flex-col md:flex-row gap-4 w-full md:w-auto flex-1">
             <div class="relative flex-1 max-w-md">
                 <input wire:model.live.debounce.300ms="search" type="text" placeholder="Search name, email, or ticket code..." class="w-full pl-10 pr-4 py-2.5 rounded-xl border-gray-200 text-sm focus:ring-red-500">
@@ -45,7 +45,7 @@
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
             Export to Excel
         </button>
-        
+
     </div>
 
     {{-- Table --}}
@@ -69,14 +69,14 @@
                             </td>
                             <td class="px-6 py-4">
                                 <span class="inline-block px-2 py-1 bg-gray-100 text-gray-700 text-[10px] font-bold rounded uppercase">{{ $reg->classification }}</span>
-                                
+
                                 {{-- Show Student Details --}}
                                 @if($reg->classification === 'BU Student')
                                     <div class="text-xs mt-1 text-gray-500">
                                         {{ $reg->program }} ({{ $reg->year_level }})<br>
-                                        ID: <span class="font-mono">{{ $reg->college_id }}</span>
+                                        <span class="font-bold text-gray-700">{{ $reg->college?->name ?? 'Unknown College' }}</span>
                                     </div>
-                                    
+
                                 {{-- Show Org Details --}}
                                 @elseif(in_array($reg->classification, ['CSO/NGO Representative', 'Partner Representative']))
                                     <div class="text-xs mt-1 text-gray-500">

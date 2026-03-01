@@ -82,7 +82,7 @@
                              ">
                             <div x-ref="ticketQr" class="flex justify-center items-center"></div>
                         </div>
-                        
+
                         <div class="bg-gray-50 rounded-xl p-4 border border-gray-100">
                             <p class="text-xs text-gray-400 font-bold uppercase tracking-widest mb-1">Ticket Code</p>
                             <p class="text-lg font-mono font-bold text-gray-900">{{ $registrationRecord->ticket_code }}</p>
@@ -98,7 +98,7 @@
                 {{-- STATE: REGISTRATION FORM --}}
                 @else
                     <h2 class="text-2xl font-black text-gray-900 mb-6">Join Event</h2>
-                    
+
                     <form wire:submit.prevent="register" class="space-y-4">
                         {{-- Standard Fields --}}
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -130,8 +130,13 @@
                         @if($classification === 'BU Student')
                             <div class="bg-orange-50/50 p-4 rounded-xl border border-orange-100 space-y-4 animate-fade-in-down">
                                 <div>
-                                    <label class="block text-xs font-bold text-orange-800 uppercase mb-2">BU Student ID</label>
-                                    <input type="text" wire:model="college_id" class="w-full rounded-lg border-orange-200 bg-white text-sm py-2 focus:ring-orange-500" placeholder="e.g. 2023-1234">
+                                    <label class="block text-xs font-bold text-orange-800 uppercase mb-2">College / Unit</label>
+                                    <select wire:model="college_id" class="w-full rounded-lg border-orange-200 bg-white text-sm py-2 focus:ring-orange-500">
+                                        <option value="">Select your College...</option>
+                                        @foreach($colleges as $college)
+                                            <option value="{{ $college->id }}">{{ $college->name }}</option>
+                                        @endforeach
+                                    </select>
                                     @error('college_id') <span class="text-xs text-red-500 mt-1 block">{{ $message }}</span> @enderror
                                 </div>
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">

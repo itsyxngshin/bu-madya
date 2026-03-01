@@ -27,8 +27,8 @@ class EventRegistrants extends Component
 
     public function export()
     {
-        // 1. Get the filtered query (ignoring pagination so we get ALL results)
-        $query = $this->event->registrations()->latest();
+        // 1. Get the filtered query AND Eager Load the college relationship for performance
+        $query = $this->event->registrations()->with('college')->latest();
 
         if ($this->search) {
             $query->where(function($q) {
@@ -45,20 +45,20 @@ class EventRegistrants extends Component
         $registrants = $query->get();
 
         // 2. Define the filename dynamically
-        $csvFileName = 'BU-MADYA-' . $this->event->slug . '-registrants-' . date('Y-m-d') . '.csv';
+        $csvFileName = 'BUMADYA-' . $this->event->slug . '-registrants-' . date('Y-m-d') . '.csv';
 
         // 3. Stream the download back to the browser
         return response()->streamDownload(function() use ($registrants) {
             $handle = fopen('php://output', 'w');
 
-            // Add the Header Row
+            // Add the Header Row (Updated 'BU College ID' to 'College / Unit')
             fputcsv($handle, [
                 'Date Registered',
                 'Status',
                 'Name',
                 'Email',
                 'Classification',
-                'BU College ID',
+                'College / Unit',
                 'Program',
                 'Year Level',
                 'Organization Name',
@@ -74,7 +74,10 @@ class EventRegistrants extends Component
                     $reg->name,
                     $reg->email,
                     $reg->classification,
-                    $reg->college_id ?? 'N/A',
+
+                    // [FIXED] Pulls the actual name from the related College model
+                    $reg->college ? $reg->college->name : 'N/A',
+
                     $reg->program ?? 'N/A',
                     $reg->year_level ?? 'N/A',
                     $reg->organization_name ?? 'N/A',

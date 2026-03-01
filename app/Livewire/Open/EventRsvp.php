@@ -60,7 +60,7 @@ class EventRsvp extends Component
 
         // Conditional Rules: BU Student
         if ($this->classification === 'BU Student') {
-            $rules['college_id'] = 'required|string|max:50';
+            $rules['college_id'] = 'required|exists:colleges,id';
             $rules['program'] = 'required|string|max:150';
             $rules['year_level'] = 'required|string';
         }
@@ -86,16 +86,16 @@ class EventRsvp extends Component
             'name' => $this->name,
             'email' => $this->email,
             'classification' => $this->classification,
-            
+
             // Student Info
             'college_id' => $this->classification === 'BU Student' ? $this->college_id : null,
             'program' => $this->classification === 'BU Student' ? $this->program : null,
             'year_level' => $this->classification === 'BU Student' ? $this->year_level : null,
-            
+
             // Org Info [NEW]
             'organization_name' => in_array($this->classification, ['CSO/NGO Representative', 'Partner Representative']) ? $this->organization_name : null,
             'position' => in_array($this->classification, ['CSO/NGO Representative', 'Partner Representative']) ? $this->position : null,
-            
+
             'ticket_code' => $ticketCode,
         ]);
 
@@ -110,7 +110,8 @@ class EventRsvp extends Component
 
     public function render()
     {
-        // Reuses the Luma-style view provided in the previous interaction
-        return view('livewire.open.event-rsvp');
+        return view('livewire.open.event-rsvp', [
+                    'colleges' => \App\Models\College::orderBy('name')->get()
+                ]);
     }
 }

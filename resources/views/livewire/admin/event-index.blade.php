@@ -1,5 +1,5 @@
 <div class="max-w-7xl mx-auto py-10 sm:px-6 lg:px-8">
-    
+
     {{-- Header & Search --}}
     <div class="flex justify-between items-center mb-6">
         <h2 class="font-bold text-2xl text-gray-800">Manage Events</h2>
@@ -9,7 +9,7 @@
     </div>
 
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        
+
         {{-- Search Bar --}}
         <div class="p-4 border-b border-gray-100">
             <input wire:model.live.debounce.300ms="search" type="text" placeholder="Search events..." class="w-full md:w-64 rounded-lg border-gray-300 text-sm focus:ring-red-500">
@@ -57,18 +57,32 @@
                                 <span class="bg-gray-100 text-gray-500 px-2 py-1 rounded text-xs font-bold uppercase">Draft</span>
                             @endif
                         </td>
-                        <td class="p-4 text-right space-x-2">
-                            <a href="{{ route('events.show', $event->slug) }}" target="_blank" class="text-blue-500 hover:underline text-xs font-bold">View</a>
-                            
-                            <a href="{{ route('admin.events.edit', $event->id) }}" class="text-gray-600 hover:text-gray-900 text-xs font-bold border border-gray-300 px-3 py-1 rounded hover:bg-gray-50 transition">
-                                Edit
-                            </a>
-                            
-                            <button wire:click="delete({{ $event->id }})" 
-                                    wire:confirm="Are you sure you want to delete this event?"
-                                    class="text-red-600 hover:text-red-900 text-xs font-bold border border-red-200 px-3 py-1 rounded hover:bg-red-50 transition">
-                                Delete
-                            </button>
+                        <td class="p-4 text-right">
+                            <div class="flex items-center justify-end gap-2">
+
+                                @if($event->is_internal_rsvp)
+                                    <a href="{{ route('admin.events.registrants', $event->slug) }}" class="text-green-700 bg-green-50 hover:bg-green-100 text-[10px] font-bold uppercase tracking-widest border border-green-200 px-3 py-1.5 rounded transition">
+                                        Registrants
+                                    </a>
+                                    <a href="{{ route('admin.events.scan', $event->slug) }}" target="_blank" class="text-purple-700 bg-purple-50 hover:bg-purple-100 text-[10px] font-bold uppercase tracking-widest border border-purple-200 px-3 py-1.5 rounded transition">
+                                        Scanner
+                                    </a>
+                                    <div class="w-px h-4 bg-gray-200 mx-1"></div>
+                                @endif
+
+                                {{-- Standard Actions --}}
+                                <a href="{{ route('open.events.show', $event->slug) }}" target="_blank" class="text-blue-500 hover:underline text-xs font-bold">View</a>
+
+                                <a href="{{ route('admin.events.edit', $event->id) }}" class="text-gray-600 hover:text-gray-900 text-xs font-bold border border-gray-300 px-3 py-1 rounded hover:bg-gray-50 transition">
+                                    Edit
+                                </a>
+
+                                <button wire:click="delete({{ $event->id }})"
+                                        wire:confirm="Are you sure you want to delete this event?"
+                                        class="text-red-600 hover:text-red-900 text-xs font-bold border border-red-200 px-3 py-1 rounded hover:bg-red-50 transition">
+                                    Delete
+                                </button>
+                            </div>
                         </td>
                     </tr>
                     @empty
@@ -79,7 +93,7 @@
                 </tbody>
             </table>
         </div>
-        
+
         <div class="p-4 border-t border-gray-100">
             {{ $events->links() }}
         </div>

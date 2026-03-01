@@ -15,4 +15,9 @@ class EventRegistration extends Model
     {
         return $this->belongsTo(Event::class);
     }
+
+    public function college()
+    {
+        return $this->belongsTo(College::class);
+    }
 }
