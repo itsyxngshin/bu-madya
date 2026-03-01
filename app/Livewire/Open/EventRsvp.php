@@ -17,6 +17,12 @@ class EventRsvp extends Component
     public Event $event;
     public $name = '';
     public $email = '';
+    public $classification = 'BU Student';
+    public $college_id = '';
+    public $program = '';
+    public $year_level = '';
+    public $organization_name = '';
+    public $position = '';
 
     public $isRegistered = false;
     public $registrationRecord;
@@ -46,28 +52,55 @@ class EventRsvp extends Component
 
     public function register()
     {
-        $this->validate([
+        $rules = [
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255',
-        ]);
+            'classification' => 'required|string',
+        ];
+
+        // Conditional Rules: BU Student
+        if ($this->classification === 'BU Student') {
+            $rules['college_id'] = 'required|string|max:50';
+            $rules['program'] = 'required|string|max:150';
+            $rules['year_level'] = 'required|string';
+        }
+
+        // Conditional Rules: External Orgs [NEW]
+        if (in_array($this->classification, ['CSO/NGO Representative', 'Partner Representative'])) {
+            $rules['organization_name'] = 'required|string|max:255';
+            $rules['position'] = 'required|string|max:255';
+        }
+
+        $this->validate($rules);
 
         if ($this->event->capacity && $this->event->registrations()->count() >= $this->event->capacity) {
             session()->flash('error', 'Sorry, this event is fully booked.');
             return;
         }
 
-        $ticketCode = 'BUMADYA-' . strtoupper(Str::random(8));
+        $ticketCode = 'BUMADYA-' . strtoupper(\Illuminate\Support\Str::random(8));
 
-        $this->registrationRecord = EventRegistration::create([
+        $this->registrationRecord = \App\Models\EventRegistration::create([
             'event_id' => $this->event->id,
-            'user_id' => Auth::id(),
+            'user_id' => \Illuminate\Support\Facades\Auth::id(),
             'name' => $this->name,
             'email' => $this->email,
+            'classification' => $this->classification,
+            
+            // Student Info
+            'college_id' => $this->classification === 'BU Student' ? $this->college_id : null,
+            'program' => $this->classification === 'BU Student' ? $this->program : null,
+            'year_level' => $this->classification === 'BU Student' ? $this->year_level : null,
+            
+            // Org Info [NEW]
+            'organization_name' => in_array($this->classification, ['CSO/NGO Representative', 'Partner Representative']) ? $this->organization_name : null,
+            'position' => in_array($this->classification, ['CSO/NGO Representative', 'Partner Representative']) ? $this->position : null,
+            
             'ticket_code' => $ticketCode,
         ]);
 
         try {
-            Mail::to($this->email)->send(new EventTicketMail($this->event, $this->registrationRecord));
+            \Illuminate\Support\Facades\Mail::to($this->email)->send(new \App\Mail\EventTicketMail($this->event, $this->registrationRecord));
         } catch (\Exception $e) {
             \Log::error('Failed to send ticket: ' . $e->getMessage());
         }

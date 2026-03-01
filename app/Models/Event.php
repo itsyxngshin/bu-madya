@@ -13,7 +13,8 @@ class Event extends Model
         'title', 'slug', 'description', 'cover_image',
         'registration_link', 'registration_button_text',
         'start_date', 'end_date', 'is_active', 'capacity',
-        'location', 'is_internal_rsvp'
+        'location', 'is_internal_rsvp', 'classification', 'college_id', 
+        'program', 'year_level'
     ];
 
     protected $casts = [

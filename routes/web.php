@@ -56,6 +56,7 @@ use App\Livewire\Open\TransparencyIndex;
 use App\Livewire\Admin\EvaluationResults;
 use App\Livewire\Admin\EvaluationList as AdminEvaluationIndex;
 use App\Livewire\Admin\EventScanner;
+use App\Livewire\Admin\EventRegistrants; 
 use App\Models\MembershipApplication;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Response;
@@ -165,6 +166,7 @@ Route::middleware(['auth', 'role:administrator,director'])
     Route::get('/manage/evaluations/{evaluation}/edit', EvaluationBuilder::class)->name('admin.evaluations.edit');
     Route::get('/manage/evaluations/{evaluation}/results', EvaluationResults::class)->name('admin.evaluations.results');
     Route::get('/manage/evaluations', AdminEvaluationIndex::class)->name('admin.evaluations.index');
+    Route::get('/events/{event:slug}/registrants', EventRegistrants::class)->name('admin.events.registrants');
 });
 
 // Public view blades with access control on parts of the navigation
