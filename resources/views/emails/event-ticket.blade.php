@@ -43,7 +43,9 @@
                 <div class="details">
                     <div class="detail-row">
                         <div class="detail-label">Date & Time</div>
-                        <div class="detail-value">{{ $event->start_time->format('l, F j, Y \a\t g:i A') }}</div>
+                        <div class="detail-value">
+                            {{ $event->start_date ? $event->start_date->format('l, F j, Y \a\t g:i A') : 'To Be Announced' }}
+                        </div>
                     </div>
                     <div style="margin-bottom: 0;">
                         <div class="detail-label">Location</div>
