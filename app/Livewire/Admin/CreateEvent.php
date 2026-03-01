@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 namespace App\Livewire\Admin;
 
@@ -14,11 +14,21 @@ class CreateEvent extends Component
     use WithFileUploads;
 
     public $title;
-    public $slug; 
+    public $slug;
     public $description;
     public $cover_image;
+
+    // Toggle Mode
+    public $is_internal_rsvp = false; // [NEW]
+
+    // External Link details
     public $registration_link;
     public $registration_button_text = 'Register Now';
+
+    // Internal RSVP details [NEW]
+    public $location;
+    public $capacity;
+
     public $start_date;
     public $end_date;
     public $is_active = true;
@@ -27,14 +37,15 @@ class CreateEvent extends Component
     protected $rules = [
         'title' => 'required|string|max:255',
         'registration_link' => 'nullable|url',
-        'cover_image' => 'nullable|image|max:2048', // 2MB Max
+        'cover_image' => 'nullable|image|max:2048',
+        'location' => 'nullable|string|max:255',
+        'capacity' => 'nullable|integer|min:1',
     ];
 
-    // Auto-generate slug when title updates
     public function updatedTitle($value)
     {
-        // Only if creating new
-        $this->validateOnly('title'); 
+        $this->validateOnly('title');
+        $this->slug = Str::slug($value); // Optionally auto-fill slug here
     }
 
     public function save()
@@ -48,11 +59,14 @@ class CreateEvent extends Component
 
         Event::create([
             'title' => $this->title,
-            'slug' => $this->slug,
+            'slug' => Str::slug($this->slug),
             'description' => $this->description,
             'cover_image' => $imagePath,
-            'registration_link' => $this->registration_link,
+            'is_internal_rsvp' => $this->is_internal_rsvp, // [NEW]
+            'registration_link' => $this->is_internal_rsvp ? null : $this->registration_link, // Clear link if using internal
             'registration_button_text' => $this->registration_button_text,
+            'location' => $this->location, // [NEW]
+            'capacity' => $this->capacity, // [NEW]
             'start_date' => $this->start_date,
             'end_date' => $this->end_date,
             'is_active' => $this->is_active,
@@ -61,14 +75,9 @@ class CreateEvent extends Component
         return redirect()->route('admin.events.index')->with('message', 'Event created successfully!');
     }
 
-    // Add this hook
     public function updatedPhotoUpload()
     {
-        $this->validate([
-            'photo_upload' => 'image|max:3072', // 3MB Max
-        ]);
-
-        // Dispatch event to insert the image tag into the editor
+        $this->validate(['photo_upload' => 'image|max:3072']);
         $this->dispatch('photo-inserted', url: $this->photo_upload->temporaryUrl());
     }
 

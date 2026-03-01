@@ -1,8 +1,8 @@
 <div class="min-h-screen bg-stone-50 font-sans text-gray-900 relative overflow-x-hidden">
 
     {{-- SEO Meta Tags (Keep as is) --}}
-    @section('meta_title', $event->title) 
-    @section('meta_description', Str::limit(strip_tags($event->description), 150)) 
+    @section('meta_title', $event->title)
+    @section('meta_description', Str::limit(strip_tags($event->description), 150))
     @section('meta_image', $event->cover_image ? (Str::startsWith($event->cover_image, 'http') ? $event->cover_image : asset('storage/' . $event->cover_image)) : asset('images/official_logo.png'))
 
     {{-- 1. BACKGROUND BLOBS (Keep as is) --}}
@@ -18,7 +18,7 @@
 
         {{-- HERO SECTION --}}
         <header class="relative pt-24 md:pt-32 pb-8 md:pb-12 px-6 max-w-7xl mx-auto">
-            
+
             {{-- A. Back Button --}}
             <div class="mb-6 md:mb-8">
                 <a href="{{ route('events.index') }}" class="inline-flex items-center gap-2 text-[10px] md:text-xs font-bold text-gray-400 hover:text-red-600 uppercase tracking-widest transition">
@@ -29,7 +29,7 @@
             {{-- B. Panoramic Cover Image --}}
             <div class="relative w-full h-64 md:h-96 lg:h-[500px] rounded-2xl md:rounded-[2.5rem] overflow-hidden shadow-2xl border-2 md:border-4 border-white bg-gray-200 group mb-8 md:mb-12">
                 @if($event->cover_image)
-                    <img src="{{ Str::startsWith($event->cover_image, 'http') ? $event->cover_image : asset('storage/'.$event->cover_image) }}" 
+                    <img src="{{ Str::startsWith($event->cover_image, 'http') ? $event->cover_image : asset('storage/'.$event->cover_image) }}"
                          class="w-full h-full object-cover transform group-hover:scale-105 transition duration-1000">
                 @else
                     <div class="flex items-center justify-center h-full text-gray-400 font-bold bg-gray-100 flex-col">
@@ -38,7 +38,7 @@
                     </div>
                 @endif
                 <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none"></div>
-                
+
                 <div class="absolute top-4 right-4 md:top-6 md:right-6">
                     @if($event->isOpen())
                         <span class="px-3 py-1.5 md:px-4 md:py-2 bg-white/90 backdrop-blur text-green-700 text-[10px] md:text-xs font-black uppercase tracking-widest rounded-full flex items-center gap-2 shadow-lg">
@@ -100,22 +100,32 @@
                 </div>
 
                 {{-- Primary CTA Button --}}
-                @if($event->isOpen() && $event->registration_link)
-                    <a href="{{ $event->registration_link }}" target="_blank" class="inline-flex items-center gap-2 px-6 py-3 md:px-8 md:py-4 bg-red-600 hover:bg-red-700 text-white font-bold uppercase tracking-wider rounded-xl shadow-xl hover:shadow-red-500/30 transition-all transform hover:-translate-y-1 text-xs md:text-sm">
-                        <span>{{ $event->registration_button_text ?? 'Register Now' }}</span>
-                        <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
-                    </a>
+                @if($event->isOpen())
+                    {{-- 1. NEW: Internal Luma-Style RSVP --}}
+                    @if($event->is_internal_rsvp)
+                        <a href="{{ route('open.events.rsvp', $event->slug) }}" class="inline-flex items-center gap-2 px-6 py-3 md:px-8 md:py-4 bg-red-600 hover:bg-red-700 text-white font-bold uppercase tracking-wider rounded-xl shadow-xl hover:shadow-red-500/30 transition-all transform hover:-translate-y-1 text-xs md:text-sm">
+                            <span>Get Ticket</span>
+                            <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"></path></svg>
+                        </a>
+
+                    {{-- 2. OLD: External Link --}}
+                    @elseif($event->registration_link)
+                        <a href="{{ $event->registration_link }}" target="_blank" class="inline-flex items-center gap-2 px-6 py-3 md:px-8 md:py-4 bg-red-600 hover:bg-red-700 text-white font-bold uppercase tracking-wider rounded-xl shadow-xl hover:shadow-red-500/30 transition-all transform hover:-translate-y-1 text-xs md:text-sm">
+                            <span>{{ $event->registration_button_text ?? 'Register Now' }}</span>
+                            <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+                        </a>
+                    @endif
                 @endif
             </div>
         </header>
 
         {{-- MAIN CONTENT GRID --}}
         <div class="max-w-7xl mx-auto px-6 pb-24 grid lg:grid-cols-12 gap-8 md:gap-12">
-            
+
             {{-- LEFT COLUMN: Sidebar --}}
             <aside class="lg:col-span-4 space-y-8 order-2">
                 @if($event->isOpen() && $event->registration_link)
-                <div 
+                <div
                     x-data="{
                         showQr: false,
                         generate() {
@@ -125,10 +135,10 @@
                                 if (container.innerHTML === '') {
                                     try {
                                         new QRCode(container, {
-                                            text: '{{ $event->registration_link }}',
-                                            width: 200, 
+                                            text: '{{ $event->is_internal_rsvp ? route('open.events.rsvp', $event->slug) : $event->registration_link }}',
+                                            width: 200,
                                             height: 200,
-                                            colorDark : '#1f2937', 
+                                            colorDark : '#1f2937',
                                             colorLight : '#ffffff',
                                             correctLevel : QRCode.CorrectLevel.H,
                                             dotScale: 0.8
@@ -163,15 +173,15 @@
             <main class="lg:col-span-8 order-1">
                 <div class="bg-white/60 backdrop-blur-sm p-6 md:p-12 rounded-[1.5rem] md:rounded-[2rem] border border-white/50 shadow-sm">
                     <h3 class="font-bold text-gray-900 uppercase tracking-widest text-[10px] md:text-sm border-b border-gray-200 pb-3 md:pb-4 mb-4 md:mb-6">About this Event</h3>
-                    
+
                     {{-- UPDATED: prose-sm on mobile, prose-lg on desktop --}}
-                    <div class="prose prose-sm md:prose-lg prose-stone max-w-none 
-                        prose-headings:font-heading prose-headings:font-black prose-headings:text-gray-900 
+                    <div class="prose prose-sm md:prose-lg prose-stone max-w-none
+                        prose-headings:font-heading prose-headings:font-black prose-headings:text-gray-900
                         prose-a:text-red-600 hover:prose-a:text-red-700
                         prose-img:rounded-2xl md:prose-img:rounded-3xl prose-img:shadow-xl prose-img:w-full">
-                        
+
                         {!! Str::markdown($event->description) !!}
-                        
+
                     </div>
                 </div>
             </main>

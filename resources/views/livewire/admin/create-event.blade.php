@@ -1,11 +1,11 @@
 <div class="max-w-7xl mx-auto py-10 sm:px-6 lg:px-8">
     <div class="md:grid md:grid-cols-3 md:gap-6">
-        
+
         {{-- LEFT COLUMN: Event Details --}}
         <div class="md:col-span-2 space-y-6">
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
                 <h3 class="text-lg font-bold text-gray-900 mb-6">Event Details</h3>
-                
+
                 {{-- Title --}}
                 <div class="mb-6">
                     <label class="block text-sm font-bold text-gray-700 mb-1">Event Title</label>
@@ -27,9 +27,9 @@
                 {{-- CUSTOM MARKDOWN EDITOR (From News Create) --}}
                 <div class="mb-6">
                     <label class="block text-sm font-bold text-gray-700 mb-2">Description</label>
-                    
+
                     <div class="relative border border-gray-200 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-red-500 focus-within:border-transparent transition bg-white"
-                         x-data="{ 
+                         x-data="{
                             insert(start, end) {
                                 let el = $refs.editor;
                                 if(!el) return;
@@ -48,18 +48,18 @@
 
                         {{-- TOOLBAR --}}
                         <div class="flex items-center gap-1 bg-gray-50 border-b border-gray-200 p-2 overflow-x-auto">
-                            
+
                             {{-- Basic Formatting --}}
                             <button @click="insert('**', '**')" class="p-1.5 text-gray-500 hover:text-gray-900 hover:bg-gray-200 rounded transition font-bold text-xs w-8" title="Bold">B</button>
                             <button @click="insert('*', '*')" class="p-1.5 text-gray-500 hover:text-gray-900 hover:bg-gray-200 rounded transition italic text-xs w-8" title="Italic">I</button>
                             <button @click="insert('~~', '~~')" class="p-1.5 text-gray-500 hover:text-gray-900 hover:bg-gray-200 rounded transition line-through text-xs w-8" title="Strike">S</button>
-                            
+
                             <div class="w-px h-4 bg-gray-300 mx-1"></div>
-                            
+
                             {{-- Headings & Quotes --}}
                             <button @click="insert('### ', '')" class="p-1.5 text-gray-500 hover:text-gray-900 hover:bg-gray-200 rounded text-xs font-bold w-8">H3</button>
                             <button @click="insert('> ', '')" class="p-1.5 text-gray-500 hover:text-gray-900 hover:bg-gray-200 rounded w-8" title="Quote">&ldquo;</button>
-                            
+
                             {{-- Link --}}
                             <button @click="insert('[', '](http://)')" class="p-1.5 text-gray-500 hover:text-gray-900 hover:bg-gray-200 rounded transition w-8 flex justify-center" title="Link">
                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
@@ -70,7 +70,7 @@
                             {{-- Lists --}}
                             <button @click="insert('- ', '')" class="p-1.5 text-gray-500 hover:text-gray-900 hover:bg-gray-200 rounded transition w-8 flex justify-center" title="Bullet List"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg></button>
                             <button @click="insert('1. ', '')" class="p-1.5 text-gray-500 hover:text-gray-900 hover:bg-gray-200 rounded transition w-8 flex justify-center" title="Numbered List"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h12M7 12h12M7 17h12M3 7h.01M3 12h.01M3 17h.01"></path></svg></button>
-                            
+
                             <div class="w-px h-4 bg-gray-300 mx-1"></div>
 
                             {{-- Image Upload Button --}}
@@ -84,8 +84,8 @@
 
                         {{-- Text Area --}}
                         <textarea x-ref="editor"
-                                  wire:model.live="description" 
-                                  rows="15" 
+                                  wire:model.live="description"
+                                  rows="15"
                                   class="w-full text-sm leading-relaxed text-gray-700 bg-transparent border-none p-4 focus:ring-0 resize-y font-sans placeholder-gray-300"
                                   placeholder="Start writing the event details here..."></textarea>
                     </div>
@@ -94,19 +94,19 @@
                 {{-- DRAG AND DROP IMAGE UPLOAD (Red/Gray Style) --}}
                 <div>
                     <label class="block text-sm font-bold text-gray-700 mb-2">Cover Poster</label>
-                    
+
                     <div x-data="{ isDropping: false, isUploading: false, progress: 0 }"
                          x-on:livewire-upload-start="isUploading = true"
                          x-on:livewire-upload-finish="isUploading = false"
                          x-on:livewire-upload-error="isUploading = false"
                          x-on:livewire-upload-progress="progress = $event.detail.progress">
-                        
+
                         <label class="relative flex flex-col items-center justify-center w-full h-64 border-2 border-dashed rounded-xl cursor-pointer transition-all duration-300 ease-in-out group overflow-hidden"
                                :class="{ 'border-red-500 bg-red-50 scale-[1.02] shadow-xl': isDropping, 'border-gray-300 bg-gray-50 hover:bg-white hover:border-red-400 hover:shadow-md': !isDropping }"
                                x-on:dragover.prevent="isDropping = true"
                                x-on:dragleave.prevent="isDropping = false"
                                x-on:drop.prevent="isDropping = false">
-                            
+
                             {{-- Image Preview (If Exists) --}}
                             @if ($cover_image)
                                 <div class="absolute inset-0 z-10 w-full h-full bg-white">
@@ -147,66 +147,17 @@
             </div>
         </div>
 
-        {{-- RIGHT COLUMN: Settings & QR Code (Same as previous) --}}
+        {{-- RIGHT COLUMN: Settings --}}
         <div class="md:col-span-1 space-y-6">
-            
-            {{-- Registration Link & Pro QR --}}
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100" 
-                 x-data="{ 
-                    link: @entangle('registration_link'),
-                    qrObject: null,
-                    generateQR() {
-                        if (!this.link) {
-                             this.$refs.qrcodeContainer.innerHTML = '';
-                             return;
-                        }
-                        this.$refs.qrcodeContainer.innerHTML = '';
-                        var options = {
-                            text: this.link, width: 180, height: 180,
-                            colorDark : '#d90429', colorLight : '#ffffff',
-                            correctLevel : QRCode.CorrectLevel.H,
-                            dotScale: 1.0
-                        };
-                        this.qrObject = new QRCode(this.$refs.qrcodeContainer, options);
-                    }
-                 }" 
-                 x-init="$watch('link', () => generateQR())"
-                 x-effect="generateQR()">
 
-                <h3 class="text-sm font-bold text-gray-900 uppercase tracking-widest mb-4">Registration</h3>
-                
-                <div class="mb-4">
-                    <label class="block text-xs font-bold text-gray-500 mb-1">Target URL</label>
-                    <input x-model="link" type="url" placeholder="https://..." class="w-full rounded-lg border-gray-200 text-sm focus:ring-red-500 focus:border-red-500 transition">
-                    @error('registration_link') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
-                </div>
-
-                {{-- Live QR Preview --}}
-                <div class="bg-gray-50 p-6 rounded-xl border border-gray-200 flex flex-col items-center text-center">
-                    <div class="bg-white p-3 rounded-2xl shadow-md mb-3" x-show="link">
-                        <div x-ref="qrcodeContainer"></div>
-                    </div>
-                    <div x-show="!link" class="h-40 flex items-center justify-center text-gray-400 text-xs italic">
-                        Paste a link above to generate<br>your custom QR code.
-                    </div>
-                    <div x-show="link" class="mt-2">
-                        <button @click="qrObject.download('event_qr.png')" type="button" class="mt-3 text-xs flex items-center gap-1 text-red-600 font-bold hover:underline transition">
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                            Download PNG
-                        </button>
-                    </div>
-                </div>
-
-                <div class="mt-4">
-                    <label class="block text-xs font-bold text-gray-500 mb-1">Button Label</label>
-                    <input wire:model="registration_button_text" type="text" class="w-full rounded-lg border-gray-200 text-sm focus:ring-red-500 focus:border-red-500">
-                </div>
-            </div>
-
-            {{-- Timing --}}
+            {{-- EVENT LOCATION & TIMING --}}
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                <h3 class="text-sm font-bold text-gray-900 uppercase tracking-widest mb-4">Schedule</h3>
-                <div class="space-y-3">
+                <h3 class="text-sm font-bold text-gray-900 uppercase tracking-widest mb-4">Details</h3>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 mb-1">Location</label>
+                        <input wire:model="location" type="text" placeholder="e.g. BU Ampitheater" class="w-full rounded-lg border-gray-200 text-sm focus:ring-red-500 focus:border-red-500">
+                    </div>
                     <div>
                         <label class="block text-xs font-bold text-gray-500 mb-1">Start Date</label>
                         <input wire:model="start_date" type="datetime-local" class="w-full rounded-lg border-gray-200 text-sm focus:ring-red-500 focus:border-red-500">
@@ -215,14 +166,99 @@
                         <label class="block text-xs font-bold text-gray-500 mb-1">End Date</label>
                         <input wire:model="end_date" type="datetime-local" class="w-full rounded-lg border-gray-200 text-sm focus:ring-red-500 focus:border-red-500">
                     </div>
-                    <div class="flex items-center gap-2 pt-2">
-                        <input type="checkbox" wire:model="is_active" class="rounded text-red-600 focus:ring-red-500 cursor-pointer">
-                        <span class="text-sm font-bold text-gray-700">Publish immediately</span>
+                </div>
+            </div>
+
+            {{-- REGISTRATION MODE TOGGLE --}}
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                <h3 class="text-sm font-bold text-gray-900 uppercase tracking-widest mb-4">Registration</h3>
+
+                {{-- The Toggle --}}
+                <div class="flex items-center justify-between mb-6 p-3 bg-gray-50 rounded-xl border border-gray-200">
+                    <div>
+                        <span class="block text-sm font-bold text-gray-900">Luma-Style RSVP</span>
+                        <span class="text-xs text-gray-500">Enable internal ticketing & QR codes</span>
                     </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" wire:model.live="is_internal_rsvp" class="sr-only peer">
+                        <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
+                    </label>
                 </div>
 
-                <button wire:click="save" class="w-full mt-6 bg-red-600 text-white font-bold py-3 rounded-xl hover:bg-red-700 transition shadow-lg transform hover:-translate-y-0.5">
-                    Create Event
+                {{-- Mode 1: Internal RSVP Settings --}}
+                @if($is_internal_rsvp)
+                    <div class="space-y-4 animate-fade-in-up">
+                        <div class="p-4 bg-red-50 border border-red-100 rounded-xl">
+                            <div class="flex gap-3">
+                                <svg class="w-5 h-5 text-red-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                <p class="text-xs text-red-800 font-medium">Users will register on the site and receive a QR Code ticket via email. An admin can scan them at the door.</p>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 mb-1">Max Capacity (Optional)</label>
+                            <input wire:model="capacity" type="number" placeholder="Leave empty for unlimited" class="w-full rounded-lg border-gray-200 text-sm focus:ring-red-500 focus:border-red-500">
+                        </div>
+                    </div>
+
+                {{-- Mode 2: External Link Settings (Your old logic) --}}
+                @else
+                    <div class="space-y-4 animate-fade-in-up"
+                         x-data="{
+                            link: @entangle('registration_link'),
+                            qrObject: null,
+                            generateQR() {
+                                if (!this.link) {
+                                    this.$refs.qrcodeContainer.innerHTML = '';
+                                    return;
+                                }
+                                this.$refs.qrcodeContainer.innerHTML = '';
+                                this.qrObject = new QRCode(this.$refs.qrcodeContainer, {
+                                    text: this.link, width: 180, height: 180,
+                                    colorDark : '#d90429', colorLight : '#ffffff',
+                                    correctLevel : QRCode.CorrectLevel.H
+                                });
+                            }
+                         }"
+                         x-init="$watch('link', () => generateQR())"
+                         x-effect="generateQR()">
+
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 mb-1">External Target URL (Google Forms, etc.)</label>
+                            <input x-model="link" type="url" placeholder="https://..." class="w-full rounded-lg border-gray-200 text-sm focus:ring-red-500 focus:border-red-500 transition">
+                            @error('registration_link') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 mb-1">Button Label</label>
+                            <input wire:model="registration_button_text" type="text" class="w-full rounded-lg border-gray-200 text-sm focus:ring-red-500 focus:border-red-500">
+                        </div>
+
+                        {{-- Live QR Preview for External Link --}}
+                        <div class="bg-gray-50 p-4 rounded-xl border border-gray-200 flex flex-col items-center text-center mt-4">
+                            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Promo QR Code</p>
+                            <div class="bg-white p-2 rounded-2xl shadow-sm mb-2" x-show="link">
+                                <div x-ref="qrcodeContainer"></div>
+                            </div>
+                            <div x-show="!link" class="h-32 flex items-center justify-center text-gray-400 text-xs italic">
+                                Paste a link above to generate.
+                            </div>
+                            <button x-show="link" @click="qrObject.download('event_qr.png')" type="button" class="mt-2 text-[10px] uppercase tracking-widest flex items-center gap-1 text-red-600 font-bold hover:underline transition">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                Download
+                            </button>
+                        </div>
+                    </div>
+                @endif
+            </div>
+
+            {{-- Publish Action --}}
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                <div class="flex items-center gap-2 mb-4">
+                    <input type="checkbox" wire:model="is_active" class="rounded text-red-600 focus:ring-red-500 cursor-pointer w-5 h-5">
+                    <span class="text-sm font-bold text-gray-900">Publish immediately</span>
+                </div>
+                <button wire:click="{{ isset($event) ? 'update' : 'save' }}" class="w-full bg-red-600 text-white font-bold py-4 rounded-xl hover:bg-red-700 transition shadow-lg text-sm uppercase tracking-widest">
+                    {{ isset($event) ? 'Update Event' : 'Create Event' }}
                 </button>
             </div>
 

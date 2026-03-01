@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 namespace App\Models;
 
@@ -19,7 +19,14 @@ class Event extends Model
         'start_date' => 'datetime',
         'end_date' => 'datetime',
         'is_active' => 'boolean',
+        'is_internal_rsvp' => 'boolean',
     ];
+
+    // Add the relationship
+    public function registrations()
+    {
+        return $this->hasMany(EventRegistration::class);
+    }
 
     // Helper to check if event is currently open
     public function isOpen()

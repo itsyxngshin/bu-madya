@@ -15,9 +15,10 @@ use App\Livewire\Open\News\Show as NewsShow;
 use App\Livewire\Open\ThePillars;
 use App\Livewire\Open\EventsIndex;
 use App\Livewire\Open\EventShow;
-use App\Livewire\Admin\EvaluationBuilder; 
-use App\Livewire\Open\EvaluationList; 
+use App\Livewire\Admin\EvaluationBuilder;
+use App\Livewire\Open\EvaluationList;
 use App\Livewire\Open\EvaluationForm;
+use \App\Livewire\Open\EventRsvp;
 
 use App\Livewire\Director\NewsCreate;
 use App\Livewire\Director\NewsEdit;
@@ -54,22 +55,18 @@ use App\Livewire\Admin\Transparency\DocumentIndex;
 use App\Livewire\Open\TransparencyIndex;
 use App\Livewire\Admin\EvaluationResults;
 use App\Livewire\Admin\EvaluationList as AdminEvaluationIndex;
-use App\Models\MembershipApplication; 
+use App\Livewire\Admin\EventScanner;
+use App\Models\MembershipApplication;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Response;
 
-
-#use App\Livewire\Admin\AdminProposalsIndex;
-// ADMIN ROUTE (Protect this group!)
-
-
 Route::get('/', function () {
     return view('welcome');
-}); 
+});
 Route::get('/evaluations/{evaluation}', EvaluationForm::class)->name('evaluations.show');
 
 Route::get('/secure-file/{application}', function (\App\Models\MembershipApplication $application) {
-    
+
     // 1. Security Check: Only allow if user is logged in & authorized
     if (!auth()->check() || !in_array(auth()->user()->role->role_name, ['administrator', 'director'])) {
         abort(403);
@@ -104,9 +101,9 @@ Route::middleware([
 
 
 // Middleware accessible to both members and directors
-Route::middleware(['auth', 'role:director']) 
+Route::middleware(['auth', 'role:director'])
     ->group(function () {
-    Route::get('/dashboard', Dashboard::class)->name('dashboard'); 
+    Route::get('/dashboard', Dashboard::class)->name('dashboard');
     Route::get('/project/create', ProjectsCreate::class)->name('projects.create');
     Route::get('/projects/{project:slug}/edit', ProjectsEdit::class)->name('projects.edit');
     Route::get('/profile/edit', EditProfile::class)->name('profile.edit');
@@ -115,20 +112,20 @@ Route::middleware(['auth', 'role:director'])
     Route::get('/director/the-pillars', ThePillarsManager::class)->name('director.pillars.index');
     Route::get('/proposals/{proposal}', ProposalsShow::class)->name('admin.proposals.show');
     Route::get('/proposals', ProposalsIndex::class)->name('admin.proposals.index');
-    Route::get('/news/{slug}/edit', NewsEdit::class)->name('news.edit');  
+    Route::get('/news/{slug}/edit', NewsEdit::class)->name('news.edit');
     Route::get('/linkage/{linkage:slug}/edit', LinkagesEdit::class)->name('linkages.edit');
 });
 
-Route::middleware(['auth']) 
+Route::middleware(['auth'])
     ->group(function () {
     Route::get('/roundtable', RoundtableIndex::class)->name('roundtable.index');
     Route::get('/roundtable/{id}', RoundtableShow::class)->name('roundtable.show');
     // 1. The Dashboard (List of pending evaluations)
-    
+
 
     // 2. The Actual Form
     Route::get('/evaluations', EvaluationList::class)->name('evaluations.index');
-    
+
 });
 
 
@@ -140,20 +137,21 @@ Route::middleware(['auth', 'role:administrator'])->prefix('admin')->name('admin.
     Route::get('/user', UserRoster::class)->name('user.index');
     Route::get('/settings', Settings::class)->name('settings');
     Route::get('/membership/settings', MembershipSetting::class)->name('membership-settings');
-    Route::get('/membership/requests', MembershipRequests::class)->name('membership-requests'); 
+    Route::get('/membership/requests', MembershipRequests::class)->name('membership-requests');
     Route::get('/dashboard', AdminDashboard::class)->name('dashboard');
     Route::get('/events', AdminEventIndex::class)->name('events.index');
     Route::get('/events/create', CreateEvent::class)->name('events.create');
-    Route::get('/events/{id}/edit', EditEvent::class)->name('events.edit'); 
+    Route::get('/events/{id}/edit', EditEvent::class)->name('events.edit');
     Route::get('/transparency', DocumentIndex::class)->name('transparency.index');
     Route::get('/transparency/create', DocumentForm::class)->name('transparency.create');
     Route::get('/transparency/{document}/edit', DocumentForm::class)->name('transparency.edit');
     Route::get('/evaluations/create', EvaluationBuilder::class)->name('evaluations.create');
+    Route::get('/events/{event:slug}/scan', EventScanner::class)->name('events.scan');
 });
 
-Route::middleware(['auth', 'role:administrator,director'])  
+Route::middleware(['auth', 'role:administrator,director'])
     ->group(function () {
-    Route::get('/dashboard', Dashboard::class)->name('dashboard'); 
+    Route::get('/dashboard', Dashboard::class)->name('dashboard');
     Route::get('/project/create', ProjectsCreate::class)->name('projects.create');
     Route::get('/projects/{project:slug}/edit', ProjectsEdit::class)->name('projects.edit');
     Route::get('/profile/edit', EditProfile::class)->name('profile.edit');
@@ -162,7 +160,7 @@ Route::middleware(['auth', 'role:administrator,director'])
     Route::get('/director/the-pillars', ThePillarsManager::class)->name('director.pillars.index');
     Route::get('/proposals/{proposal}', ProposalsShow::class)->name('admin.proposals.show');
     Route::get('/proposals', ProposalsIndex::class)->name('admin.proposals.index');
-    Route::get('/news/{slug}/edit', NewsEdit::class)->name('news.edit');  
+    Route::get('/news/{slug}/edit', NewsEdit::class)->name('news.edit');
     Route::get('/linkage/{linkage:slug}/edit', LinkagesEdit::class)->name('linkages.edit');
     Route::get('/manage/evaluations/{evaluation}/edit', EvaluationBuilder::class)->name('admin.evaluations.edit');
     Route::get('/manage/evaluations/{evaluation}/results', EvaluationResults::class)->name('admin.evaluations.results');
@@ -170,18 +168,18 @@ Route::middleware(['auth', 'role:administrator,director'])
 });
 
 // Public view blades with access control on parts of the navigation
-Route::get('/', LandingPage::class)->name('open.home');  
-Route::get('/about', About::class)->name('about'); 
-Route::get('/directory', Directory::class)->name('open.directory');  
-Route::get('/committees', Committees::class)->name('open.committees'); 
+Route::get('/', LandingPage::class)->name('open.home');
+Route::get('/about', About::class)->name('about');
+Route::get('/directory', Directory::class)->name('open.directory');
+Route::get('/committees', Committees::class)->name('open.committees');
 Route::get('/committees/{slug}', CommitteeMembers::class)->name('open.committees.show');
 Route::get('/news', NewsIndex::class)->name('news.index');
-Route::get('/news/{slug}', NewsShow::class)->name('news.show');  
-Route::get('/projects', ProjectsIndex::class)->name('projects.index'); 
+Route::get('/news/{slug}', NewsShow::class)->name('news.show');
+Route::get('/projects', ProjectsIndex::class)->name('projects.index');
 Route::get('/projects/{project:slug}', ProjectsShow::class)->name('projects.show');
 Route::get('/linkages', LinkagesIndex::class)->name('linkages.index');
 Route::get('/linkages/{linkage:slug}', LinkagesShow::class)->name('linkages.show');
-Route::get('/partner-with-us', LinkagesProposal::class)->name('linkages.proposal'); 
+Route::get('/partner-with-us', LinkagesProposal::class)->name('linkages.proposal');
 Route::get('/profile/{username}', UserProfile::class)->name('profile.public');
 Route::get('/submit-proposal', ProposalsCreate::class)->name('proposals.create');
 Route::get('/the-pillars', ThePillars::class)->name('pillars.index');
@@ -190,6 +188,8 @@ Route::get('/membership-form', RegistrationForm::class)->name('membership-form')
 Route::get('/events', EventsIndex::class)->name('events.index');
 Route::get('/events/{slug}', EventShow::class)->name('events.show');
 Route::get('/transparency', TransparencyIndex::class)->name('transparency.index');
+Route::get('/events/{event:slug}', EventRsvp::class)->name('events.rsvp');
+
 
 
 
