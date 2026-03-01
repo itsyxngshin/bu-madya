@@ -1,7 +1,7 @@
 @component('mail::message')
 {{-- HEADER IMAGE / LOGO (Optional: Add your logo URL here) --}}
 <div style="text-align: center; margin-bottom: 20px;">
-    <img src="{{ asset('images/MADYA Web Logo1.png') }}" alt="BU MADYA" style="border-radius: 50%; width: 80px; height: 80px; border: 4px solid #fff; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+    <img src="{{ asset(path: 'images/MADYA Web Logo1.png') }}" alt="BU MADYA" style="border-radius: 50%; width: 80px; height: 80px; border: 4px solid #fff; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
 </div>
 
 <h1 style="text-align: center; font-size: 24px; color: #1f2937; margin-bottom: 5px;">
@@ -26,7 +26,7 @@ We believe that your first step with our organization serves as a beacon of hope
         </span>
     @else
         <span style="font-size: 20px; font-weight: 800; color: #dc2626;">
-            General Member
+            Member-Advocate
         </span>
     @endif
 </div>

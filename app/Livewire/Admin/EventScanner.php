@@ -17,7 +17,7 @@ class EventScanner extends Component
     // Status properties to show UI feedback
     public $scanStatus = null; // 'success', 'warning', 'error'
     public $scanMessage = '';
-    public $lastScannedName = '';
+    public $lastScannedData = null;
 
     // Manual entry fallback
     public $manualCode = '';
@@ -38,7 +38,20 @@ class EventScanner extends Component
         if (!$registration) {
             $this->scanStatus = 'error';
             $this->scanMessage = 'Invalid Ticket Code or wrong event.';
-            $this->lastScannedName = '';
+            $detailString = '';
+            if ($registration->classification === 'BU Student') {
+                $detailString = ($registration->college ? $registration->college->name : 'Unknown College') . ' - ' . $registration->year_level;
+            } 
+            elseif (in_array($registration->classification, ['CSO/NGO Representative', 'Partner Representative'])) {
+                $detailString = $registration->organization_name . ' (' . $registration->position . ')';
+            }
+
+            $this->lastScannedData = [
+                'name' => $registration->name,
+                'classification' => $registration->classification,
+                'details' => $detailString,
+                'ticket_code' => $registration->ticket_code,
+            ];
 
             // Play error sound via frontend event
             $this->dispatch('play-sound', type: 'error');
@@ -49,7 +62,20 @@ class EventScanner extends Component
         if ($registration->status === 'Attended') {
             $this->scanStatus = 'warning';
             $this->scanMessage = 'Already Checked In!';
-            $this->lastScannedName = $registration->name;
+            $detailString = '';
+            if ($registration->classification === 'BU Student') {
+                $detailString = ($registration->college ? $registration->college->name : 'Unknown College') . ' - ' . $registration->year_level;
+            } 
+            elseif (in_array($registration->classification, ['CSO/NGO Representative', 'Partner Representative'])) {
+                $detailString = $registration->organization_name . ' (' . $registration->position . ')';
+            }
+
+            $this->lastScannedData = [
+                'name' => $registration->name,
+                'classification' => $registration->classification,
+                'details' => $detailString,
+                'ticket_code' => $registration->ticket_code,
+            ];
 
             $this->dispatch('play-sound', type: 'warning');
             return;
@@ -82,7 +108,20 @@ class EventScanner extends Component
 
         $this->scanStatus = 'success';
         $this->scanMessage = 'Successfully Checked In!';
-        $this->lastScannedName = $registration->name;
+        $detailString = '';
+            if ($registration->classification === 'BU Student') {
+                $detailString = ($registration->college ? $registration->college->name : 'Unknown College') . ' - ' . $registration->year_level;
+            } 
+            elseif (in_array($registration->classification, ['CSO/NGO Representative', 'Partner Representative'])) {
+                $detailString = $registration->organization_name . ' (' . $registration->position . ')';
+            }
+
+            $this->lastScannedData = [
+                'name' => $registration->name,
+                'classification' => $registration->classification,
+                'details' => $detailString,
+                'ticket_code' => $registration->ticket_code,
+            ];
 
         $this->dispatch('play-sound', type: 'success');
 
