@@ -113,13 +113,6 @@
             Event & Campaign Portal
         </a>
 
-        <a href="{{ route('admin.events.registrants') }}"
-           class="{{ $linkClass }} {{ request()->routeIs('admin.events.*') ? $activeClass : $inactiveClass }}">
-            <svg class="w-5 h-5 {{ request()->routeIs('admin.events.*') ? $iconActive : $iconInactive }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"> </path></svg>
-            Event Registrants
-        </a>
-
-
         {{-- [NEW] SEPARATOR: SERVICES --}}
         <div class="pt-4 pb-2 px-3 mt-2 border-t border-gray-100">
             <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Services</p>
