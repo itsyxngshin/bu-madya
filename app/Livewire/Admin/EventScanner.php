@@ -5,9 +5,11 @@ namespace App\Livewire\Admin;
 use Livewire\Component;
 use App\Models\Event;
 use App\Models\EventRegistration;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\EventAttendedMail;
 use Livewire\Attributes\Layout;
 
-#[Layout('layouts.madya-admin-deck')]
 class EventScanner extends Component
 {
     public Event $event;
@@ -56,6 +58,28 @@ class EventScanner extends Component
         // 4. State: Success! Mark as attended
         $registration->update(['status' => 'Attended']);
 
+        if ($registration->status !== 'Attended') {
+            
+            $registration->update(['status' => 'Attended']);
+            
+            // [NEW] Dispatch the attendance email
+                try {
+                    Mail::to($registration->email)->send(new EventAttendedMail($this->event, $registration));
+                } catch (\Exception $e) {
+                    \Log::error('Failed to send attendance email: ' . $e->getMessage());
+                }
+
+            $this->scanStatus = 'success';
+            $this->scanMessage = 'Check-in Successful';
+            $this->dispatch('play-sound', ['type' => 'success']);
+
+        } else {
+            // Already checked in logic...
+            $this->scanStatus = 'warning';
+            $this->scanMessage = 'Already Checked In';
+            $this->dispatch('play-sound', ['type' => 'warning']);
+        }
+
         $this->scanStatus = 'success';
         $this->scanMessage = 'Successfully Checked In!';
         $this->lastScannedName = $registration->name;
@@ -86,6 +110,20 @@ class EventScanner extends Component
 
     public function render()
     {
-        return view('livewire.admin.event-scanner');
+        // 1. Determine if the user is a logged-in Admin/Director
+        $isAdmin = Auth::check() && in_array(Auth::user()->role?->role_name, ['administrator', 'director']);
+
+        // 2. Set the layout dynamically!
+        $layout = $isAdmin ? 'layouts.madya-admin-deck' : 'layouts.madya-template';
+
+        return view('livewire.admin.event-scanner', [
+            'stats' => [
+                'total' => $this->event->registrations()->count(),
+                'attended' => $this->event->registrations()->where('status', 'Attended')->count(),
+                'percentage' => $this->event->registrations()->count() > 0 
+                    ? round(($this->event->registrations()->where('status', 'Attended')->count() / $this->event->registrations()->count()) * 100) 
+                    : 0
+            ]
+        ])->layout($layout); // <-- Inject the dynamic layout here
     }
 }

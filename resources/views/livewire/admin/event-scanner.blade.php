@@ -2,10 +2,13 @@
 
     {{-- Header --}}
     <div class="bg-gray-900 text-white p-6 rounded-b-3xl shadow-lg">
-        <a href="{{ route('admin.events.index') }}" class="text-xs font-bold text-gray-400 hover:text-white uppercase tracking-widest flex items-center gap-2 mb-4">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-            Back to Events
-        </a>
+        {{-- Only show the Back button to actual Admins --}}
+        @if(auth()->check() && in_array(auth()->user()->role?->role_name, ['administrator', 'director']))
+            <a href="{{ route('admin.events.index') }}" class="text-xs font-bold text-gray-400 hover:text-white uppercase tracking-widest flex items-center gap-2 mb-4">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                Back to Admin Dashboard
+            </a>
+        @endif
         <h1 class="text-2xl font-black leading-tight mb-2">{{ $event->title }}</h1>
 
         {{-- Progress Bar --}}

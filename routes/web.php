@@ -99,7 +99,7 @@ Route::middleware([
 });
 */
 
-
+Route::get('/events/{event:slug}/scan', EventScanner::class)->name('admin.events.scan');
 
 // Middleware accessible to both members and directors
 Route::middleware(['auth', 'role:director'])
@@ -147,7 +147,7 @@ Route::middleware(['auth', 'role:administrator'])->prefix('admin')->name('admin.
     Route::get('/transparency/create', DocumentForm::class)->name('transparency.create');
     Route::get('/transparency/{document}/edit', DocumentForm::class)->name('transparency.edit');
     Route::get('/evaluations/create', EvaluationBuilder::class)->name('evaluations.create');
-    Route::get('/events/{event:slug}/scan', EventScanner::class)->name('events.scan');
+    
 });
 
 Route::middleware(['auth', 'role:administrator,director'])
