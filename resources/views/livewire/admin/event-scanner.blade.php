@@ -84,86 +84,99 @@
 </div>
 
 @push('scripts')
+{{-- 1. Load the Library globally --}}
 <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 
+{{-- 2. Use Livewire 3's @script directive to bind $wire securely --}}
+@script
 <script>
-    document.addEventListener('livewire:initialized', () => {
-        let isProcessing = false; 
+    let isProcessing = false; 
 
-        let html5QrcodeScanner = new Html5QrcodeScanner(
-            "reader", 
-            { 
-                fps: 10, 
-                qrbox: {width: 250, height: 250}, 
-                aspectRatio: 1.0,
-                // Enable front/back camera switching and File Upload UI
-                supportedScanTypes: [
-                    Html5QrcodeScanType.SCAN_TYPE_CAMERA,
-                    Html5QrcodeScanType.SCAN_TYPE_FILE
-                ],
-                rememberLastUsedCamera: true
-            }, 
-            false
-        );
+    // Make the qrbox slightly dynamic for better mobile scanning
+    let qrboxFunction = function(viewfinderWidth, viewFinderHeight) {
+        let minEdgePercentage = 0.7; // 70% of the screen
+        let minEdgeSize = Math.min(viewfinderWidth, viewFinderHeight);
+        let qrboxSize = Math.floor(minEdgeSize * minEdgePercentage);
+        return {
+            width: qrboxSize,
+            height: qrboxSize
+        };
+    }
 
-        html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+    let html5QrcodeScanner = new Html5QrcodeScanner(
+        "reader", 
+        { 
+            fps: 10, 
+            qrbox: qrboxFunction, 
+            aspectRatio: 1.0,
+            supportedScanTypes: [
+                Html5QrcodeScanType.SCAN_TYPE_CAMERA,
+                Html5QrcodeScanType.SCAN_TYPE_FILE
+            ],
+            rememberLastUsedCamera: true
+        }, 
+        false
+    );
 
-        function onScanSuccess(decodedText, decodedResult) {
-            if (isProcessing) return; 
-            isProcessing = true;
-            
-            // Send to Livewire
-            $wire.processScan(decodedText).then(() => {
-                // Wait 3 seconds so the operator can verify the ID card
-                setTimeout(() => {
-                    isProcessing = false;
-                    $wire.set('scanStatus', null); 
-                }, 3000); 
-            }).catch(error => {
-                console.error("Scan error:", error);
+    html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+
+    function onScanSuccess(decodedText, decodedResult) {
+        // Stop if we are already processing a ticket
+        if (isProcessing) return; 
+        isProcessing = true;
+        
+        console.log("QR Code read successfully:", decodedText); // For debugging
+        
+        // Safely call the backend using the bound $wire object
+        $wire.processScan(decodedText).then(() => {
+            // Wait 3 seconds so the operator can verify the ID card
+            setTimeout(() => {
                 isProcessing = false;
-            });
-        }
+                $wire.set('scanStatus', null); 
+            }, 3000); 
+        }).catch(error => {
+            console.error("Livewire Server Error:", error);
+            isProcessing = false;
+        });
+    }
 
-        function onScanFailure(error) {
-            // Ignore standard frame scan failures
-        }
+    function onScanFailure(error) {
+        // Ignore standard frame scan failures
+    }
 
-        // --- BULLETPROOF AUDIO FEEDBACK LOGIC ---
-        function playTone(type) {
-            try {
-                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                const oscillator = audioCtx.createOscillator();
-                const gainNode = audioCtx.createGain();
+    // --- BULLETPROOF AUDIO FEEDBACK LOGIC ---
+    function playTone(type) {
+        try {
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
 
-                oscillator.connect(gainNode);
-                gainNode.connect(audioCtx.destination);
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
 
-                if (type === 'success') {
-                    // High happy beep (800Hz)
-                    oscillator.type = 'sine';
-                    oscillator.frequency.setValueAtTime(800, audioCtx.currentTime);
-                    gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
-                    oscillator.start();
-                    oscillator.stop(audioCtx.currentTime + 0.15);
-                } else {
-                    // Low error buzzer (150Hz)
-                    oscillator.type = 'sawtooth';
-                    oscillator.frequency.setValueAtTime(150, audioCtx.currentTime);
-                    gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
-                    oscillator.start();
-                    oscillator.stop(audioCtx.currentTime + 0.3);
-                }
-            } catch (e) {
-                console.warn('Browser prevented audio playback. Requires user interaction.');
+            if (type === 'success') {
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(800, audioCtx.currentTime);
+                gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                oscillator.start();
+                oscillator.stop(audioCtx.currentTime + 0.15);
+            } else {
+                oscillator.type = 'sawtooth';
+                oscillator.frequency.setValueAtTime(150, audioCtx.currentTime);
+                gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                oscillator.start();
+                oscillator.stop(audioCtx.currentTime + 0.3);
             }
+        } catch (e) {
+            console.warn('Browser prevented audio playback.');
         }
+    }
 
-        // Listen for the separate events dispatched from the backend
-        Livewire.on('play-success-sound', () => playTone('success'));
-        Livewire.on('play-error-sound', () => playTone('error'));
-    });
+    // Listen for the separate events dispatched from the backend
+    Livewire.on('play-success-sound', () => playTone('success'));
+    Livewire.on('play-error-sound', () => playTone('error'));
 </script>
+@endscript
 
 <style>
     /* ==============================================================
