@@ -48,8 +48,15 @@
                     </div>
                 </div>
 
-                <div class="prose prose-sm text-gray-600">
-                    {{ $event->description }}
+                {{-- DYNAMIC MARKDOWN RENDERER --}}
+                <div class="prose prose-sm md:prose-base prose-stone max-w-none 
+                    prose-headings:font-heading prose-headings:font-black prose-headings:text-gray-900 
+                    prose-a:text-red-600 hover:prose-a:text-red-700
+                    prose-img:rounded-2xl prose-img:shadow-md prose-img:w-full
+                    prose-ul:list-disc prose-ol:list-decimal">
+                    
+                    {!! Str::markdown($event->description ?? '') !!}
+                    
                 </div>
             </div>
         </div>
