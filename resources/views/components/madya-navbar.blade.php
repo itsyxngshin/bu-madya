@@ -180,15 +180,22 @@
                 
                 {{-- [FIXED] Include organization in the view check --}}
                 @php
-                    $userRole = Auth::user()->role->role_name ?? '';
+                    $userRole = Auth::user()->role->role_name ?? 'guest';
                     $canViewDashboard = in_array($userRole, ['administrator', 'director', 'organization']);
+                            
+                    // [DIRECT ROUTING] Find the exact route name immediately
+                    $navDashboardRoute = match($userRole) {
+                        'administrator' => route('admin.dashboard'),
+                        'organization'  => route('partner.dashboard'),
+                         default         => route('dashboard'), // Fallback
+                    };
                 @endphp
 
                 <div class="grid {{ $canViewDashboard ? 'grid-cols-2' : 'grid-cols-1' }} gap-3">
 
                     @if($canViewDashboard)
                         {{-- [FIXED] Rely on the unified dashboard route --}}
-                        <a href="{{ route('dashboard') }}" class="flex justify-center py-2.5 bg-white border border-gray-200 rounded-lg text-xs font-bold uppercase tracking-wide text-gray-600 hover:bg-gray-100 shadow-sm transition">
+                        <a href="{{ $navDashboardRoute }}" class="flex justify-center py-2.5 bg-white border border-gray-200 rounded-lg text-xs font-bold uppercase tracking-wide text-gray-600 hover:bg-gray-100 shadow-sm transition">
                             Dashboard
                         </a>
                     @endif

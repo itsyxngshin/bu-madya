@@ -8,7 +8,7 @@ use App\Models\EventFrame;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Layout;
 
-#[Layout('layouts.madya-template')] // Or whichever layout your logged-in partners use
+#[Layout('layouts.madya-admin-deck')] 
 class SubmitFrame extends Component
 {
     use WithFileUploads;
