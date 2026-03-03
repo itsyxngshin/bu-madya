@@ -57,7 +57,9 @@ class EventRegistrants extends Component
                 'Status',
                 'Name',
                 'Email',
+                'Contact Number',
                 'Classification',
+                'School / University',
                 'College / Unit',
                 'Program',
                 'Year Level',
@@ -73,7 +75,9 @@ class EventRegistrants extends Component
                     $reg->status,
                     $reg->name,
                     $reg->email,
+                    $reg->contact_number ?? 'N/A',
                     $reg->classification,
+                    $reg->school ?? 'N/A',
 
                     // [FIXED] Pulls the actual name from the related College model
                     $reg->college ? $reg->college->name : 'N/A',
