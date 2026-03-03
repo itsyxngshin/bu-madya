@@ -43,6 +43,11 @@ class EditEvent extends Component
     {
         $this->event = Event::findOrFail($id);
 
+        $userRole = auth()->user()->role?->role_name;
+        if (!in_array($userRole, ['administrator', 'director']) && $this->event->user_id !== auth()->id()) {
+            abort(403, 'Unauthorized action. You do not own this event.');
+        }
+
         $this->title = $this->event->title;
         $this->slug = $this->event->slug;
         $this->description = $this->event->description;

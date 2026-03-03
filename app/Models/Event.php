@@ -13,7 +13,7 @@ class Event extends Model
         'title', 'slug', 'description', 'cover_image',
         'registration_link', 'registration_button_text',
         'start_date', 'end_date', 'is_active', 'capacity',
-        'location', 'is_internal_rsvp', 'classification', 'college_id', 
+        'location', 'is_internal_rsvp', 'classification', 'college_id', 'user_id',
         'program', 'year_level'
     ];
 
@@ -28,6 +28,11 @@ class Event extends Model
     public function registrations()
     {
         return $this->hasMany(EventRegistration::class);
+    }
+
+    public function organizer()
+    {
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     // Helper to check if event is currently open

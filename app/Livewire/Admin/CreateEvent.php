@@ -58,6 +58,7 @@ class CreateEvent extends Component
         }
 
         Event::create([
+            'user_id' => auth()->id(),
             'title' => $this->title,
             'slug' => Str::slug($this->slug),
             'description' => $this->description,

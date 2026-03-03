@@ -18,6 +18,18 @@
                     </div>
                 @endif
 
+                @if($event->organizer)
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center text-red-600 font-bold text-xs uppercase">
+                            {{ substr($event->organizer->name, 0, 2) }}
+                        </div>
+                        <div>
+                            <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Hosted By</p>
+                            <p class="text-xs font-bold text-gray-900">{{ $event->organizer->name }}</p>
+                        </div>
+                    </div>
+                @endif
+                
                 <h1 class="text-4xl font-black text-gray-900 tracking-tight leading-tight mb-6">
                     {{ $event->title }}
                 </h1>

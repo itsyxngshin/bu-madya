@@ -20,6 +20,7 @@ use App\Livewire\Open\EvaluationList;
 use App\Livewire\Open\EvaluationForm;
 use App\Livewire\Open\EventRsvp;
 use App\Livewire\Open\FrameBuilder;
+use App\Livewire\Open\EventDiscovery; 
 
 use App\Livewire\Auth\RegisterOrganization;
 
@@ -130,7 +131,6 @@ Route::middleware(['auth'])
     Route::get('/roundtable', RoundtableIndex::class)->name('roundtable.index');
     Route::get('/roundtable/{id}', RoundtableShow::class)->name('roundtable.show');
     Route::get('/partner/submit-frame', SubmitFrame::class)->name('partner.frames.submit');
-    // 2. The Actual Form
     Route::get('/evaluations', EvaluationList::class)->name('evaluations.index');
 
 });
@@ -202,7 +202,7 @@ Route::get('/transparency', TransparencyIndex::class)->name('transparency.index'
 Route::get('/events/{event:slug}/register', EventRsvp::class)->name('events.rsvp');
 Route::get('/frames/{slug}', FrameBuilder::class)->name('open.frames.show');
 Route::get('/partners/register', RegisterOrganization::class)->name('register.partner');
-
+Route::get('/discover', EventDiscovery::class)->name('open.events.index');
 
 
 
