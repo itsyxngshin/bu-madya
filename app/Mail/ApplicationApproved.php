@@ -21,7 +21,7 @@ class ApplicationApproved extends Mailable
     public function build()
     {
         return $this->subject('Welcome to BU MADYA!') 
-                    ->markdown('emails.application-approved');
+                    ->view('emails.application-approved');
     }
 
 }
