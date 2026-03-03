@@ -157,7 +157,6 @@ Route::middleware(['auth', 'role:administrator'])->prefix('admin')->name('admin.
     Route::get('/frames', FrameManager::class)->name('frames.index');
     Route::get('/events/{event:slug}/raffle', EventRaffle::class)->name('events.raffle');
     Route::get('/submit-frame', SubmitFrame::class)->name('frames.submit');
-
 });
 
 Route::middleware(['auth', 'role:organization'])->prefix('partner')->name('partner.')
@@ -170,6 +169,13 @@ Route::middleware(['auth', 'role:organization'])->prefix('partner')->name('partn
     Route::get('/events/{id}/edit', EditEvent::class)->name('events.edit');
     Route::get('/event/{event}/edit', EditEvent::class)->name('events.edit');
     Route::get('/events/{event:slug}/raffle', EventRaffle::class)->name('events.raffle');
+    Route::get('/profile/edit', EditProfile::class)->name('profile.edit');
+
+});
+
+Route::middleware(['auth', 'role:member'])->prefix('member')->name('member.')
+    ->group(function () {
+    Route::get('/profile/edit', EditProfile::class)->name('profile.edit');
 
 });
 
