@@ -22,8 +22,16 @@ class UserProfile extends Component
             ->firstOrFail();
 
         $this->profile = $this->user->profile;
-        $this->engagements = $this->user->engagements;
-        $this->portfolios = $this->profile->portfolios;
+
+        // 2. FALLBACK: If profile exists, get portfolios. If null, return an empty collection.
+        $this->portfolios = $this->profile 
+            ? $this->profile->portfolios()->latest()->get() 
+            : collect(); 
+
+        // 3. FALLBACK: Safely fetch engagements
+        $this->engagements = $this->user->engagements 
+            ? $this->user->engagements()->latest()->get() 
+            : collect();
     }
 
     public function render()

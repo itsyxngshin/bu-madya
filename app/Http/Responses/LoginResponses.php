@@ -21,6 +21,10 @@ class LoginResponses implements LoginResponseContract
             return redirect()->route('dashboard'); // Your Director's Center
         }
 
+        if ($user->role->role_name === 'organization') {
+            return redirect()->route('partner.dashboard'); // Your Organization Dashboard
+        }
+
         // 3. MEMBERS -> Member/Home Page
         // Assuming 'member' is the role, or if they have no specific role
         if (in_array($user->role->role_name, ['member', 'regular'])) {
