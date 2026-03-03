@@ -39,6 +39,12 @@
                             @error('description') <span class="text-[10px] text-red-500 mt-1 block font-bold uppercase">{{ $message }}</span> @enderror
                         </div>
 
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">Official Caption (Optional)</label>
+                            <textarea wire:model="caption" rows="4" class="w-full rounded-lg border-gray-300 bg-gray-50 focus:bg-white text-sm py-2 px-3 focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all min-w-0" placeholder="Write the caption for students to copy-paste when posting..."></textarea>
+                            @error('caption') <span class="text-[10px] text-red-500 mt-1 block font-bold uppercase">{{ $message }}</span> @enderror
+                        </div>
+
                         {{-- Multiple Image Upload Zone --}}
                         <div>
                             <div class="flex items-center justify-between mb-1.5">

@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class EventFrame extends Model
 {
     protected $fillable = [
-        'user_id', 'event_id', 'title', 'slug', 'description', 'frame_image', 'is_approved', 'frame_images'
+        'user_id', 'event_id', 'title', 'slug', 'description', 'is_approved', 'frame_images'
     ];
 
     protected $casts = [

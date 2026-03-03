@@ -15,7 +15,6 @@ return new class extends Migration
             $table->string('title');
             $table->string('slug')->unique();
             $table->text('description')->nullable();
-            $table->string('frame_image'); // The transparent PNG
             $table->boolean('is_approved')->default(false); // Admin approval required
             $table->timestamps();
         });

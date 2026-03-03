@@ -15,7 +15,7 @@ class SubmitFrame extends Component
 
     public $title = '';
     public $description = '';
-    public $frame_image;
+    public $caption = '';
     public $frame_images = [];
 
     public function save()
@@ -23,6 +23,7 @@ class SubmitFrame extends Component
         $this->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string|max:500',
+            'caption' => 'nullable|string|max:2000',
             'frame_images' => 'required|array|min:1|max:5', // Max 5 variations per campaign
             'frame_images.*' => 'image|mimes:png|max:5120',
         ]);
@@ -39,12 +40,13 @@ class SubmitFrame extends Component
             'user_id' => auth()->id(),
             'title' => $this->title,
             'slug' => $slug,
+            'caption' => $this->caption,
             'description' => $this->description,
             'frame_images' => $paths, // [UPDATED] Save the array
             'is_approved' => false, // Requires Admin approval
         ]);
 
-       $this->reset(['title', 'description', 'frame_images']);
+       $this->reset(['title', 'description', 'caption', 'frame_images']);
         session()->flash('message', 'Campaign with ' . count($paths) . ' variations submitted successfully!');
     }
 

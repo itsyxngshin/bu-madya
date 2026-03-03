@@ -25,6 +25,11 @@ class FrameBuilder extends Component
         }
     }
 
+    public function incrementUsage()
+    {
+        $this->frame->increment('usage_count');
+    }
+
     public function render()
     {
         return view('livewire.open.frame-builder');
