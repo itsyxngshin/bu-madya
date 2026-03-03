@@ -74,17 +74,22 @@
                     
                     {{-- Toolbar --}}
                     <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-8 bg-white/80 shadow-sm p-3 rounded-2xl border border-white max-w-[500px] mx-auto">
-                        <label class="cursor-pointer bg-gradient-to-r from-rose-500 to-red-600 text-white px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest shadow-lg shadow-red-500/30 hover:shadow-red-500/50 hover:scale-[1.02] transition-all w-full sm:w-auto text-center flex items-center justify-center gap-2">
-                            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                        
+                        {{-- RAINBOW UPLOAD BUTTON --}}
+                        <label class="cursor-pointer bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 text-white px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest shadow-lg shadow-pink-500/30 hover:shadow-pink-500/50 hover:scale-[1.03] transition-all w-full sm:w-auto text-center flex items-center justify-center gap-2 relative overflow-hidden group">
+                            {{-- Optional shine effect --}}
+                            <div class="absolute inset-0 bg-white/20 -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-500"></div>
+                            
+                            <svg class="w-4 h-4 shrink-0 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
                             <input type="file" accept="image/png, image/jpeg" class="hidden" @change="uploadPhoto">
-                            <span x-show="!userImg">Upload Photo</span>
-                            <span x-show="userImg" style="display: none;">Change Photo</span>
+                            <span x-show="!userImg" class="relative z-10">Upload Photo</span>
+                            <span x-show="userImg" style="display: none;" class="relative z-10">Change Photo</span>
                         </label>
 
                         {{-- Zoom Slider --}}
-                        <div x-show="userImg" style="display: none;" class="flex items-center gap-3 w-full sm:flex-1 sm:px-4">
+                        <div x-show="userImg" style="display: none;" class="flex items-center gap-3 w-full sm:flex-1 sm:px-4 animate-fade-in">
                             <svg class="w-4 h-4 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7"></path></svg>
-                            <input type="range" x-model="scale" @input="draw" min="0.1" max="3" step="0.01" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-rose-500">
+                            <input type="range" x-model="scale" @input="draw" min="0.1" max="3" step="0.01" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-pink-500">
                             <svg class="w-5 h-5 text-gray-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"></path></svg>
                         </div>
                     </div>
@@ -95,8 +100,8 @@
                         
                         {{-- Placeholder Screen --}}
                         <div x-show="!userImg" class="absolute inset-0 flex flex-col items-center justify-center text-gray-400 pointer-events-none bg-gray-50/80 backdrop-blur-sm z-10 transition-opacity duration-300">
-                            <div class="w-20 h-20 bg-white rounded-full shadow-lg flex items-center justify-center mb-6 border border-gray-100">
-                                <svg class="w-10 h-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                            <div class="w-20 h-20 bg-gradient-to-tr from-pink-100 to-yellow-100 rounded-full shadow-lg flex items-center justify-center mb-6 border border-white">
+                                <svg class="w-10 h-10 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                             </div>
                             <p class="text-xs font-black uppercase tracking-widest text-gray-600">Select a photo to begin</p>
                         </div>
@@ -121,7 +126,7 @@
                         <div class="flex flex-wrap justify-center gap-3">
                             <template x-for="(frameUrl, index) in frames" :key="index">
                                 <button @click="changeFrame(frameUrl)" 
-                                        :class="{'ring-4 ring-rose-400 scale-110 shadow-lg z-10': activeFrame === frameUrl, 'border border-gray-200 hover:border-rose-300 opacity-60 hover:opacity-100 hover:scale-105': activeFrame !== frameUrl}"
+                                        :class="{'ring-4 ring-pink-400 scale-110 shadow-lg z-10': activeFrame === frameUrl, 'border border-gray-200 hover:border-pink-300 opacity-60 hover:opacity-100 hover:scale-105': activeFrame !== frameUrl}"
                                         class="w-16 h-16 rounded-xl bg-[url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAMUlEQVQ4T2NkYNgBxVD8nwEPsOEHMBqNhsFhAAfLwcAAYf///z8DHgZQDw1DDEAGDAAASgIdX/3i4QAAAABJRU5ErkJggg==')] overflow-hidden transition-all duration-300 bg-repeat focus:outline-none relative bg-white">
                                     <img :src="frameUrl" class="absolute inset-0 w-full h-full object-contain p-1">
                                 </button>
@@ -132,14 +137,45 @@
                     {{-- Download Section --}}
                     <div class="mt-8 text-center max-w-[500px] mx-auto">
                         <p class="text-[10px] uppercase tracking-widest text-gray-500 font-black mb-5 flex items-center justify-center gap-2" x-show="userImg" style="display: none;">
-                            <svg class="w-4 h-4 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11.5V14m0-2.5v-6a1.5 1.5 0 113 0m-3 6a1.5 1.5 0 00-3 0v2a7.5 7.5 0 0015 0v-5a1.5 1.5 0 00-3 0m-6-3V11m0-5.5v-1a1.5 1.5 0 013 0v1m0 0V11m0-5.5a1.5 1.5 0 013 0v3m0 0V11"></path></svg>
+                            <svg class="w-4 h-4 text-pink-500 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11.5V14m0-2.5v-6a1.5 1.5 0 113 0m-3 6a1.5 1.5 0 00-3 0v2a7.5 7.5 0 0015 0v-5a1.5 1.5 0 00-3 0m-6-3V11m0-5.5v-1a1.5 1.5 0 013 0v1m0 0V11m0-5.5a1.5 1.5 0 013 0v3m0 0V11"></path></svg>
                             Drag photo to reposition
                         </p>
 
                         <button @click="download" x-show="userImg" style="display: none;" class="w-full bg-gray-900 text-white py-4 rounded-xl font-black uppercase tracking-widest shadow-xl shadow-gray-900/20 hover:bg-black transition-all transform hover:-translate-y-1 flex items-center justify-center gap-3">
-                            <svg class="w-5 h-5 shrink-0 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                            <svg class="w-5 h-5 shrink-0 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
                             Download Frame
                         </button>
+                    </div>
+
+                    {{-- SUCCESS MODAL PROMPT --}}
+                    <div x-show="showSuccess" style="display: none;" class="fixed inset-0 z-50 flex items-center justify-center px-4">
+                        {{-- Dark Overlay --}}
+                        <div x-show="showSuccess" 
+                             x-transition.opacity.duration.300ms 
+                             class="absolute inset-0 bg-gray-900/40 backdrop-blur-sm"></div>
+                        
+                        {{-- Modal Box --}}
+                        <div x-show="showSuccess" 
+                             @click.away="showSuccess = false"
+                             x-transition:enter="transition ease-out duration-300"
+                             x-transition:enter-start="opacity-0 scale-90 translate-y-8"
+                             x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                             x-transition:leave="transition ease-in duration-200"
+                             x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+                             x-transition:leave-end="opacity-0 scale-95 translate-y-4"
+                             class="bg-white rounded-[2rem] p-8 max-w-sm w-full relative z-10 shadow-2xl flex flex-col items-center text-center">
+                             
+                             <div class="w-20 h-20 bg-green-50 text-green-500 rounded-full flex items-center justify-center mb-6 shadow-inner ring-4 ring-green-50">
+                                 <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                             </div>
+                             
+                             <h3 class="text-2xl font-black text-gray-900 mb-2">Frame Saved!</h3>
+                             <p class="text-sm text-gray-500 mb-8 font-medium leading-relaxed">Your campaign frame has been successfully downloaded to your device. You're ready to post!</p>
+                             
+                             <button @click="showSuccess = false" class="w-full bg-gray-900 text-white font-black uppercase tracking-widest py-3.5 rounded-xl hover:bg-gray-800 transition-colors shadow-lg">
+                                Awesome!
+                             </button>
+                        </div>
                     </div>
 
                 </div>
@@ -160,6 +196,9 @@
             frames: Array.isArray(frameUrls) ? frameUrls : [],
             activeFrame: null,
             imageError: false,
+            
+            // Trigger for the modal prompt
+            showSuccess: false,
 
             init() {
                 this.canvas = this.$refs.canvas;
@@ -254,10 +293,14 @@
             },
 
             download() {
+                // 1. Create and trigger the download link
                 let link = document.createElement('a');
                 link.download = 'BU-MADYA-' + Date.now() + '.png';
                 link.href = this.canvas.toDataURL('image/png');
                 link.click();
+
+                // 2. Show the beautiful success prompt
+                this.showSuccess = true;
             }
         }));
     });
