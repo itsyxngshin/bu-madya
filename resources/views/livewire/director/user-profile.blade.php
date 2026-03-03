@@ -1,5 +1,5 @@
 <div class="min-h-screen bg-gray-50 pb-20 relative isolate overflow-hidden">
-    
+
     {{-- 0. BACKGROUND DECORATION BLOBS --}}
     <div class="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
         <div class="absolute -top-40 -left-40 w-96 h-96 rounded-full bg-blue-200 mix-blend-multiply filter blur-3xl opacity-30 animate-pulse"></div>
@@ -16,11 +16,11 @@
             {{-- Standard User Gradient (Red/Orange/Green) --}}
             <div class="absolute inset-0 bg-gradient-to-br from-red-600 via-orange-500 to-green-600 opacity-90"></div>
         @endif
-        
-        <div class="absolute inset-0 opacity-20" 
+
+        <div class="absolute inset-0 opacity-20"
             style="background-image: url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');">
         </div>
-        
+
         @if(auth()->check() && auth()->id() === $user?->id)
             <a href="{{ route('profile.edit') }}" class="absolute top-4 right-4 bg-white/10 backdrop-blur-md border border-white/20 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-white/20 transition">
                 Edit Profile
@@ -31,16 +31,18 @@
     {{-- 2. MAIN CONTENT --}}
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 -mt-24 md:-mt-32">
         <div class="flex flex-col md:flex-row gap-8 items-start">
-            
+
             {{-- ================================================================= --}}
             {{-- ORGANIZATION PROFILE LAYOUT                                       --}}
             {{-- ================================================================= --}}
             @if($user?->role?->role_name === 'organization')
-                
+
                 {{-- LEFT COLUMN: ORG CARD --}}
-                <div class="w-full md:w-1/3 lg:w-1/4">
+                <div class="w-full md:w-1/3 lg:w-1/4 mt-16 md:mt-0">
                     <div class="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-white/50 relative">
-                        <div class="p-6 text-center pt-12 relative">
+
+                        {{-- [FIXED] Changed pt-12 to pt-24 so the text clears the logo completely --}}
+                        <div class="p-6 text-center pt-24 relative">
                             {{-- LOGO --}}
                             <div class="absolute -top-16 left-1/2 transform -translate-x-1/2 w-32 h-32">
                                 @php
@@ -48,18 +50,18 @@
                                     $photoUrl = $photoPath ? (Str::startsWith($photoPath, ['http', 'images/']) ? asset($photoPath) : asset('storage/' . $photoPath)) : 'https://ui-avatars.com/api/?name='.urlencode($user?->name ?? 'Org').'&color=4F46E5&background=E0E7FF';
                                 @endphp
                                 <img src="{{ $photoUrl }}" class="w-full h-full object-cover rounded-2xl border-4 border-white shadow-lg bg-white">
-                                
-                                {{-- Partner Badge --}}
-                                <div class="absolute -bottom-2 -right-2 bg-blue-600 text-white p-2 rounded-full shadow-md border-2 border-white" title="Official Partner">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+
+                                {{-- Partner Badge [FIXED BORDER AND SPACING] --}}
+                                <div class="absolute -bottom-2 -right-2 bg-blue-600 text-white p-1.5 rounded-full shadow-md border-4 border-white flex items-center justify-center" title="Official Partner">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
                                 </div>
                             </div>
 
-                            <h1 class="text-xl md:text-2xl font-black text-gray-900 mt-6 leading-tight">{{ $user?->name ?? 'Unknown Organization' }}</h1>
-                            <p class="text-xs font-bold uppercase tracking-widest mb-4 mt-2 text-blue-600 bg-blue-50 py-1 px-3 rounded-full inline-block border border-blue-100">
-                                Partner Organization
+                            <h1 class="text-xl md:text-2xl font-black text-gray-900 leading-tight">{{ $user?->name ?? 'Unknown Organization' }}</h1>
+                            <p class="text-[10px] font-black uppercase tracking-widest mb-4 mt-2 text-blue-600 bg-blue-50 py-1.5 px-3 rounded-full inline-block border border-blue-100">
+                                Organization
                             </p>
-                            
+
                             {{-- College Fallback Check --}}
                             @if($profile?->college)
                                 <div class="mt-4 mb-2 flex items-start gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100 hover:border-blue-100 transition text-left">
@@ -73,7 +75,7 @@
                                 </div>
                             @endif
                         </div>
-                        
+
                         <div class="bg-gray-50/80 p-6 border-t border-gray-100 rounded-b-3xl">
                             <h3 class="text-xs font-bold text-gray-400 uppercase mb-3">About the Organization</h3>
                             <p class="text-sm text-gray-600 leading-relaxed font-medium">
@@ -84,7 +86,7 @@
                 </div>
 
                 {{-- RIGHT COLUMN: ORG ENGAGEMENTS --}}
-                <div class="flex-1 space-y-8 mt-16 md:mt-40 min-w-0"> 
+                <div class="flex-1 space-y-8 mt-12 md:mt-40 min-w-0">
                     <section>
                         <div class="flex items-center justify-between mb-5">
                             <h3 class="flex items-center gap-3 text-xl font-bold text-gray-800 relative z-10">
@@ -105,25 +107,24 @@
                                 <thead class="bg-gray-50/50 border-b border-gray-100">
                                     <tr>
                                         <th class="px-6 py-4 font-bold text-gray-500 uppercase tracking-wider text-xs">Event / Campaign</th>
-                                        <th class="px-6 py-4 font-bold text-gray-500 uppercase tracking-wider text-xs">Description</th>
+                                        <th class="px-6 py-4 font-bold text-gray-500 uppercase tracking-wider text-xs hidden sm:table-cell">Description</th>
                                         <th class="px-6 py-4 font-bold text-gray-500 uppercase tracking-wider text-xs w-32">Date</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-100">
-                                    {{-- Use safe iteration --}}
                                     @forelse($engagements ?? [] as $engage)
                                     <tr class="hover:bg-blue-50/30 transition">
                                         <td class="px-6 py-4 font-bold text-gray-900">{{ $engage->title }}</td>
-                                        <td class="px-6 py-4 text-gray-600 leading-relaxed">{{ Str::limit($engage->description, 100) }}</td>
+                                        <td class="px-6 py-4 text-gray-600 leading-relaxed hidden sm:table-cell">{{ Str::limit($engage->description, 100) }}</td>
                                         <td class="px-6 py-4 text-gray-400 text-xs font-bold">{{ $engage->created_at->format('M Y') }}</td>
                                     </tr>
                                     @empty
                                     <tr>
                                         <td colspan="3" class="px-6 py-12 text-center">
-                                            <div class="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-3">
+                                            <div class="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-3 border border-gray-100">
                                                 <svg class="w-6 h-6 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                                             </div>
-                                            <p class="text-sm font-bold text-gray-400 uppercase tracking-widest">No activities recorded yet.</p>
+                                            <p class="text-xs font-black text-gray-400 uppercase tracking-widest">No activities recorded yet.</p>
                                         </td>
                                     </tr>
                                     @endforelse
@@ -138,48 +139,49 @@
             {{-- STANDARD USER PROFILE LAYOUT                                      --}}
             {{-- ================================================================= --}}
             @else
-                
+
                 {{-- LEFT COLUMN: PROFILE CARD --}}
-                <div class="w-full md:w-1/3 lg:w-1/4">
+                <div class="w-full md:w-1/3 lg:w-1/4 mt-16 md:mt-0">
                     <div class="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-white/50 relative">
-                        
-                        <div class="p-6 text-center pt-12 relative">
+
+                        {{-- [FIXED] Changed pt-12 to pt-24 so the text clears the logo completely --}}
+                        <div class="p-6 text-center pt-24 relative">
                             {{-- PROFILE PHOTO --}}
                             <div class="absolute -top-16 left-1/2 transform -translate-x-1/2 w-32 h-32">
                                 @php
                                     $photoPath = $user?->profile_photo_path;
                                     $photoUrl = $photoPath ? (Str::startsWith($photoPath, ['http', 'images/']) ? asset($photoPath) : asset('storage/' . $photoPath)) : 'https://ui-avatars.com/api/?name='.urlencode($user?->name ?? 'User').'&color=7F9CF5&background=EBF4FF';
                                 @endphp
-                                
+
                                 <img src="{{ $photoUrl }}" class="w-full h-full object-cover rounded-full border-4 border-white shadow-lg bg-white">
-                                
-                                {{-- BADGE LOGIC --}}
+
+                                {{-- BADGE LOGIC [FIXED BORDER AND SPACING] --}}
                                 @if($user?->directorAssignment)
-                                    <div class="absolute bottom-1 right-1 bg-yellow-400 text-green-900 p-2 rounded-full shadow-md border-2 border-white" title="Director">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path></svg>
+                                    <div class="absolute -bottom-1 -right-1 bg-yellow-400 text-yellow-900 p-2 rounded-full shadow-md border-4 border-white flex items-center justify-center" title="Director">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path></svg>
                                     </div>
                                 @elseif($user?->committeeMember)
-                                    <div class="absolute bottom-1 right-1 bg-blue-500 text-white p-2 rounded-full shadow-md border-2 border-white" title="Committee Member">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                                    <div class="absolute -bottom-1 -right-1 bg-blue-500 text-white p-2 rounded-full shadow-md border-4 border-white flex items-center justify-center" title="Committee Member">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
                                     </div>
                                 @endif
                             </div>
 
-                            <h1 class="text-xl md:text-2xl font-bold text-gray-900 mt-6">{{ $user?->name ?? 'Unknown User' }}</h1>
-                            
-                            <p class="text-xs md:text-sm font-bold uppercase tracking-wider mb-2 mt-1 {{ $user?->directorAssignment ? 'text-yellow-600' : 'text-blue-600' }}">
+                            <h1 class="text-xl md:text-2xl font-black text-gray-900 leading-tight">{{ $user?->name ?? 'Unknown User' }}</h1>
+
+                            <p class="text-[10px] font-black uppercase tracking-widest mb-4 mt-2 {{ $user?->directorAssignment ? 'text-yellow-600 bg-yellow-50 border-yellow-100' : 'text-blue-600 bg-blue-50 border-blue-100' }} py-1 px-3 rounded-full inline-block border">
                                 @if($user?->directorAssignment)
                                     {{ $user->directorAssignment->director->name }}
                                 @elseif($user?->committeeMember)
                                     {{ $user->committeeMember->title }}
-                                    <span class="block text-[10px] text-gray-400 font-normal normal-case">
+                                    <span class="block text-[8px] text-gray-400 font-bold normal-case mt-0.5 tracking-normal">
                                         {{ $user->committeeMember->committee?->name ?? 'Committee Member' }}
                                     </span>
                                 @else
                                     Member
                                 @endif
                             </p>
-                            
+
                             {{-- STYLIZED COLLEGE AND COURSE --}}
                             <div class="mt-6 mb-6 flex flex-col gap-3 text-left">
                                 <div class="flex items-start gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100 hover:border-blue-100 transition group">
@@ -203,7 +205,7 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div class="bg-gray-50/80 p-6 border-t border-gray-100 rounded-b-3xl">
                             <h3 class="text-xs font-bold text-gray-400 uppercase mb-3">About</h3>
                             <p class="text-sm text-gray-600 leading-relaxed">
@@ -214,8 +216,8 @@
                 </div>
 
                 {{-- RIGHT COLUMN: PORTFOLIO & ENGAGEMENTS --}}
-                <div class="flex-1 space-y-8 mt-16 md:mt-40 min-w-0"> 
-        
+                <div class="flex-1 space-y-8 mt-12 md:mt-40 min-w-0">
+
                     {{-- A. PORTFOLIO CARDS (COLLAPSIBLE) --}}
                     <section x-data="{ showAll: false }">
                         <div class="flex items-center justify-between mb-5">
@@ -231,32 +233,35 @@
                                 </span>
                             @endif
                         </div>
-                        
+
                         <div class="grid md:grid-cols-2 gap-4">
                             @forelse($portfolios ?? [] as $item)
-                                <div 
+                                <div
                                     class="bg-white/90 backdrop-blur-sm p-5 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition duration-300"
-                                    @if($loop->index >= 4) 
-                                        x-show="showAll" 
-                                        x-cloak 
+                                    @if($loop->index >= 4)
+                                        x-show="showAll"
+                                        x-cloak
                                         x-transition:enter="transition ease-out duration-300"
                                         x-transition:enter-start="opacity-0 transform scale-95"
                                         x-transition:enter-end="opacity-100 transform scale-100"
                                     @endif
                                 >
                                     <div class="flex justify-between items-start mb-2">
-                                        <span class="px-2 py-1 rounded text-xs font-bold {{ $item->status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600' }}">
+                                        <span class="px-2 py-1 rounded text-[10px] uppercase tracking-wider font-black {{ $item->status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600' }}">
                                             {{ $item->status }}
                                         </span>
-                                        <span class="text-xs text-gray-400 font-mono">{{ $item->duration }}</span>
+                                        <span class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">{{ $item->duration }}</span>
                                     </div>
-                                    <h4 class="font-bold text-gray-900 text-lg">{{ $item->designation }}</h4>
+                                    <h4 class="font-bold text-gray-900 text-lg leading-tight mt-1">{{ $item->designation }}</h4>
                                     <p class="text-sm text-red-600 font-medium mb-3">{{ $item->place }}</p>
                                     <p class="text-sm text-gray-500 leading-relaxed">{{ $item->description }}</p>
                                 </div>
                             @empty
-                                <div class="col-span-2 text-center py-8 text-gray-400 bg-white/50 rounded-xl border border-dashed border-gray-300">
-                                    No portfolios added yet.
+                                <div class="col-span-2 text-center py-10 bg-white/50 rounded-2xl border border-dashed border-gray-300">
+                                    <div class="w-10 h-10 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-3 border border-gray-200">
+                                        <svg class="w-5 h-5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                                    </div>
+                                    <p class="text-xs font-black text-gray-400 uppercase tracking-widest">No portfolios added yet.</p>
                                 </div>
                             @endforelse
                         </div>
@@ -287,7 +292,7 @@
                                 <thead class="bg-gray-50/50 border-b border-gray-100">
                                     <tr>
                                         <th class="px-6 py-4 font-bold text-gray-500 uppercase tracking-wider text-xs">Title / Event</th>
-                                        <th class="px-6 py-4 font-bold text-gray-500 uppercase tracking-wider text-xs">Details</th>
+                                        <th class="px-6 py-4 font-bold text-gray-500 uppercase tracking-wider text-xs hidden sm:table-cell">Details</th>
                                         <th class="px-6 py-4 font-bold text-gray-500 uppercase tracking-wider text-xs w-24">Date</th>
                                     </tr>
                                 </thead>
@@ -295,13 +300,16 @@
                                     @forelse($engagements ?? [] as $engage)
                                     <tr class="hover:bg-gray-50/50 transition">
                                         <td class="px-6 py-4 font-bold text-gray-900">{{ $engage->title }}</td>
-                                        <td class="px-6 py-4 text-gray-600">{{ Str::limit($engage->description, 80) }}</td>
+                                        <td class="px-6 py-4 text-gray-600 hidden sm:table-cell">{{ Str::limit($engage->description, 80) }}</td>
                                         <td class="px-6 py-4 text-gray-400 text-xs">{{ $engage->created_at->format('M Y') }}</td>
                                     </tr>
                                     @empty
                                     <tr>
-                                        <td colspan="3" class="px-6 py-8 text-center text-gray-400">
-                                            No engagements recorded yet.
+                                        <td colspan="3" class="px-6 py-12 text-center">
+                                            <div class="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-3 border border-gray-100">
+                                                <svg class="w-6 h-6 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                            </div>
+                                            <p class="text-xs font-black text-gray-400 uppercase tracking-widest">No engagements recorded yet.</p>
                                         </td>
                                     </tr>
                                     @endforelse
