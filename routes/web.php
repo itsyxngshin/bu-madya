@@ -18,7 +18,10 @@ use App\Livewire\Open\EventShow;
 use App\Livewire\Admin\EvaluationBuilder;
 use App\Livewire\Open\EvaluationList;
 use App\Livewire\Open\EvaluationForm;
-use \App\Livewire\Open\EventRsvp;
+use App\Livewire\Open\EventRsvp;
+use App\Livewire\Open\FrameBuilder;
+
+use App\Livewire\Auth\RegisterOrganization;
 
 use App\Livewire\Director\NewsCreate;
 use App\Livewire\Director\NewsEdit;
@@ -56,10 +59,15 @@ use App\Livewire\Open\TransparencyIndex;
 use App\Livewire\Admin\EvaluationResults;
 use App\Livewire\Admin\EvaluationList as AdminEvaluationIndex;
 use App\Livewire\Admin\EventScanner;
-use App\Livewire\Admin\EventRegistrants; 
+use App\Livewire\Admin\EventRegistrants;
+use App\Livewire\Admin\FrameManager;
+use App\Livewire\Admin\EventRaffle;
+
 use App\Models\MembershipApplication;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Response;
+
+use \App\Livewire\Partner\SubmitFrame;
 
 Route::get('/', function () {
     return view('welcome');
@@ -121,13 +129,12 @@ Route::middleware(['auth'])
     ->group(function () {
     Route::get('/roundtable', RoundtableIndex::class)->name('roundtable.index');
     Route::get('/roundtable/{id}', RoundtableShow::class)->name('roundtable.show');
-    // 1. The Dashboard (List of pending evaluations)
-
-
+    Route::get('/partner/submit-frame', SubmitFrame::class)->name('partner.frames.submit');
     // 2. The Actual Form
     Route::get('/evaluations', EvaluationList::class)->name('evaluations.index');
 
 });
+
 
 
 
@@ -147,7 +154,9 @@ Route::middleware(['auth', 'role:administrator'])->prefix('admin')->name('admin.
     Route::get('/transparency/create', DocumentForm::class)->name('transparency.create');
     Route::get('/transparency/{document}/edit', DocumentForm::class)->name('transparency.edit');
     Route::get('/evaluations/create', EvaluationBuilder::class)->name('evaluations.create');
-    
+    Route::get('/frames', FrameManager::class)->name('frames.index');
+    Route::get('/events/{event:slug}/raffle', EventRaffle::class)->name('events.raffle');
+
 });
 
 Route::middleware(['auth', 'role:administrator,director'])
@@ -191,6 +200,8 @@ Route::get('/events', EventsIndex::class)->name('events.index');
 Route::get('/events/{slug}', EventShow::class)->name('events.show');
 Route::get('/transparency', TransparencyIndex::class)->name('transparency.index');
 Route::get('/events/{event:slug}/register', EventRsvp::class)->name('events.rsvp');
+Route::get('/frames/{slug}', FrameBuilder::class)->name('open.frames.show');
+Route::get('/partners/register', RegisterOrganization::class)->name('register.partner');
 
 
 

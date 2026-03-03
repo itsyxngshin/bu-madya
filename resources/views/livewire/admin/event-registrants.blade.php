@@ -73,11 +73,18 @@
                                 {{-- Show Student Details --}}
                                 @if($reg->classification === 'BU Student')
                                     <div class="text-xs mt-1 text-gray-500">
-                                        {{ $reg->program }} ({{ $reg->year_level }})<br>
-                                        <span class="font-bold text-gray-700">{{ $reg->college?->name ?? 'Unknown College' }}</span>
+                                        <span class="font-bold text-gray-700">{{ $reg->college?->name ?? 'Unknown College' }}</span><br>
+                                        {{ $reg->program }} ({{ $reg->year_level }})
                                     </div>
 
-                                {{-- Show Org Details --}}
+                                    {{-- [NEW] Display Org if the student is representing one --}}
+                                    @if($reg->organization_name)
+                                        <div class="text-[10px] mt-2 text-blue-600 font-bold uppercase tracking-wide bg-blue-50 inline-block px-2 py-1 rounded">
+                                            Represents: {{ $reg->organization_name }} ({{ $reg->position }})
+                                        </div>
+                                    @endif
+
+                                {{-- Show External Guest Details --}}
                                 @elseif(in_array($reg->classification, ['CSO/NGO Representative', 'Partner Representative']))
                                     <div class="text-xs mt-1 text-gray-500">
                                         <span class="font-bold">{{ $reg->organization_name }}</span><br>

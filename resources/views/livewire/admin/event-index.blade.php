@@ -67,6 +67,9 @@
                                     <a href="{{ route('admin.events.scan', $event->slug) }}" target="_blank" class="text-purple-700 bg-purple-50 hover:bg-purple-100 text-[10px] font-bold uppercase tracking-widest border border-purple-200 px-3 py-1.5 rounded transition">
                                         Scanner
                                     </a>
+                                    <a href="{{ route('admin.events.raffle', $event->slug) }}" target="_blank" class="text-orange-700 bg-orange-50 hover:bg-orange-100 text-[10px] font-bold uppercase tracking-widest border border-orange-200 px-3 py-1.5 rounded transition">
+                                        Launch Raffle
+                                    </a>
                                     <div class="w-px h-4 bg-gray-200 mx-1"></div>
                                 @endif
 
