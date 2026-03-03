@@ -190,6 +190,8 @@ Route::middleware(['auth', 'role:administrator,director'])
     Route::get('/manage/evaluations/{evaluation}/results', EvaluationResults::class)->name('admin.evaluations.results');
     Route::get('/manage/evaluations', AdminEvaluationIndex::class)->name('admin.evaluations.index');
     Route::get('/events/{event:slug}/registrants', EventRegistrants::class)->name('admin.events.registrants');
+    Route::get('/director/submit-frame', SubmitFrame::class)->name('frames.submit');
+
 });
 
 // Public view blades with access control on parts of the navigation

@@ -4,7 +4,7 @@ namespace App\Livewire\Director;
 
 use Livewire\Component;
 use App\Models\User;
-use Livewire\Attributes\Layout; 
+use Livewire\Attributes\Layout;
 
 #[Layout('layouts.madya-template')]
 class UserProfile extends Component
@@ -22,8 +22,14 @@ class UserProfile extends Component
             ->firstOrFail();
 
         $this->profile = $this->user->profile;
-        $this->engagements = $this->user->engagements;
-        $this->portfolios = $this->profile->portfolios;
+        $this->portfolios = $this->profile
+            ? $this->profile->portfolios()->latest()->get()
+            : collect();
+
+        // 3. FALLBACK: Safely fetch engagements
+        $this->engagements = $this->user->engagements
+            ? $this->user->engagements()->latest()->get()
+            : collect();
     }
 
     public function render()
