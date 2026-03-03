@@ -14,7 +14,7 @@
                     
                     <tr>
                         <td style="background-color: #fef2f2; background: linear-gradient(135deg, rgba(236,72,153,0.1) 0%, rgba(249,115,22,0.15) 35%, rgba(234,179,8,0.15) 65%, rgba(16,185,129,0.1) 100%); padding: 45px 30px 30px 30px; text-align: center; border-bottom: 3px solid #ef4444;">
-                            <img src="{{ asset('images/MADYA Web Logo1.png') }}" alt="BU MADYA" style="border-radius: 50%; width: 90px; height: 90px; border: 4px solid #ffffff; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); margin-bottom: 20px;">
+                            <img src="{{ $message->embed(public_path('images/MADYA Web Logo1.png')) }}" alt="BU MADYA" style="border-radius: 50%; width: 90px; height: 90px; border: 4px solid #ffffff; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); margin-bottom: 20px;">
                             <h1 style="margin: 0; font-size: 26px; font-weight: 900; color: #111827; letter-spacing: -0.5px;">Welcome to the Movement!</h1>
                             <p style="margin: 8px 0 0 0; color: #dc2626; font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px;">
                                 Greetings in the Spirit of Advocacy
