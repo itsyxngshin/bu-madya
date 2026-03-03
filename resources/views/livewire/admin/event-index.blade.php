@@ -57,13 +57,6 @@
                                 <span class="bg-gray-100 text-gray-500 px-2 py-1 rounded text-xs font-bold uppercase">Draft</span>
                             @endif
                         </td>
-                        You are absolutely right. Stuffing six full-text buttons horizontally into a single table cell creates a very cramped, cluttered layout that easily breaks on smaller screens.
-
-The cleanest, most professional way to handle table actions in Tailwind is to convert them into a unified Icon Button Group with hover tooltips. This completely clears up the horizontal space while keeping all the tools just one click away (and it matches the exact sleek aesthetic we used on the Frame Manager page!).
-
-Replace your entire <td class="p-4 text-right"> block with this upgraded icon-based UI:
-
-HTML
                         <td class="p-4 text-right">
                             <div class="flex items-center justify-end gap-1.5">
 
