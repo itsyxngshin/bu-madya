@@ -73,7 +73,13 @@ class CreateEvent extends Component
             'is_active' => $this->is_active,
         ]);
 
-        return redirect()->route('admin.events.index')->with('message', 'Event created successfully!');
+        session()->flash('message', 'Event created successfully.');
+
+        if (auth()->user()->role?->role_name === 'organization') {
+            return redirect()->route('partner.events.index')->with('message', 'Event updated successfully!');
+        }
+
+        return redirect()->route('admin.events.index')->with('message', 'Event updated successfully!');
     }
 
     public function updatedPhotoUpload()

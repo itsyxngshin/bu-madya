@@ -99,6 +99,10 @@ class EditEvent extends Component
             'is_active' => $this->is_active,
         ]);
 
+        if (auth()->user()->role?->role_name === 'organization') {
+            return redirect()->route('partner.events.index')->with('message', 'Event updated successfully!');
+        }
+
         return redirect()->route('admin.events.index')->with('message', 'Event updated successfully!');
     }
 
