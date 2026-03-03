@@ -1,49 +1,68 @@
-<div class="min-h-screen bg-gray-50/80 py-10 px-4 sm:px-6 lg:px-8 font-sans pb-24 overflow-x-hidden">
-    <div class="max-w-7xl mx-auto w-full">
+{{-- OUTER WRAPPER: relative and overflow-x-hidden guarantee NO horizontal scrolling --}}
+<div class="relative min-h-screen bg-slate-50 overflow-x-hidden font-sans pb-24 z-0">
+    
+    {{-- ========================================== --}}
+    {{-- RAINBOW BLOBS BACKGROUND                   --}}
+    {{-- ========================================== --}}
+    <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+        {{-- Top Left Pink/Purple --}}
+        <div class="absolute -top-[10%] -left-[10%] w-[50vw] h-[50vw] max-w-[600px] max-h-[600px] rounded-full bg-gradient-to-br from-fuchsia-400 to-purple-500 blur-[100px] opacity-40 mix-blend-multiply"></div>
+        {{-- Bottom Right Yellow/Red --}}
+        <div class="absolute -bottom-[10%] -right-[10%] w-[50vw] h-[50vw] max-w-[600px] max-h-[600px] rounded-full bg-gradient-to-tl from-yellow-300 to-rose-400 blur-[100px] opacity-40 mix-blend-multiply"></div>
+        {{-- Middle Right Cyan/Blue --}}
+        <div class="absolute top-[20%] -right-[5%] w-[40vw] h-[40vw] max-w-[500px] max-h-[500px] rounded-full bg-gradient-to-bl from-cyan-300 to-blue-500 blur-[100px] opacity-40 mix-blend-multiply"></div>
+    </div>
 
-        {{-- STRICT 1/3 & 2/3 FLEX LAYOUT --}}
-        <div class="flex flex-col lg:flex-row gap-8 lg:gap-12 items-start w-full">
+    {{-- ========================================== --}}
+    {{-- MAIN CONTENT GRID                          --}}
+    {{-- ========================================== --}}
+    <div class="relative z-10 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 md:py-12">
 
-            {{-- LEFT COLUMN: Details (Strictly 1/3 Width) --}}
-            <div class="w-full lg:w-1/3 shrink-0 space-y-6 lg:sticky lg:top-12">
+        {{-- STRICT 3-COLUMN GRID --}}
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12 items-start w-full">
+
+            {{-- LEFT COLUMN: Details (Strictly 1 Column - 33%) --}}
+            <div class="lg:col-span-1 space-y-6 lg:sticky lg:top-12">
                 
-                <div>
-                    <span class="inline-block px-3 py-1 bg-red-100 text-red-700 text-[10px] font-black uppercase tracking-widest rounded-full mb-4 shadow-sm border border-red-200">
-                        BU MADYA Campaign
+                {{-- Details Glass Card --}}
+                <div class="bg-white/60 backdrop-blur-2xl p-6 md:p-8 rounded-[2rem] border border-white/80 shadow-2xl shadow-purple-900/5">
+                    <span class="inline-block px-3 py-1 bg-white/80 text-rose-600 text-[10px] font-black uppercase tracking-widest rounded-full mb-5 shadow-sm border border-rose-100 backdrop-blur-md">
+                        Campaign Frame
                     </span>
-                    <h1 class="text-3xl md:text-5xl font-black text-gray-900 leading-tight mb-4 tracking-tight">{{ $frame->title }}</h1>
-                    <p class="text-sm text-gray-600 mb-6 leading-relaxed">{{ $frame->description }}</p>
+                    <h1 class="text-3xl md:text-4xl font-black text-gray-900 leading-tight mb-4 tracking-tight drop-shadow-sm">{{ $frame->title }}</h1>
+                    <p class="text-sm text-gray-700 mb-8 leading-relaxed font-medium">{{ $frame->description }}</p>
                     
-                    <div class="flex items-center gap-3 bg-white p-3 rounded-2xl border border-gray-100 shadow-sm w-max mb-8">
-                        <div class="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center font-bold text-gray-500 text-xs uppercase">
+                    <div class="flex items-center gap-3 bg-white/80 p-3 rounded-2xl border border-white shadow-sm inline-flex">
+                        <div class="w-10 h-10 bg-gradient-to-tr from-gray-100 to-gray-200 rounded-xl flex items-center justify-center font-black text-gray-500 text-xs uppercase shadow-inner">
                             {{ substr($frame->user->name ?? 'BU', 0, 2) }}
                         </div>
                         <div class="pr-3">
                             <p class="text-[9px] text-gray-400 font-bold uppercase tracking-widest">Created By</p>
-                            <p class="text-xs font-bold text-gray-900 leading-tight truncate max-w-[200px]">{{ $frame->user->name ?? 'BU MADYA' }}</p>
+                            <p class="text-xs font-black text-gray-900 leading-tight truncate max-w-[150px]">{{ $frame->user->name ?? 'BU MADYA' }}</p>
                         </div>
                     </div>
                 </div>
 
-                {{-- Share Block --}}
-                <div class="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm" x-data="{ copied: false }">
-                    <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-3">Share this Campaign</p>
+                {{-- Share Glass Card --}}
+                <div class="bg-white/60 backdrop-blur-2xl p-5 md:p-6 rounded-[2rem] border border-white/80 shadow-2xl shadow-blue-900/5" x-data="{ copied: false }">
+                    <p class="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-3">Share Campaign Link</p>
                     <div class="flex items-center gap-2">
-                        <input type="text" readonly value="{{ url()->current() }}" class="flex-1 bg-gray-50 border border-gray-200 rounded-lg text-xs py-2.5 px-3 text-gray-600 focus:outline-none focus:ring-1 focus:ring-gray-300">
+                        <input type="text" readonly value="{{ url()->current() }}" class="flex-1 bg-white/80 border border-white/50 shadow-inner rounded-xl text-xs py-3 px-4 text-gray-600 focus:outline-none font-medium">
                         <button @click="navigator.clipboard.writeText('{{ url()->current() }}'); copied = true; setTimeout(() => copied = false, 2000)" 
-                                class="bg-gray-900 hover:bg-gray-800 text-white p-2.5 rounded-lg transition-colors flex items-center justify-center shrink-0 w-10 h-10 shadow-sm">
+                                class="bg-gray-900 hover:bg-gray-800 text-white p-3 rounded-xl transition-all transform hover:-translate-y-0.5 flex items-center justify-center shrink-0 w-11 h-11 shadow-lg">
                             <svg x-show="!copied" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
-                            <svg x-show="copied" style="display: none;" class="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                            <svg x-show="copied" style="display: none;" class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
                         </button>
                     </div>
                 </div>
             </div>
 
-            {{-- RIGHT COLUMN: The Studio (Strictly 2/3 Width) --}}
-            <div class="w-full lg:w-2/3 min-w-0 flex justify-center lg:justify-start">
+            {{-- RIGHT COLUMN: The Studio (Strictly 2 Columns - 66%) --}}
+            {{-- min-w-0 forces the grid to stop child elements from expanding past the column limits --}}
+            <div class="lg:col-span-2 w-full min-w-0 flex justify-center lg:justify-start">
                 
-                {{-- Inner Studio Container (Centered with Max Width) --}}
-                <div class="w-full max-w-2xl bg-white p-6 md:p-10 rounded-[2.5rem] shadow-xl shadow-gray-200/50 border border-gray-100 ring-1 ring-gray-900/5"
+                {{-- Inner Studio Container --}}
+                <div class="w-full bg-white/70 backdrop-blur-2xl p-6 md:p-10 rounded-[2.5rem] shadow-2xl shadow-rose-900/10 border border-white"
                      @php
                          // Safe array mapping
                          $images = is_array($frame->frame_images) ? array_filter($frame->frame_images) : (empty($frame->frame_image) ? [] : [$frame->frame_image]);
@@ -54,8 +73,8 @@
                 >
                     
                     {{-- Toolbar --}}
-                    <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-8 bg-gray-50 p-3 rounded-2xl border border-gray-100 max-w-lg mx-auto">
-                        <label class="cursor-pointer bg-red-600 text-white px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest shadow-md hover:bg-red-700 hover:shadow-lg transition-all transform hover:-translate-y-0.5 w-full sm:w-auto text-center flex items-center justify-center gap-2">
+                    <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-8 bg-white/80 shadow-sm p-3 rounded-2xl border border-white max-w-[500px] mx-auto">
+                        <label class="cursor-pointer bg-gradient-to-r from-rose-500 to-red-600 text-white px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest shadow-lg shadow-red-500/30 hover:shadow-red-500/50 hover:scale-[1.02] transition-all w-full sm:w-auto text-center flex items-center justify-center gap-2">
                             <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
                             <input type="file" accept="image/png, image/jpeg" class="hidden" @change="uploadPhoto">
                             <span x-show="!userImg">Upload Photo</span>
@@ -65,20 +84,21 @@
                         {{-- Zoom Slider --}}
                         <div x-show="userImg" style="display: none;" class="flex items-center gap-3 w-full sm:flex-1 sm:px-4">
                             <svg class="w-4 h-4 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7"></path></svg>
-                            <input type="range" x-model="scale" @input="draw" min="0.1" max="3" step="0.01" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-red-600">
+                            <input type="range" x-model="scale" @input="draw" min="0.1" max="3" step="0.01" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-rose-500">
                             <svg class="w-5 h-5 text-gray-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"></path></svg>
                         </div>
                     </div>
 
-                    {{-- Canvas Area (max-w-lg keeps it proportionate inside the 2/3 column) --}}
-                    <div class="relative w-full max-w-lg mx-auto aspect-square bg-gray-50 rounded-2xl overflow-hidden border-4 border-gray-100 shadow-inner group">
+                    {{-- Canvas Area --}}
+                    {{-- max-w-[500px] guarantees the square never explodes to fill a massive screen --}}
+                    <div class="relative w-full max-w-[500px] mx-auto aspect-square bg-white rounded-3xl overflow-hidden shadow-inner ring-4 ring-white/50 group">
                         
                         {{-- Placeholder Screen --}}
-                        <div x-show="!userImg" class="absolute inset-0 flex flex-col items-center justify-center text-gray-400 pointer-events-none bg-white/60 backdrop-blur-sm z-10 transition-opacity duration-300">
-                            <div class="w-16 h-16 bg-white rounded-full shadow-md flex items-center justify-center mb-4">
-                                <svg class="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        <div x-show="!userImg" class="absolute inset-0 flex flex-col items-center justify-center text-gray-400 pointer-events-none bg-gray-50/80 backdrop-blur-sm z-10 transition-opacity duration-300">
+                            <div class="w-20 h-20 bg-white rounded-full shadow-lg flex items-center justify-center mb-6 border border-gray-100">
+                                <svg class="w-10 h-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                             </div>
-                            <p class="text-xs font-black uppercase tracking-widest text-gray-800">Select a photo to begin</p>
+                            <p class="text-xs font-black uppercase tracking-widest text-gray-600">Select a photo to begin</p>
                         </div>
 
                         {{-- The actual canvas element --}}
@@ -91,18 +111,18 @@
                     </div>
 
                     {{-- Error Message --}}
-                    <div x-show="imageError" style="display: none;" class="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-center max-w-lg mx-auto">
-                        <p class="text-[10px] font-bold text-red-600 uppercase tracking-wider">⚠️ Error loading frame image. Check server storage links.</p>
+                    <div x-show="imageError" style="display: none;" class="mt-6 p-4 bg-red-50 border border-red-200 rounded-xl text-center max-w-[500px] mx-auto shadow-sm">
+                        <p class="text-[10px] font-black text-red-600 uppercase tracking-wider">⚠️ Error loading frame image. The path might be broken.</p>
                     </div>
 
                     {{-- Variation Selector --}}
-                    <div x-show="frames.length > 1" style="display: none;" class="mt-6 bg-gray-50/50 p-4 rounded-2xl border border-gray-100 max-w-lg mx-auto">
-                        <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-3 text-center">Select Variation</p>
+                    <div x-show="frames.length > 1" style="display: none;" class="mt-8 bg-white/80 p-5 rounded-2xl border border-white shadow-sm max-w-[500px] mx-auto backdrop-blur-md">
+                        <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-4 text-center">Select Variation</p>
                         <div class="flex flex-wrap justify-center gap-3">
                             <template x-for="(frameUrl, index) in frames" :key="index">
                                 <button @click="changeFrame(frameUrl)" 
-                                        :class="{'ring-2 ring-red-500 ring-offset-2 scale-110 shadow-md': activeFrame === frameUrl, 'border border-gray-200 hover:border-red-300 opacity-50 hover:opacity-100': activeFrame !== frameUrl}"
-                                        class="w-14 h-14 rounded-xl bg-[url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAMUlEQVQ4T2NkYNgBxVD8nwEPsOEHMBqNhsFhAAfLwcAAYf///z8DHgZQDw1DDEAGDAAASgIdX/3i4QAAAABJRU5ErkJggg==')] overflow-hidden transition-all duration-200 bg-repeat focus:outline-none relative bg-white">
+                                        :class="{'ring-4 ring-rose-400 scale-110 shadow-lg z-10': activeFrame === frameUrl, 'border border-gray-200 hover:border-rose-300 opacity-60 hover:opacity-100 hover:scale-105': activeFrame !== frameUrl}"
+                                        class="w-16 h-16 rounded-xl bg-[url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAMUlEQVQ4T2NkYNgBxVD8nwEPsOEHMBqNhsFhAAfLwcAAYf///z8DHgZQDw1DDEAGDAAASgIdX/3i4QAAAABJRU5ErkJggg==')] overflow-hidden transition-all duration-300 bg-repeat focus:outline-none relative bg-white">
                                     <img :src="frameUrl" class="absolute inset-0 w-full h-full object-contain p-1">
                                 </button>
                             </template>
@@ -110,14 +130,14 @@
                     </div>
 
                     {{-- Download Section --}}
-                    <div class="mt-8 text-center max-w-lg mx-auto">
-                        <p class="text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-4 flex items-center justify-center gap-2" x-show="userImg" style="display: none;">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11.5V14m0-2.5v-6a1.5 1.5 0 113 0m-3 6a1.5 1.5 0 00-3 0v2a7.5 7.5 0 0015 0v-5a1.5 1.5 0 00-3 0m-6-3V11m0-5.5v-1a1.5 1.5 0 013 0v1m0 0V11m0-5.5a1.5 1.5 0 013 0v3m0 0V11"></path></svg>
+                    <div class="mt-8 text-center max-w-[500px] mx-auto">
+                        <p class="text-[10px] uppercase tracking-widest text-gray-500 font-black mb-5 flex items-center justify-center gap-2" x-show="userImg" style="display: none;">
+                            <svg class="w-4 h-4 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11.5V14m0-2.5v-6a1.5 1.5 0 113 0m-3 6a1.5 1.5 0 00-3 0v2a7.5 7.5 0 0015 0v-5a1.5 1.5 0 00-3 0m-6-3V11m0-5.5v-1a1.5 1.5 0 013 0v1m0 0V11m0-5.5a1.5 1.5 0 013 0v3m0 0V11"></path></svg>
                             Drag photo to reposition
                         </p>
 
-                        <button @click="download" x-show="userImg" style="display: none;" class="w-full bg-gray-900 text-white py-4 rounded-xl font-black uppercase tracking-widest shadow-xl hover:bg-gray-800 transition-all transform hover:-translate-y-1 flex items-center justify-center gap-3">
-                            <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                        <button @click="download" x-show="userImg" style="display: none;" class="w-full bg-gray-900 text-white py-4 rounded-xl font-black uppercase tracking-widest shadow-xl shadow-gray-900/20 hover:bg-black transition-all transform hover:-translate-y-1 flex items-center justify-center gap-3">
+                            <svg class="w-5 h-5 shrink-0 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
                             Download Frame
                         </button>
                     </div>
@@ -135,12 +155,8 @@
             canvas: null, ctx: null,
             userImg: null, frameImg: null,
             scale: 1, dx: 0, dy: 0,
-            
-            // Fixed Dragging Variables
-            isDragging: false, 
-            startX: 0, startY: 0,
-            initialDx: 0, initialDy: 0, // NEW: Records starting offsets cleanly
-            
+            isDragging: false, startX: 0, startY: 0,
+            initialDx: 0, initialDy: 0,
             frames: Array.isArray(frameUrls) ? frameUrls : [],
             activeFrame: null,
             imageError: false,
@@ -163,15 +179,12 @@
                 this.imageError = false;
                 this.frameImg = new Image();
                 this.frameImg.crossOrigin = "Anonymous"; 
-                
                 this.frameImg.onload = () => this.draw();
-                
                 this.frameImg.onerror = () => {
                     this.imageError = true;
                     this.frameImg = null; 
                     this.draw(); 
                 };
-
                 this.frameImg.src = url; 
             },
 
@@ -202,7 +215,6 @@
             draw() {
                 if (!this.ctx) return;
                 this.ctx.clearRect(0, 0, 1080, 1080);
-
                 if(this.userImg) {
                     let w = this.userImg.width * this.scale;
                     let h = this.userImg.height * this.scale;
@@ -210,42 +222,30 @@
                     let y = (1080 - h) / 2 + this.dy;
                     this.ctx.drawImage(this.userImg, x, y, w, h);
                 }
-
                 if(this.frameImg && !this.imageError) {
                     this.ctx.drawImage(this.frameImg, 0, 0, 1080, 1080);
                 }
             },
 
-            // --- FIXED MATHEMATICAL DRAG LOGIC ---
             startDrag(e) {
                 if(!this.userImg) return;
                 this.isDragging = true;
-                
                 let clientX = e.touches ? e.touches[0].clientX : e.clientX;
                 let clientY = e.touches ? e.touches[0].clientY : e.clientY;
-                
-                // Record the mouse's starting point
                 this.startX = clientX;
                 this.startY = clientY;
-
-                // Record the image's offset at the exact moment the drag starts
                 this.initialDx = this.dx;
                 this.initialDy = this.dy;
             },
 
             drag(e) {
                 if(!this.isDragging) return;
-                
                 let clientX = e.touches ? e.touches[0].clientX : e.clientX;
                 let clientY = e.touches ? e.touches[0].clientY : e.clientY;
-                
                 let canvasRect = this.canvas.getBoundingClientRect();
-                let scaleRatio = 1080 / canvasRect.width; // Map screen pixels to 1080 canvas
-                
-                // New position = The exact starting offset + the delta of mouse movement
+                let scaleRatio = 1080 / canvasRect.width;
                 this.dx = this.initialDx + ((clientX - this.startX) * scaleRatio);
                 this.dy = this.initialDy + ((clientY - this.startY) * scaleRatio);
-                
                 this.draw();
             },
 
@@ -255,7 +255,7 @@
 
             download() {
                 let link = document.createElement('a');
-                link.download = 'BU-MADYA-Campaign-' + Date.now() + '.png';
+                link.download = 'BU-MADYA-' + Date.now() + '.png';
                 link.href = this.canvas.toDataURL('image/png');
                 link.click();
             }
