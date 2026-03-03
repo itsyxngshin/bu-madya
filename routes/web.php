@@ -69,6 +69,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Response;
 
 use \App\Livewire\Partner\SubmitFrame;
+use \App\Livewire\Partner\PartnerDashboard;
 
 Route::get('/', function () {
     return view('welcome');
@@ -130,7 +131,6 @@ Route::middleware(['auth'])
     ->group(function () {
     Route::get('/roundtable', RoundtableIndex::class)->name('roundtable.index');
     Route::get('/roundtable/{id}', RoundtableShow::class)->name('roundtable.show');
-    Route::get('/partner/submit-frame', SubmitFrame::class)->name('partner.frames.submit');
     Route::get('/evaluations', EvaluationList::class)->name('evaluations.index');
 
 });
@@ -157,6 +157,13 @@ Route::middleware(['auth', 'role:administrator'])->prefix('admin')->name('admin.
     Route::get('/frames', FrameManager::class)->name('frames.index');
     Route::get('/events/{event:slug}/raffle', EventRaffle::class)->name('events.raffle');
 
+});
+
+Route::middleware(['auth', 'role:organization'])->prefix('partner')->name('partner.')
+    ->group(function () {
+    Route::get('/dashboard', PartnerDashboard::class)->name('dashboard');
+    Route::get('/submit-frame', SubmitFrame::class)->name('frames.submit');
+    
 });
 
 Route::middleware(['auth', 'role:administrator,director'])
