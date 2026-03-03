@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Role; // Assuming you have a Role model based on your previous code
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 use Livewire\Attributes\Layout;
 
 #[Layout('layouts.madya-template')]
