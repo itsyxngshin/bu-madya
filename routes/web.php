@@ -163,6 +163,7 @@ Route::middleware(['auth', 'role:organization'])->prefix('partner')->name('partn
     ->group(function () {
     Route::get('/dashboard', PartnerDashboard::class)->name('dashboard');
     Route::get('/submit-frame', SubmitFrame::class)->name('frames.submit');
+    Route::get('/event/{event:slug}/registrants', EventRegistrants::class)->name('events.registrants');
     Route::get('/event/create', CreateEvent::class)->name('events.create');
     Route::get('/event/{event}/edit', EditEvent::class)->name('events.edit');
     

@@ -7,7 +7,7 @@ use App\Models\Event;
 use App\Models\EventFrame;
 use Livewire\Attributes\Layout;
 
-#[Layout('layouts.madya-admin-deck')] // Use the same sleek dark layout!
+#[Layout('layouts.madya-admin-deck')] 
 class PartnerDashboard extends Component
 {
     public function render()

@@ -46,7 +46,7 @@
 
     {{-- Action Row --}}
     <div class="flex gap-4">
-        <a href="{{ route('admin.events.create') }}" class="bg-red-600 text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-red-700 transition shadow-md">
+        <a href="{{ route('partner.events.create') }}" class="bg-red-600 text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-red-700 transition shadow-md">
             + Host New Event
         </a>
         <a href="{{ route('partner.frames.submit') }}" class="bg-white text-gray-700 border border-gray-200 px-6 py-3 rounded-xl font-bold text-sm hover:bg-gray-50 transition shadow-sm">
