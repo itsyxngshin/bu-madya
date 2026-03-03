@@ -34,7 +34,7 @@
         {{-- Event Grid --}}
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
             @forelse($events as $event)
-                <a href="{{ route('open.events.show', $event->slug) }}" class="group bg-white rounded-[2rem] shadow-sm hover:shadow-2xl border border-gray-100 overflow-hidden flex flex-col transition-all duration-300 transform hover:-translate-y-2">
+                <a href="{{ route('events.show', $event->slug) }}" class="group bg-white rounded-[2rem] shadow-sm hover:shadow-2xl border border-gray-100 overflow-hidden flex flex-col transition-all duration-300 transform hover:-translate-y-2">
                     
                     {{-- Card Image Header --}}
                     <div class="relative w-full aspect-[4/3] bg-gray-100 overflow-hidden">
