@@ -7,11 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 class EventFrame extends Model
 {
     protected $fillable = [
-        'user_id', 'event_id', 'title', 'slug', 'description', 'frame_image', 'is_approved'
+        'user_id', 'event_id', 'title', 'slug', 'description', 'frame_image', 'is_approved', 'frame_images'
     ];
 
     protected $casts = [
         'is_approved' => 'boolean',
+        'frame_images' => 'array',
     ];
 
     public function user()

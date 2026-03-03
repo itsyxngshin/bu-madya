@@ -26,7 +26,11 @@
         {{-- RIGHT COLUMN: The Interactive Studio --}}
         <div class="lg:col-span-7">
             <div class="bg-white p-6 md:p-8 rounded-[2rem] shadow-xl border border-gray-100"
-                 x-data="twibbonStudio('{{ asset('storage/' . $frame->frame_image) }}')"
+                 @php
+                     // Prepare full URLs for the array
+                     $frameUrls = array_map(fn($path) => asset('storage/' . $path), $frame->frame_images ?? []);
+                 @endphp
+                 x-data="studio(@js($frameUrls))"
                  x-init="init()"
             >
                 {{-- Toolbar --}}
@@ -61,6 +65,20 @@
                     </canvas>
                 </div>
 
+                {{-- [NEW] Variation Selector --}}
+                <div x-show="frames.length > 1" style="display: none;" class="mt-6">
+                    <p class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3 text-center">Select Variation</p>
+                    <div class="flex flex-wrap justify-center gap-3">
+                        <template x-for="(frameUrl, index) in frames" :key="index">
+                            <button @click="changeFrame(frameUrl)" 
+                                    :class="{'ring-2 ring-red-500 ring-offset-2 scale-105': activeFrame === frameUrl, 'border-gray-200 hover:border-red-300 opacity-70 hover:opacity-100': activeFrame !== frameUrl}"
+                                    class="w-16 h-16 rounded-xl border bg-[url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAMUlEQVQ4T2NkYNgBxVD8nwEPsOEHMBqNhsFhAAfLwcAAYf///z8DHgZQDw1DDEAGDAAASgIdX/3i4QAAAABJRU5ErkJggg==')] overflow-hidden transition-all duration-200 bg-repeat focus:outline-none">
+                                <img :src="frameUrl" class="w-full h-full object-contain p-1">
+                            </button>
+                        </template>
+                    </div>
+                </div>
+
                 <div class="mt-4 text-center">
                     <p class="text-xs text-gray-400 font-bold mb-4" x-show="userImg" style="display: none;">Hint: Drag your photo to reposition it.</p>
 
@@ -77,21 +95,35 @@
 @push('scripts')
 <script>
     document.addEventListener('alpine:init', () => {
-        Alpine.data('twibbonStudio', (frameUrl) => ({
+        Alpine.data('studio', (frameUrl) => ({
             canvas: null, ctx: null,
             userImg: null, frameImg: null,
             scale: 1, dx: 0, dy: 0,
             isDragging: false, startX: 0, startY: 0,
+            frames: frameUrls,
+            activeFrame: frameUrls[0] || null, 
 
             init() {
                 this.canvas = this.$refs.canvas;
                 this.ctx = this.canvas.getContext('2d');
-
-                // Load the transparent frame overlay
+                
+                if(this.activeFrame) {
+                    this.loadFrameImage(this.activeFrame);
+                }
+            },
+            
+            // [NEW] Helper to load and swap frames
+            loadFrameImage(url) {
                 this.frameImg = new Image();
-                this.frameImg.crossOrigin = "Anonymous"; // Prevent CORS canvas tainting
-                this.frameImg.src = frameUrl;
+                this.frameImg.crossOrigin = "Anonymous";
+                this.frameImg.src = url;
                 this.frameImg.onload = () => this.draw();
+            },
+
+            // [NEW] Click handler for the variation thumbnails
+            changeFrame(url) {
+                this.activeFrame = url;
+                this.loadFrameImage(url);
             },
 
             uploadPhoto(e) {

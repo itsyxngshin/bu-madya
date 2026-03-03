@@ -16,21 +16,23 @@ class SubmitFrame extends Component
     public $title = '';
     public $description = '';
     public $frame_image;
+    public $frame_images = [];
 
     public function save()
     {
         $this->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string|max:500',
-            // Strict validation: Must be an image, strictly PNG (for transparency), max 4MB
-            'frame_image' => 'required|image|mimes:png|max:4096',
+            'frame_images' => 'required|array|min:1|max:5', // Max 5 variations per campaign
+            'frame_images.*' => 'image|mimes:png|max:5120',
         ]);
 
-        // 1. Store the image securely in storage/app/public/frames
-        $path = $this->frame_image->store('frames', 'public');
+        $paths = [];
+        foreach ($this->frame_images as $image) {
+            $paths[] = $image->store('frames', 'public');
+        }
 
-        // 2. Generate a unique slug for the public URL
-        $slug = Str::slug($this->title) . '-' . strtolower(Str::random(5));
+        $slug = \Illuminate\Support\Str::slug($this->title) . '-' . strtolower(\Illuminate\Support\Str::random(5));
 
         // 3. Create the database record (Defaults to is_approved = false)
         EventFrame::create([
@@ -38,13 +40,12 @@ class SubmitFrame extends Component
             'title' => $this->title,
             'slug' => $slug,
             'description' => $this->description,
-            'frame_image' => $path,
+            'frame_images' => $paths, // [UPDATED] Save the array
             'is_approved' => false, // Requires Admin approval
         ]);
 
-        // 4. Reset the form and show a success message
-        $this->reset(['title', 'description', 'frame_image']);
-        session()->flash('message', 'Frame submitted successfully! It is currently pending admin approval.');
+       $this->reset(['title', 'description', 'frame_images']);
+        session()->flash('message', 'Campaign with ' . count($paths) . ' variations submitted successfully!');
     }
 
     public function render()

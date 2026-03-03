@@ -29,11 +29,21 @@ class FrameManager extends Component
 
     public function deleteFrame(EventFrame $frame)
     {
-        if ($frame->frame_image) {
+        // [UPDATED] Loop through the array of images and delete all of them
+        if (is_array($frame->frame_images)) {
+            foreach ($frame->frame_images as $imagePath) {
+                if (Storage::disk('public')->exists($imagePath)) {
+                    Storage::disk('public')->delete($imagePath);
+                }
+            }
+        } 
+        // Fallback just in case you have old single-image records
+        elseif ($frame->frame_image) {
             Storage::disk('public')->delete($frame->frame_image);
         }
+
         $frame->delete();
-        session()->flash('message', 'Frame permanently deleted.');
+        session()->flash('message', 'Campaign and all variations permanently deleted.');
     }
 
     public function render()

@@ -37,30 +37,33 @@
 
                         {{-- Image Upload Zone --}}
                         <div>
-                            <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Frame Image (.PNG Only)</label>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Frame Variations (.PNG Only, Max 5)</label>
 
-                            <div class="relative w-full aspect-square rounded-2xl border-2 border-dashed {{ $frame_image ? 'border-red-400 bg-gray-50' : 'border-gray-300 bg-gray-50 hover:bg-gray-100' }} transition-colors overflow-hidden group">
+                            <div class="relative w-full rounded-2xl border-2 border-dashed {{ count($frame_images) > 0 ? 'border-red-400 bg-gray-50 p-4' : 'border-gray-300 bg-gray-50 hover:bg-gray-100 p-12 aspect-video flex flex-col items-center justify-center' }} transition-colors overflow-hidden group">
+                                
+                                {{-- [NEW] Added "multiple" attribute --}}
+                                <input type="file" wire:model="frame_images" accept="image/png" multiple class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20">
 
-                                <input type="file" wire:model="frame_image" accept="image/png" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20">
-
-                                @if ($frame_image)
-                                    {{-- Live Preview with a checkerboard background to prove transparency --}}
-                                    <div class="absolute inset-0 bg-[url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAMUlEQVQ4T2NkYNgBxVD8nwEPsOEHMBqNhsFhAAfLwcAAYf///z8DHgZQDw1DDEAGDAAASgIdX/3i4QAAAABJRU5ErkJggg==')] z-0"></div>
-                                    <img src="{{ $frame_image->temporaryUrl() }}" class="absolute inset-0 w-full h-full object-contain z-10 p-2">
+                                @if (count($frame_images) > 0)
+                                    <div class="grid grid-cols-2 md:grid-cols-3 gap-4 relative z-10 pointer-events-none">
+                                        @foreach($frame_images as $index => $img)
+                                            <div class="aspect-square rounded-xl bg-[url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAMUlEQVQ4T2NkYNgBxVD8nwEPsOEHMBqNhsFhAAfLwcAAYf///z8DHgZQDw1DDEAGDAAASgIdX/3i4QAAAABJRU5ErkJggg==')] relative border border-gray-200 shadow-sm overflow-hidden bg-repeat">
+                                                <img src="{{ $img->temporaryUrl() }}" class="absolute inset-0 w-full h-full object-contain p-2">
+                                                <div class="absolute top-1 right-1 bg-gray-900/80 text-white text-[8px] font-bold px-1.5 rounded">Var {{ $index + 1 }}</div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                    <div class="mt-4 text-center text-xs font-bold text-red-600 pointer-events-none relative z-10">Click anywhere here to change files</div>
                                 @else
-                                    <div class="absolute inset-0 flex flex-col items-center justify-center text-gray-400 pointer-events-none p-6 text-center">
-                                        <svg class="w-10 h-10 mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
-                                        <p class="text-sm font-bold text-gray-700">Click or drag a transparent PNG</p>
-                                        <p class="text-[10px] uppercase tracking-widest mt-1 font-bold">Max size: 4MB • 1080x1080 Recommended</p>
+                                    <div class="text-center pointer-events-none">
+                                        <svg class="w-10 h-10 mb-3 text-gray-300 mx-auto group-hover:text-red-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                                        <p class="text-sm font-bold text-gray-700">Click or drag multiple frames</p>
+                                        <p class="text-[9px] uppercase tracking-widest mt-1 font-bold text-gray-400">Select up to 5 Transparent PNGs</p>
                                     </div>
                                 @endif
-
-                                {{-- Loading Indicator for Upload --}}
-                                <div wire:loading wire:target="frame_image" class="absolute inset-0 bg-white/80 backdrop-blur-sm z-30 flex items-center justify-center">
-                                    <span class="text-xs font-bold text-gray-900 uppercase tracking-widest animate-pulse">Processing Image...</span>
-                                </div>
                             </div>
-                            @error('frame_image') <span class="text-xs text-red-500 mt-2 block font-bold">{{ $message }}</span> @enderror
+                            @error('frame_images') <span class="text-xs text-red-500 mt-2 block font-bold text-center">{{ $message }}</span> @enderror
+                            @error('frame_images.*') <span class="text-xs text-red-500 mt-2 block font-bold text-center">{{ $message }}</span> @enderror
                         </div>
 
                         <button type="submit" class="w-full py-4 bg-gray-900 text-white font-black rounded-xl shadow-lg hover:bg-gray-800 transition-all text-sm uppercase tracking-widest disabled:opacity-50" wire:loading.attr="disabled">
