@@ -19,7 +19,9 @@
                     <span class="inline-block px-3 py-1 bg-white/80 text-rose-600 text-[10px] font-black uppercase tracking-widest rounded-full mb-5 shadow-sm border border-rose-100 backdrop-blur-md">
                         Campaign Frame
                     </span>
-                    <h1 class="break-words text-3xl md:text-4xl font-black text-gray-900 leading-tight mb-4 tracking-tight drop-shadow-sm">{{ $frame->title }}</h1>
+                    
+                    {{-- [FIXED] Changed to break-all to forcefully wrap unbroken strings --}}
+                    <h1 class="break-all text-3xl md:text-4xl font-black text-gray-900 leading-tight mb-4 tracking-tight drop-shadow-sm">{{ $frame->title }}</h1>
                     <p class="text-sm text-gray-700 mb-8 leading-relaxed font-medium break-words">{{ $frame->description }}</p>
                     
                     <div class="flex items-center gap-3 bg-white/80 p-3 rounded-2xl border border-white shadow-sm inline-flex max-w-full">
@@ -58,23 +60,23 @@
                      x-init="init()"
                 >
                     
-                    {{-- Toolbar --}}
-                    <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-8 bg-white/80 shadow-sm p-3 rounded-2xl border border-white max-w-[500px] mx-auto w-full">
+                    {{-- Toolbar [FIXED] Now stacked vertically using flex-col and gap-4 --}}
+                    <div class="flex flex-col items-center gap-4 mb-8 bg-white/80 shadow-sm p-4 rounded-2xl border border-white max-w-[500px] mx-auto w-full">
                         
                         {{-- INLINE GRADIENT FOR GUARANTEED RAINBOW RENDERING --}}
-                        <label class="cursor-pointer px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest shadow-lg hover:scale-[1.03] transition-all w-full sm:w-auto text-center flex items-center justify-center gap-2 relative overflow-hidden group" 
+                        <label class="cursor-pointer px-6 py-3.5 rounded-xl text-xs font-black uppercase tracking-widest shadow-lg hover:scale-[1.03] transition-all w-full text-center flex items-center justify-center gap-2 relative overflow-hidden group" 
                                style="background: linear-gradient(90deg, #ec4899, #ef4444, #eab308); color: #ffffff;">
                             
                             <div class="absolute inset-0 bg-white/20 -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-500"></div>
                             
-                            <svg class="w-4 h-4 shrink-0 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                            <svg class="w-5 h-5 shrink-0 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
                             <input type="file" accept="image/png, image/jpeg" class="hidden" @change="uploadPhoto">
                             <span x-show="!userImg" class="relative z-10">Upload Photo</span>
                             <span x-show="userImg" style="display: none;" class="relative z-10">Change Photo</span>
                         </label>
 
-                        {{-- Zoom Slider --}}
-                        <div x-show="userImg" style="display: none;" class="flex items-center gap-3 w-full sm:flex-1 sm:px-4">
+                        {{-- Zoom Slider (Now spans the full width underneath) --}}
+                        <div x-show="userImg" style="display: none;" class="flex items-center gap-3 w-full px-2">
                             <svg class="w-4 h-4 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7"></path></svg>
                             <input type="range" x-model="scale" @input="draw" min="0.1" max="5" step="0.01" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-pink-500">
                             <svg class="w-5 h-5 text-gray-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"></path></svg>
