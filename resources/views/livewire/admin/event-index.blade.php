@@ -32,19 +32,27 @@
                         <td class="p-4">
                             <div class="flex items-center gap-3">
                                 @if($event->cover_image)
-                                    <img src="{{ asset('storage/'.$event->cover_image) }}" class="w-12 h-12 rounded-lg object-cover bg-gray-100">
+                                    <img src="{{ asset('storage/'.$event->cover_image) }}" class="w-12 h-12 rounded-lg object-cover bg-gray-100 shadow-sm shrink-0">
                                 @else
-                                    <div class="w-12 h-12 rounded-lg bg-gray-200 flex items-center justify-center text-gray-400 font-bold text-xs">IMG</div>
+                                    <div class="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center text-gray-400 font-bold text-xs shrink-0 border border-gray-200">IMG</div>
                                 @endif
-                                <div>
-                                    <div class="font-bold text-gray-900">{{ $event->title }}</div>
-                                    <div class="text-xs text-gray-400">{{ Str::limit(strip_tags($event->description), 40) }}</div>
+                                <div class="min-w-0">
+                                    <div class="font-bold text-gray-900 truncate">{{ $event->title }}</div>
+                                    <div class="text-xs text-gray-500 truncate max-w-xs">{{ Str::limit(strip_tags($event->description), 40) }}</div>
+                                    
+                                    {{-- Admin Visibility: Show who created the event --}}
+                                    @if(in_array(auth()->user()->role?->role_name, ['administrator', 'director']))
+                                        <div class="mt-1 flex items-center gap-1 text-[9px] font-bold uppercase tracking-widest text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded w-max">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                                            {{ $event->user->name ?? 'Unknown Org' }}
+                                        </div>
+                                    @endif
                                 </div>
                             </div>
                         </td>
                         <td class="p-4 whitespace-nowrap">
                             @if($event->start_date)
-                                <div>{{ $event->start_date->format('M d, Y') }}</div>
+                                <div class="font-medium text-gray-900">{{ $event->start_date->format('M d, Y') }}</div>
                                 <div class="text-xs text-gray-400">{{ $event->start_date->format('h:i A') }}</div>
                             @else
                                 <span class="text-gray-400 italic">TBA</span>
@@ -52,9 +60,9 @@
                         </td>
                         <td class="p-4">
                             @if($event->is_active)
-                                <span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-bold uppercase">Published</span>
+                                <span class="bg-green-100 text-green-700 px-2 py-1 rounded text-[10px] font-black uppercase tracking-wider">Published</span>
                             @else
-                                <span class="bg-gray-100 text-gray-500 px-2 py-1 rounded text-xs font-bold uppercase">Draft</span>
+                                <span class="bg-gray-100 text-gray-500 px-2 py-1 rounded text-[10px] font-black uppercase tracking-wider">Draft</span>
                             @endif
                         </td>
                         <td class="p-4 text-right">
@@ -106,14 +114,18 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="4" class="p-8 text-center text-gray-400">No events found.</td>
+                        <td colspan="4" class="p-10 text-center text-gray-400">
+                            <svg class="w-8 h-8 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                            <p class="text-sm font-bold uppercase tracking-widest">No events found.</p>
+                        </td>
                     </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
 
-        <div class="p-4 border-t border-gray-100">
+        {{-- The pagination links will now render perfectly --}}
+        <div class="p-4 border-t border-gray-100 bg-gray-50/50">
             {{ $events->links() }}
         </div>
     </div>
