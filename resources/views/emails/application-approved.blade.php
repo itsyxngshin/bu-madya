@@ -33,7 +33,7 @@
                             </p>
                             
                             <p style="margin-bottom: 30px; line-height: 1.7;">
-                                Your decision to step forward is a powerful testament to the impact young people can make. Here, your voice matters. Together, we will champion causes that uplift our fellow students, challenge the status quo, and build safer, more inclusive spaces for everyone.
+                                We believe that your first step with our organization serves as a beacon of hope and inspiration for young people. Together, we can create a meaningful impact on our community.
                             </p>
 
                             <div style="background-color: #dc2626; background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); border-radius: 16px; padding: 25px 20px; text-align: center; margin-bottom: 30px; box-shadow: 0 10px 15px -3px rgba(220, 38, 38, 0.25);">
@@ -49,7 +49,7 @@
                             </div>
 
                             <p style="margin-bottom: 35px; line-height: 1.7;">
-                                As a newly minted advocate, you are now part of a collective driven by passion, purpose, and synergy. Get ready to learn, lead, and leave a lasting mark this year.
+                                As a new member - advocate of BU MADYA, you are now part of a collective driven by passion, purpose, and synergy. Get ready to learn, lead, and leave a lasting mark this year.
                             </p>
 
                             <div style="background-color: #f9fafb; border: 1px solid #f3f4f6; border-radius: 16px; padding: 25px 25px 5px 25px; margin-bottom: 35px;">
