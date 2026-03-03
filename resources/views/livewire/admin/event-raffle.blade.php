@@ -111,18 +111,17 @@
                 this.spinning = true;
                 this.winner = false;
                 this.winnerDetails = '';
+                this.currentWinnerTicket = null; // Reset
                 
-                let duration = 3500; // Spin for 3.5 seconds
-                let interval = 60; // Change name every 60ms
+                let duration = 3500; 
+                let interval = 60; 
                 let elapsed = 0;
 
-                // The Slot Machine Effect
                 let timer = setInterval(() => {
                     let randomIndex = Math.floor(Math.random() * this.attendees.length);
                     this.currentDisplay = this.attendees[randomIndex].name;
                     elapsed += interval;
 
-                    // Gradually slow down the spin at the end
                     if (elapsed > duration * 0.7) {
                         interval += 20; 
                     }
@@ -132,7 +131,7 @@
                         this.finalizeWinner(this.attendees[randomIndex]);
                     }
                 }, interval);
-            },
+            }, 
 
             finalizeWinner(selectedWinner) { 
                 this.spinning = false;

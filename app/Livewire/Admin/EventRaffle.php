@@ -10,15 +10,18 @@ use Livewire\Attributes\Layout;
 class EventRaffle extends Component
 {
     public Event $event;
-    public $winners = []; // Stores the IDs of people who already won
-    public $winnerList = []; // Stores rich data to display the winner list
+    public $winners = []; 
+    public $winnerList = []; 
+    
+    // [FIXED] Explicitly declare this as a public property so Alpine can watch it
+    public $eligibleAttendees = []; 
 
     public function mount(Event $event)
     {
         $this->event = $event;
+        $this->updatePool(); // Load the pool when the page opens
     }
 
-    // This method is called by Alpine.js after the visual spinning finishes
     public function recordWinner($winnerId)
     {
         if (!in_array($winnerId, $this->winners)) {
@@ -34,6 +37,9 @@ class EventRaffle extends Component
                     'ticket' => $winnerRecord->ticket_code
                 ]);
             }
+
+            // [FIXED] Shrink the pool immediately after someone wins
+            $this->updatePool(); 
         }
     }
 
@@ -47,18 +53,24 @@ class EventRaffle extends Component
         
         // Re-index the array so Livewire's frontend loop doesn't break
         $this->winnerList = array_values($this->winnerList);
+        
+        // Note: We deliberately leave them in $this->winners so their ticket 
+        // remains "burned" and they can't be drawn a second time!
+    }
+
+    // [FIXED] Dedicated method to fetch the latest pool of attendees
+    public function updatePool()
+    {
+        $this->eligibleAttendees = $this->event->registrations()
+            ->where('status', 'Attended')
+            ->whereNotIn('id', $this->winners)
+            ->get(['id', 'name', 'classification', 'ticket_code'])
+            ->toArray();
     }
 
     public function render()
     {
-        // Fetch ONLY people who have checked in, EXCLUDING previous winners
-        $eligibleAttendees = $this->event->registrations()
-            ->where('status', 'Attended')
-            ->whereNotIn('id', $this->winners)
-            ->get(['id', 'name', 'classification', 'ticket_code']);
-
-        return view('livewire.admin.event-raffle', [
-            'eligibleAttendees' => $eligibleAttendees
-        ]);
+        // We no longer pass data here; the public property handles it automatically
+        return view('livewire.admin.event-raffle');
     }
 }
