@@ -49,14 +49,14 @@
                 </div>
 
                 {{-- DYNAMIC MARKDOWN RENDERER --}}
-                <div class="prose prose-sm md:prose-base prose-stone max-w-none 
-                    prose-headings:font-heading prose-headings:font-black prose-headings:text-gray-900 
+                <div class="prose prose-sm md:prose-base prose-stone max-w-none
+                    prose-headings:font-heading prose-headings:font-black prose-headings:text-gray-900
                     prose-a:text-red-600 hover:prose-a:text-red-700
                     prose-img:rounded-2xl prose-img:shadow-md prose-img:w-full
                     prose-ul:list-disc prose-ol:list-decimal">
-                    
+
                     {!! Str::markdown($event->description ?? '') !!}
-                    
+
                 </div>
             </div>
         </div>
@@ -105,15 +105,15 @@
                 {{-- STATE: REGISTRATION FORM --}}
                 @else
                     <h2 class="text-2xl font-black text-gray-900 mb-6">Join Event</h2>
-                    
+
                     {{-- [NEW] Registration Method Toggle (Hide if already logged in) --}}
                     @if(!Auth::check())
                         <div class="flex bg-gray-100 p-1 rounded-xl mb-6">
-                            <button wire:click="$set('registration_method', 'manual')" 
+                            <button wire:click="$set('registration_method', 'manual')"
                                     class="flex-1 py-2 text-xs font-bold uppercase tracking-widest rounded-lg transition-all {{ $registration_method === 'manual' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700' }}">
                                 Manual Entry
                             </button>
-                            <button wire:click="$set('registration_method', 'account')" 
+                            <button wire:click="$set('registration_method', 'account')"
                                     class="flex-1 py-2 text-xs font-bold uppercase tracking-widest rounded-lg transition-all {{ $registration_method === 'account' ? 'bg-white shadow-sm text-red-600' : 'text-gray-500 hover:text-gray-700' }}">
                                 Use BU MADYA Account
                             </button>
@@ -121,10 +121,10 @@
                     @endif
 
                     <form wire:submit.prevent="register" class="space-y-4">
-                        
+
                         {{-- ACCOUNT LOOKUP MODE --}}
                         @if($registration_method === 'account')
-                            
+
                             @if(!$is_verified)
                                 <div class="bg-red-50 p-4 rounded-xl border border-red-100 animate-fade-in-down">
                                     <label class="block text-xs font-bold text-red-800 uppercase mb-2">System User ID or Email</label>
@@ -172,16 +172,21 @@
 
                         {{-- Only show the rest of the form if they are verified (or in manual mode) --}}
                         @if($registration_method === 'manual' || $is_verified)
-                            
+
+                            <div class="animate-fade-in-up mt-6">
+                                <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Contact Number</label>
+                                <input type="text" wire:model="contact_number" class="w-full rounded-xl border-gray-200 bg-gray-50 focus:bg-white text-sm py-3" placeholder="e.g. 0912 345 6789">
+                                @error('contact_number') <span class="text-xs text-red-500 mt-1 block">{{ $message }}</span> @enderror
+                            </div>
                             {{-- [NEW] The Main BU Student Toggle --}}
                             <div class="animate-fade-in-up mt-6">
                                 <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Are you a Bicol University Student?</label>
                                 <div class="flex bg-gray-100 p-1 rounded-xl mb-4">
-                                    <button type="button" wire:click="$set('is_bu_student', true)" 
+                                    <button type="button" wire:click="$set('is_bu_student', true)"
                                             class="flex-1 py-2.5 text-xs font-bold uppercase tracking-widest rounded-lg transition-all {{ $is_bu_student ? 'bg-white shadow-sm text-orange-600' : 'text-gray-500 hover:text-gray-700' }}">
                                         Yes, I am
                                     </button>
-                                    <button type="button" wire:click="$set('is_bu_student', false)" 
+                                    <button type="button" wire:click="$set('is_bu_student', false)"
                                             class="flex-1 py-2.5 text-xs font-bold uppercase tracking-widest rounded-lg transition-all {{ !$is_bu_student ? 'bg-white shadow-sm text-blue-600' : 'text-gray-500 hover:text-gray-700' }}">
                                         No, I'm a Guest
                                     </button>
@@ -216,16 +221,44 @@
                                                 <option value="3rd Year">3rd Year</option>
                                                 <option value="4th Year">4th Year</option>
                                                 <option value="5th Year">5th Year</option>
-                                                <option value="6th Year">6th Year</option>
                                             </select>
                                             @error('year_level') <span class="text-xs text-red-500 mt-1 block">{{ $message }}</span> @enderror
                                         </div>
                                     </div>
+
+                                    {{-- [NEW] Hybrid Org Checkbox for Students --}}
+                                    <div class="mt-4 pt-4 border-t border-orange-200/60">
+                                        <label class="flex items-center gap-3 cursor-pointer group">
+                                            <input type="checkbox" wire:model.live="is_representing_org" class="w-5 h-5 rounded border-orange-300 text-orange-600 focus:ring-orange-500 transition">
+                                            <span class="text-xs font-bold text-orange-900 uppercase tracking-widest group-hover:text-orange-700 transition">I am representing an Organization / NGO</span>
+                                        </label>
+                                    </div>
+
+                                    {{-- Organization Fields (Only shows if checkbox is true) --}}
+                                    @if($is_representing_org)
+                                        <div class="bg-white/60 p-4 rounded-xl border border-orange-200 space-y-4 animate-fade-in-down">
+                                            <div>
+                                                <label class="block text-xs font-bold text-orange-800 uppercase mb-2">Name of Organization / Group</label>
+                                                <input type="text" wire:model="organization_name" class="w-full rounded-lg border-orange-200 bg-white text-sm py-2 focus:ring-orange-500" placeholder="e.g. Red Cross Youth, Tarabangan Albay">
+                                                @error('organization_name') <span class="text-xs text-red-500 mt-1 block">{{ $message }}</span> @enderror
+                                            </div>
+                                            <div>
+                                                <label class="block text-xs font-bold text-orange-800 uppercase mb-2">Your Position / Designation</label>
+                                                <input type="text" wire:model="position" class="w-full rounded-lg border-orange-200 bg-white text-sm py-2 focus:ring-orange-500" placeholder="e.g. President, Volunteer, Board Member">
+                                                @error('position') <span class="text-xs text-red-500 mt-1 block">{{ $message }}</span> @enderror
+                                            </div>
+                                        </div>
+                                    @endif
                                 </div>
-                            
+
                             {{-- TIER 2: EXTERNAL GUEST --}}
                             @else
                                 <div class="animate-fade-in-down space-y-4">
+                                    <div>
+                                        <label class="block text-xs font-bold text-gray-500 uppercase mb-2">School / University (If applicable)</label>
+                                        <input type="text" wire:model="school" class="w-full rounded-xl border-gray-200 bg-gray-50 focus:bg-white text-sm py-3" placeholder="e.g. Ateneo de Naga University">
+                                        @error('school') <span class="text-xs text-red-500 mt-1 block">{{ $message }}</span> @enderror
+                                    </div>
                                     {{-- Sub-classification Dropdown --}}
                                     <div>
                                         <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Guest Classification</label>

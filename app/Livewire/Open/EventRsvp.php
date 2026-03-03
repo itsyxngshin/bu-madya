@@ -28,10 +28,12 @@ class EventRsvp extends Component
     public $lookup_id = '';
     public $is_verified = false;
     public $verified_user_id = null;
+    public $contact_number = '';
+    public $school = '';
 
     // [NEW] The Primary Toggle
     public $is_bu_student = true;
-
+    public $is_representing_org = false;
     public $isRegistered = false;
     public $registrationRecord;
 
@@ -102,17 +104,18 @@ class EventRsvp extends Component
             $this->classification = 'BU Student';
             $this->organization_name = '';
             $this->position = '';
-        } else {
+        }
+        else {
             $this->classification = ''; // Force them to select from the external dropdown
             $this->college_id = '';
             $this->program = '';
             $this->year_level = '';
+            $this->is_representing_org = false;
         }
     }
 
     public function register()
     {
-        // Force the classification just in case the toggle was manipulated
         if ($this->is_bu_student) {
             $this->classification = 'BU Student';
         }
@@ -120,6 +123,7 @@ class EventRsvp extends Component
         $rules = [
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255',
+            'contact_number' => 'required|string|max:20', // [NEW] Required for everyone
             'classification' => 'required|string',
         ];
 
@@ -127,11 +131,19 @@ class EventRsvp extends Component
             $rules['college_id'] = 'required|exists:colleges,id';
             $rules['program'] = 'required|string|max:150';
             $rules['year_level'] = 'required|string';
-        }
 
-        if (!$this->is_bu_student && in_array($this->classification, ['CSO/NGO Representative', 'Partner Representative'])) {
-            $rules['organization_name'] = 'required|string|max:255';
-            $rules['position'] = 'required|string|max:255';
+            if ($this->is_representing_org) {
+                $rules['organization_name'] = 'required|string|max:255';
+                $rules['position'] = 'required|string|max:255';
+            }
+        } else {
+            // [NEW] Validate school for non-BU students
+            $rules['school'] = 'nullable|string|max:255';
+
+            if (in_array($this->classification, ['CSO/NGO Representative', 'Partner Representative'])) {
+                $rules['organization_name'] = 'required|string|max:255';
+                $rules['position'] = 'required|string|max:255';
+            }
         }
 
         $this->validate($rules);
@@ -154,8 +166,9 @@ class EventRsvp extends Component
             'classification' => $this->classification,
             'college_id' => $this->classification === 'BU Student' ? $this->college_id : null,
             'program' => $this->classification === 'BU Student' ? $this->program : null,
+            'school' => $this->is_bu_student ? 'Bicol University' : $this->school,
             'year_level' => $this->classification === 'BU Student' ? $this->year_level : null,
-            'organization_name' => in_array($this->classification, ['CSO/NGO Representative', 'Partner Representative']) ? $this->organization_name : null,
+            'organization_name' => ($this->is_bu_student && $this->is_representing_org) || in_array($this->classification, ['CSO/NGO Representative', 'Partner Representative']) ? $this->organization_name : null,
             'position' => in_array($this->classification, ['CSO/NGO Representative', 'Partner Representative']) ? $this->position : null,
             'ticket_code' => $ticketCode,
         ]);
@@ -167,7 +180,7 @@ class EventRsvp extends Component
         }
 
         $this->isRegistered = true;
-    } 
+    }
 
     public function render()
     {
