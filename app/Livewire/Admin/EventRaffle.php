@@ -23,7 +23,7 @@ class EventRaffle extends Component
     {
         if (!in_array($winnerId, $this->winners)) {
             $this->winners[] = $winnerId;
-
+            
             // Fetch the winner's details to display in the UI list
             $winnerRecord = $this->event->registrations()->find($winnerId);
             if ($winnerRecord) {
