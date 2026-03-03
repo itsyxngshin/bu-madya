@@ -1,45 +1,49 @@
-<div class="min-h-screen bg-gray-50/50 py-8 px-4 sm:px-6 lg:px-8 font-sans pb-24 overflow-x-hidden">
-    <div class="max-w-6xl mx-auto w-full">
+<div class="min-h-screen bg-gray-50/80 py-10 px-4 sm:px-6 lg:px-8 font-sans pb-24 overflow-x-hidden">
+    <div class="max-w-7xl mx-auto w-full">
 
-        <div class="flex flex-col lg:flex-row gap-6 lg:gap-10 items-start w-full">
+        {{-- STRICT 1/3 & 2/3 FLEX LAYOUT --}}
+        <div class="flex flex-col lg:flex-row gap-8 lg:gap-12 items-start w-full">
 
-            {{-- LEFT COLUMN: Details (Strict pixel width) --}}
-            <div class="w-full lg:w-[350px] xl:w-[400px] shrink-0 space-y-6 lg:sticky lg:top-24">
+            {{-- LEFT COLUMN: Details (Strictly 1/3 Width) --}}
+            <div class="w-full lg:w-1/3 shrink-0 space-y-6 lg:sticky lg:top-12">
+                
                 <div>
                     <span class="inline-block px-3 py-1 bg-red-100 text-red-700 text-[10px] font-black uppercase tracking-widest rounded-full mb-4 shadow-sm border border-red-200">
-                        BU MADYA Campaign Frame
+                        BU MADYA Campaign
                     </span>
                     <h1 class="text-3xl md:text-5xl font-black text-gray-900 leading-tight mb-4 tracking-tight">{{ $frame->title }}</h1>
                     <p class="text-sm text-gray-600 mb-6 leading-relaxed">{{ $frame->description }}</p>
                     
-                    <div class="flex items-center gap-3 bg-white p-3 rounded-2xl border border-gray-100 shadow-sm w-max mb-6">
+                    <div class="flex items-center gap-3 bg-white p-3 rounded-2xl border border-gray-100 shadow-sm w-max mb-8">
                         <div class="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center font-bold text-gray-500 text-xs uppercase">
                             {{ substr($frame->user->name ?? 'BU', 0, 2) }}
                         </div>
-                        <div class="pr-2">
+                        <div class="pr-3">
                             <p class="text-[9px] text-gray-400 font-bold uppercase tracking-widest">Created By</p>
-                            <p class="text-xs font-bold text-gray-900 leading-tight truncate max-w-[150px]">{{ $frame->user->name ?? 'BU MADYA' }}</p>
+                            <p class="text-xs font-bold text-gray-900 leading-tight truncate max-w-[200px]">{{ $frame->user->name ?? 'BU MADYA' }}</p>
                         </div>
                     </div>
+                </div>
 
-                    {{-- NEW Share Block --}}
-                    <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm" x-data="{ copied: false }">
-                        <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Share this Campaign</p>
-                        <div class="flex items-center gap-2">
-                            <input type="text" readonly value="{{ url()->current() }}" class="flex-1 bg-gray-50 border border-gray-200 rounded-lg text-xs py-2 px-3 text-gray-600 focus:outline-none focus:ring-1 focus:ring-gray-300">
-                            <button @click="navigator.clipboard.writeText('{{ url()->current() }}'); copied = true; setTimeout(() => copied = false, 2000)" 
-                                    class="bg-gray-900 hover:bg-gray-800 text-white p-2 rounded-lg transition-colors flex items-center justify-center shrink-0 w-9 h-9">
-                                <svg x-show="!copied" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
-                                <svg x-show="copied" style="display: none;" class="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                            </button>
-                        </div>
+                {{-- Share Block --}}
+                <div class="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm" x-data="{ copied: false }">
+                    <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-3">Share this Campaign</p>
+                    <div class="flex items-center gap-2">
+                        <input type="text" readonly value="{{ url()->current() }}" class="flex-1 bg-gray-50 border border-gray-200 rounded-lg text-xs py-2.5 px-3 text-gray-600 focus:outline-none focus:ring-1 focus:ring-gray-300">
+                        <button @click="navigator.clipboard.writeText('{{ url()->current() }}'); copied = true; setTimeout(() => copied = false, 2000)" 
+                                class="bg-gray-900 hover:bg-gray-800 text-white p-2.5 rounded-lg transition-colors flex items-center justify-center shrink-0 w-10 h-10 shadow-sm">
+                            <svg x-show="!copied" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                            <svg x-show="copied" style="display: none;" class="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                        </button>
                     </div>
                 </div>
             </div>
 
-            {{-- RIGHT COLUMN: The Interactive Studio --}}
-            <div class="flex-1 w-full min-w-0 flex justify-center lg:justify-start">
-                <div class="bg-white p-5 md:p-8 rounded-[2rem] shadow-xl shadow-gray-200/50 border border-gray-100 ring-1 ring-gray-900/5 w-full max-w-[550px]"
+            {{-- RIGHT COLUMN: The Studio (Strictly 2/3 Width) --}}
+            <div class="w-full lg:w-2/3 min-w-0 flex justify-center lg:justify-start">
+                
+                {{-- Inner Studio Container (Centered with Max Width) --}}
+                <div class="w-full max-w-2xl bg-white p-6 md:p-10 rounded-[2.5rem] shadow-xl shadow-gray-200/50 border border-gray-100 ring-1 ring-gray-900/5"
                      @php
                          // Safe array mapping
                          $images = is_array($frame->frame_images) ? array_filter($frame->frame_images) : (empty($frame->frame_image) ? [] : [$frame->frame_image]);
@@ -50,8 +54,8 @@
                 >
                     
                     {{-- Toolbar --}}
-                    <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6 bg-gray-50 p-2.5 rounded-2xl border border-gray-100">
-                        <label class="cursor-pointer bg-red-600 text-white px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest shadow-md hover:bg-red-700 hover:shadow-lg transition-all transform hover:-translate-y-0.5 w-full sm:w-auto text-center flex items-center justify-center gap-2">
+                    <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-8 bg-gray-50 p-3 rounded-2xl border border-gray-100 max-w-lg mx-auto">
+                        <label class="cursor-pointer bg-red-600 text-white px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest shadow-md hover:bg-red-700 hover:shadow-lg transition-all transform hover:-translate-y-0.5 w-full sm:w-auto text-center flex items-center justify-center gap-2">
                             <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
                             <input type="file" accept="image/png, image/jpeg" class="hidden" @change="uploadPhoto">
                             <span x-show="!userImg">Upload Photo</span>
@@ -66,8 +70,8 @@
                         </div>
                     </div>
 
-                    {{-- Canvas Area --}}
-                    <div class="relative w-full aspect-square bg-gray-50 rounded-2xl overflow-hidden border-4 border-gray-100 shadow-inner group">
+                    {{-- Canvas Area (max-w-lg keeps it proportionate inside the 2/3 column) --}}
+                    <div class="relative w-full max-w-lg mx-auto aspect-square bg-gray-50 rounded-2xl overflow-hidden border-4 border-gray-100 shadow-inner group">
                         
                         {{-- Placeholder Screen --}}
                         <div x-show="!userImg" class="absolute inset-0 flex flex-col items-center justify-center text-gray-400 pointer-events-none bg-white/60 backdrop-blur-sm z-10 transition-opacity duration-300">
@@ -87,12 +91,12 @@
                     </div>
 
                     {{-- Error Message --}}
-                    <div x-show="imageError" style="display: none;" class="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-center">
-                        <p class="text-[10px] font-bold text-red-600 uppercase tracking-wider">⚠️ Error loading frame image. The image path might be broken or empty.</p>
+                    <div x-show="imageError" style="display: none;" class="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-center max-w-lg mx-auto">
+                        <p class="text-[10px] font-bold text-red-600 uppercase tracking-wider">⚠️ Error loading frame image. Check server storage links.</p>
                     </div>
 
                     {{-- Variation Selector --}}
-                    <div x-show="frames.length > 1" style="display: none;" class="mt-6 bg-gray-50/50 p-4 rounded-2xl border border-gray-100">
+                    <div x-show="frames.length > 1" style="display: none;" class="mt-6 bg-gray-50/50 p-4 rounded-2xl border border-gray-100 max-w-lg mx-auto">
                         <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-3 text-center">Select Variation</p>
                         <div class="flex flex-wrap justify-center gap-3">
                             <template x-for="(frameUrl, index) in frames" :key="index">
@@ -105,13 +109,14 @@
                         </div>
                     </div>
 
-                    <div class="mt-6 text-center">
+                    {{-- Download Section --}}
+                    <div class="mt-8 text-center max-w-lg mx-auto">
                         <p class="text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-4 flex items-center justify-center gap-2" x-show="userImg" style="display: none;">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11.5V14m0-2.5v-6a1.5 1.5 0 113 0m-3 6a1.5 1.5 0 00-3 0v2a7.5 7.5 0 0015 0v-5a1.5 1.5 0 00-3 0m-6-3V11m0-5.5v-1a1.5 1.5 0 013 0v1m0 0V11m0-5.5a1.5 1.5 0 013 0v3m0 0V11"></path></svg>
                             Drag photo to reposition
                         </p>
 
-                        <button @click="download" x-show="userImg" style="display: none;" class="w-full bg-gray-900 text-white py-3.5 rounded-xl font-black uppercase tracking-widest shadow-xl hover:bg-gray-800 transition-all transform hover:-translate-y-1 flex items-center justify-center gap-3">
+                        <button @click="download" x-show="userImg" style="display: none;" class="w-full bg-gray-900 text-white py-4 rounded-xl font-black uppercase tracking-widest shadow-xl hover:bg-gray-800 transition-all transform hover:-translate-y-1 flex items-center justify-center gap-3">
                             <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
                             Download Frame
                         </button>
@@ -130,9 +135,12 @@
             canvas: null, ctx: null,
             userImg: null, frameImg: null,
             scale: 1, dx: 0, dy: 0,
-            isDragging: false, startX: 0, startY: 0,
             
-            // Safe array mapping
+            // Fixed Dragging Variables
+            isDragging: false, 
+            startX: 0, startY: 0,
+            initialDx: 0, initialDy: 0, // NEW: Records starting offsets cleanly
+            
             frames: Array.isArray(frameUrls) ? frameUrls : [],
             activeFrame: null,
             imageError: false,
@@ -156,12 +164,9 @@
                 this.frameImg = new Image();
                 this.frameImg.crossOrigin = "Anonymous"; 
                 
-                this.frameImg.onload = () => {
-                    this.draw();
-                };
+                this.frameImg.onload = () => this.draw();
                 
                 this.frameImg.onerror = () => {
-                    console.error("Failed to load frame image: " + url);
                     this.imageError = true;
                     this.frameImg = null; 
                     this.draw(); 
@@ -196,7 +201,6 @@
 
             draw() {
                 if (!this.ctx) return;
-                
                 this.ctx.clearRect(0, 0, 1080, 1080);
 
                 if(this.userImg) {
@@ -212,25 +216,36 @@
                 }
             },
 
+            // --- FIXED MATHEMATICAL DRAG LOGIC ---
             startDrag(e) {
                 if(!this.userImg) return;
                 this.isDragging = true;
+                
                 let clientX = e.touches ? e.touches[0].clientX : e.clientX;
                 let clientY = e.touches ? e.touches[0].clientY : e.clientY;
-                this.startX = clientX - this.dx;
-                this.startY = clientY - this.dy;
+                
+                // Record the mouse's starting point
+                this.startX = clientX;
+                this.startY = clientY;
+
+                // Record the image's offset at the exact moment the drag starts
+                this.initialDx = this.dx;
+                this.initialDy = this.dy;
             },
 
             drag(e) {
                 if(!this.isDragging) return;
+                
                 let clientX = e.touches ? e.touches[0].clientX : e.clientX;
                 let clientY = e.touches ? e.touches[0].clientY : e.clientY;
                 
                 let canvasRect = this.canvas.getBoundingClientRect();
-                let scaleRatio = 1080 / canvasRect.width;
+                let scaleRatio = 1080 / canvasRect.width; // Map screen pixels to 1080 canvas
                 
-                this.dx = (clientX - this.startX) * scaleRatio;
-                this.dy = (clientY - this.startY) * scaleRatio;
+                // New position = The exact starting offset + the delta of mouse movement
+                this.dx = this.initialDx + ((clientX - this.startX) * scaleRatio);
+                this.dy = this.initialDy + ((clientY - this.startY) * scaleRatio);
+                
                 this.draw();
             },
 
