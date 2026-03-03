@@ -25,19 +25,29 @@ class RegisterOrganization extends Component
             'password' => 'required|string|min:8|confirmed',
         ]);
 
-        // Find your organization role (Adjust 'organization' to whatever is in your database)
+        // Auto-generate a unique username from the Organization Name
+        $baseUsername = Str::slug($this->name);
+        $username = $baseUsername;
+        $counter = 1;
+
+        // Ensure it is completely unique in the database
+        while (User::where('username', $username)->exists()) {
+            $username = $baseUsername . '-' . $counter++;
+        }
+
         $orgRole = Role::where('role_name', 'organization')->first();
 
         $user = User::create([
-            'name' => $this->name, // We use the User's name field for the Org Name
+            'name' => $this->name,
+            'username' => $username, // [NEW] Inject the generated username
             'email' => $this->email,
             'password' => Hash::make($this->password),
-            'role_id' => $orgRole ? $orgRole->id : null,
+            'role_id' => $orgRole ? $orgRole->id : null, 
         ]);
 
         Auth::login($user);
 
-        return redirect()->route('dashboard'); // Redirect to their org dashboard
+        return redirect()->route('partner.dashboard'); // Redirect to their org dashboard
     }
 
     public function render()

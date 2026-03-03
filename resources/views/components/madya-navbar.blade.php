@@ -59,8 +59,20 @@
             <div class="flex items-center gap-4">
                 <div class="hidden md:flex items-center gap-3">
                     @auth
-                        @if(Auth::user()->role && in_array(Auth::user()->role->role_name, ['administrator', 'director']))
-                            <a href="{{ Auth::user()->role->role_name === 'administrator' ? route('admin.dashboard') : route('dashboard') }}" 
+                        @php
+                            $userRole = Auth::user()->role->role_name ?? 'guest';
+                            $canViewDashboard = in_array($userRole, ['administrator', 'director', 'organization']);
+                            
+                            // [DIRECT ROUTING] Find the exact route name immediately
+                            $navDashboardRoute = match($userRole) {
+                                'administrator' => route('admin.dashboard'),
+                                'organization'  => route('partner.dashboard'),
+                                default         => route('dashboard'), // Fallback
+                            };
+                        @endphp
+
+                        @if($canViewDashboard)
+                            <a href="{{ $navDashboardRoute }}" 
                                class="text-[10px] font-bold uppercase tracking-widest text-gray-400 hover:text-red-600 transition whitespace-nowrap border border-gray-200 px-3 py-1 rounded-full hover:border-red-200">
                                 Dashboard
                             </a>
@@ -79,7 +91,12 @@
                                     <p class="text-xs text-gray-500 uppercase font-bold">Signed in as</p>
                                     <p class="text-sm font-bold text-gray-900 truncate">{{ Auth::user()->name }}</p>
                                 </div>
-                                <a href="{{ route('profile.public', Auth::user()->username) }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-red-600">Your Profile</a>
+                                
+                                {{-- [FIXED] Only show profile link if username exists --}}
+                                @if(Auth::user()->username)
+                                    <a href="{{ route('profile.public', Auth::user()->username) }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-red-600">Your Profile</a>
+                                @endif
+
                                 <form method="POST" action="{{ route('logout') }}">
                                     @csrf
                                     <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 font-bold">Log Out</button>
@@ -160,31 +177,22 @@
                         <div class="text-[10px] text-gray-500 font-bold uppercase tracking-wider">{{ Auth::user()->email }}</div>
                     </div>
                 </div>
+                
+                {{-- [FIXED] Include organization in the view check --}}
                 @php
                     $userRole = Auth::user()->role->role_name ?? '';
-                    $canViewDashboard = in_array($userRole, ['administrator', 'director']);
+                    $canViewDashboard = in_array($userRole, ['administrator', 'director', 'organization']);
                 @endphp
 
-                {{-- LAYOUT: Use 2 columns if Dashboard is visible, otherwise 1 column --}}
                 <div class="grid {{ $canViewDashboard ? 'grid-cols-2' : 'grid-cols-1' }} gap-3">
 
-                    {{-- 1. DASHBOARD BUTTON (Conditionally Rendered) --}}
                     @if($canViewDashboard)
-                        @php
-                            // Optional: Send them to different dashboards if needed
-                            $dashboardRoute = match($userRole) {
-                                'administrator' => route('admin.dashboard'),
-                                'director'      => route('dashboard'), // Or route('director.dashboard')
-                                default         => route('open.home'),
-                            };
-                        @endphp
-
-                        <a href="{{ $dashboardRoute }}" class="flex justify-center py-2.5 bg-white border border-gray-200 rounded-lg text-xs font-bold uppercase tracking-wide text-gray-600 hover:bg-gray-100 shadow-sm transition">
+                        {{-- [FIXED] Rely on the unified dashboard route --}}
+                        <a href="{{ route('dashboard') }}" class="flex justify-center py-2.5 bg-white border border-gray-200 rounded-lg text-xs font-bold uppercase tracking-wide text-gray-600 hover:bg-gray-100 shadow-sm transition">
                             Dashboard
                         </a>
                     @endif
 
-                    {{-- 2. LOGOUT BUTTON (Always Visible) --}}
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
                         <button type="submit" class="w-full py-2.5 bg-red-100 border border-transparent rounded-lg text-xs font-bold uppercase tracking-wide text-red-700 hover:bg-red-200 shadow-sm transition">
