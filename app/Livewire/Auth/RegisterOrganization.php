@@ -45,6 +45,18 @@ class RegisterOrganization extends Component
             'role_id' => $orgRole ? $orgRole->id : null, 
         ]);
 
+        \App\Models\Profile::create([
+            'user_id' => $user->id,
+            // Pass the org name as the first name, and a placeholder for the last name 
+            // (unless your database allows last_name to be nullable)
+            'first_name' => $this->name, 
+            'last_name' => '(Organization)', 
+            'college_id' => $this->college_id ?? null, // If you assign them a college during creation
+            'bio' => 'Official BU MADYA Partner Organization.', // A nice default bio
+            'course' => null,
+            'year_level' => null,
+        ]);
+        
         Auth::login($user);
 
         return redirect()->route('partner.dashboard'); // Redirect to their org dashboard
