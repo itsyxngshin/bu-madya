@@ -55,20 +55,27 @@
         </a>
 
         {{-- 1. EVENTS --}}
-        <a href="{{ route('open.events.index') }}"
-           class="{{ $linkClass }} {{ request()->routeIs('open.events.*') ? $activeClass : $inactiveClass }}">
-            <svg class="w-5 h-5 {{ request()->routeIs('open.events.*') ? $iconActive : $iconInactive }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"> </path></svg>
-            Manage Events
-        </a>
-
+        @if($isOrg)
+            <a href="{{ route('partner.events.index') }}"
+            class="{{ $linkClass }} {{ request()->routeIs('partner.events.*') ? $activeClass : $inactiveClass }}">
+                <svg class="w-5 h-5 {{ request()->routeIs('partner.events.*') ? $iconActive : $iconInactive }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"> </path></svg>
+                Manage Events
+            </a>
+        @elseif($isAdmin)
+         <a href="{{ route('open.events.index') }}"
+            class="{{ $linkClass }} {{ request()->routeIs('open.events.*') ? $activeClass : $inactiveClass }}">
+                <svg class="w-5 h-5 {{ request()->routeIs('open.events.*') ? $iconActive : $iconInactive }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"> </path></svg>
+                Manage Events
+            </a>
+        @endif
         {{-- ========================================== --}}
-        {{-- ORGANIZATION ONLY LINKS --}}
+        {{-- SUPER ADMIN ONLY LINKS --}}
         {{-- ========================================== --}}
         @if($isOrg)
             <div class="pt-4 pb-2 px-3 mt-2 border-t border-gray-100">
                 <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Campaigns</p>
             </div>
-            
+
             <a href="{{ route('partner.frames.submit') }}"
                class="{{ $linkClass }} {{ request()->routeIs('partner.frames.*') ? $activeClass : $inactiveClass }}">
                 <svg class="w-5 h-5 {{ request()->routeIs('partner.frames.*') ? $iconActive : $iconInactive }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
@@ -81,7 +88,7 @@
         {{-- SUPER ADMIN ONLY LINKS --}}
         {{-- ========================================== --}}
         @if($isAdmin)
-            
+
             <div class="mt-8">
                 <div class="pt-4 pb-2 px-3">
                     <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Membership</p>
@@ -149,7 +156,7 @@
                 <svg class="w-5 h-5 {{ request()->routeIs('admin.transparency.*') ? $iconActive : $iconInactive }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                 Transparency Board
             </a>
-            
+
             <a href="{{ route('admin.frames.index') }}" class="{{ $linkClass }} {{ request()->routeIs('admin.frames.*') ? $activeClass : $inactiveClass }}">
                 <svg class="w-5 h-5 {{ request()->routeIs('admin.frames.*') ? $iconActive : $iconInactive }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                 Review Frames
