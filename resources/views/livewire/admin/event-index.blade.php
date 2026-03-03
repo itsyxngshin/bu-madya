@@ -57,34 +57,57 @@
                                 <span class="bg-gray-100 text-gray-500 px-2 py-1 rounded text-xs font-bold uppercase">Draft</span>
                             @endif
                         </td>
+                        You are absolutely right. Stuffing six full-text buttons horizontally into a single table cell creates a very cramped, cluttered layout that easily breaks on smaller screens.
+
+The cleanest, most professional way to handle table actions in Tailwind is to convert them into a unified Icon Button Group with hover tooltips. This completely clears up the horizontal space while keeping all the tools just one click away (and it matches the exact sleek aesthetic we used on the Frame Manager page!).
+
+Replace your entire <td class="p-4 text-right"> block with this upgraded icon-based UI:
+
+HTML
                         <td class="p-4 text-right">
-                            <div class="flex items-center justify-end gap-2">
+                            <div class="flex items-center justify-end gap-1.5">
 
                                 @if($event->is_internal_rsvp)
-                                    <a href="{{ route('admin.events.registrants', $event->slug) }}" class="text-green-700 bg-green-50 hover:bg-green-100 text-[10px] font-bold uppercase tracking-widest border border-green-200 px-3 py-1.5 rounded transition">
-                                        Registrants
+                                    {{-- Registrants --}}
+                                    <a href="{{ route('admin.events.registrants', $event->slug) }}" title="Manage Registrants" 
+                                       class="p-2 text-gray-400 hover:text-green-600 bg-gray-50 hover:bg-green-50 rounded-lg transition">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
                                     </a>
-                                    <a href="{{ route('admin.events.scan', $event->slug) }}" target="_blank" class="text-purple-700 bg-purple-50 hover:bg-purple-100 text-[10px] font-bold uppercase tracking-widest border border-purple-200 px-3 py-1.5 rounded transition">
-                                        Scanner
+                                    
+                                    {{-- Scanner --}}
+                                    <a href="{{ route('admin.events.scan', $event->slug) }}" target="_blank" title="Launch QR Scanner" 
+                                       class="p-2 text-gray-400 hover:text-purple-600 bg-gray-50 hover:bg-purple-50 rounded-lg transition">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
                                     </a>
-                                    <a href="{{ route('admin.events.raffle', $event->slug) }}" target="_blank" class="text-orange-700 bg-orange-50 hover:bg-orange-100 text-[10px] font-bold uppercase tracking-widest border border-orange-200 px-3 py-1.5 rounded transition">
-                                        Launch Raffle
+                                    
+                                    {{-- Raffle --}}
+                                    <a href="{{ route('admin.events.raffle', $event->slug) }}" target="_blank" title="Launch Live Raffle" 
+                                       class="p-2 text-gray-400 hover:text-orange-600 bg-gray-50 hover:bg-orange-50 rounded-lg transition">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"></path></svg>
                                     </a>
-                                    <div class="w-px h-4 bg-gray-200 mx-1"></div>
+                                    
+                                    {{-- Divider --}}
+                                    <div class="w-px h-5 bg-gray-200 mx-1"></div>
                                 @endif
 
-                                {{-- Standard Actions --}}
-                                <a href="{{ route('events.show', $event->slug) }}" target="_blank" class="text-blue-500 hover:underline text-xs font-bold">View</a>
-
-                                <a href="{{ route('admin.events.edit', $event->id) }}" class="text-gray-600 hover:text-gray-900 text-xs font-bold border border-gray-300 px-3 py-1 rounded hover:bg-gray-50 transition">
-                                    Edit
+                                {{-- View Public Page --}}
+                                <a href="{{ route('open.events.show', $event->slug) }}" target="_blank" title="Preview Public Page" 
+                                   class="p-2 text-gray-400 hover:text-blue-600 bg-gray-50 hover:bg-blue-50 rounded-lg transition">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
                                 </a>
 
-                                <button wire:click="delete({{ $event->id }})"
-                                        wire:confirm="Are you sure you want to delete this event?"
-                                        class="text-red-600 hover:text-red-900 text-xs font-bold border border-red-200 px-3 py-1 rounded hover:bg-red-50 transition">
-                                    Delete
+                                {{-- Edit --}}
+                                <a href="{{ route('admin.events.edit', $event->id) }}" title="Edit Event" 
+                                   class="p-2 text-gray-400 hover:text-gray-900 bg-gray-50 hover:bg-gray-200 rounded-lg transition">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                </a>
+
+                                {{-- Delete --}}
+                                <button wire:click="delete({{ $event->id }})" wire:confirm="Are you sure you want to delete this event?" title="Delete Event" 
+                                        class="p-2 text-gray-400 hover:text-red-600 bg-gray-50 hover:bg-red-50 rounded-lg transition">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                                 </button>
+                                
                             </div>
                         </td>
                     </tr>
