@@ -20,7 +20,7 @@ use App\Livewire\Open\EvaluationList;
 use App\Livewire\Open\EvaluationForm;
 use App\Livewire\Open\EventRsvp;
 use App\Livewire\Open\FrameBuilder;
-use App\Livewire\Open\EventDiscovery; 
+use App\Livewire\Open\EventDiscovery;
 
 use App\Livewire\Auth\RegisterOrganization;
 
@@ -156,6 +156,7 @@ Route::middleware(['auth', 'role:administrator'])->prefix('admin')->name('admin.
     Route::get('/evaluations/create', EvaluationBuilder::class)->name('evaluations.create');
     Route::get('/frames', FrameManager::class)->name('frames.index');
     Route::get('/events/{event:slug}/raffle', EventRaffle::class)->name('events.raffle');
+    Route::get('/submit-frame', SubmitFrame::class)->name('frames.submit');
 
 });
 
@@ -169,7 +170,7 @@ Route::middleware(['auth', 'role:organization'])->prefix('partner')->name('partn
     Route::get('/events/{id}/edit', EditEvent::class)->name('events.edit');
     Route::get('/event/{event}/edit', EditEvent::class)->name('events.edit');
     Route::get('/events/{event:slug}/raffle', EventRaffle::class)->name('events.raffle');
-    
+
 });
 
 Route::middleware(['auth', 'role:administrator,director'])
