@@ -13,7 +13,7 @@
                 // Note: Change 'partner.events.create' to match your actual web.php route name if it differs!
         @endphp
 
-        <a href="{{ route($createRoute) }}" class="bg-red-600 hover:bg-red-700 text-white text-sm font-bold py-2 px-4 rounded-lg shadow-md transition">
+        <a href="{{ $createRoute }}" class="bg-red-600 hover:bg-red-700 text-white text-sm font-bold py-2 px-4 rounded-lg shadow-md transition">
             + Create New Event
         </a>
     </div>
