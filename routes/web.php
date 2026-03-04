@@ -167,7 +167,6 @@ Route::middleware(['auth', 'role:organization'])->prefix('partner')->name('partn
     Route::get('/events', AdminEventIndex::class)->name('events.index');
     Route::get('/event/create', CreateEvent::class)->name('events.create');
     Route::get('/events/{id}/edit', EditEvent::class)->name('events.edit');
-    Route::get('/event/{event}/edit', EditEvent::class)->name('events.edit');
     Route::get('/events/{event:slug}/raffle', EventRaffle::class)->name('events.raffle');
     Route::get('/profile/edit', EditProfile::class)->name('profile.edit');
 

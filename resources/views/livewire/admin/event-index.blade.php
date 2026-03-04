@@ -1,18 +1,22 @@
 <div class="max-w-7xl mx-auto py-10 sm:px-6 lg:px-8">
 
     {{-- Header & Search --}}
-    @php
-        // Check the role and set the correct route
-        $roleName = auth()->user()->role?->role_name;
-        $createRoute = in_array($roleName, ['administrator', 'organization']) 
-            ? route('admin.events.create') 
-             : route('partner.events.create'); 
-            // Note: Change 'partner.events.create' to match your actual web.php route name if it differs!
-    @endphp
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="font-bold text-2xl text-gray-800">Manage Events</h2>
 
-    <a href="{{ $createRoute }}" class="bg-red-600 hover:bg-red-700 text-white text-sm font-bold py-2 px-4 rounded-lg shadow-md transition">
-        + Create New Event
-    </a>
+        @php
+            // Check the role and set the correct route
+            $roleName = auth()->user()->role?->role_name;
+            $createRoute = in_array($roleName, ['administrator', 'organization']) 
+                ? route('admin.events.create') 
+                : route('partner.events.create'); 
+                // Note: Change 'partner.events.create' to match your actual web.php route name if it differs!
+        @endphp
+
+        <a href="{{ route($createRoute) }}" class="bg-red-600 hover:bg-red-700 text-white text-sm font-bold py-2 px-4 rounded-lg shadow-md transition">
+            + Create New Event
+        </a>
+    </div>
 
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
 
