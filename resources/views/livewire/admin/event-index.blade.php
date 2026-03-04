@@ -100,10 +100,18 @@
                                     </a>
                                     
                                     {{-- Raffle --}}
-                                    <a href="{{ route('admin.events.raffle', $event->slug) }}" target="_blank" title="Launch Live Raffle" 
-                                       class="p-2 text-gray-400 hover:text-orange-600 bg-gray-50 hover:bg-orange-50 rounded-lg transition">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"></path></svg>
-                                    </a>
+                                    @if(in_array(Auth::user()?->role?->role_name, ['administrator', 'director']))
+                                        <a href="{{ route('admin.events.raffle', $event->slug) }}" target="_blank" title="Launch Live Raffle" 
+                                            class="p-2 text-gray-400 hover:text-orange-600 bg-gray-50 hover:bg-orange-50 rounded-lg transition">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"></path></svg>
+                                            </a>
+
+                                    @elseif(in_array(Auth::user()?->role?->role_name, ['organization']))
+                                        <a href="{{ route('partner.events.raffle', $event->slug) }}" target="_blank" title="Launch Live Raffle" 
+                                            class="p-2 text-gray-400 hover:text-orange-600 bg-gray-50 hover:bg-orange-50 rounded-lg transition">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"></path></svg>
+                                            </a>
+                                    @endif
                                     
                                     {{-- Divider --}}
                                     <div class="w-px h-5 bg-gray-200 mx-1"></div>
