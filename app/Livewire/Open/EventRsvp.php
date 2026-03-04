@@ -123,7 +123,7 @@ class EventRsvp extends Component
         $rules = [
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255',
-            'contact_number' => 'required|string|max:20', // [NEW] Required for everyone
+            'contact_number' => 'required|string|max:20', 
             'classification' => 'required|string',
         ];
 
@@ -137,7 +137,6 @@ class EventRsvp extends Component
                 $rules['position'] = 'required|string|max:255';
             }
         } else {
-            // [NEW] Validate school for non-BU students
             $rules['school'] = 'nullable|string|max:255';
 
             if (in_array($this->classification, ['CSO/NGO Representative', 'Partner Representative'])) {
@@ -154,22 +153,25 @@ class EventRsvp extends Component
         }
 
         $ticketCode = 'BU-MADYA-' . strtoupper(Str::random(8));
-
-        // [NEW] Use the verified user ID if available, otherwise use Auth, otherwise null
         $finalUserId = $this->verified_user_id ?? Auth::id() ?? null;
+        
+        // Define if they are representing an org to use for the logic below
+        $isOrgRep = ($this->is_bu_student && $this->is_representing_org) || in_array($this->classification, ['CSO/NGO Representative', 'Partner Representative']);
 
+        // [FIXED] Contact Number added, and Org/Position logic aligned perfectly
         $this->registrationRecord = EventRegistration::create([
             'event_id' => $this->event->id,
             'user_id' => $finalUserId,
             'name' => $this->name,
             'email' => $this->email,
+            'contact_number' => $this->contact_number, // <--- Added this!
             'classification' => $this->classification,
             'college_id' => $this->classification === 'BU Student' ? $this->college_id : null,
             'program' => $this->classification === 'BU Student' ? $this->program : null,
             'school' => $this->is_bu_student ? 'Bicol University' : $this->school,
             'year_level' => $this->classification === 'BU Student' ? $this->year_level : null,
-            'organization_name' => ($this->is_bu_student && $this->is_representing_org) || in_array($this->classification, ['CSO/NGO Representative', 'Partner Representative']) ? $this->organization_name : null,
-            'position' => in_array($this->classification, ['CSO/NGO Representative', 'Partner Representative']) ? $this->position : null,
+            'organization_name' => $isOrgRep ? $this->organization_name : null,
+            'position' => $isOrgRep ? $this->position : null, // <--- Fixed logic to allow BU students!
             'ticket_code' => $ticketCode,
         ]);
 
