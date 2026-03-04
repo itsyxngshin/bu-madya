@@ -80,7 +80,7 @@
                         
                         <div class="relative ml-2" x-data="{ dropdownOpen: false }">
                             <button @click="dropdownOpen = !dropdownOpen" type="button" class="flex text-sm border-2 border-transparent rounded-full focus:outline-none focus:border-red-300 transition hover:shadow-md">
-                                <img class="h-10 w-10 rounded-full object-cover border-2 border-white shadow-sm" src="{{ Auth::user()->profile_photo_path ? (filter_var(Auth::user()->profile_photo_path, FILTER_VALIDATE_URL) ? Auth::user()->profile_photo_path : asset(Auth::user()->profile_photo_path)) : 'https://ui-avatars.com/api/?name='.urlencode(Auth::user()->name).'&color=7F9CF5&background=EBF4FF' }}" />
+                                <img class="h-9 w-9 rounded-full object-cover" src="{{ Auth::user()->profile_photo_path ? (filter_var(Auth::user()->profile_photo_path, FILTER_VALIDATE_URL) ? Auth::user()->profile_photo_path : asset(Auth::user()->profile_photo_path)) : 'https://ui-avatars.com/api/?name='.urlencode(Auth::user()->name).'&color=7F9CF5&background=EBF4FF' }}" alt="{{ Auth::user()->name }}" />
                             </button>
 
                             <div x-show="dropdownOpen" 
