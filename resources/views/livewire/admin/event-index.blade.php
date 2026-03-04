@@ -81,10 +81,17 @@
 
                                 @if($event->is_internal_rsvp)
                                     {{-- Registrants --}}
-                                    <a href="{{ route('admin.events.registrants', $event->slug) }}" title="Manage Registrants" 
-                                       class="p-2 text-gray-400 hover:text-green-600 bg-gray-50 hover:bg-green-50 rounded-lg transition">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-                                    </a>
+                                    @if(in_array(Auth::user()?->role?->role_name, ['administrator', 'director']))
+                                        <a href="{{ route('admin.events.registrants', $event->slug) }}" title="Manage Registrants" 
+                                            class="p-2 text-gray-400 hover:text-green-600 bg-gray-50 hover:bg-green-50 rounded-lg transition">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                                        </a>
+                                    @elseif(in_array(Auth::user()?->role?->role_name, ['organization']))
+                                        <a href="{{ route('partner.events.registrants', $event->slug) }}" title="Manage Registrants" 
+                                                class="p-2 text-gray-400 hover:text-green-600 bg-gray-50 hover:bg-green-50 rounded-lg transition">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                                            </a>
+                                    @endif
                                     
                                     {{-- Scanner --}}
                                     <a href="{{ route('admin.events.scan', $event->slug) }}" target="_blank" title="Launch QR Scanner" 
