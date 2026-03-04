@@ -6,7 +6,7 @@
 
         @php
             // Check the role and set the correct route
-            $roleName = auth()->user()->role?->role_name;
+            $roleName = auth()->user()->role->role_name;
             $createRoute = in_array($roleName, ['administrator', 'organization']) 
                 ? route('admin.events.create') 
                 : route('partner.events.create'); 
