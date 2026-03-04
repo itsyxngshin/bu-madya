@@ -331,45 +331,52 @@ class UserRoster extends Component
 
     public function updateProfile()
     {
+        // 1. Validate ALL fields to ensure data integrity
         $this->validate([
-            'editingProfile.first_name' => 'required|string',
-            'editingProfile.last_name' => 'required|string',
-            'editingRoleId' => 'required|exists:roles,id', // ADD VALIDATION
-            'newPhoto' => 'nullable|image|max:4096',
+            'editingProfile.first_name' => 'required|string|max:255',
+            'editingProfile.last_name'  => 'required|string|max:255',
+            'editingProfile.middle_name'=> 'nullable|string|max:255',
+            'editingProfile.college_id' => 'nullable|exists:colleges,id',
+            'editingProfile.course'     => 'nullable|string|max:255',
+            'editingProfile.year_level' => 'nullable|string|max:255',
+            'editingProfile.bio'        => 'nullable|string',
+            'editingRoleId'             => 'required|exists:roles,id',
+            'newPhoto'                  => 'nullable|image|max:4096',
         ]);
 
-        $profile = $this->viewingUser->profile;
+        // 2. Clean empty strings to NULL (Prevents SQL crashes on foreign keys)
+        $cleanProfileData = [
+            'first_name'  => $this->editingProfile['first_name'],
+            'last_name'   => $this->editingProfile['last_name'],
+            'middle_name' => empty($this->editingProfile['middle_name']) ? null : $this->editingProfile['middle_name'],
+            'college_id'  => empty($this->editingProfile['college_id']) ? null : $this->editingProfile['college_id'],
+            'course'      => empty($this->editingProfile['course']) ? null : $this->editingProfile['course'],
+            'year_level'  => empty($this->editingProfile['year_level']) ? null : $this->editingProfile['year_level'],
+            'bio'         => empty($this->editingProfile['bio']) ? null : $this->editingProfile['bio'],
+        ];
 
-        // 1. Handle Photo Upload
+        // 3. Handle Photo Upload
         if ($this->newPhoto) {
-            // Delete old photo if exists (optional cleanup)
-            if ($this->viewingUser->profile_photo_path) {
-                // Storage::delete($this->viewingUser->profile_photo_path);
-            }
-
-            // Store new photo in 'profile-photos' folder in 'public' disk
             $path = $this->newPhoto->store('profile-photos', 'public');
-            
-            // Update User record directly
             $this->viewingUser->update(['profile_photo_path' => $path]);
         }
         
-        // Update Profile Table
+        // 4. Update Profile Table
         $this->viewingUser->profile()->updateOrCreate(
             ['user_id' => $this->viewingUser->id], 
-            $this->editingProfile
+            $cleanProfileData
         );
 
-        // Update User Table (Name AND Role)
+        // 5. Update User Table (Name AND Role)
         $this->viewingUser->update([
-            'name' => trim($this->editingProfile['first_name'] . ' ' . $this->editingProfile['last_name']),
-            'role_id' => $this->editingRoleId // <--- SAVE THE NEW ROLE
+            'name'    => trim($cleanProfileData['first_name'] . ' ' . $cleanProfileData['last_name']),
+            'role_id' => $this->editingRoleId
         ]);
 
         $this->reset('newPhoto');
 
         session()->flash('message', 'Profile and Role updated successfully.');
-        $this->viewProfile($this->viewingUser->id);
+        $this->viewProfile($this->viewingUser->id); // Refresh data
     }
 
     // -- ENGAGEMENTS --
