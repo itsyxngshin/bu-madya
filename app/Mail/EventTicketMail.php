@@ -6,8 +6,6 @@ use App\Models\Event;
 use App\Models\EventRegistration;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
-use Illuminate\Mail\Mailables\Content;
-use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
 class EventTicketMail extends Mailable
@@ -23,17 +21,9 @@ class EventTicketMail extends Mailable
         $this->registration = $registration;
     }
 
-    public function envelope(): Envelope
+    public function build()
     {
-        return new Envelope(
-            subject: 'Your Ticket: ' . $this->event->title,
-        );
-    }
-
-    public function content(): Content
-    {
-        return new Content(
-            view: 'emails.event-ticket',
-        );
+        return $this->subject('Your Ticket: ' . $this->event->title)
+                    ->view('emails.event-ticket'); // We will create this view next
     }
 }

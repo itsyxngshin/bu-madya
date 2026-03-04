@@ -111,17 +111,48 @@
                                     <div class="absolute -bottom-4 -left-4 w-8 h-8 bg-white rounded-full border border-slate-200"></div>
                                     <div class="absolute -bottom-4 -right-4 w-8 h-8 bg-white rounded-full border border-slate-200"></div>
                                     
-                                    <div class="bg-white p-3 rounded-2xl shadow-sm inline-block"
-                                         wire:ignore x-data x-init="
+                                    {{-- QR Code Section with Gradient --}}
+                                    <div class="bg-white p-4 rounded-2xl shadow-sm inline-block"
+                                        wire:ignore x-data x-init="
                                             $nextTick(() => {
-                                                new QRCode($refs.ticketQr, {
-                                                    text: '{{ $registrationRecord->ticket_code }}',
-                                                    width: 160, height: 160,
-                                                    colorDark: '#0f172a', colorLight: '#ffffff',
-                                                    correctLevel: QRCode.CorrectLevel.H, dotScale: 0.8
+                                                const qrCode = new QRCodeStyling({
+                                                    width: 160, 
+                                                    height: 160,
+                                                    data: '{{ $registrationRecord->ticket_code }}',
+                                                    margin: 0,
+                                                    dotsOptions: {
+                                                        type: 'square',
+                                                        gradient: {
+                                                            type: 'linear',
+                                                            rotation: Math.PI / 4, // Diagonal gradient
+                                                            colorStops: [
+                                                                { offset: 0, color: '#ef4444' },   // Red
+                                                                { offset: 0.5, color: '#eab308' }, // Yellow
+                                                                { offset: 1, color: '#22c55e' }    // Green
+                                                            ]
+                                                        }
+                                                    },
+                                                    cornersSquareOptions: {
+                                                        type: 'square',
+                                                        gradient: {
+                                                            type: 'linear',
+                                                            rotation: Math.PI / 4,
+                                                            colorStops: [
+                                                                { offset: 0, color: '#ef4444' },
+                                                                { offset: 0.5, color: '#eab308' },
+                                                                { offset: 1, color: '#22c55e' }
+                                                            ]
+                                                        }
+                                                    },
+                                                    backgroundOptions: {
+                                                        color: '#ffffff'
+                                                    }
                                                 });
+                                                
+                                                // Append the beautiful gradient QR code to the div
+                                                qrCode.append($refs.ticketQr);
                                             })
-                                         ">
+                                        ">
                                         <div x-ref="ticketQr" class="flex justify-center items-center"></div>
                                     </div>
                                     <p class="text-sm font-mono font-bold text-slate-400 tracking-[0.2em] mt-4">{{ $registrationRecord->ticket_code }}</p>
