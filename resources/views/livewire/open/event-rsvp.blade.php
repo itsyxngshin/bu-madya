@@ -340,12 +340,13 @@
                                 @endif
 
                                 <div class="pt-6">
-                                    <button type="submit" class="w-full py-4 bg-slate-900 text-white font-black rounded-2xl shadow-xl hover:bg-black hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 text-sm uppercase tracking-widest flex items-center justify-center gap-2 group">
+                                    {{-- Changed bg-slate-900 to bg-gray-900 to ensure it renders correctly --}}
+                                    <button type="submit" class="w-full py-4 bg-gray-900 text-white font-black rounded-2xl shadow-xl hover:bg-black hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 text-sm uppercase tracking-widest flex items-center justify-center gap-2 group border border-transparent">
                                         <span>Secure My Spot</span>
                                         <svg class="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                                     </button>
 
-                                    <p class="text-[11px] text-slate-400 text-center mt-4 font-medium px-4 leading-relaxed">
+                                    <p class="text-[11px] text-gray-400 text-center mt-4 font-medium px-4 leading-relaxed">
                                         By registering, you agree to BU MADYA's privacy policy regarding event data collection and usage.
                                     </p>
                                 </div>
