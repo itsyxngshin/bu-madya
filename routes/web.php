@@ -63,6 +63,7 @@ use App\Livewire\Admin\EventScanner;
 use App\Livewire\Admin\EventRegistrants;
 use App\Livewire\Admin\FrameManager;
 use App\Livewire\Admin\EventRaffle;
+use App\Livewire\Admin\LinkagesManager;
 
 use App\Models\MembershipApplication;
 use Illuminate\Support\Facades\Storage;
@@ -161,6 +162,7 @@ Route::middleware(['auth', 'role:administrator'])->prefix('admin')->name('admin.
     Route::get('/frames', FrameManager::class)->name('frames.index');
     Route::get('/events/{event:slug}/raffle', EventRaffle::class)->name('events.raffle');
     Route::get('/submit-frame', SubmitFrame::class)->name('frames.submit');
+    Route::get('/admin/linkages', LinkagesManager::class)->name('linkages.proposals');
 });
 
 Route::middleware(['auth', 'role:organization'])->prefix('partner')->name('partner.')
