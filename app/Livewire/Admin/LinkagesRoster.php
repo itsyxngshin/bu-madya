@@ -13,8 +13,8 @@ use App\Models\Linkage;
 use App\Models\LinkageType;
 use App\Models\LinkageStatus;
 use App\Models\AgreementLevel;
-use App\Models\LinkageActivity; // To log activities
-use App\Models\Sdg; // Assuming you have an SDG model
+use App\Models\LinkageActivity; 
+use App\Models\Sdg; 
 use Livewire\Attributes\Layout;
 
 #[Layout('layouts.madya-admin-deck')]
@@ -53,12 +53,13 @@ class LinkagesRoster extends Component
     public function getTypesProperty() { return LinkageType::all(); }
     public function getStatusesProperty() { return LinkageStatus::all(); }
     public function getAgreementsProperty() { return AgreementLevel::all(); }
-    public function getSdgsProperty() { return Sdg::all(); } // Assuming Sdg model exists
+    public function getSdgsProperty() { return Sdg::all(); } 
 
     public function render()
     {
         $linkages = Linkage::query()
-            ->with(['type', 'status', 'agreementLevel'])
+            // [FIXED] Added 'sdgs' to the eager loading array
+            ->with(['type', 'status', 'agreementLevel', 'sdgs']) 
             ->when($this->search, function($q) {
                 $q->where('name', 'like', '%'.$this->search.'%')
                   ->orWhere('acronym', 'like', '%'.$this->search.'%');
@@ -103,11 +104,18 @@ class LinkagesRoster extends Component
             'form.name' => 'required|string',
             'form.linkage_type_id' => 'required|exists:linkage_types,id',
             'form.linkage_status_id' => 'required|exists:linkage_statuses,id',
+            // Allow agreement level to be null if they select the empty option
+            'form.agreement_level_id' => 'nullable|exists:agreement_levels,id',
             'logo' => 'nullable|image|max:1024',
         ]);
 
         $data = $this->form;
         $data['slug'] = Str::slug($data['name']);
+
+        // [FIXED] Sanitize empty strings to NULL to prevent database integer errors
+        $data['agreement_level_id'] = empty($data['agreement_level_id']) ? null : $data['agreement_level_id'];
+        $data['established_at'] = empty($data['established_at']) ? null : $data['established_at'];
+        $data['expires_at'] = empty($data['expires_at']) ? null : $data['expires_at'];
 
         // Handle Logo Upload
         if ($this->logo) {
@@ -122,9 +130,7 @@ class LinkagesRoster extends Component
         }
 
         // Sync SDGs
-        if (!empty($this->selectedSdgs)) {
-            $linkage->sdgs()->sync($this->selectedSdgs);
-        }
+        $linkage->sdgs()->sync($this->selectedSdgs);
 
         session()->flash('message', 'Linkage saved successfully.');
         $this->isCreateModalOpen = false;

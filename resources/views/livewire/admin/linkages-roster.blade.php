@@ -83,6 +83,21 @@
                         <span class="truncate">{{ $linkage->agreementLevel->name ?? 'No Agreement' }}</span>
                     </div>
                 </div>
+
+                @if($linkage->sdgs->count() > 0)
+                <div class="mt-4 pt-4 border-t border-gray-50 flex flex-wrap gap-1">
+                    @foreach($linkage->sdgs->take(3) as $sdg)
+                        <span class="px-2 py-0.5 bg-yellow-50 text-yellow-700 text-[9px] font-bold uppercase rounded border border-yellow-100 truncate max-w-[80px]" title="{{ $sdg->title }}">
+                            {{ $sdg->title }}
+                        </span>
+                    @endforeach
+                    @if($linkage->sdgs->count() > 3)
+                        <span class="px-2 py-0.5 bg-gray-50 text-gray-500 text-[9px] font-bold uppercase rounded border border-gray-200">
+                            +{{ $linkage->sdgs->count() - 3 }}
+                        </span>
+                    @endif
+                </div>
+                @endif
             </div>
 
             {{-- Footer Actions --}}
