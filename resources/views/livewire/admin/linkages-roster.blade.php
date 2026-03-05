@@ -280,9 +280,6 @@
                 <div>
                     <h4 class="text-xs font-bold text-gray-400 uppercase mb-3">Target SDGs</h4>
                     <div class="flex flex-wrap gap-2">
-                        <div>
-                    <h4 class="text-xs font-bold text-gray-400 uppercase mb-3">Target SDGs</h4>
-                    <div class="flex flex-wrap gap-2">
                         @foreach($viewingLinkage->sdgs as $sdg)
                             {{-- Full SDG tags using the dynamic hex color --}}
                             <span class="px-3 py-1.5 text-white text-[10px] font-bold tracking-wide rounded shadow-sm" 
