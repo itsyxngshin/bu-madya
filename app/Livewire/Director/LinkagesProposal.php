@@ -5,7 +5,9 @@ namespace App\Livewire\Director;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Livewire\Attributes\Layout; 
-use App\Models\LinkageProposal; // <-- 1. Import your model here
+use App\Models\LinkageProposal; 
+use App\Mail\ProposalReceivedMail;     
+use Illuminate\Support\Facades\Mail;    
 
 #[Layout('layouts.madya-template')]
 class LinkagesProposal extends Component
@@ -38,15 +40,13 @@ class LinkagesProposal extends Component
     {
         $this->validate();
 
-        // 3. Handle the file upload securely
         $filePath = null;
         if ($this->file) {
-            // This stores the file in 'storage/app/public/proposals'
             $filePath = $this->file->store('proposals', 'public');
         }
 
-        // 4. Save to the Database
-        LinkageProposal::create([
+        // 1. Save to Database and assign it to a variable ($proposal)
+        $proposal = LinkageProposal::create([
             'organization_name' => $this->orgName,
             'contact_person'    => $this->contactPerson,
             'email'             => $this->email,
@@ -54,11 +54,16 @@ class LinkagesProposal extends Component
             'partnership_type'  => $this->type,
             'title'             => $this->title,
             'message'           => $this->message,
-            'file_path'         => $filePath, // Save the path so you can download it later
+            'file_path'         => $filePath, 
         ]);
 
-        // Optional: Send Email Notification
-        // Mail::to('bu.madya2025@gmail.com')->send(new ProposalMail($this->all()));
+        // 2. Send the automated receipt email to the partner
+        try {
+            Mail::to($this->email)->send(new ProposalReceivedMail($proposal));
+        } catch (\Exception $e) {
+            // Log the error so the app doesn't crash if the mail server fails
+            \Log::error('Failed to send proposal receipt: ' . $e->getMessage());
+        }
         
         $this->reset();
         session()->flash('success', 'Proposal submitted successfully! We will review it and get back to you within 3-5 business days.');
