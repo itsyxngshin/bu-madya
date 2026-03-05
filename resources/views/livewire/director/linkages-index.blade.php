@@ -227,7 +227,6 @@
 
     </div>
 
-    {{-- FOOTER --}}
     <footer class="bg-gray-900 text-white pt-20 pb-10 border-t-8 border-red-600 relative z-20">
         <div class="max-w-[1800px] w-[95%] mx-auto px-6 grid md:grid-cols-4 gap-12 mb-16">
             
@@ -261,14 +260,14 @@
                 </div>
             </div>
             
-            <div>
-                <h4 class="font-bold text-lg mb-6 text-red-500 uppercase tracking-widest text-xs">Quick Links</h4>
-                <ul class="space-y-3 text-gray-400 text-sm">
+            <ul class="space-y-3 text-gray-400 text-sm">
                     <li><a href="{{ route('about') }}" class="hover:text-white hover:translate-x-1 transition inline-block">About BU MADYA</a></li>
                     <li><a href="{{ route('open.directory') }}" class="hover:text-white hover:translate-x-1 transition inline-block">Our Officers</a></li>
                     <li><a href="{{ route('transparency.index') }}" class="hover:text-white hover:translate-x-1 transition inline-block">Transparency Board</a></li>
-                </ul>
-            </div>
+                    <li class="pt-2 mt-2 border-t border-gray-800">
+                        <a href="{{ route('privacy') }}" class="text-xs text-gray-500 hover:text-white hover:translate-x-1 transition inline-block">Privacy Policy</a>
+                    </li>
+            </ul>
 
             <div>
                 <h4 class="font-bold text-lg mb-6 text-green-500 uppercase tracking-widest text-xs">Live Stats</h4>
