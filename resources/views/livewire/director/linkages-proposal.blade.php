@@ -9,10 +9,6 @@
 
     {{-- NAV --}}
     <nav class="fixed top-0 left-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-gray-200 h-16 flex items-center justify-between px-6">
-        <a href="{{ route('linkages.index') }}" class="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-500 hover:text-red-600 transition">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-            Back to Network
-        </a>
         <span class="font-heading font-black text-lg tracking-tighter text-gray-900">
             Partner <span class="text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-yellow-500">With Us</span>
         </span>
@@ -40,21 +36,21 @@
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
                     </div>
                     <h3 class="font-bold text-gray-900 mb-2">Access to Youth Leaders</h3>
-                    <p class="text-xs text-gray-500 leading-relaxed">Connect with over 500+ student leaders across the Bicol Region through our network.</p>
+                    <p class="text-xs text-gray-500 leading-relaxed">Connect with student leaders across the Bicol Region through our network.</p>
                 </div>
                 <div class="bg-white/60 backdrop-blur-sm p-6 rounded-2xl border border-white/50 shadow-sm">
                     <div class="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center text-yellow-700 mb-4">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path></svg>
                     </div>
-                    <h3 class="font-bold text-gray-900 mb-2">Data-Driven Advocacy</h3>
-                    <p class="text-xs text-gray-500 leading-relaxed">Collaborate on research and policy papers backed by our academic committees.</p>
+                    <h3 class="font-bold text-gray-900 mb-2">Meaningful Advocacy</h3>
+                    <p class="text-xs text-gray-500 leading-relaxed">Collaborate on advocacy initiatives led by our committees.</p>
                 </div>
                 <div class="bg-white/60 backdrop-blur-sm p-6 rounded-2xl border border-white/50 shadow-sm">
                     <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center text-green-600 mb-4">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     </div>
                     <h3 class="font-bold text-gray-900 mb-2">Sustainable Impact</h3>
-                    <p class="text-xs text-gray-500 leading-relaxed">Align your CSR or development goals with specific United Nations SDGs.</p>
+                    <p class="text-xs text-gray-500 leading-relaxed">Align your initiatives to development goals with specific United Nations SDGs.</p>
                 </div>
                 <div class="bg-white/60 backdrop-blur-sm p-6 rounded-2xl border border-white/50 shadow-sm">
                     <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 mb-4">
@@ -70,6 +66,7 @@
                 <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Direct Contact</h4>
                 <p class="text-sm font-bold text-gray-900">Director for External Affairs</p>
                 <a href="mailto:bu.madya2025@gmail.com" class="text-sm text-red-600 hover:underline">bu.madya2025@gmail.com</a>
+                <a href="mailto:bu-madya@bicol-u.edu.ph" class="text-sm text-red-600 hover:underline">bu-madya@bicol-u.edu.ph</a>
             </div>
 
         </div>

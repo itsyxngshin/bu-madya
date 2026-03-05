@@ -112,7 +112,7 @@ Route::middleware([
 Route::get('/events/{event:slug}/scan', EventScanner::class)->name('admin.events.scan');
 
 // Middleware accessible to both members and directors
-Route::middleware(['auth', 'role:director'])
+Route::middleware(['auth', 'role:director'])->prefix('director')->name('director.')
     ->group(function () {
     Route::get('/dashboard', Dashboard::class)->name('dashboard');
     Route::get('/project/create', ProjectsCreate::class)->name('projects.create');
@@ -120,11 +120,15 @@ Route::middleware(['auth', 'role:director'])
     Route::get('/profile/edit', EditProfile::class)->name('profile.edit');
     Route::get('/news/create', NewsCreate::class)->name('news.create');
     Route::get('/linkage/create', LinkagesCreate::class)->name('linkages.create');
-    Route::get('/director/the-pillars', ThePillarsManager::class)->name('director.pillars.index');
+    Route::get('/director/the-pillars', ThePillarsManager::class)->name('pillars.index');
     Route::get('/proposals/{proposal}', ProposalsShow::class)->name('admin.proposals.show');
-    Route::get('/proposals', ProposalsIndex::class)->name('admin.proposals.index');
+    Route::get('/proposals', ProposalsIndex::class)->name('proposals.index');
     Route::get('/news/{slug}/edit', NewsEdit::class)->name('news.edit');
     Route::get('/linkage/{linkage:slug}/edit', LinkagesEdit::class)->name('linkages.edit');
+    Route::get('/projects', ProjectRoster::class)->name('projects.index');
+    Route::get('/linkages', LinkagesRoster::class)->name('linkages.index');
+    Route::get('/news', NewsRoster::class)->name('news.index');
+    Route::get('/user', UserRoster::class)->name('user.index');
 });
 
 Route::middleware(['auth'])
