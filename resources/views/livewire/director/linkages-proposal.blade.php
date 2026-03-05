@@ -110,6 +110,13 @@
                         <input wire:model="email" type="email" class="w-full bg-gray-50 border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 transition placeholder-gray-400" placeholder="email@company.com">
                         @error('email') <span class="text-red-500 text-[10px] font-bold">{{ $message }}</span> @enderror
                     </div>
+
+                    <div class="space-y-1">
+                        <label class="text-xs font-bold text-gray-500 uppercase tracking-wider">Phone Number (Optional)</label>
+                        <input wire:model="phone" type="text" class="w-full bg-gray-50 border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 transition placeholder-gray-400" placeholder="e.g. 0912 345 6789">
+                        @error('phone') <span class="text-red-500 text-[10px] font-bold">{{ $message }}</span> @enderror
+                    </div>
+                    
                     <div class="space-y-1">
                         <label class="text-xs font-bold text-gray-500 uppercase tracking-wider">Partnership Type</label>
                         <select wire:model="type" class="w-full bg-gray-50 border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 transition text-gray-700">
