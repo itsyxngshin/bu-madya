@@ -157,80 +157,6 @@
                     </section>
                 </div>
 
-                {{-- HAZARD MAPS REPOSITORY --}}
-                <section class="py-20 bg-stone-100 border-y border-stone-200">
-                    <div class="container mx-auto px-6">
-                        
-                        {{-- Section Header --}}
-                        <div class="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
-                            <div class="max-w-2xl">
-                                <span class="text-orange-600 font-bold uppercase tracking-widest text-xs mb-2 block flex items-center gap-2">
-                                    <span class="w-2 h-2 bg-orange-600 rounded-full animate-pulse"></span> DRR Resources
-                                </span>
-                                <h2 class="font-heading text-3xl md:text-4xl font-black text-gray-900 mb-4">Hazard Maps & Safety</h2>
-                                <p class="text-gray-600">Access official, high-resolution hazard maps to help you plan and stay safe. Data sourced from PHIVOLCS and UP NOAH.</p>
-                            </div>
-                            
-                            {{-- External Link --}}
-                            <a href="https://noah.up.edu.ph/" target="_blank" class="hidden md:flex items-center gap-2 text-xs font-bold text-gray-500 hover:text-orange-600 transition uppercase tracking-wider">
-                                Visit UP NOAH Website <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
-                            </a>
-                        </div>
-
-                        {{-- Maps Grid --}}
-                        <div class="grid md:grid-cols-3 gap-8">
-                            
-                            {{-- Map 1: Mayon Volcano --}}
-                            <div class="group bg-white rounded-2xl p-4 shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-200">
-                                <div class="relative overflow-hidden rounded-xl aspect-video bg-gray-800 mb-4 group-hover:ring-4 ring-orange-100 transition">
-                                    {{-- Placeholder Image (You can replace this with a real screenshot of the Mayon map) --}}
-                                    <img src="{{ asset('images/mayon.jpg') }} " 
-                                        class="w-full h-full object-cover opacity-90 group-hover:opacity-100 group-hover:scale-110 transition duration-700" 
-                                        alt="Mayon Hazard Map">
-                                    <div class="absolute top-2 right-2 bg-black/60 backdrop-blur text-white text-[10px] font-bold px-2 py-1 rounded shadow-sm">PHIVOLCS</div>
-                                </div>
-                                <h3 class="font-bold text-lg text-gray-900 mb-1">Mayon Danger Zones</h3>
-                                <p class="text-xs text-gray-500 mb-4">Permanent (6km) and Extended (7-8km) Danger Zone demarcations.</p>
-                                <a href="https://volcano.phivolcs.dost.gov.ph/" target="_blank" class="block w-full py-2 border-2 border-gray-100 hover:border-orange-500 hover:text-orange-600 text-center rounded-lg text-xs font-bold uppercase tracking-wider transition text-gray-600">
-                                    View Interactive Map
-                                </a>
-                            </div>
-
-                            {{-- Map 2: Flood Susceptibility --}}
-                            <div class="group bg-white rounded-2xl p-4 shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-200">
-                                <div class="relative overflow-hidden rounded-xl aspect-video bg-gray-800 mb-4 group-hover:ring-4 ring-blue-100 transition">
-                                    <img src="https://images.unsplash.com/photo-1544085311-11a028465b03?q=80&w=1932&auto=format&fit=crop" 
-                                        class="w-full h-full object-cover opacity-90 group-hover:opacity-100 group-hover:scale-110 transition duration-700" 
-                                        alt="Flood Hazard Map">
-                                    <div class="absolute top-2 right-2 bg-black/60 backdrop-blur text-white text-[10px] font-bold px-2 py-1 rounded shadow-sm">NOAH</div>
-                                </div>
-                                <h3 class="font-bold text-lg text-gray-900 mb-1">Flood Susceptibility</h3>
-                                <p class="text-xs text-gray-500 mb-4">Areas in Albay prone to 5-year, 25-year, and 100-year rain return periods.</p>
-                                <a href="https://noah.up.edu.ph/know-your-hazards" target="_blank" class="block w-full py-2 border-2 border-gray-100 hover:border-blue-500 hover:text-blue-600 text-center rounded-lg text-xs font-bold uppercase tracking-wider transition text-gray-600">
-                                    Check Your Area
-                                </a>
-                            </div>
-
-                            {{-- Map 3: Evacuation Centers --}}
-                            <div class="group bg-white rounded-2xl p-4 shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-200">
-                                <div class="relative overflow-hidden rounded-xl aspect-video bg-gray-800 mb-4 group-hover:ring-4 ring-green-100 transition">
-                                    <img src="https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=1774&auto=format&fit=crop" 
-                                        class="w-full h-full object-cover opacity-90 group-hover:opacity-100 group-hover:scale-110 transition duration-700" 
-                                        alt="Evacuation Map">
-                                    <div class="absolute top-2 right-2 bg-black/60 backdrop-blur text-white text-[10px] font-bold px-2 py-1 rounded shadow-sm">LGU</div>
-                                </div>
-                                <h3 class="font-bold text-lg text-gray-900 mb-1">Evacuation Centers</h3>
-                                <p class="text-xs text-gray-500 mb-4">Designated safe zones, schools, and evacuation routes for residents.</p>
-                                {{-- Placeholder link or file download --}}
-                                <button disabled class="block w-full py-2 bg-gray-50 border-2 border-gray-100 text-center rounded-lg text-xs font-bold uppercase tracking-wider text-gray-400 cursor-not-allowed">
-                                    Download PDF (Coming Soon)
-                                </button>
-                            </div>
-
-                        </div>
-                    </div>
-                </section>
-
                 {{-- DYNAMIC NEWS SECTION (Updated Cards) --}}
                 <section class="space-y-8 pt-8">
                     <div class="flex items-center justify-between px-2">
@@ -380,14 +306,14 @@
                 </div>
             </div>
             
-            <div>
-                <h4 class="font-bold text-lg mb-6 text-red-500 uppercase tracking-widest text-xs">Quick Links</h4>
-                <ul class="space-y-3 text-gray-400 text-sm">
+            <ul class="space-y-3 text-gray-400 text-sm">
                     <li><a href="{{ route('about') }}" class="hover:text-white hover:translate-x-1 transition inline-block">About BU MADYA</a></li>
                     <li><a href="{{ route('open.directory') }}" class="hover:text-white hover:translate-x-1 transition inline-block">Our Officers</a></li>
                     <li><a href="{{ route('transparency.index') }}" class="hover:text-white hover:translate-x-1 transition inline-block">Transparency Board</a></li>
-                </ul>
-            </div>
+                    <li class="pt-2 mt-2 border-t border-gray-800">
+                        <a href="{{ route('privacy') }}" class="text-xs text-gray-500 hover:text-white hover:translate-x-1 transition inline-block">Privacy Policy</a>
+                    </li>
+            </ul>
 
             <div>
                 <h4 class="font-bold text-lg mb-6 text-green-500 uppercase tracking-widest text-xs">Live Stats</h4>

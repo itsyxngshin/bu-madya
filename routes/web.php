@@ -21,6 +21,7 @@ use App\Livewire\Open\EvaluationForm;
 use App\Livewire\Open\EventRsvp;
 use App\Livewire\Open\FrameBuilder;
 use App\Livewire\Open\EventDiscovery;
+use App\Livewire\Open\PrivacyPolicy;
 
 use App\Livewire\Auth\RegisterOrganization;
 
@@ -232,6 +233,7 @@ Route::get('/events/{event:slug}/register', EventRsvp::class)->name('events.rsvp
 Route::get('/frames/{slug}', FrameBuilder::class)->name('open.frames.show');
 Route::get('/partners/register', RegisterOrganization::class)->name('register.partner');
 Route::get('/discover', EventDiscovery::class)->name('open.events.index');
+Route::get('/privacy', PrivacyPolicy::class)->name('privacy');
 
 
 
