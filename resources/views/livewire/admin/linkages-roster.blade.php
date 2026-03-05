@@ -85,14 +85,17 @@
                 </div>
 
                 @if($linkage->sdgs->count() > 0)
-                <div class="mt-4 pt-4 border-t border-gray-50 flex flex-wrap gap-1">
+                <div class="mt-4 pt-4 border-t border-gray-50 flex flex-wrap gap-1.5">
                     @foreach($linkage->sdgs->take(3) as $sdg)
-                        <span class="px-2 py-0.5 bg-yellow-50 text-yellow-700 text-[9px] font-bold uppercase rounded border border-yellow-100 truncate max-w-[80px]" title="{{ $sdg->title }}">
-                            {{ $sdg->title }}
+                        {{-- Uses inline style for background and white text for contrast --}}
+                        <span class="px-2 py-0.5 text-white text-[9px] font-bold uppercase rounded shadow-sm truncate max-w-[100px]" 
+                              style="background-color: {{ $sdg->color_hex ?? '#6b7280' }};"
+                              title="{{ $sdg->name }}">
+                            {{ $sdg->name }}
                         </span>
                     @endforeach
                     @if($linkage->sdgs->count() > 3)
-                        <span class="px-2 py-0.5 bg-gray-50 text-gray-500 text-[9px] font-bold uppercase rounded border border-gray-200">
+                        <span class="px-2 py-0.5 bg-gray-100 text-gray-500 text-[9px] font-bold uppercase rounded border border-gray-200">
                             +{{ $linkage->sdgs->count() - 3 }}
                         </span>
                     @endif
@@ -190,7 +193,7 @@
                                  @foreach($this->sdgs as $sdg)
                                     <label class="flex items-center gap-2 text-xs cursor-pointer">
                                         <input type="checkbox" wire:model="selectedSdgs" value="{{ $sdg->id }}" class="text-red-600 rounded focus:ring-red-500">
-                                        <span class="truncate">{{ $sdg->title }}</span>
+                                        <span class="truncate">{{ $sdg->name }}</span>
                                     </label>
                                  @endforeach
                              </div>
@@ -277,8 +280,15 @@
                 <div>
                     <h4 class="text-xs font-bold text-gray-400 uppercase mb-3">Target SDGs</h4>
                     <div class="flex flex-wrap gap-2">
+                        <div>
+                    <h4 class="text-xs font-bold text-gray-400 uppercase mb-3">Target SDGs</h4>
+                    <div class="flex flex-wrap gap-2">
                         @foreach($viewingLinkage->sdgs as $sdg)
-                            <span class="px-2.5 py-1 bg-yellow-100 text-yellow-800 text-[10px] font-bold rounded border border-yellow-200 shadow-sm">{{ $sdg->title }}</span>
+                            {{-- Full SDG tags using the dynamic hex color --}}
+                            <span class="px-3 py-1.5 text-white text-[10px] font-bold tracking-wide rounded shadow-sm" 
+                                  style="background-color: {{ $sdg->color_hex ?? '#6b7280' }};">
+                                {{ $sdg->name }}
+                            </span>
                         @endforeach
                     </div>
                 </div>
