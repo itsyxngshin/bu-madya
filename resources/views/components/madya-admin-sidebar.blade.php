@@ -154,12 +154,12 @@
 
             <a href="{{ route('admin.linkages.proposals') }}" 
             class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-bold text-sm group
-                    {{ request()->routeIs('admin.linkages.*') 
+                    {{ request()->routeIs('admin.linkages.proposals') 
                         ? 'bg-red-50 text-red-600' 
                         : 'text-gray-500 hover:bg-gray-100 hover:text-gray-900' }}">
                 
                 {{-- Link / Network Icon --}}
-                <svg class="w-5 h-5 transition-transform group-hover:scale-110 {{ request()->routeIs('admin.linkages.*') ? 'text-red-600' : 'text-gray-400 group-hover:text-gray-600' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-5 h-5 transition-transform group-hover:scale-110 {{ request()->routeIs('admin.linkages.proposals') ? 'text-red-600' : 'text-gray-400 group-hover:text-gray-600' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
                 </svg>
                 
