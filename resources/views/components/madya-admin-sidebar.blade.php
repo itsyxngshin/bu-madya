@@ -147,25 +147,29 @@
                 News & Updates
             </a>
 
-            <a href="{{ route('admin.linkages.index') }}" class="{{ $linkClass }} {{ request()->routeIs('admin.linkages.*') ? $activeClass : $inactiveClass }}">
-                <svg class="w-5 h-5 {{ request()->routeIs('admin.linkages.*') ? $iconActive : $iconInactive }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+            {{-- 1. Main Linkages Directory --}}
+            <a href="{{ route('admin.linkages.index') }}" class="{{ $linkClass }} {{ request()->routeIs('admin.linkages.index') ? $activeClass : $inactiveClass }}">
+                <svg class="w-5 h-5 {{ request()->routeIs('admin.linkages.index') ? $iconActive : $iconInactive }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
+                </svg>
                 Linkages
             </a>
 
+            {{-- 2. Collaboration Proposals (Inbox/Requests) --}}
             <a href="{{ route('admin.linkages.proposals') }}" 
-            class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-bold text-sm group
-                    {{ request()->routeIs('admin.linkages.proposals') 
-                        ? 'bg-red-50 text-red-600' 
-                        : 'text-gray-500 hover:bg-gray-100 hover:text-gray-900' }}">
+               class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-bold text-sm group
+                      {{ request()->routeIs('admin.linkages.proposals') 
+                          ? 'bg-red-50 text-red-600' 
+                          : 'text-gray-500 hover:bg-gray-100 hover:text-gray-900' }}">
                 
-                {{-- Link / Network Icon --}}
+                {{-- Inbox/Document Icon --}}
                 <svg class="w-5 h-5 transition-transform group-hover:scale-110 {{ request()->routeIs('admin.linkages.proposals') ? 'text-red-600' : 'text-gray-400 group-hover:text-gray-600' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
                 </svg>
                 
                 Collaboration Proposals
                 
-                {{-- Optional: Add a subtle notification dot if you want to get fancy later --}}
+                {{-- Pending Notification Badge --}}
                 @php
                     $pendingCount = \App\Models\LinkageProposal::where('status', 'pending')->count();
                 @endphp
