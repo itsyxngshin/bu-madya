@@ -34,7 +34,7 @@ class EditEvent extends Component
     protected $rules = [
         'title' => 'required|string|max:255',
         'registration_link' => 'nullable|url',
-        'cover_image' => 'nullable|image|max:2048',
+        'cover_image' => 'nullable|image|max:8192',
         'location' => 'nullable|string|max:255',
         'capacity' => 'nullable|integer|min:1',
     ];
@@ -67,7 +67,7 @@ class EditEvent extends Component
 
     public function updatedPhotoUpload()
     {
-        $this->validate(['photo_upload' => 'image|max:3072']);
+        $this->validate(['photo_upload' => 'image|max:8192']);
         $this->dispatch('photo-inserted', url: $this->photo_upload->temporaryUrl());
     }
 
