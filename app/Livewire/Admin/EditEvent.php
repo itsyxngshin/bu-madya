@@ -30,6 +30,8 @@ class EditEvent extends Component
     public $is_active;
     public $photo_upload;
     public $slug;
+    public $checkin_start;
+    public $checkin_end;
 
     protected $rules = [
         'title' => 'required|string|max:255',
@@ -37,6 +39,8 @@ class EditEvent extends Component
         'cover_image' => 'nullable|image|max:8192',
         'location' => 'nullable|string|max:255',
         'capacity' => 'nullable|integer|min:1',
+        'checkin_start' => 'nullable|date',
+        'checkin_end' => 'nullable|date|after_or_equal:checkin_start',
     ];
 
     public function mount($id)
@@ -63,6 +67,8 @@ class EditEvent extends Component
         $this->start_date = $this->event->start_date ? $this->event->start_date->format('Y-m-d\TH:i') : null;
         $this->end_date = $this->event->end_date ? $this->event->end_date->format('Y-m-d\TH:i') : null;
         $this->is_active = (bool) $this->event->is_active;
+        $this->checkin_start = $this->event->checkin_start ? $this->event->checkin_start->format('Y-m-d\TH:i') : null; // [NEW]
+        $this->checkin_end = $this->event->checkin_end ? $this->event->checkin_end->format('Y-m-d\TH:i') : null;       // [NEW]
     }
 
     public function updatedPhotoUpload()
@@ -97,6 +103,8 @@ class EditEvent extends Component
             'start_date' => $this->start_date,
             'end_date' => $this->end_date,
             'is_active' => $this->is_active,
+            'checkin_start' => empty($this->checkin_start) ? null : $this->checkin_start, // [NEW]
+            'checkin_end' => empty($this->checkin_end) ? null : $this->checkin_end,       // [NEW]
         ]);
 
         if (auth()->user()->role?->role_name === 'organization') {

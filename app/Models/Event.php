@@ -14,12 +14,14 @@ class Event extends Model
         'registration_link', 'registration_button_text',
         'start_date', 'end_date', 'is_active', 'capacity',
         'location', 'is_internal_rsvp', 'classification', 'college_id', 'user_id',
-        'program', 'year_level'
+        'program', 'year_level','checkin_start','checkin_end', 
     ];
 
     protected $casts = [
         'start_date' => 'datetime',
         'end_date' => 'datetime',
+        'checkin_start' => 'datetime',
+        'checkin_end' => 'datetime',
         'is_active' => 'boolean',
         'is_internal_rsvp' => 'boolean',
     ];

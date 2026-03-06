@@ -166,6 +166,24 @@
                         <label class="block text-xs font-bold text-gray-500 mb-1">End Date</label>
                         <input wire:model="end_date" type="datetime-local" class="w-full rounded-lg border-gray-200 text-sm focus:ring-red-500 focus:border-red-500">
                     </div>
+
+                    {{-- [NEW] Conditional Check-in Settings --}}
+                    @if($is_internal_rsvp)
+                        <div class="pt-4 mt-4 border-t border-gray-100">
+                            <h4 class="text-[10px] font-black text-red-500 uppercase tracking-widest mb-3">Scanner Settings</h4>
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-700 mb-1">Scanner Opens At</label>
+                                    <input wire:model="checkin_start" type="datetime-local" class="w-full rounded-lg border-gray-200 text-sm focus:ring-red-500 focus:border-red-500 bg-red-50">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-700 mb-1">Scanner Closes At</label>
+                                    <input wire:model="checkin_end" type="datetime-local" class="w-full rounded-lg border-gray-200 text-sm focus:ring-red-500 focus:border-red-500 bg-red-50">
+                                </div>
+                                <p class="text-[10px] text-gray-400 leading-tight">If left blank, the scanner will accept tickets indefinitely.</p>
+                            </div>
+                        </div>
+                    @endif
                 </div>
             </div>
 

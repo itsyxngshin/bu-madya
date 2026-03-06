@@ -42,7 +42,7 @@ class EventScanner extends Component
     // The core logic for both camera and manual entry
     private function verifyTicket($ticketCode)
     {
-        // 1. Find the registration for THIS event (Eager load college to prevent errors)
+        // 1. Find the registration for THIS event
         $reg = EventRegistration::with('college')
             ->where('event_id', $this->event->id)
             ->where('ticket_code', $ticketCode)
@@ -53,11 +53,31 @@ class EventScanner extends Component
             $this->scanStatus = 'error';
             $this->scanMessage = 'Invalid Ticket';
             $this->lastScannedData = null;
-            $this->dispatch('play-error-sound'); // [FIXED] Specific sound event
+            $this->dispatch('play-error-sound'); 
             return;
         }
 
-        // 3. Build the Digital ID Card Data
+        // [NEW LOGIC] 3. Validate the Check-In Window
+        $now = Carbon::now();
+
+        if ($this->event->checkin_start && $now->lt($this->event->checkin_start)) {
+            $this->scanStatus = 'error';
+            $formattedTime = $this->event->checkin_start->format('h:i A');
+            $this->scanMessage = "Too Early. Opens at {$formattedTime}";
+            $this->lastScannedData = null;
+            $this->dispatch('play-error-sound');
+            return;
+        }
+
+        if ($this->event->checkin_end && $now->gt($this->event->checkin_end)) {
+            $this->scanStatus = 'error';
+            $this->scanMessage = "Check-in Closed";
+            $this->lastScannedData = null;
+            $this->dispatch('play-error-sound');
+            return;
+        }
+
+        // 4. Build the Digital ID Card Data
         $detailString = '';
         if ($reg->classification === 'BU Student') {
             $detailString = ($reg->college ? $reg->college->name : 'Unknown College') . ' - ' . $reg->year_level;
@@ -72,14 +92,16 @@ class EventScanner extends Component
             'ticket_code' => $reg->ticket_code,
         ];
 
-        // 4. Process Attendance
+        // 5. Process Attendance
         if ($reg->status !== 'Attended') {
             
-            $reg->update(['status' => 'Attended']);
+            $reg->update([
+                'status' => 'Attended',
+                'scanned_at' => $now // Record the exact scan time if you have this column!
+            ]);
             
-            // Optional: Send Email (Wrapped in try/catch so it doesn't break the scanner if mail fails)
+            // Optional: Send Email
             try {
-                // Using ->queue() instead of ->send() speeds up the scanner dramatically!
                 Mail::to($reg->email)->queue(new EventAttendedMail($this->event, $reg));
             } catch (\Exception $e) {
                 \Log::error('Failed to send attendance email: ' . $e->getMessage());
@@ -87,12 +109,12 @@ class EventScanner extends Component
 
             $this->scanStatus = 'success';
             $this->scanMessage = 'Check-in Successful';
-            $this->dispatch('play-success-sound'); // [FIXED] Specific sound event
+            $this->dispatch('play-success-sound'); 
 
         } else {
             $this->scanStatus = 'warning';
             $this->scanMessage = 'Already Checked In';
-            $this->dispatch('play-error-sound'); // [FIXED] Specific sound event
+            $this->dispatch('play-error-sound'); 
         }
     }
 

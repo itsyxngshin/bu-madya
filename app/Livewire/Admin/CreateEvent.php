@@ -33,6 +33,8 @@ class CreateEvent extends Component
     public $end_date;
     public $is_active = true;
     public $photo_upload;
+    public $checkin_start;
+    public $checkin_end;
 
     protected $rules = [
         'title' => 'required|string|max:255',
@@ -40,6 +42,8 @@ class CreateEvent extends Component
         'cover_image' => 'nullable|image|max:8192',
         'location' => 'nullable|string|max:255',
         'capacity' => 'nullable|integer|min:1',
+        'checkin_start' => 'nullable|date',
+        'checkin_end' => 'nullable|date|after_or_equal:checkin_start',
     ];
 
     public function updatedTitle($value)
@@ -71,6 +75,8 @@ class CreateEvent extends Component
             'start_date' => $this->start_date,
             'end_date' => $this->end_date,
             'is_active' => $this->is_active,
+            'checkin_start' => empty($this->checkin_start) ? null : $this->checkin_start, // [NEW]
+            'checkin_end' => empty($this->checkin_end) ? null : $this->checkin_end,       // [NEW]
         ]);
 
         session()->flash('message', 'Event created successfully.');
