@@ -189,13 +189,12 @@
 
             {{-- RIGHT COLUMN: Description --}}
             <main class="lg:col-span-8 order-1">
-                {{-- Changed to solid white, removed blur, added subtle gray border and slightly stronger shadow --}}
-                <div class="bg-white p-6 md:p-12 rounded-[1.5rem] md:rounded-[2rem] border border-gray-100 shadow-lg">
-                    <h3 class="font-bold text-black uppercase tracking-widest text-[10px] md:text-sm border-b border-gray-200 pb-3 md:pb-4 mb-4 md:mb-6">About this Event</h3>
+                <div class="bg-white/60 backdrop-blur-sm p-6 md:p-12 rounded-[1.5rem] md:rounded-[2rem] border border-white/50 shadow-sm">
+                    <h3 class="font-bold text-gray-900 uppercase tracking-widest text-[10px] md:text-sm border-b border-gray-200 pb-3 md:pb-4 mb-4 md:mb-6">About this Event</h3>
 
-                    {{-- UPDATED: Added text-gray-900 to base prose, enforced black headings --}}
-                    <div class="prose prose-sm md:prose-lg prose-stone max-w-none text-gray-900
-                        prose-headings:font-heading prose-headings:font-black prose-headings:text-black
+                    {{-- UPDATED: prose-sm on mobile, prose-lg on desktop --}}
+                    <div class="prose prose-sm md:prose-lg prose-stone max-w-none
+                        prose-headings:font-heading prose-headings:font-black prose-headings:text-gray-900
                         prose-a:text-red-600 hover:prose-a:text-red-700
                         prose-img:rounded-2xl md:prose-img:rounded-3xl prose-img:shadow-xl prose-img:w-full">
 

@@ -75,14 +75,23 @@
                     </div>
                 </div>
 
-                {{-- Markdown Description --}}
-                <div class="prose prose-slate md:prose-lg max-w-none
-                    prose-headings:font-black prose-headings:text-slate-900 prose-headings:tracking-tight
-                    prose-p:text-slate-600 prose-p:leading-relaxed
-                    prose-a:text-red-600 hover:prose-a:text-red-700 prose-a:font-bold prose-a:underline-offset-4
-                    prose-img:rounded-3xl prose-img:shadow-xl
-                    break-words overflow-hidden">
-                    {!! Str::markdown($event->description ?? '') !!}
+                {{-- RIGHT COLUMN: Description --}}
+                <div class="bg-white p-6 md:p-10 rounded-[1.5rem] md:rounded-[2rem] border border-gray-100 shadow-xl">
+                    
+                    <h3 class="font-bold text-black uppercase tracking-widest text-[10px] md:text-sm border-b border-gray-200 pb-3 md:pb-4 mb-4 md:mb-6">
+                        About this Event
+                    </h3>
+
+                    {{-- Markdown Description --}}
+                    <div class="prose prose-slate md:prose-lg max-w-none
+                        prose-headings:font-black prose-headings:text-black prose-headings:tracking-tight
+                        prose-p:text-gray-800 prose-p:leading-relaxed
+                        prose-a:text-red-600 hover:prose-a:text-red-700 prose-a:font-bold prose-a:underline-offset-4
+                        prose-img:rounded-3xl prose-img:shadow-md
+                        break-words overflow-hidden">
+                        {!! Str::markdown($event->description ?? '') !!}
+                    </div>
+                    
                 </div>
             </div>
 
