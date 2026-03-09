@@ -7,7 +7,7 @@ use Livewire\WithFileUploads;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Layout;
 use App\Models\Evaluation;
-use App\Models\Project;
+use App\Models\Project; 
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Str;
 
@@ -26,10 +26,13 @@ class EvaluationBuilder extends Component
     public $is_active = true;
     public $header_image;
     public $existing_header_image;
-
+    
     // Data Containers
     public $questions = [];
     public $available_projects = [];
+    
+    // [NEW] Track which question is currently selected
+    public $activeQuestionIndex = null;
 
     protected function rules()
     {
@@ -37,7 +40,7 @@ class EvaluationBuilder extends Component
             'title' => 'required|string|max:255',
             'slug' => ['nullable', 'string', 'max:255', Rule::unique('evaluations', 'slug')->ignore($this->evaluation->id)],
             'project_id' => 'nullable|integer',
-            'questions.*.question_text' => 'required|string',
+            'questions.*.question_text' => 'nullable|string', // Nullable so Page Breaks don't fail validation
             'questions.*.type' => 'required|in:text,textarea,radio,checkbox,dropdown,likert,section,file,page_break',
             'questions.*.new_image' => 'nullable|image|max:2048',
         ];
@@ -45,13 +48,11 @@ class EvaluationBuilder extends Component
 
     public function mount(Evaluation $evaluation = null)
     {
-        // 1. Load Projects for Dropdown
         $this->available_projects = Project::where('status', '!=', 'Draft')
             ->orderBy('title')->select('id', 'title')->get();
 
         $this->evaluation = $evaluation ?? new Evaluation();
 
-        // 2. Load Evaluation Data
         if ($this->evaluation->exists) {
             $this->title = $this->evaluation->title;
             $this->slug = $this->evaluation->slug;
@@ -60,7 +61,6 @@ class EvaluationBuilder extends Component
             $this->is_active = $this->evaluation->is_active;
             $this->existing_header_image = $this->evaluation->header_image;
 
-            // 3. Load Questions & Assign Temp IDs for Dragging
             $this->questions = $this->evaluation->questions()
                 ->orderBy('order')
                 ->get()
@@ -68,25 +68,33 @@ class EvaluationBuilder extends Component
                     $arr = $q->toArray();
                     $arr['new_image'] = null;
                     $arr['description'] = $arr['description'] ?? '';
-                    $arr['temp_id'] = (string) Str::uuid(); // CRITICAL for Drag & Drop
+                    $arr['temp_id'] = (string) Str::uuid(); 
                     return $arr;
                 })
                 ->toArray();
+                
+            // Set first question active by default if it exists
+            if(count($this->questions) > 0) $this->activeQuestionIndex = 0;
+            
         } else {
             $this->is_active = true;
             $this->questions = [];
         }
     }
 
-    // --- DRAG & DROP LOGIC ---
+    // --- SELECTION LOGIC ---
+    public function setActiveQuestion($index)
+    {
+        $this->activeQuestionIndex = $index;
+    }
 
+    // --- DRAG & DROP LOGIC ---
     public function updateQuestionOrder($list)
     {
         foreach ($list as $item) {
             $tempId = $item['value'];
             $order = $item['order'];
 
-            // Find question by temp_id and update order
             foreach ($this->questions as $key => $q) {
                 if ($q['temp_id'] === $tempId) {
                     $this->questions[$key]['order'] = $order;
@@ -94,48 +102,74 @@ class EvaluationBuilder extends Component
                 }
             }
         }
-
-        // Sort array in memory so the view reflects the change
+        
         usort($this->questions, fn($a, $b) => $a['order'] <=> $b['order']);
+        
+        // Reset active index so we don't accidentally highlight the wrong one after sort
+        $this->activeQuestionIndex = null; 
     }
 
     // --- QUESTION MANAGEMENT ---
-
     public function addQuestion($type)
     {
         $defaultOptions = [];
-
+        
         if ($type === 'likert') {
             $defaultOptions = ['Strongly Disagree', 'Disagree', 'Neutral', 'Agree', 'Strongly Agree'];
-        } elseif (in_array($type, ['radio', 'checkbox', 'dropdown'])) { // <-- Added 'dropdown' here
+        } elseif (in_array($type, ['radio', 'checkbox', 'dropdown'])) {
             $defaultOptions = [
                 ['text' => 'Option 1', 'jump' => null],
                 ['text' => 'Option 2', 'jump' => null]
             ];
         }
 
-        $this->questions[] = [
+        $newQuestion = [
             'id' => null,
-            'temp_id' => (string) Str::uuid(), // Unique ID for new items
+            'temp_id' => (string) Str::uuid(), 
             'type' => $type,
             'question_text' => '',
             'description' => '',
             'options' => $defaultOptions,
-            'is_required' => ($type !== 'section'),
-            'order' => count($this->questions),
+            'is_required' => !in_array($type, ['section', 'page_break']), // Auto-false for breaks/sections
+            'order' => 0, 
             'image_path' => null,
             'new_image' => null
         ];
+
+        // [NEW] Insert logic: Place it right after the currently active question
+        if ($this->activeQuestionIndex !== null && isset($this->questions[$this->activeQuestionIndex])) {
+            array_splice($this->questions, $this->activeQuestionIndex + 1, 0, [$newQuestion]);
+            $this->activeQuestionIndex++; // Move focus to the newly created question
+        } else {
+            $this->questions[] = $newQuestion; // Fallback: append to end
+            $this->activeQuestionIndex = count($this->questions) - 1;
+        }
+
+        // Recalculate order integers
+        foreach ($this->questions as $idx => $q) {
+            $this->questions[$idx]['order'] = $idx;
+        }
     }
 
     public function removeQuestion($index)
     {
         unset($this->questions[$index]);
-        $this->questions = array_values($this->questions); // Re-index array
+        $this->questions = array_values($this->questions); 
+        
+        // Recalculate order integers
+        foreach ($this->questions as $idx => $q) {
+            $this->questions[$idx]['order'] = $idx;
+        }
+
+        // Adjust active index if we deleted the active one or one above it
+        if ($this->activeQuestionIndex === $index) {
+            $this->activeQuestionIndex = null;
+        } elseif ($this->activeQuestionIndex > $index) {
+            $this->activeQuestionIndex--;
+        }
     }
 
     // --- OPTION MANAGEMENT ---
-
     public function addOption($questionIndex)
     {
         $this->questions[$questionIndex]['options'][] = ['text' => 'New Option', 'jump' => null];
@@ -148,14 +182,13 @@ class EvaluationBuilder extends Component
     }
 
     // --- COMPUTED PROPERTIES ---
-
     public function getSectionsProperty()
     {
         return collect($this->questions)
             ->where('type', 'section')
             ->map(function($q) {
                 return [
-                    'id' => $q['temp_id'], // Map section temp_id for dropdown
+                    'id' => $q['temp_id'], 
                     'title' => $q['question_text'] ?: 'Untitled Section',
                     'order' => $q['order']
                 ];
@@ -165,13 +198,12 @@ class EvaluationBuilder extends Component
     }
 
     // --- ACTIONS ---
-
     public function generateRandomSlug()
     {
         $this->slug = Str::random(16);
     }
 
-    #[On('confirmed-reset')]
+    #[On('confirmed-reset')] 
     public function resetResponses()
     {
         if (!$this->evaluation->exists) return;
@@ -181,7 +213,7 @@ class EvaluationBuilder extends Component
         if ($responseIds->isNotEmpty()) {
             \App\Models\EvaluationAnswer::whereIn('evaluation_response_id', $responseIds)->delete();
             $this->evaluation->responses()->delete();
-
+            
             $this->dispatch('swal:modal', [
                 'type' => 'success', 'title' => 'Deleted!', 'text' => 'Responses cleared successfully.'
             ]);
@@ -196,7 +228,6 @@ class EvaluationBuilder extends Component
     {
         $this->validate();
 
-        // 1. Save Evaluation
         if ($this->header_image) {
             $this->evaluation->header_image = $this->header_image->store('evaluation-headers', 'public');
         }
@@ -207,16 +238,14 @@ class EvaluationBuilder extends Component
         $this->evaluation->is_active = $this->is_active;
         $this->evaluation->save();
 
-        // 2. Sync Questions (Delete Removed)
         $currentIds = collect($this->questions)->pluck('id')->filter()->toArray();
         try {
             $this->evaluation->questions()->whereNotIn('id', $currentIds)->delete();
         } catch (\Exception $e) {
-            session()->flash('warning', 'Some removed questions could not be deleted due to existing responses. Use "Reset Data" to clear them.');
+            session()->flash('warning', 'Some removed questions could not be deleted due to existing responses.');
         }
 
-        // 3. Save Questions & Map Temp IDs
-        $tempIdMap = []; // Maps 'uuid-temp' -> 5 (real DB ID)
+        $tempIdMap = []; 
 
         foreach ($this->questions as $index => $q) {
             $imagePath = $q['image_path'] ?? null;
@@ -224,25 +253,25 @@ class EvaluationBuilder extends Component
                 $imagePath = $q['new_image']->store('question-images', 'public');
             }
 
+            // Fallback for empty strings to prevent db errors
+            $qText = empty($q['question_text']) ? ' ' : $q['question_text'];
+
             $dbQ = $this->evaluation->questions()->updateOrCreate(
                 ['id' => $q['id'] ?? null],
                 [
                     'type' => $q['type'],
-                    'question_text' => $q['question_text'],
+                    'question_text' => $q['type'] === 'page_break' ? 'Page Break' : $qText,
                     'description' => $q['description'] ?? null,
-                    'options' => $q['options'],
+                    'options' => $q['options'], 
                     'is_required' => $q['is_required'],
                     'order' => $index,
-                    'image_path' => $imagePath
+                    'image_path' => $imagePath 
                 ]
             );
 
-            // Save the mapping for Skip Logic pass
             $tempIdMap[$q['temp_id']] = $dbQ->id;
         }
 
-        // 4. Second Pass: Fix Skip Logic IDs
-        // The dropdown saved a 'temp_id'. We need to replace it with the 'real_id' we just created.
         foreach ($this->evaluation->questions as $question) {
             if ($question->type === 'radio' && is_array($question->options)) {
                 $updatedOptions = [];
@@ -250,7 +279,7 @@ class EvaluationBuilder extends Component
 
                 foreach ($question->options as $opt) {
                     if (isset($opt['jump']) && isset($tempIdMap[$opt['jump']])) {
-                        $opt['jump'] = $tempIdMap[$opt['jump']]; // Swap UUID for Integer ID
+                        $opt['jump'] = $tempIdMap[$opt['jump']]; 
                         $modified = true;
                     }
                     $updatedOptions[] = $opt;
