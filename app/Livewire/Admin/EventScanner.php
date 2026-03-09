@@ -8,6 +8,7 @@ use App\Models\EventRegistration;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\EventAttendedMail;
+use Carbon\Carbon;
 
 class EventScanner extends Component
 {
