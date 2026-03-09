@@ -44,6 +44,15 @@
                         </label>
                     </div>
 
+                    {{-- THEME COLOR --}}
+                    <div class="mb-5">
+                        <label class="block text-xs font-bold text-gray-700 mb-1">Theme Color</label>
+                        <div class="flex items-center gap-3">
+                            <input type="color" wire:model.live="theme_color" class="w-10 h-10 rounded cursor-pointer border-0 p-0 bg-transparent">
+                            <input type="text" wire:model.live="theme_color" class="w-full rounded-lg border-gray-200 bg-gray-50 text-xs font-mono p-2 uppercase" placeholder="#EA580C">
+                        </div>
+                    </div>
+
                     {{-- TITLE --}}
                     <div class="mb-4">
                         <label class="block text-xs font-bold text-gray-700 mb-1">Title <span class="text-red-500">*</span></label>
@@ -189,7 +198,7 @@
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"></path></svg>
                                     </div>
 
-                                    {{-- [NEW] ALPINE WRAPPER FOR SMART TOOLBAR --}}
+                                    {{-- ALPINE WRAPPER FOR SMART TOOLBAR --}}
                                     <div class="pl-6" x-data="{
                                             activeField: 'qText',
                                             insert(start, end) {
@@ -218,7 +227,6 @@
                                                 </div>
 
                                                 @if($isSection)
-                                                   @if($isSection)
                                                     {{-- SECTION TITLE --}}
                                                     <textarea x-ref="qText" @focus="activeField = 'qText'" wire:model="questions.{{ $index }}.question_text" class="w-full text-base font-black text-gray-800 border-0 bg-transparent placeholder-orange-300 focus:ring-0 p-0 resize-y" rows="2" placeholder="Type Section Title"></textarea>
                                                 @else
