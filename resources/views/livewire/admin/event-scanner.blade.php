@@ -168,31 +168,34 @@
 
 <style>
     /* ==============================================================
-       ULTRA-MODERN HTML5-QRCODE UI OVERRIDES
+       ULTRA-MODERN HTML5-QRCODE UI OVERRIDES (FIXED)
        ============================================================== */
 
     /* Main container cleanup */
     #reader { border: none !important; background: transparent !important; }
 
-    /* Hide ugly default descriptive texts injected by the library */
-    #reader__dashboard_section_csr > span,
-    #reader__dashboard_section_csfa > span,
-    #reader__dashboard_section_csr > div > span {
-        display: none !important;
+    /* 1. Safely hide default raw text without breaking buttons/dropdowns */
+    #reader__dashboard_section_csr,
+    #reader__dashboard_section_csfa {
+        font-size: 0 !important;
+    }
+    #reader__dashboard_section_csr *,
+    #reader__dashboard_section_csfa * {
+        font-size: 14px; /* Restores font size for interactive children */
     }
 
-    /* 1. THE TOGGLE SWITCH (Camera vs File) */
+    /* 2. THE TOGGLE SWITCH (Camera vs File) */
     #reader__dashboard_section_swaplink {
         display: inline-block;
-        background-color: #f3f4f6; /* bg-gray-100 */
-        color: #4b5563 !important; /* text-gray-600 */
+        background-color: #f3f4f6;
+        color: #4b5563 !important;
         text-decoration: none !important;
         font-weight: 800;
         text-transform: uppercase;
         letter-spacing: 1px;
-        font-size: 10px;
+        font-size: 10px !important;
         padding: 10px 20px;
-        border-radius: 9999px; /* pill shape */
+        border-radius: 9999px;
         margin: 0 auto 16px auto;
         text-align: center;
         transition: all 0.2s;
@@ -203,7 +206,7 @@
         color: #111827 !important;
     }
 
-    /* 2. THE CAMERA DROPDOWN SELECTION */
+    /* 3. THE CAMERA DROPDOWN SELECTION */
     #reader__camera_selection {
         width: 100%;
         padding: 14px 16px;
@@ -211,14 +214,13 @@
         border: 2px solid #f3f4f6;
         background-color: #f9fafb;
         color: #111827;
-        font-size: 14px;
+        font-size: 14px !important;
         font-weight: 700;
         margin-bottom: 16px;
-        appearance: none; /* Removes default OS styling */
+        appearance: none;
         outline: none;
         cursor: pointer;
         transition: all 0.2s;
-        /* Custom SVG Dropdown Arrow */
         background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M5 8l5 5 5-5'/%3e%3c/svg%3e");
         background-position: right 12px center;
         background-repeat: no-repeat;
@@ -229,7 +231,7 @@
         background-color: #ffffff;
     }
 
-    /* 3. THE FILE UPLOAD BIN (Dropzone style) */
+    /* 4. THE FILE UPLOAD BIN (Dropzone style) */
     #reader__filescan_input {
         display: block;
         width: 100%;
@@ -238,7 +240,7 @@
         border: 2px dashed #cbd5e1;
         border-radius: 16px;
         margin-bottom: 16px;
-        font-size: 13px;
+        font-size: 13px !important;
         font-weight: 600;
         color: #6b7280;
         text-align: center;
@@ -249,8 +251,6 @@
         border-color: #9ca3af;
         background: #f3f4f6;
     }
-
-    /* 3b. The actual "Choose File" button inside the input */
     #reader__filescan_input::file-selector-button {
         background-color: #111827;
         color: white;
@@ -265,49 +265,43 @@
         margin-right: 12px;
         transition: background-color 0.2s;
     }
-    #reader__filescan_input::file-selector-button:hover {
-        background-color: #374151;
-    }
+    #reader__filescan_input::file-selector-button:hover { background-color: #374151; }
 
-    /* 4. GENERIC / START SCAN BUTTON */
+    /* 5. ALL BUTTONS BASE STYLE */
     #reader button {
         width: 100%;
-        background: #10b981; /* Default to Start Green */
+        background: #111827; /* Default Black for permission/switch buttons */
         color: white;
         border-radius: 12px;
         padding: 14px 16px;
         border: none;
         font-weight: 800;
-        font-size: 14px;
+        font-size: 14px !important;
         text-transform: uppercase;
         letter-spacing: 1px;
         cursor: pointer;
         transition: all 0.2s;
         box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        margin-bottom: 10px; /* Space between stacked buttons */
     }
-    #reader button:hover { background: #059669; transform: translateY(-1px); }
+    #reader button:hover { transform: translateY(-1px); box-shadow: 0 6px 8px -1px rgba(0,0,0,0.15); }
 
-    /* 5. TARGET SPECIFIC BUTTONS (Stop Scanning & File Action) */
-    #html5-qrcode-button-camera-stop {
-        background: #ef4444 !important; /* Stop Red */
-        margin-top: 12px;
-    }
+    /* SPECIFIC TARGETED BUTTONS */
+    #html5-qrcode-button-camera-start { background: #10b981 !important; } /* Start = Green */
+    #html5-qrcode-button-camera-start:hover { background: #059669 !important; }
+
+    #html5-qrcode-button-camera-stop { background: #ef4444 !important; } /* Stop = Red */
     #html5-qrcode-button-camera-stop:hover { background: #dc2626 !important; }
-
-    #html5-qrcode-button-file-selection {
-        background: #111827 !important; /* Scan Image Black */
-    }
-    #html5-qrcode-button-file-selection:hover { background: #030712 !important; }
 
     /* The video viewfinder rounding */
     #reader__scan_region {
         border-radius: 16px;
         overflow: hidden;
         background-color: black;
+        margin-top: 16px;
+        margin-bottom: 16px;
     }
-    #reader__scan_region video {
-        border-radius: 16px;
-    }
+    #reader__scan_region video { border-radius: 16px; }
 
     .animate-bounce-short { animation: bounce 0.5s ease-in-out 1; }
 </style>
