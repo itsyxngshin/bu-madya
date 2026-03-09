@@ -150,7 +150,7 @@
                                     </div>
                                 @endif
 
-                                <div class="relative z-10">
+                                <div class="relative z-10" style="z-index: {{ 100 - $loop->index }}">
                                     {{-- INPUTS --}}
                                     @if($question->type === 'text')
                                         <input type="text" wire:model.live="answers.{{ $question->id }}" class="w-full border-0 border-b-2 border-gray-200 bg-transparent py-2 text-sm focus:border-orange-500 focus:ring-0 placeholder-gray-300" placeholder="Type your answer...">
@@ -163,8 +163,7 @@
                                                 open: false,
                                                 selected: @entangle('answers.' . $question->id).live
                                              }"
-                                             class="relative z-20"
-                                             style="z-index: {{ 100 - $loop->index }}">
+                                             class="relative z-20">
 
                                             {{-- Trigger Button --}}
                                             <button @click="open = !open" @click.outside="open = false" type="button"
