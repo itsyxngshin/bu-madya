@@ -37,8 +37,8 @@
 
                     {{-- SECTIONS --}}
                     @if($question->type === 'section')
-                        <div class="pt-8 pb-2 border-b-2 border-orange-100">
-                            <h2 class="text-lg font-black text-orange-600 uppercase tracking-tight">{{ $question->question_text }}</h2>
+                        <div class="font-bold text-gray-900 mb-4 prose prose-sm max-w-none prose-p:mt-0 prose-p:mb-2 prose-a:text-orange-600">
+                            {!! \Illuminate\Support\Str::markdown($question->question_text ?? '') !!}
                         </div>
                     
                     {{-- LIKERT SCALE RESULT --}}
@@ -56,7 +56,9 @@
                                     <span class="text-[10px] text-gray-400 font-bold uppercase">{{ $stat['count'] ?? 0 }} Responses</span>
                                 </div>
                                 <div class="md:w-2/3">
-                                    <h3 class="font-bold text-gray-900 mb-4">{{ $question->question_text }}</h3>
+                                    <div class="font-bold text-gray-900 mb-4 prose prose-sm max-w-none prose-p:mt-0 prose-p:mb-2 prose-a:text-orange-600">
+                                        {!! \Illuminate\Support\Str::markdown($question->question_text ?? '') !!}
+                                    </div>
                                     <div class="space-y-3">
                                         @if(isset($stat['count']) && $stat['count'] > 0)
                                             @foreach(array_reverse($question->options, true) as $optIndex => $label)
@@ -84,7 +86,9 @@
                     @elseif(in_array($question->type, ['radio', 'dropdown']))
                         <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
                             <div class="flex justify-between items-center mb-4">
-                                <h3 class="font-bold text-gray-900">{{ $question->question_text }}</h3>
+                                <div class="font-bold text-gray-900 mb-4 prose prose-sm max-w-none prose-p:mt-0 prose-p:mb-2 prose-a:text-orange-600">
+                                    {!! \Illuminate\Support\Str::markdown($question->question_text ?? '') !!}
+                                </div>
                                 <span class="bg-gray-100 text-gray-500 text-[10px] font-bold px-2 py-1 rounded uppercase">
                                     {{ $question->type === 'dropdown' ? 'Dropdown Menu' : 'Single Choice' }}
                                 </span>
@@ -114,7 +118,9 @@
                     @elseif($question->type === 'checkbox')
                         <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
                             <div class="flex justify-between items-center mb-4">
-                                <h3 class="font-bold text-gray-900">{{ $question->question_text }}</h3>
+                                <div class="font-bold text-gray-900 mb-4 prose prose-sm max-w-none prose-p:mt-0 prose-p:mb-2 prose-a:text-orange-600">
+                                    {!! \Illuminate\Support\Str::markdown($question->question_text ?? '') !!}
+                                </div>
                                 <span class="bg-blue-50 text-blue-600 text-[10px] font-bold px-2 py-1 rounded uppercase">Multi-Select</span>
                             </div>
                             <div class="space-y-3">
@@ -143,7 +149,9 @@
                     @else
                         <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
                             <div class="flex justify-between items-start mb-4">
-                                <h3 class="font-bold text-gray-900">{{ $question->question_text }}</h3>
+                                <div class="font-bold text-gray-900 mb-4 prose prose-sm max-w-none prose-p:mt-0 prose-p:mb-2 prose-a:text-orange-600">
+                                    {!! \Illuminate\Support\Str::markdown($question->question_text ?? '') !!}
+                                </div>
                                 <span class="bg-gray-100 text-gray-500 text-[10px] font-bold px-2 py-1 rounded uppercase">
                                     {{ $question->type === 'file' ? 'File Upload' : 'Text Input' }}
                                 </span>
@@ -221,10 +229,8 @@
                         @if($question->type === 'page_break') @continue @endif
 
                         @if($question->type === 'section')
-                            <div class="bg-gray-50 px-6 py-4 border-y border-gray-200 mt-4 first:mt-0">
-                                <h3 class="font-bold text-gray-900 mb-4 prose prose-sm max-w-none prose-p:inline prose-a:text-orange-600">
-                                    {!! \Illuminate\Support\Str::inlineMarkdown($question->question_text ?? '') !!}
-                                </h3>
+                            <div class="font-bold text-gray-900 mb-4 prose prose-sm max-w-none prose-p:mt-0 prose-p:mb-2 prose-a:text-orange-600">
+                                {!! \Illuminate\Support\Str::markdown($question->question_text ?? '') !!}
                             </div>
                         @else
                             @php
@@ -234,7 +240,9 @@
                             @endphp
 
                             <div class="px-6 py-5 border-b border-gray-100 last:border-0">
-                                <label class="block text-sm font-bold text-gray-700 mb-2">{{ $question->question_text }}</label>
+                                <div class="font-bold text-gray-900 mb-4 prose prose-sm max-w-none prose-p:mt-0 prose-p:mb-2 prose-a:text-orange-600">
+                                    {!! \Illuminate\Support\Str::markdown($question->question_text ?? '') !!}
+                                </div>
                                 
                                 @if(!$val)
                                     <span class="text-xs text-gray-400 italic">No answer provided</span>

@@ -94,6 +94,49 @@
                         @endif
                     </div>
                 </div>
+
+                {{-- [MOVED] OPT-IN / ACCOUNT LINKING (Now on Page 1) --}}
+                <div class="mb-8 bg-gray-900 rounded-2xl p-6 md:p-8 shadow-xl relative overflow-hidden border border-gray-800">
+                    <div class="absolute top-0 right-0 -mr-16 -mt-16 w-32 h-32 bg-red-600/20 rounded-full blur-2xl"></div>
+
+                    <div class="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+                        <div class="flex-1">
+                            <h4 class="text-white font-bold text-lg mb-1 flex items-center gap-2">
+                                <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                                Privacy & Account Linking
+                            </h4>
+                            @if(Auth::check())
+                                <p class="text-gray-400 text-sm leading-relaxed max-w-lg">
+                                    Would you like to attach this evaluation to your BU MADYA profile <strong>({{ Auth::user()->name }})</strong>? If left unchecked, your response will be completely anonymous.
+                                </p>
+                            @else
+                                <p class="text-gray-400 text-sm leading-relaxed max-w-lg">
+                                    You are currently submitting this form anonymously. To link this response to your member profile, please log in first.
+                                </p>
+                            @endif
+                        </div>
+
+                        <div class="shrink-0 w-full md:w-auto">
+                            @if(Auth::check())
+                                <label class="relative flex items-center justify-between md:justify-start cursor-pointer bg-gray-800 p-2 md:pr-4 rounded-xl border border-gray-700 hover:border-gray-600 transition">
+                                    <div class="flex items-center gap-3">
+                                        <div class="relative inline-flex items-center">
+                                            <input type="checkbox" wire:model="connect_account" class="sr-only peer">
+                                            <div class="w-12 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:bg-red-600 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+                                        </div>
+                                        <span class="text-xs font-bold uppercase tracking-widest transition-colors duration-300 {{ $connect_account ? 'text-red-400' : 'text-gray-400' }}">
+                                            {{ $connect_account ? 'Linked' : 'Anonymous' }}
+                                        </span>
+                                    </div>
+                                </label>
+                            @else
+                                <a href="{{ route('login') }}" class="block text-center px-6 py-3 bg-white text-gray-900 font-bold rounded-xl text-xs uppercase tracking-widest hover:bg-gray-100 hover:scale-105 transition shadow-lg">
+                                    Log In to Link
+                                </a>
+                            @endif
+                        </div>
+                    </div>
+                </div>
             @endif
 
             {{-- QUESTIONS LOOP (For Current Page Only) --}}
@@ -106,9 +149,9 @@
                             <div class="pt-6 pb-2" wire:key="section-{{ $question->id }}">
                                 <div class="flex items-center gap-4">
                                     <div class="h-px bg-gray-200 flex-1"></div>
-                                    <h2 class="text-sm font-black text-gray-800 uppercase tracking-tight px-2 prose prose-sm max-w-none prose-p:inline prose-a:text-orange-600 hover:prose-a:text-orange-700">
-                                        {!! \Illuminate\Support\Str::inlineMarkdown($question->question_text ?? '') !!}
-                                    </h2>
+                                    <div class="text-sm font-black text-gray-800 uppercase tracking-tight px-2 prose prose-sm max-w-none prose-p:my-0 prose-a:text-orange-600 hover:prose-a:text-orange-700">
+                                        {!! \Illuminate\Support\Str::markdown($question->question_text ?? '') !!}
+                                    </div>
                                     <div class="h-px bg-gray-200 flex-1"></div>
                                 </div>
                                 <div class="w-full h-1 bg-orange-600 rounded-r-full mb-2"></div>
@@ -132,9 +175,9 @@
                                     </div>
 
                                     {{-- Markdown Question Text --}}
-                                    <span class="text-base font-bold text-gray-900 block leading-snug prose prose-sm max-w-none prose-p:inline prose-a:text-orange-600 hover:prose-a:text-orange-700">
-                                        {!! \Illuminate\Support\Str::inlineMarkdown($question->question_text ?? '') !!}
-                                    </span>
+                                    <div class="text-base font-bold text-gray-900 block leading-snug prose prose-sm max-w-none prose-p:mt-0 prose-p:mb-2 prose-a:text-orange-600 hover:prose-a:text-orange-700">
+                                        {!! \Illuminate\Support\Str::markdown($question->question_text ?? '') !!}
+                                    </div>
 
                                     {{-- Markdown Description --}}
                                     @if($question->description)

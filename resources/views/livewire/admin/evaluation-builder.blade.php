@@ -218,8 +218,9 @@
                                                 </div>
 
                                                 @if($isSection)
-                                                    {{-- SECTION TITLE (Notice x-ref and @focus) --}}
-                                                    <input type="text" x-ref="qText" @focus="activeField = 'qText'" wire:model="questions.{{ $index }}.question_text" class="w-full text-base font-black text-gray-800 border-0 bg-transparent placeholder-orange-300 focus:ring-0 p-0" placeholder="Type Section Title">
+                                                   @if($isSection)
+                                                    {{-- SECTION TITLE --}}
+                                                    <textarea x-ref="qText" @focus="activeField = 'qText'" wire:model="questions.{{ $index }}.question_text" class="w-full text-base font-black text-gray-800 border-0 bg-transparent placeholder-orange-300 focus:ring-0 p-0 resize-y" rows="2" placeholder="Type Section Title"></textarea>
                                                 @else
                                                     <span class="text-[9px] font-bold uppercase tracking-wide text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded w-max">{{ ucfirst($question['type']) }}</span>
                                                 @endif
@@ -238,7 +239,7 @@
                                         {{-- MAIN INPUTS --}}
                                         @if(!$isSection)
                                             {{-- QUESTION TITLE (Notice x-ref and @focus) --}}
-                                            <input type="text" x-ref="qText" @focus="activeField = 'qText'" wire:model="questions.{{ $index }}.question_text" class="w-full text-sm font-bold border-0 border-b border-gray-100 focus:border-orange-500 focus:ring-0 bg-transparent transition mb-2 p-0" placeholder="Enter question...">
+                                            <textarea x-ref="qText" @focus="activeField = 'qText'" wire:model="questions.{{ $index }}.question_text" class="w-full text-sm font-bold border-0 border-b border-gray-100 focus:border-orange-500 focus:ring-0 bg-transparent transition mb-2 p-0 resize-y" rows="2" placeholder="Enter question..."></textarea>
 
                                             {{-- Description & Image Toggles --}}
                                             @if($isActive || $question['description'] || $question['image_path'] || (isset($question['new_image']) && $question['new_image']))
