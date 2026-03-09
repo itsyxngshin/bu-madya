@@ -1,7 +1,7 @@
 <div class="min-h-screen bg-gray-100 p-4 md:p-6 font-sans text-gray-900 pb-32">
-    
+
     <div class="max-w-5xl mx-auto">
-        
+
         {{-- HEADER / ACTIONS --}}
         <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
             <div>
@@ -25,12 +25,12 @@
         </div>
 
         <div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
-            
+
             {{-- LEFT: CONFIGURATION --}}
             <div class="xl:col-span-4 space-y-4">
                 <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-200 sticky top-24">
                     <h2 class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">Settings</h2>
-                    
+
                     {{-- HEADER IMAGE --}}
                     <div class="mb-5">
                         <label class="block text-xs font-bold text-gray-700 mb-1">Header Image</label>
@@ -90,7 +90,7 @@
 
             {{-- RIGHT: BUILDER --}}
             <div class="xl:col-span-8 relative">
-                
+
                 {{-- STICKY TOOLBAR --}}
                 <div class="sticky top-2 z-[100] bg-gray-900 text-white p-3 rounded-2xl flex flex-wrap gap-1.5 items-center shadow-xl border border-gray-800 backdrop-blur-md bg-opacity-95 mb-4">
                     <span class="font-bold ml-2 mr-auto text-xs uppercase tracking-widest text-gray-400">Insert</span>
@@ -103,16 +103,16 @@
                     <button wire:click="addQuestion('section')" class="px-2 py-1.5 bg-white/10 hover:bg-white/20 rounded-md text-[10px] uppercase font-bold transition">Section</button>
                     <button wire:click="addQuestion('page_break')" class="px-2 py-1.5 bg-red-600 hover:bg-red-700 rounded-md text-[10px] uppercase font-bold transition shadow-sm ml-1">Page Break</button>
                 </div>
-                
+
                 {{-- QUESTIONS LIST CONTAINER --}}
-                <div 
+                <div
                     class="bg-gray-50/50 rounded-2xl min-h-[400px] space-y-3 pb-20"
                     x-data="{
                         initSortable() {
                             this.sortable = new Sortable(this.$el, {
                                 animation: 150,
-                                handle: '.drag-handle', 
-                                ghostClass: 'opacity-50', 
+                                handle: '.drag-handle',
+                                ghostClass: 'opacity-50',
                                 onEnd: (evt) => {
                                     let newOrder = [];
                                     this.$el.querySelectorAll('[data-sort-id]').forEach((el, index) => {
@@ -125,16 +125,16 @@
                     }"
                     x-init="initSortable()"
                 >
-                    
+
                     @foreach($questions as $index => $question)
-                        
+
                         @php
                             $isActive = ($activeQuestionIndex === $index);
                         @endphp
 
                         {{-- DRAGGABLE ITEM WRAPPER --}}
                         <div data-sort-id="{{ $question['temp_id'] }}" wire:key="q-{{ $question['temp_id'] }}">
-                            
+
                             {{-- PAGE BREAK UI (Super slim, no inputs) --}}
                             @if($question['type'] === 'page_break')
                                 <div class="group relative bg-red-50/80 border {{ $isActive ? 'border-red-400 shadow-md ring-1 ring-red-400' : 'border-red-100 hover:border-red-200' }} rounded-xl p-2 flex items-center justify-between transition-all cursor-pointer" wire:click="setActiveQuestion({{ $index }})">
@@ -158,10 +158,10 @@
                                 @endphp
 
                                 <div class="group relative {{ $bgClass }} border {{ $borderClass }} rounded-xl p-4 transition-all duration-200 cursor-text" wire:click="setActiveQuestion({{ $index }})">
-                                    
+
                                     {{-- Active Indicator Stripe --}}
                                     @if($isActive) <div class="absolute left-0 top-3 bottom-3 w-1 bg-orange-500 rounded-r"></div> @endif
-                                    
+
                                     {{-- DRAG HANDLE --}}
                                     <div class="drag-handle absolute left-0 top-0 bottom-0 w-8 flex flex-col items-center justify-center gap-1 cursor-move z-10 text-gray-200 hover:text-gray-400 hover:bg-gray-50 rounded-l-xl">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"></path></svg>
@@ -191,18 +191,18 @@
                                         {{-- MAIN INPUTS --}}
                                         @if(!$isSection)
                                             <input type="text" wire:model="questions.{{ $index }}.question_text" class="w-full text-sm font-bold border-0 border-b border-gray-100 focus:border-orange-500 focus:ring-0 bg-transparent transition mb-2 p-0" placeholder="Enter question...">
-                                            
+
                                             {{-- Description & Image Toggles (Only show fully when active to save space) --}}
                                             @if($isActive || $question['description'] || $question['image_path'] || (isset($question['new_image']) && $question['new_image']))
                                                 <input type="text" wire:model="questions.{{ $index }}.description" class="w-full text-xs text-gray-500 border-0 border-b border-gray-50 focus:border-orange-300 focus:ring-0 bg-transparent transition mb-3 p-0 placeholder-gray-300" placeholder="Help text / description (optional)">
-                                                
+
                                                 <div class="mb-3 flex items-center gap-3">
                                                     @if(isset($questions[$index]['new_image']) && $questions[$index]['new_image'])
                                                         <img src="{{ $questions[$index]['new_image']->temporaryUrl() }}" class="h-12 w-auto rounded border border-gray-200">
                                                     @elseif(isset($question['image_path']) && $question['image_path'])
                                                         <img src="{{ asset('storage/'.$question['image_path']) }}" class="h-12 w-auto rounded border border-gray-200">
                                                     @endif
-                                                    
+
                                                     <label class="inline-flex items-center gap-1 text-[10px] font-bold uppercase text-gray-400 hover:text-orange-600 cursor-pointer bg-gray-50 px-2 py-1 rounded">
                                                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                                                         Image
@@ -240,7 +240,7 @@
                                                 @endforeach
                                                 <button wire:click.stop="addOption({{ $index }})" class="text-[10px] font-bold text-blue-500 hover:underline mt-1">+ Add Option</button>
                                             </div>
-                                        
+
                                         {{-- LIKERT --}}
                                         @elseif($question['type'] === 'likert')
                                             <div class="bg-gray-50 rounded-lg p-2 border border-gray-100 mt-2">
