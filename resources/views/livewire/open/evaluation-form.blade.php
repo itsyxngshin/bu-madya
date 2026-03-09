@@ -121,8 +121,8 @@
 
                         @else
                             {{-- QUESTION CARD --}}
-                            <div class="group bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md hover:border-orange-100 transition-all duration-300 relative overflow-hidden" wire:key="question-card-{{ $question->id }}">
-                                <div class="absolute left-0 top-0 bottom-0 w-1 bg-orange-500 opacity-0 group-focus-within:opacity-100 transition-opacity"></div>
+                            <div class="group bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md hover:border-orange-100 transition-all duration-300 relative" wire:key="question-card-{{ $question->id }}">
+                                <div class="absolute left-0 top-0 bottom-0 w-1 bg-orange-500 opacity-0 group-focus-within:opacity-100 transition-opacity rounded-l-2xl"></div>
 
                                 <label class="block mb-4 relative z-10">
                                     <div class="flex justify-end items-start mb-1">
