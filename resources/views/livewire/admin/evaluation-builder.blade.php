@@ -76,7 +76,7 @@
                     {{-- DESC & ACTIVE --}}
                     <div class="mb-4">
                         <label class="block text-xs font-bold text-gray-700 mb-1">Description</label>
-                        <textarea wire:model="description" rows="2" class="w-full rounded-lg border-gray-200 bg-gray-50 text-xs p-2 resize-none"></textarea>
+                        <textarea wire:model="description" rows="3" class="w-full rounded-lg border-gray-200 bg-gray-50 text-xs p-2 resize-y" placeholder="Supports Markdown (**bold**, *italic*, [link](url)). Use double-enter for paragraphs."></textarea>
                     </div>
                     <div class="flex items-center justify-between p-2 bg-gray-50 rounded-lg border border-gray-100">
                         <span class="text-[10px] font-bold text-gray-600 uppercase tracking-wide">Publish Active?</span>
@@ -194,7 +194,7 @@
 
                                             {{-- Description & Image Toggles (Only show fully when active to save space) --}}
                                             @if($isActive || $question['description'] || $question['image_path'] || (isset($question['new_image']) && $question['new_image']))
-                                                <input type="text" wire:model="questions.{{ $index }}.description" class="w-full text-xs text-gray-500 border-0 border-b border-gray-50 focus:border-orange-300 focus:ring-0 bg-transparent transition mb-3 p-0 placeholder-gray-300" placeholder="Help text / description (optional)">
+                                                <textarea wire:model="questions.{{ $index }}.description" class="w-full text-xs text-gray-500 border-0 border-b border-gray-50 focus:border-orange-300 focus:ring-0 bg-transparent transition mb-3 p-0 placeholder-gray-300 resize-y" rows="2" placeholder="Help text / description (Markdown supported)"></textarea>
 
                                                 <div class="mb-3 flex items-center gap-3">
                                                     @if(isset($questions[$index]['new_image']) && $questions[$index]['new_image'])
@@ -211,7 +211,7 @@
                                                 </div>
                                             @endif
                                         @else
-                                            <input type="text" wire:model="questions.{{ $index }}.description" class="w-full text-xs text-gray-500 border-0 bg-transparent placeholder-orange-300/50 focus:ring-0 p-0" placeholder="Section description (optional)...">
+                                            <textarea wire:model="questions.{{ $index }}.description" class="w-full text-xs text-gray-500 border-0 bg-transparent placeholder-orange-300/50 focus:ring-0 p-0 resize-y" rows="2" placeholder="Section description (Markdown supported)..."></textarea>
                                         @endif
 
                                         {{-- RADIO / CHECKBOX / DROPDOWN --}}

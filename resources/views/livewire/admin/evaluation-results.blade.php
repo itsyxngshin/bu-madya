@@ -222,7 +222,9 @@
 
                         @if($question->type === 'section')
                             <div class="bg-gray-50 px-6 py-4 border-y border-gray-200 mt-4 first:mt-0">
-                                <h3 class="text-sm font-black text-gray-900 uppercase tracking-tight">{{ $question->question_text }}</h3>
+                                <h3 class="font-bold text-gray-900 mb-4 prose prose-sm max-w-none prose-p:inline prose-a:text-orange-600">
+                                    {!! \Illuminate\Support\Str::inlineMarkdown($question->question_text ?? '') !!}
+                                </h3>
                             </div>
                         @else
                             @php

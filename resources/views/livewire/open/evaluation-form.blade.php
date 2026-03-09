@@ -47,12 +47,12 @@
             <div class="max-w-2xl mx-auto px-4 h-14 flex items-center justify-between">
                 <span class="text-xs font-bold text-gray-900 truncate max-w-[200px]">{{ $evaluation->title }}</span>
                 <div class="flex items-center gap-3">
-                    
+
                     {{-- [NEW] Autosave Indicator (Controlled by Alpine & Livewire Event) --}}
-                    <div x-data="{ saved: false }" 
-                         @draft-autosaved.window="saved = true; setTimeout(() => saved = false, 2500)" 
+                    <div x-data="{ saved: false }"
+                         @draft-autosaved.window="saved = true; setTimeout(() => saved = false, 2500)"
                          class="flex items-center">
-                        <span x-show="saved" 
+                        <span x-show="saved"
                               x-transition.opacity.duration.300ms
                               class="text-[9px] font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded-full flex items-center gap-1 uppercase tracking-widest shadow-sm">
                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
@@ -88,8 +88,8 @@
                     <div class="p-6 {{ $evaluation->header_image ? '-mt-12 relative z-10' : '' }}">
                         <h1 class="text-2xl font-black {{ $evaluation->header_image ? 'text-gray drop-shadow-md' : 'text-gray-900' }} mb-2 leading-tight">{{ $evaluation->title }}</h1>
                         @if($evaluation->description)
-                            <div class="prose prose-sm {{ $evaluation->header_image ? 'text-gray-800' : 'text-gray-500' }} max-w-none text-sm whitespace-pre-line">
-                                {{ $evaluation->description }}
+                            <div class="prose prose-sm {{ $evaluation->header_image ? 'prose-invert text-gray-100' : 'text-gray-500' }} max-w-none text-sm">
+                                {!! \Illuminate\Support\Str::markdown($evaluation->description ?? '') !!}
                             </div>
                         @endif
                     </div>
@@ -106,12 +106,16 @@
                             <div class="pt-6 pb-2" wire:key="section-{{ $question->id }}">
                                 <div class="flex items-center gap-4">
                                     <div class="h-px bg-gray-200 flex-1"></div>
-                                    <h2 class="text-sm font-black text-gray-800 uppercase tracking-tight px-2">{{ $question->question_text }}</h2>
+                                    <h2 class="text-sm font-black text-gray-800 uppercase tracking-tight px-2 prose prose-sm max-w-none prose-p:inline prose-a:text-orange-600 hover:prose-a:text-orange-700">
+                                        {!! \Illuminate\Support\Str::inlineMarkdown($question->question_text ?? '') !!}
+                                    </h2>
                                     <div class="h-px bg-gray-200 flex-1"></div>
                                 </div>
                                 <div class="w-full h-1 bg-orange-600 rounded-r-full mb-2"></div>
                                 @if($question->description)
-                                    <p class="text-sm text-gray-600 italic ml-1 max-w-xl whitespace-pre-line">{{ $question->description }}</p>
+                                    <div class="text-sm text-gray-600 italic ml-1 max-w-xl prose prose-sm max-w-none prose-p:my-1 prose-a:text-orange-600 hover:prose-a:text-orange-700">
+                                        {!! \Illuminate\Support\Str::markdown($question->description ?? '') !!}
+                                    </div>
                                 @endif
                             </div>
 
@@ -126,9 +130,17 @@
                                             <span class="text-[10px] font-bold text-red-500 uppercase tracking-widest bg-red-50 px-2 py-0.5 rounded">Required</span>
                                         @endif
                                     </div>
-                                    <span class="text-base font-bold text-gray-900 block leading-snug">{{ $question->question_text }}</span>
+
+                                    {{-- Markdown Question Text --}}
+                                    <span class="text-base font-bold text-gray-900 block leading-snug prose prose-sm max-w-none prose-p:inline prose-a:text-orange-600 hover:prose-a:text-orange-700">
+                                        {!! \Illuminate\Support\Str::inlineMarkdown($question->question_text ?? '') !!}
+                                    </span>
+
+                                    {{-- Markdown Description --}}
                                     @if($question->description)
-                                        <span class="text-xs text-gray-500 block mt-1 leading-relaxed whitespace-pre-line">{{ $question->description }}</span>
+                                        <div class="text-xs text-gray-500 block mt-1 leading-relaxed prose prose-sm max-w-none prose-p:my-1 prose-a:text-orange-600 hover:prose-a:text-orange-700">
+                                            {!! \Illuminate\Support\Str::markdown($question->description ?? '') !!}
+                                        </div>
                                     @endif
                                 </label>
 
@@ -146,15 +158,63 @@
                                     @elseif($question->type === 'textarea')
                                         <textarea wire:model.live="answers.{{ $question->id }}" rows="2" class="w-full rounded-xl border-gray-200 bg-gray-50 p-3 focus:bg-white focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 text-sm" placeholder="Share your thoughts..."></textarea>
 
-                                    {{-- [NEW] DROPDOWN --}}
                                     @elseif($question->type === 'dropdown')
-                                        <select wire:model.live="answers.{{ $question->id }}" class="w-full rounded-xl border-gray-200 bg-gray-50 p-3 focus:bg-white focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 text-sm text-gray-700 cursor-pointer">
-                                            <option value="">-- Select an option --</option>
-                                            @foreach($question->options as $opt)
-                                                @php $optText = is_array($opt) ? ($opt['text'] ?? '') : $opt; @endphp
-                                                <option value="{{ $optText }}">{{ $optText }}</option>
-                                            @endforeach
-                                        </select>
+                                        <div x-data="{
+                                                open: false,
+                                                selected: @entangle('answers.' . $question->id).live
+                                             }"
+                                             class="relative z-20">
+
+                                            {{-- Trigger Button --}}
+                                            <button @click="open = !open" @click.outside="open = false" type="button"
+                                                class="w-full text-left rounded-xl border border-gray-200 bg-gray-50 p-3 focus:outline-none focus:bg-white focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 text-sm transition-all flex justify-between items-center shadow-sm"
+                                                :class="open ? 'border-orange-500 bg-white ring-4 ring-orange-500/10 shadow-md' : 'hover:border-orange-300'">
+
+                                                <span x-text="selected ? selected : '-- Select an option --'"
+                                                      :class="selected ? 'text-gray-900 font-bold' : 'text-gray-500'">
+                                                </span>
+
+                                                {{-- Animated Chevron --}}
+                                                <svg class="w-4 h-4 text-gray-400 transition-transform duration-300" :class="open ? 'rotate-180 text-orange-500' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                            </button>
+
+                                            {{-- Dropdown Menu --}}
+                                            <div x-show="open"
+                                                 x-transition:enter="transition ease-out duration-200"
+                                                 x-transition:enter-start="opacity-0 scale-95 -translate-y-2"
+                                                 x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                                                 x-transition:leave="transition ease-in duration-150"
+                                                 x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+                                                 x-transition:leave-end="opacity-0 scale-95 -translate-y-2"
+                                                 class="absolute z-50 w-full mt-2 bg-white border border-gray-100 rounded-xl shadow-2xl overflow-hidden max-h-60 overflow-y-auto"
+                                                 style="display: none;">
+
+                                                <div class="p-1 space-y-0.5">
+                                                    {{-- Clear Selection Option --}}
+                                                    <button @click="selected = ''; open = false" type="button" class="w-full text-left px-3 py-2.5 text-sm text-gray-500 hover:bg-gray-50 rounded-lg transition-colors flex items-center gap-2">
+                                                        <svg class="w-4 h-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                                        Clear selection
+                                                    </button>
+
+                                                    <div class="h-px bg-gray-100 mx-2 my-1"></div>
+
+                                                    {{-- Dynamic Options --}}
+                                                    @foreach($question->options as $opt)
+                                                        @php $optText = is_array($opt) ? ($opt['text'] ?? '') : $opt; @endphp
+                                                        <button @click="selected = '{{ addslashes($optText) }}'; open = false"
+                                                                type="button"
+                                                                class="w-full text-left px-3 py-2.5 text-sm rounded-lg transition-all flex items-center justify-between group"
+                                                                :class="selected === '{{ addslashes($optText) }}' ? 'bg-orange-50 text-orange-700 font-bold' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'">
+
+                                                            <span>{{ $optText }}</span>
+
+                                                            {{-- Checkmark for selected item --}}
+                                                            <svg x-show="selected === '{{ addslashes($optText) }}'" class="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display: none;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                                        </button>
+                                                    @endforeach
+                                                </div>
+                                            </div>
+                                        </div>
 
                                     @elseif($question->type === 'radio')
                                         <div class="space-y-2">
