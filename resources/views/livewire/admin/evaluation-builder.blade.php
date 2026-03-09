@@ -74,9 +74,31 @@
                     </div>
 
                     {{-- DESC & ACTIVE --}}
-                    <div class="mb-4">
-                        <label class="block text-xs font-bold text-gray-700 mb-1">Description</label>
-                        <textarea wire:model="description" rows="3" class="w-full rounded-lg border-gray-200 bg-gray-50 text-xs p-2 resize-y" placeholder="Supports Markdown (**bold**, *italic*, [link](url)). Use double-enter for paragraphs."></textarea>
+                    <div class="mb-4" x-data="{
+                            insert(start, end) {
+                                let el = this.$refs.editor;
+                                let text = el.value;
+                                let s = el.selectionStart;
+                                let e = el.selectionEnd;
+                                el.value = text.substring(0, s) + start + text.substring(s, e) + end + text.substring(e);
+                                el.dispatchEvent(new Event('input'));
+                                setTimeout(() => { el.focus(); el.setSelectionRange(s + start.length, e + start.length); }, 50);
+                            }
+                        }">
+
+                        <div class="flex justify-between items-end mb-1">
+                            <label class="block text-xs font-bold text-gray-700">Description</label>
+
+                            {{-- Mini Toolbar --}}
+                            <div class="flex bg-gray-100 rounded border border-gray-200">
+                                <button type="button" @click="insert('**', '**')" class="px-2 py-1 hover:bg-gray-200 text-gray-600 font-black text-[9px] transition" title="Bold">B</button>
+                                <button type="button" @click="insert('*', '*')" class="px-2 py-1 hover:bg-gray-200 text-gray-600 italic text-[9px] transition border-l border-gray-200" title="Italic">I</button>
+                                <button type="button" @click="insert('~~', '~~')" class="px-2 py-1 hover:bg-gray-200 text-gray-600 line-through text-[9px] transition border-l border-gray-200" title="Strikethrough">S</button>
+                                <button type="button" @click="insert('[', '](https://)')" class="px-2 py-1 hover:bg-gray-200 text-gray-600 font-bold text-[9px] transition border-l border-gray-200" title="Link">Link</button>
+                            </div>
+                        </div>
+
+                        <textarea x-ref="editor" wire:model="description" rows="3" class="w-full rounded-lg border-gray-200 bg-gray-50 text-xs p-2 resize-y" placeholder="Use the toolbar to format your text..."></textarea>
                     </div>
                     <div class="flex items-center justify-between p-2 bg-gray-50 rounded-lg border border-gray-100">
                         <span class="text-[10px] font-bold text-gray-600 uppercase tracking-wide">Publish Active?</span>
@@ -167,16 +189,41 @@
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"></path></svg>
                                     </div>
 
-                                    <div class="pl-6">
-                                        {{-- ITEM HEADER --}}
+                                    {{-- [NEW] ALPINE WRAPPER FOR SMART TOOLBAR --}}
+                                    <div class="pl-6" x-data="{
+                                            activeField: 'qText',
+                                            insert(start, end) {
+                                                let el = this.$refs[this.activeField];
+                                                if(!el) return;
+                                                let text = el.value;
+                                                let s = el.selectionStart;
+                                                let e = el.selectionEnd;
+                                                el.value = text.substring(0, s) + start + text.substring(s, e) + end + text.substring(e);
+                                                el.dispatchEvent(new Event('input'));
+                                                setTimeout(() => { el.focus(); el.setSelectionRange(s + start.length, e + start.length); }, 50);
+                                            }
+                                        }">
+
+                                        {{-- ITEM HEADER & SMART TOOLBAR --}}
                                         <div class="flex justify-between items-start mb-2">
-                                            @if($isSection)
-                                                <div class="flex-1 mr-2">
-                                                    <input type="text" wire:model="questions.{{ $index }}.question_text" class="w-full text-base font-black text-gray-800 border-0 bg-transparent placeholder-orange-300 focus:ring-0 p-0" placeholder="Type Section Title">
+
+                                            <div class="flex flex-col gap-2 flex-1 mr-2">
+
+                                                {{-- The Smart Toolbar (Only visible when question is active) --}}
+                                                <div x-show="$wire.activeQuestionIndex === {{ $index }}" class="flex bg-orange-50 rounded border border-orange-200 w-max overflow-hidden shadow-sm" style="display: none;">
+                                                    <button type="button" @click="insert('**', '**')" class="px-2 py-1 hover:bg-orange-100 text-orange-700 font-black text-[10px] transition" title="Bold">B</button>
+                                                    <button type="button" @click="insert('*', '*')" class="px-2 py-1 hover:bg-orange-100 text-orange-700 italic text-[10px] transition border-l border-orange-200" title="Italic">I</button>
+                                                    <button type="button" @click="insert('~~', '~~')" class="px-2 py-1 hover:bg-orange-100 text-orange-700 line-through text-[10px] transition border-l border-orange-200" title="Strikethrough">S</button>
+                                                    <button type="button" @click="insert('[', '](https://)')" class="px-2 py-1 hover:bg-orange-100 text-orange-700 font-bold text-[10px] transition border-l border-orange-200" title="Link">Link</button>
                                                 </div>
-                                            @else
-                                                <span class="text-[9px] font-bold uppercase tracking-wide text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded">{{ ucfirst($question['type']) }}</span>
-                                            @endif
+
+                                                @if($isSection)
+                                                    {{-- SECTION TITLE (Notice x-ref and @focus) --}}
+                                                    <input type="text" x-ref="qText" @focus="activeField = 'qText'" wire:model="questions.{{ $index }}.question_text" class="w-full text-base font-black text-gray-800 border-0 bg-transparent placeholder-orange-300 focus:ring-0 p-0" placeholder="Type Section Title">
+                                                @else
+                                                    <span class="text-[9px] font-bold uppercase tracking-wide text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded w-max">{{ ucfirst($question['type']) }}</span>
+                                                @endif
+                                            </div>
 
                                             <div class="flex items-center gap-3 ml-auto shrink-0">
                                                 @if(!$isSection)
@@ -190,11 +237,14 @@
 
                                         {{-- MAIN INPUTS --}}
                                         @if(!$isSection)
-                                            <input type="text" wire:model="questions.{{ $index }}.question_text" class="w-full text-sm font-bold border-0 border-b border-gray-100 focus:border-orange-500 focus:ring-0 bg-transparent transition mb-2 p-0" placeholder="Enter question...">
+                                            {{-- QUESTION TITLE (Notice x-ref and @focus) --}}
+                                            <input type="text" x-ref="qText" @focus="activeField = 'qText'" wire:model="questions.{{ $index }}.question_text" class="w-full text-sm font-bold border-0 border-b border-gray-100 focus:border-orange-500 focus:ring-0 bg-transparent transition mb-2 p-0" placeholder="Enter question...">
 
-                                            {{-- Description & Image Toggles (Only show fully when active to save space) --}}
+                                            {{-- Description & Image Toggles --}}
                                             @if($isActive || $question['description'] || $question['image_path'] || (isset($question['new_image']) && $question['new_image']))
-                                                <textarea wire:model="questions.{{ $index }}.description" class="w-full text-xs text-gray-500 border-0 border-b border-gray-50 focus:border-orange-300 focus:ring-0 bg-transparent transition mb-3 p-0 placeholder-gray-300 resize-y" rows="2" placeholder="Help text / description (Markdown supported)"></textarea>
+
+                                                {{-- QUESTION DESCRIPTION (Notice x-ref and @focus) --}}
+                                                <textarea x-ref="qDesc" @focus="activeField = 'qDesc'" wire:model="questions.{{ $index }}.description" class="w-full text-xs text-gray-500 border-0 border-b border-gray-50 focus:border-orange-300 focus:ring-0 bg-transparent transition mb-3 p-0 placeholder-gray-300 resize-y" rows="2" placeholder="Help text / description"></textarea>
 
                                                 <div class="mb-3 flex items-center gap-3">
                                                     @if(isset($questions[$index]['new_image']) && $questions[$index]['new_image'])
@@ -211,7 +261,8 @@
                                                 </div>
                                             @endif
                                         @else
-                                            <textarea wire:model="questions.{{ $index }}.description" class="w-full text-xs text-gray-500 border-0 bg-transparent placeholder-orange-300/50 focus:ring-0 p-0 resize-y" rows="2" placeholder="Section description (Markdown supported)..."></textarea>
+                                            {{-- SECTION DESCRIPTION (Notice x-ref and @focus) --}}
+                                            <textarea x-ref="qDesc" @focus="activeField = 'qDesc'" wire:model="questions.{{ $index }}.description" class="w-full text-xs text-gray-500 border-0 bg-transparent placeholder-orange-300/50 focus:ring-0 p-0 resize-y" rows="2" placeholder="Section description..."></textarea>
                                         @endif
 
                                         {{-- RADIO / CHECKBOX / DROPDOWN --}}
