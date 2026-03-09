@@ -1,5 +1,16 @@
-<div class="min-h-screen bg-slate-50 relative font-sans selection:bg-red-500 selection:text-white pb-24">
+@section('meta_title', '[REGISTRATION] ' . $event->title)
+@section('meta_description', $event->description ? Str::limit(strip_tags($event->description), 160) : 'Join us for an unforgettable experience at our upcoming event! Discover inspiring speakers, engaging activities, and valuable networking opportunities. Don\'t miss out on this chance to connect and grow. Register now!')
+@php
+    // 1. Determine the image URL using PHP logic
+    $ogImage = $event->cover_image
+        ? (Str::startsWith($event->cover_image, 'http') ? $event->cover_image : asset('storage/' . $event->cover_image))
+        : asset('images/MADYA Web Logo1.png');
+@endphp
 
+{{-- 2. Pass the CLEAN variable to the layout --}}
+@section('meta_image', $ogImage)
+
+<div class="min-h-screen bg-slate-50 relative font-sans selection:bg-red-500 selection:text-white pb-24">
     {{-- Subtle Blurred Background (Luma Style) --}}
     @if($event->cover_image)
         <div class="absolute inset-0 z-0 pointer-events-none overflow-hidden h-[70vh]">
@@ -18,7 +29,7 @@
             {{-- LEFT COLUMN: EVENT DETAILS (Editorial) --}}
             {{-- ========================================== --}}
             <div class="w-full lg:w-7/12 xl:w-2/3 min-w-0 flex flex-col">
-                
+
                 {{-- Cover Image --}}
                 @if($event->cover_image)
                     <div class="w-full aspect-video md:aspect-[21/9] lg:aspect-[16/9] rounded-[2rem] overflow-hidden mb-8 shadow-2xl shadow-slate-200/50 ring-1 ring-slate-900/5 bg-slate-200">
@@ -38,7 +49,7 @@
                         </div>
                     </div>
                 @endif
-                
+
                 {{-- Title --}}
                 <h1 class="text-4xl md:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight leading-[1.1] mb-8 break-words text-balance">
                     {{ $event->title }}
@@ -46,7 +57,7 @@
 
                 {{-- Date & Location Quick Details --}}
                 <div class="flex flex-col sm:flex-row gap-6 mb-12 pb-10 border-b border-slate-200/60">
-                    
+
                     {{-- Date --}}
                     <div class="flex items-start gap-4 flex-1 min-w-0 bg-white/50 p-4 rounded-2xl border border-slate-100 shadow-sm">
                         <div class="w-12 h-12 bg-red-50 rounded-xl flex items-center justify-center text-red-600 shrink-0">
@@ -77,7 +88,7 @@
 
                 {{-- Event Description Card --}}
                 <div class="bg-white p-6 md:p-10 rounded-[1.5rem] md:rounded-[2rem] shadow-xl border border-gray-100">
-                    
+
                     <h3 class="font-bold text-black uppercase tracking-widest text-[10px] md:text-sm border-b border-gray-200 pb-3 mb-6">
                         About this Event
                     </h3>
@@ -90,11 +101,11 @@
                         prose-a:text-red-600 hover:prose-a:text-red-700 prose-a:font-bold prose-a:underline-offset-4
                         prose-img:rounded-3xl prose-img:shadow-xl
                         break-words overflow-hidden">
-                        
+
                         {!! Str::markdown($event->description ?? '') !!}
-                        
+
                     </div>
-                    
+
                 </div>
             </div>
 
@@ -102,7 +113,7 @@
             {{-- RIGHT COLUMN: RSVP BOX (Sticky)          --}}
             {{-- ========================================== --}}
             <div class="w-full lg:w-5/12 xl:w-1/3 min-w-0 relative">
-                
+
                 {{-- Sticky wrapper ensures the form floats on desktop while scrolling --}}
                 <div class="bg-white rounded-[2rem] p-6 sm:p-8 shadow-2xl shadow-slate-200/60 border border-slate-100 lg:sticky lg:top-24 w-full">
 
@@ -117,18 +128,18 @@
 
                             {{-- Ticket UI --}}
                             <div class="bg-white rounded-3xl border border-slate-200 shadow-xl overflow-hidden relative text-left w-full mx-auto max-w-sm">
-                                
+
                                 {{-- QR Section --}}
                                 <div class="p-6 flex flex-col items-center border-b-[3px] border-dashed border-slate-200 bg-slate-50/50 relative">
                                     <div class="absolute -bottom-4 -left-4 w-8 h-8 bg-white rounded-full border border-slate-200"></div>
                                     <div class="absolute -bottom-4 -right-4 w-8 h-8 bg-white rounded-full border border-slate-200"></div>
-                                    
+
                                     {{-- QR Code Section with Gradient --}}
                                     <div class="bg-white p-4 rounded-2xl shadow-sm inline-block"
                                         wire:ignore x-data x-init="
                                             $nextTick(() => {
                                                 const qrCode = new QRCodeStyling({
-                                                    width: 160, 
+                                                    width: 160,
                                                     height: 160,
                                                     data: '{{ $registrationRecord->ticket_code }}',
                                                     margin: 0,
@@ -160,7 +171,7 @@
                                                         color: '#ffffff'
                                                     }
                                                 });
-                                                
+
                                                 // Append the beautiful gradient QR code to the div
                                                 qrCode.append($refs.ticketQr);
                                             })
@@ -174,7 +185,7 @@
                                 <div class="p-6 bg-white">
                                     <p class="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-1">Attendee Name</p>
                                     <p class="text-base font-black text-slate-900 mb-5 break-words leading-tight">{{ $registrationRecord->name }}</p>
-                                    
+
                                     <div class="grid grid-cols-2 gap-4">
                                         <div class="min-w-0">
                                             <p class="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-1">Type</p>
@@ -353,7 +364,7 @@
                                             <input type="text" wire:model="school" class="w-full rounded-xl border-blue-200 bg-white text-sm py-3 px-4 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none font-medium" placeholder="e.g. Ateneo de Naga">
                                             @error('school') <span class="text-xs text-red-500 mt-1.5 block font-bold">{{ $message }}</span> @enderror
                                         </div>
-                                        
+
                                         <div>
                                             <label class="block text-[10px] font-black text-blue-800 uppercase tracking-widest mb-2">Guest Classification</label>
                                             <select wire:model.live="classification" class="w-full rounded-xl border-blue-200 bg-white text-sm py-3 px-4 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none font-medium cursor-pointer appearance-none">
