@@ -4,7 +4,16 @@
     @section('meta_image', asset('storage/'.$evaluation->header_image))
 @endif
 
-<div class="min-h-screen bg-gray-50 pb-20 font-sans text-gray-900 selection:bg-orange-100 selection:text-orange-600">
+@php
+    // Get the custom theme color, fallback to default orange if null
+    $theme = $evaluation->theme_color ?? '#ea580c';
+    // Append '26' to the hex code to create a 15% opacity version for hovers/focus rings
+    $themeLight = $theme . '26';
+@endphp
+
+{{-- [THEME APPLIED HERE] --}}
+<div style="--theme: {{ $theme }}; --theme-light: {{ $themeLight }};" class="min-h-screen bg-gray-50 pb-20 font-sans text-gray-900 selection:bg-[var(--theme-light)] selection:text-[var(--theme)]">
+
     {{-- STATE: FORM SUBMITTED --}}
     @if($isSubmitted)
         <div class="min-h-screen flex items-center justify-center p-4" x-data x-init="window.scrollTo({top: 0, behavior: 'smooth'})">
@@ -24,7 +33,6 @@
             </div>
         </div>
 
-
     {{-- STATE: FORM CLOSED --}}
     @elseif(!$evaluation->is_active)
         <div class="min-h-screen flex items-center justify-center p-4">
@@ -39,15 +47,15 @@
         </div>
 
     {{-- STATE: FORM OPEN --}}
-
     @else
+
         {{-- STICKY HEADER --}}
         <div class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100 shadow-sm transition-all duration-300">
             <div class="max-w-2xl mx-auto px-4 h-14 flex items-center justify-between">
                 <span class="text-xs font-bold text-gray-900 truncate max-w-[200px]">{{ $evaluation->title }}</span>
                 <div class="flex items-center gap-3">
-                    {{-- [NEW] Autosave Indicator (Controlled by Alpine & Livewire Event) --}}
 
+                    {{-- Autosave Indicator --}}
                     <div x-data="{ saved: false }"
                          @draft-autosaved.window="saved = true; setTimeout(() => saved = false, 2500)"
                          class="flex items-center">
@@ -59,8 +67,9 @@
                         </span>
                     </div>
 
-                    <div class="w-24 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                        <div class="h-full bg-gradient-to-r from-red-500 to-orange-500 transition-all duration-500" style="width: {{ $progress }}%"></div>
+                    {{-- Progress Bar (Themed) --}}
+                    <div class="w-24 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                        <div class="h-full bg-[var(--theme)] transition-all duration-500" style="width: {{ $progress }}%"></div>
                     </div>
                     <span class="text-[10px] font-bold text-gray-500">{{ $currentPage + 1 }} / {{ $totalPages }}</span>
                 </div>
@@ -68,38 +77,39 @@
         </div>
 
         <div class="max-w-2xl mx-auto px-4 mt-6">
+
             {{-- HERO CARD (Only show on the first page) --}}
             @if($currentPage === 0)
                 <div class="bg-white rounded-2xl shadow-xl shadow-gray-200/50 border border-white overflow-hidden relative mb-8">
                     @if($evaluation->header_image)
-                        <div class="h-32 md:h-48 w-full relative">
+                        {{-- [FIXED] Taller header image to prevent overlap issues --}}
+                        <div class="h-40 md:h-56 w-full relative border-b border-gray-100">
                             <img src="{{ asset('storage/'.$evaluation->header_image) }}" class="w-full h-full object-cover">
-                            <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
                         </div>
                     @else
-                        <div class="h-32 w-full relative overflow-hidden">
-                            <div class="absolute inset-0 bg-gradient-to-br from-red-600 via-orange-500 to-green-600 opacity-90"></div>
-                            <div class="absolute inset-0 opacity-20" style="background-image: url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');"></div>
-                        </div>
+                        {{-- Fallback Header (Themed) --}}
+                        <div class="h-6 w-full relative overflow-hidden bg-[var(--theme)]"></div>
                     @endif
 
-                    <div class="p-6 {{ $evaluation->header_image ? '-mt-12 relative z-10' : '' }}">
-                        <h1 class="text-2xl font-black {{ $evaluation->header_image ? 'text-gray drop-shadow-md' : 'text-gray-900' }} mb-2 leading-tight">{{ $evaluation->title }}</h1>
+                    {{-- [FIXED] Removed negative margin so text sits neatly below the image --}}
+                    <div class="p-6 md:p-8">
+                        <h1 class="text-2xl md:text-3xl font-black text-gray-900 mb-3 leading-tight">{{ $evaluation->title }}</h1>
                         @if($evaluation->description)
-                            <div class="prose prose-sm {{ $evaluation->header_image ? 'prose-invert text-gray-800' : 'text-gray-500' }} max-w-none text-sm">
+                            <div class="prose prose-sm text-gray-600 max-w-none text-sm prose-a:text-[var(--theme)] hover:prose-a:opacity-80">
                                 {!! \Illuminate\Support\Str::markdown($evaluation->description ?? '') !!}
                             </div>
                         @endif
                     </div>
                 </div>
 
-                {{-- [MOVED] OPT-IN / ACCOUNT LINKING (Now on Page 1) --}}
+                {{-- OPT-IN / ACCOUNT LINKING (Page 1) --}}
                 <div class="mb-8 bg-gray-900 rounded-2xl p-6 md:p-8 shadow-xl relative overflow-hidden border border-gray-800">
-                    <div class="absolute top-0 right-0 -mr-16 -mt-16 w-32 h-32 bg-red-600/20 rounded-full blur-2xl"></div>
+                    <div class="absolute top-0 right-0 -mr-16 -mt-16 w-32 h-32 bg-[var(--theme)] opacity-20 rounded-full blur-2xl"></div>
+
                     <div class="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
                         <div class="flex-1">
                             <h4 class="text-white font-bold text-lg mb-1 flex items-center gap-2">
-                                <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                                <svg class="w-5 h-5 text-[var(--theme)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
                                 Privacy & Account Linking
                             </h4>
                             @if(Auth::check())
@@ -112,15 +122,16 @@
                                 </p>
                             @endif
                         </div>
+
                         <div class="shrink-0 w-full md:w-auto">
                             @if(Auth::check())
                                 <label class="relative flex items-center justify-between md:justify-start cursor-pointer bg-gray-800 p-2 md:pr-4 rounded-xl border border-gray-700 hover:border-gray-600 transition">
                                     <div class="flex items-center gap-3">
                                         <div class="relative inline-flex items-center">
                                             <input type="checkbox" wire:model="connect_account" class="sr-only peer">
-                                            <div class="w-12 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:bg-red-600 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+                                            <div class="w-12 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:bg-[var(--theme)] peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
                                         </div>
-                                        <span class="text-xs font-bold uppercase tracking-widest transition-colors duration-300 {{ $connect_account ? 'text-red-400' : 'text-gray-400' }}">
+                                        <span class="text-xs font-bold uppercase tracking-widest transition-colors duration-300 {{ $connect_account ? 'text-[var(--theme)]' : 'text-gray-400' }}">
                                             {{ $connect_account ? 'Linked' : 'Anonymous' }}
                                         </span>
                                     </div>
@@ -151,8 +162,10 @@
                                     <div class="h-px bg-gray-200 flex-1"></div>
                                 </div>
                                 <div class="w-full h-1 bg-[var(--theme)] rounded-r-full mb-2"></div>
+
                                 @if($question->description)
-                                    <div class="text-sm text-gray-500 ml-1 max-w-xl prose prose-sm max-w-none prose-p:my-1 prose-a:text-[var(--theme)] hover:prose-a:opacity-80">
+                                    {{-- [FIXED] Section Description wrapped in a clean div to respect Markdown p tags --}}
+                                    <div class="text-sm text-gray-500 ml-1 mt-2 max-w-xl prose prose-sm max-w-none prose-p:my-1 prose-a:text-[var(--theme)] hover:prose-a:opacity-80">
                                         {!! \Illuminate\Support\Str::markdown($question->description ?? '') !!}
                                     </div>
                                 @endif
@@ -164,14 +177,14 @@
                                 {{-- Theme Active Stripe --}}
                                 <div class="absolute left-0 top-0 bottom-0 w-1 bg-[var(--theme)] opacity-0 group-focus-within:opacity-100 transition-opacity rounded-l-2xl"></div>
 
-                                <label class="block mb-4 relative z-10">
+                                <div class="block mb-4 relative z-10">
                                     <div class="flex justify-end items-start mb-1">
                                         @if($question->is_required)
                                             <span class="text-[10px] font-bold text-red-500 uppercase tracking-widest bg-red-50 px-2 py-0.5 rounded">Required</span>
                                         @endif
                                     </div>
 
-                                    {{-- Markdown Question Text --}}
+                                    {{-- [FIXED] Markdown Question Text (Changed from span to div to support new lines) --}}
                                     <div class="text-base font-bold text-gray-900 block leading-snug prose prose-sm max-w-none prose-p:mt-0 prose-p:mb-2 prose-a:text-[var(--theme)] hover:prose-a:opacity-80">
                                         {!! \Illuminate\Support\Str::markdown($question->question_text ?? '') !!}
                                     </div>
@@ -182,7 +195,7 @@
                                             {!! \Illuminate\Support\Str::markdown($question->description ?? '') !!}
                                         </div>
                                     @endif
-                                </label>
+                                </div>
 
                                 @if($question->image_path)
                                     <div class="mb-4">
