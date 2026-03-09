@@ -163,7 +163,8 @@
                                                 open: false,
                                                 selected: @entangle('answers.' . $question->id).live
                                              }"
-                                             class="relative z-20">
+                                             class="relative z-20"
+                                             style="z-index: {{ 100 - $loop->index }}">
 
                                             {{-- Trigger Button --}}
                                             <button @click="open = !open" @click.outside="open = false" type="button"
@@ -187,8 +188,7 @@
                                                  x-transition:leave-start="opacity-100 scale-100 translate-y-0"
                                                  x-transition:leave-end="opacity-0 scale-95 -translate-y-2"
                                                  class="absolute z-50 w-full mt-2 bg-white border border-gray-100 rounded-xl shadow-2xl overflow-hidden max-h-60 overflow-y-auto"
-                                                 style="display: none;"
-                                                 style="z-index: {{ 100 - $loop->index }}">
+                                                 style="display: none;">
 
                                                 <div class="p-1 space-y-0.5">
                                                     {{-- Clear Selection Option --}}
