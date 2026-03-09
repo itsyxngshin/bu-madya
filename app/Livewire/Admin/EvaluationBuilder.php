@@ -7,7 +7,7 @@ use Livewire\WithFileUploads;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Layout;
 use App\Models\Evaluation;
-use App\Models\Project; 
+use App\Models\Project;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Str;
 
@@ -26,7 +26,7 @@ class EvaluationBuilder extends Component
     public $is_active = true;
     public $header_image;
     public $existing_header_image;
-    
+
     // Data Containers
     public $questions = [];
     public $available_projects = [];
@@ -38,7 +38,7 @@ class EvaluationBuilder extends Component
             'slug' => ['nullable', 'string', 'max:255', Rule::unique('evaluations', 'slug')->ignore($this->evaluation->id)],
             'project_id' => 'nullable|integer',
             'questions.*.question_text' => 'required|string',
-            'questions.*.type' => 'required|in:text,textarea,radio,checkbox,likert,section,file',
+            'questions.*.type' => 'required|in:text,textarea,radio,checkbox,dropdown,likert,section,file,page_break',
             'questions.*.new_image' => 'nullable|image|max:2048',
         ];
     }
@@ -94,7 +94,7 @@ class EvaluationBuilder extends Component
                 }
             }
         }
-        
+
         // Sort array in memory so the view reflects the change
         usort($this->questions, fn($a, $b) => $a['order'] <=> $b['order']);
     }
@@ -104,11 +104,10 @@ class EvaluationBuilder extends Component
     public function addQuestion($type)
     {
         $defaultOptions = [];
-        
+
         if ($type === 'likert') {
             $defaultOptions = ['Strongly Disagree', 'Disagree', 'Neutral', 'Agree', 'Strongly Agree'];
-        } elseif (in_array($type, ['radio', 'checkbox'])) {
-            // Structure for Skip Logic support
+        } elseif (in_array($type, ['radio', 'checkbox', 'dropdown'])) { // <-- Added 'dropdown' here
             $defaultOptions = [
                 ['text' => 'Option 1', 'jump' => null],
                 ['text' => 'Option 2', 'jump' => null]
@@ -172,7 +171,7 @@ class EvaluationBuilder extends Component
         $this->slug = Str::random(16);
     }
 
-    #[On('confirmed-reset')] 
+    #[On('confirmed-reset')]
     public function resetResponses()
     {
         if (!$this->evaluation->exists) return;
@@ -182,7 +181,7 @@ class EvaluationBuilder extends Component
         if ($responseIds->isNotEmpty()) {
             \App\Models\EvaluationAnswer::whereIn('evaluation_response_id', $responseIds)->delete();
             $this->evaluation->responses()->delete();
-            
+
             $this->dispatch('swal:modal', [
                 'type' => 'success', 'title' => 'Deleted!', 'text' => 'Responses cleared successfully.'
             ]);
@@ -231,10 +230,10 @@ class EvaluationBuilder extends Component
                     'type' => $q['type'],
                     'question_text' => $q['question_text'],
                     'description' => $q['description'] ?? null,
-                    'options' => $q['options'], 
+                    'options' => $q['options'],
                     'is_required' => $q['is_required'],
                     'order' => $index,
-                    'image_path' => $imagePath 
+                    'image_path' => $imagePath
                 ]
             );
 

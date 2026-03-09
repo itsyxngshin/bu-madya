@@ -1,7 +1,7 @@
 <div class="min-h-screen bg-gray-100 p-6 font-sans text-gray-900">
-    
+
     <div class="max-w-6xl mx-auto">
-        
+
         {{-- HEADER / ACTIONS --}}
         <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
             <div>
@@ -29,12 +29,12 @@
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            
+
             {{-- LEFT: CONFIGURATION --}}
             <div class="lg:col-span-4 space-y-6">
                 <div class="bg-white rounded-[2rem] p-6 shadow-sm border border-gray-200 sticky top-24">
                     <h2 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Settings</h2>
-                    
+
                     {{-- HEADER IMAGE --}}
                     <div class="mb-6">
                         <label class="block text-sm font-bold text-gray-700 mb-2">Header Image</label>
@@ -94,23 +94,25 @@
 
             {{-- RIGHT: BUILDER --}}
             <div class="lg:col-span-8 relative">
-                
+
                 {{-- STICKY TOOLBAR (Pushed down to top-24 to avoid header overlap) --}}
                 <div class="sticky top-24 z-[100] bg-gray-900 text-white p-4 rounded-xl flex flex-wrap gap-2 items-center shadow-2xl border border-gray-800 backdrop-blur-md bg-opacity-95 mb-6">
                     <span class="font-bold ml-2 mr-auto text-sm flex items-center gap-2">Add Content</span>
                     <button wire:click="addQuestion('text')" class="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-bold transition">Text</button>
                     <button wire:click="addQuestion('radio')" class="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-bold transition">Radio</button>
                     <button wire:click="addQuestion('checkbox')" class="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-bold transition">Checkbox</button>
+                    <button wire:click="addQuestion('dropdown')" class="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-bold transition">Dropdown</button>
                     <button wire:click="addQuestion('likert')" class="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-bold transition">Scale</button>
                     <div class="h-6 w-px bg-gray-700 mx-1"></div>
                     <button wire:click="addQuestion('file')" class="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-bold transition border border-white/30">Upload</button>
                     <button wire:click="addQuestion('section')" class="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-bold transition border-l border-white/20 ml-2">Section</button>
+                    <button wire:click="addQuestion('page_break')" class="px-3 py-1.5 bg-red-600 hover:bg-red-700 rounded-lg text-xs font-bold transition ml-2 shadow-md">Add Page Break</button>
                 </div>
-                
+
                 {{-- QUESTIONS LIST CONTAINER --}}
-                <div 
+                <div
                     class="bg-white rounded-b-[2rem] p-6 shadow-sm border border-t-0 border-gray-200 min-h-[400px] space-y-4 pb-20"
-                    
+
                     {{-- [NEW] Alpine Sortable Logic --}}
                     x-data="{
                         initSortable() {
@@ -125,7 +127,7 @@
                                     this.$el.querySelectorAll('[data-sort-id]').forEach((el, index) => {
                                         newOrder.push({ value: el.getAttribute('data-sort-id'), order: index });
                                     });
-                                    
+
                                     // Send to Livewire
                                     $wire.updateQuestionOrder(newOrder);
                                 }
@@ -134,13 +136,13 @@
                     }"
                     x-init="initSortable()"
                 >
-                    
+
                     @foreach($questions as $index => $question)
-                        
+
                         {{-- DRAGGABLE ITEM WRAPPER --}}
                         {{-- Must have a data-sort-id matching the temp_id --}}
                         <div data-sort-id="{{ $question['temp_id'] }}" wire:key="q-{{ $question['temp_id'] }}">
-                            
+
                             {{-- Determine Styles --}}
                             @php
                                 $isSection = $question['type'] === 'section';
@@ -149,7 +151,7 @@
                             @endphp
 
                             <div class="group relative {{ $bgClass }} rounded-2xl p-6 hover:shadow-lg transition-all duration-300">
-                                
+
                                 {{-- [FIXED] DRAG HANDLE --}}
                                 {{-- Added 'drag-handle' class for SortableJS target --}}
                                 {{-- Added 'z-50' to ensure it's clickable above other elements --}}
@@ -161,7 +163,13 @@
                                 <div class="pl-8">
                                     {{-- ITEM HEADER --}}
                                     <div class="flex justify-between items-center mb-3">
-                                        @if(!$isSection)
+                                        @if($question['type'] === 'page_break')
+                                            <div class="w-full flex items-center gap-4">
+                                                <div class="h-px bg-red-200 flex-1"></div>
+                                                <span class="text-xs font-black uppercase tracking-widest text-red-600 bg-red-50 px-3 py-1 rounded-full border border-red-200">Page Break</span>
+                                                <div class="h-px bg-red-200 flex-1"></div>
+                                            </div>
+                                        @elseif(!$isSection)
                                             <span class="text-[10px] font-bold uppercase tracking-wide text-gray-400 bg-gray-100 px-2 py-1 rounded">{{ ucfirst($question['type']) }}</span>
                                         @else
                                             <div class="flex-1 mr-4"><input type="text" wire:model="questions.{{ $index }}.question_text" class="w-full text-xl font-black text-gray-800 border-0 bg-transparent placeholder-orange-300 focus:ring-0 p-0" placeholder="Type Section Title"></div>
@@ -181,7 +189,7 @@
                                     @if(!$isSection)
                                         <input type="text" wire:model="questions.{{ $index }}.question_text" class="w-full text-lg font-bold border-0 border-b-2 border-gray-100 focus:border-orange-500 focus:ring-0 bg-transparent transition mb-4" placeholder="Enter question...">
                                         <input type="text" wire:model="questions.{{ $index }}.description" class="w-full text-xs text-gray-500 border-0 border-b border-gray-50 focus:border-orange-300 focus:ring-0 bg-transparent transition mb-4 placeholder-gray-300" placeholder="Description (optional)">
-                                        
+
                                         {{-- Image Upload --}}
                                         <div class="mb-4 bg-gray-50 p-3 rounded-lg border border-dashed border-gray-200">
                                             @if(isset($questions[$index]['new_image']) && $questions[$index]['new_image'])
@@ -199,11 +207,13 @@
                                         <input type="text" wire:model="questions.{{ $index }}.description" class="w-full text-sm text-gray-600 border-0 bg-transparent placeholder-orange-300/50 focus:ring-0 p-0" placeholder="Add description (optional)...">
                                     @endif
 
-                                    {{-- RADIO / CHECKBOX (With Skip Logic) --}}
-                                    @if(in_array($question['type'], ['radio', 'checkbox']))
+                                    {{-- RADIO / CHECKBOX/DROPDOWN (With Skip Logic) --}}
+                                    @if(in_array($question['type'], ['radio', 'checkbox', 'dropdown']))
                                         <div class="pl-4 border-l-2 border-gray-100 space-y-3 mt-2">
                                             <div class="flex justify-between items-end mb-2">
-                                                <p class="text-[10px] text-gray-400 font-bold uppercase">{{ $question['type'] === 'checkbox' ? 'Multiple Choice' : 'Single Choice' }}</p>
+                                                <p class="text-[10px] text-gray-400 font-bold uppercase">
+                                                    {{ $question['type'] === 'checkbox' ? 'Multiple Choice' : ($question['type'] === 'dropdown' ? 'Dropdown Menu' : 'Single Choice') }}
+                                                </p>
                                                 @if($question['type'] === 'radio') <span class="text-[10px] text-orange-500 bg-orange-50 px-2 py-1 rounded font-bold">Skip Logic Available</span> @endif
                                             </div>
                                             @foreach($question['options'] as $optIndex => $opt)
@@ -229,7 +239,7 @@
                                             @endforeach
                                             <button wire:click="addOption({{ $index }})" class="text-xs font-bold text-blue-600 hover:underline mt-2 flex items-center gap-1">+ Add Option</button>
                                         </div>
-                                    
+
                                     {{-- LIKERT --}}
                                     @elseif($question['type'] === 'likert')
                                         <div class="bg-gray-50 p-4 rounded-xl border border-gray-100 mt-2">
