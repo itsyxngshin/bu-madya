@@ -47,6 +47,19 @@
             <div class="max-w-2xl mx-auto px-4 h-14 flex items-center justify-between">
                 <span class="text-xs font-bold text-gray-900 truncate max-w-[200px]">{{ $evaluation->title }}</span>
                 <div class="flex items-center gap-3">
+                    
+                    {{-- [NEW] Autosave Indicator (Controlled by Alpine & Livewire Event) --}}
+                    <div x-data="{ saved: false }" 
+                         @draft-autosaved.window="saved = true; setTimeout(() => saved = false, 2500)" 
+                         class="flex items-center">
+                        <span x-show="saved" 
+                              x-transition.opacity.duration.300ms
+                              class="text-[9px] font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded-full flex items-center gap-1 uppercase tracking-widest shadow-sm">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                            Saved
+                        </span>
+                    </div>
+
                     <div class="w-24 h-1.5 bg-gray-100 rounded-full overflow-hidden">
                         <div class="h-full bg-gradient-to-r from-red-500 to-orange-500 transition-all duration-500" style="width: {{ $progress }}%"></div>
                     </div>
@@ -223,6 +236,53 @@
                     @endforeach
                 @endif
             </div>
+
+            {{-- [NEW] OPT-IN / ACCOUNT LINKING (Only visible on the last page) --}}
+            @if($currentPage === ($totalPages - 1))
+                <div class="mt-8 bg-gray-900 rounded-2xl p-6 md:p-8 shadow-xl relative overflow-hidden border border-gray-800">
+                    {{-- Decorative Background Glow --}}
+                    <div class="absolute top-0 right-0 -mr-16 -mt-16 w-32 h-32 bg-red-600/20 rounded-full blur-2xl"></div>
+
+                    <div class="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+                        <div class="flex-1">
+                            <h4 class="text-white font-bold text-lg mb-1 flex items-center gap-2">
+                                <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                                Privacy & Account Linking
+                            </h4>
+                            @if(Auth::check())
+                                <p class="text-gray-400 text-sm leading-relaxed max-w-lg">
+                                    Would you like to attach this evaluation to your BU MADYA profile <strong>({{ Auth::user()->name }})</strong>? If left unchecked, your response will be completely anonymous.
+                                </p>
+                            @else
+                                <p class="text-gray-400 text-sm leading-relaxed max-w-lg">
+                                    You are currently submitting this form anonymously. To link this response to your member profile, please log in first.
+                                </p>
+                            @endif
+                        </div>
+
+                        {{-- Toggle or Login Button --}}
+                        <div class="shrink-0 w-full md:w-auto">
+                            @if(Auth::check())
+                                <label class="relative flex items-center justify-between md:justify-start cursor-pointer bg-gray-800 p-2 md:pr-4 rounded-xl border border-gray-700 hover:border-gray-600 transition">
+                                    <div class="flex items-center gap-3">
+                                        <div class="relative inline-flex items-center">
+                                            <input type="checkbox" wire:model="connect_account" class="sr-only peer">
+                                            <div class="w-12 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:bg-red-600 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+                                        </div>
+                                        <span class="text-xs font-bold uppercase tracking-widest transition-colors duration-300 {{ $connect_account ? 'text-red-400' : 'text-gray-400' }}">
+                                            {{ $connect_account ? 'Linked' : 'Anonymous' }}
+                                        </span>
+                                    </div>
+                                </label>
+                            @else
+                                <a href="{{ route('login') }}" class="block text-center px-6 py-3 bg-white text-gray-900 font-bold rounded-xl text-xs uppercase tracking-widest hover:bg-gray-100 hover:scale-105 transition shadow-lg">
+                                    Log In to Link
+                                </a>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            @endif
 
             {{-- PAGINATION & SUBMIT BUTTONS --}}
             <div class="mt-8 pb-20 flex flex-col sm:flex-row gap-4 justify-between">

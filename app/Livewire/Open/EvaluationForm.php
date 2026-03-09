@@ -17,35 +17,64 @@ class EvaluationForm extends Component
 
     public Evaluation $evaluation;
     public $project_id = null;
-    public $answers = [];
+    public $answers = []; 
     public $isSubmitted = false;
-
-    // --- Pagination Properties ---
+    public $connect_account = false; 
     public $currentPage = 0;
 
     protected $queryString = ['project_id'];
 
+    // --- AUTOSAVE LOGIC: Generate a unique key for this user/guest ---
+    private function getDraftKey()
+    {
+        $identifier = Auth::check() ? 'user_' . Auth::id() : 'ip_' . request()->ip();
+        return 'evaluation_draft_' . $this->evaluation->id . '_' . $identifier;
+    }
+
     public function mount(Evaluation $evaluation)
     {
         $this->evaluation = $evaluation;
-
+        
         if (request()->has('project_id')) {
             $this->project_id = request()->query('project_id');
         }
 
-        // Initialize answers with correct data types
+        // 1. Initialize empty answers based on type
         foreach($evaluation->questions as $q) {
-            if ($q->type === 'checkbox') {
-                $this->answers[$q->id] = [];
-            } else {
-                $this->answers[$q->id] = '';
+            $this->answers[$q->id] = ($q->type === 'checkbox') ? [] : '';
+        }
+
+        // 2. [NEW] RESTORE AUTOSAVED DRAFT
+        $draft = cache()->get($this->getDraftKey());
+        if ($draft) {
+            foreach ($draft as $qId => $val) {
+                // We only restore if the question still exists on the form
+                if (isset($this->answers[$qId])) {
+                    $this->answers[$qId] = $val;
+                }
             }
         }
+    }
+
+    // --- [NEW] AUTOSAVE LOGIC: Triggers automatically when ANY answer changes ---
+    public function updatedAnswers()
+    {
+        // Filter out file uploads (files cannot be safely cached this way, they must be re-uploaded)
+        $cacheableAnswers = collect($this->answers)->filter(function ($value) {
+            return !($value instanceof \Illuminate\Http\UploadedFile);
+        })->toArray();
+
+        // Save to cache for 7 days
+        cache()->put($this->getDraftKey(), $cacheableAnswers, now()->addDays(7));
+        
+        // Dispatch event to show a subtle "Saved" checkmark on the frontend
+        $this->dispatch('draft-autosaved');
     }
 
     // --- DYNAMIC PAGE BUILDER (Respects Skip Logic) ---
     private function getPages()
     {
+        // ... (Keep your exact existing getPages() logic here) ...
         $pages = [];
         $pageIndex = 0;
         $skipping = false;
@@ -54,27 +83,20 @@ class EvaluationForm extends Component
         $sortedQuestions = $this->evaluation->questions->sortBy('order');
 
         foreach ($sortedQuestions as $question) {
-
-            // 1. Check if we reached the skip logic destination
             if ($skipping && $question->type === 'section' && $question->id == $targetSectionId) {
                 $skipping = false;
                 $targetSectionId = null;
             }
 
-            // 2. If we are NOT skipping, process the question
             if (!$skipping) {
                 if ($question->type === 'page_break') {
-                    // Create a new page index (do not add the break itself to the UI)
                     $pageIndex++;
                 } else {
-                    // Add question to current page
                     $pages[$pageIndex][] = $question;
                 }
 
-                // 3. Trigger Skip Logic check (Radio only)
                 if (isset($this->answers[$question->id]) && $question->type === 'radio') {
                     $selectedAnswer = $this->answers[$question->id];
-
                     if (is_array($question->options)) {
                         foreach ($question->options as $opt) {
                             $optText = is_array($opt) ? ($opt['text'] ?? '') : $opt;
@@ -89,23 +111,18 @@ class EvaluationForm extends Component
                 }
             }
         }
-
-        // Return re-indexed array in case there are empty pages from back-to-back breaks
-        return array_values(array_filter($pages));
+        return array_values(array_filter($pages)); 
     }
 
     // --- NAVIGATION ---
     public function nextPage()
     {
         $pages = $this->getPages();
-
-        // 1. Validate only the current page before allowing them to proceed
         $this->validateCurrentPage($pages[$this->currentPage] ?? []);
 
-        // 2. Proceed
         if ($this->currentPage < count($pages) - 1) {
             $this->currentPage++;
-            $this->dispatch('scroll-to-top'); // Using your existing Alpine scroll trigger
+            $this->dispatch('scroll-to-top'); 
         }
     }
 
@@ -134,22 +151,20 @@ class EvaluationForm extends Component
     public function submit()
     {
         $pages = $this->getPages();
-
-        // 1. Validate the final page
         $this->validateCurrentPage($pages[$this->currentPage] ?? []);
 
-        // 2. Create Response
+        $userId = ($this->connect_account && Auth::check()) ? Auth::id() : null;
+
         $response = EvaluationResponse::create([
             'evaluation_id' => $this->evaluation->id,
-            'user_id' => Auth::id(),
+            'user_id' => $userId,
             'ip_address' => request()->ip(),
         ]);
 
-        // 3. Save Answers (ONLY for questions that were visible/not skipped)
         $visibleQuestionIds = collect($pages)->flatten()->pluck('id')->toArray();
 
         foreach ($this->answers as $questionId => $value) {
-            if (!in_array($questionId, $visibleQuestionIds)) continue; // Ignore skipped questions
+            if (!in_array($questionId, $visibleQuestionIds)) continue; 
             if ($value === '' || $value === null || $value === []) continue;
 
             $finalValue = $value;
@@ -167,16 +182,17 @@ class EvaluationForm extends Component
             ]);
         }
 
+        // [NEW] CLEAR THE DRAFT CACHE UPON SUCCESSFUL SUBMIT
+        cache()->forget($this->getDraftKey());
+
         $this->isSubmitted = true;
-        $this->dispatch('scroll-to-top');
+        $this->dispatch('scroll-to-top'); 
     }
 
     public function render()
     {
         $pages = $this->getPages();
         $totalPages = count($pages);
-
-        // Progress Calculation based on Pages rather than fields
         $progress = $totalPages > 0 ? round((($this->currentPage + 1) / $totalPages) * 100) : 0;
 
         return view('livewire.open.evaluation-form', [
