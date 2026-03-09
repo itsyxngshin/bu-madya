@@ -4,6 +4,7 @@ namespace App\Livewire\Admin;
 
 use Livewire\Component;
 use App\Models\Evaluation;
+use App\Models\EvaluationResponse;
 use Livewire\Attributes\Layout;
 
 #[Layout('layouts.madya-admin-deck')]
@@ -12,18 +13,53 @@ class EvaluationResults extends Component
     public Evaluation $evaluation;
     public $stats = [];
 
+    // [NEW] Tab & Individual Response Tracking
+    public $tab = 'summary'; // 'summary' or 'individual'
+    public $currentIndex = 0;
+
     public function mount(Evaluation $evaluation)
     {
         $this->evaluation = $evaluation;
         $this->calculateStats();
     }
 
+    // [NEW] Switch Tabs
+    public function setTab($tabName)
+    {
+        $this->tab = $tabName;
+        $this->currentIndex = 0; // Reset index when switching
+    }
+
+    // [NEW] Pagination for Individual Responses
+    public function nextResponse()
+    {
+        $total = $this->evaluation->responses()->count();
+        if ($this->currentIndex < $total - 1) {
+            $this->currentIndex++;
+        }
+    }
+
+    public function previousResponse()
+    {
+        if ($this->currentIndex > 0) {
+            $this->currentIndex--;
+        }
+    }
+
     public function calculateStats()
     {
-        $this->evaluation->load(['questions.answers']);
+        // Load questions in order
+        $this->evaluation->load(['questions' => function ($query) {
+            $query->orderBy('order');
+        }, 'questions.answers']);
 
         foreach ($this->evaluation->questions as $question) {
             
+            // Skip structural elements early
+            if (in_array($question->type, ['section', 'page_break'])) {
+                continue;
+            }
+
             $totalResponses = $question->answers->count();
             
             if ($totalResponses === 0) {
@@ -33,20 +69,17 @@ class EvaluationResults extends Component
                 continue;
             }
 
-            // --- HELPER: Extract Labels safely ---
-            // Handles both old format ("Yes") and new format (["text" => "Yes", "jump" => ...])
+            // Extract Labels safely
             $flatOptions = collect($question->options)->map(function($opt) {
                 return is_array($opt) ? ($opt['text'] ?? '') : $opt;
             })->toArray();
 
-
-            // A. LIKERT LOGIC (Usually simple strings, but good to be safe)
+            // A. LIKERT LOGIC
             if ($question->type === 'likert') {
                 $sum = 0;
                 $counts = array_fill(0, count($flatOptions), 0);
 
                 foreach ($question->answers as $answer) {
-                    // Match answer against the flattened labels
                     $index = array_search($answer->answer_value, $flatOptions);
                     if ($index !== false) {
                         $sum += ($index + 1);
@@ -61,9 +94,8 @@ class EvaluationResults extends Component
                 ];
             } 
             
-            // B. RADIO LOGIC (Single Choice)
-            elseif ($question->type === 'radio') {
-                // [FIX] Use flatOptions for keys to avoid Array-to-String error
+            // B. RADIO & DROPDOWN LOGIC
+            elseif (in_array($question->type, ['radio', 'dropdown'])) {
                 $counts = array_fill_keys($flatOptions, 0);
 
                 foreach ($question->answers as $answer) {
@@ -79,9 +111,8 @@ class EvaluationResults extends Component
                 ];
             }
 
-            // C. CHECKBOX LOGIC (Multi Choice)
+            // C. CHECKBOX LOGIC
             elseif ($question->type === 'checkbox') {
-                // [FIX] Use flatOptions for keys
                 $counts = array_fill_keys($flatOptions, 0);
 
                 foreach ($question->answers as $answer) {
@@ -89,7 +120,6 @@ class EvaluationResults extends Component
 
                     if (is_array($selections)) {
                         foreach ($selections as $selected) {
-                            // Ensure the selected option exists in our keys before counting
                             if (array_key_exists($selected, $counts)) {
                                 $counts[$selected]++;
                             }
@@ -114,6 +144,21 @@ class EvaluationResults extends Component
 
     public function render()
     {
-        return view('livewire.admin.evaluation-results');
+        $totalResponsesCount = $this->evaluation->responses()->count();
+        $currentResponse = null;
+
+        // [NEW] Fetch the specific individual response if on the 'individual' tab
+        if ($this->tab === 'individual' && $totalResponsesCount > 0) {
+            $currentResponse = EvaluationResponse::with(['answers', 'user'])
+                ->where('evaluation_id', $this->evaluation->id)
+                ->orderBy('created_at')
+                ->skip($this->currentIndex)
+                ->first();
+        }
+
+        return view('livewire.admin.evaluation-results', [
+            'totalResponsesCount' => $totalResponsesCount,
+            'currentResponse' => $currentResponse,
+        ]);
     }
-} 
+}
