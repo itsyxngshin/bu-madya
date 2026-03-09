@@ -86,9 +86,9 @@
                     @endif
 
                     <div class="p-6 {{ $evaluation->header_image ? '-mt-12 relative z-10' : '' }}">
-                        <h1 class="text-2xl font-black {{ $evaluation->header_image ? 'text-gray drop-shadow-md' : 'text-gray-900' }} mb-2 leading-tight">{{ $evaluation->title }}</h1>
+                        <h1 class="text-2xl font-black {{ $evaluation->header_image ? 'text-white drop-shadow-md' : 'text-gray-900' }} mb-2 leading-tight">{{ $evaluation->title }}</h1>
                         @if($evaluation->description)
-                            <div class="prose prose-sm {{ $evaluation->header_image ? 'prose-invert text-gray-100' : 'text-gray-500' }} max-w-none text-sm">
+                            <div class="prose prose-sm {{ $evaluation->header_image ? 'prose-invert text-gray-800' : 'text-gray-500' }} max-w-none text-sm">
                                 {!! \Illuminate\Support\Str::markdown($evaluation->description ?? '') !!}
                             </div>
                         @endif
