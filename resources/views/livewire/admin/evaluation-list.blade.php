@@ -23,7 +23,7 @@
                     // STRICT CHECK: Is the user an administrator?
                     $createRoute = ($roleName === 'administrator') 
                         ? route('admin.evaluations.create')     // Yes? Send to Admin
-                        : route('director.evaluations .create');  // No? Send to Partner
+                        : route('director.evaluations.create');  // No? Send to Partner
                 @endphp
 
                 {{-- Create Button --}}

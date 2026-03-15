@@ -82,7 +82,7 @@ class EvaluationList extends Component
 
         $evaluations = $query->paginate(10);
 
-         $layoutFile = auth()->user()->role?->role_name === 'administrator' 
+        $layoutFile = auth()->user()->role?->role_name === 'administrator' 
             ? 'layouts.madya-admin-deck' 
             : 'layouts.madya-admin'; 
 
