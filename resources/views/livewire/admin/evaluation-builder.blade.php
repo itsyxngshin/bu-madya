@@ -6,20 +6,34 @@
         <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
             <div>
                 <h1 class="text-xl md:text-2xl font-black text-gray-900 flex items-center gap-2">
-                    @if($evaluation->exists) <span class="text-orange-500">Edit</span> Evaluation @else <span class="text-green-500">Create</span> Evaluation @endif
+                    @if($evaluation->exists) <span class="text-orange-500">Edit</span> Evaluation 
+                        @if(auth()->user()->role?->role_name === 'administrator' && $evaluation->creator_id !== auth()->id())
+                                <span class="ml-2 px-2 py-0.5 bg-blue-50 border border-blue-200 text-blue-700 text-[10px] uppercase tracking-widest font-bold rounded-full shadow-sm">
+                                    Owner: {{ $evaluation->creator->name ?? 'System' }}
+                                </span>
+                            @endif
+                    @else <span class="text-green-500">Create</span> Evaluation @endif
                 </h1>
             </div>
             <div class="flex items-center gap-2">
-                <a href="{{ route('admin.evaluations.index') }}" class="px-4 py-2 bg-white border border-gray-300 text-gray-600 font-bold rounded-lg text-xs uppercase tracking-wider hover:bg-gray-50 transition">Cancel</a>
+                <a href="{{ route('admin.evaluations.index') }}" class="hidden sm:inline-block px-4 py-2 bg-white border border-gray-300 text-gray-600 font-bold rounded-lg text-xs uppercase tracking-wider hover:bg-gray-50 transition">Cancel</a>
 
-                @if($evaluation->exists && $evaluation->responses()->count() > 0)
-                    <button type="button" onclick="confirmReset({{ $evaluation->responses()->count() }})" class="px-4 py-2 bg-red-50 border border-red-200 text-red-600 font-bold rounded-lg text-xs uppercase tracking-wider hover:bg-red-100 transition flex items-center gap-2">
-                        Reset ({{ $evaluation->responses()->count() }})
+                @if($evaluation->exists)
+                    {{-- Duplicate Button --}}
+                    <button wire:click="duplicate" type="button" class="px-4 py-2 bg-blue-50 border border-blue-200 text-blue-700 font-bold rounded-lg text-xs uppercase tracking-wider hover:bg-blue-100 transition flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                        <span class="hidden sm:inline">Duplicate</span>
                     </button>
+
+                    @if($evaluation->responses()->count() > 0)
+                        <button type="button" onclick="confirmReset({{ $evaluation->responses()->count() }})" class="px-4 py-2 bg-red-50 border border-red-200 text-red-600 font-bold rounded-lg text-xs uppercase tracking-wider hover:bg-red-100 transition flex items-center gap-2">
+                            Reset ({{ $evaluation->responses()->count() }})
+                        </button>
+                    @endif
                 @endif
 
                 <button wire:click="save" class="px-6 py-2 bg-gray-900 text-white font-bold rounded-lg shadow-lg hover:bg-gray-800 transition text-xs uppercase tracking-wider flex items-center gap-2">
-                    Save Changes
+                    Save
                 </button>
             </div>
         </div>
@@ -166,17 +180,37 @@
                         {{-- DRAGGABLE ITEM WRAPPER --}}
                         <div data-sort-id="{{ $question['temp_id'] }}" wire:key="q-{{ $question['temp_id'] }}">
 
-                            {{-- PAGE BREAK UI (Super slim, no inputs) --}}
                             @if($question['type'] === 'page_break')
                                 <div class="group relative bg-red-50/80 border {{ $isActive ? 'border-red-400 shadow-md ring-1 ring-red-400' : 'border-red-100 hover:border-red-200' }} rounded-xl p-2 flex items-center justify-between transition-all cursor-pointer" wire:click="setActiveQuestion({{ $index }})">
+                                    
                                     <div class="drag-handle w-6 flex items-center justify-center cursor-move text-red-300 hover:text-red-500">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"></path></svg>
                                     </div>
-                                    <div class="flex-1 flex items-center gap-3 px-2 pointer-events-none opacity-70">
-                                        <div class="h-px bg-red-300 flex-1"></div>
-                                        <span class="text-[9px] font-black uppercase tracking-widest text-red-600 bg-white px-2 py-0.5 rounded border border-red-200">Page Break</span>
-                                        <div class="h-px bg-red-300 flex-1"></div>
+                                    
+                                    <div class="flex-1 flex flex-col sm:flex-row sm:items-center gap-3 px-4">
+                                        <div class="hidden sm:block h-px bg-red-300 flex-1 opacity-70"></div>
+                                        
+                                        <span class="text-[9px] font-black uppercase tracking-widest text-red-600 bg-white px-2 py-0.5 rounded border border-red-200 shadow-sm w-max">Page Break</span>
+                                        
+                                        {{-- [NEW] Page Routing Dropdown --}}
+                                        @if($isActive)
+                                            <div class="flex items-center gap-2">
+                                                <span class="text-[9px] font-bold text-gray-500 uppercase tracking-widest">After page:</span>
+                                                <select wire:model="questions.{{ $index }}.options.0.jump" class="text-[10px] font-bold border-red-200 rounded-lg py-1 px-2 bg-white text-gray-700 shadow-sm focus:ring-red-500 focus:border-red-500 w-40 cursor-pointer">
+                                                    <option value="">Continue to next page</option>
+                                                    <option value="submit">Submit Form</option>
+                                                    @foreach($this->sections as $section)
+                                                        @if($section['order'] > $question['order']) 
+                                                            <option value="{{ $section['id'] }}">Go to: {{ Str::limit($section['title'], 15) }}</option> 
+                                                        @endif
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        @endif
+                                        
+                                        <div class="hidden sm:block h-px bg-red-300 flex-1 opacity-70"></div>
                                     </div>
+
                                     <button wire:click.stop="removeQuestion({{ $index }})" class="text-red-300 hover:text-red-600 p-1">&times;</button>
                                 </div>
 

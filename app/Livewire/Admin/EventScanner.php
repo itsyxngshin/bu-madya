@@ -13,7 +13,7 @@ use Carbon\Carbon;
 class EventScanner extends Component
 {
     public Event $event;
-    public $scanStatus = null; 
+    public $scanStatus = null;
     public $scanMessage = '';
     public $lastScannedData = null; // [FIXED] Properly declared as an array
     public $manualCode = '';
@@ -35,7 +35,7 @@ class EventScanner extends Component
         $this->validate([
             'manualCode' => 'required|string'
         ]);
-        
+
         $this->verifyTicket(trim($this->manualCode));
         $this->manualCode = ''; // Clear input after submit
     }
@@ -54,7 +54,7 @@ class EventScanner extends Component
             $this->scanStatus = 'error';
             $this->scanMessage = 'Invalid Ticket';
             $this->lastScannedData = null;
-            $this->dispatch('play-error-sound'); 
+            $this->dispatch('play-error-sound');
             return;
         }
 
@@ -95,12 +95,12 @@ class EventScanner extends Component
 
         // 5. Process Attendance
         if ($reg->status !== 'Attended') {
-            
+
             $reg->update([
                 'status' => 'Attended',
                 'scanned_at' => $now // Record the exact scan time if you have this column!
             ]);
-            
+
             // Optional: Send Email
             try {
                 Mail::to($reg->email)->queue(new EventAttendedMail($this->event, $reg));
@@ -110,12 +110,12 @@ class EventScanner extends Component
 
             $this->scanStatus = 'success';
             $this->scanMessage = 'Check-in Successful';
-            $this->dispatch('play-success-sound'); 
+            $this->dispatch('play-success-sound');
 
         } else {
             $this->scanStatus = 'warning';
             $this->scanMessage = 'Already Checked In';
-            $this->dispatch('play-error-sound'); 
+            $this->dispatch('play-error-sound');
         }
     }
 

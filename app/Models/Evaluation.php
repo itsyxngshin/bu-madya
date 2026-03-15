@@ -12,7 +12,8 @@ class Evaluation extends Model
 
     protected $fillable = [
         'title',
-        'slug', // Add this
+        'slug', 
+        'created_by',
         'description',
         'type',
         'is_active',
@@ -25,6 +26,11 @@ class Evaluation extends Model
     public function getRouteKeyName()
     {
         return 'slug';
+    }
+
+    public function creator()
+    {
+        return $this->belongsTo(User::class, 'created_by');
     }
 
     // Optional: Boot method to auto-generate slug on creation if missing

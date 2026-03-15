@@ -73,14 +73,21 @@ class EvaluationList extends Component
 
     public function render()
     {
-        $evaluations = Evaluation::query()
-            ->withCount('responses') // Efficiently count responses
-            ->where('title', 'like', '%' . $this->search . '%')
-            ->latest()
-            ->paginate(9);
+        // [NEW] Added ->with('creator') to make loading the author badge lightning fast
+        $query = Evaluation::with('creator')->latest();
 
-        return view('livewire.admin.evaluation-list', [
-            'evaluations' => $evaluations
-        ]);
+        if (auth()->user()->role?->role_name !== 'administrator') {
+            $query->where('created_by', auth()->id());
+        }
+
+        $evaluations = $query->paginate(10);
+
+         $layoutFile = auth()->user()->role?->role_name === 'administrator' 
+            ? 'layouts.madya-admin-deck' 
+            : 'layouts.madya-admin'; 
+
+        // Pass the layout dynamically
+        return view('livewire.admin.evaluation-index', compact('evaluations'))
+            ->layout($layoutFile);
     }
 }

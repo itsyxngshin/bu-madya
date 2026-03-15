@@ -74,7 +74,6 @@ class EvaluationForm extends Component
     // --- DYNAMIC PAGE BUILDER (Respects Skip Logic) ---
     private function getPages()
     {
-        // ... (Keep your exact existing getPages() logic here) ...
         $pages = [];
         $pageIndex = 0;
         $skipping = false;
@@ -83,20 +82,36 @@ class EvaluationForm extends Component
         $sortedQuestions = $this->evaluation->questions->sortBy('order');
 
         foreach ($sortedQuestions as $question) {
+            
+            // 1. Check if we reached the skip logic destination
             if ($skipping && $question->type === 'section' && $question->id == $targetSectionId) {
                 $skipping = false;
                 $targetSectionId = null;
             }
 
-            if (!$skipping) {
-                if ($question->type === 'page_break') {
-                    $pageIndex++;
-                } else {
-                    $pages[$pageIndex][] = $question;
+            // 2. Always process Page Breaks to ensure proper pagination
+            if ($question->type === 'page_break') {
+                $pageIndex++;
+                
+                // If a radio button hasn't already triggered a jump, check if this page has a forced redirect
+                if (!$skipping) {
+                    $jumpTarget = is_array($question->options) ? ($question->options[0]['jump'] ?? null) : null;
+                    if (!empty($jumpTarget)) {
+                        $skipping = true;
+                        $targetSectionId = ($jumpTarget === 'submit') ? 9999999 : $jumpTarget;
+                    }
                 }
+                continue; // Skip adding the break to the UI
+            }
 
-                if (isset($this->answers[$question->id]) && $question->type === 'radio') {
+            // 3. If we are NOT skipping, process standard questions
+            if (!$skipping) {
+                $pages[$pageIndex][] = $question;
+
+                // 4. Trigger Conditional Skip Logic (Radio / Dropdown)
+                if (isset($this->answers[$question->id]) && in_array($question->type, ['radio', 'dropdown'])) {
                     $selectedAnswer = $this->answers[$question->id];
+                    
                     if (is_array($question->options)) {
                         foreach ($question->options as $opt) {
                             $optText = is_array($opt) ? ($opt['text'] ?? '') : $opt;
@@ -111,6 +126,8 @@ class EvaluationForm extends Component
                 }
             }
         }
+
+        // Return re-indexed array in case there are empty pages
         return array_values(array_filter($pages)); 
     }
 

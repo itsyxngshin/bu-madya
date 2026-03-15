@@ -11,7 +11,6 @@ use App\Models\Project;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Str;
 
-#[Layout('layouts.madya-admin-deck')]
 class EvaluationBuilder extends Component
 {
     use WithFileUploads;
@@ -39,11 +38,76 @@ class EvaluationBuilder extends Component
         return [
             'title' => 'required|string|max:255',
             'slug' => ['nullable', 'string', 'max:255', Rule::unique('evaluations', 'slug')->ignore($this->evaluation->id)],
+            'theme_color' => 'required|string|max:7',
+            'description' => 'nullable|string',
             'project_id' => 'nullable|integer',
-            'questions.*.question_text' => 'nullable|string', // Nullable so Page Breaks don't fail validation
+            'is_active' => 'boolean',
+            
+            // [FIXED] Explicitly validate all array keys so Livewire doesn't strip them during deletion
+            'questions' => 'array',
+            'questions.*.id' => 'nullable',
+            'questions.*.temp_id' => 'required|string', 
             'questions.*.type' => 'required|in:text,textarea,radio,checkbox,dropdown,likert,section,file,page_break',
+            'questions.*.question_text' => 'nullable|string',
+            'questions.*.description' => 'nullable|string',
+            'questions.*.is_required' => 'boolean',
+            'questions.*.order' => 'integer',
+            'questions.*.image_path' => 'nullable|string',
             'questions.*.new_image' => 'nullable|image|max:2048',
+            'questions.*.options' => 'nullable|array', 
         ];
+    }
+
+    public function duplicate()
+    {
+        if (!$this->evaluation->exists) {
+            session()->flash('error', 'Cannot duplicate an unsaved form.');
+            return;
+        }
+
+        // 1. Clone the main evaluation
+        $newEval = $this->evaluation->replicate();
+        $newEval->title = $this->evaluation->title . ' (Copy)';
+        $newEval->slug = \Illuminate\Support\Str::random(16); // Give it a fresh, unique URL
+        $newEval->is_active = false; // Always set copies to Draft mode
+        $newEval->save();
+
+        $idMap = []; // To keep track of old_id => new_id for skip logic
+
+        // 2. Clone all questions
+        foreach ($this->evaluation->questions as $q) {
+            $newQ = $q->replicate();
+            $newQ->evaluation_id = $newEval->id;
+            $newQ->save();
+            $idMap[$q->id] = $newQ->id;
+        }
+
+        // 3. Remap the Skip Logic (Jump Targets)
+        foreach ($newEval->questions as $newQ) {
+            if (in_array($newQ->type, ['radio', 'dropdown', 'page_break']) && is_array($newQ->options)) {
+                $updatedOptions = [];
+                $modified = false;
+
+                foreach ($newQ->options as $opt) {
+                    // If this option has a jump target, replace the old ID with the new ID
+                    if (isset($opt['jump']) && is_numeric($opt['jump']) && isset($idMap[$opt['jump']])) {
+                        $opt['jump'] = $idMap[$opt['jump']];
+                        $modified = true;
+                    }
+                    $updatedOptions[] = $opt;
+                }
+
+                if ($modified) {
+                    $newQ->options = $updatedOptions;
+                    $newQ->save();
+                }
+            }
+        }
+
+        session()->flash('success', 'Form duplicated successfully!');
+        
+        // Redirect to the newly created form
+        return redirect()->route('admin.evaluations.edit', $newEval->id); 
     }
 
     public function mount(Evaluation $evaluation = null)
@@ -52,6 +116,14 @@ class EvaluationBuilder extends Component
             ->orderBy('title')->select('id', 'title')->get();
 
         $this->evaluation = $evaluation ?? new Evaluation();
+
+        $user = auth()->user();
+        
+        // If the form exists, and the user is NOT an admin, and they DID NOT create it -> Block them
+        if ($this->evaluation->exists && 
+            $user->role?->role_name !== 'administrator' && 
+            $this->evaluation->created_by !== $user->id) {
+            abort(403, 'You do not have permission to edit this evaluation.');
 
         if ($this->evaluation->exists) {
             $this->title = $this->evaluation->title;
@@ -116,11 +188,15 @@ class EvaluationBuilder extends Component
         
         if ($type === 'likert') {
             $defaultOptions = ['Strongly Disagree', 'Disagree', 'Neutral', 'Agree', 'Strongly Agree'];
-        } elseif (in_array($type, ['radio', 'checkbox', 'dropdown'])) {
+        } 
+        elseif (in_array($type, ['radio', 'checkbox', 'dropdown'])) {
             $defaultOptions = [
                 ['text' => 'Option 1', 'jump' => null],
                 ['text' => 'Option 2', 'jump' => null]
             ];
+        } 
+        elseif ($type === 'page_break') {
+            $defaultOptions = [['jump' => null]]; 
         }
 
         $newQuestion = [
@@ -236,6 +312,9 @@ class EvaluationBuilder extends Component
         $this->evaluation->description = $this->description;
         $this->evaluation->project_id = $this->project_id;
         $this->evaluation->is_active = $this->is_active;
+        if (!$this->evaluation->exists) {
+            $this->evaluation->created_by = auth()->id();
+        }
         $this->evaluation->save();
 
         $currentIds = collect($this->questions)->pluck('id')->filter()->toArray();
@@ -273,7 +352,8 @@ class EvaluationBuilder extends Component
         }
 
         foreach ($this->evaluation->questions as $question) {
-            if ($question->type === 'radio' && is_array($question->options)) {
+            // [UPDATED] Check radio, dropdown, AND page_break for jump targets
+            if (in_array($question->type, ['radio', 'dropdown', 'page_break']) && is_array($question->options)) {
                 $updatedOptions = [];
                 $modified = false;
 
@@ -298,6 +378,13 @@ class EvaluationBuilder extends Component
 
     public function render()
     {
-        return view('livewire.admin.evaluation-builder');
+        // Determine the correct layout based on the user's role
+        $layoutFile = auth()->user()->role?->role_name === 'administrator' 
+            ? 'layouts.madya-admin-deck' 
+            : 'layouts.madya-admin'; 
+
+        // Pass the layout dynamically
+        return view('livewire.admin.evaluation-builder')
+            ->layout($layoutFile);
     }
 }

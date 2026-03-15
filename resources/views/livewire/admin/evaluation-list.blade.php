@@ -57,6 +57,13 @@
                         <h3 class="text-xl font-bold text-gray-900 leading-tight mb-2 line-clamp-1" title="{{ $eval->title }}">
                             {{ $eval->title }}
                         </h3>
+
+                        @if(auth()->user()->role?->role_name === 'administrator')
+                            <div class="mt-2 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-gray-500">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                                Built by: <span class="text-orange-600">{{ $eval->creator->name ?? 'System Admin' }}</span>
+                            </div>
+                        @endif
                         <p class="text-xs text-gray-500 mb-4 font-mono">
                             Updated {{ $eval->updated_at->diffForHumans() }}
                         </p>

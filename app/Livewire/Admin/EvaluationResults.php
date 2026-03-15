@@ -19,6 +19,13 @@ class EvaluationResults extends Component
 
     public function mount(Evaluation $evaluation)
     {
+        $user = auth()->user();
+
+        // Block unauthorized directors from viewing the results
+        if ($user->role?->role_name !== 'administrator' && $evaluation->created_by !== $user->id) {
+            abort(403, 'You do not have permission to view these results.');
+        }
+
         $this->evaluation = $evaluation;
         $this->calculateStats();
     }
@@ -156,9 +163,13 @@ class EvaluationResults extends Component
                 ->first();
         }
 
+        $layoutFile = auth()->user()->role?->role_name === 'administrator' 
+            ? 'layouts.madya-admin-deck' 
+            : 'layouts.madya-admin'; 
+
         return view('livewire.admin.evaluation-results', [
             'totalResponsesCount' => $totalResponsesCount,
             'currentResponse' => $currentResponse,
-        ]);
+        ])->layout($layoutFile);
     }
 }

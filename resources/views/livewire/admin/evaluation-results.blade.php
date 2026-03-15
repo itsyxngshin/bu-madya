@@ -9,6 +9,13 @@
                 Back to List
             </a>
             <h1 class="text-2xl md:text-3xl font-black text-gray-900">{{ $evaluation->title }}</h1>
+
+            @if(auth()->user()->role?->role_name === 'administrator' && $evaluation->creator)
+                    <span class="px-2 py-1 bg-orange-50 border border-orange-200 text-orange-700 text-[10px] uppercase tracking-widest font-bold rounded-full shadow-sm flex items-center gap-1 mt-1">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                        {{ $evaluation->creator->name }}
+                    </span>
+                @endif
             <p class="text-sm text-gray-500 mt-1">
                 Analysis of <strong class="text-gray-900">{{ $totalResponsesCount }}</strong> total responses.
             </p>
