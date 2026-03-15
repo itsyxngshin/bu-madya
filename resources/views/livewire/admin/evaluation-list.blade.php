@@ -16,8 +16,18 @@
                     <svg class="w-4 h-4 text-gray-400 absolute left-3 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                 </div>
 
+                @php
+                    // Check the role and set the correct route
+                    $roleName = auth()->user()->role->role_name;
+                    
+                    // STRICT CHECK: Is the user an administrator?
+                    $createRoute = ($roleName === 'administrator') 
+                        ? route('admin.evaluations.create')     // Yes? Send to Admin
+                        : route('director.evaluations .create');  // No? Send to Partner
+                @endphp
+
                 {{-- Create Button --}}
-                <a href="{{ route('admin.evaluations.create') }}" class="px-5 py-2 bg-gray-900 text-white font-bold rounded-xl shadow-lg hover:bg-orange-600 transition flex items-center gap-2 text-sm whitespace-nowrap">
+                <a href="{{ $createRoute }}" class="px-5 py-2 bg-gray-900 text-white font-bold rounded-xl shadow-lg hover:bg-orange-600 transition flex items-center gap-2 text-sm whitespace-nowrap">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                     Create New
                 </a>
