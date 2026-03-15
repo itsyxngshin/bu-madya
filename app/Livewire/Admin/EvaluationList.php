@@ -87,7 +87,7 @@ class EvaluationList extends Component
             : 'layouts.madya-admin'; 
 
         // Pass the layout dynamically
-        return view('livewire.admin.evaluation-index', compact('evaluations'))
+        return view('livewire.admin.evaluation-list', compact('evaluations'))
             ->layout($layoutFile);
     }
 }
