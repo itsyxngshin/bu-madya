@@ -130,10 +130,10 @@ Route::middleware(['auth', 'role:director'])->prefix('director')->name('director
     Route::get('/linkages', LinkagesRoster::class)->name('linkages.index');
     Route::get('/news', NewsRoster::class)->name('news.index');
     Route::get('/user', UserRoster::class)->name('user.index');
-    Route::get('/evaluations/{evaluation}/edit', EvaluationBuilder::class)->name('director.evaluations.edit');
-    Route::get('/evaluations/{evaluation}/results', EvaluationResults::class)->name('director.evaluations.results');
-    Route::get('/evaluations', AdminEvaluationIndex::class)->name('director.evaluations.index');
-    Route::get('/evaluations/create', EvaluationBuilder::class)->name('director.evaluations.create');
+    Route::get('/evaluations/{evaluation}/edit', EvaluationBuilder::class)->name('evaluations.edit');
+    Route::get('/evaluations/{evaluation}/results', EvaluationResults::class)->name('evaluations.results');
+    Route::get('/evaluations', AdminEvaluationIndex::class)->name('evaluations.index');
+    Route::get('/evaluations/create', EvaluationBuilder::class)->name('evaluations.create');
 });
 
 Route::middleware(['auth'])
