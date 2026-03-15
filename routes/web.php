@@ -76,7 +76,6 @@ use \App\Livewire\Partner\PartnerDashboard;
 Route::get('/', function () {
     return view('welcome');
 });
-Route::get('/evaluations/{evaluation}', EvaluationForm::class)->name('evaluations.show');
 
 Route::get('/secure-file/{application}', function (\App\Models\MembershipApplication $application) {
 
@@ -131,6 +130,10 @@ Route::middleware(['auth', 'role:director'])->prefix('director')->name('director
     Route::get('/linkages', LinkagesRoster::class)->name('linkages.index');
     Route::get('/news', NewsRoster::class)->name('news.index');
     Route::get('/user', UserRoster::class)->name('user.index');
+    Route::get('/evaluations/{evaluation}/edit', EvaluationBuilder::class)->name('director.evaluations.edit');
+    Route::get('/evaluations/{evaluation}/results', EvaluationResults::class)->name('director.evaluations.results');
+    Route::get('/evaluations', AdminEvaluationIndex::class)->name('director.evaluations.index');
+    Route::get('/evaluations/create', EvaluationBuilder::class)->name('director.evaluations.create');
 });
 
 Route::middleware(['auth'])
@@ -234,6 +237,7 @@ Route::get('/frames/{slug}', FrameBuilder::class)->name('open.frames.show');
 Route::get('/partners/register', RegisterOrganization::class)->name('register.partner');
 Route::get('/discover', EventDiscovery::class)->name('open.events.index');
 Route::get('/privacy', PrivacyPolicy::class)->name('privacy');
+Route::get('/evaluations/{evaluation}', EvaluationForm::class)->name('evaluations.show');
 
 
 
