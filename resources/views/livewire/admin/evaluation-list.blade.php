@@ -38,7 +38,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
             {{-- "Create New" Ghost Card (Optional Shortcut) --}}
-            <a href="{{ route('admin.evaluations.create') }}" class="group border-2 border-dashed border-gray-300 rounded-[2rem] p-6 flex flex-col items-center justify-center text-center hover:border-orange-400 hover:bg-orange-50 transition min-h-[250px] cursor-pointer">
+            <a href="{{ $createRoute }}" class="group border-2 border-dashed border-gray-300 rounded-[2rem] p-6 flex flex-col items-center justify-center text-center hover:border-orange-400 hover:bg-orange-50 transition min-h-[250px] cursor-pointer">
                 <div class="w-16 h-16 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center mb-4 group-hover:bg-orange-100 group-hover:text-orange-500 transition">
                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                 </div>
