@@ -124,7 +124,8 @@ class EvaluationBuilder extends Component
             $user->role?->role_name !== 'administrator' && 
             $this->evaluation->created_by !== $user->id) {
             abort(403, 'You do not have permission to edit this evaluation.');
-
+            }
+            
         if ($this->evaluation->exists) {
             $this->title = $this->evaluation->title;
             $this->slug = $this->evaluation->slug;
