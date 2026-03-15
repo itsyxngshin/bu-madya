@@ -25,6 +25,7 @@ class EvaluationBuilder extends Component
     public $is_active = true;
     public $header_image;
     public $existing_header_image;
+    public $theme_color = '#f1e7e2';
     
     // Data Containers
     public $questions = [];
@@ -125,7 +126,7 @@ class EvaluationBuilder extends Component
             $this->evaluation->created_by !== $user->id) {
             abort(403, 'You do not have permission to edit this evaluation.');
             }
-            
+
         if ($this->evaluation->exists) {
             $this->title = $this->evaluation->title;
             $this->slug = $this->evaluation->slug;
@@ -133,6 +134,7 @@ class EvaluationBuilder extends Component
             $this->project_id = $this->evaluation->project_id;
             $this->is_active = $this->evaluation->is_active;
             $this->existing_header_image = $this->evaluation->header_image;
+            $this->theme_color = $this->evaluation->theme_color ?? '#f1e7e2';
 
             $this->questions = $this->evaluation->questions()
                 ->orderBy('order')
