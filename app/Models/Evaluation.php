@@ -52,7 +52,7 @@ class Evaluation extends Model
 
     public function responses()
     {
-        return $this->hasMany(EvaluationResponse::class);
+        return $this->hasMany(EvaluationResponse::class, 'evaluation_id');
     }
 
     public function project()

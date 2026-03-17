@@ -19,9 +19,9 @@
                 @php
                     // Check the role and set the correct route
                     $roleName = auth()->user()->role->role_name;
-                    
+
                     // STRICT CHECK: Is the user an administrator?
-                    $createRoute = ($roleName === 'administrator') 
+                    $createRoute = ($roleName === 'administrator')
                         ? route('admin.evaluations.create')     // Yes? Send to Admin
                         : route('director.evaluations.create');  // No? Send to Partner
                 @endphp
@@ -102,10 +102,10 @@
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                             </a>
 
-                            {{-- [NEW] Duplicate --}}
-                            <button wire:click="duplicate({{ $eval->id }})" class="text-gray-400 hover:text-blue-600 transition" title="Duplicate Form">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
-                            </button>
+                            <a href="{{ route('evaluations.show', $eval->slug) }}" target="_blank" title="Preview Live Form" class="p-1.5 text-gray-400 hover:text-orange-500 hover:bg-orange-50 rounded-lg transition flex items-center gap-1">
+                                <span class="text-[10px] font-bold uppercase tracking-widest hidden sm:inline-block">Preview</span>
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                            </a>
 
                             {{-- Delete --}}
                             <button onclick="confirm('Are you sure? This cannot be undone.') || event.stopImmediatePropagation()" wire:click="delete({{ $eval->id }})" class="text-gray-400 hover:text-red-600 transition" title="Delete">

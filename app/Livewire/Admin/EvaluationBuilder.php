@@ -108,7 +108,7 @@ class EvaluationBuilder extends Component
         session()->flash('success', 'Form duplicated successfully!');
         
         // Redirect to the newly created form
-        return redirect()->route('admin.evaluations.edit', $newEval->id); 
+        return redirect()->route('admin.evaluations.edit', $newEval->slug); 
     }
 
     public function mount(Evaluation $evaluation = null)

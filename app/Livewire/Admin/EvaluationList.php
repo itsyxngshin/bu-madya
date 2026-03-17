@@ -74,7 +74,7 @@ class EvaluationList extends Component
     public function render()
     {
         // [NEW] Added ->with('creator') to make loading the author badge lightning fast
-        $query = Evaluation::with('creator')->latest();
+        $query = Evaluation::with('creator')->withCount('responses')->latest();
 
         if (auth()->user()->role?->role_name !== 'administrator') {
             $query->where('created_by', auth()->id());

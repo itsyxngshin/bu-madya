@@ -144,6 +144,7 @@
                     <button wire:click="addQuestion('checkbox')" class="px-2 py-1.5 bg-white/10 hover:bg-white/20 rounded-md text-[10px] uppercase font-bold transition">Check</button>
                     <button wire:click="addQuestion('dropdown')" class="px-2 py-1.5 bg-white/10 hover:bg-white/20 rounded-md text-[10px] uppercase font-bold transition">Drop</button>
                     <button wire:click="addQuestion('likert')" class="px-2 py-1.5 bg-white/10 hover:bg-white/20 rounded-md text-[10px] uppercase font-bold transition">Scale</button>
+                    <button wire:click="addQuestion('file')" class="px-2 py-1.5 bg-blue-600 hover:bg-blue-700 rounded-md text-[10px] uppercase font-bold transition shadow-sm ml-1">File Bin</button>
                     <div class="h-4 w-px bg-gray-700 mx-1"></div>
                     <button wire:click="addQuestion('section')" class="px-2 py-1.5 bg-white/10 hover:bg-white/20 rounded-md text-[10px] uppercase font-bold transition">Section</button>
                     <button wire:click="addQuestion('page_break')" class="px-2 py-1.5 bg-red-600 hover:bg-red-700 rounded-md text-[10px] uppercase font-bold transition shadow-sm ml-1">Page Break</button>
