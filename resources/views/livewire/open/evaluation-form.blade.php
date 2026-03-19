@@ -207,9 +207,20 @@
 
                                 <div class="relative z-10">
                                     {{-- INPUTS --}}
-                                    @if($question->type === 'text')
-                                        <input type="text" wire:model.live="answers.{{ $question->id }}" class="w-full border-0 border-b-2 border-gray-200 bg-transparent py-2 text-sm focus:border-[var(--theme)] focus:ring-0 placeholder-gray-300 transition-colors" placeholder="Type your answer...">
-
+                                    @if($question['type'] === 'text')
+                                        <div class="mt-4">
+                                            <textarea 
+                                                wire:model.defer="answers.{{ $question['id'] }}"
+                                                x-data="{ resize() { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px' } }"
+                                                x-init="resize()"
+                                                @input="resize()"
+                                                rows="1"
+                                                placeholder="Type your answer here..."
+                                                class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[var(--theme)] focus:border-[var(--theme)] block p-3 shadow-sm transition-all resize-none overflow-hidden"
+                                                {{ !empty($question['is_required']) ? 'required' : '' }}
+                                            ></textarea>
+                                        </div>
+                      
                                     @elseif($question->type === 'textarea')
                                         <textarea wire:model.live="answers.{{ $question->id }}" rows="2" class="w-full rounded-xl border-gray-200 bg-gray-50 p-3 focus:bg-white focus:border-[var(--theme)] focus:ring-4 focus:ring-[var(--theme-light)] text-sm transition-colors" placeholder="Share your thoughts..."></textarea>
 

@@ -1,6 +1,4 @@
 {{-- [NEW] Load Chart.js for Beautiful Graphs --}}
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 <div class="min-h-screen bg-gray-50 p-4 md:p-6 font-sans text-gray-900 pb-20"
      x-data="{ 
         previewOpen: false, 
@@ -19,6 +17,9 @@
             this.previewOpen = true;
         }
      }">
+    
+    {{-- [FIXED] Moved the script inside the root element so Livewire doesn't panic! --}}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <div class="max-w-5xl mx-auto">
         
