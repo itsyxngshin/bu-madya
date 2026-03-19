@@ -107,7 +107,7 @@
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
                             </a>
 
-                            @if(auth()->user()->role?->role_name === 'administrator' || $evaluation->created_by === auth()->id())
+                            @if(auth()->user()->role?->role_name === 'administrator' || $eval->created_by === auth()->id())
                                 <button wire:click="openShareModal({{ $evaluation->id }})" class="px-3 py-1.5 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-lg text-xs font-bold transition flex items-center gap-1.5">
                                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>
                                     Share
@@ -138,7 +138,7 @@
 
             {{-- Modal Content --}}
             <div class="relative bg-white rounded-3xl shadow-2xl w-full max-w-md flex flex-col overflow-visible transform transition-all">
-                
+
                 {{-- Header --}}
                 <div class="flex items-center justify-between p-6 border-b border-gray-100 bg-white rounded-t-3xl">
                     <div>
@@ -152,7 +152,7 @@
 
                 {{-- Body --}}
                 <div class="p-6 bg-gray-50 rounded-b-3xl">
-                    
+
                     {{-- Search Input (Livewire Auto-Search) --}}
                     <div class="relative mb-8">
                         <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Add Collaborators</label>
@@ -195,7 +195,7 @@
                     {{-- Current Access List --}}
                     <div>
                         <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-3">Who has access</label>
-                        
+
                         <div class="space-y-2 max-h-[35vh] overflow-y-auto pr-2 custom-scrollbar">
                             {{-- Owner --}}
                             <div class="flex items-center justify-between p-3 bg-white rounded-xl border border-gray-100 shadow-sm">
