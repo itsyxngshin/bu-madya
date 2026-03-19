@@ -108,7 +108,7 @@
                             </a>
 
                             @if(auth()->user()->role?->role_name === 'administrator' || $eval->created_by === auth()->id())
-                                <button wire:click="openShareModal({{ $evaluation->id }})" class="px-3 py-1.5 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-lg text-xs font-bold transition flex items-center gap-1.5">
+                                <button wire:click="openShareModal({{ $eval->id }})" class="px-3 py-1.5 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-lg text-xs font-bold transition flex items-center gap-1.5">
                                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>
                                     Share
                                 </button>
