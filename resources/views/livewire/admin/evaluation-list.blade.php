@@ -131,7 +131,7 @@
         </div>
 
     </div>
-    @if($sharingEvaluation)
+    @if($sharingEvaluation && isset($sharingEvaluation->id))
         <div class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
             {{-- Backdrop --}}
             <div class="fixed inset-0 bg-gray-900/80 backdrop-blur-sm transition-opacity" wire:click="closeShareModal"></div>

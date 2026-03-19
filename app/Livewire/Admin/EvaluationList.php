@@ -6,6 +6,7 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\Evaluation;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Computed;
 use Illuminate\Support\Str; // <-- Add this import
 
 #[Layout('layouts.madya-admin-deck')]
@@ -106,7 +107,7 @@ class EvaluationList extends Component
     }
 
     // A computed property to fetch users based on the search input
-    #[Livewire\Attributes\Computed]
+    #[Computed]
     public function searchResults()
     {
         if (empty($this->shareSearch) || strlen($this->shareSearch) < 2 || !$this->sharingEvaluation) {
