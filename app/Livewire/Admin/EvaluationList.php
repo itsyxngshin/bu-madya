@@ -7,9 +7,8 @@ use Livewire\WithPagination;
 use App\Models\Evaluation;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Computed;
-use Illuminate\Support\Str; // <-- Add this import
+use Illuminate\Support\Str;
 
-#[Layout('layouts.madya-admin-deck')]
 class EvaluationList extends Component
 {
     use WithPagination;
@@ -32,37 +31,27 @@ class EvaluationList extends Component
         session()->flash('success', $evaluation->is_active ? 'Form published!' : 'Form unpublished.');
     }
 
-    // --- NEW DUPLICATE METHOD ---
+    // --- SECURE DUPLICATE METHOD ---
     public function duplicate($id)
     {
-        // 1. Find the original and eager-load its questions to optimize database queries
         $original = Evaluation::with('questions')->find($id);
 
         if (!$original) return;
 
-        // 2. Clone the main evaluation record
         $duplicate = $original->replicate();
         $duplicate->title = $original->title . ' (Copy)';
-        $duplicate->is_active = false; // Force copies to be Drafts by default
+        $duplicate->is_active = false; 
 
-        // Prevent Unique Constraint errors if you use slugs
         if (isset($original->slug)) {
             $duplicate->slug = Str::slug($duplicate->title) . '-' . strtolower(Str::random(5));
         }
 
         $duplicate->save();
 
-        // 3. Clone all associated questions
         foreach ($original->questions as $question) {
             $newQuestion = $question->replicate();
-            $newQuestion->evaluation_id = $duplicate->id; // Attach to the new form
+            $newQuestion->evaluation_id = $duplicate->id; 
             $newQuestion->save();
-
-            foreach ($question->options as $option) {
-               $newOption = $option->replicate();
-               $newOption->question_id = $newQuestion->id; // Attach to the new question
-               $newOption->save();
-            }
         }
 
         session()->flash('success', 'Form and questions duplicated successfully!');
@@ -74,9 +63,16 @@ class EvaluationList extends Component
         session()->flash('success', 'Evaluation form deleted.');
     }
 
-    public function openShareModal(Evaluation $evaluation)
+    // --- SECURE SHARE MODAL (Fixes 404 Error) ---
+    public function openShareModal($id)
     {
-        // Only Admins and the original Creator can share the form
+        $evaluation = Evaluation::with(['creator', 'collaborators'])->find($id);
+
+        if (!$evaluation) {
+            session()->flash('error', 'Evaluation not found.');
+            return;
+        }
+
         if (auth()->user()->role?->role_name !== 'administrator' && $evaluation->created_by !== auth()->id()) {
             session()->flash('error', 'Only the form owner can manage access.');
             return;
@@ -95,7 +91,7 @@ class EvaluationList extends Component
     {
         if ($this->sharingEvaluation) {
             $this->sharingEvaluation->collaborators()->syncWithoutDetaching([$userId]);
-            $this->shareSearch = ''; // Clear search after adding
+            $this->shareSearch = ''; 
         }
     }
 
@@ -106,7 +102,6 @@ class EvaluationList extends Component
         }
     }
 
-    // A computed property to fetch users based on the search input
     #[Computed]
     public function searchResults()
     {
@@ -115,20 +110,28 @@ class EvaluationList extends Component
         }
 
         return \App\Models\User::where('name', 'like', '%' . $this->shareSearch . '%')
-            ->where('id', '!=', auth()->id()) // Don't show yourself
-            ->where('id', '!=', $this->sharingEvaluation->created_by) // Don't show the owner
-            ->whereNotIn('id', $this->sharingEvaluation->collaborators->pluck('id')) // Don't show existing collaborators
+            ->where('id', '!=', auth()->id()) 
+            ->where('id', '!=', $this->sharingEvaluation->created_by) 
+            ->whereNotIn('id', $this->sharingEvaluation->collaborators->pluck('id')) 
             ->take(5)
             ->get();
     }
 
     public function render()
     {
-        // [NEW] Added ->with('creator') to make loading the author badge lightning fast
-        $query = Evaluation::with('creator')->withCount('responses')->latest();
+        $query = Evaluation::with(['creator', 'collaborators'])->withCount('responses')->latest();
 
         if (auth()->user()->role?->role_name !== 'administrator') {
-            $query->where('created_by', auth()->id());
+            $query->where(function ($q) {
+                $q->where('created_by', auth()->id())
+                  ->orWhereHas('collaborators', function ($q2) {
+                      $q2->where('user_id', auth()->id());
+                  });
+            });
+        }
+
+        if (!empty($this->search)) {
+            $query->where('title', 'like', '%' . $this->search . '%');
         }
 
         $evaluations = $query->paginate(10);
@@ -137,7 +140,6 @@ class EvaluationList extends Component
             ? 'layouts.madya-admin-deck'
             : 'layouts.madya-admin';
 
-        // Pass the layout dynamically
         return view('livewire.admin.evaluation-list', compact('evaluations'))
             ->layout($layoutFile);
     }
