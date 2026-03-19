@@ -1,4 +1,22 @@
-<div class="min-h-screen bg-gray-50 p-4 md:p-6 font-sans text-gray-900 pb-20">
+<div class="min-h-screen bg-gray-50 p-4 md:p-6 font-sans text-gray-900 pb-20"
+     x-data="{ 
+        previewOpen: false, 
+        previewUrl: '', 
+        previewType: '', 
+        openPreview(url) {
+            this.previewUrl = url;
+            // Determine file type from extension
+            let ext = url.split('.').pop().toLowerCase();
+            if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(ext)) {
+                this.previewType = 'image';
+            } else if (ext === 'pdf') {
+                this.previewType = 'pdf';
+            } else {
+                this.previewType = 'other';
+            }
+            this.previewOpen = true;
+        }
+     }">
     
     <div class="max-w-5xl mx-auto">
         
@@ -8,15 +26,17 @@
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                 Back to List
             </a>
-            <h1 class="text-2xl md:text-3xl font-black text-gray-900">{{ $evaluation->title }}</h1>
+            <div class="flex items-center flex-wrap gap-3">
+                <h1 class="text-2xl md:text-3xl font-black text-gray-900">{{ $evaluation->title }}</h1>
 
-            @if(auth()->user()->role?->role_name === 'administrator' && $evaluation->creator)
+                @if(auth()->user()->role?->role_name === 'administrator' && $evaluation->creator)
                     <span class="px-2 py-1 bg-orange-50 border border-orange-200 text-orange-700 text-[10px] uppercase tracking-widest font-bold rounded-full shadow-sm flex items-center gap-1 mt-1">
                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
                         {{ $evaluation->creator->name }}
                     </span>
                 @endif
-            <p class="text-sm text-gray-500 mt-1">
+            </div>
+            <p class="text-sm text-gray-500 mt-2">
                 Analysis of <strong class="text-gray-900">{{ $totalResponsesCount }}</strong> total responses.
             </p>
         </div>
@@ -32,7 +52,7 @@
         </div>
 
         {{-- ========================================== --}}
-        {{-- TAB 1: SUMMARY (Your existing code) --}}
+        {{-- TAB 1: SUMMARY --}}
         {{-- ========================================== --}}
         @if($tab === 'summary')
             <div class="space-y-6">
@@ -44,8 +64,10 @@
 
                     {{-- SECTIONS --}}
                     @if($question->type === 'section')
-                        <div class="font-bold text-gray-900 mb-4 prose prose-sm max-w-none prose-p:mt-0 prose-p:mb-2 prose-a:text-orange-600">
-                            {!! \Illuminate\Support\Str::markdown($question->question_text ?? '') !!}
+                        <div class="pt-8 pb-2 border-b-2 border-orange-100">
+                            <div class="text-lg font-black text-orange-600 uppercase tracking-tight prose prose-sm max-w-none prose-p:my-0 prose-a:text-orange-600">
+                                {!! \Illuminate\Support\Str::markdown($question->question_text ?? '') !!}
+                            </div>
                         </div>
                     
                     {{-- LIKERT SCALE RESULT --}}
@@ -57,7 +79,7 @@
                                     <div class="text-5xl font-black text-gray-900 mb-1">{{ $stat['average'] ?? '0.0' }}</div>
                                     <div class="flex gap-1 text-orange-400 mb-2">
                                         @for($i=1; $i<=5; $i++)
-                                            <svg class="w-4 h-4 {{ $i <= round($stat['average']) ? 'fill-current' : 'text-gray-200' }}" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                                            <svg class="w-4 h-4 {{ $i <= round($stat['average'] ?? 0) ? 'fill-current' : 'text-gray-200' }}" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
                                         @endfor
                                     </div>
                                     <span class="text-[10px] text-gray-400 font-bold uppercase">{{ $stat['count'] ?? 0 }} Responses</span>
@@ -96,7 +118,7 @@
                                 <div class="font-bold text-gray-900 mb-4 prose prose-sm max-w-none prose-p:mt-0 prose-p:mb-2 prose-a:text-orange-600">
                                     {!! \Illuminate\Support\Str::markdown($question->question_text ?? '') !!}
                                 </div>
-                                <span class="bg-gray-100 text-gray-500 text-[10px] font-bold px-2 py-1 rounded uppercase">
+                                <span class="bg-gray-100 text-gray-500 text-[10px] font-bold px-2 py-1 rounded uppercase shrink-0 ml-4">
                                     {{ $question->type === 'dropdown' ? 'Dropdown Menu' : 'Single Choice' }}
                                 </span>
                             </div>
@@ -128,7 +150,7 @@
                                 <div class="font-bold text-gray-900 mb-4 prose prose-sm max-w-none prose-p:mt-0 prose-p:mb-2 prose-a:text-orange-600">
                                     {!! \Illuminate\Support\Str::markdown($question->question_text ?? '') !!}
                                 </div>
-                                <span class="bg-blue-50 text-blue-600 text-[10px] font-bold px-2 py-1 rounded uppercase">Multi-Select</span>
+                                <span class="bg-blue-50 text-blue-600 text-[10px] font-bold px-2 py-1 rounded uppercase shrink-0 ml-4">Multi-Select</span>
                             </div>
                             <div class="space-y-3">
                                 @if(isset($stat['count']) && $stat['count'] > 0 && isset($stat['breakdown']))
@@ -159,8 +181,8 @@
                                 <div class="font-bold text-gray-900 mb-4 prose prose-sm max-w-none prose-p:mt-0 prose-p:mb-2 prose-a:text-orange-600">
                                     {!! \Illuminate\Support\Str::markdown($question->question_text ?? '') !!}
                                 </div>
-                                <span class="bg-gray-100 text-gray-500 text-[10px] font-bold px-2 py-1 rounded uppercase">
-                                    {{ $question->type === 'file' ? 'File Upload' : 'Text Input' }}
+                                <span class="bg-gray-100 text-gray-500 text-[10px] font-bold px-2 py-1 rounded uppercase shrink-0 ml-4">
+                                    {{ $question->type === 'file' ? 'File Uploads' : 'Text Input' }}
                                 </span>
                             </div>
                             @if($question->answers->count() > 0)
@@ -168,10 +190,11 @@
                                     @foreach($question->answers->take(10) as $answer)
                                         <div class="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg border border-gray-100">
                                             @if($question->type == 'file')
-                                                <a href="{{ asset('storage/'.$answer->answer_value) }}" target="_blank" class="text-blue-600 hover:underline flex items-center gap-1 font-bold text-xs">
-                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                                                    View Uploaded File
-                                                </a>
+                                                {{-- [NEW] Alpine Button instead of direct link --}}
+                                                <button type="button" @click="openPreview('{{ asset('storage/'.$answer->answer_value) }}')" class="text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1.5 font-bold text-xs transition">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                                    Preview Uploaded File
+                                                </button>
                                             @else
                                                 "{{ $answer->answer_value }}"
                                             @endif
@@ -236,7 +259,7 @@
                         @if($question->type === 'page_break') @continue @endif
 
                         @if($question->type === 'section')
-                            <div class="font-bold text-gray-900 mb-4 prose prose-sm max-w-none prose-p:mt-0 prose-p:mb-2 prose-a:text-orange-600">
+                            <div class="font-bold text-gray-900 mb-4 prose prose-sm max-w-none prose-p:mt-0 prose-p:mb-2 prose-a:text-orange-600 px-6 pt-6">
                                 {!! \Illuminate\Support\Str::markdown($question->question_text ?? '') !!}
                             </div>
                         @else
@@ -254,10 +277,11 @@
                                 @if(!$val)
                                     <span class="text-xs text-gray-400 italic">No answer provided</span>
                                 @elseif($question->type === 'file')
-                                    <a href="{{ asset('storage/'.$val) }}" target="_blank" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 font-bold text-xs rounded-lg hover:bg-blue-100 transition">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13l-3 3m0 0l-3-3m3 3V8m0 13a9 9 0 110-18 9 9 0 010 18z"></path></svg>
-                                        Download Uploaded File
-                                    </a>
+                                    {{-- [NEW] Alpine Button instead of direct link --}}
+                                    <button type="button" @click="openPreview('{{ asset('storage/'.$val) }}')" class="inline-flex items-center gap-2 px-5 py-2.5 bg-gray-900 text-white font-bold text-xs rounded-xl hover:bg-gray-800 shadow-md hover:shadow-lg transition transform hover:-translate-y-0.5">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                        Preview Uploaded File
+                                    </button>
                                 @elseif($question->type === 'checkbox')
                                     @php 
                                         // Decode JSON array and display as pills
@@ -284,4 +308,80 @@
 
         @endif
     </div>
-</div>
+
+    {{-- ========================================== --}}
+    {{-- ALPINE.JS FILE PREVIEW MODAL (Smart Fit) --}}
+    {{-- ========================================== --}}
+    <div x-show="previewOpen" style="display: none;" class="fixed inset-0 z-[100] flex items-center justify-center p-2 sm:p-6" x-cloak>
+        {{-- Backdrop --}}
+        <div x-show="previewOpen" 
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             class="fixed inset-0 bg-gray-900/90 backdrop-blur-sm" 
+             @click="previewOpen = false"></div>
+
+        {{-- Modal Content (Dynamically swaps between Shrink-Wrap for Images and Full-Size for PDFs) --}}
+        <div x-show="previewOpen"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 scale-95"
+             x-transition:enter-end="opacity-100 scale-100"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 scale-100"
+             x-transition:leave-end="opacity-0 scale-95"
+             class="relative bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden"
+             :class="previewType === 'pdf' ? 'w-[95vw] h-[90vh]' : 'w-auto max-w-[95vw] max-h-[95vh]'">
+
+            {{-- Header --}}
+            <div class="flex items-center justify-between p-4 border-b border-gray-100 bg-white z-10 shrink-0">
+                <h3 class="text-sm font-black text-gray-900 uppercase tracking-widest flex items-center gap-2 pr-6">
+                    <svg class="w-4 h-4 text-orange-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                    <span class="truncate">File Preview</span>
+                </h3>
+                <div class="flex items-center gap-2 shrink-0">
+                    {{-- Quick Download Button --}}
+                    <a :href="previewUrl" target="_blank" download class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-[10px] font-bold uppercase tracking-widest rounded-lg transition flex items-center gap-1.5">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        <span class="hidden sm:inline">Download</span>
+                    </a>
+                    {{-- Close Button --}}
+                    <button @click="previewOpen = false" class="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+            </div>
+
+            {{-- Body --}}
+            <div class="overflow-hidden bg-gray-100/80 flex items-center justify-center p-2 sm:p-4 relative"
+                 :class="previewType === 'pdf' ? 'flex-1' : ''">
+                
+                {{-- Show if Image (Shrink-wraps but maxes out at 80% of window height so the header stays visible) --}}
+                <template x-if="previewType === 'image'">
+                    <img :src="previewUrl" class="max-w-full max-h-[80vh] w-auto h-auto object-contain rounded-lg drop-shadow-sm">
+                </template>
+
+                {{-- Show if PDF (Fills the entire 90vh/95vw container) --}}
+                <template x-if="previewType === 'pdf'">
+                    <iframe :src="previewUrl" class="w-full h-full rounded-lg border border-gray-200 shadow-sm bg-white"></iframe>
+                </template>
+
+                {{-- Show if unknown file type --}}
+                <template x-if="previewType === 'other'">
+                    <div class="text-center p-8 max-w-sm">
+                        <div class="w-20 h-20 bg-gray-200 text-gray-400 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner">
+                            <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        </div>
+                        <h4 class="text-gray-900 font-bold text-lg mb-1">Preview Not Available</h4>
+                        <p class="text-gray-500 text-sm mb-6 leading-relaxed">This file format cannot be displayed natively in the browser. You must download it to view.</p>
+                        <a :href="previewUrl" download class="px-6 py-3 bg-gray-900 hover:bg-gray-800 text-white font-bold rounded-xl transition shadow-lg text-xs uppercase tracking-widest inline-flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                            Download File
+                        </a>
+                    </div>
+                </template>
+            </div>
+        </div>
+    </div>

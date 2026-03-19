@@ -14,6 +14,8 @@ class EvaluationList extends Component
     use WithPagination;
 
     public $search = '';
+    public $sharingEvaluation = null;
+    public $shareSearch = '';
 
     public function updatingSearch()
     {
@@ -71,6 +73,54 @@ class EvaluationList extends Component
         session()->flash('success', 'Evaluation form deleted.');
     }
 
+    public function openShareModal(Evaluation $evaluation)
+    {
+        // Only Admins and the original Creator can share the form
+        if (auth()->user()->role?->role_name !== 'administrator' && $evaluation->created_by !== auth()->id()) {
+            session()->flash('error', 'Only the form owner can manage access.');
+            return;
+        }
+
+        $this->sharingEvaluation = $evaluation;
+        $this->shareSearch = '';
+    }
+
+    public function closeShareModal()
+    {
+        $this->sharingEvaluation = null;
+    }
+
+    public function addCollaborator($userId)
+    {
+        if ($this->sharingEvaluation) {
+            $this->sharingEvaluation->collaborators()->syncWithoutDetaching([$userId]);
+            $this->shareSearch = ''; // Clear search after adding
+        }
+    }
+
+    public function removeCollaborator($userId)
+    {
+        if ($this->sharingEvaluation) {
+            $this->sharingEvaluation->collaborators()->detach($userId);
+        }
+    }
+
+    // A computed property to fetch users based on the search input
+    #[Livewire\Attributes\Computed]
+    public function searchResults()
+    {
+        if (empty($this->shareSearch) || strlen($this->shareSearch) < 2 || !$this->sharingEvaluation) {
+            return [];
+        }
+
+        return \App\Models\User::where('name', 'like', '%' . $this->shareSearch . '%')
+            ->where('id', '!=', auth()->id()) // Don't show yourself
+            ->where('id', '!=', $this->sharingEvaluation->created_by) // Don't show the owner
+            ->whereNotIn('id', $this->sharingEvaluation->collaborators->pluck('id')) // Don't show existing collaborators
+            ->take(5)
+            ->get();
+    }
+
     public function render()
     {
         // [NEW] Added ->with('creator') to make loading the author badge lightning fast
@@ -82,9 +132,9 @@ class EvaluationList extends Component
 
         $evaluations = $query->paginate(10);
 
-        $layoutFile = auth()->user()->role?->role_name === 'administrator' 
-            ? 'layouts.madya-admin-deck' 
-            : 'layouts.madya-admin'; 
+        $layoutFile = auth()->user()->role?->role_name === 'administrator'
+            ? 'layouts.madya-admin-deck'
+            : 'layouts.madya-admin';
 
         // Pass the layout dynamically
         return view('livewire.admin.evaluation-list', compact('evaluations'))

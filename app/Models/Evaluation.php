@@ -12,7 +12,7 @@ class Evaluation extends Model
 
     protected $fillable = [
         'title',
-        'slug', 
+        'slug',
         'created_by',
         'description',
         'type',
@@ -58,5 +58,10 @@ class Evaluation extends Model
     public function project()
     {
         return $this->belongsTo(Project::class);
-    }    
+    }
+
+    public function collaborators()
+    {
+        return $this->belongsToMany(User::class, 'evaluation_collaborators')->withTimestamps();
+    }
 }

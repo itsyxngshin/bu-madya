@@ -12,7 +12,9 @@
 @endphp
 
 {{-- [THEME APPLIED HERE] --}}
-<div style="--theme: {{ $theme }}; --theme-light: {{ $themeLight }};" class="min-h-screen bg-gray-50 pb-20 font-sans text-gray-900 selection:bg-[var(--theme-light)] selection:text-[var(--theme)]">
+<div style="--theme: {{ $theme }}; --theme-light: {{ $themeLight }};" class="min-h-screen bg-gray-50 pb-20 font-sans text-gray-900 selection:bg-[var(--theme-light)] selection:text-[var(--theme)]"
+    x-data 
+     @scroll-to-top.window="window.scrollTo({ top: 0, behavior: 'smooth' })">
 
     {{-- STATE: FORM SUBMITTED --}}
     @if($isSubmitted)
@@ -50,7 +52,7 @@
     @else
 
         {{-- STICKY HEADER --}}
-        <div class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100 shadow-sm transition-all duration-300">
+        <div class="sticky top-20 z-40 bg-white/90 backdrop-blur-md border-b border-gray-100 shadow-sm transition-all duration-300">
             <div class="max-w-2xl mx-auto px-4 h-14 flex items-center justify-between">
                 <span class="text-xs font-bold text-gray-900 truncate max-w-[200px]">{{ $evaluation->title }}</span>
                 <div class="flex items-center gap-3">
@@ -173,7 +175,7 @@
 
                         @else
                             {{-- QUESTION CARD --}}
-                            <div class="group bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md hover:border-[var(--theme-light)] transition-all duration-300 relative" wire:key="question-card-{{ $question->id }}" style="z-index: {{ 100 - $loop->index }}">
+                            <div class="group bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md hover:border-[var(--theme-light)] transition-all duration-300 relative" wire:key="question-card-{{ $question->id }}" style="z-index: {{ 30 - $loop->index }}">
                                 {{-- Theme Active Stripe --}}
                                 <div class="absolute left-0 top-0 bottom-0 w-1 bg-[var(--theme)] opacity-0 group-focus-within:opacity-100 transition-opacity rounded-l-2xl"></div>
 

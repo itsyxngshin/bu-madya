@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 namespace App\Livewire\Admin;
 
@@ -23,15 +23,15 @@ class EventIndex extends Component
     public function delete($id)
     {
         $event = Event::findOrFail($id);
-        
+
         // [SECURITY FIX] Ensure only the owner OR an admin can delete
         $userRole = auth()->user()->role?->role_name;
         $isAdmin = in_array($userRole, ['administrator', 'director']);
-        
+
         if ($event->user_id !== auth()->id() && !$isAdmin) {
             abort(403, 'You do not have permission to delete this event.');
         }
-        
+
         // Delete cover image if it exists
         if ($event->cover_image) {
             Storage::disk('public')->delete($event->cover_image);
@@ -44,15 +44,23 @@ class EventIndex extends Component
     public function render()
     {
         // 1. Start the query builder (DO NOT paginate yet)
-        $query = Event::query()
-            ->where('title', 'like', '%' . $this->search . '%')
-            ->orderBy('created_at', 'desc');
-        
-        // 2. Apply multi-tenant security scoping
-        $userRole = auth()->user()->role?->role_name;
-        if (!in_array($userRole, ['administrator', 'director'])) {
-            // Lock organizations to only their own events
-            $query->where('user_id', auth()->id());
+        $query = Evaluation::with(['creator', 'collaborators'])->withCount('responses')->latest();
+
+        if (auth()->user()->role?->role_name !== 'administrator') {
+            $query->where(function ($q) {
+                // Show it if they created it...
+                $q->where('created_by', auth()->id())
+                  // OR if they are a collaborator
+                  ->orWhereHas('collaborators', function ($q2) {
+                      $q2->where('user_id', auth()->id());
+                  });
+            });
+        }
+
+        $evaluations = $query->paginate(10);
+        // 2. Apply search filtering (if needed)
+        if ($this->search) {
+            $query->where('title', 'like', '%' . $this->search . '%');
         }
 
         // 3. Paginate ONLY at the very end of the query chain!

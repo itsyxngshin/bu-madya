@@ -7,9 +7,10 @@ use Livewire\WithFileUploads;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Layout;
 use App\Models\Evaluation;
-use App\Models\Project; 
+use App\Models\Project;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Str;
+use Livewire\Attributes\Computed;
 
 class EvaluationBuilder extends Component
 {
@@ -26,11 +27,11 @@ class EvaluationBuilder extends Component
     public $header_image;
     public $existing_header_image;
     public $theme_color = '#f1e7e2';
-    
+
     // Data Containers
     public $questions = [];
     public $available_projects = [];
-    
+
     // [NEW] Track which question is currently selected
     public $activeQuestionIndex = null;
 
@@ -43,11 +44,11 @@ class EvaluationBuilder extends Component
             'description' => 'nullable|string',
             'project_id' => 'nullable|integer',
             'is_active' => 'boolean',
-            
+
             // [FIXED] Explicitly validate all array keys so Livewire doesn't strip them during deletion
             'questions' => 'array',
             'questions.*.id' => 'nullable',
-            'questions.*.temp_id' => 'required|string', 
+            'questions.*.temp_id' => 'required|string',
             'questions.*.type' => 'required|in:text,textarea,radio,checkbox,dropdown,likert,section,file,page_break',
             'questions.*.question_text' => 'nullable|string',
             'questions.*.description' => 'nullable|string',
@@ -55,7 +56,7 @@ class EvaluationBuilder extends Component
             'questions.*.order' => 'integer',
             'questions.*.image_path' => 'nullable|string',
             'questions.*.new_image' => 'nullable|image|max:2048',
-            'questions.*.options' => 'nullable|array', 
+            'questions.*.options' => 'nullable|array',
         ];
     }
 
@@ -106,9 +107,9 @@ class EvaluationBuilder extends Component
         }
 
         session()->flash('success', 'Form duplicated successfully!');
-        
+
         // Redirect to the newly created form
-        return redirect()->route('admin.evaluations.edit', $newEval->slug); 
+        return redirect()->route('admin.evaluations.edit', $newEval->slug);
     }
 
     public function mount(Evaluation $evaluation = null)
@@ -119,13 +120,17 @@ class EvaluationBuilder extends Component
         $this->evaluation = $evaluation ?? new Evaluation();
 
         $user = auth()->user();
-        
-        // If the form exists, and the user is NOT an admin, and they DID NOT create it -> Block them
-        if ($this->evaluation->exists && 
-            $user->role?->role_name !== 'administrator' && 
-            $this->evaluation->created_by !== $user->id) {
-            abort(403, 'You do not have permission to edit this evaluation.');
-            }
+
+        // Check if the user is in the collaborators list
+        $isCollaborator = $this->evaluation->exists ? $this->evaluation->collaborators()->where('user_id', $user->id)->exists() : false;
+
+        // Block if not Admin, not Creator, AND not Collaborator
+        if ($this->evaluation->exists &&
+            $user->role?->role_name !== 'administrator' &&
+            $this->evaluation->created_by !== $user->id &&
+            !$isCollaborator) {
+            abort(403, 'You do not have permission to access this evaluation.');
+        }
 
         if ($this->evaluation->exists) {
             $this->title = $this->evaluation->title;
@@ -143,18 +148,47 @@ class EvaluationBuilder extends Component
                     $arr = $q->toArray();
                     $arr['new_image'] = null;
                     $arr['description'] = $arr['description'] ?? '';
-                    $arr['temp_id'] = (string) Str::uuid(); 
+                    $arr['temp_id'] = (string) Str::uuid();
+
+                    // [NEW] Ensure 'options' is a valid array
+                    if (!isset($arr['options']) || !is_array($arr['options'])) {
+                        $arr['options'] = is_string($arr['options'] ?? null)
+                            ? json_decode($arr['options'], true) ?? []
+                            : [];
+                    }
+
+                    // [NEW] Fix page_break routing data on load so the dropdown binds correctly
+                    if ($arr['type'] === 'page_break' && empty($arr['options'])) {
+                        $arr['options'] = [['jump' => '']];
+                    }
                     return $arr;
                 })
                 ->toArray();
-                
+
             // Set first question active by default if it exists
             if(count($this->questions) > 0) $this->activeQuestionIndex = 0;
-            
+
         } else {
             $this->is_active = true;
             $this->questions = [];
         }
+    }
+
+    #[Computed]
+    public function sections()
+    {
+        $sections = [];
+        foreach ($this->questions as $index => $question) {
+            if ($question['type'] === 'section') {
+                $sections[] = [
+                    // Use database ID if saved, otherwise use temp_id for brand new sections
+                    'id' => !empty($question['id']) ? $question['id'] : $question['temp_id'],
+                    'title' => !empty($question['question_text']) ? $question['question_text'] : 'Untitled Section',
+                    'order' => $index,
+                ];
+            }
+        }
+        return $sections;
     }
 
     // --- SELECTION LOGIC ---
@@ -177,40 +211,40 @@ class EvaluationBuilder extends Component
                 }
             }
         }
-        
+
         usort($this->questions, fn($a, $b) => $a['order'] <=> $b['order']);
-        
+
         // Reset active index so we don't accidentally highlight the wrong one after sort
-        $this->activeQuestionIndex = null; 
+        $this->activeQuestionIndex = null;
     }
 
     // --- QUESTION MANAGEMENT ---
     public function addQuestion($type)
     {
         $defaultOptions = [];
-        
+
         if ($type === 'likert') {
             $defaultOptions = ['Strongly Disagree', 'Disagree', 'Neutral', 'Agree', 'Strongly Agree'];
-        } 
+        }
         elseif (in_array($type, ['radio', 'checkbox', 'dropdown'])) {
             $defaultOptions = [
                 ['text' => 'Option 1', 'jump' => null],
                 ['text' => 'Option 2', 'jump' => null]
             ];
-        } 
+        }
         elseif ($type === 'page_break') {
-            $defaultOptions = [['jump' => null]]; 
+            $defaultOptions = [['jump' => null]];
         }
 
         $newQuestion = [
             'id' => null,
-            'temp_id' => (string) Str::uuid(), 
+            'temp_id' => (string) Str::uuid(),
             'type' => $type,
             'question_text' => '',
             'description' => '',
             'options' => $defaultOptions,
             'is_required' => !in_array($type, ['section', 'page_break']), // Auto-false for breaks/sections
-            'order' => 0, 
+            'order' => 0,
             'image_path' => null,
             'new_image' => null
         ];
@@ -233,8 +267,8 @@ class EvaluationBuilder extends Component
     public function removeQuestion($index)
     {
         unset($this->questions[$index]);
-        $this->questions = array_values($this->questions); 
-        
+        $this->questions = array_values($this->questions);
+
         // Recalculate order integers
         foreach ($this->questions as $idx => $q) {
             $this->questions[$idx]['order'] = $idx;
@@ -267,7 +301,7 @@ class EvaluationBuilder extends Component
             ->where('type', 'section')
             ->map(function($q) {
                 return [
-                    'id' => $q['temp_id'], 
+                    'id' => $q['temp_id'],
                     'title' => $q['question_text'] ?: 'Untitled Section',
                     'order' => $q['order']
                 ];
@@ -282,7 +316,7 @@ class EvaluationBuilder extends Component
         $this->slug = Str::random(16);
     }
 
-    #[On('confirmed-reset')] 
+    #[On('confirmed-reset')]
     public function resetResponses()
     {
         if (!$this->evaluation->exists) return;
@@ -292,7 +326,7 @@ class EvaluationBuilder extends Component
         if ($responseIds->isNotEmpty()) {
             \App\Models\EvaluationAnswer::whereIn('evaluation_response_id', $responseIds)->delete();
             $this->evaluation->responses()->delete();
-            
+
             $this->dispatch('swal:modal', [
                 'type' => 'success', 'title' => 'Deleted!', 'text' => 'Responses cleared successfully.'
             ]);
@@ -313,7 +347,7 @@ class EvaluationBuilder extends Component
         $this->evaluation->title = $this->title;
         $this->evaluation->slug = !empty($this->slug) ? Str::slug($this->slug) : Str::slug($this->title);
         $this->evaluation->description = $this->description;
-        $this->evaluation->project_id = $this->project_id;
+        $this->evaluation->project_id = empty($this->project_id) ? null : $this->project_id;
         $this->evaluation->is_active = $this->is_active;
         if (!$this->evaluation->exists) {
             $this->evaluation->created_by = auth()->id();
@@ -327,7 +361,7 @@ class EvaluationBuilder extends Component
             session()->flash('warning', 'Some removed questions could not be deleted due to existing responses.');
         }
 
-        $tempIdMap = []; 
+        $tempIdMap = [];
 
         foreach ($this->questions as $index => $q) {
             $imagePath = $q['image_path'] ?? null;
@@ -344,10 +378,10 @@ class EvaluationBuilder extends Component
                     'type' => $q['type'],
                     'question_text' => $q['type'] === 'page_break' ? 'Page Break' : $qText,
                     'description' => $q['description'] ?? null,
-                    'options' => $q['options'], 
+                    'options' => $q['options'],
                     'is_required' => $q['is_required'],
                     'order' => $index,
-                    'image_path' => $imagePath 
+                    'image_path' => $imagePath
                 ]
             );
 
@@ -362,7 +396,7 @@ class EvaluationBuilder extends Component
 
                 foreach ($question->options as $opt) {
                     if (isset($opt['jump']) && isset($tempIdMap[$opt['jump']])) {
-                        $opt['jump'] = $tempIdMap[$opt['jump']]; 
+                        $opt['jump'] = $tempIdMap[$opt['jump']];
                         $modified = true;
                     }
                     $updatedOptions[] = $opt;
@@ -382,9 +416,9 @@ class EvaluationBuilder extends Component
     public function render()
     {
         // Determine the correct layout based on the user's role
-        $layoutFile = auth()->user()->role?->role_name === 'administrator' 
-            ? 'layouts.madya-admin-deck' 
-            : 'layouts.madya-admin'; 
+        $layoutFile = auth()->user()->role?->role_name === 'administrator'
+            ? 'layouts.madya-admin-deck'
+            : 'layouts.madya-admin';
 
         // Pass the layout dynamically
         return view('livewire.admin.evaluation-builder')

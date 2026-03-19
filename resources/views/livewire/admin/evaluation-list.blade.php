@@ -107,6 +107,13 @@
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
                             </a>
 
+                            @if(auth()->user()->role?->role_name === 'administrator' || $evaluation->created_by === auth()->id())
+                                <button wire:click="openShareModal({{ $evaluation->id }})" class="px-3 py-1.5 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-lg text-xs font-bold transition flex items-center gap-1.5">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>
+                                    Share
+                                </button>
+                            @endif
+
                             {{-- Delete --}}
                             <button onclick="confirm('Are you sure? This cannot be undone.') || event.stopImmediatePropagation()" wire:click="delete({{ $eval->id }})" class="text-gray-400 hover:text-red-600 transition" title="Delete">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
@@ -124,4 +131,110 @@
         </div>
 
     </div>
+    @if($sharingEvaluation)
+        <div class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
+            {{-- Backdrop --}}
+            <div class="fixed inset-0 bg-gray-900/80 backdrop-blur-sm transition-opacity" wire:click="closeShareModal"></div>
+
+            {{-- Modal Content --}}
+            <div class="relative bg-white rounded-3xl shadow-2xl w-full max-w-md flex flex-col overflow-visible transform transition-all">
+                
+                {{-- Header --}}
+                <div class="flex items-center justify-between p-6 border-b border-gray-100 bg-white rounded-t-3xl">
+                    <div>
+                        <h3 class="text-xl font-black text-gray-900 leading-tight">Share Access</h3>
+                        <p class="text-xs font-bold text-gray-400 mt-1 truncate max-w-[250px]">{{ $sharingEvaluation->title }}</p>
+                    </div>
+                    <button wire:click="closeShareModal" class="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+
+                {{-- Body --}}
+                <div class="p-6 bg-gray-50 rounded-b-3xl">
+                    
+                    {{-- Search Input (Livewire Auto-Search) --}}
+                    <div class="relative mb-8">
+                        <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Add Collaborators</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <svg class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                            </div>
+                            <input wire:model.live.debounce.300ms="shareSearch" type="text" placeholder="Search by name..." class="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl leading-5 bg-white text-sm font-bold placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition shadow-sm">
+                        </div>
+
+                        {{-- Search Results Dropdown --}}
+                        @if(!empty($shareSearch) && count($this->searchResults) > 0)
+                            <div class="absolute z-50 mt-2 w-full bg-white shadow-xl rounded-2xl border border-gray-100 overflow-hidden">
+                                <ul class="max-h-56 overflow-y-auto">
+                                    @foreach($this->searchResults as $user)
+                                        <li>
+                                            <button wire:click="addCollaborator({{ $user->id }})" class="w-full text-left px-4 py-3 hover:bg-blue-50 flex items-center gap-3 transition border-b border-gray-50 last:border-0">
+                                                <div class="h-8 w-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xs shrink-0">
+                                                    {{ substr($user->name, 0, 1) }}
+                                                </div>
+                                                <div class="overflow-hidden">
+                                                    <p class="text-sm font-bold text-gray-900 truncate">{{ $user->name }}</p>
+                                                    <p class="text-[10px] text-gray-500 truncate">{{ $user->email }}</p>
+                                                </div>
+                                                <div class="ml-auto">
+                                                    <span class="text-[10px] font-bold text-blue-600 uppercase tracking-widest bg-blue-100 px-2 py-1 rounded-md">Add</span>
+                                                </div>
+                                            </button>
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @elseif(!empty($shareSearch))
+                            <div class="absolute z-50 mt-2 w-full bg-white shadow-xl rounded-2xl border border-gray-100 p-4 text-center">
+                                <p class="text-xs text-gray-500 font-bold">No available users found.</p>
+                            </div>
+                        @endif
+                    </div>
+
+                    {{-- Current Access List --}}
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-3">Who has access</label>
+                        
+                        <div class="space-y-2 max-h-[35vh] overflow-y-auto pr-2 custom-scrollbar">
+                            {{-- Owner --}}
+                            <div class="flex items-center justify-between p-3 bg-white rounded-xl border border-gray-100 shadow-sm">
+                                <div class="flex items-center gap-3 overflow-hidden">
+                                    <div class="h-8 w-8 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center font-black text-xs shrink-0 ring-2 ring-white shadow-sm">
+                                        {{ substr($sharingEvaluation->creator->name ?? 'A', 0, 1) }}
+                                    </div>
+                                    <div class="overflow-hidden">
+                                        <p class="text-sm font-bold text-gray-900 truncate">{{ $sharingEvaluation->creator->name ?? 'System Admin' }}</p>
+                                    </div>
+                                </div>
+                                <span class="text-[9px] font-black text-orange-500 uppercase tracking-widest bg-orange-50 px-2 py-1 rounded-md shrink-0 border border-orange-100">Owner</span>
+                            </div>
+
+                            {{-- Collaborators --}}
+                            @forelse($sharingEvaluation->collaborators as $collaborator)
+                                <div class="flex items-center justify-between p-3 bg-white rounded-xl border border-gray-100 shadow-sm">
+                                    <div class="flex items-center gap-3 overflow-hidden">
+                                        <div class="h-8 w-8 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center font-bold text-xs shrink-0 ring-2 ring-white shadow-sm">
+                                            {{ substr($collaborator->name, 0, 1) }}
+                                        </div>
+                                        <div class="overflow-hidden">
+                                            <p class="text-sm font-bold text-gray-900 truncate">{{ $collaborator->name }}</p>
+                                        </div>
+                                    </div>
+                                    <button wire:click="removeCollaborator({{ $collaborator->id }})" class="text-[10px] font-bold text-red-500 hover:text-red-700 hover:bg-red-50 px-2 py-1 rounded transition shrink-0 uppercase tracking-widest border border-transparent hover:border-red-100">
+                                        Remove
+                                    </button>
+                                </div>
+                            @empty
+                                <div class="text-center p-5 bg-white rounded-xl border border-gray-200 border-dashed">
+                                    <svg class="w-6 h-6 text-gray-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                                    <p class="text-[10px] uppercase tracking-widest text-gray-400 font-bold">Only the owner has access.</p>
+                                </div>
+                            @endforelse
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
 </div>

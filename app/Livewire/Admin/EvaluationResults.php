@@ -21,9 +21,15 @@ class EvaluationResults extends Component
     {
         $user = auth()->user();
 
-        // Block unauthorized directors from viewing the results
-        if ($user->role?->role_name !== 'administrator' && $evaluation->created_by !== $user->id) {
-            abort(403, 'You do not have permission to view these results.');
+        // Check if the user is in the collaborators list
+        $isCollaborator = $this->evaluation->exists ? $this->evaluation->collaborators()->where('user_id', $user->id)->exists() : false;
+
+        // Block if not Admin, not Creator, AND not Collaborator
+        if ($this->evaluation->exists &&
+            $user->role?->role_name !== 'administrator' &&
+            $this->evaluation->created_by !== $user->id &&
+            !$isCollaborator) {
+            abort(403, 'You do not have permission to access this evaluation.');
         }
 
         $this->evaluation = $evaluation;
@@ -61,14 +67,14 @@ class EvaluationResults extends Component
         }, 'questions.answers']);
 
         foreach ($this->evaluation->questions as $question) {
-            
+
             // Skip structural elements early
             if (in_array($question->type, ['section', 'page_break'])) {
                 continue;
             }
 
             $totalResponses = $question->answers->count();
-            
+
             if ($totalResponses === 0) {
                 $this->stats[$question->id] = [
                     'count' => 0, 'average' => 0, 'breakdown' => []
@@ -99,8 +105,8 @@ class EvaluationResults extends Component
                     'average' => round($sum / $totalResponses, 2),
                     'breakdown' => $counts
                 ];
-            } 
-            
+            }
+
             // B. RADIO & DROPDOWN LOGIC
             elseif (in_array($question->type, ['radio', 'dropdown'])) {
                 $counts = array_fill_keys($flatOptions, 0);
@@ -139,7 +145,7 @@ class EvaluationResults extends Component
                     'breakdown' => $counts
                 ];
             }
-            
+
             // D. TEXT / FILE
             else {
                 $this->stats[$question->id] = [
@@ -163,9 +169,9 @@ class EvaluationResults extends Component
                 ->first();
         }
 
-        $layoutFile = auth()->user()->role?->role_name === 'administrator' 
-            ? 'layouts.madya-admin-deck' 
-            : 'layouts.madya-admin'; 
+        $layoutFile = auth()->user()->role?->role_name === 'administrator'
+            ? 'layouts.madya-admin-deck'
+            : 'layouts.madya-admin';
 
         return view('livewire.admin.evaluation-results', [
             'totalResponsesCount' => $totalResponsesCount,
