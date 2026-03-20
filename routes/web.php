@@ -167,6 +167,7 @@ Route::middleware(['auth', 'role:administrator'])->prefix('admin')->name('admin.
     Route::get('/events/{event:slug}/raffle', EventRaffle::class)->name('events.raffle');
     Route::get('/submit-frame', SubmitFrame::class)->name('frames.submit');
     Route::get('/linkages-proposals', LinkagesManager::class)->name('linkages.proposals');
+    Route::get('/admin/welfare', \App\Livewire\Admin\WelfareManager::class)->name('admin.welfare.index');
 });
 
 Route::middleware(['auth', 'role:organization'])->prefix('partner')->name('partner.')
@@ -239,5 +240,19 @@ Route::get('/discover', EventDiscovery::class)->name('open.events.index');
 Route::get('/privacy', PrivacyPolicy::class)->name('privacy');
 Route::get('/evaluations/{evaluation}', EvaluationForm::class)->name('evaluations.show');
 
+// ==========================================
+// WELFARE & GRIEVANCE SUBDOMAIN
+// ==========================================
+$welfareDomain = 'welfare.' . parse_url(config('app.url'), PHP_URL_HOST);
+
+Route::domain($welfareDomain)->middleware(['web', 'throttle:5,1'])->group(function () {
+    
+    // The Submit Form
+    Route::get('/', \App\Livewire\Welfare\SubmitTicket::class)->name('welfare.submit');
+    
+    // The Secure Tracker
+    Route::get('/track', \App\Livewire\Welfare\TrackTicket::class)->name('welfare.track');
+
+});
 
 

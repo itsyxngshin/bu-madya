@@ -13,7 +13,7 @@
 
 {{-- [THEME APPLIED HERE] --}}
 <div style="--theme: {{ $theme }}; --theme-light: {{ $themeLight }};" class="min-h-screen bg-gray-50 pb-20 font-sans text-gray-900 selection:bg-[var(--theme-light)] selection:text-[var(--theme)]"
-    x-data 
+    x-data
      @scroll-to-top.window="window.scrollTo({ top: 0, behavior: 'smooth' })">
 
     {{-- STATE: FORM SUBMITTED --}}
@@ -209,7 +209,7 @@
                                     {{-- INPUTS --}}
                                     @if($question['type'] === 'text')
                                         <div class="mt-4">
-                                            <textarea 
+                                            <textarea
                                                 wire:model.defer="answers.{{ $question['id'] }}"
                                                 x-data="{ resize() { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px' } }"
                                                 x-init="resize()"
@@ -220,7 +220,7 @@
                                                 {{ !empty($question['is_required']) ? 'required' : '' }}
                                             ></textarea>
                                         </div>
-                      
+
                                     @elseif($question->type === 'textarea')
                                         <textarea wire:model.live="answers.{{ $question->id }}" rows="2" class="w-full rounded-xl border-gray-200 bg-gray-50 p-3 focus:bg-white focus:border-[var(--theme)] focus:ring-4 focus:ring-[var(--theme-light)] text-sm transition-colors" placeholder="Share your thoughts..."></textarea>
 

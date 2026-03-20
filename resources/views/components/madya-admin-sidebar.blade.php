@@ -91,6 +91,20 @@
                 <svg class="w-5 h-5 {{ request()->routeIs('partner.frames.*') ? $iconActive : $iconInactive }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                 My Campaign Frames
             </a>
+
+            {{-- Welfare & Grievances Link (Partner/Org Sidebar) --}}
+            <a href="{{ route('admin.welfare.index') }}" 
+            class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group
+                    {{ request()->routeIs('admin.welfare.*') 
+                        ? 'bg-orange-50 text-orange-600 font-black shadow-sm border border-orange-100' 
+                        : 'text-gray-500 font-bold hover:bg-gray-50 hover:text-gray-900' }}">
+                
+                <svg class="w-5 h-5 transition-transform group-hover:scale-110 {{ request()->routeIs('admin.welfare.*') ? 'text-orange-500' : 'text-gray-400 group-hover:text-orange-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                </svg>
+                
+                <span class="text-sm tracking-wide">Welfare & Grievances</span>
+            </a>
         @endif
 
 
@@ -178,6 +192,21 @@
                         {{ $pendingCount }}
                     </span>
                 @endif
+            </a>
+
+            {{-- Welfare & Grievances Link --}}
+            <a href="{{ route('admin.welfare.index') }}" 
+            class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group
+                    {{ request()->routeIs('admin.welfare.*') 
+                        ? 'bg-orange-50 text-orange-600 font-black shadow-sm border border-orange-100' 
+                        : 'text-gray-500 font-bold hover:bg-gray-50 hover:text-gray-900' }}">
+                
+                {{-- Shield/Security Icon --}}
+                <svg class="w-5 h-5 transition-transform group-hover:scale-110 {{ request()->routeIs('admin.welfare.*') ? 'text-orange-500' : 'text-gray-400 group-hover:text-orange-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                </svg>
+                
+                <span class="text-sm tracking-wide">Welfare & Grievances</span>
             </a>
 
             {{-- SEPARATOR: SERVICES --}}
