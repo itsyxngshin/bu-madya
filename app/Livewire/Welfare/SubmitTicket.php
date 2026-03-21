@@ -48,7 +48,7 @@ class SubmitTicket extends Component
 
         $filePath = null;
         if ($this->file_upload) {
-            $filePath = $this->file_upload->store('incident_evidence', 'local');
+            $filePath = $this->file_upload->store('incident_evidence', 'public');
         }
 
         $report = IncidentReport::create([
