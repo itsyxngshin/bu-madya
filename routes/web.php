@@ -167,7 +167,7 @@ Route::middleware(['auth', 'role:administrator'])->prefix('admin')->name('admin.
     Route::get('/events/{event:slug}/raffle', EventRaffle::class)->name('events.raffle');
     Route::get('/submit-frame', SubmitFrame::class)->name('frames.submit');
     Route::get('/linkages-proposals', LinkagesManager::class)->name('linkages.proposals');
-    Route::get('/admin/welfare', \App\Livewire\Admin\WelfareManager::class)->name('admin.welfare.index');
+    Route::get('/admin/welfare', \App\Livewire\Admin\WelfareManager::class)->name('welfare.index');
 });
 
 Route::middleware(['auth', 'role:organization'])->prefix('partner')->name('partner.')
