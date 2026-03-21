@@ -185,12 +185,47 @@
                         </div>
 
                         @if($selectedTicket->file_upload_path)
-                            <div class="mb-4">
+                            {{-- [NEW] Alpine.js Lightbox Component --}}
+                            <div class="mb-4" x-data="{ photoOpen: false }">
                                 <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-2">Attached Evidence</span>
-                                <a href="{{ asset('storage/' . $selectedTicket->file_upload_path) }}" target="_blank" class="inline-flex items-center gap-2 px-4 py-3 bg-gray-50 border border-gray-200 hover:border-gray-300 rounded-xl text-sm font-bold text-gray-700 hover:text-orange-600 transition w-full sm:w-auto">
-                                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                                    View Uploaded File
-                                </a>
+
+                                {{-- Thumbnail Preview Button --}}
+                                <button @click="photoOpen = true" type="button" class="relative group block w-full sm:w-48 h-32 rounded-xl overflow-hidden border border-gray-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 bg-gray-50">
+                                    <img src="{{ asset('storage/' . $selectedTicket->file_upload_path) }}" alt="Evidence Thumbnail" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+
+                                    {{-- Hover Overlay --}}
+                                    <div class="absolute inset-0 bg-gray-900/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                        <span class="text-white text-xs font-bold flex items-center gap-1.5 drop-shadow-md">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                                            Enlarge
+                                        </span>
+                                    </div>
+                                </button>
+
+                                {{-- Fullscreen Popup Modal --}}
+                                {{-- z-[200] ensures it sits on top of your existing Ticket Modal --}}
+                                <div x-show="photoOpen"
+                                     style="display: none;"
+                                     class="fixed inset-0 z-[200] flex items-center justify-center bg-gray-900/95 backdrop-blur-md p-4 sm:p-8"
+                                     x-transition:enter="transition ease-out duration-200"
+                                     x-transition:enter-start="opacity-0 scale-95"
+                                     x-transition:enter-end="opacity-100 scale-100"
+                                     x-transition:leave="transition ease-in duration-150"
+                                     x-transition:leave-start="opacity-100 scale-100"
+                                     x-transition:leave-end="opacity-0 scale-95">
+
+                                     {{-- Close Button (Top Right) --}}
+                                     <button @click="photoOpen = false" type="button" class="absolute top-4 right-4 sm:top-8 sm:right-8 text-gray-400 hover:text-white transition focus:outline-none bg-gray-800/50 hover:bg-gray-700/50 p-2 rounded-full backdrop-blur-sm">
+                                         <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                     </button>
+
+                                     {{-- The Smart-Fit Image --}}
+                                     {{-- max-w-full and max-h-[90vh] with object-contain is the secret to perfect scaling --}}
+                                     <img @click.away="photoOpen = false"
+                                          src="{{ asset('storage/' . $selectedTicket->file_upload_path) }}"
+                                          alt="Evidence Fullscreen"
+                                          class="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl">
+                                </div>
                             </div>
                         @endif
                     </div>
