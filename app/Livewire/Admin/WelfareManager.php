@@ -49,23 +49,6 @@ class WelfareManager extends Component
         }
     }
 
-    public function toggleWelfareAccess($userId)
-    {
-        // Security check: Only administrators can grant this access
-        if (auth()->user()->role?->role_name !== 'administrator') {
-            abort(403, 'Unauthorized action.');
-        }
-
-        $user = \App\Models\User::findOrFail($userId);
-        
-        // Flip the boolean switch (if true make false, if false make true)
-        $user->can_manage_welfare = !$user->can_manage_welfare;
-        $user->save();
-
-        $status = $user->can_manage_welfare ? 'granted access to' : 'revoked access from';
-        session()->flash('success', "Successfully {$status} {$user->name}.");
-    }
-
     public function render()
     {
         $user = auth()->user();

@@ -141,6 +141,34 @@
                         </span>
                     </td>
 
+                    <td class="p-4">
+                        {{-- Only show the toggle if the user is an organization (Admins/Heads already have access) --}}
+                        @if($user->role?->role_name === 'organization')
+                            <div class="flex items-center gap-3">
+                                <button wire:click="toggleWelfareAccess({{ $user->id }})" 
+                                        type="button" 
+                                        class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 {{ $user->can_manage_welfare ? 'bg-green-500' : 'bg-gray-200' }}" 
+                                        role="switch" 
+                                        aria-checked="{{ $user->can_manage_welfare ? 'true' : 'false' }}">
+                                    
+                                    {{-- The sliding circle --}}
+                                    <span aria-hidden="true" 
+                                        class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out {{ $user->can_manage_welfare ? 'translate-x-5' : 'translate-x-0' }}">
+                                    </span>
+                                </button>
+                                
+                                {{-- Status Label --}}
+                                <span class="text-xs font-bold {{ $user->can_manage_welfare ? 'text-green-600' : 'text-gray-400' }}">
+                                    {{ $user->can_manage_welfare ? 'Access Granted' : 'No Access' }}
+                                </span>
+                            </div>
+                        @else
+                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                                Default Access
+                            </span>
+                        @endif
+                    </td>
+
                     {{-- Actions --}}
                     <td class="px-6 py-4 text-right flex items-center justify-end gap-2">
                         <button wire:click="openAssignmentModal({{ $user->id }})" class="p-2 text-blue-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition" title="Assign Position">
