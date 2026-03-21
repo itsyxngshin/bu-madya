@@ -247,10 +247,10 @@ Route::get('/evaluations/{evaluation}', EvaluationForm::class)->name('evaluation
 $welfareDomain = 'straw.' . parse_url(config('app.url'), PHP_URL_HOST);
 
 Route::domain($welfareDomain)->middleware(['web', 'throttle:5,1'])->group(function () {
-    
+
     // The Submit Form
     Route::get('/submit', \App\Livewire\Welfare\SubmitTicket::class)->name('welfare.submit');
-    
+
     // The Secure Tracker
     Route::get('/track', \App\Livewire\Welfare\TrackTicket::class)->name('welfare.track');
 
