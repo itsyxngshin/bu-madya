@@ -24,6 +24,7 @@ class SubmitTicket extends Component
     public $nature_of_incident = '';
     public $incident_details = '';
     public $file_upload;
+    public $assigned_org_id = '';
 
     public $isSubmitted = false;
     public $generatedCaseNumber = '';
@@ -35,6 +36,7 @@ class SubmitTicket extends Component
         'email' => 'required|email|max:255',
         'phone_number' => 'required|string|max:20',
         'year_and_block' => 'required|string|max:50',
+        'assigned_org_id' => 'nullable|exists:users,id',
         'nature_of_incident' => 'required|string',
         'incident_details' => 'required|string',
         'file_upload' => 'required|file|mimes:jpg,jpeg,png,pdf,doc,docx|max:10240', // Max 10MB
@@ -46,7 +48,7 @@ class SubmitTicket extends Component
 
         $filePath = null;
         if ($this->file_upload) {
-            $filePath = $this->file_upload->store('incident_evidence', 'local'); 
+            $filePath = $this->file_upload->store('incident_evidence', 'local');
         }
 
         $report = IncidentReport::create([
@@ -59,6 +61,7 @@ class SubmitTicket extends Component
             'nature_of_incident' => $this->nature_of_incident,
             'incident_details' => $this->incident_details,
             'file_upload_path' => $filePath,
+            'assigned_org_id' => $this->assigned_org_id ?: null,
         ]);
 
         // [NEW] Trigger the Automated Email!
@@ -70,6 +73,13 @@ class SubmitTicket extends Component
 
     public function render()
     {
-        return view('livewire.welfare.submit-ticket');
+        // Fetch ONLY users who are 'organization' AND have welfare access = 1
+        $authorizedOrgs = \App\Models\User::whereHas('role', function($query) {
+            $query->where('role_name', 'organization');
+        })->where('can_manage_welfare', 1)->get();
+
+        return view('livewire.welfare.submit-ticket', [
+            'authorizedOrgs' => $authorizedOrgs
+        ]);
     }
 }

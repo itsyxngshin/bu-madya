@@ -14,17 +14,13 @@ class WelfareManager extends Component
 
     public $search = '';
     public $statusFilter = ''; // Pending, Under Review, Resolved
-    
+
     // For the View Modal
     public $selectedTicket = null;
     public $viewModalOpen = false;
+    public $adminNotes = '';
 
     public function updatingSearch()
-    {
-        $this->resetPage();
-    }
-
-    public function updatingStatusFilter()
     {
         $this->resetPage();
     }
@@ -32,8 +28,26 @@ class WelfareManager extends Component
     public function viewTicket($id)
     {
         $this->selectedTicket = IncidentReport::findOrFail($id);
+        $this->adminNotes = $this->selectedTicket->admin_notes; // Load the notes!
         $this->viewModalOpen = true;
     }
+
+    // 3. Add this brand new method to save the notes
+    public function saveNotes()
+    {
+        if ($this->selectedTicket) {
+            $this->selectedTicket->update([
+                'admin_notes' => $this->adminNotes
+            ]);
+            session()->flash('success', 'Notes updated successfully for ' . $this->selectedTicket->case_number);
+        }
+    }
+
+    public function updatingStatusFilter()
+    {
+        $this->resetPage();
+    }
+
 
     public function closeTicket()
     {
@@ -51,20 +65,15 @@ class WelfareManager extends Component
 
     public function render()
     {
+        $query = IncidentReport::with('assignedOrganization')->latest();
         $user = auth()->user();
-        $role = $user->role?->role_name;
 
-        // 1. Admins, STRAW Heads, and CSC Presidents always have access.
-        $hasStandardAccess = in_array($role, ['administrator', 'straw_head', 'csc_president']);
-        
-        // 2. Organizations ONLY have access if the Admin flipped their switch to TRUE.
-        $hasOrgAccess = ($role === 'organization' && $user->can_manage_welfare === 1);
-
-        if (!$hasStandardAccess && !$hasOrgAccess) {
-            abort(403, 'Unauthorized access. You have not been granted permission to view confidential welfare records.');
+        // [SECURITY LOCKDOWN]
+        // If the logged-in user is an organization, force the query to ONLY fetch their assigned tickets.
+        if ($user->role?->role_name === 'organization') {
+            $query->where('assigned_org_id', $user->id);
         }
 
-        $query = IncidentReport::query()->latest();
 
         if (!empty($this->search)) {
             $query->where(function ($q) {

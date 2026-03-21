@@ -1,12 +1,12 @@
 <div class="min-h-screen bg-gray-900 py-12 px-4 sm:px-6 lg:px-8 flex items-center justify-center relative overflow-hidden">
-    
+
     {{-- Orange Background Accent from your mockup --}}
     <div class="absolute inset-0 z-0 flex justify-center">
         <div class="w-[800px] h-full bg-orange-500 rounded-t-[500px] mt-32 shadow-2xl"></div>
     </div>
 
     <div class="max-w-5xl w-full z-10">
-        
+
         @if($isSubmitted)
             {{-- SUCCESS SCREEN --}}
             <div class="bg-white rounded-2xl shadow-xl p-10 text-center max-w-lg mx-auto transform transition-all">
@@ -15,7 +15,7 @@
                 </div>
                 <h2 class="text-3xl font-black text-gray-900 mb-2">Report Submitted</h2>
                 <p class="text-gray-500 mb-6">Your incident report has been securely transmitted to the STRAW Head and CSC President. Please save your Case Number for tracking.</p>
-                
+
                 <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 mb-8">
                     <span class="text-xs font-bold text-gray-400 uppercase tracking-widest block mb-1">Your Case Number</span>
                     <span class="text-2xl font-black text-orange-600 tracking-wider">{{ $generatedCaseNumber }}</span>
@@ -28,7 +28,7 @@
         @else
             {{-- INCIDENT FORM --}}
             <form wire:submit.prevent="submitReport" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                
+
                 {{-- LEFT COLUMN --}}
                 <div class="bg-white rounded-2xl shadow-xl p-8 lg:p-10">
                     <div class="mb-8 border-b border-gray-100 pb-6">
@@ -37,6 +37,21 @@
                     </div>
 
                     <div class="space-y-6">
+
+                        {{-- [NEW] Send Report To Dropdown --}}
+                        <div class="bg-orange-50/50 p-5 rounded-xl border border-orange-100 mb-6">
+                            <label class="block text-sm font-black text-gray-900 mb-2">Direct this report to:</label>
+                            <p class="text-xs text-gray-500 mb-3">You can send this directly to the main STRAW office, or route it to a specific recognized student council/organization.</p>
+
+                            <select wire:model="assigned_org_id" class="w-full rounded-lg border-gray-200 focus:border-orange-500 focus:ring-orange-500 text-sm font-bold text-gray-700 bg-white">
+                                <option value="">Main STRAW Head & CSC President</option>
+                                @foreach($authorizedOrgs as $org)
+                                    <option value="{{ $org->id }}">{{ $org->name }}</option>
+                                @endforeach
+                            </select>
+                            @error('assigned_org_id') <span class="text-xs text-red-500 block mt-1">{{ $message }}</span> @enderror
+                        </div>
+
                         {{-- Name Fields --}}
                         <div>
                             <label class="block text-sm font-bold text-gray-700 mb-2">Incident report issued by: <span class="text-red-500">*</span></label>
@@ -80,7 +95,7 @@
 
                 {{-- RIGHT COLUMN --}}
                 <div class="bg-white rounded-2xl shadow-xl p-8 lg:p-10 flex flex-col justify-between">
-                    
+
                     <div class="space-y-8">
                         {{-- Nature of Incident --}}
                         <div>
@@ -112,9 +127,9 @@
                                  x-on:livewire-upload-finish="isUploading = false"
                                  x-on:livewire-upload-error="isUploading = false"
                                  x-on:livewire-upload-progress="progress = $event.detail.progress">
-                                
+
                                 <input type="file" wire:model="file_upload" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
-                                
+
                                 <div x-show="!isUploading">
                                     @if($file_upload)
                                         <div class="text-green-500 flex flex-col items-center">

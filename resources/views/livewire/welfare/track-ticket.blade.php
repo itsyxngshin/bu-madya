@@ -1,5 +1,5 @@
 <div class="min-h-screen bg-gray-900 py-12 px-4 sm:px-6 lg:px-8 flex items-center justify-center relative overflow-hidden">
-    
+
     {{-- Orange Background Accent --}}
     <div class="absolute inset-0 z-0 flex justify-center">
         <div class="w-[800px] h-full bg-orange-500 rounded-t-[500px] mt-32 shadow-2xl"></div>
@@ -7,7 +7,7 @@
 
     <div class="max-w-xl w-full z-10">
         <div class="bg-white rounded-3xl shadow-2xl overflow-hidden transform transition-all">
-            
+
             <div class="p-8 md:p-10">
                 <div class="text-center mb-8">
                     <div class="w-16 h-16 bg-orange-100 text-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-4 transform rotate-3">
@@ -20,7 +20,7 @@
                 @if(!$ticket)
                     {{-- SEARCH FORM --}}
                     <form wire:submit.prevent="searchTicket" class="space-y-5">
-                        
+
                         @if (session()->has('error'))
                             <div class="bg-red-50 text-red-600 p-4 rounded-xl text-sm font-bold flex items-start gap-3">
                                 <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -60,7 +60,7 @@
 
                             <div class="mb-2">
                                 <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-2">Current Status</span>
-                                
+
                                 {{-- Dynamic Status Badge --}}
                                 @if($ticket->status === 'Pending')
                                     <div class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-orange-100 text-orange-700 font-bold border border-orange-200">
@@ -79,6 +79,20 @@
                                     </div>
                                 @endif
                             </div>
+
+                            {{-- [NEW] Official Updates Display --}}
+                            @if($ticket->admin_notes)
+                                <div class="mt-6 border-t border-gray-200 pt-6 animate-fade-in-up">
+                                    <span class="text-[10px] font-bold text-orange-500 uppercase tracking-widest block mb-2 flex items-center gap-1.5">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
+                                        Official Update from STRAW
+                                    </span>
+                                    <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
+                                        <p class="text-sm text-gray-800 leading-relaxed whitespace-pre-wrap">{{ $ticket->admin_notes }}</p>
+                                    </div>
+                                </div>
+                            @endif
+
                             <p class="text-xs text-gray-500 mt-3 leading-relaxed">
                                 The STRAW Head and CSC President have received your report. Please check back here periodically or monitor your email for official updates regarding your case.
                             </p>
@@ -91,7 +105,7 @@
                     </div>
                 @endif
             </div>
-            
+
             <div class="bg-gray-50 px-8 py-4 border-t border-gray-100 text-center">
                 <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">BU MADYA Student Welfare & Grievance Portal</p>
             </div>

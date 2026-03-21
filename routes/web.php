@@ -182,6 +182,7 @@ Route::middleware(['auth', 'role:organization'])->prefix('partner')->name('partn
     Route::get('/profile/edit', EditProfile::class)->name('profile.edit');
     Route::get('/events/{event:slug}/registrants', EventRegistrants::class)->name('events.registrants');
     Route::get('/events/{event:slug}/raffle', EventRaffle::class)->name('events.raffle');
+    Route::get('/welfare', \App\Livewire\Admin\WelfareManager::class)->name('welfare.index');
 
 });
 

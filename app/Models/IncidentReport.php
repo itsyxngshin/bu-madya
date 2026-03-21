@@ -15,6 +15,8 @@ class IncidentReport extends Model
         'middle_name',
         'last_name',
         'email',
+        'admin_notes',
+        'assigned_org_id',
         'phone_number',
         'year_and_block',
         'nature_of_incident',
@@ -35,10 +37,15 @@ class IncidentReport extends Model
                 // Get the ID of the last report to determine the next number
                 $lastReport = self::orderBy('id', 'desc')->first();
                 $nextId = $lastReport ? $lastReport->id + 1 : 1;
-                
+
                 // Formats it exactly like your mockup: CASE-0001, CASE-0002
                 $report->case_number = 'CASE-' . str_pad($nextId, 4, '0', STR_PAD_LEFT);
             }
         });
+    }
+
+    public function assignedOrganization()
+    {
+        return $this->belongsTo(User::class, 'assigned_org_id');
     }
 }

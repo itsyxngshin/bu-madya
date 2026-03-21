@@ -42,6 +42,7 @@
                             <th class="p-4 whitespace-nowrap">Case Number</th>
                             <th class="p-4 whitespace-nowrap">Date Submitted</th>
                             <th class="p-4 whitespace-nowrap">Reporter Name</th>
+                            <th class="p-4 whitespace-nowrap">Assigned To</th>
                             <th class="p-4 whitespace-nowrap">Nature of Incident</th>
                             <th class="p-4 whitespace-nowrap">Status</th>
                             <th class="p-4 whitespace-nowrap text-right">Action</th>
@@ -53,6 +54,17 @@
                                 <td class="p-4 font-black text-gray-900">{{ $ticket->case_number }}</td>
                                 <td class="p-4 text-gray-500 font-medium">{{ $ticket->created_at->format('M d, Y') }}</td>
                                 <td class="p-4 font-bold text-gray-700">{{ $ticket->first_name }} {{ $ticket->last_name }}</td>
+                                <td class="p-4">
+                                    @if($ticket->assignedOrganization)
+                                        <span class="px-2.5 py-1 bg-purple-50 text-purple-700 border border-purple-100 rounded-lg text-[10px] font-bold uppercase tracking-wider inline-block truncate max-w-[120px]" title="{{ $ticket->assignedOrganization->name }}">
+                                            {{ $ticket->assignedOrganization->name }}
+                                        </span>
+                                    @else
+                                        <span class="px-2.5 py-1 bg-gray-100 text-gray-500 border border-gray-200 rounded-lg text-[10px] font-bold uppercase tracking-wider inline-block">
+                                            Main
+                                        </span>
+                                    @endif
+                                </td>
                                 <td class="p-4">
                                     <span class="px-2.5 py-1 bg-gray-100 text-gray-600 rounded-lg text-[10px] font-bold uppercase tracking-wider">
                                         {{ $ticket->nature_of_incident }}
@@ -78,7 +90,7 @@
                                         Review Case
                                     </button>
                                 </td>
-                                
+
                             </tr>
                         @empty
                             <tr>
@@ -90,7 +102,7 @@
                     </tbody>
                 </table>
             </div>
-            
+
             @if($tickets->hasPages())
                 <div class="p-4 border-t border-gray-100 bg-gray-50">
                     {{ $tickets->links() }}
@@ -106,7 +118,7 @@
                 <div class="fixed inset-0 bg-gray-900/80 backdrop-blur-sm transition-opacity" wire:click="closeTicket"></div>
 
                 <div class="relative bg-white rounded-3xl shadow-2xl w-full max-w-2xl flex flex-col max-h-[90vh] overflow-hidden transform transition-all">
-                    
+
                     {{-- Modal Header --}}
                     <div class="flex items-center justify-between p-6 border-b border-gray-100 bg-gray-50 shrink-0">
                         <div>
@@ -120,7 +132,7 @@
 
                     {{-- Modal Body --}}
                     <div class="p-6 overflow-y-auto custom-scrollbar">
-                        
+
                         <div class="grid grid-cols-2 gap-6 mb-8 border-b border-gray-100 pb-8">
                             <div>
                                 <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-1">Reporter</span>
@@ -154,6 +166,24 @@
                             </div>
                         </div>
 
+                        {{-- [NEW] Official Updates & Notes Box --}}
+                        <div class="mb-8 border-t border-gray-100 pt-6">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-[10px] font-bold text-orange-600 uppercase tracking-widest">Official Updates (Visible to Student)</span>
+
+                                {{-- Save Button --}}
+                                <button wire:click="saveNotes" class="text-[10px] bg-orange-100 text-orange-700 hover:bg-orange-200 px-3 py-1 rounded-md font-bold uppercase tracking-wider transition">
+                                    <span wire:loading.remove wire:target="saveNotes">Save Updates</span>
+                                    <span wire:loading wire:target="saveNotes">Saving...</span>
+                                </button>
+                            </div>
+
+                            <textarea wire:model="adminNotes" rows="4"
+                                      class="w-full bg-white border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-orange-500 focus:border-orange-500 block p-4 shadow-sm resize-y"
+                                      placeholder="Write an update here. The student will see this message when they track their case..."></textarea>
+                            <p class="text-[10px] text-gray-400 mt-1 italic">Note: Remember to click 'Save Updates' after typing.</p>
+                        </div>
+
                         @if($selectedTicket->file_upload_path)
                             <div class="mb-4">
                                 <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-2">Attached Evidence</span>
@@ -168,7 +198,7 @@
                     {{-- Modal Footer: Status Update Actions --}}
                     <div class="p-6 border-t border-gray-100 bg-gray-50 shrink-0 flex flex-col sm:flex-row items-center justify-between gap-4">
                         <span class="text-xs font-bold text-gray-500 uppercase tracking-widest">Update Case Status:</span>
-                        
+
                         <div class="flex gap-2 w-full sm:w-auto">
                             <button wire:click="updateStatus('Pending')" class="flex-1 sm:flex-none px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition border {{ $selectedTicket->status === 'Pending' ? 'bg-orange-100 text-orange-700 border-orange-200' : 'bg-white text-gray-500 border-gray-200 hover:bg-gray-50' }}">
                                 Pending
