@@ -38,34 +38,83 @@
 
                     <div class="space-y-6">
 
+                        {{-- [CUSTOM ALPINE DROPDOWN] Send Report To --}}
                         <div class="bg-orange-50/50 p-5 rounded-xl border border-orange-100 mb-6">
                             <label class="block text-sm font-black text-gray-900 mb-2">Direct this report to:</label>
                             <p class="text-xs text-gray-500 mb-3">You can send this directly to the main STRAW office, or route it to a specific recognized student council.</p>
 
-                            {{-- Notice the wire:model.live so it reacts instantly! --}}
-                            <select wire:model.live="assigned_org_id" class="w-full rounded-lg border-gray-200 focus:border-orange-500 focus:ring-orange-500 text-sm font-bold text-gray-700 bg-white cursor-pointer shadow-sm">
-                                <option value="">🏛️ Main STRAW Office & CSC President</option>
+                            {{-- Alpine.js Component --}}
+                            <div x-data="{
+                                    open: false,
+                                    // @entangle magically syncs this Alpine variable with Livewire!
+                                    selectedId: @entangle('assigned_org_id'),
 
-                                @if($authorizedOrgs->count() > 0)
-                                    <optgroup label="Recognized Organizations & Councils">
-                                        @foreach($authorizedOrgs as $org)
-                                            <option value="{{ $org->id }}">👥 {{ $org->name }}</option>
-                                        @endforeach
-                                    </optgroup>
-                                @endif
-                            </select>
+                                    // Helper to dynamically show the name on the button
+                                    get selectedName() {
+                                        if (!this.selectedId) return '🏛️ Main STRAW Office & CSC President';
 
-                            {{-- Dynamic Hint Message --}}
-                            @if($assigned_org_id)
-                                <div class="mt-3 text-[11px] font-bold text-orange-700 bg-orange-100/70 p-2.5 rounded-lg flex items-start gap-2 animate-fade-in-up">
-                                    <svg class="w-4 h-4 shrink-0 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                    <span>This report will be securely routed directly to the selected organization. The Main STRAW Office will retain administrative oversight.</span>
+                                        // Pass the PHP array of organizations to JavaScript
+                                        let orgs = @js($authorizedOrgs->pluck('name', 'id'));
+                                        return '👥 ' + orgs[this.selectedId];
+                                    }
+                                 }"
+                                 class="relative"
+                                 @click.away="open = false">
+
+                                {{-- The Trigger Button --}}
+                                <button @click="open = !open" type="button" class="w-full flex justify-between items-center bg-white border border-gray-200 text-gray-700 font-bold text-sm rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none shadow-sm transition-all">
+                                    <span x-text="selectedName" class="truncate"></span>
+                                    <svg class="w-5 h-5 text-gray-400 transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                </button>
+
+                                {{-- The Animated Dropdown Menu --}}
+                                <div x-show="open"
+                                     x-transition:enter="transition ease-out duration-100"
+                                     x-transition:enter-start="opacity-0 scale-95 translate-y-[-10px]"
+                                     x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                                     x-transition:leave="transition ease-in duration-75"
+                                     x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+                                     x-transition:leave-end="opacity-0 scale-95 translate-y-[-10px]"
+                                     class="absolute z-50 w-full mt-2 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden"
+                                     style="display: none;">
+
+                                    <div class="max-h-60 overflow-y-auto p-2 space-y-1">
+
+                                        {{-- Default Main Office Option --}}
+                                        <div @click="selectedId = ''; open = false"
+                                             class="cursor-pointer px-4 py-3 rounded-lg text-sm font-bold transition-colors flex items-center gap-2"
+                                             :class="selectedId === '' ? 'bg-orange-50 text-orange-700' : 'text-gray-700 hover:bg-gray-50'">
+                                            🏛️ Main STRAW Office & CSC President
+                                            <svg x-show="selectedId === ''" class="w-4 h-4 ml-auto text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                        </div>
+
+                                        @if($authorizedOrgs->count() > 0)
+                                            <div class="px-4 py-2 mt-2 text-[10px] font-black text-gray-400 uppercase tracking-widest border-t border-gray-50">
+                                                Recognized Organizations & Councils
+                                            </div>
+
+                                            {{-- Dynamic Organization Options --}}
+                                            @foreach($authorizedOrgs as $org)
+                                                <div @click="selectedId = '{{ $org->id }}'; open = false"
+                                                     class="cursor-pointer px-4 py-3 rounded-lg text-sm font-bold transition-colors flex items-center gap-2"
+                                                     :class="selectedId == '{{ $org->id }}' ? 'bg-orange-50 text-orange-700' : 'text-gray-700 hover:bg-gray-50'">
+                                                    👥 {{ $org->name }}
+                                                    <svg x-show="selectedId == '{{ $org->id }}'" class="w-4 h-4 ml-auto text-orange-500" style="display: none;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                                </div>
+                                            @endforeach
+                                        @endif
+                                    </div>
                                 </div>
-                            @endif
+                            </div>
+
+                            {{-- Dynamic Hint Message (Using Alpine instead of Livewire for instant rendering) --}}
+                            <div x-data="{ id: @entangle('assigned_org_id') }" x-show="id !== ''" style="display: none;" class="mt-3 text-[11px] font-bold text-orange-700 bg-orange-100/70 p-2.5 rounded-lg flex items-start gap-2 transition-all">
+                                <svg class="w-4 h-4 shrink-0 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                <span>This report will be securely routed directly to the selected organization. The Main STRAW Office will retain administrative oversight.</span>
+                            </div>
 
                             @error('assigned_org_id') <span class="text-xs text-red-500 block mt-1">{{ $message }}</span> @enderror
                         </div>
-
                         {{-- Name Fields --}}
                         <div>
                             <label class="block text-sm font-bold text-gray-700 mb-2">Incident report issued by: <span class="text-red-500">*</span></label>
