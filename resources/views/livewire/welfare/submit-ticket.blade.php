@@ -38,17 +38,31 @@
 
                     <div class="space-y-6">
 
-                        {{-- [NEW] Send Report To Dropdown --}}
                         <div class="bg-orange-50/50 p-5 rounded-xl border border-orange-100 mb-6">
                             <label class="block text-sm font-black text-gray-900 mb-2">Direct this report to:</label>
-                            <p class="text-xs text-gray-500 mb-3">You can send this directly to the main STRAW office, or route it to a specific recognized student council/organization.</p>
+                            <p class="text-xs text-gray-500 mb-3">You can send this directly to the main STRAW office, or route it to a specific recognized student council.</p>
 
-                            <select wire:model="assigned_org_id" class="w-full rounded-lg border-gray-200 focus:border-orange-500 focus:ring-orange-500 text-sm font-bold text-gray-700 bg-white">
-                                <option value="">Main STRAW Head & CSC President</option>
-                                @foreach($authorizedOrgs as $org)
-                                    <option value="{{ $org->id }}">{{ $org->name }}</option>
-                                @endforeach
+                            {{-- Notice the wire:model.live so it reacts instantly! --}}
+                            <select wire:model.live="assigned_org_id" class="w-full rounded-lg border-gray-200 focus:border-orange-500 focus:ring-orange-500 text-sm font-bold text-gray-700 bg-white cursor-pointer shadow-sm">
+                                <option value="">🏛️ Main STRAW Office & CSC President</option>
+
+                                @if($authorizedOrgs->count() > 0)
+                                    <optgroup label="Recognized Organizations & Councils">
+                                        @foreach($authorizedOrgs as $org)
+                                            <option value="{{ $org->id }}">👥 {{ $org->name }}</option>
+                                        @endforeach
+                                    </optgroup>
+                                @endif
                             </select>
+
+                            {{-- Dynamic Hint Message --}}
+                            @if($assigned_org_id)
+                                <div class="mt-3 text-[11px] font-bold text-orange-700 bg-orange-100/70 p-2.5 rounded-lg flex items-start gap-2 animate-fade-in-up">
+                                    <svg class="w-4 h-4 shrink-0 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                    <span>This report will be securely routed directly to the selected organization. The Main STRAW Office will retain administrative oversight.</span>
+                                </div>
+                            @endif
+
                             @error('assigned_org_id') <span class="text-xs text-red-500 block mt-1">{{ $message }}</span> @enderror
                         </div>
 

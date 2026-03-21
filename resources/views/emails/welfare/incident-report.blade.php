@@ -31,6 +31,14 @@
                 <td class="label" style="text-transform: uppercase; color: #ea580c;">CASE NUMBER</td>
                 <td class="value" style="font-weight: bold; color: #ea580c;">{{ $report->case_number }}</td>
             </tr>
+
+            <tr>
+                <td class="label">Routed To:</td>
+                <td class="value" style="font-weight: bold; color: #4338ca;">
+                    {{ $report->assignedOrganization ? $report->assignedOrganization->name : 'Main STRAW Office & CSC President' }}
+                </td>
+            </tr>
+
             <tr>
                 <td class="label">Email</td>
                 <td class="value">{{ $report->email }}</td>
