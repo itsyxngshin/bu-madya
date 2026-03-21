@@ -46,14 +46,10 @@
                             {{-- Alpine.js Component --}}
                             <div x-data="{
                                     open: false,
-                                    // @entangle magically syncs this Alpine variable with Livewire!
                                     selectedId: @entangle('assigned_org_id'),
-
-                                    // Helper to dynamically show the name on the button
                                     get selectedName() {
                                         if (!this.selectedId) return '🏛️ Main STRAW Office & CSC President';
 
-                                        // Pass the PHP array of organizations to JavaScript
                                         let orgs = @js($authorizedOrgs->pluck('name', 'id'));
                                         return '👥 ' + orgs[this.selectedId];
                                     }
