@@ -43,28 +43,28 @@ class EventIndex extends Component
 
     public function render()
     {
-        // 1. Start the query builder using the EVENT model
-        // Note: I left 'creator' and 'collaborators' here assuming Events share the same permissions,
-        // but removed 'responses' since that is usually just for Evaluations/Forms!
-        $query = \App\Models\Event::with(['creator'])->latest();
+        // 1. Start the query builder
+        // (Removed the 'creator' and 'collaborators' relationships)
+        $query = Event::query()->latest();
 
         // 2. Apply Security / Role Scoping
-        if (auth()->user()->role?->role_name !== 'administrator') {
-            $query->where(function ($q) {
-                // Show it if they created it...
-                $q->where('created_by', auth()->id());
-            });
+        // We will use the exact same logic you used in your delete method!
+        $userRole = auth()->user()->role?->role_name;
+        $isAdmin = in_array($userRole, ['administrator', 'director']);
+
+        if (!$isAdmin) {
+            // If they are not an Admin or Director, ONLY show events they created themselves
+            $query->where('user_id', auth()->id());
         }
 
-        // 3. Apply search filtering FIRST
+        // 3. Apply search filtering
         if (!empty($this->search)) {
             $query->where('title', 'like', '%' . $this->search . '%');
         }
 
-        // 4. Paginate ONLY ONCE at the very end of the query chain!
+        // 4. Paginate
         $events = $query->paginate(10);
 
-        // 5. Return the correct Event view with the Event data
         return view('livewire.admin.event-index', [
             'events' => $events
         ]);
