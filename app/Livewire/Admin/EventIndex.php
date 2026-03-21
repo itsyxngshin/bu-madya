@@ -43,29 +43,28 @@ class EventIndex extends Component
 
     public function render()
     {
-        // 1. Start the query builder (DO NOT paginate yet)
-        $query = Evaluation::with(['creator', 'collaborators'])->withCount('responses')->latest();
+        // 1. Start the query builder using the EVENT model
+        // Note: I left 'creator' and 'collaborators' here assuming Events share the same permissions,
+        // but removed 'responses' since that is usually just for Evaluations/Forms!
+        $query = \App\Models\Event::with(['creator'])->latest();
 
+        // 2. Apply Security / Role Scoping
         if (auth()->user()->role?->role_name !== 'administrator') {
             $query->where(function ($q) {
                 // Show it if they created it...
-                $q->where('created_by', auth()->id())
-                  // OR if they are a collaborator
-                  ->orWhereHas('collaborators', function ($q2) {
-                      $q2->where('user_id', auth()->id());
-                  });
+                $q->where('created_by', auth()->id());
             });
         }
 
-        $evaluations = $query->paginate(10);
-        // 2. Apply search filtering (if needed)
-        if ($this->search) {
+        // 3. Apply search filtering FIRST
+        if (!empty($this->search)) {
             $query->where('title', 'like', '%' . $this->search . '%');
         }
 
-        // 3. Paginate ONLY at the very end of the query chain!
+        // 4. Paginate ONLY ONCE at the very end of the query chain!
         $events = $query->paginate(10);
 
+        // 5. Return the correct Event view with the Event data
         return view('livewire.admin.event-index', [
             'events' => $events
         ]);
