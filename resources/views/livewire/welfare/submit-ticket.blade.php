@@ -71,7 +71,7 @@
 
                         {{-- Year and Block --}}
                         <div>
-                            <label class="block text-sm font-bold text-gray-700 mb-2">Year and Block <span class="text-red-500">*</span></label>
+                            <label class="block text-sm font-bold text-gray-700 mb-2">Program, Year, and Block <span class="text-red-500">*</span></label>
                             <input type="text" wire:model="year_and_block" class="w-full sm:w-2/3 rounded-lg border-gray-200 focus:border-orange-500 focus:ring-orange-500 text-sm" placeholder="e.g. 3rd Year - Block A">
                             @error('year_and_block') <span class="text-xs text-red-500 block mt-1">{{ $message }}</span> @enderror
                         </div>
