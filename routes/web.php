@@ -243,7 +243,7 @@ Route::get('/evaluations/{evaluation}', EvaluationForm::class)->name('evaluation
 // ==========================================
 // WELFARE & GRIEVANCE SUBDOMAIN
 // ==========================================
-$welfareDomain = 'welfare.' . parse_url(config('app.url'), PHP_URL_HOST);
+$welfareDomain = 'student-welfare.' . parse_url(config('app.url'), PHP_URL_HOST);
 
 Route::domain($welfareDomain)->middleware(['web', 'throttle:5,1'])->group(function () {
     
