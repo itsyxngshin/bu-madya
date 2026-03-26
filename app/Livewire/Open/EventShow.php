@@ -4,6 +4,10 @@ namespace App\Livewire\Open;
 
 use Livewire\Component;
 use App\Models\Event;
+use App\Models\SiteStat;
+use App\Models\User;
+use App\Models\DirectorAssignment;
+use Illuminate\Support\Facades\Session;
 class EventShow extends Component
 {
     public Event $event;
