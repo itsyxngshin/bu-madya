@@ -5,6 +5,7 @@ namespace App\Livewire\Admin;
 use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\Event;
+use App\Models\User;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Layout;
 
