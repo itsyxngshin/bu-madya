@@ -7,6 +7,7 @@ use App\Models\Event;
 class EventShow extends Component
 {
     public Event $event;
+    public $visitorCount = 1;
 
     // The router passes the {slug} parameter here
     public function mount($slug)
@@ -15,6 +16,14 @@ class EventShow extends Component
         $this->event = Event::where('slug', $slug)
             ->where('is_active', true)
             ->firstOrFail();
+
+        if (!Session::has('has_visited_site')) {
+            SiteStat::where('key', 'visitor_count')->increment('value');
+            Session::put('has_visited_site', true);
+        }
+        $this->visitorCount = SiteStat::where('key', 'visitor_count')->value('value');
+
+
     }
 
     public function render()
