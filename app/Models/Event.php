@@ -45,4 +45,15 @@ class Event extends Model
         if (!$this->end_date) return true;
         return now()->lte($this->end_date);
     }
+
+    public function creator()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    // [NEW] The users who have been granted shared access
+    public function collaborators()
+    {
+        return $this->belongsToMany(User::class, 'event_collaborators', 'event_id', 'user_id');
+    }
 }

@@ -123,6 +123,12 @@
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
                                 </a>
 
+                                @if($event->user_id === auth()->id() || in_array(auth()->user()->role?->role_name, ['administrator', 'director']))
+                                    <button wire:click="openCollaborators({{ $event->id }})" class="px-3 py-1.5 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-lg text-xs font-bold transition">
+                                        👥 Share Access
+                                    </button>
+                                @endif
+
                                 {{-- Edit --}}
                                 <a href="{{ route('admin.events.edit', $event->id) }}" title="Edit Event" 
                                    class="p-2 text-gray-400 hover:text-gray-900 bg-gray-50 hover:bg-gray-200 rounded-lg transition">
@@ -155,4 +161,75 @@
             {{ $events->links() }}
         </div>
     </div>
+    
+    {{-- ========================================== --}}
+        {{-- MANAGE COLLABORATORS MODAL --}}
+        {{-- ========================================== --}}
+        @if($manageModalOpen)
+            <div class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6" x-data="{}" x-cloak>
+                <div class="fixed inset-0 bg-gray-900/80 backdrop-blur-sm transition-opacity" wire:click="closeCollaborators"></div>
+
+                <div class="relative bg-white rounded-3xl shadow-2xl w-full max-w-xl flex flex-col max-h-[85vh] overflow-hidden transform transition-all">
+                    
+                    {{-- Header --}}
+                    <div class="flex items-center justify-between p-6 border-b border-gray-100 bg-gray-50 shrink-0">
+                        <div>
+                            <h3 class="text-xl font-black text-gray-900">Manage Event Access</h3>
+                            <p class="text-xs text-gray-500 mt-1">Select organizations to help manage registrants.</p>
+                        </div>
+                        <button wire:click="closeCollaborators" class="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        </button>
+                    </div>
+
+                    {{-- Body --}}
+                    <div class="p-6 overflow-y-auto custom-scrollbar flex-1 bg-white">
+                        
+                        {{-- Organization Search Bar --}}
+                        <div class="relative mb-6">
+                            <input wire:model.live.debounce.300ms="orgSearch" type="text" class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" placeholder="Search for a council or organization...">
+                            <svg class="w-5 h-5 text-gray-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        </div>
+
+                        {{-- Organizations List --}}
+                        <div class="space-y-3">
+                            @forelse($organizations as $org)
+                                @php
+                                    $hasAccess = in_array($org->id, $currentCollaboratorIds);
+                                @endphp
+                                <div class="flex items-center justify-between p-4 rounded-xl border {{ $hasAccess ? 'border-indigo-200 bg-indigo-50/50' : 'border-gray-100 hover:bg-gray-50' }} transition-colors">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 font-black text-xs">
+                                            {{ substr($org->name, 0, 1) }}
+                                        </div>
+                                        <span class="text-sm font-bold text-gray-800">{{ $org->name }}</span>
+                                    </div>
+                                    
+                                    {{-- The Access Toggle Switch --}}
+                                    <button wire:click="toggleCollaborator({{ $org->id }})" 
+                                            type="button" 
+                                            class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 {{ $hasAccess ? 'bg-indigo-600' : 'bg-gray-200' }}" 
+                                            role="switch">
+                                        <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out {{ $hasAccess ? 'translate-x-5' : 'translate-x-0' }}"></span>
+                                    </button>
+                                </div>
+                            @empty
+                                <div class="text-center py-8 text-sm text-gray-400 font-bold">
+                                    No organizations found matching your search.
+                                </div>
+                            @endforelse
+                        </div>
+
+                    </div>
+                    
+                    {{-- Footer --}}
+                    <div class="p-4 border-t border-gray-100 bg-gray-50 shrink-0 text-right">
+                        <button wire:click="closeCollaborators" class="px-5 py-2 bg-gray-900 text-white font-bold text-sm rounded-xl hover:bg-gray-800 transition shadow-sm">
+                            Done
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+        @endif
 </div>
