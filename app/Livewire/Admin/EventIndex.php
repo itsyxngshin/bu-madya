@@ -17,6 +17,7 @@ class EventIndex extends Component
     public $search = '';
     public $manageModalOpen = false;
     public $selectedEventId = null;
+    public $selectedOrgToAdd = ''; // Holds the dropdown selection
     public $orgSearch = '';
 
     public function updatingSearch()
@@ -35,7 +36,6 @@ class EventIndex extends Component
     {
         $event = Event::findOrFail($id);
 
-        // Security: Only the Creator, Admin, or Director can manage collaborators
         $userRole = auth()->user()->role?->role_name;
         $isAdmin = in_array($userRole, ['administrator', 'director']);
 
@@ -45,25 +45,91 @@ class EventIndex extends Component
 
         $this->selectedEventId = $id;
         $this->manageModalOpen = true;
-        $this->orgSearch = ''; // Clear previous searches
+        $this->selectedOrgToAdd = ''; // Clear previous selections
     }
 
-    // [NEW] Close the Modal
     public function closeCollaborators()
     {
         $this->manageModalOpen = false;
         $this->selectedEventId = null;
+        $this->selectedOrgToAdd = '';
     }
 
-    // [NEW] The Magic Toggle Method
-    public function toggleCollaborator($userId)
+    // [NEW] Explicitly Add a Collaborator
+    public function addCollaborator()
+    {
+        $this->validate([
+            'selectedOrgToAdd' => 'required|exists:users,id'
+        ], [
+            'selectedOrgToAdd.required' => 'Please select an organization first.'
+        ]);
+
+        if ($this->selectedEventId) {
+            $event = Event::findOrFail($this->selectedEventId);
+            // syncWithoutDetaching prevents errors if they accidentally try to add them twice
+            $event->collaborators()->syncWithoutDetaching([$this->selectedOrgToAdd]);
+
+            $this->selectedOrgToAdd = ''; // Reset the dropdown
+            session()->flash('collaborator_msg', 'Organization granted access.');
+        }
+    }
+
+    // [NEW] Explicitly Remove a Collaborator
+    public function removeCollaborator($userId)
     {
         if ($this->selectedEventId) {
             $event = Event::findOrFail($this->selectedEventId);
-            
-            // Laravel magically adds them if they aren't there, or removes them if they are!
-            $event->collaborators()->toggle($userId);
+            $event->collaborators()->detach($userId);
+            session()->flash('collaborator_msg', 'Organization access revoked.');
         }
+    }
+
+    public function render()
+    {
+        // 1. Fetch Events
+        $query = Event::query()->latest();
+        $userRole = auth()->user()->role?->role_name;
+        $isAdmin = in_array($userRole, ['administrator', 'director']);
+
+        if (!$isAdmin) {
+            $query->where(function ($q) {
+                $q->where('user_id', auth()->id())
+                  ->orWhereHas('collaborators', function ($subQuery) {
+                      $subQuery->where('user_id', auth()->id());
+                  });
+            });
+        }
+
+        if (!empty($this->search)) {
+            $query->where('title', 'like', '%' . $this->search . '%');
+        }
+
+        $events = $query->paginate(10);
+
+        // 2. Fetch Organizations for the Modal
+        $currentCollaborators = collect();
+        $availableOrgs = collect();
+
+        if ($this->manageModalOpen && $this->selectedEventId) {
+            $event = Event::with('collaborators')->findOrFail($this->selectedEventId);
+            $currentCollaborators = $event->collaborators;
+            $currentIds = $currentCollaborators->pluck('id')->toArray();
+
+            // Fetch organizations that DO NOT currently have access (for the dropdown)
+            $availableOrgs = User::whereHas('role', function($q) {
+                $q->where('role_name', 'organization');
+            })
+            ->where('id', '!=', $event->user_id) // Exclude the creator
+            ->whereNotIn('id', $currentIds)      // Exclude those who already have access
+            ->orderBy('name')
+            ->get();
+        }
+
+        return view('livewire.admin.event-index', [
+            'events' => $events,
+            'currentCollaborators' => $currentCollaborators,
+            'availableOrgs' => $availableOrgs,
+        ]);
     }
 
     public function delete($id)
@@ -89,7 +155,7 @@ class EventIndex extends Component
 
     public function render()
     {
-        // 1. Fetch Events 
+        // 1. Fetch Events
         $query = Event::query()->latest();
         $userRole = auth()->user()->role?->role_name;
         $isAdmin = in_array($userRole, ['administrator', 'director']);

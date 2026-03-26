@@ -185,39 +185,61 @@
                     {{-- Body --}}
                     <div class="p-6 overflow-y-auto custom-scrollbar flex-1 bg-white">
                         
-                        {{-- Organization Search Bar --}}
-                        <div class="relative mb-6">
-                            <input wire:model.live.debounce.300ms="orgSearch" type="text" class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" placeholder="Search for a council or organization...">
-                            <svg class="w-5 h-5 text-gray-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        {{-- Flash Message --}}
+                        @if (session()->has('collaborator_msg'))
+                            <div class="mb-4 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl text-sm font-bold flex items-center gap-2" x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3000)">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                {{ session('collaborator_msg') }}
+                            </div>
+                        @endif
+
+                        {{-- [NEW] Add Collaborator Form --}}
+                        <div class="bg-gray-50 p-4 rounded-2xl border border-gray-100 mb-6">
+                            <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Grant Access</label>
+                            <div class="flex flex-col sm:flex-row gap-3">
+                                <div class="flex-1">
+                                    <select wire:model="selectedOrgToAdd" class="w-full rounded-xl border-gray-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm font-bold text-gray-700 bg-white shadow-sm">
+                                        <option value="">Select an organization...</option>
+                                        @foreach($availableOrgs as $org)
+                                            <option value="{{ $org->id }}">{{ $org->name }}</option>
+                                        @endforeach
+                                    </select>
+                                    @error('selectedOrgToAdd') <span class="text-[10px] text-red-500 font-bold block mt-1">{{ $message }}</span> @enderror
+                                </div>
+                                <button wire:click="addCollaborator" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm rounded-xl shadow-sm transition flex items-center justify-center gap-2 sm:w-auto w-full">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                                    Add
+                                </button>
+                            </div>
                         </div>
 
-                        {{-- Organizations List --}}
-                        <div class="space-y-3">
-                            @forelse($organizations as $org)
-                                @php
-                                    $hasAccess = in_array($org->id, $currentCollaboratorIds);
-                                @endphp
-                                <div class="flex items-center justify-between p-4 rounded-xl border {{ $hasAccess ? 'border-indigo-200 bg-indigo-50/50' : 'border-gray-100 hover:bg-gray-50' }} transition-colors">
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 font-black text-xs">
-                                            {{ substr($org->name, 0, 1) }}
+                        {{-- [NEW] Active Collaborators List --}}
+                        <div>
+                            <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 px-1">Currently Authorized</h4>
+                            
+                            <div class="space-y-2">
+                                @forelse($currentCollaborators as $org)
+                                    <div class="flex items-center justify-between p-3 rounded-xl border border-gray-100 bg-white hover:border-gray-200 transition-colors shadow-sm">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-8 h-8 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600 font-black text-xs border border-indigo-100">
+                                                {{ substr($org->name, 0, 1) }}
+                                            </div>
+                                            <span class="text-sm font-bold text-gray-800">{{ $org->name }}</span>
                                         </div>
-                                        <span class="text-sm font-bold text-gray-800">{{ $org->name }}</span>
+                                        
+                                        {{-- Revoke Button --}}
+                                        <button wire:click="removeCollaborator({{ $org->id }})" class="px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 rounded-lg text-xs font-bold transition flex items-center gap-1">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                            Revoke
+                                        </button>
                                     </div>
-                                    
-                                    {{-- The Access Toggle Switch --}}
-                                    <button wire:click="toggleCollaborator({{ $org->id }})" 
-                                            type="button" 
-                                            class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 {{ $hasAccess ? 'bg-indigo-600' : 'bg-gray-200' }}" 
-                                            role="switch">
-                                        <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out {{ $hasAccess ? 'translate-x-5' : 'translate-x-0' }}"></span>
-                                    </button>
-                                </div>
-                            @empty
-                                <div class="text-center py-8 text-sm text-gray-400 font-bold">
-                                    No organizations found matching your search.
-                                </div>
-                            @endforelse
+                                @empty
+                                    <div class="text-center py-6 bg-gray-50 border border-gray-100 border-dashed rounded-xl">
+                                        <svg class="w-8 h-8 text-gray-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                                        <p class="text-xs text-gray-500 font-bold">No organizations have been granted access yet.</p>
+                                    </div>
+                                @endforelse
+                            </div>
                         </div>
 
                     </div>
