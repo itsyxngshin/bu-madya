@@ -17,6 +17,13 @@ class EvaluationList extends Component
     public $sharingEvaluation = null;
     public $shareSearch = '';
 
+    public function mount()
+    {
+        $role = auth()->user()->role?->role_name;
+        if (!in_array($role, ['administrator', 'director', 'organization'])) {
+            abort(403, 'You do not have permission to access the Evaluation Manager.');
+        }
+    }
     public function updatingSearch()
     {
         $this->resetPage();

@@ -120,6 +120,11 @@ class EvaluationBuilder extends Component
         $this->evaluation = $evaluation ?? new Evaluation();
 
         $user = auth()->user();
+        $role = $user->role?->role_name;
+
+        if (!in_array($role, ['administrator', 'director', 'organization'])) {
+             abort(403, 'You do not have permission to build evaluations.');
+        }
 
         // Check if the user is in the collaborators list
         $isCollaborator = $this->evaluation->exists ? $this->evaluation->collaborators()->where('user_id', $user->id)->exists() : false;

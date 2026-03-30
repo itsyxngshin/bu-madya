@@ -73,6 +73,21 @@ use Illuminate\Support\Facades\Response;
 use \App\Livewire\Partner\SubmitFrame;
 use \App\Livewire\Partner\PartnerDashboard;
 
+// ==========================================
+// WELFARE & GRIEVANCE SUBDOMAIN
+// ==========================================
+$welfareDomain = 'straw.' . parse_url(config('app.url'), PHP_URL_HOST);
+
+Route::domain($welfareDomain)->middleware(['web', 'throttle:5,1'])->group(function () {
+
+    // The Submit Form
+    Route::get('/submit', \App\Livewire\Welfare\SubmitTicket::class)->name('welfare.submit');
+
+    // The Secure Tracker
+    Route::get('/track', \App\Livewire\Welfare\TrackTicket::class)->name('welfare.track');
+
+});
+
 Route::get('/', function () {
     return view('welcome');
 });
@@ -183,6 +198,9 @@ Route::middleware(['auth', 'role:organization'])->prefix('partner')->name('partn
     Route::get('/events/{event:slug}/registrants', EventRegistrants::class)->name('events.registrants');
     Route::get('/events/{event:slug}/raffle', EventRaffle::class)->name('events.raffle');
     Route::get('/welfare', \App\Livewire\Admin\WelfareManager::class)->name('welfare.index');
+    Route::get('/manage/evaluations/{evaluation}/edit', EvaluationBuilder::class)->name('evaluations.edit');
+    Route::get('/manage/evaluations/{evaluation}/results', EvaluationResults::class)->name('evaluations.results');
+    Route::get('/manage/evaluations', AdminEvaluationIndex::class)->name('evaluations.index');
 
 });
 
@@ -241,19 +259,6 @@ Route::get('/discover', EventDiscovery::class)->name('open.events.index');
 Route::get('/privacy', PrivacyPolicy::class)->name('privacy');
 Route::get('/evaluations/{evaluation}', EvaluationForm::class)->name('evaluations.show');
 
-// ==========================================
-// WELFARE & GRIEVANCE SUBDOMAIN
-// ==========================================
-$welfareDomain = 'straw.' . parse_url(config('app.url'), PHP_URL_HOST);
 
-Route::domain($welfareDomain)->middleware(['web', 'throttle:5,1'])->group(function () {
-
-    // The Submit Form
-    Route::get('/submit', \App\Livewire\Welfare\SubmitTicket::class)->name('welfare.submit');
-
-    // The Secure Tracker
-    Route::get('/track', \App\Livewire\Welfare\TrackTicket::class)->name('welfare.track');
-
-});
 
 
