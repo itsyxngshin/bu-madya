@@ -8,6 +8,11 @@ use App\Models\EvaluationResponse;
 use App\Models\EvaluationAnswer;
 use Illuminate\Support\Facades\Auth;
 use Livewire\WithFileUploads;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
+use App\Mail\CertificateMail;
 use Livewire\Attributes\Layout;
 
 #[Layout('layouts.madya-template')]
@@ -197,6 +202,51 @@ class EvaluationForm extends Component
                 'evaluation_question_id' => $questionId,
                 'answer_value' => $finalValue
             ]);
+        }
+
+        if ($this->evaluation->certificate_template && $this->evaluation->cert_delivery_mode === 'automatic') {
+            $manager = new ImageManager(new Driver());
+            
+            // Read the saved template
+            $image = $manager->read(storage_path('app/public/' . $this->evaluation->certificate_template));
+
+            // Calculate exact pixel coordinates from the saved percentages
+            $pixelX = $image->width() * ($this->evaluation->cert_pos_x / 100);
+            $pixelY = $image->height() * ($this->evaluation->cert_pos_y / 100);
+
+            // Write the text
+            $image->text($this->respondentName, $pixelX, $pixelY, function($font) {
+                $font->file(public_path('fonts/Montserrat-Bold.ttf')); // Ensure you have a font file here
+                $font->size($this->evaluation->cert_font_size);
+                $font->color($this->evaluation->cert_text_color);
+                $font->align('center');
+                $font->valign('middle');
+            });
+
+            // Save the image temporarily to your server so the email can attach it
+            $tempPath = storage_path('app/public/temp_cert_' . time() . '.png');
+            $image->toPng()->save($tempPath);
+
+            // Prep the Email Content
+            $respondentName = $this->respondentName; // Or auth()->user()->name
+            $eventName = $this->evaluation->title;
+            $userEmail = $this->respondentEmail; // Make sure you capture their email!
+
+            $subject = $this->evaluation->cert_use_custom_email 
+                ? $this->evaluation->cert_email_subject 
+                : 'Your Certificate of Participation - BU MADYA';
+
+            if ($this->evaluation->cert_use_custom_email) {
+                $body = str_replace(['[Name]', '[Event]'], [$respondentName, $eventName], $this->evaluation->cert_email_body);
+            } else {
+                $body = "Hi {$respondentName},\n\nThank you for participating in {$eventName}. Please find your official certificate attached below.\n\nBest regards,\nBU MADYA";
+            }
+
+            // Send the Email
+            Mail::to($userEmail)->send(new CertificateMail($subject, $body, $tempPath));
+
+            // Delete the temporary file to save server space
+            unlink($tempPath);
         }
 
         // [NEW] CLEAR THE DRAFT CACHE UPON SUCCESSFUL SUBMIT

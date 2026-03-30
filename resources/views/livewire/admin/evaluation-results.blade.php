@@ -538,6 +538,15 @@
                             @endif
                         </h2>
                     </div>
+
+                    {{-- ONLY SHOW IF A TEMPLATE EXISTS --}}
+                    @if($evaluation->certificate_template)
+                        <button wire:click="generateManualCertificate({{ $currentResponse->id }})" class="px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white text-xs font-bold uppercase tracking-widest rounded-xl transition flex items-center gap-2 shadow-lg">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                            Issue Certificate
+                        </button>
+                    @endif
+                    
                     <div class="text-left md:text-right border-t border-gray-700 pt-3 md:border-t-0 md:pt-0 w-full md:w-auto">
                         <span class="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Date & Time</span>
                         <p class="text-sm mt-1">{{ $currentResponse->created_at->format('F d, Y - h:i A') }}</p>

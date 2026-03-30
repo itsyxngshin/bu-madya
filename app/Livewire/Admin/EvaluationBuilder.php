@@ -41,6 +41,11 @@ class EvaluationBuilder extends Component
     public $certPosY;
     public $certTextColor;
     public $certFontSize;
+    public $certDeliveryMode;
+
+    public $certUseCustomEmail = false;
+    public $certEmailSubject = '';
+    public $certEmailBody = '';
 
     protected function rules()
     {
@@ -131,6 +136,7 @@ class EvaluationBuilder extends Component
         $this->certPosY = $evaluation->cert_pos_y ?? 50;
         $this->certTextColor = $evaluation->cert_text_color ?? '#1f2937';
         $this->certFontSize = $evaluation->cert_font_size ?? 80;
+        $this->certDeliveryMode = $evaluation->cert_delivery_mode ?? 'automatic';
 
         $user = auth()->user();
         $role = $user->role?->role_name;
@@ -190,6 +196,10 @@ class EvaluationBuilder extends Component
             $this->is_active = true;
             $this->questions = [];
         }
+
+        $this->certUseCustomEmail = $evaluation->cert_use_custom_email ?? false;
+        $this->certEmailSubject = $evaluation->cert_email_subject ?? 'Your Certificate of Participation';
+        $this->certEmailBody = $evaluation->cert_email_body ?? "Hi [Name],\n\nThank you for participating in our event and taking the time to provide your feedback. Please find your e-certificate attached.\n\nBest regards,\nBU MADYA";
     }
 
     public function saveCertificateSettings()
@@ -203,9 +213,13 @@ class EvaluationBuilder extends Component
         $this->evaluation->cert_pos_y = $this->certPosY;
         $this->evaluation->cert_text_color = $this->certTextColor;
         $this->evaluation->cert_font_size = $this->certFontSize;
+        $this->evaluation->cert_delivery_mode = $this->certDeliveryMode;
+        $this->evaluation->cert_use_custom_email = $this->certUseCustomEmail;
+        $this->evaluation->cert_email_subject = $this->certEmailSubject;
+        $this->evaluation->cert_email_body = $this->certEmailBody;
         $this->evaluation->save();
 
-        session()->flash('success', 'Certificate settings saved!');
+        session()->flash('success', 'Certificate & Email settings saved!');
     }
 
     #[Computed]

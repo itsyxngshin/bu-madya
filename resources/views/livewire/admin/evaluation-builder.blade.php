@@ -136,6 +136,28 @@
                 {{-- [NEW] E-CERTIFICATE BUILDER                --}}
                 {{-- ========================================== --}}
                 <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-200">
+
+                    {{-- Delivery Mode Controls --}}
+                    <div class="mb-5 bg-gray-50 p-3 rounded-lg border border-gray-100">
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Delivery Mode</label>
+                        <div class="flex flex-col gap-2">
+                            <label class="flex items-center gap-2 cursor-pointer group">
+                                <input type="radio" wire:model.live="certDeliveryMode" value="automatic" class="text-orange-500 focus:ring-orange-500 w-4 h-4 border-gray-300">
+                                <span class="text-xs font-bold text-gray-700 group-hover:text-gray-900 transition">Automatic (Instant Download)</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer group">
+                                <input type="radio" wire:model.live="certDeliveryMode" value="manual" class="text-orange-500 focus:ring-orange-500 w-4 h-4 border-gray-300">
+                                <span class="text-xs font-bold text-gray-700 group-hover:text-gray-900 transition">Manual (Admin Verification Required)</span>
+                            </label>
+                        </div>
+                        
+                        {{-- Helper Text using Alpine for smooth transitions --}}
+                        <div class="mt-2 text-[9px] text-gray-500 font-medium italic border-t border-gray-200 pt-2">
+                            <span x-show="$wire.certDeliveryMode === 'automatic'">Participants will download their certificate instantly upon submitting the form.</span>
+                            <span x-show="$wire.certDeliveryMode === 'manual'" x-cloak>Certificates are held back. You must manually generate them from the Results Dashboard after verifying attendance.</span>
+                        </div>
+                    </div>
+                    
                     <h3 class="text-sm font-black text-gray-900 mb-1">E-Certificate Builder</h3>
                     <p class="text-[10px] text-gray-500 mb-4 leading-tight">Upload a blank template and drag the name placeholder to automate certificates.</p>
 
@@ -206,7 +228,49 @@
                             No Template
                         </div>
                     @endif
+                    
+                    {{-- ========================================== --}}
+                    {{-- [NEW] EMAIL CUSTOMIZATION SECTION          --}}
+                    {{-- ========================================== --}}
+                    <div class="mt-6 border-t border-gray-100 pt-5">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <h4 class="text-xs font-bold text-gray-900">Email Delivery Template</h4>
+                                <p class="text-[10px] text-gray-500 mt-0.5">Customize the email sent to participants with their certificate.</p>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" wire:model.live="certUseCustomEmail" class="sr-only peer">
+                                <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:bg-orange-500 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all shadow-inner"></div>
+                            </label>
+                        </div>
 
+                        @if($certUseCustomEmail)
+                            <div class="space-y-3 bg-orange-50/50 p-4 rounded-xl border border-orange-100">
+                                <div>
+                                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Subject Line</label>
+                                    <input type="text" wire:model="certEmailSubject" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs font-bold focus:ring-orange-500 focus:border-orange-500 shadow-sm" placeholder="e.g., Your Event Certificate">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Email Message</label>
+                                    <textarea wire:model="certEmailBody" rows="4" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs focus:ring-orange-500 focus:border-orange-500 resize-y shadow-sm" placeholder="Type your message here..."></textarea>
+                                    
+                                    {{-- Dynamic Placeholders Helper --}}
+                                    <div class="mt-2 flex items-center gap-2">
+                                        <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Smart Tags:</span>
+                                        <span class="text-[9px] font-bold text-orange-600 bg-orange-100 px-1.5 py-0.5 rounded cursor-help" title="Will be replaced by the respondent's name">[Name]</span>
+                                        <span class="text-[9px] font-bold text-orange-600 bg-orange-100 px-1.5 py-0.5 rounded cursor-help" title="Will be replaced by the event/form title">[Event]</span>
+                                    </div>
+                                </div>
+                            </div>
+                        @else
+                            <div class="bg-gray-50 p-4 rounded-xl border border-gray-200 border-dashed text-center flex flex-col items-center justify-center">
+                                <svg class="w-5 h-5 text-gray-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                                <p class="text-xs font-bold text-gray-500">Using the Generic System Template</p>
+                                <p class="text-[9px] text-gray-400 mt-1 uppercase tracking-widest font-medium">Standard automated message will be sent.</p>
+                            </div>
+                        @endif
+                    </div>
+                    
                     @if($newTemplate)
                         <button wire:click="saveCertificateSettings" class="w-full mt-4 py-2 bg-gray-900 text-white font-bold rounded-lg shadow hover:bg-orange-600 transition text-[10px] uppercase tracking-widest flex items-center justify-center gap-1">
                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
