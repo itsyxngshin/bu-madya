@@ -1,4 +1,3 @@
-{{-- [NEW] Load Chart.js for Beautiful Graphs --}}
 <div class="min-h-screen bg-gray-50 p-4 md:p-6 font-sans text-gray-900 pb-20"
      x-data="{ 
         previewOpen: false, 
@@ -18,7 +17,6 @@
         }
      }">
     
-    {{-- [FIXED] Moved the script inside the root element so Livewire doesn't panic! --}}
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <div class="max-w-5xl mx-auto">
@@ -45,7 +43,7 @@
         </div>
 
         {{-- TABS --}}
-        <div class="flex gap-4 border-b border-gray-200 mb-8 overflow-x-auto whitespace-nowrap">
+        <div class="flex gap-4 border-b border-gray-200 mb-8 overflow-x-auto whitespace-nowrap custom-scrollbar">
             <button wire:click="setTab('summary')" class="pb-3 text-sm font-bold uppercase tracking-widest transition border-b-2 {{ $tab === 'summary' ? 'border-orange-500 text-orange-600' : 'border-transparent text-gray-400 hover:text-gray-600' }}">
                 Summary
             </button>
@@ -58,6 +56,210 @@
         {{-- TAB 1: SUMMARY WITH CHARTS --}}
         {{-- ========================================== --}}
         @if($tab === 'summary')
+            
+            {{-- GEMINI AI INSIGHTS ENGINE --}}
+            <div class="bg-gradient-to-br from-purple-50 to-indigo-50 border border-purple-100 rounded-2xl p-6 shadow-sm mb-8 relative overflow-hidden animate-fade-in-up">
+                <div class="absolute -right-6 -top-6 text-purple-500/10">
+                    <svg class="w-32 h-32" fill="currentColor" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-8 14H7v-2h4v2zm4-4H7v-2h8v2zm0-4H7V7h8v2z"/></svg>
+                </div>
+                <div class="relative z-10">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+                        <div>
+                            <h3 class="text-sm font-black text-purple-900 uppercase tracking-widest flex items-center gap-2">
+                                <svg class="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                                Gemini AI Executive Summary
+                            </h3>
+                            <p class="text-xs text-purple-700 font-medium mt-1">Deep analysis of quantitative scores and qualitative written feedback.</p>
+                        </div>
+                        
+                        @if(!$aiReport)
+                            <button wire:click="generateAIInsights" wire:loading.attr="disabled" class="shrink-0 px-5 py-2.5 bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold uppercase tracking-widest rounded-xl shadow-md transition flex items-center gap-2 group">
+                                <span wire:loading.remove wire:target="generateAIInsights">
+                                    <svg class="w-4 h-4 group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+                                </span>
+                                <span wire:loading wire:target="generateAIInsights">
+                                    <svg class="animate-spin w-4 h-4 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                </span>
+                                <span wire:loading.remove wire:target="generateAIInsights">Generate Insights</span>
+                                <span wire:loading wire:target="generateAIInsights">Analyzing Data...</span>
+                            </button>
+                        @endif
+                    </div>
+
+                    @if (session()->has('ai_error'))
+                        <div class="mt-4 bg-red-50 text-red-600 px-4 py-3 rounded-lg text-xs font-bold border border-red-100">
+                            {{ session('ai_error') }}
+                        </div>
+                    @endif
+
+                    @if($aiReport)
+                        <div class="mt-6 bg-white/60 p-5 rounded-xl border border-purple-100">
+                            <div class="prose prose-sm prose-purple max-w-none text-purple-900 leading-relaxed font-medium prose-p:mb-4 last:prose-p:mb-0">
+                                {!! \Illuminate\Support\Str::markdown($aiReport) !!}
+                            </div>
+                        </div>
+                        <div class="mt-4 text-right">
+                            <button wire:click="generateAIInsights" class="text-[10px] font-bold uppercase tracking-widest text-purple-500 hover:text-purple-700 transition flex items-center gap-1 ml-auto">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                                Regenerate Report
+                            </button>
+                        </div>
+                    @endif
+                </div>
+            </div>
+            
+            {{-- ALGORITHMIC SYNTHESIS BOX --}}
+            @if($synthesisReport)
+                <div class="bg-gradient-to-br from-indigo-50 to-blue-50 border border-indigo-100 rounded-2xl p-6 shadow-sm mb-8 relative overflow-hidden animate-fade-in-up">
+                    <div class="absolute -right-6 -top-6 text-indigo-500/10">
+                        <svg class="w-32 h-32" fill="currentColor" viewBox="0 0 24 24"><path d="M19.92 12.38c-.3-.22-.61-.41-.93-.57l1.42-1.42c.58-.58.58-1.54 0-2.12l-1.42-1.42c-.58-.58-1.54-.58-2.12 0l-1.42 1.42a8.04 8.04 0 00-1.07-1.07l1.42-1.42c.58-.58.58-1.54 0-2.12l-1.42-1.42c-.58-.58-1.54-.58-2.12 0l-1.42 1.42A7.9 7.9 0 0012 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10c0-1.28-.24-2.5-.68-3.62zm-7.92 7.62A8 8 0 1120 12a8.01 8.01 0 01-8 8zm4-9h-3V8c0-.55-.45-1-1-1s-1 .45-1 1v3H8c-.55 0-1 .45-1 1s.45 1 1 1h3v3c0 .55.45 1 1 1s1-.45 1-1v-3h3c.55 0 1-.45 1-1s-.45-1-1-1z"/></svg>
+                    </div>
+                    <div class="relative z-10">
+                        <h3 class="text-sm font-black text-indigo-900 uppercase tracking-widest flex items-center gap-2 mb-3">
+                            <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                            Automated Data Synthesis
+                        </h3>
+                        <div class="text-indigo-900 leading-relaxed text-sm md:text-base font-medium prose prose-strong:text-indigo-700 max-w-none">
+                            {!! \Illuminate\Support\Str::markdown($synthesisReport) !!}
+                        </div>
+                    </div>
+                </div>
+            @endif
+            
+            {{-- LIKERT HTML TABLE WITH SUBTOTALS --}}
+            @php
+                $likertQuestions = $evaluation->questions->where('type', 'likert')->sortBy('order');
+                $firstLikert = $likertQuestions->first();
+                $likertOptions = $firstLikert ? collect($firstLikert->options)->map(fn($opt) => is_array($opt) ? ($opt['text'] ?? '') : $opt)->toArray() : [];
+                
+                $groupedSections = [];
+                $currentSectionTitle = 'General Evaluation';
+                $currentSectionIndex = 0;
+
+                $groupedSections[$currentSectionIndex] = [
+                    'title' => $currentSectionTitle,
+                    'questions' => [],
+                    'totals' => array_fill(0, count($likertOptions), 0),
+                    'sum_averages' => 0,
+                    'count_averages' => 0,
+                ];
+
+                foreach($evaluation->questions->sortBy('order') as $question) {
+                    if ($question->type === 'section') {
+                        $currentSectionIndex++;
+                        $groupedSections[$currentSectionIndex] = [
+                            'title' => strip_tags(\Illuminate\Support\Str::markdown($question->question_text ?? '')),
+                            'questions' => [],
+                            'totals' => array_fill(0, count($likertOptions), 0),
+                            'sum_averages' => 0,
+                            'count_averages' => 0,
+                        ];
+                    } elseif ($question->type === 'likert') {
+                        $groupedSections[$currentSectionIndex]['questions'][] = $question;
+                        
+                        $stat = $stats[$question->id] ?? null;
+                        if ($stat) {
+                            foreach($likertOptions as $idx => $lbl) {
+                                $groupedSections[$currentSectionIndex]['totals'][$idx] += ($stat['breakdown'][$idx] ?? 0);
+                            }
+                            if (($stat['average'] ?? 0) > 0) {
+                                $groupedSections[$currentSectionIndex]['sum_averages'] += $stat['average'];
+                                $groupedSections[$currentSectionIndex]['count_averages']++;
+                            }
+                        }
+                    }
+                }
+                $groupedSections = array_filter($groupedSections, fn($sec) => count($sec['questions']) > 0);
+            @endphp
+
+            @if(count($groupedSections) > 0 && count($likertOptions) > 0)
+                <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden mb-8 animate-fade-in-up">
+                    <div class="p-5 border-b border-gray-200 bg-gray-50/80">
+                        <h3 class="text-lg font-black text-gray-900 flex items-center gap-2">
+                            <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                            Overall Likert Results
+                        </h3>
+                        <p class="text-xs text-gray-500 mt-1">Aggregated sentiment analysis with section sub-tabulations.</p>
+                    </div>
+
+                    <div class="overflow-x-auto custom-scrollbar">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-white border-b border-gray-200 text-[10px] uppercase tracking-widest text-gray-500 font-bold">
+                                    <th class="p-4 whitespace-nowrap min-w-[250px]">Evaluation Criteria</th>
+                                    @foreach($likertOptions as $optionLabel)
+                                        <th class="p-4 text-center whitespace-nowrap">{{ $optionLabel }}</th>
+                                    @endforeach
+                                    <th class="p-4 text-center">Score</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100">
+                                @foreach($groupedSections as $section)
+                                    <tr class="bg-orange-50/50">
+                                        <td colspan="{{ count($likertOptions) + 2 }}" class="p-4 text-sm font-black text-orange-700 uppercase tracking-widest border-y border-orange-100">
+                                            {{ $section['title'] }}
+                                        </td>
+                                    </tr>
+                                    
+                                    @foreach($section['questions'] as $question)
+                                        @php
+                                            $stat = $stats[$question->id] ?? null;
+                                            $avg = $stat['average'] ?? 0;
+                                            
+                                            if ($avg >= 4.5) $colorClass = 'bg-green-50 text-green-700 border-green-200';
+                                            elseif ($avg >= 3.5) $colorClass = 'bg-blue-50 text-blue-700 border-blue-200';
+                                            elseif ($avg >= 2.5) $colorClass = 'bg-yellow-50 text-yellow-700 border-yellow-200';
+                                            else $colorClass = 'bg-red-50 text-red-700 border-red-200';
+                                            
+                                            $qText = strip_tags(\Illuminate\Support\Str::markdown($question->question_text ?? ''));
+                                        @endphp
+                                        <tr class="hover:bg-gray-50 transition-colors">
+                                            <td class="p-4 text-sm text-gray-900 font-medium pl-6">
+                                                {{ $qText }}
+                                            </td>
+                                            @foreach($likertOptions as $index => $optionLabel)
+                                                <td class="p-4 text-center font-bold text-sm text-gray-600">
+                                                    {{ $stat['breakdown'][$index] ?? 0 }}
+                                                </td>
+                                            @endforeach
+                                            <td class="p-4 text-center">
+                                                <span class="px-2.5 py-1 rounded-lg border text-xs font-black {{ $colorClass }} shadow-sm">
+                                                    {{ number_format($avg, 2) }}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+
+                                    @php
+                                        $secAvg = $section['count_averages'] > 0 ? ($section['sum_averages'] / $section['count_averages']) : 0;
+                                        if ($secAvg >= 4.5) $secColorClass = 'bg-green-100 text-green-800 border-green-300';
+                                        elseif ($secAvg >= 3.5) $secColorClass = 'bg-blue-100 text-blue-800 border-blue-300';
+                                        elseif ($secAvg >= 2.5) $secColorClass = 'bg-yellow-100 text-yellow-800 border-yellow-300';
+                                        else $secColorClass = 'bg-red-100 text-red-800 border-red-300';
+                                    @endphp
+                                    <tr class="bg-gray-50/80 border-t-2 border-gray-200">
+                                        <td class="p-4 text-[10px] font-black text-gray-700 text-right uppercase tracking-widest">
+                                            Section Subtotal
+                                        </td>
+                                        @foreach($section['totals'] as $total)
+                                            <td class="p-4 text-center font-black text-sm text-gray-800">
+                                                {{ $total }}
+                                            </td>
+                                        @endforeach
+                                        <td class="p-4 text-center">
+                                            <span class="px-2.5 py-1 rounded-lg border text-sm font-black {{ $secColorClass }} shadow-sm">
+                                                {{ number_format($secAvg, 2) }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            @endif
+
+            {{-- INDIVIDUAL QUESTION CHARTS --}}
             <div class="space-y-6">
                 @foreach($evaluation->questions->sortBy('order') as $index => $question)
                     
@@ -65,8 +267,6 @@
 
                     @php 
                         $stat = $stats[$question->id] ?? null; 
-                        
-                        // [NEW] Dynamically Build Chart Data Array
                         $chartLabels = [];
                         $chartData = [];
                         $chartColors = [];
@@ -95,7 +295,6 @@
                         }
                     @endphp
 
-                    {{-- SECTIONS --}}
                     @if($question->type === 'section')
                         <div class="pt-8 pb-2 border-b-2 border-orange-100">
                             <div class="text-lg font-black text-orange-600 uppercase tracking-tight prose prose-sm max-w-none prose-p:my-0 prose-a:text-orange-600">
@@ -103,7 +302,6 @@
                             </div>
                         </div>
                     
-                    {{-- LIKERT SCALE (Vertical Bar Chart) --}}
                     @elseif($question->type === 'likert')
                         <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
                             <div class="font-bold text-gray-900 mb-6 prose prose-sm max-w-none prose-p:mt-0 prose-p:mb-2 prose-a:text-orange-600">
@@ -130,7 +328,6 @@
                                                         data: {
                                                             labels: {{ json_encode(array_values($chartLabels)) }},
                                                             datasets: [{
-                                                                label: 'Responses',
                                                                 data: {{ json_encode(array_values($chartData)) }},
                                                                 backgroundColor: '#f97316',
                                                                 borderRadius: 4
@@ -154,7 +351,6 @@
                             </div>
                         </div>
 
-                    {{-- RADIO & DROPDOWN (Horizontal Chart) --}}
                     @elseif(in_array($question->type, ['radio', 'dropdown']))
                         <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
                             <div class="flex justify-between items-center mb-6">
@@ -215,7 +411,6 @@
                             @endif
                         </div>
 
-                    {{-- CHECKBOX (Horizontal Chart) --}}
                     @elseif($question->type === 'checkbox')
                         <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
                             <div class="flex justify-between items-center mb-6">
@@ -275,7 +470,6 @@
                             @endif
                         </div>
 
-                    {{-- TEXT / FILE --}}
                     @else
                         <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
                             <div class="flex justify-between items-start mb-4">
@@ -289,7 +483,7 @@
                             @if($question->answers->count() > 0)
                                 <div class="max-h-48 overflow-y-auto space-y-2 pr-2 custom-scrollbar">
                                     @foreach($question->answers->take(10) as $answer)
-                                        <div class="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg border border-gray-100">
+                                        <div class="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg border border-gray-100 break-words">
                                             @if($question->type == 'file')
                                                 <button type="button" @click="openPreview('{{ asset('storage/'.$answer->answer_value) }}')" class="text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1.5 font-bold text-xs transition">
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
@@ -317,7 +511,6 @@
                     <p class="text-gray-400 font-bold">No responses have been submitted yet.</p>
                 </div>
             @else
-                
                 <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-200 mb-6 flex items-center justify-between">
                     <button wire:click="previousResponse" class="p-2 bg-gray-50 hover:bg-gray-100 text-gray-700 rounded-lg transition disabled:opacity-30 disabled:cursor-not-allowed" {{ $currentIndex === 0 ? 'disabled' : '' }}>
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
@@ -345,7 +538,7 @@
                             @endif
                         </h2>
                     </div>
-                    <div class="text-left md:text-right">
+                    <div class="text-left md:text-right border-t border-gray-700 pt-3 md:border-t-0 md:pt-0 w-full md:w-auto">
                         <span class="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Date & Time</span>
                         <p class="text-sm mt-1">{{ $currentResponse->created_at->format('F d, Y - h:i A') }}</p>
                     </div>
@@ -389,7 +582,7 @@
                                         @endif
                                     </div>
                                 @else
-                                    <div class="text-sm text-gray-900 font-medium bg-gray-50/50 p-3 rounded-lg border border-gray-100">{{ $val }}</div>
+                                    <div class="text-sm text-gray-900 font-medium bg-gray-50/50 p-3 rounded-lg border border-gray-100 break-words">{{ $val }}</div>
                                 @endif
                             </div>
                         @endif
@@ -400,7 +593,7 @@
     </div>
 
     {{-- ========================================== --}}
-    {{-- ALPINE.JS FILE PREVIEW MODAL (Smart Fit) --}}
+    {{-- ALPINE.JS FILE PREVIEW MODAL               --}}
     {{-- ========================================== --}}
     <div x-show="previewOpen" style="display: none;" class="fixed inset-0 z-[100] flex items-center justify-center p-2 sm:p-6" x-cloak>
         <div x-show="previewOpen" 

@@ -6,6 +6,8 @@ use Livewire\Component;
 use App\Models\Evaluation;
 use App\Models\EvaluationResponse;
 use Livewire\Attributes\Layout;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 
 #[Layout('layouts.madya-admin-deck')]
 class EvaluationResults extends Component
@@ -13,9 +15,13 @@ class EvaluationResults extends Component
     public Evaluation $evaluation;
     public $stats = [];
 
-    // [NEW] Tab & Individual Response Tracking
+    // Tab & Individual Response Tracking
     public $tab = 'summary'; // 'summary' or 'individual'
     public $currentIndex = 0;
+
+    // Synthesis & AI Reports
+    public $synthesisReport = null;
+    public $aiReport = null;
 
     public function mount(Evaluation $evaluation)
     {
@@ -36,14 +42,12 @@ class EvaluationResults extends Component
         $this->calculateStats();
     }
 
-    // [NEW] Switch Tabs
     public function setTab($tabName)
     {
         $this->tab = $tabName;
-        $this->currentIndex = 0; // Reset index when switching
+        $this->currentIndex = 0;
     }
 
-    // [NEW] Pagination for Individual Responses
     public function nextResponse()
     {
         $total = $this->evaluation->responses()->count();
@@ -153,6 +157,105 @@ class EvaluationResults extends Component
                 ];
             }
         }
+
+        // Generate Algorithmic Synthesis
+        $this->generateSynthesis();
+    }
+
+    public function generateSynthesis()
+    {
+        $likertData = [];
+        $overallSum = 0;
+        $totalLikertQuestions = 0;
+
+        foreach ($this->evaluation->questions as $question) {
+            if ($question->type === 'likert' && isset($this->stats[$question->id])) {
+                $avg = $this->stats[$question->id]['average'];
+                if ($avg > 0) {
+                    $cleanText = strip_tags(Str::markdown($question->question_text));
+                    $likertData[$cleanText] = $avg;
+                    $overallSum += $avg;
+                    $totalLikertQuestions++;
+                }
+            }
+        }
+
+        if (count($likertData) < 2) {
+            $this->synthesisReport = null;
+            return;
+        }
+
+        $overallAverage = round($overallSum / $totalLikertQuestions, 2);
+        
+        $highestScore = max($likertData);
+        $highestCriteria = array_search($highestScore, $likertData);
+        
+        $lowestScore = min($likertData);
+        $lowestCriteria = array_search($lowestScore, $likertData);
+
+        $sentiment = $overallAverage >= 4.0 ? 'highly positive' : ($overallAverage >= 3.0 ? 'generally mixed' : 'concerning');
+        $successLvl = $overallAverage >= 4.5 ? 'an overwhelming success' : ($overallAverage >= 3.5 ? 'a successful execution' : 'an area requiring significant review');
+
+        $this->synthesisReport = "Based on the data collected, this event received a **{$sentiment}** reception with an overall aggregated score of **{$overallAverage} out of 5**, indicating {$successLvl}. " .
+            "Respondents were most satisfied with **\"{$highestCriteria}\"**, which earned the highest rating of **{$highestScore}**. " .
+            "However, data indicates an opportunity for improvement regarding **\"{$lowestCriteria}\"**, which received the lowest relative score of **{$lowestScore}**.";
+    }
+
+    public function generateAIInsights()
+    {
+        $apiKey = env('GEMINI_API_KEY');
+        if (!$apiKey) {
+            session()->flash('ai_error', 'Gemini API key is missing. Please add it to your .env file.');
+            return;
+        }
+
+        $eventContext = "Event Name: " . $this->evaluation->title . "\nTotal Responses: " . $this->evaluation->responses()->count() . "\n\n";
+        
+        $quantitativeData = "Quantitative (Likert) Averages:\n";
+        $qualitativeData = "Qualitative (Text) Feedback:\n";
+
+        foreach ($this->evaluation->questions as $question) {
+            if ($question->type === 'likert' && isset($this->stats[$question->id])) {
+                $cleanText = strip_tags(Str::markdown($question->question_text));
+                $quantitativeData .= "- {$cleanText}: " . $this->stats[$question->id]['average'] . " out of 5\n";
+            } 
+            elseif (in_array($question->type, ['text', 'textarea'])) {
+                $cleanText = strip_tags(Str::markdown($question->question_text));
+                $qualitativeData .= "\nQuestion: {$cleanText}\nAnswers:\n";
+                foreach ($question->answers->take(15) as $answer) {
+                    if (!empty($answer->answer_value)) {
+                        $qualitativeData .= "- \"{$answer->answer_value}\"\n";
+                    }
+                }
+            }
+        }
+
+        $prompt = "You are the Chief Data Strategist for BU MADYA, a youth-led advocacy and student organization. Analyze the following post-event evaluation data: \n\n" . 
+                  $eventContext . $quantitativeData . "\n" . $qualitativeData . "\n\n" .
+                  "Write a concise, highly readable Executive Summary for the Director-General and Executive Committee. " .
+                  "Do NOT use large markdown headers (like # or ##). Use bold text and bullet points for readability. " .
+                  "You MUST structure your response exactly like this:\n\n" .
+                  "**1. The Bottom Line:** Write a 2-3 sentence overarching summary of the event's overall success, dominant sentiment, and quantitative performance.\n\n" .
+                  "**2. What Went Well:** Provide a bulleted list of 2-3 common positive themes or specific criteria that scored the highest.\n\n" .
+                  "**3. Areas for Growth:** Provide a bulleted list of 2-3 recurring criticisms, common complaints, or areas with the lowest scores.\n\n" .
+                  "**4. Strategic Recommendations:** Provide 2 concrete, actionable steps the project committee should take to improve the next event based purely on this data.";
+
+        try {
+            $response = Http::withHeaders(['Content-Type' => 'application/json'])
+                ->post('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' . $apiKey, [
+                    'contents' => [
+                        ['parts' => [['text' => $prompt]]]
+                    ]
+                ]);
+
+            if ($response->successful()) {
+                $this->aiReport = $response->json('candidates.0.content.parts.0.text');
+            } else {
+                session()->flash('ai_error', 'Google AI API Error: ' . $response->body());
+            }
+        } catch (\Exception $e) {
+            session()->flash('ai_error', 'Connection failed: ' . $e->getMessage());
+        }
     }
 
     public function render()
@@ -160,7 +263,6 @@ class EvaluationResults extends Component
         $totalResponsesCount = $this->evaluation->responses()->count();
         $currentResponse = null;
 
-        // [NEW] Fetch the specific individual response if on the 'individual' tab
         if ($this->tab === 'individual' && $totalResponsesCount > 0) {
             $currentResponse = EvaluationResponse::with(['answers', 'user'])
                 ->where('evaluation_id', $this->evaluation->id)
@@ -178,4 +280,4 @@ class EvaluationResults extends Component
             'currentResponse' => $currentResponse,
         ])->layout($layoutFile);
     }
-}
+} 

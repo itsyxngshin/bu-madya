@@ -7,9 +7,9 @@
        @php
             // Check the role and set the correct route
             $roleName = auth()->user()->role->role_name;
-            
+
             // STRICT CHECK: Is the user an administrator?
-            $createRoute = ($roleName === 'administrator') 
+            $createRoute = ($roleName === 'administrator')
                 ? route('admin.events.create')     // Yes? Send to Admin
                 : route('partner.events.create');  // No? Send to Partner
         @endphp
@@ -50,7 +50,7 @@
                                 <div class="min-w-0">
                                     <div class="font-bold text-gray-900 truncate">{{ $event->title }}</div>
                                     <div class="text-xs text-gray-500 truncate max-w-xs">{{ Str::limit(strip_tags($event->description), 40) }}</div>
-                                    
+
                                     {{-- Admin Visibility: Show who created the event --}}
                                     @if(in_array(auth()->user()->role?->role_name, ['administrator', 'director']))
                                         <div class="mt-1 flex items-center gap-1 text-[9px] font-bold uppercase tracking-widest text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded w-max">
@@ -82,43 +82,43 @@
                                 @if($event->is_internal_rsvp)
                                     {{-- Registrants --}}
                                     @if(in_array(Auth::user()?->role?->role_name, ['administrator', 'director']))
-                                        <a href="{{ route('admin.events.registrants', $event->slug) }}" title="Manage Registrants" 
+                                        <a href="{{ route('admin.events.registrants', $event->slug) }}" title="Manage Registrants"
                                             class="p-2 text-gray-400 hover:text-green-600 bg-gray-50 hover:bg-green-50 rounded-lg transition">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
                                         </a>
                                     @elseif(in_array(Auth::user()?->role?->role_name, ['organization']))
-                                        <a href="{{ route('partner.events.registrants', $event->slug) }}" title="Manage Registrants" 
+                                        <a href="{{ route('partner.events.registrants', $event->slug) }}" title="Manage Registrants"
                                                 class="p-2 text-gray-400 hover:text-green-600 bg-gray-50 hover:bg-green-50 rounded-lg transition">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
                                             </a>
                                     @endif
-                                    
+
                                     {{-- Scanner --}}
-                                    <a href="{{ route('admin.events.scan', $event->slug) }}" target="_blank" title="Launch QR Scanner" 
+                                    <a href="{{ route('admin.events.scan', $event->slug) }}" target="_blank" title="Launch QR Scanner"
                                        class="p-2 text-gray-400 hover:text-purple-600 bg-gray-50 hover:bg-purple-50 rounded-lg transition">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
                                     </a>
-                                    
+
                                     {{-- Raffle --}}
                                     @if(in_array(Auth::user()?->role?->role_name, ['administrator', 'director']))
-                                        <a href="{{ route('admin.events.raffle', $event->slug) }}" target="_blank" title="Launch Live Raffle" 
+                                        <a href="{{ route('admin.events.raffle', $event->slug) }}" target="_blank" title="Launch Live Raffle"
                                             class="p-2 text-gray-400 hover:text-orange-600 bg-gray-50 hover:bg-orange-50 rounded-lg transition">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"></path></svg>
                                             </a>
 
                                     @elseif(in_array(Auth::user()?->role?->role_name, ['organization']))
-                                        <a href="{{ route('partner.events.raffle', $event->slug) }}" target="_blank" title="Launch Live Raffle" 
+                                        <a href="{{ route('partner.events.raffle', $event->slug) }}" target="_blank" title="Launch Live Raffle"
                                             class="p-2 text-gray-400 hover:text-orange-600 bg-gray-50 hover:bg-orange-50 rounded-lg transition">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"></path></svg>
                                             </a>
                                     @endif
-                                    
+
                                     {{-- Divider --}}
                                     <div class="w-px h-5 bg-gray-200 mx-1"></div>
                                 @endif
 
                                 {{-- View Public Page --}}
-                                <a href="{{ route('events.show', $event->slug) }}" target="_blank" title="Preview Public Page" 
+                                <a href="{{ route('events.show', $event->slug) }}" target="_blank" title="Preview Public Page"
                                    class="p-2 text-gray-400 hover:text-blue-600 bg-gray-50 hover:bg-blue-50 rounded-lg transition">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
                                 </a>
@@ -130,17 +130,17 @@
                                 @endif
 
                                 {{-- Edit --}}
-                                <a href="{{ route('admin.events.edit', $event->id) }}" title="Edit Event" 
+                                <a href="{{ route('admin.events.edit', $event->id) }}" title="Edit Event"
                                    class="p-2 text-gray-400 hover:text-gray-900 bg-gray-50 hover:bg-gray-200 rounded-lg transition">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                                 </a>
 
                                 {{-- Delete --}}
-                                <button wire:click="delete({{ $event->id }})" wire:confirm="Are you sure you want to delete this event?" title="Delete Event" 
+                                <button wire:click="delete({{ $event->id }})" wire:confirm="Are you sure you want to delete this event?" title="Delete Event"
                                         class="p-2 text-gray-400 hover:text-red-600 bg-gray-50 hover:bg-red-50 rounded-lg transition">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                                 </button>
-                                
+
                             </div>
                         </td>
                     </tr>
@@ -161,7 +161,7 @@
             {{ $events->links() }}
         </div>
     </div>
-    
+
     {{-- ========================================== --}}
         {{-- MANAGE COLLABORATORS MODAL --}}
         {{-- ========================================== --}}
@@ -170,7 +170,7 @@
                 <div class="fixed inset-0 bg-gray-900/80 backdrop-blur-sm transition-opacity" wire:click="closeCollaborators"></div>
 
                 <div class="relative bg-white rounded-3xl shadow-2xl w-full max-w-xl flex flex-col max-h-[85vh] overflow-hidden transform transition-all">
-                    
+
                     {{-- Header --}}
                     <div class="flex items-center justify-between p-6 border-b border-gray-100 bg-gray-50 shrink-0">
                         <div>
@@ -184,7 +184,7 @@
 
                     {{-- Body --}}
                     <div class="p-6 overflow-y-auto custom-scrollbar flex-1 bg-white">
-                        
+
                         {{-- Flash Message --}}
                         @if (session()->has('collaborator_msg'))
                             <div class="mb-4 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl text-sm font-bold flex items-center gap-2" x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3000)">
@@ -216,7 +216,7 @@
                         {{-- [NEW] Active Collaborators List --}}
                         <div>
                             <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 px-1">Currently Authorized</h4>
-                            
+
                             <div class="space-y-2">
                                 @forelse($currentCollaborators as $org)
                                     <div class="flex items-center justify-between p-3 rounded-xl border border-gray-100 bg-white hover:border-gray-200 transition-colors shadow-sm">
@@ -226,7 +226,7 @@
                                             </div>
                                             <span class="text-sm font-bold text-gray-800">{{ $org->name }}</span>
                                         </div>
-                                        
+
                                         {{-- Revoke Button --}}
                                         <button wire:click="removeCollaborator({{ $org->id }})" class="px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 rounded-lg text-xs font-bold transition flex items-center gap-1">
                                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
@@ -243,7 +243,7 @@
                         </div>
 
                     </div>
-                    
+
                     {{-- Footer --}}
                     <div class="p-4 border-t border-gray-100 bg-gray-50 shrink-0 text-right">
                         <button wire:click="closeCollaborators" class="px-5 py-2 bg-gray-900 text-white font-bold text-sm rounded-xl hover:bg-gray-800 transition shadow-sm">
