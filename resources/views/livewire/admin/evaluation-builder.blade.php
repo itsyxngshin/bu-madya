@@ -230,6 +230,38 @@
                     @endif
                     
                     {{-- ========================================== --}}
+                    {{-- [NEW] DATA MAPPING SECTION                 --}}
+                    {{-- ========================================== --}}
+                    <div class="mb-5 bg-orange-50/50 p-4 rounded-xl border border-orange-100">
+                        <h4 class="text-xs font-bold text-gray-900 mb-3">Field Mapping</h4>
+                        <p class="text-[10px] text-gray-500 mb-4 leading-tight">Tell the system which questions to use to generate and send the certificates.</p>
+
+                        <div class="space-y-3">
+                            {{-- Name Mapping --}}
+                            <div>
+                                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Which question asks for their Name?</label>
+                                <select wire:model="certNameQuestionId" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs font-bold focus:ring-orange-500 focus:border-orange-500 shadow-sm cursor-pointer">
+                                    <option value="">-- Select Question --</option>
+                                    @foreach(collect($questions)->where('type', 'text') as $q)
+                                        <option value="{{ $q['id'] ?? $q['temp_id'] }}">{{ \Illuminate\Support\Str::limit($q['question_text'], 40) ?: 'Untitled Question' }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            {{-- Email Mapping --}}
+                            <div>
+                                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Which question asks for their Email?</label>
+                                <select wire:model="certEmailQuestionId" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs font-bold focus:ring-orange-500 focus:border-orange-500 shadow-sm cursor-pointer">
+                                    <option value="">-- Select Question --</option>
+                                    @foreach(collect($questions)->where('type', 'text') as $q)
+                                        <option value="{{ $q['id'] ?? $q['temp_id'] }}">{{ \Illuminate\Support\Str::limit($q['question_text'], 40) ?: 'Untitled Question' }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {{-- ========================================== --}}
                     {{-- [NEW] EMAIL CUSTOMIZATION SECTION          --}}
                     {{-- ========================================== --}}
                     <div class="mt-6 border-t border-gray-100 pt-5">
@@ -270,7 +302,7 @@
                             </div>
                         @endif
                     </div>
-                    
+
                     @if($newTemplate)
                         <button wire:click="saveCertificateSettings" class="w-full mt-4 py-2 bg-gray-900 text-white font-bold rounded-lg shadow hover:bg-orange-600 transition text-[10px] uppercase tracking-widest flex items-center justify-center gap-1">
                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>

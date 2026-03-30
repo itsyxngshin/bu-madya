@@ -29,7 +29,7 @@ class EvaluationForm extends Component
 
     protected $queryString = ['project_id'];
 
-    // --- AUTOSAVE LOGIC: Generate a unique key for this user/guest ---
+    // --- AUTOSAVE LOGIC ---
     private function getDraftKey()
     {
         $identifier = Auth::check() ? 'user_' . Auth::id() : 'ip_' . request()->ip();
@@ -44,16 +44,13 @@ class EvaluationForm extends Component
             $this->project_id = request()->query('project_id');
         }
 
-        // 1. Initialize empty answers based on type
         foreach($evaluation->questions as $q) {
             $this->answers[$q->id] = ($q->type === 'checkbox') ? [] : '';
         }
 
-        // 2. [NEW] RESTORE AUTOSAVED DRAFT
         $draft = cache()->get($this->getDraftKey());
         if ($draft) {
             foreach ($draft as $qId => $val) {
-                // We only restore if the question still exists on the form
                 if (isset($this->answers[$qId])) {
                     $this->answers[$qId] = $val;
                 }
@@ -61,22 +58,16 @@ class EvaluationForm extends Component
         }
     }
 
-    // --- [NEW] AUTOSAVE LOGIC: Triggers automatically when ANY answer changes ---
     public function updatedAnswers()
     {
-        // Filter out file uploads (files cannot be safely cached this way, they must be re-uploaded)
         $cacheableAnswers = collect($this->answers)->filter(function ($value) {
             return !($value instanceof \Illuminate\Http\UploadedFile);
         })->toArray();
 
-        // Save to cache for 7 days
         cache()->put($this->getDraftKey(), $cacheableAnswers, now()->addDays(7));
-        
-        // Dispatch event to show a subtle "Saved" checkmark on the frontend
         $this->dispatch('draft-autosaved');
     }
 
-    // --- DYNAMIC PAGE BUILDER (Respects Skip Logic) ---
     private function getPages()
     {
         $pages = [];
@@ -87,18 +78,13 @@ class EvaluationForm extends Component
         $sortedQuestions = $this->evaluation->questions->sortBy('order');
 
         foreach ($sortedQuestions as $question) {
-            
-            // 1. Check if we reached the skip logic destination
             if ($skipping && $question->type === 'section' && $question->id == $targetSectionId) {
                 $skipping = false;
                 $targetSectionId = null;
             }
 
-            // 2. Always process Page Breaks to ensure proper pagination
             if ($question->type === 'page_break') {
                 $pageIndex++;
-                
-                // If a radio button hasn't already triggered a jump, check if this page has a forced redirect
                 if (!$skipping) {
                     $jumpTarget = is_array($question->options) ? ($question->options[0]['jump'] ?? null) : null;
                     if (!empty($jumpTarget)) {
@@ -106,14 +92,12 @@ class EvaluationForm extends Component
                         $targetSectionId = ($jumpTarget === 'submit') ? 9999999 : $jumpTarget;
                     }
                 }
-                continue; // Skip adding the break to the UI
+                continue; 
             }
 
-            // 3. If we are NOT skipping, process standard questions
             if (!$skipping) {
                 $pages[$pageIndex][] = $question;
 
-                // 4. Trigger Conditional Skip Logic (Radio / Dropdown)
                 if (isset($this->answers[$question->id]) && in_array($question->type, ['radio', 'dropdown'])) {
                     $selectedAnswer = $this->answers[$question->id];
                     
@@ -132,11 +116,9 @@ class EvaluationForm extends Component
             }
         }
 
-        // Return re-indexed array in case there are empty pages
         return array_values(array_filter($pages)); 
     }
 
-    // --- NAVIGATION ---
     public function nextPage()
     {
         $pages = $this->getPages();
@@ -169,7 +151,6 @@ class EvaluationForm extends Component
         }
     }
 
-    // --- SUBMISSION ---
     public function submit()
     {
         $pages = $this->getPages();
@@ -204,55 +185,63 @@ class EvaluationForm extends Component
             ]);
         }
 
+        // 2. EXTRACT THE MAPPED DATA
+        $nameAnswer = $response->answers()->where('evaluation_question_id', $this->evaluation->cert_name_question_id)->first();
+        $respondentName = $nameAnswer && !empty($nameAnswer->answer_value) 
+            ? $nameAnswer->answer_value 
+            : (auth()->user()->name ?? 'Valued Participant'); 
+
+        $emailAnswer = $response->answers()->where('evaluation_question_id', $this->evaluation->cert_email_question_id)->first();
+        $respondentEmail = $emailAnswer && !empty($emailAnswer->answer_value) 
+            ? $emailAnswer->answer_value 
+            : (auth()->user()->email ?? null);
+
+        // CLEAR DRAFT CACHE IMMEDIATELY UPON SUCCESSFUL SAVE
+        cache()->forget($this->getDraftKey());
+        $this->isSubmitted = true;
+
+        // 3. E-CERTIFICATE GENERATION
         if ($this->evaluation->certificate_template && $this->evaluation->cert_delivery_mode === 'automatic') {
             $manager = new ImageManager(new Driver());
-            
-            // Read the saved template
             $image = $manager->read(storage_path('app/public/' . $this->evaluation->certificate_template));
 
-            // Calculate exact pixel coordinates from the saved percentages
             $pixelX = $image->width() * ($this->evaluation->cert_pos_x / 100);
             $pixelY = $image->height() * ($this->evaluation->cert_pos_y / 100);
 
-            // Write the text
-            $image->text($this->respondentName, $pixelX, $pixelY, function($font) {
-                $font->file(public_path('fonts/Montserrat-Bold.ttf')); // Ensure you have a font file here
+            // [FIXED] Use local $respondentName variable
+            $image->text($respondentName, $pixelX, $pixelY, function($font) {
+                $font->file(public_path('fonts/Montserrat-Bold.ttf'));
                 $font->size($this->evaluation->cert_font_size);
                 $font->color($this->evaluation->cert_text_color);
                 $font->align('center');
                 $font->valign('middle');
             });
 
-            // Save the image temporarily to your server so the email can attach it
+            // Save temporary image for the email attachment
             $tempPath = storage_path('app/public/temp_cert_' . time() . '.png');
             $image->toPng()->save($tempPath);
 
-            // Prep the Email Content
-            $respondentName = $this->respondentName; // Or auth()->user()->name
             $eventName = $this->evaluation->title;
-            $userEmail = $this->respondentEmail; // Make sure you capture their email!
-
             $subject = $this->evaluation->cert_use_custom_email 
                 ? $this->evaluation->cert_email_subject 
                 : 'Your Certificate of Participation - BU MADYA';
 
+            // [FIXED] Formulate the email body
             if ($this->evaluation->cert_use_custom_email) {
                 $body = str_replace(['[Name]', '[Event]'], [$respondentName, $eventName], $this->evaluation->cert_email_body);
             } else {
                 $body = "Hi {$respondentName},\n\nThank you for participating in {$eventName}. Please find your official certificate attached below.\n\nBest regards,\nBU MADYA";
             }
 
-            // Send the Email
-            Mail::to($userEmail)->send(new CertificateMail($subject, $body, $tempPath));
+            // Send Email
+            if ($respondentEmail) {
+                Mail::to($respondentEmail)->send(new CertificateMail($subject, $body, $tempPath));
+            }
 
-            // Delete the temporary file to save server space
-            unlink($tempPath);
+            // Trigger Instant Download and clean up the file
+            return response()->download($tempPath, 'Certificate-' . str_replace(' ', '-', $respondentName) . '.png')->deleteFileAfterSend(true);
         }
 
-        // [NEW] CLEAR THE DRAFT CACHE UPON SUCCESSFUL SUBMIT
-        cache()->forget($this->getDraftKey());
-
-        $this->isSubmitted = true;
         $this->dispatch('scroll-to-top'); 
     }
 

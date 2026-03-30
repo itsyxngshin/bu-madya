@@ -9,6 +9,9 @@ use Livewire\Attributes\Layout;
 use Illuminate\Support\Facades\Http;
 use Intervention\Image\ImageManager;
 use Intervention\Image\Drivers\Gd\Driver;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
+use App\Mail\CertificateMail;
 use Illuminate\Support\Str;
 
 class EvaluationResults extends Component
@@ -261,15 +264,25 @@ class EvaluationResults extends Component
 
     public function generateManualCertificate($responseId)
     {
-        $response = EvaluationResponse::with('user')->find($responseId);
+        $response = EvaluationResponse::with(['user', 'answers'])->find($responseId);
         
         if (!$response || !$this->evaluation->certificate_template) {
             session()->flash('error', 'Certificate generation failed.');
             return;
         }
 
-        // Figure out the name (fallback to User's account name if anonymous)
-        $respondentName = $response->user->name ?? 'Participant'; 
+        // [FIXED] Extract the Mapped Name
+        $nameAnswer = $response->answers->where('evaluation_question_id', $this->evaluation->cert_name_question_id)->first();
+        $respondentName = $nameAnswer && !empty($nameAnswer->answer_value) 
+            ? $nameAnswer->answer_value 
+            : ($response->user->name ?? 'Participant'); 
+
+        // [FIXED] Extract the Mapped Email
+        $emailAnswer = $response->answers->where('evaluation_question_id', $this->evaluation->cert_email_question_id)->first();
+        $respondentEmail = $emailAnswer && !empty($emailAnswer->answer_value) 
+            ? $emailAnswer->answer_value 
+            : ($response->user->email ?? null);
+
 
         $manager = new ImageManager(new Driver());
         $image = $manager->read(storage_path('app/public/' . $this->evaluation->certificate_template));
@@ -277,6 +290,7 @@ class EvaluationResults extends Component
         $pixelX = $image->width() * ($this->evaluation->cert_pos_x / 100);
         $pixelY = $image->height() * ($this->evaluation->cert_pos_y / 100);
 
+        // [FIXED] Pass the extracted $respondentName into the closure
         $image->text($respondentName, $pixelX, $pixelY, function($font) {
             $font->file(public_path('fonts/Montserrat-Bold.ttf')); 
             $font->size($this->evaluation->cert_font_size);
@@ -290,9 +304,7 @@ class EvaluationResults extends Component
         $image->toPng()->save($tempPath);
 
         // Prep the Email Content
-        $respondentName = $this->respondentName; // Or auth()->user()->name
         $eventName = $this->evaluation->title;
-        $userEmail = $this->respondentEmail; // Make sure you capture their email!
 
         $subject = $this->evaluation->cert_use_custom_email 
             ? $this->evaluation->cert_email_subject 
@@ -304,11 +316,16 @@ class EvaluationResults extends Component
             $body = "Hi {$respondentName},\n\nThank you for participating in {$eventName}. Please find your official certificate attached below.\n\nBest regards,\nBU MADYA";
         }
 
-        // Send the Email
-        Mail::to($userEmail)->send(new CertificateMail($subject, $body, $tempPath));
+        // Send the Email (Only if we successfully extracted an email address)
+        if ($respondentEmail) {
+            Mail::to($respondentEmail)->send(new CertificateMail($subject, $body, $tempPath));
+            session()->flash('success', 'Certificate generated and emailed to ' . $respondentEmail);
+        } else {
+            session()->flash('success', 'Certificate generated and downloaded. (No email mapped for this respondent).');
+        }
 
-        // Delete the temporary file to save server space
-        unlink($tempPath);
+        // Trigger Instant Download
+        return response()->download($tempPath, 'Verified-Certificate-' . str_replace(' ', '-', $respondentName) . '.png')->deleteFileAfterSend(true);
     }
 
     public function render()
@@ -333,4 +350,4 @@ class EvaluationResults extends Component
             'currentResponse' => $currentResponse,
         ])->layout($layoutFile);
     }
-} 
+}

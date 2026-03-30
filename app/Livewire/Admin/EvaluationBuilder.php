@@ -31,21 +31,20 @@ class EvaluationBuilder extends Component
     // Data Containers
     public $questions = [];
     public $available_projects = [];
-
-    // [NEW] Track which question is currently selected
     public $activeQuestionIndex = null;
 
     // Certificate Properties
-    public $newTemplate; // For the file upload
+    public $newTemplate; 
     public $certPosX;
     public $certPosY;
     public $certTextColor;
     public $certFontSize;
     public $certDeliveryMode;
-
     public $certUseCustomEmail = false;
     public $certEmailSubject = '';
     public $certEmailBody = '';
+    public $certNameQuestionId = null;
+    public $certEmailQuestionId = null;
 
     protected function rules()
     {
@@ -56,8 +55,6 @@ class EvaluationBuilder extends Component
             'description' => 'nullable|string',
             'project_id' => 'nullable|integer',
             'is_active' => 'boolean',
-
-            // [FIXED] Explicitly validate all array keys so Livewire doesn't strip them during deletion
             'questions' => 'array',
             'questions.*.id' => 'nullable',
             'questions.*.temp_id' => 'required|string',
@@ -79,16 +76,14 @@ class EvaluationBuilder extends Component
             return;
         }
 
-        // 1. Clone the main evaluation
         $newEval = $this->evaluation->replicate();
         $newEval->title = $this->evaluation->title . ' (Copy)';
-        $newEval->slug = \Illuminate\Support\Str::random(16); // Give it a fresh, unique URL
-        $newEval->is_active = false; // Always set copies to Draft mode
+        $newEval->slug = \Illuminate\Support\Str::random(16); 
+        $newEval->is_active = false; 
         $newEval->save();
 
-        $idMap = []; // To keep track of old_id => new_id for skip logic
+        $idMap = []; 
 
-        // 2. Clone all questions
         foreach ($this->evaluation->questions as $q) {
             $newQ = $q->replicate();
             $newQ->evaluation_id = $newEval->id;
@@ -96,14 +91,12 @@ class EvaluationBuilder extends Component
             $idMap[$q->id] = $newQ->id;
         }
 
-        // 3. Remap the Skip Logic (Jump Targets)
         foreach ($newEval->questions as $newQ) {
             if (in_array($newQ->type, ['radio', 'dropdown', 'page_break']) && is_array($newQ->options)) {
                 $updatedOptions = [];
                 $modified = false;
 
                 foreach ($newQ->options as $opt) {
-                    // If this option has a jump target, replace the old ID with the new ID
                     if (isset($opt['jump']) && is_numeric($opt['jump']) && isset($idMap[$opt['jump']])) {
                         $opt['jump'] = $idMap[$opt['jump']];
                         $modified = true;
@@ -119,9 +112,14 @@ class EvaluationBuilder extends Component
         }
 
         session()->flash('success', 'Form duplicated successfully!');
-
-        // Redirect to the newly created form
-        return redirect()->route('admin.evaluations.edit', $newEval->slug);
+        
+        $roleName = auth()->user()->role?->role_name ?? 'guest';
+        $routePrefix = match($roleName) {
+            'organization'  => 'partner.evaluations',
+            'director'      => 'director.evaluations',
+            default         => 'admin.evaluations',
+        };
+        return redirect()->route($routePrefix . '.edit', $newEval->slug);
     }
 
     public function mount(Evaluation $evaluation = null)
@@ -131,7 +129,6 @@ class EvaluationBuilder extends Component
 
         $this->evaluation = $evaluation ?? new Evaluation();
 
-        // Load existing settings
         $this->certPosX = $evaluation->cert_pos_x ?? 50;
         $this->certPosY = $evaluation->cert_pos_y ?? 50;
         $this->certTextColor = $evaluation->cert_text_color ?? '#1f2937';
@@ -145,10 +142,8 @@ class EvaluationBuilder extends Component
              abort(403, 'You do not have permission to build evaluations.');
         }
 
-        // Check if the user is in the collaborators list
         $isCollaborator = $this->evaluation->exists ? $this->evaluation->collaborators()->where('user_id', $user->id)->exists() : false;
 
-        // Block if not Admin, not Creator, AND not Collaborator
         if ($this->evaluation->exists &&
             $user->role?->role_name !== 'administrator' &&
             $this->evaluation->created_by !== $user->id &&
@@ -174,14 +169,12 @@ class EvaluationBuilder extends Component
                     $arr['description'] = $arr['description'] ?? '';
                     $arr['temp_id'] = (string) Str::uuid();
 
-                    // [NEW] Ensure 'options' is a valid array
                     if (!isset($arr['options']) || !is_array($arr['options'])) {
                         $arr['options'] = is_string($arr['options'] ?? null)
                             ? json_decode($arr['options'], true) ?? []
                             : [];
                     }
 
-                    // [NEW] Fix page_break routing data on load so the dropdown binds correctly
                     if ($arr['type'] === 'page_break' && empty($arr['options'])) {
                         $arr['options'] = [['jump' => '']];
                     }
@@ -189,7 +182,6 @@ class EvaluationBuilder extends Component
                 })
                 ->toArray();
 
-            // Set first question active by default if it exists
             if(count($this->questions) > 0) $this->activeQuestionIndex = 0;
 
         } else {
@@ -200,6 +192,8 @@ class EvaluationBuilder extends Component
         $this->certUseCustomEmail = $evaluation->cert_use_custom_email ?? false;
         $this->certEmailSubject = $evaluation->cert_email_subject ?? 'Your Certificate of Participation';
         $this->certEmailBody = $evaluation->cert_email_body ?? "Hi [Name],\n\nThank you for participating in our event and taking the time to provide your feedback. Please find your e-certificate attached.\n\nBest regards,\nBU MADYA";
+        $this->certNameQuestionId = $evaluation->cert_name_question_id;
+        $this->certEmailQuestionId = $evaluation->cert_email_question_id;
     }
 
     public function saveCertificateSettings()
@@ -217,6 +211,8 @@ class EvaluationBuilder extends Component
         $this->evaluation->cert_use_custom_email = $this->certUseCustomEmail;
         $this->evaluation->cert_email_subject = $this->certEmailSubject;
         $this->evaluation->cert_email_body = $this->certEmailBody;
+        $this->evaluation->cert_name_question_id = $this->certNameQuestionId ?: null;
+        $this->evaluation->cert_email_question_id = $this->certEmailQuestionId ?: null;
         $this->evaluation->save();
 
         session()->flash('success', 'Certificate & Email settings saved!');
@@ -229,7 +225,6 @@ class EvaluationBuilder extends Component
         foreach ($this->questions as $index => $question) {
             if ($question['type'] === 'section') {
                 $sections[] = [
-                    // Use database ID if saved, otherwise use temp_id for brand new sections
                     'id' => !empty($question['id']) ? $question['id'] : $question['temp_id'],
                     'title' => !empty($question['question_text']) ? $question['question_text'] : 'Untitled Section',
                     'order' => $index,
@@ -239,13 +234,11 @@ class EvaluationBuilder extends Component
         return $sections;
     }
 
-    // --- SELECTION LOGIC ---
     public function setActiveQuestion($index)
     {
         $this->activeQuestionIndex = $index;
     }
 
-    // --- DRAG & DROP LOGIC ---
     public function updateQuestionOrder($list)
     {
         foreach ($list as $item) {
@@ -261,12 +254,9 @@ class EvaluationBuilder extends Component
         }
 
         usort($this->questions, fn($a, $b) => $a['order'] <=> $b['order']);
-
-        // Reset active index so we don't accidentally highlight the wrong one after sort
         $this->activeQuestionIndex = null;
     }
 
-    // --- QUESTION MANAGEMENT ---
     public function addQuestion($type)
     {
         $defaultOptions = [];
@@ -291,22 +281,20 @@ class EvaluationBuilder extends Component
             'question_text' => '',
             'description' => '',
             'options' => $defaultOptions,
-            'is_required' => !in_array($type, ['section', 'page_break']), // Auto-false for breaks/sections
+            'is_required' => !in_array($type, ['section', 'page_break']), 
             'order' => 0,
             'image_path' => null,
             'new_image' => null
         ];
 
-        // [NEW] Insert logic: Place it right after the currently active question
         if ($this->activeQuestionIndex !== null && isset($this->questions[$this->activeQuestionIndex])) {
             array_splice($this->questions, $this->activeQuestionIndex + 1, 0, [$newQuestion]);
-            $this->activeQuestionIndex++; // Move focus to the newly created question
+            $this->activeQuestionIndex++; 
         } else {
-            $this->questions[] = $newQuestion; // Fallback: append to end
+            $this->questions[] = $newQuestion; 
             $this->activeQuestionIndex = count($this->questions) - 1;
         }
 
-        // Recalculate order integers
         foreach ($this->questions as $idx => $q) {
             $this->questions[$idx]['order'] = $idx;
         }
@@ -317,12 +305,10 @@ class EvaluationBuilder extends Component
         unset($this->questions[$index]);
         $this->questions = array_values($this->questions);
 
-        // Recalculate order integers
         foreach ($this->questions as $idx => $q) {
             $this->questions[$idx]['order'] = $idx;
         }
 
-        // Adjust active index if we deleted the active one or one above it
         if ($this->activeQuestionIndex === $index) {
             $this->activeQuestionIndex = null;
         } elseif ($this->activeQuestionIndex > $index) {
@@ -330,7 +316,6 @@ class EvaluationBuilder extends Component
         }
     }
 
-    // --- OPTION MANAGEMENT ---
     public function addOption($questionIndex)
     {
         $this->questions[$questionIndex]['options'][] = ['text' => 'New Option', 'jump' => null];
@@ -342,23 +327,6 @@ class EvaluationBuilder extends Component
         $this->questions[$qIndex]['options'] = array_values($this->questions[$qIndex]['options']);
     }
 
-    // --- COMPUTED PROPERTIES ---
-    public function getSectionsProperty()
-    {
-        return collect($this->questions)
-            ->where('type', 'section')
-            ->map(function($q) {
-                return [
-                    'id' => $q['temp_id'],
-                    'title' => $q['question_text'] ?: 'Untitled Section',
-                    'order' => $q['order']
-                ];
-            })
-            ->sortBy('order')
-            ->values();
-    }
-
-    // --- ACTIONS ---
     public function generateRandomSlug()
     {
         $this->slug = Str::random(16);
@@ -417,7 +385,6 @@ class EvaluationBuilder extends Component
                 $imagePath = $q['new_image']->store('question-images', 'public');
             }
 
-            // Fallback for empty strings to prevent db errors
             $qText = empty($q['question_text']) ? ' ' : $q['question_text'];
 
             $dbQ = $this->evaluation->questions()->updateOrCreate(
@@ -437,7 +404,6 @@ class EvaluationBuilder extends Component
         }
 
         foreach ($this->evaluation->questions as $question) {
-            // [UPDATED] Check radio, dropdown, AND page_break for jump targets
             if (in_array($question->type, ['radio', 'dropdown', 'page_break']) && is_array($question->options)) {
                 $updatedOptions = [];
                 $modified = false;
@@ -458,18 +424,23 @@ class EvaluationBuilder extends Component
         }
 
         session()->flash('success', 'Evaluation saved successfully!');
-        return redirect()->route('admin.evaluations.index');
+        
+        // [FIXED] DYNAMIC REDIRECT
+        $roleName = auth()->user()->role?->role_name ?? 'guest';
+        $routePrefix = match($roleName) {
+            'organization'  => 'partner.evaluations',
+            'director'      => 'director.evaluations',
+            default         => 'admin.evaluations',
+        };
+        return redirect()->route($routePrefix . '.index');
     }
 
     public function render()
     {
-        // Determine the correct layout based on the user's role
         $layoutFile = in_array(auth()->user()->role?->role_name, ['administrator', 'organization'])
             ? 'layouts.madya-admin-deck'
             : 'layouts.madya-admin';
 
-        // Pass the layout dynamically
-        return view('livewire.admin.evaluation-builder')
-            ->layout($layoutFile);
+        return view('livewire.admin.evaluation-builder')->layout($layoutFile);
     }
 }

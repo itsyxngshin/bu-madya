@@ -52,6 +52,18 @@
             </button>
         </div>
 
+        {{-- [NEW] Flash Messages for Manual Certificate Generation --}}
+        @if (session()->has('success'))
+            <div class="mb-6 bg-green-50 text-green-700 px-4 py-3 rounded-lg text-xs font-bold border border-green-200 animate-fade-in-up">
+                {{ session('success') }}
+            </div>
+        @endif
+        @if (session()->has('error'))
+            <div class="mb-6 bg-red-50 text-red-700 px-4 py-3 rounded-lg text-xs font-bold border border-red-200 animate-fade-in-up">
+                {{ session('error') }}
+            </div>
+        @endif
+        
         {{-- ========================================== --}}
         {{-- TAB 1: SUMMARY WITH CHARTS --}}
         {{-- ========================================== --}}
@@ -546,7 +558,7 @@
                             Issue Certificate
                         </button>
                     @endif
-                    
+
                     <div class="text-left md:text-right border-t border-gray-700 pt-3 md:border-t-0 md:pt-0 w-full md:w-auto">
                         <span class="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Date & Time</span>
                         <p class="text-sm mt-1">{{ $currentResponse->created_at->format('F d, Y - h:i A') }}</p>
