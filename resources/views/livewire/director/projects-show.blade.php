@@ -222,27 +222,49 @@
             </div>
             @endif
 
-            @if($project->evaluation && $project->evaluation->is_active)
-    
+            {{-- 4. EVALUATION ACTION CARD --}}
+            @if($project->evaluation)
                 <div class="mt-8 bg-gradient-to-br from-red-50 to-orange-50 rounded-[2rem] p-6 border border-orange-100 relative overflow-hidden group">
-                    
-                    {{-- Decoration --}}
                     <div class="absolute -right-6 -top-6 w-24 h-24 bg-orange-100 rounded-full opacity-50 group-hover:scale-150 transition duration-500"></div>
-                    
                     <div class="relative z-10">
-                        <h3 class="font-black text-gray-900 text-lg mb-1">We value your feedback!</h3>
-                        <p class="text-sm text-gray-600 mb-4">
-                            Please take a moment to evaluate the <strong>{{ $project->title }}</strong> project.
+                        <div class="flex items-center justify-between mb-1">
+                            <h3 class="font-black text-gray-900 text-lg">Project Feedback</h3>
+                            @if($project->evaluation->is_active)
+                                <span class="relative flex h-3 w-3">
+                                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                                  <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                                </span>
+                            @endif
+                        </div>
+                        <p class="text-sm text-gray-600 mb-5 mt-2">
+                            @if($project->evaluation->is_active)
+                                Please take a moment to evaluate the <strong>{{ $project->title }}</strong> project.
+                            @else
+                                The evaluation period for this project has officially closed.
+                            @endif
                         </p>
                         
-                        <a href="{{ route('evaluations.show', $project->evaluation->slug) }}?project_id={{ $project->id }}" 
-                        class="inline-flex items-center gap-2 px-5 py-2.5 bg-gray-900 text-white font-bold rounded-xl shadow-lg hover:bg-orange-600 hover:-translate-y-1 transition duration-300 text-xs uppercase tracking-wider">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                            Take Evaluation
-                        </a>
+                        <div class="flex flex-wrap gap-2">
+                            {{-- The Public Form Link --}}
+                            @if($project->evaluation->is_active)
+                                <a href="{{ route('evaluations.show', $project->evaluation->slug) }}?project_id={{ $project->id }}" 
+                                   class="inline-flex items-center gap-2 px-5 py-2.5 bg-gray-900 text-white font-bold rounded-xl shadow-md hover:bg-orange-600 hover:-translate-y-0.5 transition duration-300 text-[10px] md:text-xs uppercase tracking-wider">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                    Take Evaluation
+                                </a>
+                            @endif
+
+                            {{-- The Admin Results Link --}}
+                            @if($canViewEvaluationResults)
+                                <a href="{{ route('admin.evaluations.results', $project->evaluation->slug) }}" 
+                                   class="inline-flex items-center gap-2 px-4 py-2.5 bg-white border-2 border-orange-200 text-orange-700 font-bold rounded-xl shadow-sm hover:bg-orange-50 hover:border-orange-300 hover:-translate-y-0.5 transition duration-300 text-[10px] md:text-xs uppercase tracking-wider">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                                    View Analytics
+                                </a>
+                            @endif
+                        </div>
                     </div>
                 </div>
-
             @endif
 
         </aside>
@@ -273,6 +295,90 @@
                     @endforeach
                 </ul>
             </div>
+            @endif
+            
+            {{-- 4.5 PUBLIC EVALUATION RESULTS --}}
+            @if($project->evaluation && $totalResponses > 0 && $overallRating > 0)
+                <div class="mt-8 md:mt-12 bg-white rounded-2xl md:rounded-[2rem] p-6 md:p-8 border border-gray-100 shadow-xl shadow-gray-200/50">
+                    
+                    <div class="flex items-center gap-3 mb-6 md:mb-8">
+                        <div class="p-1.5 md:p-2 bg-orange-50 rounded-lg text-orange-600">
+                            <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path></svg>
+                        </div>
+                        <div>
+                            <h3 class="font-heading text-lg md:text-xl font-black text-gray-900 leading-tight">Community Feedback</h3>
+                            <p class="text-[10px] md:text-sm text-gray-500 font-medium">Based on {{ $totalResponses }} official evaluations</p>
+                        </div>
+                    </div>
+
+                    {{-- TOP ROW: Massive Score Display Card --}}
+                    <div class="bg-gradient-to-br from-orange-50 to-red-50 border border-orange-100 rounded-2xl p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 mb-10">
+                        <div class="text-center md:text-left">
+                            <h4 class="text-orange-900 font-black text-xl md:text-2xl mb-1">Overall Satisfaction</h4>
+                            <p class="text-sm font-bold text-orange-700 bg-orange-200/50 inline-block px-4 py-1.5 rounded-full border border-orange-200 mt-2 md:mt-1">
+                                {{ $overallRating >= 4.5 ? 'Excellent' : ($overallRating >= 4.0 ? 'Very Good' : ($overallRating >= 3.0 ? 'Good' : 'Needs Improvement')) }} Experience
+                            </p>
+                        </div>
+                        
+                        <div class="flex items-center gap-4 md:gap-6">
+                            <div class="flex flex-col items-end">
+                                <div class="flex text-orange-500 mb-1">
+                                    @for($i=1; $i<=5; $i++)
+                                        <svg class="w-6 h-6 md:w-8 md:h-8 {{ $i <= round($overallRating) ? 'fill-current' : 'text-orange-200' }}" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                                    @endfor
+                                </div>
+                                <span class="text-[10px] font-bold text-orange-600/80 uppercase tracking-widest">Out of 5.0</span>
+                            </div>
+                            <div class="text-6xl md:text-7xl font-black text-orange-600 leading-none drop-shadow-sm">
+                                {{ number_format($overallRating, 1) }}
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- BOTTOM ROW: The Sectioned Evaluation Breakdown --}}
+                    <div>
+                        <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-6 shrink-0">Detailed Evaluation Breakdown</h4>
+                        
+                        <div class="space-y-10 max-h-[400px] md:max-h-[500px] overflow-y-auto custom-scrollbar pr-2 sm:pr-4">
+                            @foreach($groupedLikertResults as $section)
+                                <div>
+                                    {{-- Section Header --}}
+                                    <div class="flex justify-between items-end border-b-2 border-gray-100 pb-2 mb-5">
+                                        <h5 class="text-sm font-black text-gray-800 uppercase tracking-widest">{{ $section['title'] }}</h5>
+                                        <span class="text-xs font-bold text-gray-500 bg-gray-100 px-2 py-1 rounded">Score: {{ number_format($section['section_average'], 1) }}</span>
+                                    </div>
+
+                                    {{-- Section Criteria --}}
+                                    <div class="space-y-4">
+                                        @foreach($section['criteria'] as $criteria)
+                                            @php
+                                                $percent = ($criteria['score'] / 5) * 100;
+                                                if ($criteria['score'] >= 4.5) $barColor = 'bg-green-500';
+                                                elseif ($criteria['score'] >= 3.5) $barColor = 'bg-blue-500';
+                                                elseif ($criteria['score'] >= 2.5) $barColor = 'bg-yellow-400';
+                                                else $barColor = 'bg-red-500';
+                                            @endphp
+                                            <div class="w-full block">
+                                                <div class="flex justify-between items-end gap-4 mb-1.5 w-full">
+                                                    <div class="text-xs sm:text-sm font-bold text-gray-700 leading-snug">
+                                                        {{ html_entity_decode($criteria['label']) }}
+                                                    </div>
+                                                    <div class="text-sm font-black text-gray-900 shrink-0">
+                                                        {{ number_format($criteria['score'], 1) }}
+                                                    </div>
+                                                </div>
+                                                <div class="w-full bg-gray-100 h-2 sm:h-2.5 rounded-full overflow-hidden">
+                                                    <div class="{{ $barColor }} h-full rounded-full transition-all duration-1000 ease-out" style="width: {{ $percent }}%"></div>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+
+                </div>
             @endif
 
             {{-- 5. GALLERY --}}
