@@ -133,43 +133,56 @@
                 </div>
 
                 {{-- ========================================== --}}
-                {{-- [NEW] E-CERTIFICATE BUILDER                --}}
+                {{-- THE E-CERTIFICATE MASTER SUITE --}}
                 {{-- ========================================== --}}
-                <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-200">
+                <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-200 mt-4">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h3 class="text-sm font-black text-gray-900 leading-tight">E-Certificate Builder</h3>
+                            <p class="text-[10px] text-gray-500 leading-tight mt-0.5">Automate completion certificates.</p>
+                        </div>
+                        <div class="p-1.5 bg-orange-50 text-orange-600 rounded-lg">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path></svg>
+                        </div>
+                    </div>
 
                     {{-- Delivery Mode Controls --}}
-                    <div class="mb-5 bg-gray-50 p-3 rounded-lg border border-gray-100">
-                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Delivery Mode</label>
-                        <div class="flex flex-col gap-2">
+                    <div class="mb-5 bg-gray-50 p-3 rounded-xl border border-gray-100">
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">Delivery Mode</label>
+                        <div class="flex flex-col gap-2.5">
                             <label class="flex items-center gap-2 cursor-pointer group">
                                 <input type="radio" wire:model.live="certDeliveryMode" value="automatic" class="text-orange-500 focus:ring-orange-500 w-4 h-4 border-gray-300">
                                 <span class="text-xs font-bold text-gray-700 group-hover:text-gray-900 transition">Automatic (Instant Download)</span>
                             </label>
                             <label class="flex items-center gap-2 cursor-pointer group">
                                 <input type="radio" wire:model.live="certDeliveryMode" value="manual" class="text-orange-500 focus:ring-orange-500 w-4 h-4 border-gray-300">
-                                <span class="text-xs font-bold text-gray-700 group-hover:text-gray-900 transition">Manual (Admin Verification Required)</span>
+                                <span class="text-xs font-bold text-gray-700 group-hover:text-gray-900 transition">Manual (Admin Verification)</span>
                             </label>
                         </div>
                         
-                        {{-- Helper Text using Alpine for smooth transitions --}}
-                        <div class="mt-2 text-[9px] text-gray-500 font-medium italic border-t border-gray-200 pt-2">
-                            <span x-show="$wire.certDeliveryMode === 'automatic'">Participants will download their certificate instantly upon submitting the form.</span>
-                            <span x-show="$wire.certDeliveryMode === 'manual'" x-cloak>Certificates are held back. You must manually generate them from the Results Dashboard after verifying attendance.</span>
+                        <div class="mt-3 text-[9px] text-gray-500 font-medium italic border-t border-gray-200 pt-2 leading-relaxed">
+                            <span x-show="$wire.certDeliveryMode === 'automatic'">Participants download their certificate instantly upon submitting the form.</span>
+                            <span x-show="$wire.certDeliveryMode === 'manual'" x-cloak>Certificates are held back. You must generate them from the Results Dashboard after verifying attendance.</span>
                         </div>
                     </div>
-                    
-                    <h3 class="text-sm font-black text-gray-900 mb-1">E-Certificate Builder</h3>
-                    <p class="text-[10px] text-gray-500 mb-4 leading-tight">Upload a blank template and drag the name placeholder to automate certificates.</p>
 
-                    {{-- File Upload --}}
+                    {{-- File Upload & Canvas Controls --}}
                     <div class="mb-4">
-                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Upload Blank Template</label>
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Blank Template (PNG/JPG)</label>
                         <input type="file" wire:model="newTemplate" class="block w-full text-xs text-gray-500 file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:font-bold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100 transition cursor-pointer">
                         <div wire:loading wire:target="newTemplate" class="text-[10px] text-orange-500 font-bold mt-1 animate-pulse">Uploading template...</div>
                     </div>
 
-                    {{-- Controls --}}
-                    <div class="grid grid-cols-2 gap-3 mb-4">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Font Family</label>
+                            <select wire:model.live="certFontFamily" class="w-full bg-gray-50 border border-gray-200 rounded px-2 py-1.5 text-xs font-bold focus:ring-orange-500 focus:border-orange-500 cursor-pointer">
+                                <option value="Montserrat">Montserrat (Modern)</option>
+                                <option value="Arial">Arial (Standard)</option>
+                                <option value="Times New Roman">Times New Roman (Formal)</option>
+                                <option value="Playfair Display">Playfair Display (Elegant)</option>
+                            </select>
+                        </div>
                         <div>
                             <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Text Color</label>
                             <input type="color" wire:model.live="certTextColor" class="h-8 w-full rounded border-gray-200 cursor-pointer p-0.5">
@@ -186,89 +199,96 @@
                             $imageUrl = $newTemplate ? $newTemplate->temporaryUrl() : asset('storage/' . $evaluation->certificate_template);
                         @endphp
 
-                        <div class="relative w-full rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 overflow-hidden select-none cursor-crosshair"
-                             x-data="{
-                                 isDragging: false,
-                                 x: @entangle('certPosX'),
-                                 y: @entangle('certPosY'),
-                                 startDrag(e) { this.isDragging = true; },
-                                 stopDrag() { this.isDragging = false; },
-                                 onDrag(e) {
-                                     if (!this.isDragging) return;
-                                     let rect = this.$refs.canvas.getBoundingClientRect();
-                                     let calcX = ((e.clientX - rect.left) / rect.width) * 100;
-                                     let calcY = ((e.clientY - rect.top) / rect.height) * 100;
-                                     this.x = Math.max(0, Math.min(100, calcX));
-                                     this.y = Math.max(0, Math.min(100, calcY));
-                                 }
-                             }"
-                             @mousemove.window="onDrag($event)"
-                             @mouseup.window="stopDrag()"
-                             x-ref="canvas">
-                             
-                            <img src="{{ $imageUrl }}" class="w-full h-auto pointer-events-none">
+                        <div x-data="{
+                                expandedCanvas: false,
+                                isDragging: false,
+                                x: @entangle('certPosX'),
+                                y: @entangle('certPosY'),
+                                startDrag(e) { this.isDragging = true; },
+                                stopDrag() { this.isDragging = false; },
+                                onDrag(e, refName) {
+                                    if (!this.isDragging) return;
+                                    let rect = this.$refs[refName].getBoundingClientRect();
+                                    let calcX = ((e.clientX - rect.left) / rect.width) * 100;
+                                    let calcY = ((e.clientY - rect.top) / rect.height) * 100;
+                                    this.x = Math.max(0, Math.min(100, calcX));
+                                    this.y = Math.max(0, Math.min(100, calcY));
+                                }
+                             }">
 
-                            {{-- The Draggable Text Element --}}
-                            <div @mousedown="startDrag($event)"
-                                 class="absolute cursor-move group hover:ring-2 hover:ring-blue-500 rounded transition-shadow"
-                                 :style="`top: ${y}%; left: ${x}%; transform: translate(-50%, -50%);`">
-                                 
-                                 <span class="font-bold border border-dashed border-transparent group-hover:border-blue-400 p-1 whitespace-nowrap block"
-                                       :style="`color: ${$wire.certTextColor}; font-size: ${$wire.certFontSize / 5}px; line-height: 1;`"> {{-- Divided by 5 for mini preview scaling --}}
-                                     [Participant Name]
-                                 </span>
+                            {{-- Mini Preview --}}
+                            <div class="relative w-full rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 overflow-hidden select-none cursor-crosshair group"
+                                 @mousemove.window="onDrag($event, 'miniCanvas')" @mouseup.window="stopDrag()" x-ref="miniCanvas">
+                                <img src="{{ $imageUrl }}" class="w-full h-auto pointer-events-none">
+                                <div @mousedown="startDrag($event)" class="absolute cursor-move group/text rounded" :style="`top: ${y}%; left: ${x}%; transform: translate(-50%, -50%);`">
+                                    <span class="font-bold border border-dashed border-transparent group-hover/text:border-blue-400 p-1 whitespace-nowrap block" :style="`color: ${$wire.certTextColor}; font-size: ${$wire.certFontSize / 5}px; line-height: 1; font-family: ${$wire.certFontFamily};`">[Participant Name]</span>
+                                </div>
+                                <button @click="expandedCanvas = true" type="button" class="absolute top-2 right-2 bg-gray-900/80 text-white p-2 rounded-lg opacity-0 group-hover:opacity-100 transition backdrop-blur-sm shadow text-xs font-bold flex items-center gap-1">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg> Expand to Align
+                                </button>
+                            </div>
+                            <p class="text-center text-[9px] text-gray-400 font-bold mt-2 font-mono uppercase tracking-widest">
+                                X: <span x-text="Math.round($wire.certPosX)"></span>% | Y: <span x-text="Math.round($wire.certPosY)"></span>%
+                            </p>
+
+                            {{-- Fullscreen Canvas Modal --}}
+                            <div x-show="expandedCanvas" style="display: none;" class="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-gray-900/95 backdrop-blur-sm" x-cloak>
+                                <div class="relative bg-gray-100 rounded-xl shadow-2xl flex flex-col overflow-hidden max-w-[95vw] max-h-[95vh]" @click.outside="expandedCanvas = false">
+                                    <div class="flex items-center justify-between p-4 bg-white border-b border-gray-200 z-10 shrink-0 shadow-sm">
+                                        <h3 class="text-sm font-black text-gray-900 uppercase tracking-widest">Align Certificate Name</h3>
+                                        <button @click="expandedCanvas = false" type="button" class="px-4 py-2 bg-red-50 text-red-600 font-bold rounded-lg hover:bg-red-100 text-xs uppercase tracking-widest">Done Aligning</button>
+                                    </div>
+                                    <div class="overflow-auto bg-gray-200 p-8 flex items-center justify-center custom-scrollbar">
+                                        <div class="relative shadow-xl cursor-crosshair inline-block" @mousemove.window="onDrag($event, 'largeCanvas')" @mouseup.window="stopDrag()" x-ref="largeCanvas">
+                                            <img src="{{ $imageUrl }}" class="max-w-[1200px] w-full h-auto pointer-events-none">
+                                            <div @mousedown="startDrag($event)" class="absolute cursor-move rounded" :style="`top: ${y}%; left: ${x}%; transform: translate(-50%, -50%);`">
+                                                <span class="font-bold border-2 border-dashed border-blue-500 bg-white/30 backdrop-blur-sm p-1 whitespace-nowrap block shadow-lg" :style="`color: ${$wire.certTextColor}; font-size: ${$wire.certFontSize / 1.5}px; line-height: 1; font-family: ${$wire.certFontFamily};`">[Participant Name]</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        
-                        <p class="text-center text-[9px] text-gray-400 font-bold mt-2 font-mono uppercase tracking-widest">
-                            X: <span x-text="Math.round($wire.certPosX)"></span>% | Y: <span x-text="Math.round($wire.certPosY)"></span>%
-                        </p>
                     @else
                         <div class="w-full h-32 bg-gray-50 border-2 border-dashed border-gray-200 rounded-lg flex items-center justify-center text-gray-400 font-bold text-[10px] uppercase tracking-widest">
                             No Template
                         </div>
                     @endif
-                    
-                    {{-- ========================================== --}}
-                    {{-- [NEW] DATA MAPPING SECTION                 --}}
-                    {{-- ========================================== --}}
-                    <div class="mb-5 bg-orange-50/50 p-4 rounded-xl border border-orange-100">
-                        <h4 class="text-xs font-bold text-gray-900 mb-3">Field Mapping</h4>
-                        <p class="text-[10px] text-gray-500 mb-4 leading-tight">Tell the system which questions to use to generate and send the certificates.</p>
+
+                    {{-- Data Mapping --}}
+                    <div class="mt-6 mb-5 bg-orange-50/50 p-4 rounded-xl border border-orange-100">
+                        <h4 class="text-xs font-bold text-gray-900 mb-2">Field Mapping</h4>
+                        <p class="text-[10px] text-gray-500 mb-4 leading-tight">Tell the system which form questions capture the user's details.</p>
 
                         <div class="space-y-3">
-                            {{-- Name Mapping --}}
                             <div>
-                                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Which question asks for their Name?</label>
+                                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Name Question</label>
                                 <select wire:model="certNameQuestionId" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs font-bold focus:ring-orange-500 focus:border-orange-500 shadow-sm cursor-pointer">
                                     <option value="">-- Select Question --</option>
-                                    @foreach(collect($questions)->where('type', 'text') as $q)
+                                    @foreach(collect($questions)->whereIn('type', ['text', 'textarea']) as $q)
                                         <option value="{{ $q['id'] ?? $q['temp_id'] }}">{{ \Illuminate\Support\Str::limit($q['question_text'], 40) ?: 'Untitled Question' }}</option>
                                     @endforeach
                                 </select>
                             </div>
 
-                            {{-- Email Mapping --}}
                             <div>
-                                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Which question asks for their Email?</label>
+                                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Email Question</label>
                                 <select wire:model="certEmailQuestionId" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs font-bold focus:ring-orange-500 focus:border-orange-500 shadow-sm cursor-pointer">
                                     <option value="">-- Select Question --</option>
-                                    @foreach(collect($questions)->where('type', 'text') as $q)
+                                    @foreach(collect($questions)->whereIn('type', ['text', 'textarea']) as $q)
                                         <option value="{{ $q['id'] ?? $q['temp_id'] }}">{{ \Illuminate\Support\Str::limit($q['question_text'], 40) ?: 'Untitled Question' }}</option>
                                     @endforeach
                                 </select>
                             </div>
                         </div>
                     </div>
-                    
-                    {{-- ========================================== --}}
-                    {{-- [NEW] EMAIL CUSTOMIZATION SECTION          --}}
-                    {{-- ========================================== --}}
+
+                    {{-- Email Customization --}}
                     <div class="mt-6 border-t border-gray-100 pt-5">
                         <div class="flex items-center justify-between mb-4">
                             <div>
                                 <h4 class="text-xs font-bold text-gray-900">Email Delivery Template</h4>
-                                <p class="text-[10px] text-gray-500 mt-0.5">Customize the email sent to participants with their certificate.</p>
+                                <p class="text-[10px] text-gray-500 mt-0.5">Customize the email sent to participants.</p>
                             </div>
                             <label class="relative inline-flex items-center cursor-pointer">
                                 <input type="checkbox" wire:model.live="certUseCustomEmail" class="sr-only peer">
@@ -286,11 +306,10 @@
                                     <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Email Message</label>
                                     <textarea wire:model="certEmailBody" rows="4" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs focus:ring-orange-500 focus:border-orange-500 resize-y shadow-sm" placeholder="Type your message here..."></textarea>
                                     
-                                    {{-- Dynamic Placeholders Helper --}}
                                     <div class="mt-2 flex items-center gap-2">
                                         <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Smart Tags:</span>
-                                        <span class="text-[9px] font-bold text-orange-600 bg-orange-100 px-1.5 py-0.5 rounded cursor-help" title="Will be replaced by the respondent's name">[Name]</span>
-                                        <span class="text-[9px] font-bold text-orange-600 bg-orange-100 px-1.5 py-0.5 rounded cursor-help" title="Will be replaced by the event/form title">[Event]</span>
+                                        <span class="text-[9px] font-bold text-orange-600 bg-orange-100 px-1.5 py-0.5 rounded cursor-help" title="Will be replaced by respondent's name">[Name]</span>
+                                        <span class="text-[9px] font-bold text-orange-600 bg-orange-100 px-1.5 py-0.5 rounded cursor-help" title="Will be replaced by event title">[Event]</span>
                                     </div>
                                 </div>
                             </div>
@@ -302,13 +321,6 @@
                             </div>
                         @endif
                     </div>
-
-                    @if($newTemplate)
-                        <button wire:click="saveCertificateSettings" class="w-full mt-4 py-2 bg-gray-900 text-white font-bold rounded-lg shadow hover:bg-orange-600 transition text-[10px] uppercase tracking-widest flex items-center justify-center gap-1">
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                            Save Template
-                        </button>
-                    @endif
                 </div>
 
             </div>

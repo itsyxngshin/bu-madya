@@ -63,7 +63,7 @@
                 {{ session('error') }}
             </div>
         @endif
-        
+
         {{-- ========================================== --}}
         {{-- TAB 1: SUMMARY WITH CHARTS --}}
         {{-- ========================================== --}}
@@ -553,7 +553,7 @@
 
                     {{-- ONLY SHOW IF A TEMPLATE EXISTS --}}
                     @if($evaluation->certificate_template)
-                        <button wire:click="generateManualCertificate({{ $currentResponse->id }})" class="px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white text-xs font-bold uppercase tracking-widest rounded-xl transition flex items-center gap-2 shadow-lg">
+                        <button wire:click="openIssueModal({{ $currentResponse->id }})" class="px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white text-xs font-bold uppercase tracking-widest rounded-xl transition flex items-center gap-2 shadow-lg">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                             Issue Certificate
                         </button>
@@ -680,4 +680,66 @@
             </div>
         </div>
     </div>
+    {{-- ========================================== --}}
+    {{-- REVIEW & ISSUE CERTIFICATE MODAL --}}
+    {{-- ========================================== --}}
+    @if($issueModalOpen)
+        <div class="fixed inset-0 z-[120] flex items-center justify-center p-4 sm:p-6 bg-gray-900/80 backdrop-blur-sm transition-opacity" x-data="{ tab: 'details' }">
+            
+            <div class="relative bg-white rounded-3xl shadow-2xl w-full max-w-2xl flex flex-col overflow-hidden transform transition-all">
+                
+                {{-- Modal Header --}}
+                <div class="flex items-center justify-between p-6 border-b border-gray-100 bg-white">
+                    <div>
+                        <h3 class="text-xl font-black text-gray-900 leading-tight">Review & Issue Certificate</h3>
+                        <p class="text-xs font-bold text-gray-400 mt-1">Verify details before sending.</p>
+                    </div>
+                    <button wire:click="closeIssueModal" class="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+
+                {{-- Modal Body --}}
+                <div class="p-6 bg-gray-50 flex-1 overflow-y-auto">
+                    <div class="space-y-4">
+                        {{-- Editable Details --}}
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Participant Name (On Cert)</label>
+                                <input type="text" wire:model="issueName" class="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-bold focus:ring-orange-500 focus:border-orange-500 shadow-sm">
+                                @error('issueName') <span class="text-red-500 text-[10px] font-bold">{{ $message }}</span> @enderror
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Recipient Email</label>
+                                <input type="email" wire:model="issueEmail" class="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-orange-500 focus:border-orange-500 shadow-sm" placeholder="Leave blank to skip email">
+                                @error('issueEmail') <span class="text-red-500 text-[10px] font-bold">{{ $message }}</span> @enderror
+                            </div>
+                        </div>
+
+                        {{-- Editable Email Message --}}
+                        <div class="mt-4 border-t border-gray-200 pt-4">
+                            <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Email Subject</label>
+                            <input type="text" wire:model="issueSubject" class="w-full bg-white border border-gray-200 rounded-xl px-4 py-2 text-sm font-bold focus:ring-orange-500 focus:border-orange-500 shadow-sm mb-3">
+                            
+                            <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Email Body</label>
+                            <textarea wire:model="issueBody" rows="5" class="w-full bg-white border border-gray-200 rounded-xl px-4 py-2 text-sm focus:ring-orange-500 focus:border-orange-500 resize-y shadow-sm"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Modal Footer Actions --}}
+                <div class="p-6 bg-white border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <button wire:click="downloadCertificate" class="w-full sm:w-auto px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl text-xs uppercase tracking-widest transition flex items-center justify-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        Download Only
+                    </button>
+                    
+                    <button wire:click="sendCertificateEmail" class="w-full sm:w-auto px-6 py-3 bg-orange-600 hover:bg-orange-500 text-white font-bold rounded-xl text-xs uppercase tracking-widest shadow-lg transition flex items-center justify-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                        Send Email
+                    </button>
+                </div>
+            </div>
+        </div>
+    @endif
 </div>

@@ -33,13 +33,14 @@ class EvaluationBuilder extends Component
     public $available_projects = [];
     public $activeQuestionIndex = null;
 
-    // Certificate Properties
+    // Certificate & Email Properties
     public $newTemplate; 
-    public $certPosX;
-    public $certPosY;
-    public $certTextColor;
-    public $certFontSize;
-    public $certDeliveryMode;
+    public $certPosX = 50;
+    public $certPosY = 50;
+    public $certTextColor = '#1f2937';
+    public $certFontSize = 80;
+    public $certFontFamily = 'Montserrat';
+    public $certDeliveryMode = 'automatic';
     public $certUseCustomEmail = false;
     public $certEmailSubject = '';
     public $certEmailBody = '';
@@ -66,6 +67,18 @@ class EvaluationBuilder extends Component
             'questions.*.image_path' => 'nullable|string',
             'questions.*.new_image' => 'nullable|image|max:2048',
             'questions.*.options' => 'nullable|array',
+            // Cert Validations
+            'certPosX' => 'numeric',
+            'certPosY' => 'numeric',
+            'certTextColor' => 'string',
+            'certFontSize' => 'integer',
+            'certFontFamily' => 'string',
+            'certDeliveryMode' => 'string',
+            'certUseCustomEmail' => 'boolean',
+            'certEmailSubject' => 'nullable|string',
+            'certEmailBody' => 'nullable|string',
+            'certNameQuestionId' => 'nullable',
+            'certEmailQuestionId' => 'nullable',
         ];
     }
 
@@ -129,12 +142,6 @@ class EvaluationBuilder extends Component
 
         $this->evaluation = $evaluation ?? new Evaluation();
 
-        $this->certPosX = $evaluation->cert_pos_x ?? 50;
-        $this->certPosY = $evaluation->cert_pos_y ?? 50;
-        $this->certTextColor = $evaluation->cert_text_color ?? '#1f2937';
-        $this->certFontSize = $evaluation->cert_font_size ?? 80;
-        $this->certDeliveryMode = $evaluation->cert_delivery_mode ?? 'automatic';
-
         $user = auth()->user();
         $role = $user->role?->role_name;
 
@@ -189,33 +196,18 @@ class EvaluationBuilder extends Component
             $this->questions = [];
         }
 
-        $this->certUseCustomEmail = $evaluation->cert_use_custom_email ?? false;
-        $this->certEmailSubject = $evaluation->cert_email_subject ?? 'Your Certificate of Participation';
-        $this->certEmailBody = $evaluation->cert_email_body ?? "Hi [Name],\n\nThank you for participating in our event and taking the time to provide your feedback. Please find your e-certificate attached.\n\nBest regards,\nBU MADYA";
-        $this->certNameQuestionId = $evaluation->cert_name_question_id;
-        $this->certEmailQuestionId = $evaluation->cert_email_question_id;
-    }
-
-    public function saveCertificateSettings()
-    {
-        if ($this->newTemplate) {
-            $path = $this->newTemplate->store('certificates', 'public');
-            $this->evaluation->certificate_template = $path;
-        }
-
-        $this->evaluation->cert_pos_x = $this->certPosX;
-        $this->evaluation->cert_pos_y = $this->certPosY;
-        $this->evaluation->cert_text_color = $this->certTextColor;
-        $this->evaluation->cert_font_size = $this->certFontSize;
-        $this->evaluation->cert_delivery_mode = $this->certDeliveryMode;
-        $this->evaluation->cert_use_custom_email = $this->certUseCustomEmail;
-        $this->evaluation->cert_email_subject = $this->certEmailSubject;
-        $this->evaluation->cert_email_body = $this->certEmailBody;
-        $this->evaluation->cert_name_question_id = $this->certNameQuestionId ?: null;
-        $this->evaluation->cert_email_question_id = $this->certEmailQuestionId ?: null;
-        $this->evaluation->save();
-
-        session()->flash('success', 'Certificate & Email settings saved!');
+        // Initialize Certificate Settings
+        $this->certPosX = $this->evaluation->cert_pos_x ?? 50;
+        $this->certPosY = $this->evaluation->cert_pos_y ?? 50;
+        $this->certTextColor = $this->evaluation->cert_text_color ?? '#1f2937';
+        $this->certFontSize = $this->evaluation->cert_font_size ?? 80;
+        $this->certFontFamily = $this->evaluation->cert_font_family ?? 'Montserrat';
+        $this->certDeliveryMode = $this->evaluation->cert_delivery_mode ?? 'automatic';
+        $this->certUseCustomEmail = $this->evaluation->cert_use_custom_email ?? false;
+        $this->certEmailSubject = $this->evaluation->cert_email_subject ?? 'Your Certificate of Participation';
+        $this->certEmailBody = $this->evaluation->cert_email_body ?? "Hi [Name],\n\nThank you for participating in our event and taking the time to provide your feedback. Please find your e-certificate attached.\n\nBest regards,\nBU MADYA";
+        $this->certNameQuestionId = $this->evaluation->cert_name_question_id;
+        $this->certEmailQuestionId = $this->evaluation->cert_email_question_id;
     }
 
     #[Computed]
@@ -357,9 +349,15 @@ class EvaluationBuilder extends Component
     {
         $this->validate();
 
+        // 1. Save File Uploads First
         if ($this->header_image) {
             $this->evaluation->header_image = $this->header_image->store('evaluation-headers', 'public');
         }
+        if ($this->newTemplate) {
+            $this->evaluation->certificate_template = $this->newTemplate->store('certificates', 'public');
+        }
+
+        // 2. Save Core Settings
         $this->evaluation->title = $this->title;
         $this->evaluation->slug = !empty($this->slug) ? Str::slug($this->slug) : Str::slug($this->title);
         $this->evaluation->description = $this->description;
@@ -368,8 +366,23 @@ class EvaluationBuilder extends Component
         if (!$this->evaluation->exists) {
             $this->evaluation->created_by = auth()->id();
         }
+
+        // 3. Save Certificate & Email Configurations
+        $this->evaluation->cert_pos_x = $this->certPosX;
+        $this->evaluation->cert_pos_y = $this->certPosY;
+        $this->evaluation->cert_text_color = $this->certTextColor;
+        $this->evaluation->cert_font_size = $this->certFontSize;
+        $this->evaluation->cert_font_family = $this->certFontFamily;
+        $this->evaluation->cert_delivery_mode = $this->certDeliveryMode;
+        $this->evaluation->cert_use_custom_email = $this->certUseCustomEmail;
+        $this->evaluation->cert_email_subject = $this->certEmailSubject;
+        $this->evaluation->cert_email_body = $this->certEmailBody;
+        $this->evaluation->cert_name_question_id = $this->certNameQuestionId ?: null;
+        $this->evaluation->cert_email_question_id = $this->certEmailQuestionId ?: null;
+
         $this->evaluation->save();
 
+        // 4. Save Questions
         $currentIds = collect($this->questions)->pluck('id')->filter()->toArray();
         try {
             $this->evaluation->questions()->whereNotIn('id', $currentIds)->delete();
@@ -403,6 +416,7 @@ class EvaluationBuilder extends Component
             $tempIdMap[$q['temp_id']] = $dbQ->id;
         }
 
+        // 5. Update Skip Logic
         foreach ($this->evaluation->questions as $question) {
             if (in_array($question->type, ['radio', 'dropdown', 'page_break']) && is_array($question->options)) {
                 $updatedOptions = [];
@@ -423,9 +437,9 @@ class EvaluationBuilder extends Component
             }
         }
 
-        session()->flash('success', 'Evaluation saved successfully!');
+        session()->flash('success', 'Evaluation and Certificate Settings saved successfully!');
         
-        // [FIXED] DYNAMIC REDIRECT
+        // Redirect to appropriate dashboard
         $roleName = auth()->user()->role?->role_name ?? 'guest';
         $routePrefix = match($roleName) {
             'organization'  => 'partner.evaluations',

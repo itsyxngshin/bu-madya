@@ -27,6 +27,14 @@ class EvaluationResults extends Component
     public $synthesisReport = null;
     public $aiReport = null;
 
+    // --- NEW: Manual Issue Modal State ---
+    public $issueModalOpen = false;
+    public $issueResponseId = null;
+    public $issueName = '';
+    public $issueEmail = '';
+    public $issueSubject = '';
+    public $issueBody = '';
+
     public function mount(Evaluation $evaluation)
     {
         $user = auth()->user();
@@ -262,70 +270,95 @@ class EvaluationResults extends Component
         }
     }
 
-    public function generateManualCertificate($responseId)
+    public function openIssueModal($responseId)
     {
         $response = EvaluationResponse::with(['user', 'answers'])->find($responseId);
-        
-        if (!$response || !$this->evaluation->certificate_template) {
-            session()->flash('error', 'Certificate generation failed.');
-            return;
+        if (!$response) return;
+
+        $this->issueResponseId = $responseId;
+
+        // Extract Name
+        $nameAnswer = $response->answers->where('evaluation_question_id', $this->evaluation->cert_name_question_id)->first();
+        $this->issueName = $nameAnswer && !empty($nameAnswer->answer_value) ? $nameAnswer->answer_value : ($response->user->name ?? 'Participant'); 
+
+        // Extract Email
+        $emailAnswer = $response->answers->where('evaluation_question_id', $this->evaluation->cert_email_question_id)->first();
+        $this->issueEmail = $emailAnswer && !empty($emailAnswer->answer_value) ? $emailAnswer->answer_value : ($response->user->email ?? '');
+
+        // Pre-fill Subject and Body
+        $this->issueSubject = $this->evaluation->cert_use_custom_email ? $this->evaluation->cert_email_subject : 'Your Certificate of Participation - BU MADYA';
+        $eventName = $this->evaluation->title;
+
+        if ($this->evaluation->cert_use_custom_email) {
+            $this->issueBody = str_replace(['[Name]', '[Event]'], [$this->issueName, $eventName], $this->evaluation->cert_email_body);
+        } else {
+            $this->issueBody = "Hi {$this->issueName},\n\nThank you for participating in {$eventName}. Please find your official certificate attached below.\n\nBest regards,\nBU MADYA";
         }
 
-        // [FIXED] Extract the Mapped Name
-        $nameAnswer = $response->answers->where('evaluation_question_id', $this->evaluation->cert_name_question_id)->first();
-        $respondentName = $nameAnswer && !empty($nameAnswer->answer_value) 
-            ? $nameAnswer->answer_value 
-            : ($response->user->name ?? 'Participant'); 
+        $this->issueModalOpen = true;
+    }
 
-        // [FIXED] Extract the Mapped Email
-        $emailAnswer = $response->answers->where('evaluation_question_id', $this->evaluation->cert_email_question_id)->first();
-        $respondentEmail = $emailAnswer && !empty($emailAnswer->answer_value) 
-            ? $emailAnswer->answer_value 
-            : ($response->user->email ?? null);
+    public function closeIssueModal()
+    {
+        $this->issueModalOpen = false;
+    }
 
-
+    // Helper to generate the Intervention Image
+    private function createCertificateImage()
+    {
         $manager = new ImageManager(new Driver());
         $image = $manager->read(storage_path('app/public/' . $this->evaluation->certificate_template));
-
         $pixelX = $image->width() * ($this->evaluation->cert_pos_x / 100);
         $pixelY = $image->height() * ($this->evaluation->cert_pos_y / 100);
 
-        // [FIXED] Pass the extracted $respondentName into the closure
-        $image->text($respondentName, $pixelX, $pixelY, function($font) {
-            $font->file(public_path('fonts/Montserrat-Bold.ttf')); 
+        // Map the font
+        $fontFamily = $this->evaluation->cert_font_family ?? 'Montserrat';
+        $fontFile = match($fontFamily) {
+            'Arial' => public_path('fonts/Arial.ttf'),
+            'Times New Roman' => public_path('fonts/TimesNewRoman.ttf'),
+            'Playfair Display' => public_path('fonts/PlayfairDisplay-Bold.ttf'),
+            default => public_path('fonts/Montserrat-Bold.ttf'),
+        };
+        if (!file_exists($fontFile)) $fontFile = public_path('fonts/Montserrat-Bold.ttf'); // Fallback
+
+        $image->text($this->issueName, $pixelX, $pixelY, function($font) use ($fontFile) {
+            $font->file($fontFile); 
             $font->size($this->evaluation->cert_font_size);
             $font->color($this->evaluation->cert_text_color);
             $font->align('center');
             $font->valign('middle');
         });
 
-        // Save the image temporarily to your server so the email can attach it
+        return $image;
+    }
+
+    // Action 1: Send Email Only
+    public function sendCertificateEmail()
+    {
+        $this->validate(['issueName' => 'required|string', 'issueEmail' => 'required|email']);
+        
+        $image = $this->createCertificateImage();
         $tempPath = storage_path('app/public/temp_cert_' . time() . '.png');
         $image->toPng()->save($tempPath);
 
-        // Prep the Email Content
-        $eventName = $this->evaluation->title;
+        Mail::to($this->issueEmail)->send(new CertificateMail($this->issueSubject, $this->issueBody, $tempPath));
+        unlink($tempPath);
 
-        $subject = $this->evaluation->cert_use_custom_email 
-            ? $this->evaluation->cert_email_subject 
-            : 'Your Certificate of Participation - BU MADYA';
+        session()->flash('success', 'Certificate emailed successfully to ' . $this->issueEmail);
+        $this->closeIssueModal();
+    }
 
-        if ($this->evaluation->cert_use_custom_email) {
-            $body = str_replace(['[Name]', '[Event]'], [$respondentName, $eventName], $this->evaluation->cert_email_body);
-        } else {
-            $body = "Hi {$respondentName},\n\nThank you for participating in {$eventName}. Please find your official certificate attached below.\n\nBest regards,\nBU MADYA";
-        }
+    // Action 2: Download Only
+    public function downloadCertificate()
+    {
+        $this->validate(['issueName' => 'required|string']);
 
-        // Send the Email (Only if we successfully extracted an email address)
-        if ($respondentEmail) {
-            Mail::to($respondentEmail)->send(new CertificateMail($subject, $body, $tempPath));
-            session()->flash('success', 'Certificate generated and emailed to ' . $respondentEmail);
-        } else {
-            session()->flash('success', 'Certificate generated and downloaded. (No email mapped for this respondent).');
-        }
+        $image = $this->createCertificateImage();
+        $tempPath = storage_path('app/public/temp_cert_' . time() . '.png');
+        $image->toPng()->save($tempPath);
 
-        // Trigger Instant Download
-        return response()->download($tempPath, 'Verified-Certificate-' . str_replace(' ', '-', $respondentName) . '.png')->deleteFileAfterSend(true);
+        $this->closeIssueModal();
+        return response()->download($tempPath, 'Certificate-' . Str::slug($this->issueName) . '.png')->deleteFileAfterSend(true);
     }
 
     public function render()
