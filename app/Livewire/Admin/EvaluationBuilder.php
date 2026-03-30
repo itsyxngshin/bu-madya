@@ -35,6 +35,13 @@ class EvaluationBuilder extends Component
     // [NEW] Track which question is currently selected
     public $activeQuestionIndex = null;
 
+    // Certificate Properties
+    public $newTemplate; // For the file upload
+    public $certPosX;
+    public $certPosY;
+    public $certTextColor;
+    public $certFontSize;
+
     protected function rules()
     {
         return [
@@ -119,6 +126,12 @@ class EvaluationBuilder extends Component
 
         $this->evaluation = $evaluation ?? new Evaluation();
 
+        // Load existing settings
+        $this->certPosX = $evaluation->cert_pos_x ?? 50;
+        $this->certPosY = $evaluation->cert_pos_y ?? 50;
+        $this->certTextColor = $evaluation->cert_text_color ?? '#1f2937';
+        $this->certFontSize = $evaluation->cert_font_size ?? 80;
+
         $user = auth()->user();
         $role = $user->role?->role_name;
 
@@ -177,6 +190,22 @@ class EvaluationBuilder extends Component
             $this->is_active = true;
             $this->questions = [];
         }
+    }
+
+    public function saveCertificateSettings()
+    {
+        if ($this->newTemplate) {
+            $path = $this->newTemplate->store('certificates', 'public');
+            $this->evaluation->certificate_template = $path;
+        }
+
+        $this->evaluation->cert_pos_x = $this->certPosX;
+        $this->evaluation->cert_pos_y = $this->certPosY;
+        $this->evaluation->cert_text_color = $this->certTextColor;
+        $this->evaluation->cert_font_size = $this->certFontSize;
+        $this->evaluation->save();
+
+        session()->flash('success', 'Certificate settings saved!');
     }
 
     #[Computed]

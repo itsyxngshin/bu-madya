@@ -42,7 +42,7 @@
 
             {{-- LEFT: CONFIGURATION --}}
             <div class="xl:col-span-4 space-y-4">
-                <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-200 sticky top-24">
+                <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-200">
                     <h2 class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">Settings</h2>
 
                     {{-- HEADER IMAGE --}}
@@ -131,6 +131,90 @@
                         </label>
                     </div>
                 </div>
+
+                {{-- ========================================== --}}
+                {{-- [NEW] E-CERTIFICATE BUILDER                --}}
+                {{-- ========================================== --}}
+                <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-200">
+                    <h3 class="text-sm font-black text-gray-900 mb-1">E-Certificate Builder</h3>
+                    <p class="text-[10px] text-gray-500 mb-4 leading-tight">Upload a blank template and drag the name placeholder to automate certificates.</p>
+
+                    {{-- File Upload --}}
+                    <div class="mb-4">
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Upload Blank Template</label>
+                        <input type="file" wire:model="newTemplate" class="block w-full text-xs text-gray-500 file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:font-bold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100 transition cursor-pointer">
+                        <div wire:loading wire:target="newTemplate" class="text-[10px] text-orange-500 font-bold mt-1 animate-pulse">Uploading template...</div>
+                    </div>
+
+                    {{-- Controls --}}
+                    <div class="grid grid-cols-2 gap-3 mb-4">
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Text Color</label>
+                            <input type="color" wire:model.live="certTextColor" class="h-8 w-full rounded border-gray-200 cursor-pointer p-0.5">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Size (px)</label>
+                            <input type="number" wire:model.live="certFontSize" class="w-full bg-gray-50 border border-gray-200 rounded px-2 py-1.5 text-xs font-bold focus:ring-orange-500 focus:border-orange-500">
+                        </div>
+                    </div>
+
+                    {{-- INTERACTIVE PREVIEW CANVAS --}}
+                    @if($newTemplate || $evaluation->certificate_template)
+                        @php
+                            $imageUrl = $newTemplate ? $newTemplate->temporaryUrl() : asset('storage/' . $evaluation->certificate_template);
+                        @endphp
+
+                        <div class="relative w-full rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 overflow-hidden select-none cursor-crosshair"
+                             x-data="{
+                                 isDragging: false,
+                                 x: @entangle('certPosX'),
+                                 y: @entangle('certPosY'),
+                                 startDrag(e) { this.isDragging = true; },
+                                 stopDrag() { this.isDragging = false; },
+                                 onDrag(e) {
+                                     if (!this.isDragging) return;
+                                     let rect = this.$refs.canvas.getBoundingClientRect();
+                                     let calcX = ((e.clientX - rect.left) / rect.width) * 100;
+                                     let calcY = ((e.clientY - rect.top) / rect.height) * 100;
+                                     this.x = Math.max(0, Math.min(100, calcX));
+                                     this.y = Math.max(0, Math.min(100, calcY));
+                                 }
+                             }"
+                             @mousemove.window="onDrag($event)"
+                             @mouseup.window="stopDrag()"
+                             x-ref="canvas">
+                             
+                            <img src="{{ $imageUrl }}" class="w-full h-auto pointer-events-none">
+
+                            {{-- The Draggable Text Element --}}
+                            <div @mousedown="startDrag($event)"
+                                 class="absolute cursor-move group hover:ring-2 hover:ring-blue-500 rounded transition-shadow"
+                                 :style="`top: ${y}%; left: ${x}%; transform: translate(-50%, -50%);`">
+                                 
+                                 <span class="font-bold border border-dashed border-transparent group-hover:border-blue-400 p-1 whitespace-nowrap block"
+                                       :style="`color: ${$wire.certTextColor}; font-size: ${$wire.certFontSize / 5}px; line-height: 1;`"> {{-- Divided by 5 for mini preview scaling --}}
+                                     [Participant Name]
+                                 </span>
+                            </div>
+                        </div>
+                        
+                        <p class="text-center text-[9px] text-gray-400 font-bold mt-2 font-mono uppercase tracking-widest">
+                            X: <span x-text="Math.round($wire.certPosX)"></span>% | Y: <span x-text="Math.round($wire.certPosY)"></span>%
+                        </p>
+                    @else
+                        <div class="w-full h-32 bg-gray-50 border-2 border-dashed border-gray-200 rounded-lg flex items-center justify-center text-gray-400 font-bold text-[10px] uppercase tracking-widest">
+                            No Template
+                        </div>
+                    @endif
+
+                    @if($newTemplate)
+                        <button wire:click="saveCertificateSettings" class="w-full mt-4 py-2 bg-gray-900 text-white font-bold rounded-lg shadow hover:bg-orange-600 transition text-[10px] uppercase tracking-widest flex items-center justify-center gap-1">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                            Save Template
+                        </button>
+                    @endif
+                </div>
+
             </div>
 
             {{-- RIGHT: BUILDER --}}
@@ -193,7 +277,6 @@
                                         
                                         <span class="text-[9px] font-black uppercase tracking-widest text-red-600 bg-white px-2 py-0.5 rounded border border-red-200 shadow-sm w-max">Page Break</span>
                                         
-                                        {{-- [NEW] Page Routing Dropdown --}}
                                         @if($isActive)
                                             <div class="flex items-center gap-2">
                                                 <span class="text-[9px] font-bold text-gray-500 uppercase tracking-widest">After page:</span>
@@ -253,7 +336,7 @@
 
                                             <div class="flex flex-col gap-2 flex-1 mr-2">
 
-                                                {{-- The Smart Toolbar (Only visible when question is active) --}}
+                                                {{-- The Smart Toolbar --}}
                                                 <div x-show="$wire.activeQuestionIndex === {{ $index }}" class="flex bg-orange-50 rounded border border-orange-200 w-max overflow-hidden shadow-sm" style="display: none;">
                                                     <button type="button" @click="insert('**', '**')" class="px-2 py-1 hover:bg-orange-100 text-orange-700 font-black text-[10px] transition" title="Bold">B</button>
                                                     <button type="button" @click="insert('*', '*')" class="px-2 py-1 hover:bg-orange-100 text-orange-700 italic text-[10px] transition border-l border-orange-200" title="Italic">I</button>
@@ -281,13 +364,13 @@
 
                                         {{-- MAIN INPUTS --}}
                                         @if(!$isSection)
-                                            {{-- QUESTION TITLE (Notice x-ref and @focus) --}}
+                                            {{-- QUESTION TITLE --}}
                                             <textarea x-ref="qText" @focus="activeField = 'qText'" wire:model="questions.{{ $index }}.question_text" class="w-full text-sm font-bold border-0 border-b border-gray-100 focus:border-orange-500 focus:ring-0 bg-transparent transition mb-2 p-0 resize-y" rows="2" placeholder="Enter question..."></textarea>
 
                                             {{-- Description & Image Toggles --}}
                                             @if($isActive || $question['description'] || $question['image_path'] || (isset($question['new_image']) && $question['new_image']))
 
-                                                {{-- QUESTION DESCRIPTION (Notice x-ref and @focus) --}}
+                                                {{-- QUESTION DESCRIPTION --}}
                                                 <textarea x-ref="qDesc" @focus="activeField = 'qDesc'" wire:model="questions.{{ $index }}.description" class="w-full text-xs text-gray-500 border-0 border-b border-gray-50 focus:border-orange-300 focus:ring-0 bg-transparent transition mb-3 p-0 placeholder-gray-300 resize-y" rows="2" placeholder="Help text / description"></textarea>
 
                                                 <div class="mb-3 flex items-center gap-3">
@@ -305,7 +388,7 @@
                                                 </div>
                                             @endif
                                         @else
-                                            {{-- SECTION DESCRIPTION (Notice x-ref and @focus) --}}
+                                            {{-- SECTION DESCRIPTION --}}
                                             <textarea x-ref="qDesc" @focus="activeField = 'qDesc'" wire:model="questions.{{ $index }}.description" class="w-full text-xs text-gray-500 border-0 bg-transparent placeholder-orange-300/50 focus:ring-0 p-0 resize-y" rows="2" placeholder="Section description..."></textarea>
                                         @endif
 
