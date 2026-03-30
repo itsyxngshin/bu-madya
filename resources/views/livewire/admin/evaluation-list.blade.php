@@ -15,11 +15,17 @@
                     <svg class="w-4 h-4 text-gray-400 absolute left-3 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                 </div>
 
+                {{-- Dynamic Route Prefix based on Role --}}
                 @php
-                    $roleName = auth()->user()->role->role_name;
-                    $createRoute = ($roleName === 'administrator')
-                        ? route('admin.evaluations.create') 
-                        : route('director.evaluations.create'); 
+                    $roleName = auth()->user()->role?->role_name ?? 'guest';
+                    
+                    $routePrefix = match($roleName) {
+                        'organization'  => 'partner.evaluations',
+                        'director'      => 'director.evaluations',
+                        default         => 'admin.evaluations',
+                    };
+                    
+                    $createRoute = route($routePrefix . '.create'); 
                 @endphp
 
                 {{-- Create Button --}}
@@ -83,32 +89,53 @@
                         </div>
                     </div>
 
-                    {{-- Actions Footer (Decluttered) --}}
+                    {{-- Actions Footer --}}
                     <div class="border-t border-gray-100 pt-4 flex items-center justify-between">
                         
-                        <a href="{{ route('admin.evaluations.results', $eval->slug ?? $eval->id) }}" class="text-xs font-bold text-orange-600 hover:text-orange-700 uppercase tracking-wider flex items-center gap-1.5 transition">
+                        {{-- Results Link --}}
+                        <a href="{{ route($routePrefix . '.results', $eval->slug ?? $eval->id) }}" class="text-xs font-bold text-orange-600 hover:text-orange-700 uppercase tracking-wider flex items-center gap-1.5 transition">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
                             Results
                         </a>
 
                         <div class="flex items-center gap-1">
-                            <a href="{{ route('admin.evaluations.edit', $eval->slug ?? $eval->id) }}" class="p-2 text-gray-400 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition" title="Edit Form">
+                            {{-- Edit Link --}}
+                            <a href="{{ route($routePrefix . '.edit', $eval->slug ?? $eval->id) }}" class="p-2 text-gray-400 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition" title="Edit Form">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                             </a>
+                            
+                            {{-- Preview Link --}}
                             <a href="{{ route('evaluations.show', $eval->slug) }}" target="_blank" class="p-2 text-gray-400 hover:text-orange-500 hover:bg-orange-50 rounded-lg transition" title="Preview Live Form">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
                             </a>
+
+                            {{-- [NEW] Copy Link Button (Alpine.js) --}}
+                            <button x-data="{ copied: false }" 
+                                    @click="navigator.clipboard.writeText('{{ route('evaluations.show', $eval->slug) }}').then(() => { copied = true; setTimeout(() => copied = false, 2000); })"
+                                    class="p-2 rounded-lg transition"
+                                    :class="copied ? 'text-green-500 bg-green-50' : 'text-gray-400 hover:text-indigo-600 hover:bg-indigo-50'"
+                                    :title="copied ? 'Copied!' : 'Copy Public Link'">
+                                
+                                {{-- Default Link Icon --}}
+                                <svg x-show="!copied" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+                                
+                                {{-- Checkmark Icon (Shows temporarily when copied) --}}
+                                <svg x-show="copied" x-cloak class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                            </button>
                             
+                            {{-- Share Link --}}
                             @if(auth()->user()->role?->role_name === 'administrator' || $eval->created_by === auth()->id())
                                 <button wire:click="openShareModal({{ $eval->id }})" class="p-2 text-blue-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition" title="Share Access">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>
                                 </button>
                             @endif
 
+                            {{-- Duplicate --}}
                             <button wire:click="duplicate({{ $eval->id }})" class="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition" title="Duplicate Form">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
                             </button>
 
+                            {{-- Delete --}}
                             <button onclick="confirm('Are you sure? This cannot be undone.') || event.stopImmediatePropagation()" wire:click="delete({{ $eval->id }})" class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition" title="Delete Form">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                             </button>
