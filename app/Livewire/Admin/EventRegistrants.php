@@ -8,7 +8,6 @@ use App\Models\Event;
 use App\Models\EventRegistration;
 use Livewire\Attributes\Layout;
 
-#[Layout('layouts.madya-admin-deck')]
 class EventRegistrants extends Component
 {
     use WithPagination;
@@ -110,12 +109,16 @@ class EventRegistrants extends Component
             $query->where('status', $this->statusFilter);
         }
 
+        $layoutFile = in_array(auth()->user()->role?->role_name, ['administrator', 'organization'])
+            ? 'layouts.madya-admin-deck'
+            : 'layouts.madya-admin';
+
         return view('livewire.admin.event-registrants', [
             'registrants' => $query->paginate(20),
             'stats' => [
                 'total' => $this->event->registrations()->count(),
                 'attended' => $this->event->registrations()->where('status', 'Attended')->count(),
             ]
-        ]);
+        ])->layout($layoutFile);
     }
 }

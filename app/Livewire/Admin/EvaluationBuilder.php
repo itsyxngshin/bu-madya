@@ -421,7 +421,7 @@ class EvaluationBuilder extends Component
     public function render()
     {
         // Determine the correct layout based on the user's role
-        $layoutFile = auth()->user()->role?->role_name === 'administrator'
+        $layoutFile = in_array(auth()->user()->role?->role_name, ['administrator', 'organization'])
             ? 'layouts.madya-admin-deck'
             : 'layouts.madya-admin';
 

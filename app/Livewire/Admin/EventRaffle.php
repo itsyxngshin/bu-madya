@@ -6,7 +6,6 @@ use Livewire\Component;
 use App\Models\Event;
 use Livewire\Attributes\Layout;
 
-#[Layout('layouts.madya-admin-deck')]
 class EventRaffle extends Component
 {
     public Event $event;
@@ -70,7 +69,11 @@ class EventRaffle extends Component
 
     public function render()
     {
+
+        $layoutFile = in_array(auth()->user()->role?->role_name, ['administrator', 'organization'])
+            ? 'layouts.madya-admin-deck'
+            : 'layouts.madya-admin';
         // We no longer pass data here; the public property handles it automatically
-        return view('livewire.admin.event-raffle');
+        return view('livewire.admin.event-raffle')->layout($layoutFile);
     }
 }

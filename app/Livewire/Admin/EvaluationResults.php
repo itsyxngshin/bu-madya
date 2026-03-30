@@ -9,7 +9,6 @@ use Livewire\Attributes\Layout;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 
-#[Layout('layouts.madya-admin-deck')]
 class EvaluationResults extends Component
 {
     public Evaluation $evaluation;
@@ -271,7 +270,7 @@ class EvaluationResults extends Component
                 ->first();
         }
 
-        $layoutFile = auth()->user()->role?->role_name === 'administrator'
+        $layoutFile = in_array(auth()->user()->role?->role_name, ['administrator', 'organization'])
             ? 'layouts.madya-admin-deck'
             : 'layouts.madya-admin';
 

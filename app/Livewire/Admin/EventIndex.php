@@ -148,10 +148,14 @@ class EventIndex extends Component
             ->get();
         }
 
+        $layoutFile = in_array(auth()->user()->role?->role_name, ['administrator', 'organization'])
+            ? 'layouts.madya-admin-deck'
+            : 'layouts.madya-admin';
+
         return view('livewire.admin.event-index', [
             'events' => $events,
             'currentCollaborators' => $currentCollaborators,
             'availableOrgs' => $availableOrgs,
-        ]);
+        ])->layout($layoutFile);
     }
 }
