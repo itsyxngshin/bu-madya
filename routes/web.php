@@ -198,6 +198,7 @@ Route::middleware(['auth', 'role:organization'])->prefix('partner')->name('partn
     Route::get('/events/{event:slug}/registrants', EventRegistrants::class)->name('events.registrants');
     Route::get('/events/{event:slug}/raffle', EventRaffle::class)->name('events.raffle');
     Route::get('/welfare', \App\Livewire\Admin\WelfareManager::class)->name('welfare.index');
+    Route::get('/evaluations/create', EvaluationBuilder::class)->name('evaluations.create');
     Route::get('/manage/evaluations/{evaluation}/edit', EvaluationBuilder::class)->name('evaluations.edit');
     Route::get('/manage/evaluations/{evaluation}/results', EvaluationResults::class)->name('evaluations.results');
     Route::get('/manage/evaluations', AdminEvaluationIndex::class)->name('evaluations.index');
