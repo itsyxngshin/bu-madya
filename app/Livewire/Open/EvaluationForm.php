@@ -22,9 +22,9 @@ class EvaluationForm extends Component
 
     public Evaluation $evaluation;
     public $project_id = null;
-    public $answers = []; 
+    public $answers = [];
     public $isSubmitted = false;
-    public $connect_account = false; 
+    public $connect_account = false;
     public $currentPage = 0;
 
     protected $queryString = ['project_id'];
@@ -39,7 +39,7 @@ class EvaluationForm extends Component
     public function mount(Evaluation $evaluation)
     {
         $this->evaluation = $evaluation;
-        
+
         if (request()->has('project_id')) {
             $this->project_id = request()->query('project_id');
         }
@@ -92,7 +92,7 @@ class EvaluationForm extends Component
                         $targetSectionId = ($jumpTarget === 'submit') ? 9999999 : $jumpTarget;
                     }
                 }
-                continue; 
+                continue;
             }
 
             if (!$skipping) {
@@ -100,7 +100,7 @@ class EvaluationForm extends Component
 
                 if (isset($this->answers[$question->id]) && in_array($question->type, ['radio', 'dropdown'])) {
                     $selectedAnswer = $this->answers[$question->id];
-                    
+
                     if (is_array($question->options)) {
                         foreach ($question->options as $opt) {
                             $optText = is_array($opt) ? ($opt['text'] ?? '') : $opt;
@@ -116,7 +116,7 @@ class EvaluationForm extends Component
             }
         }
 
-        return array_values(array_filter($pages)); 
+        return array_values(array_filter($pages));
     }
 
     public function nextPage()
@@ -126,7 +126,7 @@ class EvaluationForm extends Component
 
         if ($this->currentPage < count($pages) - 1) {
             $this->currentPage++;
-            $this->dispatch('scroll-to-top'); 
+            $this->dispatch('scroll-to-top');
         }
     }
 
@@ -167,7 +167,7 @@ class EvaluationForm extends Component
         $visibleQuestionIds = collect($pages)->flatten()->pluck('id')->toArray();
 
         foreach ($this->answers as $questionId => $value) {
-            if (!in_array($questionId, $visibleQuestionIds)) continue; 
+            if (!in_array($questionId, $visibleQuestionIds)) continue;
             if ($value === '' || $value === null || $value === []) continue;
 
             $finalValue = $value;
@@ -187,13 +187,13 @@ class EvaluationForm extends Component
 
         // 2. EXTRACT THE MAPPED DATA
         $nameAnswer = $response->answers()->where('evaluation_question_id', $this->evaluation->cert_name_question_id)->first();
-        $respondentName = $nameAnswer && !empty($nameAnswer->answer_value) 
-            ? $nameAnswer->answer_value 
-            : (auth()->user()->name ?? 'Valued Participant'); 
+        $respondentName = $nameAnswer && !empty($nameAnswer->answer_value)
+            ? $nameAnswer->answer_value
+            : (auth()->user()->name ?? 'Valued Participant');
 
         $emailAnswer = $response->answers()->where('evaluation_question_id', $this->evaluation->cert_email_question_id)->first();
-        $respondentEmail = $emailAnswer && !empty($emailAnswer->answer_value) 
-            ? $emailAnswer->answer_value 
+        $respondentEmail = $emailAnswer && !empty($emailAnswer->answer_value)
+            ? $emailAnswer->answer_value
             : (auth()->user()->email ?? null);
 
         // CLEAR DRAFT CACHE IMMEDIATELY UPON SUCCESSFUL SAVE
@@ -222,8 +222,8 @@ class EvaluationForm extends Component
             $image->toPng()->save($tempPath);
 
             $eventName = $this->evaluation->title;
-            $subject = $this->evaluation->cert_use_custom_email 
-                ? $this->evaluation->cert_email_subject 
+            $subject = $this->evaluation->cert_use_custom_email
+                ? $this->evaluation->cert_email_subject
                 : 'Your Certificate of Participation - BU MADYA';
 
             // [FIXED] Formulate the email body
@@ -238,11 +238,13 @@ class EvaluationForm extends Component
                 Mail::to($respondentEmail)->send(new CertificateMail($subject, $body, $tempPath));
             }
 
+            $response->update(['certificate_issued_at' => now()]);
+
             // Trigger Instant Download and clean up the file
             return response()->download($tempPath, 'Certificate-' . str_replace(' ', '-', $respondentName) . '.png')->deleteFileAfterSend(true);
         }
 
-        $this->dispatch('scroll-to-top'); 
+        $this->dispatch('scroll-to-top');
     }
 
     public function render()

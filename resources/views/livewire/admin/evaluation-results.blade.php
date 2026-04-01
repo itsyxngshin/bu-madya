@@ -551,6 +551,20 @@
                         </h2>
                     </div>
 
+                    @if($evaluation->certificate_template)
+                        @if($currentResponse->certificate_issued_at)
+                            <div class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-green-500/20 border border-green-500/30 text-green-400 text-[9px] uppercase tracking-widest font-bold rounded-lg w-max">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                Issued on {{ \Carbon\Carbon::parse($currentResponse->certificate_issued_at)->format('M d, Y - h:i A') }}
+                            </div>
+                        @else
+                            <div class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-gray-800 border border-gray-700 text-gray-400 text-[9px] uppercase tracking-widest font-bold rounded-lg w-max">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                Pending Issuance
+                            </div>
+                        @endif
+                    @endif
+
                     {{-- ONLY SHOW IF A TEMPLATE EXISTS --}}
                     @if($evaluation->certificate_template)
                         <button wire:click="openIssueModal({{ $currentResponse->id }})" class="px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white text-xs font-bold uppercase tracking-widest rounded-xl transition flex items-center gap-2 shadow-lg">

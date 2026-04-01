@@ -344,6 +344,8 @@ class EvaluationResults extends Component
         Mail::to($this->issueEmail)->send(new CertificateMail($this->issueSubject, $this->issueBody, $tempPath));
         unlink($tempPath);
 
+        EvaluationResponse::where('id', $this->issueResponseId)->update(['certificate_issued_at' => now()]);
+
         session()->flash('success', 'Certificate emailed successfully to ' . $this->issueEmail);
         $this->closeIssueModal();
     }
@@ -356,6 +358,8 @@ class EvaluationResults extends Component
         $image = $this->createCertificateImage();
         $tempPath = storage_path('app/public/temp_cert_' . time() . '.png');
         $image->toPng()->save($tempPath);
+
+        EvaluationResponse::where('id', $this->issueResponseId)->update(['certificate_issued_at' => now()]);
 
         $this->closeIssueModal();
         return response()->download($tempPath, 'Certificate-' . Str::slug($this->issueName) . '.png')->deleteFileAfterSend(true);

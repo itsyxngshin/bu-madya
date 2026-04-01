@@ -1,153 +1,46 @@
 <?php
 
-namespace App\Livewire\Admin;
+namespace App\Livewire\Open;
 
 use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\Evaluation;
+use App\Models\Visitor;
 use Livewire\Attributes\Layout;
-use Livewire\Attributes\Computed;
-use Illuminate\Support\Str;
 
+#[Layout('layouts.madya-template')] // Uses your public layout
 class EvaluationList extends Component
 {
     use WithPagination;
 
-    public $search = '';
-    public $sharingEvaluation = null;
-    public $shareSearch = '';
+    public $visitorCount = 0;
 
     public function mount()
     {
-        $role = auth()->user()->role?->role_name;
-        if (!in_array($role, ['administrator', 'director', 'organization'])) {
-            abort(403, 'You do not have permission to access the Evaluation Manager.');
-        }
-    }
-    public function updatingSearch()
-    {
-        $this->resetPage();
-    }
-
-    public function toggleStatus($id)
-    {
-        $evaluation = Evaluation::find($id);
-        $evaluation->is_active = !$evaluation->is_active;
-        $evaluation->save();
-
-        session()->flash('success', $evaluation->is_active ? 'Form published!' : 'Form unpublished.');
-    }
-
-    // --- SECURE DUPLICATE METHOD ---
-    public function duplicate($id)
-    {
-        $original = Evaluation::with('questions')->find($id);
-
-        if (!$original) return;
-
-        $duplicate = $original->replicate();
-        $duplicate->title = $original->title . ' (Copy)';
-        $duplicate->is_active = false; 
-
-        if (isset($original->slug)) {
-            $duplicate->slug = Str::slug($duplicate->title) . '-' . strtolower(Str::random(5));
-        }
-
-        $duplicate->save();
-
-        foreach ($original->questions as $question) {
-            $newQuestion = $question->replicate();
-            $newQuestion->evaluation_id = $duplicate->id; 
-            $newQuestion->save();
-        }
-
-        session()->flash('success', 'Form and questions duplicated successfully!');
-    }
-
-    public function delete($id)
-    {
-        Evaluation::find($id)->delete();
-        session()->flash('success', 'Evaluation form deleted.');
-    }
-
-    // --- SECURE SHARE MODAL (Fixes 404 Error) ---
-    public function openShareModal($id)
-    {
-        $evaluation = Evaluation::with(['creator', 'collaborators'])->find($id);
-
-        if (!$evaluation) {
-            session()->flash('error', 'Evaluation not found.');
-            return;
-        }
-
-        if (auth()->user()->role?->role_name !== 'administrator' && $evaluation->created_by !== auth()->id()) {
-            session()->flash('error', 'Only the form owner can manage access.');
-            return;
-        }
-
-        $this->sharingEvaluation = $evaluation;
-        $this->shareSearch = '';
-    }
-
-    public function closeShareModal()
-    {
-        $this->sharingEvaluation = null;
-    }
-
-    public function addCollaborator($userId)
-    {
-        if ($this->sharingEvaluation) {
-            $this->sharingEvaluation->collaborators()->syncWithoutDetaching([$userId]);
-            $this->shareSearch = ''; 
-        }
-    }
-
-    public function removeCollaborator($userId)
-    {
-        if ($this->sharingEvaluation) {
-            $this->sharingEvaluation->collaborators()->detach($userId);
-        }
-    }
-
-    #[Computed]
-    public function searchResults()
-    {
-        if (empty($this->shareSearch) || strlen($this->shareSearch) < 2 || !$this->sharingEvaluation) {
-            return [];
-        }
-
-        return \App\Models\User::where('name', 'like', '%' . $this->shareSearch . '%')
-            ->where('id', '!=', auth()->id()) 
-            ->where('id', '!=', $this->sharingEvaluation->created_by) 
-            ->whereNotIn('id', $this->sharingEvaluation->collaborators->pluck('id')) 
-            ->take(5)
-            ->get();
+        // Example: If you are tracking visitors, you can load it here
+        // $this->visitorCount = Visitor::count(); 
     }
 
     public function render()
     {
-        $query = Evaluation::with(['creator', 'collaborators'])->withCount('responses')->latest();
+        // 1. Fetch only ACTIVE evaluations for the public to see
+        // 2. Eager load the project relationship if you use it in the blade
+        $evaluations = Evaluation::with('project')
+            ->where('is_active', true)
+            ->latest()
+            ->paginate(12);
 
-        if (auth()->user()->role?->role_name !== 'administrator') {
-            $query->where(function ($q) {
-                $q->where('created_by', auth()->id())
-                  ->orWhereHas('collaborators', function ($q2) {
-                      $q2->where('user_id', auth()->id());
-                  });
-            });
-        }
+        // Add a dynamic 'status' property for the UI (Pending vs Completed)
+        $evaluations->getCollection()->transform(function ($eval) {
+            // Check if the currently logged-in user has already submitted this form
+            if (auth()->check() && $eval->responses()->where('user_id', auth()->id())->exists()) {
+                $eval->status = 'Completed';
+            } else {
+                $eval->status = 'Pending';
+            }
+            return $eval;
+        });
 
-        if (!empty($this->search)) {
-            $query->where('title', 'like', '%' . $this->search . '%');
-        }
-
-        $evaluations = $query->paginate(10);
-
-        $layoutFile = in_array(auth()->user()->role?->role_name, ['administrator', 'organization'])
-            ? 'layouts.madya-admin-deck'
-            : 'layouts.madya-admin';
-
-        return view('livewire.admin.evaluation-list', compact('evaluations'))
-            ->layout($layoutFile);
+        return view('livewire.open.evaluation-list', compact('evaluations'));
     }
 }
