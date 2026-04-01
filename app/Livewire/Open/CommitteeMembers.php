@@ -15,17 +15,17 @@ class CommitteeMembers extends Component
 
     public function mount(Committee $committee)
     {
-        // Eager load the deeply nested relationships for the Leadership section
+        // Eager load directly to college
         $this->committee = $committee->load([
             'directorAssignments.director',
-            'directorAssignments.user.profile.course.college'
+            'directorAssignments.user.profile.college' 
         ]);
     }
 
     public function render()
     {
-        // Fetch members and eager load their deep relations
-        $members = CommitteeMember::with(['user.profile.course.college'])
+        // Fetch members and eager load directly to college
+        $members = CommitteeMember::with(['user.profile.college'])
             ->where('committee_id', $this->committee->id)
             ->when($this->search, function($query) {
                 $query->whereHas('user', function($q) {
