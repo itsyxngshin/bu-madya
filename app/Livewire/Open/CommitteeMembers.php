@@ -1,7 +1,7 @@
 use App\Models\Committee;
 use App\Models\CommitteeMember;
 
-class CommitteeShow extends Component
+class CommitteeMembers extends Component
 {
     public Committee $committee;
     public $search = '';

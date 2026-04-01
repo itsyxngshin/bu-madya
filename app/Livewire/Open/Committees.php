@@ -7,7 +7,7 @@ use App\Models\Committee;
 use Livewire\Attributes\Layout;
 
 #[Layout('layouts.madya-template')]
-class CommitteesList extends Component
+class Committees extends Component
 {
     // SVG Map to keep the Blade file perfectly clean
     private $iconMap = [
