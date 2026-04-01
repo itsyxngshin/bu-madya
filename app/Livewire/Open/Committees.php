@@ -9,7 +9,6 @@ use Livewire\Attributes\Layout;
 #[Layout('layouts.madya-template')]
 class Committees extends Component
 {
-    // SVG Map to keep the Blade file perfectly clean
     private $iconMap = [
         'Strategic Initiatives & Advocacy' => 'M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z',
         'Education' => 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253',
@@ -32,20 +31,16 @@ class Committees extends Component
 
     public function render()
     {
-        // 1. Fetch all committees with their assigned directors AND the associated user details
-        $allCommittees = Committee::with('directorAssignments.user')->orderBy('name')->get();
+        // 1. Fetch ALL committees ordered alphabetically (or by ID, whichever you prefer)
+        $committees = Committee::with('directorAssignments.user')->orderBy('name')->get();
 
         // 2. Map the SVG icons dynamically
-        $allCommittees->transform(function($committee) {
-            // Check if we have a mapped SVG, otherwise give it a default generic folder icon
+        $committees->transform(function($committee) {
             $committee->svg_path = $this->iconMap[$committee->name] ?? 'M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z';
             return $committee;
         });
 
-        // 3. Group them by type (assuming your DB has a 'type' column that is either 'Advocacy' or 'Standing')
-        $advocacyCommittees = $allCommittees->where('type', 'Advocacy');
-        $standingCommittees = $allCommittees->where('type', 'Standing');
-
-        return view('livewire.open.committees', compact('advocacyCommittees', 'standingCommittees'));
+        // Pass a single, unified collection to the view
+        return view('livewire.open.committees', compact('committees'));
     }
 }
