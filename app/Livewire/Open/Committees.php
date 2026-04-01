@@ -41,6 +41,6 @@ class Committees extends Component
         });
 
         // Pass a single, unified collection to the view
-        return view('livewire.open.committees', compact('committees'));
+        return view('livewire.open.committees', compact('committees')); 
     }
 }

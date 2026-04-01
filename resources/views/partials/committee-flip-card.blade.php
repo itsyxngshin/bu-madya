@@ -75,7 +75,7 @@
         @endif
 
         {{-- Safe Route Generation with Fallback --}}
-        <a href="{{ route('open.committees.show', ['committee' => $committee->slug ?? \Illuminate\Support\Str::slug($committee->name)]) }}" 
+        <a href="{{ route('open.committees.show', ['committee' => $committee->slug]) }}" 
            class="px-4 py-1.5 bg-gray-900 text-white rounded-full text-[10px] font-bold hover:bg-gray-800 transition shadow-sm mt-1" @click.stop>
            View Roster
         </a>
