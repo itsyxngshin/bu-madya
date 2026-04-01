@@ -74,7 +74,8 @@
             <span class="text-[10px] font-bold uppercase tracking-wider mb-2 {{ $textMuted }}">Committee Head</span>
         @endif
 
-        <a href="{{ route('open.committees.show', $committee->slug) }}" 
+        {{-- Safe Route Generation with Fallback --}}
+        <a href="{{ route('open.committees.show', ['committee' => $committee->slug ?? \Illuminate\Support\Str::slug($committee->name)]) }}" 
            class="px-4 py-1.5 bg-gray-900 text-white rounded-full text-[10px] font-bold hover:bg-gray-800 transition shadow-sm mt-1" @click.stop>
            View Roster
         </a>

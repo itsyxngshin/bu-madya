@@ -87,12 +87,12 @@
                         <div class="flex-grow min-w-0">
                             <h5 class="font-bold text-gray-900 text-sm truncate group-hover:text-red-700 transition">{{ $member->user->name }}</h5>
                             <p class="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-1 truncate">
-                                {{ $member->title ?? ($member->user->course ?? 'Member') }}
+                                {{ $member->title ?? ($member->user->profile->course ?? 'Member') }}
                             </p>
                             
                             <div class="flex items-center gap-2 text-[10px] text-gray-500">
                                 <span class="bg-gray-100 px-2 py-0.5 rounded font-bold text-gray-600">{{ $member->user->college ?? 'BU' }}</span>
-                                <span class="truncate border-l border-gray-300 pl-2">{{ $member->user->year_level ?? 'N/A' }}</span>
+                                <span class="truncate border-l border-gray-300 pl-2">{{ $member->user->profile->year_level ?? 'N/A' }}</span>
                             </div>
                         </div>
 
