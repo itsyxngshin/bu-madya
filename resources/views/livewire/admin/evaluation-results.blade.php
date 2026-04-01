@@ -567,9 +567,9 @@
 
                     {{-- ONLY SHOW IF A TEMPLATE EXISTS --}}
                     @if($evaluation->certificate_template)
-                        <button wire:click="openIssueModal({{ $currentResponse->id }})" class="px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white text-xs font-bold uppercase tracking-widest rounded-xl transition flex items-center gap-2 shadow-lg">
+                        <button wire:click="openIssueModal({{ $currentResponse->id }})" class="w-full md:w-auto px-5 py-2.5 {{ $currentResponse->certificate_issued_at ? 'bg-gray-800 hover:bg-gray-700 text-gray-200' : 'bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg shadow-orange-900/20' }} text-xs font-bold uppercase tracking-widest rounded-xl transition flex items-center justify-center gap-2">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                            Issue Certificate
+                            {{ $currentResponse->certificate_issued_at ? 'Re-Issue Cert' : 'Issue Certificate' }}
                         </button>
                     @endif
 

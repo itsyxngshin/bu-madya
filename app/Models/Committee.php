@@ -11,10 +11,11 @@ class Committee extends Model
         'description',
         'slug'
     ];
-    public function directorAssignment()
+    public function directorAssignments()
     {
-        return $this->hasOne(DirectorAssignment::class)
-                    ->where('academic_year_id', AcademicYear::current()->id);
+        return $this->hasMany(DirectorAssignment::class)
+                    ->where('academic_year_id', AcademicYear::current()->id)
+                    ->with('user'); // Eager load the user to prevent N+1 queries!
     }
 
     // Helper: Get the User object directly (The person)

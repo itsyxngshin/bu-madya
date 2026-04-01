@@ -1,6 +1,6 @@
 <div class="font-sans antialiased text-gray-800 bg-gray-50 selection:bg-red-500 selection:text-white">
     
-    {{--  HERO HEADER --}}
+    {{-- HERO HEADER --}}
     <header class="relative h-[350px] flex items-center justify-center text-white overflow-hidden rounded-3xl shadow-xl mx-6 -mt-20 z-10">
         <div class="absolute inset-0 z-0">
             <img src="https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=2070&auto=format&fit=crop" 
@@ -19,7 +19,7 @@
         </div>
     </header>
 
-    {{-- 3. MAIN CONTENT --}}
+    {{-- MAIN CONTENT --}}
     <div class="relative min-h-screen px-6 pb-24 mt-12 max-w-[1800px] w-[95%] mx-auto">
         
         {{-- Background Blobs --}}
@@ -40,60 +40,9 @@
                 </div>
             </div>
 
-            @php
-                $advocacyCommittees = [
-                    [
-                        'name' => 'Strategic Initiatives & Advocacy',
-                        'path' => 'M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z',
-                        'desc' => 'Leads development of programs promoting core advocacies. Conducts issue-based research and coordinates with partners.',
-                        'heads' => [
-                            ['name' => 'Mendones, Lance RJ D.', 'img' => asset('images/MENDONES.jpg')]
-                        ]
-                    ],
-                    [
-                        'name' => 'Education',
-                        'path' => 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253',
-                        'desc' => 'Advocates for inclusive, quality education globally. Promotes education as a fundamental human right.',
-                        'heads' => [] // Vacant
-                    ],
-                    [
-                        'name' => 'Science & Technology',
-                        'path' => 'M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z',
-                        'desc' => 'Initiates campaigns for environmental conservation, climate change adaptation, and healthy technology use.',
-                        'heads' => [
-                            ['name' => 'Buenconsejo, Vincent A.', 'img' => asset('images/BUENCONSEJO.png')]
-                        ]
-                    ],
-                    [
-                        'name' => 'Culture & Heritage',
-                        'path' => 'M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418',
-                        'desc' => 'Promotes love and respect for culture, tolerance among other cultures, and fostering cross-cultural understanding.',
-                        'heads' => [
-                            ['name' => 'Jacob, Khryssdale S.', 'img' => null]
-                        ]
-                    ],
-                    [
-                        'name' => 'Social Sciences',
-                        'path' => 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z',
-                        'desc' => 'Upholds human rights, democracy, equity, and freedom. Leads HIV/AIDS awareness campaigns.',
-                        'heads' => [
-                            ['name' => 'Monacillo, Briella Dee B.', 'img' => null]
-                        ]
-                    ],
-                    [
-                        'name' => 'Digital Strategies & Comm.',
-                        'path' => 'M8.288 15.038a5.25 5.25 0 017.424 0M5.106 11.856c3.807-3.808 9.98-3.808 13.788 0M1.924 8.674c5.565-5.565 14.587-5.565 20.152 0M12.53 18.22l-.53.53-.53-.53a.75.75 0 011.06 0z',
-                        'desc' => 'Facilitates policy formulation in communication. Promotes freedom of expression via digital tech.',
-                        'heads' => [
-                            ['name' => 'Garduque, Dana Zusha A.', 'img' => asset('images/GARDUQUE.jpg')]
-                        ]
-                    ],
-                ];
-            @endphp
-
-            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
                 @foreach($advocacyCommittees as $comm)
-                    <x-committee-card :comm="$comm" />
+                    @include('partials.committee-flip-card', ['committee' => $comm, 'theme' => 'red'])
                 @endforeach
             </div>
         </section>
@@ -110,237 +59,16 @@
                 </div>
             </div>
 
-            @php
-                $standingCommittees = [
-                    [
-                        'name' => 'Planning Committee', 
-                        'path' => 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z', 
-                        'desc' => 'Designs strategic plans, resource allocation, and performance monitoring.',
-                        'heads' => [
-                            ['name' => 'Cabalbag, Adornado Jr B.', 'img' => asset('images/CABALBAG.png')]
-                        ]
-                    ],
-                    [
-                        'name' => 'Internal Affairs', 
-                        'path' => 'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z', 
-                        'desc' => 'Oversees governance, compliance, and integrity.',
-                        'heads' => [
-                             ['name' => 'Gubia, Darwin Isiah L.', 'img' => asset('images/GUBIA.jpg')]
-                        ] 
-                    ],
-                    [
-                        'name' => 'External Affairs', 
-                        'path' => 'M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9', 
-                        'desc' => 'Manages relations, partnerships, and diplomatic engagements.',
-                        'heads' => [
-                            ['name' => 'Oarde, Shiela Jean E.', 'img' => asset('images/OARDE.png')]
-                        ]
-                    ],
-                    [
-                        'name' => 'Secretariat Affairs', 
-                        'path' => 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z', 
-                        'desc' => 'Maintains documentation and manages membership records.',
-                        'heads' => [
-                            ['name' => 'Gerani, Maureen May L.', 'img' => asset('images/GERANI.jpg')]
-                        ]
-                    ],
-                    [
-                        'name' => 'Finance Committee', 
-                        'path' => 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z', 
-                        'desc' => 'Manages all financial transactions, budgeting, and reporting.',
-                        'heads' => [
-                            ['name' => 'Briol, Nicole Kate G.', 'img' => asset('images/BRIOL.jpeg')]
-                        ]
-                    ],
-                    [
-                        'name' => 'Auditing Committee', 
-                        'path' => 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4', 
-                        'desc' => 'Verifies financial reports for accuracy and legality.',
-                        'heads' => [
-                            ['name' => 'Soreda, Kimberly B.', 'img' => asset('images/SOREDA.jpeg')]
-                        ]
-                    ],
-                    [
-                        'name' => 'Marketing & Logistics', 
-                        'path' => 'M13 10V3L4 14h7v7l9-11h-7z', 
-                        'desc' => 'Designs marketing strategies and manages venue/equipment logistics.',
-                        'heads' => [
-                            ['name' => 'Rosare, Rowena M.', 'img' => null]
-                        ]
-                    ],
-                    [
-                        'name' => 'Public Affairs (PR)', 
-                        'path' => 'M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6 3 3 0 000 6zM5 19a2 2 0 01-2-2V6a2 2 0 012-2h12a2 2 0 012 2v1m-6.5 11.971a6.745 6.745 0 01-3.84.529', 
-                        'desc' => 'Manages communication with external audiences via media channels.',
-                        'heads' => [
-                            ['name' => 'Esparrago, Kyle Emil E.', 'img' => asset('images/ESPARRAGO.png')]
-                        ]
-                    ],
-                    [
-                        'name' => 'Multimedia & Creatives', 
-                        'path' => 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z', 
-                        'desc' => 'Creates digital content, graphics, and videos ensuring consistent branding.',
-                        // CO-HEADS Example
-                        'heads' => [
-                            ['name' => 'Lique, Xanthie Luis S.', 'img' => asset('images/LIQUE.png')],
-                            ['name' => 'Nuez, Ma. Allessandra B.', 'img' => null]
-                        ]
-                    ],
-                    [
-                        'name' => 'Ops & Documentation', 
-                        'path' => 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z', 
-                        'desc' => 'Coordinates event logistics and documents activities.',
-                        'heads' => [
-                            ['name' => 'Orbana, Alexa S.', 'img' => asset('images/ORBANA.jpeg')]
-                        ]
-                    ],
-                    [
-                        'name' => 'Technical & Productions', 
-                        'path' => 'M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z', 
-                        'desc' => 'Oversees audio-visual equipment and technical support.',
-                        'heads' => [
-                            ['name' => 'Cotara, Julius Christian C.', 'img' => asset('images/COTARA.jpeg')]
-                        ]
-                    ],
-                ];
-            @endphp
-
             <div class="grid md:grid-cols-2 xl:grid-cols-4 gap-5">
                 @foreach($standingCommittees as $comm)
-                    {{-- REUSABLE CARD COMPONENT LOGIC (Inlined for simplicity) --}}
-                    <div x-data="{ flipped: false }" 
-                         @click="flipped = !flipped"
-                         class="bg-white rounded-xl p-5 shadow-sm border-l-4 border-green-500 hover:border-red-500 hover:shadow-md transition-all duration-300 cursor-pointer h-full relative group min-h-[220px] flex flex-col justify-center">
-                        
-                        {{-- Front Side --}}
-                        <div x-show="!flipped" class="flex flex-col h-full justify-between">
-                            <div>
-                                <div class="flex items-center gap-3 mb-3">
-                                    <div class="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center text-green-600 group-hover:text-red-500 group-hover:bg-red-50 transition-colors shrink-0">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $comm['path'] }}"></path></svg>
-                                    </div>
-                                    <h4 class="font-bold text-gray-800 text-lg leading-tight">{{ $comm['name'] }}</h4>
-                                </div>
-                                <p class="text-xs text-gray-500 leading-relaxed text-justify">
-                                    {{ $comm['desc'] }}
-                                </p>
-                            </div>
-                            <div class="text-[10px] text-gray-300 text-right mt-3 font-bold uppercase group-hover:text-red-400">View Head</div>
-                        </div>
-
-                        {{-- Back Side (Dynamic Logic for Vacant/Single/Co-Heads) --}}
-                        <div x-show="flipped" 
-                             style="display: none;"
-                             x-transition:enter="transition ease-out duration-200"
-                             x-transition:enter-start="opacity-0 translate-y-2"
-                             x-transition:enter-end="opacity-100 translate-y-0"
-                             class="flex flex-col items-center justify-center h-full text-center w-full">
-                            
-                            @if(empty($comm['heads']))
-                                {{-- 1. VACANT --}}
-                                <div class="w-16 h-16 bg-gray-100 rounded-full mb-2 flex items-center justify-center text-gray-300 border border-dashed border-gray-300">
-                                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
-                                </div>
-                                <p class="font-bold text-gray-400 text-xs uppercase tracking-widest">Position Vacant</p>
-
-                            @elseif(count($comm['heads']) > 1)
-                                {{-- 2. CO-HEADS (Grid Layout) --}}
-                                <div class="grid grid-cols-2 gap-2 w-full px-1 mb-2">
-                                    @foreach($comm['heads'] as $head)
-                                    <div class="flex flex-col items-center">
-                                        <div class="w-14 h-14 bg-gray-100 rounded-full mb-1 overflow-hidden border border-green-500 shadow-sm">
-                                            <img src="{{ $head['img'] ?? 'https://ui-avatars.com/api/?name='.urlencode($head['name']).'&background=random&color=fff' }}" 
-                                                 class="w-full h-full object-cover">
-                                        </div>
-                                        <p class="font-bold text-gray-800 text-[9px] leading-tight line-clamp-2 px-1">
-                                            {{ $head['name'] }}
-                                        </p>
-                                    </div>
-                                    @endforeach
-                                </div>
-                                <span class="text-[10px] text-green-600 font-bold uppercase tracking-wider mb-2">Co-Heads</span>
-
-                            @else
-                                {{-- 3. SINGLE HEAD --}}
-                                @php $head = $comm['heads'][0]; @endphp
-                                <div class="w-16 h-16 bg-gray-100 rounded-full mb-2 overflow-hidden border-2 border-green-500 shadow-md">
-                                    <img src="{{ $head['img'] ?? 'https://ui-avatars.com/api/?name='.urlencode($head['name']).'&background=random&color=fff' }}" 
-                                         class="w-full h-full object-cover">
-                                </div>
-                                <p class="font-bold text-gray-800 text-sm leading-tight px-2 mb-1">{{ $head['name'] }}</p>
-                                <span class="text-[10px] text-green-600 font-bold uppercase tracking-wider mb-2">Committee Head</span>
-                            @endif
-
-                            @if(!empty($comm['heads']))
-                                <a href="{{ route('open.committees.show', \Illuminate\Support\Str::slug($comm['name'])) }}" 
-                                class="px-3 py-1 bg-green-600 text-white rounded-full text-[10px] font-bold hover:bg-green-700 transition shadow-sm">
-                                View Members
-                                </a>
-                            @endif
-                        </div>
-
-                    </div>
+                    @include('partials.committee-flip-card', ['committee' => $comm, 'theme' => 'green'])
                 @endforeach
             </div>
         </section>
 
     </div>
-
+    
+    {{-- (Footer remains identical) --}}
     <footer class="bg-gray-900 text-white pt-20 pb-10 border-t-8 border-red-600 relative z-20">
-        <div class="max-w-[1800px] w-[95%] mx-auto px-6 grid md:grid-cols-4 gap-12 mb-16">
-            
-            <div class="col-span-1 md:col-span-2">
-                <div class="flex items-center gap-3 mb-6">
-                    <div class="w-10 h-10 bg-red-600 text-white rounded-full flex items-center justify-center shadow-[0_0_15px_rgba(220,38,38,0.5)]">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z"></path></svg>
-                    </div>
-                    <span class="font-heading font-bold text-2xl tracking-tight">BU MADYA</span>
-                </div>
-                <p class="text-gray-400 leading-relaxed max-w-sm mb-6 text-sm">
-                    The Bicol University - Movement for the Advancement of Youth-led Advocacy is a duly-accredited University Based Organization in Bicol University committed to service and reaching communities through advocacy.
-                </p>
-                
-                {{-- Social Media Links --}}
-                <div class="flex space-x-4">
-                    {{-- Facebook --}}
-                    <a href="https://www.facebook.com/BUMadya" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-blue-600 hover:text-white text-gray-400 transition">
-                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-                    </a>
-
-                    {{-- Instagram --}}
-                    <a href="https://www.instagram.com/bu_madya" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-pink-600 hover:text-white text-gray-400 transition">
-                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
-                    </a>
-
-                    {{-- X (Twitter) --}}
-                    <a href="https://www.x.com/bu_madya" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-black hover:text-white text-gray-400 transition">
-                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-                    </a>
-                </div>
-            </div>
-            
-            <ul class="space-y-3 text-gray-400 text-sm">
-                    <li><a href="{{ route('about') }}" class="hover:text-white hover:translate-x-1 transition inline-block">About BU MADYA</a></li>
-                    <li><a href="{{ route('open.directory') }}" class="hover:text-white hover:translate-x-1 transition inline-block">Our Officers</a></li>
-                    <li><a href="{{ route('transparency.index') }}" class="hover:text-white hover:translate-x-1 transition inline-block">Transparency Board</a></li>
-                    <li class="pt-2 mt-2 border-t border-gray-800">
-                        <a href="{{ route('privacy') }}" class="text-xs text-gray-500 hover:text-white hover:translate-x-1 transition inline-block">Privacy Policy</a>
-                    </li>
-            </ul>
-
-            <div>
-                <h4 class="font-bold text-lg mb-6 text-green-500 uppercase tracking-widest text-xs">Live Stats</h4>
-                <div class="bg-gray-800 p-6 rounded-2xl border border-gray-700 shadow-inner">
-                    <span class="block text-[10px] uppercase tracking-widest text-gray-500 mb-2">Total Visitors</span>
-                    <div class="text-4xl font-mono text-yellow-400 tracking-widest">
-                        {{ str_pad($visitorCount ?? 0, 7, '0', STR_PAD_LEFT) }}
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="border-t border-gray-800 pt-8 text-center text-gray-600 text-xs uppercase tracking-widest">
-            &copy; {{ date('Y') }} BU MADYA. All Rights Reserved.
-        </div>
-    </footer>
-
+        </footer>
 </div>
