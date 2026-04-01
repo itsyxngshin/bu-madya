@@ -91,7 +91,7 @@
                             </p>
                             
                             <div class="flex items-center gap-2 text-[10px] text-gray-500">
-                                <span class="bg-gray-100 px-2 py-0.5 rounded font-bold text-gray-600">{{ $member->user->profile->college ?? 'BU' }}</span>
+                                <span class="bg-gray-100 px-2 py-0.5 rounded font-bold text-gray-600">{{ $member->user->profile->college->name ?? 'BU' }}</span>
                                 <span class="truncate border-l border-gray-300 pl-2">{{ $member->user->profile->year_level ?? 'N/A' }}</span>
                             </div>
                         </div>
