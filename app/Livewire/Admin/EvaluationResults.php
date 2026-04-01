@@ -198,10 +198,10 @@ class EvaluationResults extends Component
         }
 
         $overallAverage = round($overallSum / $totalLikertQuestions, 2);
-        
+
         $highestScore = max($likertData);
         $highestCriteria = array_search($highestScore, $likertData);
-        
+
         $lowestScore = min($likertData);
         $lowestCriteria = array_search($lowestScore, $likertData);
 
@@ -222,7 +222,7 @@ class EvaluationResults extends Component
         }
 
         $eventContext = "Event Name: " . $this->evaluation->title . "\nTotal Responses: " . $this->evaluation->responses()->count() . "\n\n";
-        
+
         $quantitativeData = "Quantitative (Likert) Averages:\n";
         $qualitativeData = "Qualitative (Text) Feedback:\n";
 
@@ -230,7 +230,7 @@ class EvaluationResults extends Component
             if ($question->type === 'likert' && isset($this->stats[$question->id])) {
                 $cleanText = strip_tags(Str::markdown($question->question_text));
                 $quantitativeData .= "- {$cleanText}: " . $this->stats[$question->id]['average'] . " out of 5\n";
-            } 
+            }
             elseif (in_array($question->type, ['text', 'textarea'])) {
                 $cleanText = strip_tags(Str::markdown($question->question_text));
                 $qualitativeData .= "\nQuestion: {$cleanText}\nAnswers:\n";
@@ -242,7 +242,7 @@ class EvaluationResults extends Component
             }
         }
 
-        $prompt = "You are the Chief Data Strategist for BU MADYA, a youth-led advocacy and student organization. Analyze the following post-event evaluation data: \n\n" . 
+        $prompt = "You are the Chief Data Strategist for BU MADYA, a youth-led advocacy and student organization. Analyze the following post-event evaluation data: \n\n" .
                   $eventContext . $quantitativeData . "\n" . $qualitativeData . "\n\n" .
                   "Write a concise, highly readable Executive Summary for the Director-General and Executive Committee. " .
                   "Do NOT use large markdown headers (like # or ##). Use bold text and bullet points for readability. " .
@@ -279,7 +279,7 @@ class EvaluationResults extends Component
 
         // Extract Name
         $nameAnswer = $response->answers->where('evaluation_question_id', $this->evaluation->cert_name_question_id)->first();
-        $this->issueName = $nameAnswer && !empty($nameAnswer->answer_value) ? $nameAnswer->answer_value : ($response->user->name ?? 'Participant'); 
+        $this->issueName = $nameAnswer && !empty($nameAnswer->answer_value) ? $nameAnswer->answer_value : ($response->user->name ?? 'Participant');
 
         // Extract Email
         $emailAnswer = $response->answers->where('evaluation_question_id', $this->evaluation->cert_email_question_id)->first();
@@ -322,7 +322,7 @@ class EvaluationResults extends Component
         if (!file_exists($fontFile)) $fontFile = public_path('fonts/Montserrat-Bold.ttf'); // Fallback
 
         $image->text($this->issueName, $pixelX, $pixelY, function($font) use ($fontFile) {
-            $font->file($fontFile); 
+            $font->file($fontFile);
             $font->size($this->evaluation->cert_font_size);
             $font->color($this->evaluation->cert_text_color);
             $font->align('center');
@@ -336,7 +336,7 @@ class EvaluationResults extends Component
     public function sendCertificateEmail()
     {
         $this->validate(['issueName' => 'required|string', 'issueEmail' => 'required|email']);
-        
+
         $image = $this->createCertificateImage();
         $tempPath = storage_path('app/public/temp_cert_' . time() . '.png');
         $image->toPng()->save($tempPath);

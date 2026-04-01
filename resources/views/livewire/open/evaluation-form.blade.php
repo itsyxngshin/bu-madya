@@ -84,14 +84,15 @@
             @if($currentPage === 0)
                 <div class="bg-white rounded-2xl shadow-xl shadow-gray-200/50 border border-white overflow-hidden relative mb-8">
                     @if($evaluation->header_image)
-                        {{-- [FIXED] Taller header image to prevent overlap issues --}}
-                        <div class="h-40 md:h-56 w-full relative border-b border-gray-100">
-                            <img src="{{ asset('storage/'.$evaluation->header_image) }}" class="w-full h-full object-cover">
+                        {{-- Adaptive height header image --}}
+                        <div class="w-full relative border-b border-gray-100">
+                            <img src="{{ asset('storage/'.$evaluation->header_image) }}" class="w-full h-auto block">
                         </div>
                     @else
                         {{-- Fallback Header (Themed) --}}
                         <div class="h-6 w-full relative overflow-hidden bg-[var(--theme)]"></div>
                     @endif
+
 
                     {{-- [FIXED] Removed negative margin so text sits neatly below the image --}}
                     <div class="p-6 md:p-8">

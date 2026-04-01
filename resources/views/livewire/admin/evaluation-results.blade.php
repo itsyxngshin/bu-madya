@@ -1,8 +1,8 @@
 <div class="min-h-screen bg-gray-50 p-4 md:p-6 font-sans text-gray-900 pb-20"
-     x-data="{ 
-        previewOpen: false, 
-        previewUrl: '', 
-        previewType: '', 
+     x-data="{
+        previewOpen: false,
+        previewUrl: '',
+        previewType: '',
         openPreview(url) {
             this.previewUrl = url;
             let ext = url.split('.').pop().toLowerCase();
@@ -16,11 +16,11 @@
             this.previewOpen = true;
         }
      }">
-    
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
+
     <div class="max-w-5xl mx-auto">
-        
+
         {{-- HEADER --}}
         <div class="mb-6">
             <a href="{{ route('admin.evaluations.index') }}" class="flex items-center gap-2 text-xs font-bold text-gray-400 hover:text-orange-600 mb-2 uppercase tracking-widest transition">
@@ -68,7 +68,7 @@
         {{-- TAB 1: SUMMARY WITH CHARTS --}}
         {{-- ========================================== --}}
         @if($tab === 'summary')
-            
+
             {{-- GEMINI AI INSIGHTS ENGINE --}}
             <div class="bg-gradient-to-br from-purple-50 to-indigo-50 border border-purple-100 rounded-2xl p-6 shadow-sm mb-8 relative overflow-hidden animate-fade-in-up">
                 <div class="absolute -right-6 -top-6 text-purple-500/10">
@@ -83,7 +83,7 @@
                             </h3>
                             <p class="text-xs text-purple-700 font-medium mt-1">Deep analysis of quantitative scores and qualitative written feedback.</p>
                         </div>
-                        
+
                         @if(!$aiReport)
                             <button wire:click="generateAIInsights" wire:loading.attr="disabled" class="shrink-0 px-5 py-2.5 bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold uppercase tracking-widest rounded-xl shadow-md transition flex items-center gap-2 group">
                                 <span wire:loading.remove wire:target="generateAIInsights">
@@ -119,7 +119,7 @@
                     @endif
                 </div>
             </div>
-            
+
             {{-- ALGORITHMIC SYNTHESIS BOX --}}
             @if($synthesisReport)
                 <div class="bg-gradient-to-br from-indigo-50 to-blue-50 border border-indigo-100 rounded-2xl p-6 shadow-sm mb-8 relative overflow-hidden animate-fade-in-up">
@@ -137,13 +137,13 @@
                     </div>
                 </div>
             @endif
-            
+
             {{-- LIKERT HTML TABLE WITH SUBTOTALS --}}
             @php
                 $likertQuestions = $evaluation->questions->where('type', 'likert')->sortBy('order');
                 $firstLikert = $likertQuestions->first();
                 $likertOptions = $firstLikert ? collect($firstLikert->options)->map(fn($opt) => is_array($opt) ? ($opt['text'] ?? '') : $opt)->toArray() : [];
-                
+
                 $groupedSections = [];
                 $currentSectionTitle = 'General Evaluation';
                 $currentSectionIndex = 0;
@@ -168,7 +168,7 @@
                         ];
                     } elseif ($question->type === 'likert') {
                         $groupedSections[$currentSectionIndex]['questions'][] = $question;
-                        
+
                         $stat = $stats[$question->id] ?? null;
                         if ($stat) {
                             foreach($likertOptions as $idx => $lbl) {
@@ -212,17 +212,17 @@
                                             {{ $section['title'] }}
                                         </td>
                                     </tr>
-                                    
+
                                     @foreach($section['questions'] as $question)
                                         @php
                                             $stat = $stats[$question->id] ?? null;
                                             $avg = $stat['average'] ?? 0;
-                                            
+
                                             if ($avg >= 4.5) $colorClass = 'bg-green-50 text-green-700 border-green-200';
                                             elseif ($avg >= 3.5) $colorClass = 'bg-blue-50 text-blue-700 border-blue-200';
                                             elseif ($avg >= 2.5) $colorClass = 'bg-yellow-50 text-yellow-700 border-yellow-200';
                                             else $colorClass = 'bg-red-50 text-red-700 border-red-200';
-                                            
+
                                             $qText = strip_tags(\Illuminate\Support\Str::markdown($question->question_text ?? ''));
                                         @endphp
                                         <tr class="hover:bg-gray-50 transition-colors">
@@ -274,15 +274,15 @@
             {{-- INDIVIDUAL QUESTION CHARTS --}}
             <div class="space-y-6">
                 @foreach($evaluation->questions->sortBy('order') as $index => $question)
-                    
+
                     @if($question->type === 'page_break') @continue @endif
 
-                    @php 
-                        $stat = $stats[$question->id] ?? null; 
+                    @php
+                        $stat = $stats[$question->id] ?? null;
                         $chartLabels = [];
                         $chartData = [];
                         $chartColors = [];
-                        
+
                         if($stat && isset($stat['count']) && $stat['count'] > 0 && is_array($question->options)) {
                             $colors = ['#f97316', '#3b82f6', '#10b981', '#ef4444', '#8b5cf6', '#eab308', '#ec4899', '#06b6d4'];
                             $colorIndex = 0;
@@ -290,7 +290,7 @@
                             foreach($question->options as $optIndex => $opt) {
                                 $lbl = is_array($opt) ? ($opt['text'] ?? '') : $opt;
                                 $chartLabels[] = \Illuminate\Support\Str::limit($lbl, 25);
-                                
+
                                 if ($question->type === 'likert') {
                                     $chartData[] = $stat['breakdown'][$optIndex] ?? 0;
                                     $chartColors[] = '#f97316';
@@ -313,7 +313,7 @@
                                 {!! \Illuminate\Support\Str::markdown($question->question_text ?? '') !!}
                             </div>
                         </div>
-                    
+
                     @elseif($question->type === 'likert')
                         <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
                             <div class="font-bold text-gray-900 mb-6 prose prose-sm max-w-none prose-p:mt-0 prose-p:mb-2 prose-a:text-orange-600">
@@ -377,7 +377,7 @@
                                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
                                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4">
                                         @foreach($question->options as $option)
-                                            @php 
+                                            @php
                                                 $label = is_array($option) ? ($option['text'] ?? '') : $option;
                                                 $count = $stat['breakdown'][$label] ?? 0;
                                                 $percent = $stat['count'] > 0 ? ($count / $stat['count']) * 100 : 0;
@@ -435,7 +435,7 @@
                                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
                                     <div class="space-y-4">
                                         @foreach($question->options as $option)
-                                            @php 
+                                            @php
                                                 $label = is_array($option) ? ($option['text'] ?? '') : $option;
                                                 $count = $stat['breakdown'][$label] ?? 0;
                                                 $percent = $stat['count'] > 0 ? ($count / $stat['count']) * 100 : 0;
@@ -517,7 +517,7 @@
         {{-- TAB 2: INDIVIDUAL RESPONSES --}}
         {{-- ========================================== --}}
         @elseif($tab === 'individual')
-            
+
             @if($totalResponsesCount === 0)
                 <div class="bg-white rounded-2xl p-12 text-center border border-gray-200">
                     <p class="text-gray-400 font-bold">No responses have been submitted yet.</p>
@@ -583,7 +583,7 @@
                                 <div class="font-bold text-gray-900 mb-4 prose prose-sm max-w-none prose-p:mt-0 prose-p:mb-2 prose-a:text-orange-600">
                                     {!! \Illuminate\Support\Str::markdown($question->question_text ?? '') !!}
                                 </div>
-                                
+
                                 @if(!$val)
                                     <span class="text-xs text-gray-400 italic">No answer provided</span>
                                 @elseif($question->type === 'file')
@@ -617,14 +617,14 @@
     {{-- ALPINE.JS FILE PREVIEW MODAL               --}}
     {{-- ========================================== --}}
     <div x-show="previewOpen" style="display: none;" class="fixed inset-0 z-[100] flex items-center justify-center p-2 sm:p-6" x-cloak>
-        <div x-show="previewOpen" 
+        <div x-show="previewOpen"
              x-transition:enter="transition ease-out duration-300"
              x-transition:enter-start="opacity-0"
              x-transition:enter-end="opacity-100"
              x-transition:leave="transition ease-in duration-200"
              x-transition:leave-start="opacity-100"
              x-transition:leave-end="opacity-0"
-             class="fixed inset-0 bg-gray-900/90 backdrop-blur-sm" 
+             class="fixed inset-0 bg-gray-900/90 backdrop-blur-sm"
              @click="previewOpen = false"></div>
 
         <div x-show="previewOpen"
@@ -655,7 +655,7 @@
 
             <div class="overflow-hidden bg-gray-100/80 flex items-center justify-center p-2 sm:p-4 relative"
                  :class="previewType === 'pdf' ? 'flex-1' : ''">
-                
+
                 <template x-if="previewType === 'image'">
                     <img :src="previewUrl" class="max-w-full max-h-[80vh] w-auto h-auto object-contain rounded-lg drop-shadow-sm">
                 </template>
@@ -685,9 +685,9 @@
     {{-- ========================================== --}}
     @if($issueModalOpen)
         <div class="fixed inset-0 z-[120] flex items-center justify-center p-4 sm:p-6 bg-gray-900/80 backdrop-blur-sm transition-opacity" x-data="{ tab: 'details' }">
-            
+
             <div class="relative bg-white rounded-3xl shadow-2xl w-full max-w-2xl flex flex-col overflow-hidden transform transition-all">
-                
+
                 {{-- Modal Header --}}
                 <div class="flex items-center justify-between p-6 border-b border-gray-100 bg-white">
                     <div>
@@ -720,7 +720,7 @@
                         <div class="mt-4 border-t border-gray-200 pt-4">
                             <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Email Subject</label>
                             <input type="text" wire:model="issueSubject" class="w-full bg-white border border-gray-200 rounded-xl px-4 py-2 text-sm font-bold focus:ring-orange-500 focus:border-orange-500 shadow-sm mb-3">
-                            
+
                             <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Email Body</label>
                             <textarea wire:model="issueBody" rows="5" class="w-full bg-white border border-gray-200 rounded-xl px-4 py-2 text-sm focus:ring-orange-500 focus:border-orange-500 resize-y shadow-sm"></textarea>
                         </div>
@@ -733,7 +733,7 @@
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                         Download Only
                     </button>
-                    
+
                     <button wire:click="sendCertificateEmail" class="w-full sm:w-auto px-6 py-3 bg-orange-600 hover:bg-orange-500 text-white font-bold rounded-xl text-xs uppercase tracking-widest shadow-lg transition flex items-center justify-center gap-2">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
                         Send Email
