@@ -84,15 +84,34 @@
                         </div>
 
                         {{-- Info --}}
-                        <div class="flex-grow min-w-0">
-                            <h5 class="font-bold text-gray-900 text-sm truncate group-hover:text-red-700 transition">{{ $member->user->name }}</h5>
-                            <p class="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-1 truncate">
-                                {{ $member->title ?? ($member->user->profile->course ?? 'Member') }}
-                            </p>
+                        <div class="flex-grow min-w-0 flex flex-col justify-between">
+                            <div>
+                                <h5 class="font-bold text-gray-900 text-sm truncate group-hover:text-red-700 transition">
+                                    {{ $member->user?->name ?? 'Unknown Member' }}
+                                </h5>
+                                <p class="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-2 truncate">
+                                    {{ $member->title ?? 'Committee Member' }}
+                                </p>
+                            </div>
                             
-                            <div class="flex items-center gap-2 text-[10px] text-gray-500">
-                                <span class="bg-gray-100 px-2 py-0.5 rounded font-bold text-gray-600">{{ $member->user->profile->college->name ?? 'BU' }}</span>
-                                <span class="truncate border-l border-gray-300 pl-2">{{ $member->user->profile->year_level ?? 'N/A' }}</span>
+                            {{-- Academic Info (College, Course, Year) --}}
+                            <div class="flex items-start gap-2 text-[10px] text-gray-500 border-t border-gray-100 pt-2 mt-auto">
+                                
+                                {{-- Left Side: College & Course (Can wrap/truncate) --}}
+                                <div class="flex-1 min-w-0">
+                                    <p class="font-bold text-gray-600 line-clamp-2 leading-tight" title="{{ $member->user?->profile?->college?->name }}">
+                                        {{ $member->user?->profile?->college?->name ?? 'Bicol University' }}
+                                    </p>
+                                    <p class="truncate text-gray-400 mt-0.5" title="{{ $member->user?->profile?->course }}">
+                                        {{ $member->user?->profile?->course ?? 'N/A' }}
+                                    </p>
+                                </div>
+
+                                {{-- Right Side: Year Level Badge (Protected, will never shrink) --}}
+                                <div class="shrink-0 bg-gray-100 border border-gray-200 px-2 py-1 rounded-md font-black text-gray-700 text-center shadow-sm">
+                                    {{ $member->user?->profile?->year_level ?? 'N/A' }}
+                                </div>
+                                
                             </div>
                         </div>
 
