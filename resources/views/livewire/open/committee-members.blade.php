@@ -79,7 +79,7 @@
                         
                         {{-- Avatar --}}
                         <div class="w-12 h-12 rounded-xl bg-gray-100 overflow-hidden shrink-0 group-hover:ring-2 ring-red-100 transition">
-                            <img src="{{ $member->user->profile_photo_path ? asset('storage/'.$member->user->profile_photo_path) : 'https://ui-avatars.com/api/?name='.urlencode($member->user->name).'&background=random&color=fff&size=128' }}" 
+                            <img src="{{ $member->user->profile_photo_path ? asset($member->user->profile_photo_path) : 'https://ui-avatars.com/api/?name='.urlencode($member->user->name).'&background=random&color=fff&size=128' }}" 
                                  class="w-full h-full object-cover">
                         </div>
 
