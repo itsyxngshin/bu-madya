@@ -237,7 +237,7 @@ Route::get('/', LandingPage::class)->name('open.home');
 Route::get('/about', About::class)->name('about');
 Route::get('/directory', Directory::class)->name('open.directory');
 Route::get('/committees', Committees::class)->name('open.committees');
-Route::get('/committee-members', CommitteeMembers::class)->name('open.committees.show');
+Route::get('/committees/{committee:slug}', CommitteeMembers::class)->name('open.committees.show');
 Route::get('/news', NewsIndex::class)->name('news.index');
 Route::get('/news/{slug}', NewsShow::class)->name('news.show');
 Route::get('/projects', ProjectsIndex::class)->name('projects.index');

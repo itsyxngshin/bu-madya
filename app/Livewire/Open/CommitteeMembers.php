@@ -1,3 +1,8 @@
+<?php
+
+namespace App\Livewire\Open;
+
+use Livewire\Component;
 use App\Models\Committee;
 use App\Models\CommitteeMember;
 
