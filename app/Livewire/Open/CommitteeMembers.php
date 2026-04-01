@@ -5,7 +5,9 @@ namespace App\Livewire\Open;
 use Livewire\Component;
 use App\Models\Committee;
 use App\Models\CommitteeMember;
+use Livewire\Attributes\Layout;
 
+#[Layout('layouts.madya-template')]
 class CommitteeMembers extends Component
 {
     public Committee $committee;
@@ -13,14 +15,17 @@ class CommitteeMembers extends Component
 
     public function mount(Committee $committee)
     {
-        // Eager load the leadership to prevent N+1 queries in the Hero
-        $this->committee = $committee->load('directorAssignments.user', 'directorAssignments.director');
+        // Eager load the deeply nested relationships for the Leadership section
+        $this->committee = $committee->load([
+            'directorAssignments.director',
+            'directorAssignments.user.profile.course.college'
+        ]);
     }
 
     public function render()
     {
-        // Fetch members and filter by the related User's name if a search exists
-        $members = CommitteeMember::with('user')
+        // Fetch members and eager load their deep relations
+        $members = CommitteeMember::with(['user.profile.course.college'])
             ->where('committee_id', $this->committee->id)
             ->when($this->search, function($query) {
                 $query->whereHas('user', function($q) {
@@ -29,7 +34,6 @@ class CommitteeMembers extends Component
             })
             ->get();
 
-        return view('livewire.open.committee-members', compact('members'))
-            ->layout('layouts.madya-template');
+        return view('livewire.open.committee-members', compact('members'));
     }
 }
