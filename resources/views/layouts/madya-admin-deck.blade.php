@@ -124,7 +124,7 @@
                                     <p class="text-sm font-bold text-gray-900 truncate">{{ Auth::user()->email }}</p>
                                 </div>
 
-                                <a href="{{ route('profile.public') }}" class="block px-4 py-2.5 text-xs font-bold uppercase tracking-wide text-gray-700 hover:bg-gray-50 transition">
+                                <a href="{{ route('profile.public', Auth::user()->username) }}" class="block px-4 py-2.5 text-xs font-bold uppercase tracking-wide text-gray-700 hover:bg-gray-50 transition">
                                     Profile Settings
                                 </a>
 
