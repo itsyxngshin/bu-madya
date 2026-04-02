@@ -47,7 +47,7 @@ class EvaluationList extends Component
 
         $duplicate = $original->replicate();
         $duplicate->title = $original->title . ' (Copy)';
-        $duplicate->is_active = false; 
+        $duplicate->is_active = false;
 
         if (isset($original->slug)) {
             $duplicate->slug = Str::slug($duplicate->title) . '-' . strtolower(Str::random(5));
@@ -57,7 +57,7 @@ class EvaluationList extends Component
 
         foreach ($original->questions as $question) {
             $newQuestion = $question->replicate();
-            $newQuestion->evaluation_id = $duplicate->id; 
+            $newQuestion->evaluation_id = $duplicate->id;
             $newQuestion->save();
         }
 
@@ -98,7 +98,7 @@ class EvaluationList extends Component
     {
         if ($this->sharingEvaluation) {
             $this->sharingEvaluation->collaborators()->syncWithoutDetaching([$userId]);
-            $this->shareSearch = ''; 
+            $this->shareSearch = '';
         }
     }
 
@@ -117,9 +117,9 @@ class EvaluationList extends Component
         }
 
         return \App\Models\User::where('name', 'like', '%' . $this->shareSearch . '%')
-            ->where('id', '!=', auth()->id()) 
-            ->where('id', '!=', $this->sharingEvaluation->created_by) 
-            ->whereNotIn('id', $this->sharingEvaluation->collaborators->pluck('id')) 
+            ->where('id', '!=', auth()->id())
+            ->where('id', '!=', $this->sharingEvaluation->created_by)
+            ->whereNotIn('id', $this->sharingEvaluation->collaborators->pluck('id'))
             ->take(5)
             ->get();
     }

@@ -34,7 +34,7 @@ class EvaluationBuilder extends Component
     public $activeQuestionIndex = null;
 
     // Certificate & Email Properties
-    public $newTemplate; 
+    public $newTemplate;
     public $certPosX = 50;
     public $certPosY = 50;
     public $certTextColor = '#1f2937';
@@ -91,11 +91,11 @@ class EvaluationBuilder extends Component
 
         $newEval = $this->evaluation->replicate();
         $newEval->title = $this->evaluation->title . ' (Copy)';
-        $newEval->slug = \Illuminate\Support\Str::random(16); 
-        $newEval->is_active = false; 
+        $newEval->slug = \Illuminate\Support\Str::random(16);
+        $newEval->is_active = false;
         $newEval->save();
 
-        $idMap = []; 
+        $idMap = [];
 
         foreach ($this->evaluation->questions as $q) {
             $newQ = $q->replicate();
@@ -125,7 +125,7 @@ class EvaluationBuilder extends Component
         }
 
         session()->flash('success', 'Form duplicated successfully!');
-        
+
         $roleName = auth()->user()->role?->role_name ?? 'guest';
         $routePrefix = match($roleName) {
             'organization'  => 'partner.evaluations',
@@ -226,6 +226,83 @@ class EvaluationBuilder extends Component
         return $sections;
     }
 
+    public function duplicateQuestion($index)
+    {
+        // 1. Get the original question
+        $original = $this->questions[$index];
+
+        // 2. Create a deep copy of the array so we don't accidentally link references
+        $copy = json_decode(json_encode($original), true);
+
+        // 3. Reset IDs so it is treated as a brand new question
+        $copy['id'] = null; // Clear database ID
+        $copy['temp_id'] = uniqid(); // Generate new Livewire tracking ID
+
+        // Slightly tweak the title to indicate it's a copy
+        $copy['question_text'] = $copy['question_text'] . ' (Copy)';
+
+        // 4. Insert the copied question immediately after the original
+        array_splice($this->questions, $index + 1, 0, [$copy]);
+
+        // 5. Update the active index to highlight the newly created copy
+        $this->activeQuestionIndex = $index + 1;
+
+        // 6. Re-calculate sorting orders
+        $this->refreshQuestionOrders();
+    }
+
+    public function duplicateSection($index)
+    {
+        // 1. Collect the Section Header
+        $itemsToDuplicate = [];
+        $itemsToDuplicate[] = $this->questions[$index];
+
+        // 2. Scan downwards to collect all child questions
+        $i = $index + 1;
+        while ($i < count($this->questions)) {
+            $type = $this->questions[$i]['type'];
+
+            // Stop collecting if we hit another section boundary or page break
+            if (in_array($type, ['section', 'page_break'])) {
+                break;
+            }
+
+            $itemsToDuplicate[] = $this->questions[$i];
+            $i++;
+        }
+
+        $insertionIndex = $i; // We will insert the clones right after the original block
+
+        // 3. Create fresh copies with new IDs
+        $newItems = [];
+        foreach ($itemsToDuplicate as $item) {
+            $copy = json_decode(json_encode($item), true);
+            $copy['id'] = null; // Clear DB ID
+            $copy['temp_id'] = uniqid(); // Generate new temporary ID
+
+            if ($copy['type'] === 'section') {
+                $copy['question_text'] = $copy['question_text'] . ' (Copy)';
+            }
+
+            $newItems[] = $copy;
+        }
+
+        // 4. Splice the new items into the main array
+        array_splice($this->questions, $insertionIndex, 0, $newItems);
+
+        // 5. Update active state and re-sync ordering
+        $this->activeQuestionIndex = $insertionIndex;
+        $this->refreshQuestionOrders();
+    }
+
+    // Helper method to ensure the 'order' keys stay sequential after a duplication
+    private function refreshQuestionOrders()
+    {
+        foreach ($this->questions as $i => $q) {
+            $this->questions[$i]['order'] = $i;
+        }
+    }
+
     public function setActiveQuestion($index)
     {
         $this->activeQuestionIndex = $index;
@@ -273,7 +350,7 @@ class EvaluationBuilder extends Component
             'question_text' => '',
             'description' => '',
             'options' => $defaultOptions,
-            'is_required' => !in_array($type, ['section', 'page_break']), 
+            'is_required' => !in_array($type, ['section', 'page_break']),
             'order' => 0,
             'image_path' => null,
             'new_image' => null
@@ -281,9 +358,9 @@ class EvaluationBuilder extends Component
 
         if ($this->activeQuestionIndex !== null && isset($this->questions[$this->activeQuestionIndex])) {
             array_splice($this->questions, $this->activeQuestionIndex + 1, 0, [$newQuestion]);
-            $this->activeQuestionIndex++; 
+            $this->activeQuestionIndex++;
         } else {
-            $this->questions[] = $newQuestion; 
+            $this->questions[] = $newQuestion;
             $this->activeQuestionIndex = count($this->questions) - 1;
         }
 
@@ -438,7 +515,7 @@ class EvaluationBuilder extends Component
         }
 
         session()->flash('success', 'Evaluation and Certificate Settings saved successfully!');
-        
+
         // Redirect to appropriate dashboard
         $roleName = auth()->user()->role?->role_name ?? 'guest';
         $routePrefix = match($roleName) {

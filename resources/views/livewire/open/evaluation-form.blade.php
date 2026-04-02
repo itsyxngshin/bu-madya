@@ -99,7 +99,24 @@
                         <h1 class="text-2xl md:text-3xl font-black text-gray-900 mb-3 leading-tight">{{ $evaluation->title }}</h1>
                         @if($evaluation->description)
                             <div class="prose prose-sm text-gray-600 max-w-none text-sm prose-a:text-[var(--theme)] hover:prose-a:opacity-80">
-                                {!! \Illuminate\Support\Str::markdown($evaluation->description ?? '') !!}
+                                {!! \Illuminate\Support\Str::markdown($evaluation->description ?? '', ['html_input' => 'strip']) !!}
+                            </div>
+                        @endif
+
+                          @if($evaluation->creator)
+                            <div class="flex items-center gap-3 mt-6 pt-6 border-t border-gray-100">
+                                {{-- Themed Avatar Placeholder --}}
+                                <div class="w-10 h-10 rounded-full bg-[var(--theme-light)] text-[var(--theme)] flex items-center justify-center shrink-0">
+                                    @if($evaluation->creator->profile_photo_path)
+                                        <img src="{{ asset('storage/'.$evaluation->creator->profile_photo_path) }}" class="w-full h-full rounded-full object-cover">
+                                    @else
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                                    @endif
+                                </div>
+                                <div>
+                                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none mb-1.5">Hosted By</p>
+                                    <p class="text-sm font-bold text-gray-900 leading-none">{{ $evaluation->creator->name }}</p>
+                                </div>
                             </div>
                         @endif
                     </div>
@@ -160,7 +177,7 @@
                                 <div class="flex items-center gap-4">
                                     <div class="h-px bg-gray-200 flex-1"></div>
                                     <div class="text-sm font-black text-gray-800 uppercase tracking-tight px-2 prose prose-sm max-w-none prose-p:my-0 prose-a:text-[var(--theme)] hover:prose-a:opacity-80">
-                                        {!! \Illuminate\Support\Str::markdown($question->question_text ?? '') !!}
+                                        {!! \Illuminate\Support\Str::markdown($question->question_text ?? '', ['html_input' => 'strip']) !!}
                                     </div>
                                     <div class="h-px bg-gray-200 flex-1"></div>
                                 </div>
@@ -169,14 +186,14 @@
                                 @if($question->description)
                                     {{-- [FIXED] Section Description wrapped in a clean div to respect Markdown p tags --}}
                                     <div class="text-sm text-gray-500 ml-1 mt-2 max-w-xl prose prose-sm max-w-none prose-p:my-1 prose-a:text-[var(--theme)] hover:prose-a:opacity-80">
-                                        {!! \Illuminate\Support\Str::markdown($question->description ?? '') !!}
+                                        {!! \Illuminate\Support\Str::markdown($question->description ?? '', ['html_input' => 'strip']) !!}
                                     </div>
                                 @endif
                             </div>
 
                         @else
                             {{-- QUESTION CARD --}}
-                            <div class="group bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md hover:border-[var(--theme-light)] transition-all duration-300 relative" wire:key="question-card-{{ $question->id }}" style="z-index: {{ 30 - $loop->index }}">
+                            <div class="group bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md hover:border-[var(--theme-light)] transition-all duration-300 relative" wire:key="question-card-{{ $question->id }}" style="z-index: {{ max(10, 30 - $loop->index) }}">
                                 {{-- Theme Active Stripe --}}
                                 <div class="absolute left-0 top-0 bottom-0 w-1 bg-[var(--theme)] opacity-0 group-focus-within:opacity-100 transition-opacity rounded-l-2xl"></div>
 
@@ -189,13 +206,13 @@
 
                                     {{-- [FIXED] Markdown Question Text (Changed from span to div to support new lines) --}}
                                     <div class="text-base font-bold text-gray-900 block leading-snug prose prose-sm max-w-none prose-p:mt-0 prose-p:mb-2 prose-a:text-[var(--theme)] hover:prose-a:opacity-80">
-                                        {!! \Illuminate\Support\Str::markdown($question->question_text ?? '') !!}
+                                        {!! \Illuminate\Support\Str::markdown($question->question_text ?? '', ['html_input' => 'strip']) !!}
                                     </div>
 
                                     {{-- Markdown Description --}}
                                     @if($question->description)
                                         <div class="text-xs text-gray-500 block mt-1 leading-relaxed prose prose-sm max-w-none prose-p:my-1 prose-a:text-[var(--theme)] hover:prose-a:opacity-80">
-                                            {!! \Illuminate\Support\Str::markdown($question->description ?? '') !!}
+                                            {!! \Illuminate\Support\Str::markdown($question->description ?? '', ['html_input' => 'strip']) !!}
                                         </div>
                                     @endif
                                 </div>
