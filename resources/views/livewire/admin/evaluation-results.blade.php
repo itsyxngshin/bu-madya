@@ -1,6 +1,7 @@
 <div class="min-h-screen bg-gray-50 p-3 sm:p-4 md:p-6 font-sans text-gray-900 pb-24"
      x-data="{
         previewOpen: false,
+        issueModalOpen: @entangle('issueModalOpen'),
         previewUrl: '',
         previewType: '',
         openPreview(url) {
@@ -15,7 +16,8 @@
             }
             this.previewOpen = true;
         }
-     }">
+     }"
+     x-effect="document.body.classList.toggle('overflow-hidden', previewOpen || issueModalOpen)">
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -43,8 +45,8 @@
                 </span>
 
                 @if($evaluation->certificate_template)
-                    @php 
-                        $issuedCerts = $evaluation->responses->whereNotNull('certificate_issued_at')->count(); 
+                    @php
+                        $issuedCerts = $evaluation->responses->whereNotNull('certificate_issued_at')->count();
                     @endphp
                     <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-green-50 text-green-700 text-[10px] sm:text-xs font-bold uppercase tracking-widest rounded-lg border border-green-200 shadow-sm">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -158,7 +160,7 @@
                 $groupedSections[$currentSectionIndex] = [
                     'title' => 'General Evaluation',
                     'questions' => [],
-                    'options' => [], 
+                    'options' => [],
                     'totals' => [],
                     'sum_averages' => 0,
                     'count_averages' => 0,
@@ -196,7 +198,7 @@
                         }
                     }
                 }
-                
+
                 $groupedSections = array_filter($groupedSections, fn($sec) => count($sec['questions']) > 0);
             @endphp
 
@@ -215,7 +217,7 @@
                         <table class="w-full text-left border-collapse min-w-max sm:min-w-full">
                             <tbody class="divide-y divide-gray-100">
                                 @foreach($groupedSections as $section)
-                                    
+
                                     <tr class="bg-orange-50/50">
                                         <td colspan="{{ count($section['options']) + 2 }}" class="p-3 sm:p-4 text-xs sm:text-sm font-black text-orange-700 uppercase tracking-widest border-y border-orange-100">
                                             {{ $section['title'] }}
@@ -544,36 +546,36 @@
             @else
                 {{-- STICKY MOBILE PAGINATION WITH PREMIUM DROPDOWN --}}
                 <div class="bg-white/95 backdrop-blur-md rounded-2xl p-3 sm:p-4 shadow-sm border border-gray-200 mb-6 flex items-center justify-between sticky top-4 z-40 drop-shadow-md">
-                    
+
                     {{-- Previous Button --}}
                     <button wire:click="previousResponse" class="p-2 sm:p-3 bg-gray-50 hover:bg-gray-100 text-gray-700 rounded-xl transition disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center shrink-0" {{ $currentIndex === 0 ? 'disabled' : '' }}>
                         <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
                     </button>
-                    
+
                     {{-- Center Column --}}
                     <div class="flex-1 px-2 flex flex-col items-center justify-center z-50">
-                        
+
                         <span class="text-[9px] sm:text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-0.5 sm:mb-1">Jump to Response</span>
-                        
+
                         {{-- [FIXED] Tightly wrapped relative container for accurate positioning --}}
                         <div class="relative w-max mx-auto"
-                             x-data="{ 
-                                open: false, 
-                                activeIndex: @entangle('currentIndex').live 
+                             x-data="{
+                                open: false,
+                                activeIndex: @entangle('currentIndex').live
                              }">
-                             
+
                             {{-- Trigger Button --}}
                             <button @click="open = !open" @click.outside="open = false" type="button"
                                     class="flex items-center justify-center gap-2 px-4 py-1.5 rounded-xl transition-all duration-300 group"
                                     :class="open ? 'bg-[var(--theme-light)] ring-2 ring-[var(--theme-light)]' : 'hover:bg-gray-50'">
-                                
+
                                 <div class="text-base sm:text-lg font-black transition-colors duration-300"
                                      :class="open ? 'text-[var(--theme)]' : 'text-gray-900 group-hover:text-[var(--theme)]'">
-                                    <span x-text="activeIndex + 1"></span> 
-                                    <span class="text-gray-400 font-normal mx-0.5">of</span> 
+                                    <span x-text="activeIndex + 1"></span>
+                                    <span class="text-gray-400 font-normal mx-0.5">of</span>
                                     <span>{{ $totalResponsesCount }}</span>
                                 </div>
-                                
+
                                 <div class="w-5 h-5 rounded-full flex items-center justify-center transition-colors duration-300"
                                      :class="open ? 'bg-white text-[var(--theme)] shadow-sm' : 'text-gray-400 group-hover:text-[var(--theme)]'">
                                     <svg class="w-3.5 h-3.5 transition-transform duration-300" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"></path></svg>
@@ -598,7 +600,7 @@
                                                 class="w-full text-left px-4 py-3 text-sm rounded-xl transition-all flex items-center justify-between group/item relative overflow-hidden"
                                                 :class="activeIndex === {{ $i }} ? 'bg-[var(--theme)] text-white shadow-md' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'">
 
-                                            <span class="relative z-10 transition-all" 
+                                            <span class="relative z-10 transition-all"
                                                   :class="activeIndex === {{ $i }} ? 'font-black' : 'font-medium group-hover/item:pl-1'">
                                                 Response {{ $i + 1 }}
                                             </span>
@@ -795,11 +797,7 @@
         {{-- [FIXED] Added x-init to lock body scroll, and $cleanup to unlock it when closed --}}
         <div class="fixed inset-0 flex items-end sm:items-center justify-center p-0 sm:p-6 bg-gray-900/80 backdrop-blur-sm transition-opacity" 
              style="z-index: 9999;" 
-             x-data="{ tab: 'details' }"
-             x-init="
-                document.body.classList.add('overflow-hidden');
-                $cleanup(() => document.body.classList.remove('overflow-hidden'));
-             ">
+             x-data="{ tab: 'details' }">
 
             {{-- [FIXED] Reduced max-height for better mobile keyboard clearance --}}
             <div class="relative bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl w-full max-w-2xl flex flex-col overflow-hidden max-h-[85vh] sm:max-h-[90vh]">
