@@ -287,16 +287,16 @@ Next, you MUST base your assessment strictly on the following official organizat
 EOT;
 
         try {
-            // 1. Make the actual call to Google's Gemini API
+            // 1. Make the actual call to Google's Gemini API (Updated to gemini-2.5-flash)
             $response = \Illuminate\Support\Facades\Http::withHeaders([
                 'Content-Type' => 'application/json',
-            ])->post('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' . env('GEMINI_API_KEY'), [
+            ])->post('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' . env('GEMINI_API_KEY'), [
                 'contents' => [
                     ['parts' => [['text' => $prompt]]]
                 ]
             ]);
 
-            // 2. Check for errors
+            // 2. Check for HTTP errors
             if ($response->failed()) {
                 throw new \Exception('API Error: ' . $response->body());
             }
