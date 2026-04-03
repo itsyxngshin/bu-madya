@@ -3,7 +3,7 @@
     {{-- 2. HERO HEADER --}}
     <header class="relative pt-32 pb-16 px-6 bg-white border-b border-gray-200">
         <div class="max-w-5xl mx-auto text-center">
-            
+
             {{-- Icon (Fallback to a generic team icon if svg_path isn't passed) --}}
             <div class="w-16 h-16 mx-auto bg-gradient-to-br from-red-600 to-yellow-500 rounded-2xl flex items-center justify-center text-white shadow-lg mb-6 transform -rotate-3">
                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $committee->svg_path ?? 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z' }}"></path></svg>
@@ -12,7 +12,7 @@
             <h1 class="font-heading text-4xl md:text-5xl font-black text-gray-900 leading-tight mb-4">
                 {{ $committee->name }}
             </h1>
-            
+
             <p class="text-gray-500 max-w-2xl mx-auto leading-relaxed text-sm md:text-base">
                 {{ $committee->description }}
             </p>
@@ -20,7 +20,7 @@
     </header>
 
     <div class="max-w-7xl mx-auto px-6 py-12">
-        
+
         {{-- 3. LEADERSHIP SECTION --}}
         <div class="mb-16">
             <h3 class="font-bold text-gray-900 uppercase tracking-widest text-xs border-b border-gray-200 pb-2 mb-8 text-center">
@@ -33,7 +33,7 @@
                         <div class="bg-white p-6 rounded-3xl shadow-lg border border-gray-100 flex items-center gap-5 w-full md:w-auto md:min-w-[350px] hover:-translate-y-1 transition duration-300">
                             <div class="w-20 h-20 rounded-full p-1 bg-gradient-to-br from-yellow-400 to-red-600 shrink-0">
                                 <div class="w-full h-full rounded-full overflow-hidden bg-white">
-                                    <img src="{{ $assignment->user->profile_photo_path ? asset('storage/'.$assignment->user->profile_photo_path) : 'https://ui-avatars.com/api/?name='.urlencode($assignment->user->name).'&background=random&color=fff' }}" 
+                                    <img src="{{ $assignment->user->profile_photo_path ? asset('storage/'.$assignment->user->profile_photo_path) : 'https://ui-avatars.com/api/?name='.urlencode($assignment->user->name).'&background=random&color=fff' }}"
                                          class="w-full h-full object-cover" alt="{{ $assignment->user->name }}">
                                 </div>
                             </div>
@@ -61,11 +61,11 @@
                 <h3 class="font-heading font-bold text-2xl text-gray-900">Official Members</h3>
                 <p class="text-sm text-gray-500">Active roster for A.Y. 2025-2026</p>
             </div>
-            
+
             <div class="relative w-full md:w-72">
-                <input wire:model.live="search" 
-                       type="text" 
-                       placeholder="Search member..." 
+                <input wire:model.live="search"
+                       type="text"
+                       placeholder="Search member..."
                        class="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-full text-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 transition shadow-sm">
                 <svg class="absolute left-3.5 top-2.5 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
             </div>
@@ -76,10 +76,10 @@
             @forelse($members as $member)
                 @if($member->user)
                     <div class="group bg-white/60 backdrop-blur-sm border border-white/60 p-5 rounded-2xl shadow-sm hover:shadow-md hover:bg-white transition duration-300 flex items-start gap-4">
-                        
+
                         {{-- Avatar --}}
                         <div class="w-12 h-12 rounded-xl bg-gray-100 overflow-hidden shrink-0 group-hover:ring-2 ring-red-100 transition">
-                            <img src="{{ $member->user->profile_photo_path ? asset($member->user->profile_photo_path) : 'https://ui-avatars.com/api/?name='.urlencode($member->user->name).'&background=random&color=fff&size=128' }}" 
+                            <img src="{{ $member->user->profile_photo_path ? asset('storage/' . $member->user->profile_photo_path) : 'https://ui-avatars.com/api/?name='.urlencode($member->user->name).'&background=random&color=fff&size=128' }}"
                                  class="w-full h-full object-cover">
                         </div>
 
@@ -93,10 +93,10 @@
                                     {{ $member->title ?? 'Committee Member' }}
                                 </p>
                             </div>
-                            
+
                             {{-- Academic Info (College, Course, Year) --}}
                             <div class="flex items-start gap-2 text-[10px] text-gray-500 border-t border-gray-100 pt-2 mt-auto">
-                                
+
                                 {{-- Left Side: College & Course (Can wrap/truncate) --}}
                                 <div class="flex-1 min-w-0">
                                     <p class="font-bold text-gray-600 line-clamp-2 leading-tight" title="{{ $member->user?->profile?->college?->name }}">
@@ -111,7 +111,7 @@
                                 <div class="shrink-0 bg-gray-100 border border-gray-200 px-2 py-1 rounded-md font-black text-gray-700 text-center shadow-sm">
                                     {{ $member->user?->profile?->year_level ?? 'N/A' }}
                                 </div>
-                                
+
                             </div>
                         </div>
 

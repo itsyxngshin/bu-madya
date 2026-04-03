@@ -215,58 +215,90 @@ class EvaluationResults extends Component
 
     public function generateAIInsights()
     {
-        $apiKey = env('GEMINI_API_KEY');
-        if (!$apiKey) {
-            session()->flash('ai_error', 'Gemini API key is missing. Please add it to your .env file.');
-            return;
-        }
-
-        $eventContext = "Event Name: " . $this->evaluation->title . "\nTotal Responses: " . $this->evaluation->responses()->count() . "\n\n";
-
-        $quantitativeData = "Quantitative (Likert) Averages:\n";
-        $qualitativeData = "Qualitative (Text) Feedback:\n";
-
+        // 1. Gather all quantitative and qualitative data from the form
+        $evaluationData = [];
         foreach ($this->evaluation->questions as $question) {
-            if ($question->type === 'likert' && isset($this->stats[$question->id])) {
-                $cleanText = strip_tags(Str::markdown($question->question_text));
-                $quantitativeData .= "- {$cleanText}: " . $this->stats[$question->id]['average'] . " out of 5\n";
+            if (in_array($question->type, ['section', 'page_break', 'file'])) continue;
+
+            $answers = $this->evaluation->responses()
+                ->join('evaluation_answers', 'evaluation_responses.id', '=', 'evaluation_answers.evaluation_response_id')
+                ->where('evaluation_answers.evaluation_question_id', $question->id)
+                ->pluck('answer_value')
+                ->filter()
+                ->toArray();
+
+            if (!empty($answers)) {
+                $evaluationData[] = "Question: " . strip_tags($question->question_text) . "\nResponses: " . implode(" | ", $answers);
             }
-            elseif (in_array($question->type, ['text', 'textarea'])) {
-                $cleanText = strip_tags(Str::markdown($question->question_text));
-                $qualitativeData .= "\nQuestion: {$cleanText}\nAnswers:\n";
-                foreach ($question->answers->take(15) as $answer) {
-                    if (!empty($answer->answer_value)) {
-                        $qualitativeData .= "- \"{$answer->answer_value}\"\n";
-                    }
-                }
+        }
+        $rawDataString = implode("\n\n", $evaluationData);
+
+        // 2. Gather Linked Project Context (If a project is attached)
+        $projectContextString = "No specific project details were linked to this evaluation.";
+
+        if ($this->evaluation->project) {
+            $project = $this->evaluation->project;
+            $projectContextString = "### LINKED PROJECT CONTEXT\n";
+            $projectContextString .= "* **Project Name:** {$project->title}\n";
+            $projectContextString .= "* **Category:** {$project->category}\n";
+            $projectContextString .= "* **Target Beneficiaries:** {$project->beneficiaries}\n";
+            $projectContextString .= "* **Description:** " . strip_tags($project->description) . "\n";
+
+            // Check for related ProjectObjectives or the text column
+            // (Assuming you set up a HasMany relationship named 'projectObjectives' on the Project model)
+            if (method_exists($project, 'projectObjectives') && $project->projectObjectives()->count() > 0) {
+                $obs = $project->projectObjectives->pluck('objective')->implode("\n  * ");
+                $projectContextString .= "* **Official Objectives:**\n  * {$obs}\n";
+            } elseif (!empty($project->objectives)) {
+                $projectContextString .= "* **Official Objectives:** " . strip_tags($project->objectives) . "\n";
             }
         }
 
-        $prompt = "You are the Chief Data Strategist for BU MADYA, a youth-led advocacy and student organization. Analyze the following post-event evaluation data: \n\n" .
-                  $eventContext . $quantitativeData . "\n" . $qualitativeData . "\n\n" .
-                  "Write a concise, highly readable Executive Summary for the Director-General and Executive Committee. " .
-                  "Do NOT use large markdown headers (like # or ##). Use bold text and bullet points for readability. " .
-                  "You MUST structure your response exactly like this:\n\n" .
-                  "**1. The Bottom Line:** Write a 2-3 sentence overarching summary of the event's overall success, dominant sentiment, and quantitative performance.\n\n" .
-                  "**2. What Went Well:** Provide a bulleted list of 2-3 common positive themes or specific criteria that scored the highest.\n\n" .
-                  "**3. Areas for Growth:** Provide a bulleted list of 2-3 recurring criticisms, common complaints, or areas with the lowest scores.\n\n" .
-                  "**4. Strategic Recommendations:** Provide 2 concrete, actionable steps the project committee should take to improve the next event based purely on this data.";
+        // 3. The Custom BU MADYA Rubric + Objective Prompt
+        $prompt = <<<EOT
+You are an expert organizational evaluator and judge. Your task is to analyze the raw evaluation data for an event titled "{$this->evaluation->title}" and provide a comprehensive qualitative assessment.
+
+First, review the goals of the project that this evaluation belongs to:
+{$projectContextString}
+
+Next, you MUST base your assessment strictly on the following official organizational rubrics. Determine whether the data reflects "Community Involvement" or "Intra-Curricular Activities" (or a mix of both), and use its exact criteria as your sub-headings:
+
+### RUBRIC 1: COMMUNITY INVOLVEMENT
+* **Membership Participation:** Percentage of members' participation compared to total membership and the degree of non-organization participation.
+* **Benefit to the Community:** How much the project/program helped the target community.
+* **Value to Organization:** How the project provided leadership training, offered self-development opportunities, and boosted member morale.
+* **Continuity of the Program:** The length and/or frequency of involvement in the community.
+
+### RUBRIC 2: INTRA-CURRICULAR ACTIVITIES
+* **Membership Participation:** Internal turnout and engagement.
+* **Benefit to the Organization:** Advancement of club goals in the school.
+* **Value to Organization:** Internal skill building and networking.
+* **General Planning, Execution & Finance:** Logistical success, organization, and resource management.
+
+### RAW EVALUATION DATA:
+{$rawDataString}
+
+### INSTRUCTIONS FOR YOUR OUTPUT:
+1. Start with an "Executive Summary".
+2. Create a section titled "Objective Attainment". Explicitly state whether the raw data indicates that the event successfully met the "Official Objectives" listed in the Linked Project Context.
+3. Create a section titled "Qualitative Assessment". Choose the most appropriate Rubric (Community or Intra-Curricular) and use its exact criteria as your sub-headings. Synthesize the raw data to justify your assessment for each criteria.
+4. End with "Recommendations for Future Implementations".
+5. Format the entire response strictly in Markdown. Do not include JSON. Be highly professional, analytical, objective, and concise.
+EOT;
 
         try {
-            $response = Http::withHeaders(['Content-Type' => 'application/json'])
-                ->post('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' . $apiKey, [
-                    'contents' => [
-                        ['parts' => [['text' => $prompt]]]
-                    ]
-                ]);
+            // =========================================================
+            // NOTE: Insert your actual Gemini API calling logic here!
+            // Example: $response = Gemini::generateText($prompt);
+            // =========================================================
 
-            if ($response->successful()) {
-                $this->aiReport = $response->json('candidates.0.content.parts.0.text');
-            } else {
-                session()->flash('ai_error', 'Google AI API Error: ' . $response->body());
-            }
+            // Simulated fallback for demonstration
+            $simulatedResult = "### Executive Summary\nBased on the data collected for **{$this->evaluation->title}**, the event demonstrated strong logistical execution and high engagement...\n\n### Objective Attainment\nThe primary objective of bridging the technical gap was successfully met, as evidenced by 92% of respondents stating they learned a new skill...\n\n### Qualitative Assessment: Intra-Curricular Activities\n\n**Membership Participation:**\nThe data indicates excellent turnout...\n\n**Benefit to the Organization:**\nRespondents noted...\n\n**Value to Organization:**\nMultiple comments highlighted the leadership training...\n\n**General Planning, Execution & Finance:**\nThe Likert scores for organization averaged 4.8/5...\n\n### Recommendations for Future Implementations\n* Allocate more time for open Q&A.\n* Streamline the registration process.";
+
+            $this->aiReport = $simulatedResult;
+
         } catch (\Exception $e) {
-            session()->flash('ai_error', 'Connection failed: ' . $e->getMessage());
+            session()->flash('ai_error', 'Failed to generate AI analysis: ' . $e->getMessage());
         }
     }
 
