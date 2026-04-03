@@ -244,8 +244,6 @@ class EvaluationResults extends Component
             $projectContextString .= "* **Target Beneficiaries:** {$project->beneficiaries}\n";
             $projectContextString .= "* **Description:** " . strip_tags($project->description) . "\n";
 
-            // Check for related ProjectObjectives or the text column
-            // (Assuming you set up a HasMany relationship named 'projectObjectives' on the Project model)
             if (method_exists($project, 'projectObjectives') && $project->projectObjectives()->count() > 0) {
                 $obs = $project->projectObjectives->pluck('objective')->implode("\n  * ");
                 $projectContextString .= "* **Official Objectives:**\n  * {$obs}\n";
@@ -254,22 +252,22 @@ class EvaluationResults extends Component
             }
         }
 
-        // 3. The Custom BU MADYA Rubric + Objective Prompt
+        // 3. The Custom BU MADYA Rubric + Objective Prompt (UPDATED STRUCTURE)
         $prompt = <<<EOT
-You are an expert organizational evaluator and judge. Your task is to analyze the raw evaluation data for an event titled "{$this->evaluation->title}" and provide a comprehensive qualitative assessment.
+You are an expert organizational evaluator and auditor. Your task is to analyze the raw evaluation data for an event titled "{$this->evaluation->title}" and provide a comprehensive qualitative assessment.
 
 First, review the goals of the project that this evaluation belongs to:
 {$projectContextString}
 
-Next, you MUST base your assessment strictly on the following official organizational rubrics. Determine whether the data reflects "Community Involvement" or "Intra-Curricular Activities" (or a mix of both), and use its exact criteria as your sub-headings:
+Next, review the official BU MADYA organizational rubrics provided below:
 
-### RUBRIC 1: COMMUNITY INVOLVEMENT
+### RUBRIC A: COMMUNITY INVOLVEMENT
 * **Membership Participation:** Percentage of members' participation compared to total membership and the degree of non-organization participation.
 * **Benefit to the Community:** How much the project/program helped the target community.
 * **Value to Organization:** How the project provided leadership training, offered self-development opportunities, and boosted member morale.
 * **Continuity of the Program:** The length and/or frequency of involvement in the community.
 
-### RUBRIC 2: INTRA-CURRICULAR ACTIVITIES
+### RUBRIC B: INTRA-CURRICULAR ACTIVITIES
 * **Membership Participation:** Internal turnout and engagement.
 * **Benefit to the Organization:** Advancement of club goals in the school.
 * **Value to Organization:** Internal skill building and networking.
@@ -279,15 +277,23 @@ Next, you MUST base your assessment strictly on the following official organizat
 {$rawDataString}
 
 ### INSTRUCTIONS FOR YOUR OUTPUT:
-1. Start with an "Executive Summary".
-2. Create a section titled "Objective Attainment". Explicitly state whether the raw data indicates that the event successfully met the "Official Objectives" listed in the Linked Project Context.
-3. Create a section titled "Qualitative Assessment". Choose the most appropriate Rubric (Community or Intra-Curricular) and use its exact criteria as your sub-headings. Synthesize the raw data to justify your assessment for each criteria.
-4. End with "Recommendations for Future Implementations".
-5. Format the entire response strictly in Markdown. Do not include JSON. Be highly professional, analytical, objective, and concise.
+Format your response strictly in Markdown using the following exact structure and headings. Do not include JSON. Be highly professional, analytical, and objective.
+
+### 1. General Outlook
+Provide a broad, overarching executive summary of the event. What was the overall sentiment of the respondents? What were the major themes or immediate takeaways from the raw data?
+
+### 2. Objective Attainment
+Explicitly state whether the raw data indicates that the event successfully met the "Official Objectives" listed in the Linked Project Context. If no project was linked, briefly state that this evaluation is being assessed independently of a specific project charter.
+
+### 3. Rubric-Aligned Analysis
+*(Determine whether the raw data best reflects "Community Involvement" or "Intra-Curricular Activities", or both. Using the exact criteria from the relevant rubric(s) above as your bullet points, provide a granular breakdown of how the event performed in each specific metric based on the feedback.)*
+
+### 4. Recommendations for Future Implementations
+Provide 2-3 actionable, data-driven recommendations based specifically on the constructive criticisms or patterns found in the raw data.
 EOT;
 
         try {
-            // 1. Make the actual call to Google's Gemini API (Updated to gemini-2.5-flash)
+            // Make the actual call to Google's Gemini API
             $response = \Illuminate\Support\Facades\Http::withHeaders([
                 'Content-Type' => 'application/json',
             ])->post('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' . env('GEMINI_API_KEY'), [
@@ -296,12 +302,10 @@ EOT;
                 ]
             ]);
 
-            // 2. Check for HTTP errors
             if ($response->failed()) {
                 throw new \Exception('API Error: ' . $response->body());
             }
 
-            // 3. Extract the full text and assign it to the report
             $this->aiReport = $response->json('candidates.0.content.parts.0.text');
 
         } catch (\Exception $e) {
