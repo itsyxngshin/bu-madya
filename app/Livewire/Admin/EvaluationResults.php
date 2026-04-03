@@ -287,15 +287,22 @@ Next, you MUST base your assessment strictly on the following official organizat
 EOT;
 
         try {
-            // =========================================================
-            // NOTE: Insert your actual Gemini API calling logic here!
-            // Example: $response = Gemini::generateText($prompt);
-            // =========================================================
+            // 1. Make the actual call to Google's Gemini API
+            $response = \Illuminate\Support\Facades\Http::withHeaders([
+                'Content-Type' => 'application/json',
+            ])->post('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' . env('GEMINI_API_KEY'), [
+                'contents' => [
+                    ['parts' => [['text' => $prompt]]]
+                ]
+            ]);
 
-            // Simulated fallback for demonstration
-            $simulatedResult = "### Executive Summary\nBased on the data collected for **{$this->evaluation->title}**, the event demonstrated strong logistical execution and high engagement...\n\n### Objective Attainment\nThe primary objective of bridging the technical gap was successfully met, as evidenced by 92% of respondents stating they learned a new skill...\n\n### Qualitative Assessment: Intra-Curricular Activities\n\n**Membership Participation:**\nThe data indicates excellent turnout...\n\n**Benefit to the Organization:**\nRespondents noted...\n\n**Value to Organization:**\nMultiple comments highlighted the leadership training...\n\n**General Planning, Execution & Finance:**\nThe Likert scores for organization averaged 4.8/5...\n\n### Recommendations for Future Implementations\n* Allocate more time for open Q&A.\n* Streamline the registration process.";
+            // 2. Check for errors
+            if ($response->failed()) {
+                throw new \Exception('API Error: ' . $response->body());
+            }
 
-            $this->aiReport = $simulatedResult;
+            // 3. Extract the full text and assign it to the report
+            $this->aiReport = $response->json('candidates.0.content.parts.0.text');
 
         } catch (\Exception $e) {
             session()->flash('ai_error', 'Failed to generate AI analysis: ' . $e->getMessage());
