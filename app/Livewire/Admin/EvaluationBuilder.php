@@ -46,6 +46,7 @@ class EvaluationBuilder extends Component
     public $certEmailBody = '';
     public $certNameQuestionId = null;
     public $certEmailQuestionId = null;
+    public $sectionToDeleteIndex = null;
 
     protected function rules()
     {
@@ -425,6 +426,35 @@ class EvaluationBuilder extends Component
     {
         $this->slug = Str::random(16);
     }
+
+    public function confirmDeleteSection($index)
+    {
+        $this->sectionToDeleteIndex = $index;
+    }
+
+    public function cancelDeleteSection()
+    {
+        $this->sectionToDeleteIndex = null;
+    }
+
+    public function executeDeleteSection()
+    {
+        if ($this->sectionToDeleteIndex !== null) {
+            // Call the removeQuestion method we updated earlier
+            $this->removeQuestion($this->sectionToDeleteIndex);
+
+            // Close the modal
+            $this->sectionToDeleteIndex = null;
+
+            // Optional: Trigger a success toast
+            $this->dispatch('swal:modal', [
+                'type' => 'success',
+                'title' => 'Deleted',
+                'text' => 'Section and all contained questions were removed.'
+            ]);
+        }
+    }
+
 
     #[On('confirmed-reset')]
     public function resetResponses()
