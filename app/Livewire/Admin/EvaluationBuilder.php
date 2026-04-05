@@ -371,18 +371,43 @@ class EvaluationBuilder extends Component
 
     public function removeQuestion($index)
     {
-        unset($this->questions[$index]);
+        if (!isset($this->questions[$index])) return;
+
+        $isSection = $this->questions[$index]['type'] === 'section';
+
+        if ($isSection) {
+            // 1. Collect the index of the section AND all its children
+            $indicesToRemove = [$index];
+            $i = $index + 1;
+
+            while ($i < count($this->questions)) {
+                // Stop collecting if we hit the next section or a page break
+                if (in_array($this->questions[$i]['type'], ['section', 'page_break'])) {
+                    break;
+                }
+                $indicesToRemove[] = $i;
+                $i++;
+            }
+
+            // 2. Remove them from highest index to lowest so the array doesn't shift while unsetting
+            rsort($indicesToRemove);
+            foreach ($indicesToRemove as $idx) {
+                unset($this->questions[$idx]);
+            }
+        } else {
+            // Normal single question deletion
+            unset($this->questions[$index]);
+        }
+
+        // 3. Re-index array sequentially
         $this->questions = array_values($this->questions);
 
+        // 4. Re-assign order values
         foreach ($this->questions as $idx => $q) {
             $this->questions[$idx]['order'] = $idx;
         }
 
-        if ($this->activeQuestionIndex === $index) {
-            $this->activeQuestionIndex = null;
-        } elseif ($this->activeQuestionIndex > $index) {
-            $this->activeQuestionIndex--;
-        }
+        $this->activeQuestionIndex = null;
     }
 
     public function addOption($questionIndex)
@@ -405,6 +430,13 @@ class EvaluationBuilder extends Component
     public function resetResponses()
     {
         if (!$this->evaluation->exists) return;
+
+        // BACKEND SECURITY CHECK: Block if they are not an Admin AND not the Owner
+        abort_if(
+            auth()->user()->role?->role_name !== 'administrator' && $this->evaluation->created_by !== auth()->id(),
+            403,
+            'Unauthorized Action. Only the form owner or an administrator can reset responses.'
+        );
 
         $responseIds = $this->evaluation->responses()->pluck('id');
 

@@ -163,13 +163,15 @@
                                         Duplicate Form
                                     </button>
 
-                                    {{-- Delete --}}
-                                    <button onclick="confirm('Are you sure? This cannot be undone.') || event.stopImmediatePropagation()" wire:click="delete({{ $eval->id }})" class="group w-full text-left px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-xl flex items-center gap-2.5 transition-all">
-                                        <div class="bg-red-50 text-red-500 group-hover:bg-red-100 group-hover:text-red-600 p-1.5 rounded-lg transition-colors">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                        </div>
-                                        Delete Form
-                                    </button>
+                                    {{-- Delete (Protected: Only Admin or Owner) --}}
+                                    @if(auth()->user()->role?->role_name === 'administrator' || $eval->created_by === auth()->id())
+                                        <button onclick="confirm('Are you sure? This cannot be undone.') || event.stopImmediatePropagation()" wire:click="delete({{ $eval->id }})" class="group w-full text-left px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-xl flex items-center gap-2.5 transition-all">
+                                            <div class="bg-red-50 text-red-500 group-hover:bg-red-100 group-hover:text-red-600 p-1.5 rounded-lg transition-colors">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                            </div>
+                                            Delete Form
+                                        </button>
+                                    @endif
                                 </div>
                             </div>
                         </div>

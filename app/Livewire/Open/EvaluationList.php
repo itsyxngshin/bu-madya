@@ -18,7 +18,7 @@ class EvaluationList extends Component
     public function mount()
     {
         // Example: If you are tracking visitors, you can load it here
-        // $this->visitorCount = Visitor::count(); 
+        // $this->visitorCount = Visitor::count();
     }
 
     public function render()

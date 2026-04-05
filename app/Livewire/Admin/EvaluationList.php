@@ -41,13 +41,29 @@ class EvaluationList extends Component
     // --- SECURE DUPLICATE METHOD ---
     public function duplicate($id)
     {
-        $original = Evaluation::with('questions')->find($id);
+        // 1. Eager load questions and collaborators
+        $original = Evaluation::with(['questions', 'collaborators'])->find($id);
 
         if (!$original) return;
 
+        // 2. BACKEND SECURITY CHECK: Admin, Owner, OR Collaborator
+        $isOwner = $original->created_by === auth()->id();
+        $isAdmin = auth()->user()->role?->role_name === 'administrator';
+        $isCollaborator = $original->collaborators->contains('id', auth()->id());
+
+        abort_if(
+            !$isAdmin && !$isOwner && !$isCollaborator,
+            403,
+            'Unauthorized Action. You must be an owner or collaborator to duplicate this form.'
+        );
+
+        // 3. Clone the evaluation
         $duplicate = $original->replicate();
         $duplicate->title = $original->title . ' (Copy)';
         $duplicate->is_active = false;
+
+        // ✨ THE MAGIC LINE: Force the new owner to be the person duplicating it
+        $duplicate->created_by = auth()->id();
 
         if (isset($original->slug)) {
             $duplicate->slug = Str::slug($duplicate->title) . '-' . strtolower(Str::random(5));
@@ -55,18 +71,53 @@ class EvaluationList extends Component
 
         $duplicate->save();
 
+        // 4. Copy questions and map old IDs to new IDs
+        $idMap = [];
         foreach ($original->questions as $question) {
             $newQuestion = $question->replicate();
             $newQuestion->evaluation_id = $duplicate->id;
             $newQuestion->save();
+            $idMap[$question->id] = $newQuestion->id;
         }
 
-        session()->flash('success', 'Form and questions duplicated successfully!');
+        // 5. Scan the new duplicate's questions and remap the skip-logic pointers
+        foreach ($duplicate->questions as $newQ) {
+            if (in_array($newQ->type, ['radio', 'dropdown', 'page_break']) && is_array($newQ->options)) {
+                $updatedOptions = [];
+                $modified = false;
+
+                foreach ($newQ->options as $opt) {
+                    if (isset($opt['jump']) && is_numeric($opt['jump']) && isset($idMap[$opt['jump']])) {
+                        // Point the jump logic to the newly created question ID
+                        $opt['jump'] = $idMap[$opt['jump']];
+                        $modified = true;
+                    }
+                    $updatedOptions[] = $opt;
+                }
+
+                // Only hit the database if we actually changed something
+                if ($modified) {
+                    $newQ->options = $updatedOptions;
+                    $newQ->save();
+                }
+            }
+        }
+
+        session()->flash('success', 'Form duplicated successfully! You are the owner of this new copy.');
     }
 
     public function delete($id)
     {
-        Evaluation::find($id)->delete();
+        $evaluation = Evaluation::findOrFail($id);
+
+        // BACKEND SECURITY CHECK: Block if they are not an Admin AND not the Owner
+        abort_if(
+            auth()->user()->role?->role_name !== 'administrator' && $evaluation->created_by !== auth()->id(),
+            403,
+            'Unauthorized Action. Only the form owner or an administrator can delete this evaluation.'
+        );
+
+        $evaluation->delete();
         session()->flash('success', 'Evaluation form deleted.');
     }
 

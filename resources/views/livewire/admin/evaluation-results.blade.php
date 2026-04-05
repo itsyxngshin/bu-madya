@@ -795,8 +795,8 @@
     {{-- ========================================== --}}
     @if($issueModalOpen)
         {{-- [FIXED] Added x-init to lock body scroll, and $cleanup to unlock it when closed --}}
-        <div class="fixed inset-0 flex items-end sm:items-center justify-center p-0 sm:p-6 bg-gray-900/80 backdrop-blur-sm transition-opacity" 
-             style="z-index: 9999;" 
+        <div class="fixed inset-0 flex items-end sm:items-center justify-center p-0 sm:p-6 bg-gray-900/80 backdrop-blur-sm transition-opacity"
+             style="z-index: 9999;"
              x-data="{ tab: 'details' }">
 
             {{-- [FIXED] Reduced max-height for better mobile keyboard clearance --}}
