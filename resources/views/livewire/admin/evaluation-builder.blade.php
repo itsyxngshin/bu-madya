@@ -625,9 +625,7 @@
                                                 </button>
                                             @endif
 
-                                            <button onclick="confirm('Delete this section and ALL questions inside it?') || event.stopImmediatePropagation()" wire:click.stop="removeQuestion({{ $index }})" class="text-gray-400 hover:text-red-500 transition-colors p-1" title="Delete Section & Contents">
-                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                            </button>
+                                            <button wire:click.stop="confirmDeleteSection({{ $index }})" class="text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors p-1.5" title="Delete Section & Contents">
                                         </div>
                                     </div>
 
@@ -714,7 +712,45 @@
         </div>
     </div>
 </div>
+{{-- ========================================== --}}
+    {{-- DELETE SECTION CONFIRMATION MODAL          --}}
+    {{-- ========================================== --}}
+    @if($sectionToDeleteIndex !== null)
+        <div class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6"
+             x-data x-init="document.body.classList.add('overflow-hidden'); $cleanup(() => document.body.classList.remove('overflow-hidden'));">
 
+            {{-- Dark Overlay (Click to cancel) --}}
+            <div class="fixed inset-0 bg-gray-900/80 backdrop-blur-sm transition-opacity" wire:click="cancelDeleteSection"></div>
+
+            {{-- Modal Content --}}
+            <div class="relative bg-white rounded-3xl shadow-2xl w-full max-w-md flex flex-col overflow-hidden animate-fade-in-up">
+                <div class="p-6 sm:p-8 text-center">
+
+                    {{-- Warning Icon --}}
+                    <div class="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-5 ring-4 ring-red-50">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                    </div>
+
+                    <h3 class="text-xl font-black text-gray-900 mb-2">Delete Entire Section?</h3>
+
+                    <p class="text-sm text-gray-500 mb-6 leading-relaxed">
+                        You are about to delete <strong class="text-gray-800">"{{ $questions[$sectionToDeleteIndex]['question_text'] ?: 'Untitled Section' }}"</strong> and <strong class="text-red-600">all questions contained inside it</strong>. This action cannot be undone.
+                    </p>
+
+                    {{-- Actions --}}
+                    <div class="flex gap-3 w-full">
+                        <button wire:click="cancelDeleteSection" class="flex-1 px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl text-sm transition">
+                            Cancel
+                        </button>
+                        <button wire:click="executeDeleteSection" class="flex-1 px-4 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl text-sm shadow-md shadow-red-600/20 transition flex items-center justify-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                            Yes, Delete
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
 @push('scripts')
 <script>
     function confirmReset(count) {
