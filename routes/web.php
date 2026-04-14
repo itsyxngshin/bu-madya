@@ -67,6 +67,8 @@ use App\Livewire\Admin\FrameManager;
 use App\Livewire\Admin\EventRaffle;
 use App\Livewire\Admin\LinkagesManager;
 use App\Livewire\Admin\CampaignList;
+use App\Livewire\Admin\CampaignBuilder;
+
 
 use App\Models\MembershipApplication;
 use Illuminate\Support\Facades\Storage;
@@ -151,6 +153,10 @@ Route::middleware(['auth', 'role:director'])->prefix('director')->name('director
     Route::get('/evaluations/{evaluation}/results', EvaluationResults::class)->name('evaluations.results');
     Route::get('/evaluations', AdminEvaluationIndex::class)->name('evaluations.index');
     Route::get('/evaluations/create', EvaluationBuilder::class)->name('evaluations.create');
+    Route::get('/campaigns', CampaignList::class)->name('campaigns.index');
+    Route::get('/campaigns/create', CampaignBuilder::class)->name('campaigns.create');
+    Route::get('/campaigns/{slug}/edit', CampaignBuilder::class)->name('campaigns.edit');
+
 });
 
 Route::middleware(['auth'])
@@ -171,7 +177,9 @@ Route::middleware(['auth', 'role:administrator'])->prefix('admin')->name('admin.
     Route::get('/user', UserRoster::class)->name('user.index');
     Route::get('/settings', Settings::class)->name('settings');
     Route::get('/profile/edit', EditProfile::class)->name('profile.edit');
-    Route::get('/campaigns', CampaignList::class)->name('campaigns');
+    Route::get('/campaigns', CampaignList::class)->name('campaigns.index');
+    Route::get('/campaigns/create', CampaignBuilder::class)->name('campaigns.create');
+    Route::get('/campaigns/{slug}/edit', CampaignBuilder::class)->name('campaigns.edit');
     Route::get('/membership/settings', MembershipSetting::class)->name('membership-settings');
     Route::get('/membership/requests', MembershipRequests::class)->name('membership-requests');
     Route::get('/dashboard', AdminDashboard::class)->name('dashboard');
@@ -207,6 +215,9 @@ Route::middleware(['auth', 'role:organization'])->prefix('partner')->name('partn
     Route::get('/manage/evaluations/{evaluation}/edit', EvaluationBuilder::class)->name('evaluations.edit');
     Route::get('/manage/evaluations/{evaluation}/results', EvaluationResults::class)->name('evaluations.results');
     Route::get('/manage/evaluations', AdminEvaluationIndex::class)->name('evaluations.index');
+    Route::get('/campaigns', CampaignList::class)->name('campaigns.index');
+    Route::get('/campaigns/create', CampaignBuilder::class)->name('campaigns.create');
+    Route::get('/campaigns/{slug}/edit', CampaignBuilder::class)->name('campaigns.edit');
 
 });
 
