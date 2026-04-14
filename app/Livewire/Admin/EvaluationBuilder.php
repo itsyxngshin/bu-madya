@@ -32,6 +32,7 @@ class EvaluationBuilder extends Component
     public $questions = [];
     public $available_projects = [];
     public $activeQuestionIndex = null;
+    public $sectionToDeleteIndex = null;
 
     // Certificate & Email Properties
     public $newTemplate;
@@ -46,7 +47,6 @@ class EvaluationBuilder extends Component
     public $certEmailBody = '';
     public $certNameQuestionId = null;
     public $certEmailQuestionId = null;
-    public $sectionToDeleteIndex = null;
 
     protected function rules()
     {
@@ -68,7 +68,6 @@ class EvaluationBuilder extends Component
             'questions.*.image_path' => 'nullable|string',
             'questions.*.new_image' => 'nullable|image|max:2048',
             'questions.*.options' => 'nullable|array',
-            // Cert Validations
             'certPosX' => 'numeric',
             'certPosY' => 'numeric',
             'certTextColor' => 'string',
@@ -94,6 +93,7 @@ class EvaluationBuilder extends Component
         $newEval->title = $this->evaluation->title . ' (Copy)';
         $newEval->slug = \Illuminate\Support\Str::random(16);
         $newEval->is_active = false;
+        $newEval->created_by = auth()->id();
         $newEval->save();
 
         $idMap = [];
@@ -229,74 +229,49 @@ class EvaluationBuilder extends Component
 
     public function duplicateQuestion($index)
     {
-        // 1. Get the original question
         $original = $this->questions[$index];
-
-        // 2. Create a deep copy of the array so we don't accidentally link references
         $copy = json_decode(json_encode($original), true);
-
-        // 3. Reset IDs so it is treated as a brand new question
-        $copy['id'] = null; // Clear database ID
-        $copy['temp_id'] = uniqid(); // Generate new Livewire tracking ID
-
-        // Slightly tweak the title to indicate it's a copy
+        $copy['id'] = null; 
+        $copy['temp_id'] = (string) Str::uuid(); 
         $copy['question_text'] = $copy['question_text'] . ' (Copy)';
 
-        // 4. Insert the copied question immediately after the original
         array_splice($this->questions, $index + 1, 0, [$copy]);
-
-        // 5. Update the active index to highlight the newly created copy
         $this->activeQuestionIndex = $index + 1;
-
-        // 6. Re-calculate sorting orders
         $this->refreshQuestionOrders();
     }
 
     public function duplicateSection($index)
     {
-        // 1. Collect the Section Header
         $itemsToDuplicate = [];
         $itemsToDuplicate[] = $this->questions[$index];
 
-        // 2. Scan downwards to collect all child questions
         $i = $index + 1;
         while ($i < count($this->questions)) {
             $type = $this->questions[$i]['type'];
-
-            // Stop collecting if we hit another section boundary or page break
-            if (in_array($type, ['section', 'page_break'])) {
-                break;
-            }
-
+            if (in_array($type, ['section', 'page_break'])) break;
             $itemsToDuplicate[] = $this->questions[$i];
             $i++;
         }
 
-        $insertionIndex = $i; // We will insert the clones right after the original block
+        $insertionIndex = $i; 
 
-        // 3. Create fresh copies with new IDs
         $newItems = [];
         foreach ($itemsToDuplicate as $item) {
             $copy = json_decode(json_encode($item), true);
-            $copy['id'] = null; // Clear DB ID
-            $copy['temp_id'] = uniqid(); // Generate new temporary ID
+            $copy['id'] = null;
+            $copy['temp_id'] = (string) Str::uuid(); 
 
             if ($copy['type'] === 'section') {
                 $copy['question_text'] = $copy['question_text'] . ' (Copy)';
             }
-
             $newItems[] = $copy;
         }
 
-        // 4. Splice the new items into the main array
         array_splice($this->questions, $insertionIndex, 0, $newItems);
-
-        // 5. Update active state and re-sync ordering
         $this->activeQuestionIndex = $insertionIndex;
         $this->refreshQuestionOrders();
     }
 
-    // Helper method to ensure the 'order' keys stay sequential after a duplication
     private function refreshQuestionOrders()
     {
         foreach ($this->questions as $i => $q) {
@@ -365,8 +340,29 @@ class EvaluationBuilder extends Component
             $this->activeQuestionIndex = count($this->questions) - 1;
         }
 
-        foreach ($this->questions as $idx => $q) {
-            $this->questions[$idx]['order'] = $idx;
+        $this->refreshQuestionOrders();
+    }
+
+    public function confirmDeleteSection($index)
+    {
+        $this->sectionToDeleteIndex = $index;
+    }
+
+    public function cancelDeleteSection()
+    {
+        $this->sectionToDeleteIndex = null;
+    }
+
+    public function executeDeleteSection()
+    {
+        if ($this->sectionToDeleteIndex !== null) {
+            $this->removeQuestion($this->sectionToDeleteIndex);
+            $this->sectionToDeleteIndex = null;
+            $this->dispatch('swal:modal', [
+                'type' => 'success', 
+                'title' => 'Deleted', 
+                'text' => 'Section and all contained questions were removed.'
+            ]);
         }
     }
 
@@ -377,12 +373,10 @@ class EvaluationBuilder extends Component
         $isSection = $this->questions[$index]['type'] === 'section';
 
         if ($isSection) {
-            // 1. Collect the index of the section AND all its children
             $indicesToRemove = [$index];
             $i = $index + 1;
-
+            
             while ($i < count($this->questions)) {
-                // Stop collecting if we hit the next section or a page break
                 if (in_array($this->questions[$i]['type'], ['section', 'page_break'])) {
                     break;
                 }
@@ -390,24 +384,16 @@ class EvaluationBuilder extends Component
                 $i++;
             }
 
-            // 2. Remove them from highest index to lowest so the array doesn't shift while unsetting
             rsort($indicesToRemove);
             foreach ($indicesToRemove as $idx) {
                 unset($this->questions[$idx]);
             }
         } else {
-            // Normal single question deletion
             unset($this->questions[$index]);
         }
 
-        // 3. Re-index array sequentially
         $this->questions = array_values($this->questions);
-
-        // 4. Re-assign order values
-        foreach ($this->questions as $idx => $q) {
-            $this->questions[$idx]['order'] = $idx;
-        }
-
+        $this->refreshQuestionOrders();
         $this->activeQuestionIndex = null;
     }
 
@@ -427,44 +413,14 @@ class EvaluationBuilder extends Component
         $this->slug = Str::random(16);
     }
 
-    public function confirmDeleteSection($index)
-    {
-        $this->sectionToDeleteIndex = $index;
-    }
-
-    public function cancelDeleteSection()
-    {
-        $this->sectionToDeleteIndex = null;
-    }
-
-    public function executeDeleteSection()
-    {
-        if ($this->sectionToDeleteIndex !== null) {
-            // Call the removeQuestion method we updated earlier
-            $this->removeQuestion($this->sectionToDeleteIndex);
-
-            // Close the modal
-            $this->sectionToDeleteIndex = null;
-
-            // Optional: Trigger a success toast
-            $this->dispatch('swal:modal', [
-                'type' => 'success',
-                'title' => 'Deleted',
-                'text' => 'Section and all contained questions were removed.'
-            ]);
-        }
-    }
-
-
     #[On('confirmed-reset')]
     public function resetResponses()
     {
         if (!$this->evaluation->exists) return;
 
-        // BACKEND SECURITY CHECK: Block if they are not an Admin AND not the Owner
         abort_if(
-            auth()->user()->role?->role_name !== 'administrator' && $this->evaluation->created_by !== auth()->id(),
-            403,
+            auth()->user()->role?->role_name !== 'administrator' && $this->evaluation->created_by !== auth()->id(), 
+            403, 
             'Unauthorized Action. Only the form owner or an administrator can reset responses.'
         );
 
@@ -488,7 +444,6 @@ class EvaluationBuilder extends Component
     {
         $this->validate();
 
-        // 1. Save File Uploads First
         if ($this->header_image) {
             $this->evaluation->header_image = $this->header_image->store('evaluation-headers', 'public');
         }
@@ -496,7 +451,6 @@ class EvaluationBuilder extends Component
             $this->evaluation->certificate_template = $this->newTemplate->store('certificates', 'public');
         }
 
-        // 2. Save Core Settings
         $this->evaluation->title = $this->title;
         $this->evaluation->slug = !empty($this->slug) ? Str::slug($this->slug) : Str::slug($this->title);
         $this->evaluation->description = $this->description;
@@ -506,7 +460,6 @@ class EvaluationBuilder extends Component
             $this->evaluation->created_by = auth()->id();
         }
 
-        // 3. Save Certificate & Email Configurations
         $this->evaluation->cert_pos_x = $this->certPosX;
         $this->evaluation->cert_pos_y = $this->certPosY;
         $this->evaluation->cert_text_color = $this->certTextColor;
@@ -521,7 +474,6 @@ class EvaluationBuilder extends Component
 
         $this->evaluation->save();
 
-        // 4. Save Questions
         $currentIds = collect($this->questions)->pluck('id')->filter()->toArray();
         try {
             $this->evaluation->questions()->whereNotIn('id', $currentIds)->delete();
@@ -555,7 +507,6 @@ class EvaluationBuilder extends Component
             $tempIdMap[$q['temp_id']] = $dbQ->id;
         }
 
-        // 5. Update Skip Logic
         foreach ($this->evaluation->questions as $question) {
             if (in_array($question->type, ['radio', 'dropdown', 'page_break']) && is_array($question->options)) {
                 $updatedOptions = [];
@@ -578,7 +529,6 @@ class EvaluationBuilder extends Component
 
         session()->flash('success', 'Evaluation and Certificate Settings saved successfully!');
 
-        // Redirect to appropriate dashboard
         $roleName = auth()->user()->role?->role_name ?? 'guest';
         $routePrefix = match($roleName) {
             'organization'  => 'partner.evaluations',

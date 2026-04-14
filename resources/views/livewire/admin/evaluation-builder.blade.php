@@ -1,4 +1,6 @@
-<div class="min-h-screen bg-gray-50 p-4 md:p-8 font-sans text-gray-900 pb-32">
+<div class="min-h-screen bg-gray-50 p-4 md:p-8 font-sans text-gray-900 pb-32"
+     x-data="{ sectionToDelete: @entangle('sectionToDeleteIndex') }"
+     x-effect="document.body.classList.toggle('overflow-hidden', sectionToDelete !== null)">
 
     <div class="max-w-6xl mx-auto">
 
@@ -24,7 +26,6 @@
                 <a href="{{ route('admin.evaluations.index') }}" class="hidden sm:inline-block px-5 py-2.5 bg-white border border-gray-300 text-gray-700 font-bold rounded-xl text-sm hover:bg-gray-50 transition shadow-sm">Cancel</a>
 
                 @if($evaluation->exists)
-                    {{-- Duplicate Button --}}
                     <button wire:click="duplicate" type="button" class="px-4 py-2.5 bg-blue-50 border border-blue-200 text-blue-700 font-bold rounded-xl text-sm hover:bg-blue-100 transition flex items-center gap-2 shadow-sm">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
                         <span class="hidden sm:inline">Duplicate</span>
@@ -54,7 +55,6 @@
                 <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
                     <h2 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-5">General Settings</h2>
 
-                    {{-- HEADER IMAGE --}}
                     <div class="mb-5">
                         <label class="block text-sm font-semibold text-gray-700 mb-1.5">Header Image</label>
                         @if($header_image)
@@ -68,7 +68,6 @@
                         </label>
                     </div>
 
-                    {{-- THEME COLOR --}}
                     <div class="mb-5">
                         <label class="block text-sm font-semibold text-gray-700 mb-1.5">Theme Color</label>
                         <div class="flex items-center gap-3">
@@ -77,14 +76,12 @@
                         </div>
                     </div>
 
-                    {{-- TITLE --}}
                     <div class="mb-5">
                         <label class="block text-sm font-semibold text-gray-700 mb-1.5">Title <span class="text-red-500">*</span></label>
                         <input wire:model.live="title" type="text" class="w-full rounded-xl border-gray-200 bg-gray-50 text-base font-medium p-3 focus:bg-white focus:ring-orange-500 focus:border-orange-500 transition-colors">
                         @error('title') <span class="text-xs text-red-500 font-semibold block mt-1.5">{{ $message }}</span> @enderror
                     </div>
 
-                    {{-- PROJECT LINK --}}
                     <div class="mb-5">
                         <label class="block text-sm font-semibold text-gray-700 mb-1.5">Link to Project</label>
                         <select wire:model="project_id" class="w-full rounded-xl border-gray-200 bg-gray-50 text-sm p-3 focus:bg-white focus:ring-orange-500 focus:border-orange-500 transition-colors cursor-pointer">
@@ -95,7 +92,6 @@
                         </select>
                     </div>
 
-                    {{-- SLUG --}}
                     <div class="mb-5">
                         <label class="block text-sm font-semibold text-gray-700 mb-1.5">URL Slug</label>
                         <div class="flex gap-2">
@@ -106,7 +102,6 @@
                         </div>
                     </div>
 
-                    {{-- DESCRIPTION (Auto-Expanding) --}}
                     <div class="mb-5" x-data="{
                             insert(start, end) {
                                 let el = this.$refs.editor;
@@ -139,7 +134,6 @@
                                   placeholder="Evaluation instructions or details..."></textarea>
                     </div>
 
-                    {{-- ACTIVE TOGGLE --}}
                     <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-200">
                         <div>
                             <span class="text-sm font-semibold text-gray-900 block">Publish Active</span>
@@ -172,7 +166,6 @@
                     <div x-show="expanded" x-collapse x-cloak>
                         <div class="p-6 border-t border-gray-100 space-y-6 bg-gray-50/30">
 
-                            {{-- Delivery Mode Controls --}}
                             <div>
                                 <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Delivery Mode</label>
                                 <div class="grid grid-cols-1 gap-3">
@@ -193,7 +186,6 @@
                                 </div>
                             </div>
 
-                            {{-- File Upload --}}
                             <div>
                                 <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Blank Template (PNG/JPG)</label>
                                 <input type="file" wire:model="newTemplate" class="block w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100 transition cursor-pointer bg-white border border-gray-200 rounded-xl p-1">
@@ -220,7 +212,6 @@
                                 </div>
                             </div>
 
-                            {{-- INTERACTIVE PREVIEW CANVAS --}}
                             @if($newTemplate || $evaluation->certificate_template)
                                 @php
                                     $imageUrl = $newTemplate ? $newTemplate->temporaryUrl() : asset('storage/' . $evaluation->certificate_template);
@@ -266,7 +257,6 @@
 
                                     <div class="w-full bg-gray-100 border-2 border-dashed border-gray-300 rounded-xl flex items-center justify-center p-4 relative group">
 
-                                        {{-- Isolate and Overflow Hidden to prevent canvas bleeding --}}
                                         <div class="relative inline-block select-none cursor-crosshair shadow-md touch-none overflow-hidden isolate z-10"
                                              @mousemove.window="handleMove($event)"
                                              @touchmove.window="handleMove($event)"
@@ -310,7 +300,6 @@
                                 </div>
                             @endif
 
-                            {{-- Data Mapping --}}
                             <div class="bg-orange-50/50 p-5 rounded-2xl border border-orange-100">
                                 <h4 class="text-sm font-bold text-gray-900 mb-1">Field Mapping</h4>
                                 <p class="text-xs text-gray-500 mb-4">Link your form questions to the certificate system.</p>
@@ -337,7 +326,6 @@
                                 </div>
                             </div>
 
-                            {{-- Custom Email Delivery --}}
                             <div class="border-t border-gray-200 pt-6">
                                 <div class="flex items-center justify-between mb-4">
                                     <div>
@@ -385,7 +373,6 @@
             {{-- ========================================== --}}
             <div class="xl:col-span-8 relative">
 
-                {{-- STICKY TOOLBAR (DROPDOWN MENU) --}}
                 <div class="sticky top-6 z-[100] flex justify-center mb-8 pointer-events-none px-4 sm:px-0">
                     <div class="pointer-events-auto relative w-full max-w-sm sm:max-w-md md:max-w-2xl" x-data="{ open: false }">
                         <button @click="open = !open" @click.outside="open = false" type="button" class="w-full flex items-center justify-center gap-3 py-3.5 bg-gray-900 text-white font-bold rounded-full shadow-2xl hover:bg-gray-800 transition ring-4 ring-white/80 group">
@@ -483,10 +470,8 @@
                     @foreach($questions as $index => $question)
 
                         @php
-                            // State Bleeding Fix
                             $qKey = $question['id'] ?? $question['temp_id'] ?? $index;
 
-                            // Boundaries
                             if ($question['type'] === 'section') $inSection = true;
                             elseif ($question['type'] === 'page_break') $inSection = false;
 
@@ -498,7 +483,6 @@
                             $isEnclosedItem = $inSection && !$isSectionHeader && !$isPageBreak;
                             $isActive = ($activeQuestionIndex === $index);
 
-                            // Dynamic Unified Classes
                             $classes = 'group/card relative transition-all duration-200 cursor-text p-5 sm:p-6 ';
 
                             if ($isSectionHeader) {
@@ -519,8 +503,8 @@
                             else $classes .= 'z-10 ';
                         @endphp
 
-                        {{-- SORTABLE ITEM WRAPPER --}}
-                        <div data-sort-id="{{ $qKey }}" wire:key="q-{{ $qKey }}" class="{{ $classes }}" wire:click="setActiveQuestion({{ $index }})">
+                        {{-- [FIXED] wire:key forces a complete DOM re-render when index changes to prevent data bleeding --}}
+                        <div data-sort-id="{{ $qKey }}" wire:key="question-{{ $index }}-{{ $qKey }}" class="{{ $classes }}" wire:click="setActiveQuestion({{ $index }})">
 
                             @if($isActive)
                                 <div class="absolute left-0 top-6 bottom-6 w-1.5 bg-orange-500 rounded-r-full"></div>
@@ -530,12 +514,10 @@
                                 <div class="absolute top-0 left-6 right-6 h-px bg-gray-100"></div>
                             @endif
 
-                            {{-- DRAG HANDLE --}}
                             <div class="drag-handle absolute left-0 top-0 bottom-0 w-10 flex flex-col items-center justify-center cursor-move z-10 text-gray-300 hover:text-gray-500 hover:bg-gray-100/50 transition-colors {{ $isSectionHeader && !$isLastInSection ? 'rounded-tl-3xl' : ($isEnclosedItem && $isLastInSection ? 'rounded-bl-3xl' : ($isEnclosedItem ? '' : 'rounded-l-3xl')) }}">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"></path></svg>
                             </div>
 
-                            {{-- PAGE BREAK UI --}}
                             @if($isPageBreak)
                                 <div class="flex items-center justify-between pl-6 sm:pl-8">
                                     <div class="flex-1 flex flex-col sm:flex-row sm:items-center gap-4">
@@ -549,7 +531,6 @@
                                                     <option value="">Continue to next page</option>
                                                     <option value="submit">Submit Form</option>
                                                     @foreach($this->sections as $section)
-                                                        {{-- Removed the forward-only restriction so ALL sections appear --}}
                                                         <option value="{{ $section['id'] }}">
                                                             Go to: {{ Str::limit($section['title'], 20) }}
                                                         </option>
@@ -564,7 +545,6 @@
                                     </button>
                                 </div>
 
-                            {{-- STANDARD UI --}}
                             @else
                                 <div class="{{ $isEnclosedItem ? 'pl-10 sm:pl-16' : 'pl-8' }}" x-data="{
                                         activeField: 'qText',
@@ -619,15 +599,19 @@
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
                                                     Clone Section
                                                 </button>
+                                                {{-- [FIXED] Section Delete calls the specific modal confirm function --}}
+                                                <button wire:click.stop="confirmDeleteSection({{ $index }})" class="text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors p-1.5" title="Delete Section & Contents">
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                                </button>
                                             @else
-                                                <button wire:click.stop="duplicateQuestion({{ $index }})" class="text-gray-400 hover:text-blue-500 transition-colors p-1" title="Duplicate Question">
+                                                <button wire:click.stop="duplicateQuestion({{ $index }})" class="text-gray-400 hover:text-blue-500 transition-colors p-1 mr-1" title="Duplicate Question">
                                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
                                                 </button>
+                                                {{-- [FIXED] Regular Delete directly deletes the single question --}}
+                                                <button wire:click.stop="removeQuestion({{ $index }})" class="text-gray-400 hover:text-red-500 transition-colors p-1" title="Delete Question">
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                                </button>
                                             @endif
-
-                                            <button wire:click.stop="confirmDeleteSection({{ $index }})" class="text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors p-1.5" title="Delete Section & Contents">
-                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                            </button>
                                         </div>
                                     </div>
 
@@ -667,7 +651,8 @@
                                     @if(in_array($question['type'], ['radio', 'checkbox', 'dropdown']))
                                         <div class="pl-2 border-l-2 border-gray-100 space-y-2.5 mt-4">
                                             @foreach($question['options'] as $optIndex => $opt)
-                                                <div class="flex flex-col gap-1.5" wire:key="opt-{{ $qKey }}-{{ $optIndex }}">
+                                                {{-- [FIXED] Options wire:key syncs perfectly with index --}}
+                                                <div class="flex flex-col gap-1.5" wire:key="opt-{{ $index }}-{{ $qKey }}-{{ $optIndex }}">
                                                     <div class="flex items-center gap-3">
                                                         <div class="w-3 h-3 border-2 border-gray-300 {{ $question['type'] === 'checkbox' ? 'rounded-sm' : 'rounded-full' }} shrink-0"></div>
                                                         <input type="text" wire:model="questions.{{ $index }}.options.{{ $optIndex }}{{ is_array($opt) ? '.text' : '' }}" class="w-full text-sm border-0 border-b border-dashed border-gray-300 hover:border-gray-400 bg-transparent focus:border-orange-500 focus:ring-0 p-1 placeholder-gray-400 transition-colors" placeholder="Enter option text">
@@ -682,7 +667,6 @@
                                                                 <option value="">Continue to next</option>
                                                                 <option value="submit">Submit Form</option>
                                                                 @foreach($this->sections as $section)
-                                                                    {{-- Removed the forward-only restriction so ALL sections appear --}}
                                                                     <option value="{{ $section['id'] }}">
                                                                         Go to: {{ Str::limit($section['title'], 20) }}
                                                                     </option>
@@ -700,7 +684,8 @@
                                         <div class="bg-gray-50 rounded-xl p-3 border border-gray-100 mt-4 overflow-x-auto">
                                             <div class="flex gap-2 min-w-max">
                                                 @foreach($question['options'] as $optIndex => $option)
-                                                    <input type="text" wire:key="likert-{{ $qKey }}-{{ $optIndex }}" wire:model="questions.{{ $index }}.options.{{ $optIndex }}" class="w-24 text-xs font-medium text-center border-gray-200 focus:border-orange-500 focus:ring-orange-500 rounded-lg p-2 shadow-sm">
+                                                    {{-- [FIXED] Likert wire:key syncs perfectly with index --}}
+                                                    <input type="text" wire:key="likert-{{ $index }}-{{ $qKey }}-{{ $optIndex }}" wire:model="questions.{{ $index }}.options.{{ $optIndex }}" class="w-24 text-xs font-medium text-center border-gray-200 focus:border-orange-500 focus:ring-orange-500 rounded-lg p-2 shadow-sm">
                                                 @endforeach
                                             </div>
                                         </div>
@@ -713,21 +698,18 @@
             </div>
         </div>
     </div>
+    
     {{-- ========================================== --}}
     {{-- DELETE SECTION CONFIRMATION MODAL          --}}
     {{-- ========================================== --}}
     @if($sectionToDeleteIndex !== null)
-        <div class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6"
-             x-data x-init="document.body.classList.add('overflow-hidden'); $cleanup(() => document.body.classList.remove('overflow-hidden'));">
+        <div class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
 
-            {{-- Dark Overlay (Click to cancel) --}}
             <div class="fixed inset-0 bg-gray-900/80 backdrop-blur-sm transition-opacity" wire:click="cancelDeleteSection"></div>
 
-            {{-- Modal Content --}}
             <div class="relative bg-white rounded-3xl shadow-2xl w-full max-w-md flex flex-col overflow-hidden animate-fade-in-up">
                 <div class="p-6 sm:p-8 text-center">
 
-                    {{-- Warning Icon --}}
                     <div class="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-5 ring-4 ring-red-50">
                         <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
                     </div>
@@ -738,7 +720,6 @@
                         You are about to delete <strong class="text-gray-800">"{{ $questions[$sectionToDeleteIndex]['question_text'] ?: 'Untitled Section' }}"</strong> and <strong class="text-red-600">all questions contained inside it</strong>. This action cannot be undone.
                     </p>
 
-                    {{-- Actions --}}
                     <div class="flex gap-3 w-full">
                         <button wire:click="cancelDeleteSection" class="flex-1 px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl text-sm transition">
                             Cancel

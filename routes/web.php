@@ -58,6 +58,7 @@ use App\Livewire\Admin\EditEvent;
 use App\Livewire\Admin\Transparency\DocumentForm;
 use App\Livewire\Admin\Transparency\DocumentIndex;
 use App\Livewire\Open\TransparencyIndex;
+use App\Livewire\Open\CampaignView;
 use App\Livewire\Admin\EvaluationResults;
 use App\Livewire\Admin\EvaluationList as AdminEvaluationIndex;
 use App\Livewire\Admin\EventScanner;
@@ -65,6 +66,7 @@ use App\Livewire\Admin\EventRegistrants;
 use App\Livewire\Admin\FrameManager;
 use App\Livewire\Admin\EventRaffle;
 use App\Livewire\Admin\LinkagesManager;
+use App\Livewire\Admin\CampaignList;
 
 use App\Models\MembershipApplication;
 use Illuminate\Support\Facades\Storage;
@@ -169,6 +171,7 @@ Route::middleware(['auth', 'role:administrator'])->prefix('admin')->name('admin.
     Route::get('/user', UserRoster::class)->name('user.index');
     Route::get('/settings', Settings::class)->name('settings');
     Route::get('/profile/edit', EditProfile::class)->name('profile.edit');
+    Route::get('/campaigns', CampaignList::class)->name('campaigns');
     Route::get('/membership/settings', MembershipSetting::class)->name('membership-settings');
     Route::get('/membership/requests', MembershipRequests::class)->name('membership-requests');
     Route::get('/dashboard', AdminDashboard::class)->name('dashboard');
@@ -260,6 +263,7 @@ Route::get('/frames/{slug}', FrameBuilder::class)->name('open.frames.show');
 Route::get('/partners/register', RegisterOrganization::class)->name('register.partner');
 Route::get('/discover', EventDiscovery::class)->name('open.events.index');
 Route::get('/privacy', PrivacyPolicy::class)->name('privacy');
+Route::get('/campaigns/{slug}', CampaignView::class)->name('campaigns.show');
 Route::get('/evaluations/{evaluation}', EvaluationForm::class)->name('evaluations.show');
 
 
