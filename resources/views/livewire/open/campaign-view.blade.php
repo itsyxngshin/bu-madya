@@ -146,18 +146,20 @@
 
                             {{-- DYNAMIC STUDENT FIELDS (Slides open only for students) --}}
                             <div x-show="affiliation === 'student'" x-collapse x-cloak>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                                {{-- CHANGED: Removed md:grid-cols-2 so it forces a single stacked column --}}
+                                <div class="grid grid-cols-1 gap-4 pt-2">
                                     
                                     {{-- PREMIUM DATABASE COLLEGES DROPDOWN --}}
                                     @php
                                         $collegeOptions = $colleges->mapWithKeys(function($c) { return [$c->id => $c->name]; })->toArray();
                                     @endphp
+                                    {{-- CHANGED: Removed md:col-span-2 --}}
                                     <div x-data="{
                                             open: false,
                                             value: @entangle('college_id'),
                                             options: {{ json_encode($collegeOptions) }},
                                             get selectedLabel() { return this.options[this.value] || '-- Select College --'; }
-                                        }" class="relative md:col-span-2">
+                                        }" class="relative">
                                         
                                         <button @click="open = !open" @click.outside="open = false" type="button" 
                                                 class="w-full bg-white border focus:outline-none rounded-xl px-4 py-3 text-sm shadow-sm font-semibold flex items-center justify-between transition-all"
