@@ -5,7 +5,9 @@ namespace App\Livewire\Open;
 use Livewire\Component;
 use App\Models\Campaign;
 use App\Models\CampaignSignature;
+use Livewire\Attributes\Layout;
 
+#[Layout('layouts.madya-template')]
 class CampaignView extends Component
 {
     public Campaign $campaign;
