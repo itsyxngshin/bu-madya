@@ -21,7 +21,7 @@ return new class extends Migration
 
             // 3. Add Demographic Fields
             $table->string('affiliation')->default('student')->after('guest_email');
-            $table->string('program')->nullable()->after('college');
+            $table->string('program')->nullable()->after('college_id');
             $table->string('year_level')->nullable()->after('program');
             $table->foreignId('college_id')->nullable()->constrained('colleges')->nullOnDelete()->after('affiliation');
         });
@@ -38,7 +38,7 @@ return new class extends Migration
                 'guest_name',
                 'guest_email',
                 'affiliation',
-                'college',
+                'college_id',
                 'program',
                 'year_level'
             ]);
