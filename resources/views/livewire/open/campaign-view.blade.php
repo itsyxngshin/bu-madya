@@ -86,74 +86,144 @@
                     </div>
                 @else
                     <div class="space-y-4" x-data="{ affiliation: @entangle('affiliation') }">
-                        
-                        <div class="bg-gray-50 p-5 rounded-2xl border border-gray-100 space-y-4 shadow-inner">
+                        <div class="bg-gray-50/80 p-5 rounded-[1.5rem] border border-gray-100 space-y-5 shadow-sm">
                             
                             {{-- GUEST IDENTIFICATION (Only show if not logged in) --}}
                             @if(!auth()->check())
-                                <div class="grid grid-cols-1 gap-3">
+                                <div class="grid grid-cols-1 gap-4">
                                     <div>
-                                        <input wire:model="guestName" type="text" class="w-full bg-white border-gray-200 focus:border-orange-500 focus:ring-orange-500 rounded-xl px-4 py-3 text-sm shadow-sm" placeholder="First and Last Name">
+                                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Full Name</label>
+                                        <input wire:model="guestName" type="text" class="w-full bg-white border border-gray-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 rounded-xl px-4 py-3 text-sm shadow-sm transition-all outline-none" placeholder="e.g., Juan Dela Cruz">
                                         @error('guestName') <span class="text-[10px] text-red-500 font-bold mt-1 block px-1">{{ $message }}</span> @enderror
                                     </div>
                                     <div>
-                                        <input wire:model="guestEmail" type="email" class="w-full bg-white border-gray-200 focus:border-orange-500 focus:ring-orange-500 rounded-xl px-4 py-3 text-sm shadow-sm" placeholder="Email Address">
+                                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Email Address</label>
+                                        <input wire:model="guestEmail" type="email" class="w-full bg-white border border-gray-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 rounded-xl px-4 py-3 text-sm shadow-sm transition-all outline-none" placeholder="juan@example.com">
                                         @error('guestEmail') <span class="text-[10px] text-red-500 font-bold mt-1 block px-1">{{ $message }}</span> @enderror
                                     </div>
                                 </div>
-                                <hr class="border-gray-200 my-2">
+                                <div class="h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent my-2"></div>
                             @endif
 
-                            {{-- AFFILIATION DROPDOWN --}}
-                            <div>
-                                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Your Affiliation</label>
-                                <select wire:model.live="affiliation" class="w-full bg-white border-gray-200 focus:border-orange-500 focus:ring-orange-500 rounded-xl px-4 py-3 text-sm shadow-sm font-semibold text-gray-700 cursor-pointer">
-                                    <option value="student">Current BU Student</option>
-                                    <option value="alumni">BU Alumni</option>
-                                    <option value="faculty">BU Faculty / Staff</option>
-                                    <option value="stakeholder">External Stakeholder / Citizen</option>
-                                </select>
+                            {{-- PREMIUM AFFILIATION DROPDOWN --}}
+                            <div x-data="{
+                                    open: false,
+                                    value: @entangle('affiliation'),
+                                    options: {
+                                        'student': 'Current BU Student',
+                                        'alumni': 'BU Alumni',
+                                        'faculty': 'BU Faculty / Staff',
+                                        'stakeholder': 'External Stakeholder / Citizen'
+                                    },
+                                    get selectedLabel() { return this.options[this.value] || 'Select Affiliation'; }
+                                }" class="relative">
+                                
+                                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Your Affiliation</label>
+                                
+                                {{-- Custom Trigger Button --}}
+                                <button @click="open = !open" @click.outside="open = false" type="button" 
+                                        class="w-full bg-white border focus:outline-none rounded-xl px-4 py-3 text-sm shadow-sm font-semibold flex items-center justify-between transition-all"
+                                        :class="open ? 'border-orange-500 ring-2 ring-orange-500/20 text-orange-700' : 'border-gray-200 text-gray-700 hover:border-gray-300'">
+                                    <span x-text="selectedLabel"></span>
+                                    <svg class="w-4 h-4 transition-transform duration-200" :class="open ? 'rotate-180 text-orange-500' : 'text-gray-400'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                </button>
+
+                                {{-- Custom Dropdown Menu --}}
+                                <div x-show="open" x-transition.opacity.duration.200ms x-cloak
+                                    class="absolute z-50 w-full mt-2 bg-white border border-gray-100 rounded-xl shadow-xl overflow-hidden py-1">
+                                    <template x-for="(label, key) in options" :key="key">
+                                        <button type="button" @click="value = key; open = false" 
+                                                class="w-full text-left px-4 py-2.5 text-sm font-medium transition-colors"
+                                                :class="value === key ? 'bg-orange-50 text-orange-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'">
+                                            <div class="flex items-center justify-between">
+                                                <span x-text="label"></span>
+                                                <svg x-show="value === key" class="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                            </div>
+                                        </button>
+                                    </template>
+                                </div>
                             </div>
 
                             {{-- DYNAMIC STUDENT FIELDS (Slides open only for students) --}}
                             <div x-show="affiliation === 'student'" x-collapse x-cloak>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
                                     
-                                    {{-- Dynamic Database Colleges Dropdown --}}
-                                    <div class="md:col-span-2">
-                                        <select wire:model="college_id" class="w-full bg-white border-gray-200 focus:border-orange-500 focus:ring-orange-500 rounded-xl px-4 py-3 text-sm shadow-sm">
-                                            <option value="">-- Select College --</option>
-                                            @foreach($colleges as $c)
-                                                <option value="{{ $c->id }}">{{ $c->name }}</option>
-                                            @endforeach
-                                        </select>
+                                    {{-- PREMIUM DATABASE COLLEGES DROPDOWN --}}
+                                    @php
+                                        $collegeOptions = $colleges->mapWithKeys(function($c) { return [$c->id => $c->name]; })->toArray();
+                                    @endphp
+                                    <div x-data="{
+                                            open: false,
+                                            value: @entangle('college_id'),
+                                            options: {{ json_encode($collegeOptions) }},
+                                            get selectedLabel() { return this.options[this.value] || '-- Select College --'; }
+                                        }" class="relative md:col-span-2">
+                                        
+                                        <button @click="open = !open" @click.outside="open = false" type="button" 
+                                                class="w-full bg-white border focus:outline-none rounded-xl px-4 py-3 text-sm shadow-sm font-semibold flex items-center justify-between transition-all"
+                                                :class="open ? 'border-orange-500 ring-2 ring-orange-500/20 text-orange-700' : 'border-gray-200 text-gray-700 hover:border-gray-300'">
+                                            <span x-text="selectedLabel" class="truncate pr-4"></span>
+                                            <svg class="w-4 h-4 shrink-0 transition-transform duration-200" :class="open ? 'rotate-180 text-orange-500' : 'text-gray-400'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                        </button>
+
+                                        <div x-show="open" x-transition.opacity.duration.200ms x-cloak
+                                            class="absolute z-50 w-full mt-2 bg-white border border-gray-100 rounded-xl shadow-xl overflow-y-auto max-h-60 py-1 scrollbar-thin scrollbar-thumb-gray-200">
+                                            <template x-for="(label, key) in options" :key="key">
+                                                <button type="button" @click="value = key; open = false" 
+                                                        class="w-full text-left px-4 py-2.5 text-sm font-medium transition-colors"
+                                                        :class="value == key ? 'bg-orange-50 text-orange-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'">
+                                                    <span x-text="label"></span>
+                                                </button>
+                                            </template>
+                                        </div>
                                         @error('college_id') <span class="text-[10px] text-red-500 font-bold mt-1 block px-1">{{ $message }}</span> @enderror
                                     </div>
                                     
+                                    {{-- PROGRAM INPUT --}}
                                     <div>
-                                        <input wire:model="program" type="text" class="w-full bg-white border-gray-200 focus:border-orange-500 focus:ring-orange-500 rounded-xl px-4 py-3 text-sm shadow-sm" placeholder="Program (e.g. BSIT)">
+                                        <input wire:model="program" type="text" class="w-full bg-white border border-gray-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 rounded-xl px-4 py-3 text-sm shadow-sm transition-all outline-none font-medium text-gray-700" placeholder="Program (e.g. BSIT)">
                                         @error('program') <span class="text-[10px] text-red-500 font-bold mt-1 block px-1">{{ $message }}</span> @enderror
                                     </div>
                                     
-                                    <div>
-                                        <select wire:model="yearLevel" class="w-full bg-white border-gray-200 focus:border-orange-500 focus:ring-orange-500 rounded-xl px-4 py-3 text-sm shadow-sm cursor-pointer">
-                                            <option value="">-- Year Level --</option>
-                                            <option value="1st Year">1st Year</option>
-                                            <option value="2nd Year">2nd Year</option>
-                                            <option value="3rd Year">3rd Year</option>
-                                            <option value="4th Year">4th Year</option>
-                                            <option value="5th Year">5th Year</option>
-                                        </select>
+                                    {{-- PREMIUM YEAR LEVEL DROPDOWN --}}
+                                    <div x-data="{
+                                            open: false,
+                                            value: @entangle('yearLevel'),
+                                            options: { '1st Year': '1st Year', '2nd Year': '2nd Year', '3rd Year': '3rd Year', '4th Year': '4th Year', '5th Year': '5th Year' },
+                                            get selectedLabel() { return this.options[this.value] || '-- Year Level --'; }
+                                        }" class="relative">
+                                        
+                                        <button @click="open = !open" @click.outside="open = false" type="button" 
+                                                class="w-full bg-white border focus:outline-none rounded-xl px-4 py-3 text-sm shadow-sm font-semibold flex items-center justify-between transition-all"
+                                                :class="open ? 'border-orange-500 ring-2 ring-orange-500/20 text-orange-700' : 'border-gray-200 text-gray-700 hover:border-gray-300'">
+                                            <span x-text="selectedLabel"></span>
+                                            <svg class="w-4 h-4 transition-transform duration-200" :class="open ? 'rotate-180 text-orange-500' : 'text-gray-400'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                        </button>
+
+                                        <div x-show="open" x-transition.opacity.duration.200ms x-cloak
+                                            class="absolute z-50 w-full mt-2 bg-white border border-gray-100 rounded-xl shadow-xl overflow-hidden py-1">
+                                            <template x-for="(label, key) in options" :key="key">
+                                                <button type="button" @click="value = key; open = false" 
+                                                        class="w-full text-left px-4 py-2.5 text-sm font-medium transition-colors"
+                                                        :class="value === key ? 'bg-orange-50 text-orange-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'">
+                                                    <span x-text="label"></span>
+                                                </button>
+                                            </template>
+                                        </div>
                                         @error('yearLevel') <span class="text-[10px] text-red-500 font-bold mt-1 block px-1">{{ $message }}</span> @enderror
                                     </div>
+
                                 </div>
                             </div>
 
-                            <p class="text-[10px] text-gray-400 font-medium text-center px-2 pt-2">By signing, you support this advocacy. Your email will remain private.</p>
+                            <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wide text-center px-2 pt-3">
+                                <svg class="w-3 h-3 inline-block mr-1 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                                Your information is securely encrypted
+                            </p>
                         </div>
 
                         {{-- SUBMIT BUTTON --}}
-                        <button wire:click="signPetition" wire:loading.attr="disabled" class="w-full py-4 bg-gray-900 hover:bg-orange-600 text-white font-black text-lg rounded-2xl shadow-xl hover:shadow-orange-500/30 transition-all transform hover:-translate-y-0.5 flex items-center justify-center gap-2 group">
+                        <button wire:click="signPetition" wire:loading.attr="disabled" class="w-full py-4 bg-gray-900 hover:bg-orange-600 text-white font-black text-lg rounded-2xl shadow-[0_8px_20px_rgb(0,0,0,0.12)] hover:shadow-[0_8px_25px_rgba(234,88,12,0.3)] transition-all duration-300 transform hover:-translate-y-1 flex items-center justify-center gap-2 group mt-2 border border-gray-800 hover:border-orange-500">
                             <span wire:loading.remove wire:target="signPetition" class="flex items-center gap-2">
                                 Sign Petition 
                                 <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
