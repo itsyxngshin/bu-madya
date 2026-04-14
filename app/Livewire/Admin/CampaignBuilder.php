@@ -35,11 +35,18 @@ class CampaignBuilder extends Component
         ];
     }
 
-    public function mount(Campaign $campaign = null)
+    public function mount($campaign = null)
     {
-        $this->campaign = $campaign ?? new Campaign();
+        // 1. Bulletproof Database Fetching (Handles ID, Slug, or Model)
+        if (is_string($campaign) || is_numeric($campaign)) {
+            $this->campaign = Campaign::where('slug', $campaign)->orWhere('id', $campaign)->firstOrFail();
+        } elseif ($campaign instanceof Campaign) {
+            $this->campaign = $campaign;
+        } else {
+            $this->campaign = new Campaign();
+        }
 
-        // 1. Role Check
+        // 2. Role Check
         $user = auth()->user();
         $role = $user->role?->role_name;
 
@@ -47,12 +54,12 @@ class CampaignBuilder extends Component
              abort(403, 'You do not have permission to build campaigns.');
         }
 
-        // 2. Ownership Check (if editing)
+        // 3. Ownership Security Check (if editing)
         if ($this->campaign->exists && $role !== 'administrator' && $this->campaign->created_by !== $user->id) {
             abort(403, 'You do not have permission to edit this campaign.');
         }
 
-        // 3. Populate existing data
+        // 4. Populate the form with existing data!
         if ($this->campaign->exists) {
             $this->title = $this->campaign->title;
             $this->slug = $this->campaign->slug;
