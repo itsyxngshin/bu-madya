@@ -72,7 +72,8 @@ class CampaignList extends Component
     // Generates the CSV for the Dean/President
     public function exportSignatures($id)
     {
-        $campaign = Campaign::with('signatures.user')->findOrFail($id);
+        // Add 'signatures.college' to the Eager Load to prevent N+1 Query issues!
+        $campaign = Campaign::with(['signatures.user', 'signatures.college'])->findOrFail($id);
 
         abort_if(
             auth()->user()->role?->role_name !== 'administrator' && $campaign->created_by !== auth()->id(), 
@@ -80,13 +81,18 @@ class CampaignList extends Component
             'Unauthorized Action.'
         );
         
-        $csvData = "Name,Email,Date Signed\n";
+        $csvData = "Name,Email,Affiliation,College,Program,Year Level,Date Signed\n";
+        
         foreach($campaign->signatures as $sig) {
-            // Check if user exists to prevent errors if a user account was deleted
-            if($sig->user) {
-                $date = $sig->created_at->format('Y-m-d H:i:s');
-                $csvData .= "\"{$sig->user->name}\",\"{$sig->user->email}\",\"{$date}\"\n";
-            }
+            $name = $sig->user ? $sig->user->name : $sig->guest_name;
+            $email = $sig->user ? $sig->user->email : $sig->guest_email;
+            
+            // Safely grab the college name if it exists via the relationship
+            $collegeName = $sig->college ? $sig->college->name : 'N/A';
+            
+            $date = $sig->created_at->format('Y-m-d H:i:s');
+            
+            $csvData .= "\"{$name}\",\"{$email}\",\"{$sig->affiliation}\",\"{$collegeName}\",\"{$sig->program}\",\"{$sig->year_level}\",\"{$date}\"\n";
         }
 
         return response()->streamDownload(function () use ($csvData) {
