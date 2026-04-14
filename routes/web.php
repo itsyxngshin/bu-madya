@@ -68,6 +68,7 @@ use App\Livewire\Admin\EventRaffle;
 use App\Livewire\Admin\LinkagesManager;
 use App\Livewire\Admin\CampaignList;
 use App\Livewire\Admin\CampaignBuilder;
+use App\Livewire\Admin\CampaignAnalytics;
 
 
 use App\Models\MembershipApplication;
@@ -156,6 +157,7 @@ Route::middleware(['auth', 'role:director'])->prefix('director')->name('director
     Route::get('/campaigns', CampaignList::class)->name('campaigns.index');
     Route::get('/campaigns/create', CampaignBuilder::class)->name('campaigns.create');
     Route::get('/campaigns/{slug}/edit', CampaignBuilder::class)->name('campaigns.edit'); 
+    Route::get('/campaigns/{slug}/results', CampaignAnalytics::class)->name('campaigns.results');
 
 });
 
@@ -196,6 +198,7 @@ Route::middleware(['auth', 'role:administrator'])->prefix('admin')->name('admin.
     Route::get('/linkages-proposals', LinkagesManager::class)->name('linkages.proposals');
     Route::get('/welfare', \App\Livewire\Admin\WelfareManager::class)->name('welfare.index');
     Route::get('/the-pillars', ThePillarsManager::class)->name('pillars.index');
+    Route::get('/campaigns/{slug}/results', CampaignAnalytics::class)->name('campaigns.results'); 
 });
 
 Route::middleware(['auth', 'role:organization'])->prefix('partner')->name('partner.')
@@ -218,7 +221,8 @@ Route::middleware(['auth', 'role:organization'])->prefix('partner')->name('partn
     Route::get('/campaigns', CampaignList::class)->name('campaigns.index');
     Route::get('/campaigns/create', CampaignBuilder::class)->name('campaigns.create');
     Route::get('/campaigns/{slug}/edit', CampaignBuilder::class)->name('campaigns.edit');
-
+    Route::get('/campaigns/{slug}/results', CampaignAnalytics::class)->name('campaigns.results');
+    
 });
 
 Route::middleware(['auth', 'role:member'])->prefix('member')->name('member.')
