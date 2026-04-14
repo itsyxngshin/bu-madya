@@ -155,7 +155,7 @@ Route::middleware(['auth', 'role:director'])->prefix('director')->name('director
     Route::get('/evaluations/create', EvaluationBuilder::class)->name('evaluations.create');
     Route::get('/campaigns', CampaignList::class)->name('campaigns.index');
     Route::get('/campaigns/create', CampaignBuilder::class)->name('campaigns.create');
-    Route::get('/campaigns/{campaign}/edit', CampaignBuilder::class)->name('campaigns.edit');
+    Route::get('/campaigns/{slug}/edit', CampaignBuilder::class)->name('campaigns.edit'); 
 
 });
 
@@ -179,7 +179,7 @@ Route::middleware(['auth', 'role:administrator'])->prefix('admin')->name('admin.
     Route::get('/profile/edit', EditProfile::class)->name('profile.edit');
     Route::get('/campaigns', CampaignList::class)->name('campaigns.index');
     Route::get('/campaigns/create', CampaignBuilder::class)->name('campaigns.create');
-    Route::get('/campaigns/{campaign}/edit', CampaignBuilder::class)->name('campaigns.edit');
+    Route::get('/campaigns/{slug}/edit', CampaignBuilder::class)->name('campaigns.edit');
     Route::get('/membership/settings', MembershipSetting::class)->name('membership-settings');
     Route::get('/membership/requests', MembershipRequests::class)->name('membership-requests');
     Route::get('/dashboard', AdminDashboard::class)->name('dashboard');
@@ -217,7 +217,7 @@ Route::middleware(['auth', 'role:organization'])->prefix('partner')->name('partn
     Route::get('/manage/evaluations', AdminEvaluationIndex::class)->name('evaluations.index');
     Route::get('/campaigns', CampaignList::class)->name('campaigns.index');
     Route::get('/campaigns/create', CampaignBuilder::class)->name('campaigns.create');
-    Route::get('/campaigns/{campaign}/edit', CampaignBuilder::class)->name('campaigns.edit');
+    Route::get('/campaigns/{slug}/edit', CampaignBuilder::class)->name('campaigns.edit');
 
 });
 

@@ -35,13 +35,11 @@ class CampaignBuilder extends Component
         ];
     }
 
-    public function mount($campaign = null)
+    public function mount($slug = null) // Changed $campaign to $slug
     {
-        // 1. Bulletproof Database Fetching (Handles ID, Slug, or Model)
-        if (is_string($campaign) || is_numeric($campaign)) {
-            $this->campaign = Campaign::where('slug', $campaign)->orWhere('id', $campaign)->firstOrFail();
-        } elseif ($campaign instanceof Campaign) {
-            $this->campaign = $campaign;
+        // 1. Bulletproof Database Fetching
+        if ($slug) {
+            $this->campaign = Campaign::where('slug', $slug)->orWhere('id', $slug)->firstOrFail();
         } else {
             $this->campaign = new Campaign();
         }
@@ -90,7 +88,7 @@ class CampaignBuilder extends Component
         $this->campaign->description = $this->description;
         $this->campaign->target_signatures = $this->target_signatures;
         $this->campaign->status = $this->status;
-        
+
         if (!$this->campaign->exists) {
             $this->campaign->created_by = auth()->id();
         }
@@ -106,7 +104,7 @@ class CampaignBuilder extends Component
             'director'      => 'director.campaigns',
             default         => 'admin.campaigns',
         };
-        
+
         return redirect()->route($routePrefix . '.index');
     }
 
