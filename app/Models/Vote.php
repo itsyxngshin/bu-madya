@@ -6,10 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Vote extends Model
 {
-    protected $fillable = [
-        'election_id', 'election_position_id', 'candidate_id'
-    ];
-
+    protected $guarded = [];
     public function election() {
         return $this->belongsTo(Election::class);
     }

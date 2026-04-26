@@ -107,7 +107,7 @@ class VotingBooth extends Component
             }
         }
 
-        // Security Lock 4: Did they over-vote? (e.g., picking 3 Presidents)
+        // Security Lock 4: Did they over-vote?
         foreach ($this->positions as $position) {
             $selectedCount = count($this->selectedCandidates[$position->id] ?? []);
             if ($selectedCount > $position->max_winners) {
@@ -116,38 +116,44 @@ class VotingBooth extends Component
             }
         }
 
-        // If all security checks pass, encrypt and save the ballot!
-        DB::transaction(function () {
-            
-            // A. Create the check-in record to prevent double voting
-            VoterLog::create([
-                'election_id' => $this->election->id,
-                'user_id' => auth()->id(), // Will be null if guest
-                'guest_name' => auth()->check() ? null : $this->guest_name,
-                'guest_email' => auth()->check() ? null : $this->guest_email,
-                'college_id' => auth()->check() ? null : $this->college_id,
-                'program' => auth()->check() ? null : $this->program,
-                'year_level' => auth()->check() ? null : $this->year_level,
-                'voted_at' => now(),
-            ]);
+        // TRY-CATCH BLOCK: This will reveal any hidden database errors!
+        try {
+            DB::transaction(function () {
+                
+                // A. Create the check-in record
+                VoterLog::create([
+                    'election_id' => $this->election->id,
+                    'user_id' => auth()->id(), 
+                    'guest_name' => auth()->check() ? null : $this->guest_name,
+                    'guest_email' => auth()->check() ? null : $this->guest_email,
+                    'college_id' => auth()->check() ? null : $this->college_id,
+                    'program' => auth()->check() ? null : $this->program,
+                    'year_level' => auth()->check() ? null : $this->year_level,
+                    'voted_at' => now(),
+                ]);
 
-            // B. Cast the actual votes into the ballot box
-            foreach ($this->selectedCandidates as $positionId => $candidateIds) {
-                foreach ((array) $candidateIds as $candidateId) {
-                    if ($candidateId) { // Ensure it's not a null/empty checkbox
-                        Vote::create([
-                            'election_id' => $this->election->id,
-                            'election_position_id' => $positionId,
-                            'candidate_id' => $candidateId,
-                        ]);
+                // B. Cast the actual votes
+                foreach ($this->selectedCandidates as $positionId => $candidateIds) {
+                    foreach ((array) $candidateIds as $candidateId) {
+                        if (!empty($candidateId)) { // Ensure it's not null
+                            Vote::create([
+                                'election_id' => $this->election->id,
+                                'election_position_id' => $positionId,
+                                'candidate_id' => $candidateId,
+                            ]);
+                        }
                     }
                 }
-            }
-        });
+            });
 
-        // Trigger the success UI screen
-        $this->hasVoted = true;
-        session()->flash('success', 'Your official ballot has been securely cast.');
+            // Trigger the success UI screen
+            $this->hasVoted = true;
+            session()->flash('success', 'Your official ballot has been securely cast.');
+
+        } catch (\Exception $e) {
+            // IF ANYTHING FAILS, IT PRINTS THE ERROR TO THE SCREEN!
+            session()->flash('error', 'Database Error: ' . $e->getMessage());
+        }
     }
 
     public function render()

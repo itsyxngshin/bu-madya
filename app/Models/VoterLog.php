@@ -6,11 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class VoterLog extends Model
 {
-    protected $fillable = [
-        'user_id', 'election_id', 
-        'guest_email', 'guest_name', 'college_id', 'program', 'year_level', 
-        'voted_at'
-    ];
+    protected $guarded = [];
 
     protected $casts = [
         'voted_at' => 'datetime',
