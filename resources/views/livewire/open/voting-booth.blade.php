@@ -115,64 +115,81 @@
 
             {{-- PHASE 2: THE OFFICIAL BALLOT --}}
             <div class="space-y-8 md:space-y-10">
-                    @foreach($positions as $position)
-                        {{-- Added wire:key to the position wrapper --}}
-                        <div wire:key="ballot-position-{{ $position->id }}" class="relative">
-                            <div class="flex flex-col md:flex-row md:items-end justify-between mb-4 gap-2">
-                                <div>
-                                    <h4 class="text-lg font-black text-gray-900 uppercase tracking-tight">{{ $position->title }}</h4>
-                                    <p class="text-[10px] md:text-xs font-bold text-gray-500 uppercase tracking-wider mt-1">
-                                        Select up to {{ $position->max_winners }} candidate(s)
-                                    </p>
-                                </div>
-                                <span class="text-[10px] font-black {{ count($selectedCandidates[$position->id] ?? []) == $position->max_winners ? 'text-green-600 bg-green-50' : 'text-gray-500 bg-gray-100' }} px-3 py-1 rounded-full w-max transition-colors">
-                                    {{ count($selectedCandidates[$position->id] ?? []) }} / {{ $position->max_winners }} Selected
-                                </span>
+                @foreach($positions as $position)
+                    <div wire:key="ballot-position-{{ $position->id }}" class="relative">
+                        
+                        <div class="flex flex-col md:flex-row md:items-end justify-between mb-4 gap-2">
+                            <div>
+                                <h4 class="text-lg font-black text-gray-900 uppercase tracking-tight">{{ $position->title }}</h4>
+                                <p class="text-[10px] md:text-xs font-bold text-gray-500 uppercase tracking-wider mt-1">
+                                    Select up to {{ $position->max_winners }} candidate(s)
+                                </p>
                             </div>
-
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                @forelse($position->candidates as $candidate)
-                                    {{-- FIX 1: Added wire:key to the label so Livewire tracks the state --}}
-                                    <label wire:key="candidate-card-{{ $position->id }}-{{ $candidate->id }}" class="relative cursor-pointer group">
-                                        
-                                        {{-- CRITICAL FIX: Must be "peer sr-only", NOT "peer hidden" --}}
-                                        <input type="checkbox" 
-                                            wire:model.live="selectedCandidates.{{ $position->id }}" 
-                                            value="{{ $candidate->id }}" 
-                                            class="peer sr-only"
-                                            @if(count($selectedCandidates[$position->id] ?? []) >= $position->max_winners && !in_array($candidate->id, $selectedCandidates[$position->id] ?? [])) disabled @endif>
-                                        
-                                        <div class="flex items-center gap-4 p-4 rounded-2xl bg-gray-50 border-2 border-gray-100 transition-all duration-200 ease-in-out
-                                                    peer-checked:border-orange-500 peer-checked:bg-orange-50 peer-checked:shadow-md
-                                                    peer-disabled:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:bg-gray-100
-                                                    hover:border-orange-200">
-                                            
-                                            {{-- Custom Checkbox UI --}}
-                                            <div class="w-6 h-6 rounded-full border-2 border-gray-300 flex items-center justify-center shrink-0 transition-colors peer-checked:bg-orange-500 peer-checked:border-orange-500 group-hover:border-orange-400">
-                                                <svg class="w-3.5 h-3.5 text-white opacity-0 peer-checked:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
-                                            </div>
-
-                                            @if($candidate->profile_photo_path)
-                                                <img src="{{ asset('storage/'.$candidate->profile_photo_path) }}" class="w-12 h-12 rounded-full object-cover shadow-sm shrink-0">
-                                            @else
-                                                <div class="w-12 h-12 rounded-full bg-white border border-gray-200 text-gray-400 flex items-center justify-center font-black text-lg shrink-0">{{ substr($candidate->user->name ?? '?', 0, 1) }}</div>
-                                            @endif
-                                            
-                                            <div class="min-w-0 flex-1">
-                                                <p class="font-black text-gray-900 leading-tight text-sm md:text-base truncate peer-checked:text-orange-900">{{ $candidate->user->name ?? 'Unknown' }}</p>
-                                                <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mt-0.5 truncate">{{ $candidate->program }}</p>
-                                            </div>
-                                        </div>
-                                    </label>
-                                @empty
-                                    <div class="col-span-full text-center py-6 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
-                                        <p class="text-gray-400 text-sm font-bold">No approved candidates for this position.</p>
-                                    </div>
-                                @endforelse
-                            </div>
+                            <span class="text-[10px] font-black {{ count($selectedCandidates[$position->id] ?? []) == $position->max_winners ? 'text-green-600 bg-green-50' : 'text-gray-500 bg-gray-100' }} px-3 py-1 rounded-full w-max transition-colors">
+                                {{ count($selectedCandidates[$position->id] ?? []) }} / {{ $position->max_winners }} Selected
+                            </span>
                         </div>
-                    @endforeach
-                </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            @forelse($position->candidates as $candidate)
+                                @php
+                                    // SAFELY CALCULATE STATES
+                                    // 1. Get current selections for this position (default to empty array)
+                                    $currentSelected = $selectedCandidates[$position->id] ?? [];
+                                    
+                                    // 2. Convert all values to strings for strict matching (Livewire passes strings)
+                                    $currentSelected = array_map('strval', $currentSelected);
+                                    $candidateIdStr = (string) $candidate->id;
+
+                                    // 3. Determine if this specific card is checked and if the limit is reached
+                                    $isSelected = in_array($candidateIdStr, $currentSelected);
+                                    $reachedMax = count($currentSelected) >= $position->max_winners;
+                                @endphp
+
+                                {{-- FIX 1: Added explicit 'for' attribute --}}
+                                <label for="candidate-{{ $position->id }}-{{ $candidate->id }}" 
+                                       wire:key="candidate-card-{{ $position->id }}-{{ $candidate->id }}" 
+                                       class="relative cursor-pointer group">
+                                    
+                                    {{-- FIX 2: Added explicit 'id' and simplified the disabled logic --}}
+                                    <input type="checkbox" 
+                                        id="candidate-{{ $position->id }}-{{ $candidate->id }}"
+                                        wire:model.live="selectedCandidates.{{ $position->id }}" 
+                                        value="{{ $candidate->id }}" 
+                                        class="peer sr-only"
+                                        @if($reachedMax && !$isSelected) disabled @endif>
+                                    
+                                    <div class="flex items-center gap-4 p-4 rounded-2xl bg-gray-50 border-2 border-gray-100 transition-all duration-200 ease-in-out
+                                                peer-checked:border-orange-500 peer-checked:bg-orange-50 peer-checked:shadow-md
+                                                peer-disabled:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:bg-gray-100
+                                                hover:border-orange-200">
+                                        
+                                        {{-- Custom Checkbox UI --}}
+                                        <div class="w-6 h-6 rounded-full border-2 border-gray-300 flex items-center justify-center shrink-0 transition-colors peer-checked:bg-orange-500 peer-checked:border-orange-500 group-hover:border-orange-400">
+                                            <svg class="w-3.5 h-3.5 text-white opacity-0 peer-checked:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+                                        </div>
+
+                                        @if($candidate->profile_photo_path)
+                                            <img src="{{ asset('storage/'.$candidate->profile_photo_path) }}" class="w-12 h-12 rounded-full object-cover shadow-sm shrink-0">
+                                        @else
+                                            <div class="w-12 h-12 rounded-full bg-white border border-gray-200 text-gray-400 flex items-center justify-center font-black text-lg shrink-0">{{ substr($candidate->user->name ?? '?', 0, 1) }}</div>
+                                        @endif
+                                        
+                                        <div class="min-w-0 flex-1">
+                                            <p class="font-black text-gray-900 leading-tight text-sm md:text-base truncate peer-checked:text-orange-900">{{ $candidate->user->name ?? 'Unknown' }}</p>
+                                            <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mt-0.5 truncate">{{ $candidate->program }}</p>
+                                        </div>
+                                    </div>
+                                </label>
+                            @empty
+                                <div class="col-span-full text-center py-6 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+                                    <p class="text-gray-400 text-sm font-bold">No approved candidates for this position.</p>
+                                </div>
+                            @endforelse
+                        </div>
+                    </div>
+                @endforeach
+            </div>
 
             {{-- STICKY MOBILE SUBMIT BUTTON --}}
             <div class="fixed bottom-0 left-0 w-full p-4 bg-white/90 backdrop-blur-md border-t border-gray-200 shadow-[0_-10px_20px_rgba(0,0,0,0.05)] z-50 md:static md:bg-transparent md:border-0 md:shadow-none md:p-0 md:pt-4">
