@@ -106,7 +106,7 @@ class ElectionEditor extends Component
             'title' => 'required|string|max:255',
             'slug' => 'required|string|alpha_dash|max:255|unique:elections,slug,' . $this->election->id,
             'type' => 'required|in:general,special,runoff',
-            'cover_photo' => 'nullable|image|max:2048',
+            'cover_photo' => 'nullable|image',
             'application_start' => 'nullable|date',
             'application_end' => 'nullable|date|after:application_start',
             'voting_start' => 'nullable|date|after:application_end',
