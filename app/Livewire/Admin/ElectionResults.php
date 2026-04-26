@@ -24,18 +24,20 @@ class ElectionResults extends Component
         // 1. Get the total number of people who checked in
         $totalVoters = VoterLog::where('election_id', $this->election->id)->count();
 
-        // 2. Fetch the election positions and approved candidates WITH their vote counts
-        $electionData = Election::with(['positions' => function ($query) {
-            $query->orderBy('order');
-        }, 'positions.candidates' => function ($query) {
-            $query->where('status', 'approved')
-                  ->with('user')
-                  ->withCount('votes')
-                  ->orderByDesc('votes_count');
-        }])->find($this->election->id);
+        // 2. LOAD the relationships and vote counts directly into the public $election variable!
+        $this->election->load([
+            'positions' => function ($query) {
+                $query->orderBy('order');
+            }, 
+            'positions.candidates' => function ($query) {
+                $query->where('status', 'approved')
+                      ->with('user')
+                      ->withCount('votes') // This dynamically creates the 'votes_count' attribute
+                      ->orderByDesc('votes_count');
+            }
+        ]);
 
         return view('livewire.admin.election-results', [
-            'electionData' => $electionData, // Pass the fresh data to the view
             'totalVoters' => $totalVoters
         ])->layout('layouts.madya-admin-deck');
     }
