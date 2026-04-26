@@ -67,6 +67,46 @@ class VotingBooth extends Component
         }
     }
 
+    // ADD THIS METHOD TO YOUR COMPONENT
+    public function toggleSelection($positionId, $candidateId)
+    {
+        // 1. Get the current selections for this position
+        $current = $this->selectedCandidates[$positionId] ?? [];
+        $position = $this->positions->firstWhere('id', $positionId);
+        
+        // Ensure the incoming ID is treated as a string for strict array matching
+        $candidateId = (string) $candidateId;
+
+        // 2. Handle the special "Abstain" logic
+        if ($candidateId === 'abstain') {
+            if (in_array('abstain', $current)) {
+                $this->selectedCandidates[$positionId] = []; // Toggle off
+            } else {
+                $this->selectedCandidates[$positionId] = ['abstain']; // Toggle on (exclusively)
+            }
+            return;
+        }
+
+        // 3. If they select a real candidate, automatically clear 'abstain' if it was selected
+        if (($key = array_search('abstain', $current)) !== false) {
+            unset($current[$key]);
+        }
+
+        // 4. Standard Toggle Logic
+        if (($key = array_search($candidateId, $current)) !== false) {
+            // If it's already checked, uncheck it
+            unset($current[$key]);
+        } else {
+            // If it's NOT checked, ensure we haven't hit the max limit before adding it
+            if (count($current) < $position->max_winners) {
+                $current[] = $candidateId;
+            }
+        }
+
+        // 5. Re-index the array and save it back to Livewire's state
+        $this->selectedCandidates[$positionId] = array_values($current);
+    }
+
     public function castBallot()
     {
         // Security Lock 1: Is Voting Open?

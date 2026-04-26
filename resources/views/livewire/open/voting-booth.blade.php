@@ -125,91 +125,92 @@
                                     Select up to {{ $position->max_winners }} candidate(s)
                                 </p>
                             </div>
-                            <span class="text-[10px] font-black {{ count($selectedCandidates[$position->id] ?? []) == $position->max_winners ? 'text-green-600 bg-green-50' : 'text-gray-500 bg-gray-100' }} px-3 py-1 rounded-full w-max transition-colors">
-                                {{ count($selectedCandidates[$position->id] ?? []) }} / {{ $position->max_winners }} Selected
+                            <span class="text-[10px] font-black {{ count($selectedCandidates[$position->id] ?? []) == $position->max_winners && !in_array('abstain', $selectedCandidates[$position->id] ?? []) ? 'text-green-600 bg-green-50' : 'text-gray-500 bg-gray-100' }} px-3 py-1 rounded-full w-max transition-colors">
+                                @if(in_array('abstain', $selectedCandidates[$position->id] ?? []))
+                                    Abstained
+                                @else
+                                    {{ count($selectedCandidates[$position->id] ?? []) }} / {{ $position->max_winners }} Selected
+                                @endif
                             </span>
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             @forelse($position->candidates as $candidate)
                                 @php
-                                    // Calculate states purely in PHP
                                     $currentSelected = $selectedCandidates[$position->id] ?? [];
-                                    $isSelected = in_array($candidate->id, $currentSelected);
+                                    $isSelected = in_array((string)$candidate->id, $currentSelected);
                                     $reachedMax = count($currentSelected) >= $position->max_winners;
                                 @endphp
 
-                                <label for="cand-{{ $position->id }}-{{ $candidate->id }}" class="relative block cursor-pointer group">
+                                {{-- PURE BUTTON (No Checkboxes) --}}
+                                <button type="button" 
+                                        wire:click="toggleSelection({{ $position->id }}, '{{ $candidate->id }}')"
+                                        wire:key="candidate-card-{{ $position->id }}-{{ $candidate->id }}"
+                                        class="w-full text-left relative flex items-center gap-4 p-4 rounded-2xl border-2 transition-all duration-200 ease-in-out group disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-100 {{ $isSelected ? 'border-orange-500 bg-orange-50 shadow-md' : 'border-gray-100 bg-gray-50 hover:border-orange-200' }}"
+                                        @if($reachedMax && !$isSelected) disabled @endif>
                                     
-                                    {{-- NATIVE LIVEWIRE BINDING (Bulletproof) --}}
-                                    <input type="checkbox" 
-                                           id="cand-{{ $position->id }}-{{ $candidate->id }}"
-                                           wire:model.live="selectedCandidates.{{ $position->id }}" 
-                                           value="{{ $candidate->id }}" 
-                                           class="opacity-0 absolute w-0 h-0 peer"
-                                           @if($reachedMax && !$isSelected) disabled @endif>
-                                    
-                                    <div class="flex items-center gap-4 p-4 rounded-2xl bg-gray-50 border-2 border-gray-100 transition-all duration-200 ease-in-out
-                                                peer-checked:border-orange-500 peer-checked:bg-orange-50 peer-checked:shadow-md
-                                                peer-disabled:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:bg-gray-100
-                                                hover:border-orange-200">
-                                        
-                                        {{-- Custom Checkbox UI --}}
-                                        <div class="w-6 h-6 rounded-full border-2 border-gray-300 flex items-center justify-center shrink-0 transition-colors peer-checked:bg-orange-500 peer-checked:border-orange-500 group-hover:border-orange-400">
-                                            <svg class="w-3.5 h-3.5 text-white opacity-0 peer-checked:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
-                                        </div>
-
-                                        @if($candidate->profile_photo_path)
-                                            <img src="{{ asset('storage/'.$candidate->profile_photo_path) }}" class="w-12 h-12 rounded-full object-cover shadow-sm shrink-0 bg-white">
-                                        @else
-                                            <div class="w-12 h-12 rounded-full bg-white border border-gray-200 text-gray-400 flex items-center justify-center font-black text-lg shrink-0">{{ substr($candidate->user->name ?? '?', 0, 1) }}</div>
+                                    {{-- Custom Checkbox UI --}}
+                                    <div class="w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors {{ $isSelected ? 'border-orange-500 bg-orange-500' : 'border-gray-300 group-hover:border-orange-400' }}">
+                                        @if($isSelected)
+                                            <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
                                         @endif
-                                        
-                                        <div class="min-w-0 flex-1">
-                                            <p class="font-black text-gray-900 leading-tight text-sm md:text-base truncate peer-checked:text-orange-900 transition-colors">{{ $candidate->user->name ?? 'Unknown' }}</p>
-                                            <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mt-0.5 truncate">{{ $candidate->program }}</p>
-                                        </div>
                                     </div>
-                                </label>
+
+                                    @if($candidate->profile_photo_path)
+                                        <img src="{{ asset('storage/'.$candidate->profile_photo_path) }}" class="w-12 h-12 rounded-full object-cover shadow-sm shrink-0 bg-white">
+                                    @else
+                                        <div class="w-12 h-12 rounded-full bg-white border border-gray-200 text-gray-400 flex items-center justify-center font-black text-lg shrink-0">{{ substr($candidate->user->name ?? '?', 0, 1) }}</div>
+                                    @endif
+                                    
+                                    <div class="min-w-0 flex-1">
+                                        <p class="font-black leading-tight text-sm md:text-base truncate transition-colors {{ $isSelected ? 'text-orange-900' : 'text-gray-900' }}">{{ $candidate->user->name ?? 'Unknown' }}</p>
+                                        <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mt-0.5 truncate">{{ $candidate->program }}</p>
+                                    </div>
+                                </button>
                             @empty
                                 <div class="col-span-full text-center py-6 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
                                     <p class="text-gray-400 text-sm font-bold">No approved candidates for this position.</p>
                                 </div>
                             @endforelse
+
+                            {{-- MANDATORY ABSTAIN BUTTON --}}
+                            @php
+                                $isAbstainSelected = in_array('abstain', $selectedCandidates[$position->id] ?? []);
+                            @endphp
+                            <button type="button" 
+                                    wire:click="toggleSelection({{ $position->id }}, 'abstain')"
+                                    class="w-full text-left relative flex items-center gap-4 p-4 rounded-2xl border-2 border-dashed transition-all duration-200 ease-in-out group {{ $isAbstainSelected ? 'border-gray-500 bg-gray-200 shadow-inner' : 'border-gray-200 bg-gray-100/50 hover:border-gray-300' }}">
+                                
+                                <div class="w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors {{ $isAbstainSelected ? 'border-gray-600 bg-gray-600' : 'border-gray-300 group-hover:border-gray-400' }}">
+                                    @if($isAbstainSelected)
+                                        <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+                                    @endif
+                                </div>
+
+                                <div class="min-w-0 flex-1">
+                                    <p class="font-black text-gray-600 leading-tight text-sm md:text-base italic">Abstain / No Selection</p>
+                                    <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">Skip voting for this position</p>
+                                </div>
+                            </button>
                         </div>
                     </div>
                 @endforeach
-
-                {{-- MANDATORY ABSTAIN OPTION --}}
-                <label for="abstain-{{ $position->id }}" class="relative block cursor-pointer group">
-                    <input type="checkbox" 
-                        id="abstain-{{ $position->id }}"
-                        wire:model.live="selectedCandidates.{{ $position->id }}" 
-                        value="abstain" 
-                        class="opacity-0 absolute w-0 h-0 peer"
-                        {{-- Disable Abstain if they already picked a candidate for a 1-seat position --}}
-                        @if(count($selectedCandidates[$position->id] ?? []) >= $position->max_winners && !in_array('abstain', $selectedCandidates[$position->id] ?? [])) disabled @endif>
-                    
-                    <div class="flex items-center gap-4 p-4 rounded-2xl bg-gray-100/50 border-2 border-dashed border-gray-200 transition-all duration-200 
-                                peer-checked:border-gray-500 peer-checked:bg-gray-200 peer-checked:shadow-inner
-                                peer-disabled:opacity-50">
-                        
-                        {{-- Simple Circle UI --}}
-                        <div class="w-6 h-6 rounded-full border-2 border-gray-300 flex items-center justify-center shrink-0 peer-checked:bg-gray-600 peer-checked:border-gray-600">
-                            <svg class="w-3.5 h-3.5 text-white opacity-0 peer-checked:opacity-100" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
-                        </div>
-
-                        <div class="min-w-0 flex-1">
-                            <p class="font-black text-gray-600 leading-tight text-sm md:text-base italic">Abstain / No Selection</p>
-                            <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">Skip voting for this position</p>
-                        </div>
-                    </div>
-                </label>
             </div>
+
+            {{-- THE UI FIX: A large empty spacer so the sticky button never overlaps candidates --}}
+            <div class="h-40 md:h-12 w-full pointer-events-none"></div>
 
             {{-- STICKY MOBILE SUBMIT BUTTON --}}
             <div class="fixed bottom-0 left-0 w-full p-4 bg-white/90 backdrop-blur-md border-t border-gray-200 shadow-[0_-10px_20px_rgba(0,0,0,0.05)] z-50 md:static md:bg-transparent md:border-0 md:shadow-none md:p-0 md:pt-4">
-                <button type="submit" wire:loading.attr="disabled" class="w-full py-4 md:py-5 bg-gradient-to-r from-gray-900 to-black text-white font-black text-lg md:text-xl rounded-xl md:rounded-2xl shadow-xl transition-all flex items-center justify-center gap-2">
+                
+                @if($errors->any())
+                    <div class="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-[10px] md:text-sm font-bold text-center flex justify-center items-center gap-2 animate-pulse">
+                        <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                        Validation failed! Please scroll up and complete the required fields.
+                    </div>
+                @endif
+
+                <button type="submit" wire:loading.attr="disabled" class="w-full py-4 md:py-5 bg-gradient-to-r from-gray-900 to-black text-white font-black text-lg md:text-xl rounded-xl md:rounded-2xl shadow-xl transition-all flex items-center justify-center gap-2 hover:from-black hover:to-gray-800 transform active:scale-[0.98]">
                     <span wire:loading.remove wire:target="castBallot">Cast Official Ballot</span>
                     <span wire:loading wire:target="castBallot">Encrypting...</span>
                 </button>
