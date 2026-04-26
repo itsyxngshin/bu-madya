@@ -116,45 +116,8 @@
             {{-- PHASE 2: THE OFFICIAL BALLOT --}}
             <div class="space-y-8 md:space-y-10">
                 @foreach($positions as $position)
-                    
-                    {{-- ALPINE + LIVEWIRE ENTANGLE WRAPPER --}}
-                    <div wire:key="ballot-position-{{ $position->id }}" 
-                         x-data="{
-                            // Sync this Alpine variable directly with Livewire's backend array
-                            selected: @entangle('selectedCandidates.'.$position->id),
-                            max: {{ $position->max_winners }},
-                            
-                            init() {
-                                // Ensure it's always an array to prevent errors
-                                if (!Array.isArray(this.selected)) this.selected = [];
-                            },
-                            
-                            toggle(candidateId) {
-                                let strId = String(candidateId);
-                                let index = this.selected.indexOf(strId);
-                                
-                                if (index > -1) {
-                                    // It's checked. Uncheck it.
-                                    this.selected.splice(index, 1);
-                                } else {
-                                    // It's not checked. Check it if we haven't hit the limit.
-                                    if (this.selected.length < this.max) {
-                                        this.selected.push(strId);
-                                    }
-                                }
-                            },
-                            
-                            isSelected(candidateId) {
-                                return this.selected.includes(String(candidateId));
-                            },
-                            
-                            isMaxed() {
-                                return this.selected.length >= this.max;
-                            }
-                         }"
-                         class="relative">
+                    <div wire:key="ballot-position-{{ $position->id }}" class="relative">
                         
-                        {{-- Position Header --}}
                         <div class="flex flex-col md:flex-row md:items-end justify-between mb-4 gap-2">
                             <div>
                                 <h4 class="text-lg font-black text-gray-900 uppercase tracking-tight">{{ $position->title }}</h4>
@@ -162,49 +125,52 @@
                                     Select up to {{ $position->max_winners }} candidate(s)
                                 </p>
                             </div>
-                            
-                            {{-- Dynamic Counter mapped to Alpine --}}
-                            <span class="text-[10px] font-black px-3 py-1 rounded-full w-max transition-colors"
-                                  :class="isMaxed() ? 'text-green-600 bg-green-50' : 'text-gray-500 bg-gray-100'"
-                                  x-text="`${selected.length} / ${max} Selected`">
+                            <span class="text-[10px] font-black {{ count($selectedCandidates[$position->id] ?? []) == $position->max_winners ? 'text-green-600 bg-green-50' : 'text-gray-500 bg-gray-100' }} px-3 py-1 rounded-full w-max transition-colors">
+                                {{ count($selectedCandidates[$position->id] ?? []) }} / {{ $position->max_winners }} Selected
                             </span>
                         </div>
 
-                        {{-- Candidate Grid --}}
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             @forelse($position->candidates as $candidate)
-                                
-                                {{-- REWIRED CARD: Now a pure interactive button --}}
-                                <button type="button" 
-                                        wire:key="candidate-card-{{ $position->id }}-{{ $candidate->id }}"
-                                        @click="toggle('{{ $candidate->id }}')"
-                                        :disabled="isMaxed() && !isSelected('{{ $candidate->id }}')"
-                                        class="w-full text-left relative flex items-center gap-4 p-4 rounded-2xl border-2 transition-all duration-200 ease-in-out group disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-100"
-                                        :class="isSelected('{{ $candidate->id }}') ? 'border-orange-500 bg-orange-50 shadow-md' : 'border-gray-100 bg-gray-50 hover:border-orange-200'">
-                                    
-                                    {{-- Custom Checkbox UI --}}
-                                    <div class="w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors"
-                                         :class="isSelected('{{ $candidate->id }}') ? 'border-orange-500 bg-orange-500' : 'border-gray-300 group-hover:border-orange-400'">
-                                        <svg x-show="isSelected('{{ $candidate->id }}')" x-cloak class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
-                                    </div>
+                                @php
+                                    // Calculate states purely in PHP
+                                    $currentSelected = $selectedCandidates[$position->id] ?? [];
+                                    $isSelected = in_array($candidate->id, $currentSelected);
+                                    $reachedMax = count($currentSelected) >= $position->max_winners;
+                                @endphp
 
-                                    {{-- Avatar --}}
-                                    @if($candidate->profile_photo_path)
-                                        <img src="{{ asset('storage/'.$candidate->profile_photo_path) }}" class="w-12 h-12 rounded-full object-cover shadow-sm shrink-0 bg-white">
-                                    @else
-                                        <div class="w-12 h-12 rounded-full bg-white border border-gray-200 text-gray-400 flex items-center justify-center font-black text-lg shrink-0">{{ substr($candidate->user->name ?? '?', 0, 1) }}</div>
-                                    @endif
+                                <label for="cand-{{ $position->id }}-{{ $candidate->id }}" class="relative block cursor-pointer group">
                                     
-                                    {{-- Info --}}
-                                    <div class="min-w-0 flex-1">
-                                        <p class="font-black leading-tight text-sm md:text-base truncate transition-colors"
-                                           :class="isSelected('{{ $candidate->id }}') ? 'text-orange-900' : 'text-gray-900'">
-                                            {{ $candidate->user->name ?? 'Unknown' }}
-                                        </p>
-                                        <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mt-0.5 truncate">{{ $candidate->program }}</p>
-                                    </div>
-                                </button>
+                                    {{-- NATIVE LIVEWIRE BINDING (Bulletproof) --}}
+                                    <input type="checkbox" 
+                                           id="cand-{{ $position->id }}-{{ $candidate->id }}"
+                                           wire:model.live="selectedCandidates.{{ $position->id }}" 
+                                           value="{{ $candidate->id }}" 
+                                           class="opacity-0 absolute w-0 h-0 peer"
+                                           @if($reachedMax && !$isSelected) disabled @endif>
+                                    
+                                    <div class="flex items-center gap-4 p-4 rounded-2xl bg-gray-50 border-2 border-gray-100 transition-all duration-200 ease-in-out
+                                                peer-checked:border-orange-500 peer-checked:bg-orange-50 peer-checked:shadow-md
+                                                peer-disabled:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:bg-gray-100
+                                                hover:border-orange-200">
+                                        
+                                        {{-- Custom Checkbox UI --}}
+                                        <div class="w-6 h-6 rounded-full border-2 border-gray-300 flex items-center justify-center shrink-0 transition-colors peer-checked:bg-orange-500 peer-checked:border-orange-500 group-hover:border-orange-400">
+                                            <svg class="w-3.5 h-3.5 text-white opacity-0 peer-checked:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+                                        </div>
 
+                                        @if($candidate->profile_photo_path)
+                                            <img src="{{ asset('storage/'.$candidate->profile_photo_path) }}" class="w-12 h-12 rounded-full object-cover shadow-sm shrink-0 bg-white">
+                                        @else
+                                            <div class="w-12 h-12 rounded-full bg-white border border-gray-200 text-gray-400 flex items-center justify-center font-black text-lg shrink-0">{{ substr($candidate->user->name ?? '?', 0, 1) }}</div>
+                                        @endif
+                                        
+                                        <div class="min-w-0 flex-1">
+                                            <p class="font-black text-gray-900 leading-tight text-sm md:text-base truncate peer-checked:text-orange-900 transition-colors">{{ $candidate->user->name ?? 'Unknown' }}</p>
+                                            <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mt-0.5 truncate">{{ $candidate->program }}</p>
+                                        </div>
+                                    </div>
+                                </label>
                             @empty
                                 <div class="col-span-full text-center py-6 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
                                     <p class="text-gray-400 text-sm font-bold">No approved candidates for this position.</p>

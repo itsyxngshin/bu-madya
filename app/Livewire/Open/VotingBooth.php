@@ -96,7 +96,6 @@ class VotingBooth extends Component
                 'year_level' => 'required|string|max:50',
             ]);
 
-            // Ensure this email hasn't been used to vote in this election yet
             $alreadyVoted = VoterLog::where('election_id', $this->election->id)
                                     ->where('guest_email', $this->guest_email)
                                     ->exists();
@@ -107,20 +106,28 @@ class VotingBooth extends Component
             }
         }
 
-        // Security Lock 4: Did they over-vote?
-        foreach ($this->positions as $position) {
-            $selectedCount = count($this->selectedCandidates[$position->id] ?? []);
-            if ($selectedCount > $position->max_winners) {
-                session()->flash('error', "You selected too many candidates for {$position->title}. Maximum allowed is {$position->max_winners}.");
+        // NEW SECURITY LOCK 4: Did they actually select anyone?
+        $totalSelections = 0;
+        foreach ($this->selectedCandidates as $posId => $cands) {
+            $totalSelections += count(array_filter((array) $cands));
+            
+            // Check for over-voting while we are looping
+            $position = $this->positions->firstWhere('id', $posId);
+            if ($position && count(array_filter((array) $cands)) > $position->max_winners) {
+                session()->flash('error', "You selected too many candidates for {$position->title}.");
                 return;
             }
         }
 
-        // TRY-CATCH BLOCK: This will reveal any hidden database errors!
+        if ($totalSelections === 0) {
+            session()->flash('error', 'Your ballot is empty! Please select at least one candidate.');
+            return;
+        }
+
+        // 5. Encrypt and save!
         try {
             DB::transaction(function () {
-                
-                // A. Create the check-in record
+                // A. Check-in record
                 VoterLog::create([
                     'election_id' => $this->election->id,
                     'user_id' => auth()->id(), 
@@ -132,10 +139,10 @@ class VotingBooth extends Component
                     'voted_at' => now(),
                 ]);
 
-                // B. Cast the actual votes
+                // B. Cast votes
                 foreach ($this->selectedCandidates as $positionId => $candidateIds) {
                     foreach ((array) $candidateIds as $candidateId) {
-                        if (!empty($candidateId)) { // Ensure it's not null
+                        if (!empty($candidateId)) { 
                             Vote::create([
                                 'election_id' => $this->election->id,
                                 'election_position_id' => $positionId,
@@ -146,12 +153,10 @@ class VotingBooth extends Component
                 }
             });
 
-            // Trigger the success UI screen
             $this->hasVoted = true;
             session()->flash('success', 'Your official ballot has been securely cast.');
 
         } catch (\Exception $e) {
-            // IF ANYTHING FAILS, IT PRINTS THE ERROR TO THE SCREEN!
             session()->flash('error', 'Database Error: ' . $e->getMessage());
         }
     }
