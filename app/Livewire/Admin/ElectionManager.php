@@ -58,11 +58,11 @@ class ElectionManager extends Component
 
     public function saveElection()
     {
+        // 1. Only validate the fields the user actually typed in!
         $this->validate([
             'title' => 'required|string|max:255',
             'type' => 'required|in:general,special,runoff',
-            'cover_photo' => 'nullable|image',
-            'slug' => Str::slug($this->title . '-' . uniqid()),
+            'cover_photo' => 'nullable|image|max:2048',
             'application_start' => 'required|date',
             'application_end' => 'required|date|after:application_start',
             'voting_start' => 'required|date|after:application_end',
@@ -77,15 +77,16 @@ class ElectionManager extends Component
             $photoPath = $this->cover_photo ? $this->cover_photo->store('elections/covers', 'public') : null;
             $activeYear = AcademicYear::where('is_active', true)->first();
 
-            // 1. Create the Master Election Entity
+            // 2. Generate and save the slug right here during creation
             $election = Election::create([
-                'user_id' => auth()->id(), // The Organization Owner
+                'user_id' => auth()->id(),
                 'academic_year_id' => $activeYear->id ?? 1,
                 'title' => $this->title,
+                'slug' => Str::slug($this->title . '-' . uniqid()), // <--- Moved here!
                 'description' => $this->description,
                 'cover_photo_path' => $photoPath,
                 'type' => $this->type,
-                'status' => 'active', // Set to active immediately for this example
+                'status' => 'active',
                 'allow_guest_voting' => $this->allow_guest_voting,
                 'application_start' => $this->application_start,
                 'application_end' => $this->application_end,
@@ -94,7 +95,7 @@ class ElectionManager extends Component
                 'results_release' => $this->results_release,
             ]);
 
-            // 2. Create the Custom Positions
+            // 3. Create the Custom Positions
             foreach ($this->positions as $index => $pos) {
                 ElectionPosition::create([
                     'election_id' => $election->id,
@@ -106,7 +107,7 @@ class ElectionManager extends Component
         });
 
         session()->flash('success', 'Election entity created successfully!');
-        return redirect()->route('admin.elections.index'); // Adjust route as needed
+        return redirect()->route('admin.elections.index'); 
     }
 
     public function render()
