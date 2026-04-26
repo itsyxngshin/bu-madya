@@ -3,7 +3,7 @@
     <div class="mb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
             <h1 class="text-3xl font-black text-gray-900 tracking-tight flex items-center gap-3">
-                <a href="{{ route('admin.elections.manage') }}" class="text-gray-400 hover:text-orange-600 transition-colors">
+                <a href="{{ route('admin.elections.index') }}" class="text-gray-400 hover:text-orange-600 transition-colors">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                 </a>
                 Edit Election
@@ -48,6 +48,37 @@
                 <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Election Title</label>
                 <input type="text" wire:model="title" class="w-full rounded-xl border-gray-200 bg-gray-50 focus:ring-orange-500 p-3 shadow-sm font-bold text-gray-900">
                 @error('title') <span class="text-[10px] text-red-500 font-bold mt-1 block">{{ $message }}</span> @enderror
+            </div>
+
+            {{-- Custom URL Slug Editor (Locked by default) --}}
+            <div x-data="{ editSlug: false }">
+                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Public URL Slug</label>
+                <div class="flex rounded-xl shadow-sm relative transition-all" :class="editSlug ? 'ring-2 ring-orange-500' : ''">
+                    <span class="inline-flex items-center px-4 rounded-l-xl border border-r-0 border-gray-200 bg-gray-100 text-gray-500 sm:text-sm font-bold">
+                        /elections/
+                    </span>
+                    
+                    <input type="text" wire:model="slug" :readonly="!editSlug" 
+                           class="flex-1 min-w-0 block w-full px-4 py-3 border border-gray-200 focus:ring-0 font-bold text-gray-900 shadow-sm transition-colors" 
+                           :class="editSlug ? 'bg-white border-orange-500' : 'bg-gray-50 text-gray-500 cursor-not-allowed'" 
+                           placeholder="e.g. 2026-general-elections">
+                    
+                    {{-- Unlock / Lock Button --}}
+                    <button type="button" @click="editSlug = !editSlug" 
+                            class="inline-flex items-center px-4 rounded-r-xl border border-l-0 border-gray-200 font-bold text-xs transition-colors"
+                            :class="editSlug ? 'bg-orange-100 text-orange-700 hover:bg-orange-200 border-orange-500' : 'bg-white text-gray-600 hover:bg-gray-50'">
+                        <span x-show="!editSlug">Edit</span>
+                        <span x-show="editSlug" x-cloak>Lock</span>
+                    </button>
+                </div>
+                
+                {{-- Warning message only shows when unlocked --}}
+                <div x-show="editSlug" style="display: none;" class="mt-2 text-[10px] text-orange-600 font-black uppercase tracking-wider flex items-center gap-1">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                    Warning: Changing this will instantly break any links already shared with students!
+                </div>
+                
+                @error('slug') <span class="text-[10px] text-red-500 font-bold mt-1 block">{{ $message }}</span> @enderror
             </div>
             
             <div>

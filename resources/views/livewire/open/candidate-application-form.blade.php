@@ -22,39 +22,40 @@
         <form wire:submit.prevent="submitApplication" class="space-y-8">
             
             {{-- MULTI-TENANT ELECTION SELECTION --}}
+            {{-- LOCKED ELECTION SELECTION --}}
             <div class="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray-200">
                 <h3 class="text-lg font-black text-gray-900 border-b border-gray-100 pb-4 mb-6 flex items-center gap-2">
                     <span class="w-6 h-6 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center text-xs">1</span>
-                    Election & Position
+                    Candidacy Details
                 </h3>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Select Election</label>
-                        {{-- Notice the wire:model.live so it triggers the dynamic positions! --}}
-                        <select wire:model.live="election_id" class="w-full bg-gray-50 border border-gray-200 focus:border-orange-500 focus:bg-white rounded-xl px-4 py-3 text-sm font-bold text-gray-800 shadow-sm transition-colors cursor-pointer">
-                            <option value="">-- Choose Election --</option>
-                            @foreach($activeElections as $election)
-                                <option value="{{ $election->id }}">{{ $election->title }}</option>
-                            @endforeach
-                        </select>
-                        @error('election_id') <span class="text-[10px] text-red-500 font-bold mt-1 block">{{ $message }}</span> @enderror
+                    {{-- Locked Election Display --}}
+                    <div class="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 shadow-inner">
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Filing for Election</label>
+                        <p class="text-sm font-black text-gray-900 truncate">{{ $election->title }}</p>
                     </div>
 
+                    {{-- Position Selection --}}
                     <div>
                         <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Position Applied For</label>
-                        <select wire:model="election_position_id" class="w-full bg-gray-50 border border-gray-200 focus:border-orange-500 focus:bg-white rounded-xl px-4 py-3 text-sm font-bold text-gray-800 shadow-sm transition-colors cursor-pointer" @if(empty($availablePositions)) disabled @endif>
+                        <select wire:model="election_position_id" class="w-full bg-white border border-gray-200 focus:border-orange-500 rounded-xl px-4 py-3 text-sm font-bold text-gray-800 shadow-sm transition-colors cursor-pointer" @if(empty($availablePositions)) disabled @endif>
                             <option value="">-- Select Position --</option>
                             @foreach($availablePositions as $pos)
                                 <option value="{{ $pos->id }}">{{ $pos->title }} ({{ $pos->max_winners }} Seat/s)</option>
                             @endforeach
                         </select>
                         @error('election_position_id') <span class="text-[10px] text-red-500 font-bold mt-1 block">{{ $message }}</span> @enderror
-                        @if(empty($availablePositions) && $election_id)
-                            <span class="text-[10px] text-gray-400 font-bold mt-1 block">Loading positions...</span>
-                        @endif
                     </div>
                 </div>
+
+                {{-- Application Closed Warning --}}
+                @if(!$isApplicationOpen)
+                    <div class="mt-6 bg-red-50 text-red-700 p-4 rounded-xl border border-red-200 font-bold flex items-center justify-center gap-2 text-sm">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                        The application filing period for this election is currently closed.
+                    </div>
+                @endif
             </div>
 
             {{-- DEMOGRAPHICS --}}

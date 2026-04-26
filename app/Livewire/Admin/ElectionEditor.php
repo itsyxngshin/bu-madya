@@ -19,6 +19,7 @@ class ElectionEditor extends Component
 
     // Election Details
     public $title = '';
+    public $slug = '';
     public $description = '';
     public $type = 'general';
     public $allow_guest_voting = false;
@@ -34,7 +35,7 @@ class ElectionEditor extends Component
 
     // Dynamic Positions
     public $positions = [];
-    public $positionsToDelete = []; // Track DB IDs to delete on save
+    public $positionsToDelete = []; 
 
     public function mount(Election $election)
     {
@@ -47,6 +48,7 @@ class ElectionEditor extends Component
 
         // Populate Basic Details
         $this->title = $election->title;
+        $this->slug = $election->slug;
         $this->description = $election->description;
         $this->type = $election->type;
         $this->allow_guest_voting = $election->allow_guest_voting;
@@ -66,7 +68,7 @@ class ElectionEditor extends Component
                 'temp_id' => null,
                 'title' => $pos->title,
                 'max_winners' => $pos->max_winners,
-                'candidate_count' => $pos->candidates()->count(), // Safety Lock Check!
+                'candidate_count' => $pos->candidates()->count(), // Safety Lock Check
             ];
         }
     }
@@ -90,7 +92,6 @@ class ElectionEditor extends Component
             return;
         }
 
-        // If it exists in the database, queue it for deletion
         if (!empty($this->positions[$index]['id'])) {
             $this->positionsToDelete[] = $this->positions[$index]['id'];
         }
@@ -103,6 +104,7 @@ class ElectionEditor extends Component
     {
         $this->validate([
             'title' => 'required|string|max:255',
+            'slug' => 'required|string|alpha_dash|max:255|unique:elections,slug,' . $this->election->id,
             'type' => 'required|in:general,special,runoff',
             'cover_photo' => 'nullable|image|max:2048',
             'application_start' => 'nullable|date',
@@ -127,8 +129,7 @@ class ElectionEditor extends Component
             // 2. Update Election Details
             $this->election->update([
                 'title' => $this->title,
-                // Optional: Update slug if title changes, but usually best to keep URL stable
-                // 'slug' => Str::slug($this->title . '-' . uniqid()), 
+                'slug' => Str::slug($this->slug), // Force sanitization just in case
                 'description' => $this->description,
                 'type' => $this->type,
                 'allow_guest_voting' => $this->allow_guest_voting,
@@ -147,19 +148,19 @@ class ElectionEditor extends Component
             // 4. Update or Create Positions
             foreach ($this->positions as $index => $pos) {
                 ElectionPosition::updateOrCreate(
-                    ['id' => $pos['id'] ?? null], // If ID exists, update. If null, create.
+                    ['id' => $pos['id'] ?? null],
                     [
                         'election_id' => $this->election->id,
                         'title' => $pos['title'],
                         'max_winners' => $pos['max_winners'],
-                        'order' => $index, // Preserves the order they appear in the UI
+                        'order' => $index, 
                     ]
                 );
             }
         });
 
         session()->flash('success', 'Election settings updated successfully!');
-        return redirect()->route('admin.elections.manage'); // Redirect back to list
+        return redirect()->route('admin.elections.index'); 
     }
 
     public function render()
