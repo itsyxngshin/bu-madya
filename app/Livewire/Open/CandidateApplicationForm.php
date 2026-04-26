@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Frontend;
+namespace App\Livewire\Open;
 
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -134,6 +134,6 @@ class CandidateApplicationForm extends Component
 
     public function render()
     {
-        return view('livewire.frontend.candidate-application-form')->layout('layouts.app');
+        return view('livewire.open.candidate-application-form')->layout('layouts.madya-template');
     }
 }
