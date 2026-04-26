@@ -13,6 +13,12 @@ return new class extends Migration
     {
         Schema::create('votes', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('election_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('election_position_id')->constrained()->cascadeOnDelete();
+            
+            // THIS IS THE COLUMN IT IS LOOKING FOR:
+            $table->foreignId('candidate_id')->constrained()->cascadeOnDelete();
+            
             $table->timestamps();
         });
     }
