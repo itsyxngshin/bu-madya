@@ -11,19 +11,15 @@ use Illuminate\Support\Facades\DB;
 
 class VotingBooth extends Component
 {
-    // The magic fix: Livewire will automatically find the election by the URL slug!
     public Election $election; 
-    
     public $isVotingOpen = false;
     public $hasVoted = false;
 
     // Ballot Data
     public $positions;
-    
-    // This will hold the user's choices. Format: [position_id => [candidate_id1, candidate_id2]]
     public $selectedCandidates = []; 
 
-    // Guest Voter Form (Used if user is not logged in)
+    // Guest Voter Form
     public $colleges = [];
     public $guest_name;
     public $guest_email;
@@ -34,9 +30,8 @@ class VotingBooth extends Component
     public function mount(Election $election)
     {
         $this->election = $election;
-
-        // 1. Check if the voting window is currently open
         $now = now();
+
         $this->isVotingOpen = (
             $this->election->status === 'active' &&
             $this->election->voting_start &&
@@ -44,84 +39,73 @@ class VotingBooth extends Component
             $now->between($this->election->voting_start, $this->election->voting_end)
         );
 
-        // 2. Check if an Authenticated User has already voted
         if (auth()->check()) {
             $this->hasVoted = VoterLog::where('user_id', auth()->id())
                                       ->where('election_id', $this->election->id)
                                       ->exists();
         }
 
-        // 3. Load the Official Ballot (Only Approved Candidates!)
         $this->positions = $this->election->positions()->with(['candidates' => function($query) {
             $query->where('status', 'approved')->with('user');
         }])->orderBy('order')->get();
 
-        // 4. Initialize the selections array so Livewire doesn't throw undefined errors
         foreach ($this->positions as $position) {
             $this->selectedCandidates[$position->id] = [];
         }
 
-        // 5. Load Colleges for the Guest verification form (if enabled)
         if ($this->election->allow_guest_voting && !auth()->check()) {
             $this->colleges = College::orderBy('name')->get();
         }
     }
 
-    // ADD THIS METHOD TO YOUR COMPONENT
+    // THE CRITICAL MISSING METHOD FOR CLICKING CANDIDATES
     public function toggleSelection($positionId, $candidateId)
     {
-        // 1. Get the current selections for this position
         $current = $this->selectedCandidates[$positionId] ?? [];
         $position = $this->positions->firstWhere('id', $positionId);
-        
-        // Ensure the incoming ID is treated as a string for strict array matching
         $candidateId = (string) $candidateId;
 
-        // 2. Handle the special "Abstain" logic
+        // 1. Handle "Abstain" explicitly
         if ($candidateId === 'abstain') {
             if (in_array('abstain', $current)) {
-                $this->selectedCandidates[$positionId] = []; // Toggle off
+                $this->selectedCandidates[$positionId] = [];
             } else {
-                $this->selectedCandidates[$positionId] = ['abstain']; // Toggle on (exclusively)
+                $this->selectedCandidates[$positionId] = ['abstain'];
             }
             return;
         }
 
-        // 3. If they select a real candidate, automatically clear 'abstain' if it was selected
+        // 2. Clear abstain if a real candidate is chosen
         if (($key = array_search('abstain', $current)) !== false) {
             unset($current[$key]);
+            $current = array_values($current); // re-index
         }
 
-        // 4. Standard Toggle Logic
+        // 3. Toggle Candidate Selection
         if (($key = array_search($candidateId, $current)) !== false) {
-            // If it's already checked, uncheck it
             unset($current[$key]);
+            $current = array_values($current); // re-index
         } else {
-            // If it's NOT checked, ensure we haven't hit the max limit before adding it
             if (count($current) < $position->max_winners) {
                 $current[] = $candidateId;
             }
         }
 
-        // 5. Re-index the array and save it back to Livewire's state
-        $this->selectedCandidates[$positionId] = array_values($current);
+        $this->selectedCandidates[$positionId] = $current;
     }
 
     public function castBallot()
     {
-        // Security Lock 1: Is Voting Open?
         if (!$this->isVotingOpen) {
             session()->flash('error', 'Voting is currently closed.');
             return;
         }
 
-        // Security Lock 2: Did they already vote?
         if ($this->hasVoted) {
             session()->flash('error', 'You have already cast your ballot in this election.');
             return;
         }
 
-        // Security Lock 3: Guest Verification
         if (!auth()->check()) {
             if (!$this->election->allow_guest_voting) {
                 session()->flash('error', 'Guest voting is not enabled. Please log in.');
@@ -146,12 +130,11 @@ class VotingBooth extends Component
             }
         }
 
-        // NEW SECURITY LOCK 4: Did they actually select anyone?
+        // Validate Selections (Ensure not empty, and no over-voting)
         $totalSelections = 0;
         foreach ($this->selectedCandidates as $posId => $cands) {
             $totalSelections += count(array_filter((array) $cands));
             
-            // Check for over-voting while we are looping
             $position = $this->positions->firstWhere('id', $posId);
             if ($position && count(array_filter((array) $cands)) > $position->max_winners) {
                 session()->flash('error', "You selected too many candidates for {$position->title}.");
@@ -160,14 +143,12 @@ class VotingBooth extends Component
         }
 
         if ($totalSelections === 0) {
-            session()->flash('error', 'Your ballot is empty! Please select at least one candidate.');
+            session()->flash('error', 'Your ballot is empty! Please select at least one option.');
             return;
         }
 
-        // 5. Encrypt and save!
         try {
             DB::transaction(function () {
-                // A. Check-in record
                 VoterLog::create([
                     'election_id' => $this->election->id,
                     'user_id' => auth()->id(), 
@@ -179,11 +160,8 @@ class VotingBooth extends Component
                     'voted_at' => now(),
                 ]);
 
-                // B. Cast votes
-                // Inside castBallot transaction
                 foreach ($this->selectedCandidates as $positionId => $candidateIds) {
                     foreach ((array) $candidateIds as $candidateId) {
-                        // Only insert if the ID is not 'abstain' and not empty
                         if (!empty($candidateId) && $candidateId !== 'abstain') { 
                             Vote::create([
                                 'election_id' => $this->election->id,
