@@ -258,28 +258,70 @@
                     </button>
                 </div>
 
-                <div class="space-y-4">
+                <div class="space-y-6">
                     @foreach($credentials as $index => $credential)
-                        <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-                            <div class="w-full sm:w-1/3">
-                                <select wire:model="credentials.{{ $index }}.type" class="w-full bg-white border border-gray-200 focus:border-orange-500 rounded-xl px-4 py-3 text-sm font-bold text-gray-800 shadow-sm cursor-pointer">
-                                    <option value="">Type...</option>
-                                    <option value="Experience">Experience</option>
-                                    <option value="Affiliation">Affiliation</option>
-                                    <option value="Award">Award</option>
-                                </select>
-                                @error("credentials.$index.type") <span class="text-[10px] text-red-500 font-bold block mt-1">{{ $message }}</span> @enderror
-                            </div>
+                        <div class="relative bg-gray-50 p-5 rounded-2xl border border-gray-200 shadow-inner">
+                            
+                            {{-- Remove Button --}}
+                            @if(count($credentials) > 1)
+                                <button type="button" wire:click="removeCredential({{ $index }})" class="absolute top-4 right-4 text-gray-400 hover:text-red-500 transition">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                </button>
+                            @endif
 
-                            <div class="flex-1 w-full relative">
-                                <input wire:model="credentials.{{ $index }}.description" type="text" class="w-full bg-white border border-gray-200 focus:border-orange-500 rounded-xl px-4 py-3 text-sm font-bold text-gray-800 shadow-sm" placeholder="e.g. President, College Council (2025)">
-                                @error("credentials.$index.description") <span class="text-[10px] text-red-500 font-bold block mt-1">{{ $message }}</span> @enderror
+                            <div class="pr-10 grid grid-cols-1 md:grid-cols-3 gap-5">
                                 
-                                @if(count($credentials) > 1)
-                                    <button type="button" wire:click="removeCredential({{ $index }})" class="absolute right-3 top-3 text-gray-400 hover:text-red-500 transition">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                    </button>
-                                @endif
+                                {{-- PREMIUM CREDENTIAL TYPE DROPDOWN --}}
+                                <div class="md:col-span-1">
+                                    <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Credential Type</label>
+                                    
+                                    <div x-data="{
+                                            open: false,
+                                            selectedValue: @entangle('credentials.'.$index.'.type'),
+                                            options: ['Experience', 'Affiliation', 'Award'],
+                                            get selectedLabel() {
+                                                return this.selectedValue ? this.selectedValue : 'Select Type';
+                                            }
+                                        }"
+                                        @click.away="open = false"
+                                        class="relative w-full"
+                                    >
+                                        <button @click="open = !open" type="button"
+                                                class="w-full bg-white border border-gray-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-200/50 rounded-xl px-4 py-3 text-sm font-bold text-gray-800 shadow-sm transition-all cursor-pointer flex justify-between items-center">
+                                            <span x-text="selectedLabel" class="truncate" :class="!selectedValue ? 'text-gray-400 font-medium' : ''"></span>
+                                            <svg class="w-5 h-5 text-gray-400 transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                        </button>
+
+                                        <div x-show="open" x-cloak
+                                             x-transition:enter="transition ease-out duration-100"
+                                             x-transition:enter-start="transform opacity-0 scale-95"
+                                             x-transition:enter-end="transform opacity-100 scale-100"
+                                             x-transition:leave="transition ease-in duration-75"
+                                             x-transition:leave-start="transform opacity-100 scale-100"
+                                             x-transition:leave-end="transform opacity-0 scale-95"
+                                             class="absolute z-50 w-full mt-2 bg-white border border-gray-100 rounded-xl shadow-xl overflow-hidden">
+                                            <ul class="max-h-60 overflow-y-auto p-1">
+                                                <template x-for="option in options" :key="option">
+                                                    <li @click="selectedValue = option; open = false"
+                                                        class="px-4 py-2.5 text-sm font-bold rounded-lg cursor-pointer transition-colors flex items-center justify-between"
+                                                        :class="selectedValue === option ? 'bg-orange-50 text-orange-600' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'">
+                                                        <span x-text="option"></span>
+                                                        <svg x-show="selectedValue === option" class="w-4 h-4 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                                    </li>
+                                                </template>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    @error('credentials.'.$index.'.type') <span class="text-[10px] text-red-500 font-bold block mt-1">{{ $message }}</span> @enderror
+                                </div>
+
+                                {{-- CREDENTIAL DESCRIPTION --}}
+                                <div class="md:col-span-2">
+                                    <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Details (Organization, Year, etc.)</label>
+                                    <input wire:model="credentials.{{ $index }}.description" type="text" class="w-full bg-white border border-gray-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-200/50 rounded-xl px-4 py-3 text-sm font-bold text-gray-800 shadow-sm" placeholder="e.g. President, BU Student Council (2025)">
+                                    @error('credentials.'.$index.'.description') <span class="text-[10px] text-red-500 font-bold block mt-1">{{ $message }}</span> @enderror
+                                </div>
+
                             </div>
                         </div>
                     @endforeach
