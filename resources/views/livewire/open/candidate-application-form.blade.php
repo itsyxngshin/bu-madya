@@ -1,28 +1,30 @@
-<div class="max-w-4xl mx-auto py-12 px-4 sm:px-6 font-sans">
-    
-    <div class="text-center mb-10">
-        <h1 class="text-3xl md:text-4xl font-black text-gray-900 tracking-tight mb-2">Electoral Candidacy Portal</h1>
-        <p class="text-gray-500 font-medium">Submit your official application to the Board of Elections.</p>
-    </div>
+<style>
+    /* Ensure Alpine dropdowns don't flash on page load */
+    [x-cloak] { display: none !important; }
+</style>
 
+<div class="max-w-4xl mx-auto py-12 px-4 sm:px-6 font-sans">
+
+    {{-- SUCCESS STATE --}}
     @if($hasApplied)
-        {{-- ALREADY APPLIED STATE --}}
-        <div class="bg-white rounded-3xl p-10 text-center shadow-xl border border-gray-100 animate-fade-in-up">
-            <div class="w-20 h-20 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mx-auto mb-6">
-                <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        <div class="bg-white rounded-3xl shadow-xl border border-gray-100 p-12 text-center animate-fade-in-up">
+            <div class="w-24 h-24 bg-green-50 text-green-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner border border-green-100">
+                <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
             </div>
-            <h2 class="text-2xl font-black text-gray-900 mb-2">Application Submitted</h2>
-            <p class="text-gray-500 mb-6 max-w-md mx-auto">You have already submitted an application for this specific election. It is currently under review by the Electoral Board.</p>
-            <div class="inline-block bg-orange-100 text-orange-700 font-bold px-4 py-2 rounded-xl text-sm tracking-wider uppercase">
-                Status: Pending Review
-            </div>
+            <h2 class="text-3xl font-black text-gray-900 mb-4">Application Submitted!</h2>
+            <p class="text-gray-500 mb-8 max-w-md mx-auto text-lg leading-relaxed">Your candidacy for <strong>{{ $election->title }}</strong> has been officially securely transmitted to the Electoral Board for vetting.</p>
+            <a href="/" class="inline-block px-8 py-3 bg-gray-100 text-gray-700 font-bold rounded-xl shadow-sm hover:bg-gray-200 transition">Back to Home</a>
         </div>
     @else
-        {{-- THE APPLICATION FORM --}}
+
+        <div class="mb-10 text-center">
+            <h1 class="text-4xl font-black text-gray-900 tracking-tight mb-3">File Your Candidacy</h1>
+            <p class="text-gray-500 font-medium">Complete the form below to submit your official application to the Electoral Board.</p>
+        </div>
+
         <form wire:submit.prevent="submitApplication" class="space-y-8">
             
-            {{-- MULTI-TENANT ELECTION SELECTION --}}
-            {{-- LOCKED ELECTION SELECTION --}}
+            {{-- STEP 1: CANDIDACY DETAILS --}}
             <div class="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray-200">
                 <h3 class="text-lg font-black text-gray-900 border-b border-gray-100 pb-4 mb-6 flex items-center gap-2">
                     <span class="w-6 h-6 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center text-xs">1</span>
@@ -36,20 +38,56 @@
                         <p class="text-sm font-black text-gray-900 truncate">{{ $election->title }}</p>
                     </div>
 
-                    {{-- Position Selection --}}
+                    {{-- PREMIUM POSITION DROPDOWN --}}
                     <div>
                         <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Position Applied For</label>
-                        <select wire:model="election_position_id" class="w-full bg-white border border-gray-200 focus:border-orange-500 rounded-xl px-4 py-3 text-sm font-bold text-gray-800 shadow-sm transition-colors cursor-pointer" @if(empty($availablePositions)) disabled @endif>
-                            <option value="">-- Select Position --</option>
-                            @foreach($availablePositions as $pos)
-                                <option value="{{ $pos->id }}">{{ $pos->title }} ({{ $pos->max_winners }} Seat/s)</option>
-                            @endforeach
-                        </select>
+                        
+                        <div x-data="{
+                                open: false,
+                                selectedId: @entangle('election_position_id'),
+                                options: [
+                                    @foreach($availablePositions as $pos)
+                                        { id: '{{ $pos->id }}', label: '{{ addslashes($pos->title) }} ({{ $pos->max_winners }} Seat/s)' },
+                                    @endforeach
+                                ],
+                                get selectedLabel() {
+                                    let option = this.options.find(opt => opt.id == this.selectedId);
+                                    return option ? option.label : '-- Select Position --';
+                                }
+                            }"
+                            @click.away="open = false"
+                            class="relative w-full"
+                        >
+                            <button @click="open = !open" type="button" :disabled="{{ empty($availablePositions) ? 'true' : 'false' }}"
+                                    class="w-full bg-white border border-gray-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-200/50 rounded-xl px-4 py-3 text-sm font-bold text-gray-800 shadow-sm transition-all cursor-pointer flex justify-between items-center disabled:bg-gray-50 disabled:text-gray-400">
+                                <span x-text="selectedLabel" class="truncate" :class="!selectedId ? 'text-gray-400 font-medium' : ''"></span>
+                                <svg class="w-5 h-5 text-gray-400 transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                            </button>
+
+                            <div x-show="open" x-cloak
+                                 x-transition:enter="transition ease-out duration-100"
+                                 x-transition:enter-start="transform opacity-0 scale-95"
+                                 x-transition:enter-end="transform opacity-100 scale-100"
+                                 x-transition:leave="transition ease-in duration-75"
+                                 x-transition:leave-start="transform opacity-100 scale-100"
+                                 x-transition:leave-end="transform opacity-0 scale-95"
+                                 class="absolute z-50 w-full mt-2 bg-white border border-gray-100 rounded-xl shadow-xl overflow-hidden">
+                                <ul class="max-h-60 overflow-y-auto p-1">
+                                    <template x-for="option in options" :key="option.id">
+                                        <li @click="selectedId = option.id; open = false"
+                                            class="px-4 py-2.5 text-sm font-bold rounded-lg cursor-pointer transition-colors flex items-center justify-between"
+                                            :class="selectedId == option.id ? 'bg-orange-50 text-orange-600' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'">
+                                            <span x-text="option.label"></span>
+                                            <svg x-show="selectedId == option.id" class="w-4 h-4 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                        </li>
+                                    </template>
+                                </ul>
+                            </div>
+                        </div>
                         @error('election_position_id') <span class="text-[10px] text-red-500 font-bold mt-1 block">{{ $message }}</span> @enderror
                     </div>
                 </div>
 
-                {{-- Application Closed Warning --}}
                 @if(!$isApplicationOpen)
                     <div class="mt-6 bg-red-50 text-red-700 p-4 rounded-xl border border-red-200 font-bold flex items-center justify-center gap-2 text-sm">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
@@ -58,113 +96,187 @@
                 @endif
             </div>
 
-            {{-- DEMOGRAPHICS --}}
+            {{-- STEP 2: PERSONAL INFORMATION --}}
             <div class="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray-200">
                 <h3 class="text-lg font-black text-gray-900 border-b border-gray-100 pb-4 mb-6 flex items-center gap-2">
                     <span class="w-6 h-6 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center text-xs">2</span>
-                    Personal Details
+                    Personal & Academic Profile
                 </h3>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <div class="md:col-span-2">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+                    
+                    {{-- PREMIUM COLLEGE DROPDOWN --}}
+                    <div>
                         <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">College</label>
-                        <select wire:model="college_id" class="w-full bg-gray-50 border border-gray-200 focus:border-orange-500 focus:bg-white rounded-xl px-4 py-3 text-sm shadow-sm transition-colors">
-                            <option value="">-- Select College --</option>
-                            @foreach($colleges as $college)
-                                <option value="{{ $college->id }}">{{ $college->name }}</option>
-                            @endforeach
-                        </select>
+                        <div x-data="{
+                                open: false,
+                                selectedId: @entangle('college_id'),
+                                options: [
+                                    @foreach($colleges as $college)
+                                        { id: '{{ $college->id }}', label: '{{ addslashes($college->name) }}' },
+                                    @endforeach
+                                ],
+                                get selectedLabel() {
+                                    let option = this.options.find(opt => opt.id == this.selectedId);
+                                    return option ? option.label : '-- Select College --';
+                                }
+                            }"
+                            @click.away="open = false"
+                            class="relative w-full"
+                        >
+                            <button @click="open = !open" type="button"
+                                    class="w-full bg-white border border-gray-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-200/50 rounded-xl px-4 py-3 text-sm font-bold text-gray-800 shadow-sm transition-all cursor-pointer flex justify-between items-center">
+                                <span x-text="selectedLabel" class="truncate" :class="!selectedId ? 'text-gray-400 font-medium' : ''"></span>
+                                <svg class="w-5 h-5 text-gray-400 transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                            </button>
+
+                            <div x-show="open" x-cloak
+                                 x-transition:enter="transition ease-out duration-100"
+                                 x-transition:enter-start="transform opacity-0 scale-95"
+                                 x-transition:enter-end="transform opacity-100 scale-100"
+                                 x-transition:leave="transition ease-in duration-75"
+                                 x-transition:leave-start="transform opacity-100 scale-100"
+                                 x-transition:leave-end="transform opacity-0 scale-95"
+                                 class="absolute z-50 w-full mt-2 bg-white border border-gray-100 rounded-xl shadow-xl overflow-hidden">
+                                <ul class="max-h-60 overflow-y-auto p-1">
+                                    <template x-for="option in options" :key="option.id">
+                                        <li @click="selectedId = option.id; open = false"
+                                            class="px-4 py-2.5 text-sm font-bold rounded-lg cursor-pointer transition-colors flex items-center justify-between"
+                                            :class="selectedId == option.id ? 'bg-orange-50 text-orange-600' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'">
+                                            <span x-text="option.label"></span>
+                                            <svg x-show="selectedId == option.id" class="w-4 h-4 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                        </li>
+                                    </template>
+                                </ul>
+                            </div>
+                        </div>
                         @error('college_id') <span class="text-[10px] text-red-500 font-bold mt-1 block">{{ $message }}</span> @enderror
                     </div>
 
+                    {{-- PREMIUM YEAR LEVEL DROPDOWN --}}
                     <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Program / Course</label>
-                        <input wire:model="program" type="text" class="w-full bg-gray-50 border border-gray-200 focus:border-orange-500 focus:bg-white rounded-xl px-4 py-3 text-sm shadow-sm transition-colors" placeholder="e.g. BS Information Technology">
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Year Level</label>
+                        <div x-data="{
+                                open: false,
+                                selectedValue: @entangle('year_level'),
+                                options: ['1st Year', '2nd Year', '3rd Year', '4th Year', '5th Year'],
+                                get selectedLabel() {
+                                    return this.selectedValue ? this.selectedValue : '-- Select Year --';
+                                }
+                            }"
+                            @click.away="open = false"
+                            class="relative w-full"
+                        >
+                            <button @click="open = !open" type="button"
+                                    class="w-full bg-white border border-gray-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-200/50 rounded-xl px-4 py-3 text-sm font-bold text-gray-800 shadow-sm transition-all cursor-pointer flex justify-between items-center">
+                                <span x-text="selectedLabel" class="truncate" :class="!selectedValue ? 'text-gray-400 font-medium' : ''"></span>
+                                <svg class="w-5 h-5 text-gray-400 transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                            </button>
+
+                            <div x-show="open" x-cloak
+                                 x-transition:enter="transition ease-out duration-100"
+                                 x-transition:enter-start="transform opacity-0 scale-95"
+                                 x-transition:enter-end="transform opacity-100 scale-100"
+                                 x-transition:leave="transition ease-in duration-75"
+                                 x-transition:leave-start="transform opacity-100 scale-100"
+                                 x-transition:leave-end="transform opacity-0 scale-95"
+                                 class="absolute z-50 w-full mt-2 bg-white border border-gray-100 rounded-xl shadow-xl overflow-hidden">
+                                <ul class="max-h-60 overflow-y-auto p-1">
+                                    <template x-for="option in options" :key="option">
+                                        <li @click="selectedValue = option; open = false"
+                                            class="px-4 py-2.5 text-sm font-bold rounded-lg cursor-pointer transition-colors flex items-center justify-between"
+                                            :class="selectedValue === option ? 'bg-orange-50 text-orange-600' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'">
+                                            <span x-text="option"></span>
+                                            <svg x-show="selectedValue === option" class="w-4 h-4 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                        </li>
+                                    </template>
+                                </ul>
+                            </div>
+                        </div>
+                        @error('year_level') <span class="text-[10px] text-red-500 font-bold mt-1 block">{{ $message }}</span> @enderror
+                    </div>
+
+                    {{-- Program & Address --}}
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Academic Program / Course</label>
+                        <input wire:model="program" type="text" class="w-full bg-white border border-gray-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-200/50 rounded-xl px-4 py-3 text-sm font-bold text-gray-800 shadow-sm transition-colors" placeholder="e.g. BS Information Technology">
                         @error('program') <span class="text-[10px] text-red-500 font-bold mt-1 block">{{ $message }}</span> @enderror
                     </div>
 
                     <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Year Level</label>
-                        <select wire:model="year_level" class="w-full bg-gray-50 border border-gray-200 focus:border-orange-500 focus:bg-white rounded-xl px-4 py-3 text-sm shadow-sm transition-colors">
-                            <option value="">-- Select --</option>
-                            <option value="1st Year">1st Year</option>
-                            <option value="2nd Year">2nd Year</option>
-                            <option value="3rd Year">3rd Year</option>
-                            <option value="4th Year">4th Year</option>
-                            <option value="5th Year">5th Year</option>
-                        </select>
-                        @error('year_level') <span class="text-[10px] text-red-500 font-bold mt-1 block">{{ $message }}</span> @enderror
-                    </div>
-
-                    <div class="md:col-span-2">
                         <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Current Address</label>
-                        <textarea wire:model="address" rows="2" class="w-full bg-gray-50 border border-gray-200 focus:border-orange-500 focus:bg-white rounded-xl px-4 py-3 text-sm shadow-sm transition-colors resize-none" placeholder="City, Province"></textarea>
+                        <input wire:model="address" type="text" class="w-full bg-white border border-gray-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-200/50 rounded-xl px-4 py-3 text-sm font-bold text-gray-800 shadow-sm transition-colors" placeholder="City, Province">
                         @error('address') <span class="text-[10px] text-red-500 font-bold mt-1 block">{{ $message }}</span> @enderror
                     </div>
                 </div>
             </div>
 
-            {{-- PLATFORMS --}}
+            {{-- STEP 3: ELECTION PLATFORMS --}}
             <div class="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray-200">
-                <h3 class="text-lg font-black text-gray-900 border-b border-gray-100 pb-4 mb-6 flex items-center justify-between">
-                    <div class="flex items-center gap-2">
+                <div class="flex justify-between items-center border-b border-gray-100 pb-4 mb-6">
+                    <h3 class="text-lg font-black text-gray-900 flex items-center gap-2">
                         <span class="w-6 h-6 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center text-xs">3</span>
-                        Platform of Governance
-                    </div>
-                    <button type="button" wire:click="addPlatform" class="text-xs font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1 bg-blue-50 px-3 py-1.5 rounded-lg transition-colors">
-                        <span>+</span> Add Platform
+                        Platforms & Vision
+                    </h3>
+                    <button type="button" wire:click="addPlatform" class="text-xs font-bold text-orange-600 bg-orange-50 hover:bg-orange-100 px-4 py-2 rounded-xl transition-colors shadow-sm">
+                        + Add Platform
                     </button>
-                </h3>
+                </div>
 
-                <div class="space-y-4">
+                <div class="space-y-6">
                     @foreach($platforms as $index => $platform)
-                        <div class="p-5 border border-gray-200 rounded-2xl bg-gray-50 relative group" wire:key="platform-{{ $index }}">
+                        <div class="relative bg-gray-50 p-5 rounded-2xl border border-gray-200 shadow-inner">
                             @if(count($platforms) > 1)
-                                <button type="button" wire:click="removePlatform({{ $index }})" class="absolute -top-3 -right-3 bg-red-100 text-red-600 hover:bg-red-600 hover:text-white w-8 h-8 rounded-full flex items-center justify-center shadow-md transition-colors opacity-0 group-hover:opacity-100">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                <button type="button" wire:click="removePlatform({{ $index }})" class="absolute top-4 right-4 text-gray-400 hover:text-red-500 transition">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                                 </button>
                             @endif
 
-                            <input wire:model="platforms.{{ $index }}.title" type="text" class="w-full bg-white border border-gray-200 focus:border-orange-500 rounded-xl px-4 py-2.5 text-sm font-bold shadow-sm mb-3" placeholder="Platform Title (e.g., Transparent Budgeting)">
-                            @error('platforms.'.$index.'.title') <span class="text-[10px] text-red-500 font-bold -mt-2 mb-2 block">{{ $message }}</span> @enderror
-                            
-                            <textarea wire:model="platforms.{{ $index }}.description" rows="3" class="w-full bg-white border border-gray-200 focus:border-orange-500 rounded-xl px-4 py-3 text-sm shadow-sm resize-none" placeholder="Describe how you will implement this platform..."></textarea>
-                            @error('platforms.'.$index.'.description') <span class="text-[10px] text-red-500 font-bold mt-1 block">{{ $message }}</span> @enderror
+                            <div class="pr-10">
+                                <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Platform Title</label>
+                                <input wire:model="platforms.{{ $index }}.title" type="text" class="w-full bg-white border border-gray-200 focus:border-orange-500 rounded-xl px-4 py-2.5 text-sm font-bold text-gray-800 shadow-sm mb-3" placeholder="e.g. Student Welfare Initiative">
+                                @error("platforms.$index.title") <span class="text-[10px] text-red-500 font-bold block mb-2">{{ $message }}</span> @enderror
+                                
+                                <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Description & Action Plan</label>
+                                <textarea wire:model="platforms.{{ $index }}.description" rows="3" class="w-full bg-white border border-gray-200 focus:border-orange-500 rounded-xl px-4 py-3 text-sm text-gray-700 shadow-sm resize-none" placeholder="Elaborate on how you will implement this..."></textarea>
+                                @error("platforms.$index.description") <span class="text-[10px] text-red-500 font-bold block mt-1">{{ $message }}</span> @enderror
+                            </div>
                         </div>
                     @endforeach
                 </div>
             </div>
 
-            {{-- CREDENTIALS --}}
+            {{-- STEP 4: CREDENTIALS --}}
             <div class="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray-200">
-                <h3 class="text-lg font-black text-gray-900 border-b border-gray-100 pb-4 mb-6 flex items-center justify-between">
-                    <div class="flex items-center gap-2">
+                <div class="flex justify-between items-center border-b border-gray-100 pb-4 mb-6">
+                    <h3 class="text-lg font-black text-gray-900 flex items-center gap-2">
                         <span class="w-6 h-6 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center text-xs">4</span>
-                        Relevant Credentials
-                    </div>
-                    <button type="button" wire:click="addCredential" class="text-xs font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1 bg-blue-50 px-3 py-1.5 rounded-lg transition-colors">
-                        <span>+</span> Add Credential
+                        Qualifications
+                    </h3>
+                    <button type="button" wire:click="addCredential" class="text-xs font-bold text-orange-600 bg-orange-50 hover:bg-orange-100 px-4 py-2 rounded-xl transition-colors shadow-sm">
+                        + Add Credential
                     </button>
-                </h3>
+                </div>
 
                 <div class="space-y-4">
                     @foreach($credentials as $index => $credential)
-                        <div class="flex flex-col md:flex-row gap-3 relative group" wire:key="credential-{{ $index }}">
-                            <div class="w-full md:w-1/3">
-                                <select wire:model="credentials.{{ $index }}.type" class="w-full bg-gray-50 border border-gray-200 focus:border-orange-500 rounded-xl px-4 py-2.5 text-sm font-bold text-gray-700 shadow-sm">
-                                    <option value="">-- Type --</option>
-                                    <option value="Leadership">Leadership Role</option>
-                                    <option value="Award">Award / Honor</option>
-                                    <option value="Affiliation">Org Affiliation</option>
+                        <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+                            <div class="w-full sm:w-1/3">
+                                <select wire:model="credentials.{{ $index }}.type" class="w-full bg-white border border-gray-200 focus:border-orange-500 rounded-xl px-4 py-3 text-sm font-bold text-gray-800 shadow-sm cursor-pointer">
+                                    <option value="">Type...</option>
+                                    <option value="Experience">Experience</option>
+                                    <option value="Affiliation">Affiliation</option>
+                                    <option value="Award">Award</option>
                                 </select>
-                                @error('credentials.'.$index.'.type') <span class="text-[10px] text-red-500 font-bold mt-1 block">{{ $message }}</span> @enderror
+                                @error("credentials.$index.type") <span class="text-[10px] text-red-500 font-bold block mt-1">{{ $message }}</span> @enderror
                             </div>
-                            <div class="w-full md:w-2/3 relative">
-                                <input wire:model="credentials.{{ $index }}.description" type="text" class="w-full bg-white border border-gray-200 focus:border-orange-500 rounded-xl px-4 py-2.5 text-sm shadow-sm pr-10" placeholder="e.g., Project Head, BU CircUITS 2025">
-                                @error('credentials.'.$index.'.description') <span class="text-[10px] text-red-500 font-bold mt-1 block">{{ $message }}</span> @enderror
+
+                            <div class="flex-1 w-full relative">
+                                <input wire:model="credentials.{{ $index }}.description" type="text" class="w-full bg-white border border-gray-200 focus:border-orange-500 rounded-xl px-4 py-3 text-sm font-bold text-gray-800 shadow-sm" placeholder="e.g. President, College Council (2025)">
+                                @error("credentials.$index.description") <span class="text-[10px] text-red-500 font-bold block mt-1">{{ $message }}</span> @enderror
                                 
                                 @if(count($credentials) > 1)
-                                    <button type="button" wire:click="removeCredential({{ $index }})" class="absolute right-2 top-2 text-gray-300 hover:text-red-500 transition-colors p-1">
+                                    <button type="button" wire:click="removeCredential({{ $index }})" class="absolute right-3 top-3 text-gray-400 hover:text-red-500 transition">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                                     </button>
                                 @endif
@@ -174,74 +286,70 @@
                 </div>
             </div>
 
-            {{-- ATTACHMENTS --}}
+            {{-- STEP 5: ATTACHMENTS & SIGNATURE --}}
             <div class="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray-200">
                 <h3 class="text-lg font-black text-gray-900 border-b border-gray-100 pb-4 mb-6 flex items-center gap-2">
                     <span class="w-6 h-6 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center text-xs">5</span>
-                    Attachments & Verification
+                    Official Requirements
                 </h3>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {{-- Profile Photo Upload --}}
                     <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 text-center">Formal Profile Photo</label>
-                        <div class="flex flex-col items-center">
-                            @if($profile_photo)
-                                <img src="{{ $profile_photo->temporaryUrl() }}" class="w-32 h-32 object-cover rounded-2xl border-4 border-white shadow-lg mb-4">
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">2x2 Profile Photo</label>
+                        <div class="border-2 border-dashed border-gray-300 rounded-2xl p-6 text-center hover:border-orange-500 transition-colors bg-gray-50 relative group">
+                            @if ($profile_photo)
+                                <img src="{{ $profile_photo->temporaryUrl() }}" class="w-24 h-24 mx-auto rounded-full object-cover shadow-sm mb-3">
                             @else
-                                <div class="w-32 h-32 bg-gray-100 rounded-2xl border-2 border-dashed border-gray-300 flex items-center justify-center text-gray-400 mb-4">
-                                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                                <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto shadow-sm mb-3 text-gray-400">
+                                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                                 </div>
                             @endif
-                            
-                            <label class="cursor-pointer bg-orange-50 hover:bg-orange-100 text-orange-700 px-4 py-2 rounded-xl text-sm font-bold transition shadow-sm border border-orange-100">
-                                Browse Photo
-                                <input type="file" wire:model="profile_photo" class="hidden" accept="image/*">
-                            </label>
-                            <div wire:loading wire:target="profile_photo" class="text-[10px] text-orange-500 font-bold mt-2 animate-pulse">Uploading...</div>
-                            @error('profile_photo') <span class="text-[10px] text-red-500 font-bold mt-2 text-center">{{ $message }}</span> @enderror
+                            <input type="file" wire:model="profile_photo" id="profile_photo" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" accept="image/*">
+                            <span class="text-sm font-bold text-gray-700 group-hover:text-orange-600">Click to upload photo</span>
+                            <p class="text-[10px] text-gray-400 mt-1">PNG, JPG up to 2MB</p>
+                            <div wire:loading wire:target="profile_photo" class="text-[10px] font-bold text-orange-500 mt-2 animate-pulse">Processing image...</div>
                         </div>
+                        @error('profile_photo') <span class="text-[10px] text-red-500 font-bold mt-1 block">{{ $message }}</span> @enderror
                     </div>
 
                     {{-- E-Signature Upload --}}
                     <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 text-center">Scanned E-Signature (PNG)</label>
-                        <div class="flex flex-col items-center">
-                            @if($e_signature)
-                                <div class="w-full h-32 bg-white rounded-2xl border-2 border-gray-200 shadow-inner flex items-center justify-center p-4 mb-4">
-                                    <img src="{{ $e_signature->temporaryUrl() }}" class="max-h-full max-w-full object-contain mix-blend-multiply">
-                                </div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">E-Signature</label>
+                        <div class="border-2 border-dashed border-gray-300 rounded-2xl p-6 text-center hover:border-orange-500 transition-colors bg-gray-50 relative group">
+                            @if ($e_signature)
+                                <img src="{{ $e_signature->temporaryUrl() }}" class="h-20 mx-auto object-contain mb-3">
                             @else
-                                <div class="w-full h-32 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-300 flex flex-col items-center justify-center text-gray-400 mb-4 px-4 text-center">
-                                    <svg class="w-6 h-6 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                                    <span class="text-[10px] font-bold uppercase tracking-wider">Clear background preferred</span>
+                                <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto shadow-sm mb-3 text-gray-400">
+                                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                                 </div>
                             @endif
-
-                            <label class="cursor-pointer bg-gray-900 hover:bg-gray-800 text-white px-4 py-2 rounded-xl text-sm font-bold transition shadow-md">
-                                Upload Signature
-                                <input type="file" wire:model="e_signature" class="hidden" accept="image/png, image/jpeg">
-                            </label>
-                            <div wire:loading wire:target="e_signature" class="text-[10px] text-orange-500 font-bold mt-2 animate-pulse">Uploading...</div>
-                            @error('e_signature') <span class="text-[10px] text-red-500 font-bold mt-2 text-center">{{ $message }}</span> @enderror
+                            <input type="file" wire:model="e_signature" id="e_signature" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" accept="image/*">
+                            <span class="text-sm font-bold text-gray-700 group-hover:text-orange-600">Click to upload signature</span>
+                            <p class="text-[10px] text-gray-400 mt-1">Clear background preferred</p>
+                            <div wire:loading wire:target="e_signature" class="text-[10px] font-bold text-orange-500 mt-2 animate-pulse">Processing image...</div>
                         </div>
+                        @error('e_signature') <span class="text-[10px] text-red-500 font-bold mt-1 block">{{ $message }}</span> @enderror
                     </div>
-
                 </div>
             </div>
 
-            {{-- SUBMIT --}}
-            <div class="pt-4">
-                <button type="submit" wire:loading.attr="disabled" class="w-full py-4 md:py-5 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-black text-lg rounded-2xl shadow-xl hover:shadow-orange-500/30 transition-all transform hover:-translate-y-1 flex items-center justify-center gap-2">
-                    <span wire:loading.remove wire:target="submitApplication">Submit Candidacy for Vetting</span>
-                    <span wire:loading wire:target="submitApplication" class="flex items-center gap-2">
-                        <svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                        Processing Application...
-                    </span>
-                </button>
-                <p class="text-center text-[10px] text-gray-400 font-bold uppercase tracking-wider mt-4">By submitting, you certify that all provided credentials are authentic.</p>
+            {{-- SUBMIT ACTIONS --}}
+            <div class="pt-6 border-t border-gray-200">
+                @if($isApplicationOpen)
+                    <button type="submit" wire:loading.attr="disabled" class="w-full py-5 bg-gradient-to-r from-gray-900 to-black hover:from-black hover:to-gray-900 text-white font-black text-xl rounded-2xl shadow-2xl transition-all transform hover:-translate-y-1 flex items-center justify-center gap-2">
+                        <span wire:loading.remove wire:target="submitApplication">Submit Official Candidacy</span>
+                        <span wire:loading wire:target="submitApplication">Encrypting & Submitting...</span>
+                    </button>
+                    <p class="text-center text-[10px] text-gray-400 font-bold uppercase tracking-wider mt-4">By submitting, you attest that all provided information is accurate and true.</p>
+                @else
+                    <button type="button" disabled class="w-full py-5 bg-gray-200 text-gray-400 font-black text-xl rounded-2xl shadow-none cursor-not-allowed flex items-center justify-center gap-2">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                        Application Window Closed
+                    </button>
+                @endif
             </div>
+
         </form>
     @endif
 </div>
