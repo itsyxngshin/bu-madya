@@ -15,6 +15,7 @@ use App\Models\CandidatePlatform;
 use App\Models\CandidateCredential;
 use App\Models\VoterLog;
 use App\Models\Vote;
+use App\Models\AcademicYear;
 use Faker\Factory as Faker;
 
 class ElectionSystemSeeder extends Seeder
@@ -25,26 +26,31 @@ class ElectionSystemSeeder extends Seeder
         $now = Carbon::now();
 
         // 1. Fetch Existing Data (Fails gracefully if you haven't set them up yet)
-        $admin = User::first(); // Grabs your existing first user (usually the super admin)
-        
+        $admin = User::first(); 
         if (!$admin) {
             $this->command->error('No users found in the database. Please create your admin account first.');
             return;
         }
 
         $collegeIds = College::pluck('id')->toArray();
-        
         if (empty($collegeIds)) {
             $this->command->error('No colleges found in the database. Please populate the colleges table first.');
             return;
         }
 
-        $this->command->info("Building Election using Admin ID: {$admin->id} and " . count($collegeIds) . " existing colleges...");
+        // Fetch the active academic year (or grab the first one available)
+        $activeYear = AcademicYear::where('is_active', true)->first() ?? AcademicYear::first();
+        if (!$activeYear) {
+            $this->command->error('No Academic Year found in the database. Please create an Academic Year first.');
+            return;
+        }
+
+        $this->command->info("Building Election using Admin ID: {$admin->id}, Academic Year: {$activeYear->name}, and " . count($collegeIds) . " existing colleges...");
 
         // 2. Create the Main Active Election
-        // Voting Start is yesterday, Voting End is tomorrow so it shows up as "LIVE!"
         $election = Election::create([
             'user_id' => $admin->id,
+            'academic_year_id' => $activeYear->id, // <-- THE FIX: Injecting the Academic Year ID
             'title' => '2026 BU MADYA General Elections',
             'slug' => '2026-bu-madya-general-elections',
             'description' => 'The official general elections for the 2026-2027 Executive Board.',
@@ -100,7 +106,7 @@ class ElectionSystemSeeder extends Seeder
                     'program' => 'BS ' . $faker->jobTitle,
                     'year_level' => $faker->randomElement(['1st Year', '2nd Year', '3rd Year', '4th Year']),
                     'address' => $faker->city . ', ' . $faker->state,
-                    'profile_photo_path' => null, // UI fallbacks handle null
+                    'profile_photo_path' => null, 
                     'e_signature_path' => null,
                     // Mix of statuses to populate the vetting dashboard
                     'status' => $faker->randomElement(['approved', 'approved', 'approved', 'pending', 'rejected']),
