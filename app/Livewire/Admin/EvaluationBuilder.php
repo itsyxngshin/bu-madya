@@ -287,17 +287,19 @@ class EvaluationBuilder extends Component
     public function updateQuestionOrder($list)
     {
         foreach ($list as $item) {
-            $tempId = $item['value'];
+            $sortId = $item['value'];
             $order = $item['order'];
 
             foreach ($this->questions as $key => $q) {
-                if ($q['temp_id'] === $tempId) {
+                // [FIXED] Now safely matches whether SortableJS sends the UUID OR the Database ID
+                if ($q['temp_id'] == $sortId || (!empty($q['id']) && $q['id'] == $sortId)) {
                     $this->questions[$key]['order'] = $order;
                     break;
                 }
             }
         }
 
+        // Re-sort the array based on the newly applied order
         usort($this->questions, fn($a, $b) => $a['order'] <=> $b['order']);
         $this->activeQuestionIndex = null;
     }

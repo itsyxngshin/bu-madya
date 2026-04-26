@@ -207,7 +207,36 @@
 
 
         {{-- ========================================== --}}
-        {{-- SERVICES SECTION (Evaluations & Transparency) --}}
+        {{-- ELECTIONS SECTION (Secure Voting Engine)   --}}
+        {{-- ========================================== --}}
+        @if($isAdmin)
+            <div class="pt-5 pb-2 px-3 mt-2 border-t border-gray-100">
+                <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Elections</p>
+            </div>
+
+            {{-- Notice the asterisk (*) - This keeps the sidebar tab highlighted even when you are inside the Vetting or Results sub-pages! --}}
+            @php $isElectionsActive = request()->routeIs('admin.elections.*'); @endphp
+            <a href="{{ route('admin.elections.index') }}" class="{{ $linkClass }} {{ $isElectionsActive ? $activeClass : $inactiveClass }}">
+                <svg class="{{ $isElectionsActive ? $iconActive : $iconInactive }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                Election Manager
+            </a>
+        @endif
+
+        @elseif($isOrg)
+            <div class="pt-5 pb-2 px-3 mt-2 border-t border-gray-100">
+                <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Elections</p>
+            </div>
+
+            {{-- Notice the asterisk (*) - This keeps the sidebar tab highlighted even when you are inside the Vetting or Results sub-pages! --}}
+            @php $isElectionsActive = request()->routeIs('partner.elections.*'); @endphp
+            <a href="{{ route('partner.elections.index') }}" class="{{ $linkClass }} {{ $isElectionsActive ? $activeClass : $inactiveClass }}">
+                <svg class="{{ $isElectionsActive ? $iconActive : $iconInactive }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                Election Manager
+            </a>
+        @endif
+
+        {{-- ========================================== --}}
+        {{-- SERVICES SECTION (Evaluations & Transparency)--}}
         {{-- ========================================== --}}
         @if($isAdmin)
             <div class="pt-5 pb-2 px-3 mt-2 border-t border-gray-100">
@@ -227,7 +256,6 @@
                 Evaluation Manager
             </a>
         @endif
-
 
         @if($isAdmin)
             @php $isTransparencyActive = request()->routeIs('admin.transparency.*'); @endphp

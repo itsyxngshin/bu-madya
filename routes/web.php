@@ -166,6 +166,9 @@ Route::middleware(['auth'])
     Route::get('/roundtable', RoundtableIndex::class)->name('roundtable.index');
     Route::get('/roundtable/{id}', RoundtableShow::class)->name('roundtable.show');
     Route::get('/evaluations', EvaluationList::class)->name('evaluations.index');
+    Route::get('/elections/apply', \App\Livewire\Open\CandidateApplicationForm::class)->name('elections.apply');
+    Route::get('/elections/{election:slug}/vote', \App\Livewire\Open\VotingBooth::class)->name('elections.vote');
+    Route::get('/elections/{election:slug}/results', \App\Livewire\Open\PublicElectionResults::class)->name('elections.public-results');
 
 });
 
@@ -199,6 +202,11 @@ Route::middleware(['auth', 'role:administrator'])->prefix('admin')->name('admin.
     Route::get('/welfare', \App\Livewire\Admin\WelfareManager::class)->name('welfare.index');
     Route::get('/the-pillars', ThePillarsManager::class)->name('pillars.index');
     Route::get('/campaigns/{slug}/results', CampaignAnalytics::class)->name('campaigns.results'); 
+    Route::get('/elections', \App\Livewire\Admin\ElectionList::class)->name('elections.index');
+    Route::get('/elections/manage', \App\Livewire\Admin\ElectionManager::class)->name('elections.manage');
+    Route::get('/elections/{election:slug}/vetting', \App\Livewire\Admin\ElectionDashboard::class)->name('elections.vetting');
+    Route::get('/elections/{election:slug}/results', \App\Livewire\Admin\ElectionResults::class)->name('elections.results');
+    Route::get('/elections/{election:slug}/edit', \App\Livewire\Admin\ElectionEditor::class)->name('elections.edit');
 });
 
 Route::middleware(['auth', 'role:organization'])->prefix('partner')->name('partner.')
@@ -222,6 +230,11 @@ Route::middleware(['auth', 'role:organization'])->prefix('partner')->name('partn
     Route::get('/campaigns/create', CampaignBuilder::class)->name('campaigns.create');
     Route::get('/campaigns/{slug}/edit', CampaignBuilder::class)->name('campaigns.edit');
     Route::get('/campaigns/{slug}/results', CampaignAnalytics::class)->name('campaigns.results');
+    Route::get('/elections', \App\Livewire\Admin\ElectionList::class)->name('elections.index');
+    Route::get('/elections/manage', \App\Livewire\Admin\ElectionManager::class)->name('elections.manage');
+    Route::get('/elections/{election:slug}/vetting', \App\Livewire\Admin\ElectionDashboard::class)->name('elections.vetting');
+    Route::get('/elections/{election:slug}/results', \App\Livewire\Admin\ElectionResults::class)->name('elections.results');
+    Route::get('/elections/{election:slug}/edit', \App\Livewire\Admin\ElectionEditor::class)->name('elections.edit');
     
 });
 

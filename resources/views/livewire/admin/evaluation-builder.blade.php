@@ -470,7 +470,7 @@
                     @foreach($questions as $index => $question)
 
                         @php
-                            $qKey = $question['id'] ?? $question['temp_id'] ?? $index;
+                            $qKey = $question['temp_id'];
 
                             if ($question['type'] === 'section') $inSection = true;
                             elseif ($question['type'] === 'page_break') $inSection = false;
