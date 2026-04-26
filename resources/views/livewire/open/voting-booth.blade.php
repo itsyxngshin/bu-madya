@@ -101,47 +101,91 @@
                 </div>
             @endif
 
-            {{-- PHASE 2: OFFICIAL BALLOT --}}
+            {{-- PHASE 2: OFFICIAL BALLOT (Powered by Alpine.js + Entangle) --}}
             <div class="space-y-8 md:space-y-10">
                 @foreach($positions as $position)
-                    <div wire:key="ballot-position-{{ $position->id }}">
+                    
+                    {{-- ALPINE WRAPPER --}}
+                    <div wire:key="ballot-position-{{ $position->id }}" 
+                         x-data="{
+                            selected: @entangle('selectedCandidates.'.$position->id),
+                            max: {{ $position->max_winners }},
+                            
+                            init() {
+                                if (!Array.isArray(this.selected)) this.selected = [];
+                            },
+                            
+                            toggle(id) {
+                                let strId = String(id);
+
+                                // 1. Handle Abstain specifically
+                                if (strId === 'abstain') {
+                                    // If already abstained, uncheck it. Otherwise, ONLY select abstain.
+                                    this.selected = this.selected.includes('abstain') ? [] : ['abstain'];
+                                    return;
+                                }
+
+                                // 2. If picking a candidate, automatically clear 'abstain'
+                                this.selected = this.selected.filter(i => i !== 'abstain');
+
+                                // 3. Standard Toggle Logic
+                                let index = this.selected.indexOf(strId);
+                                if (index > -1) {
+                                    this.selected.splice(index, 1); // Uncheck
+                                } else if (this.selected.length < this.max) {
+                                    this.selected.push(strId); // Check (if under limit)
+                                }
+                            },
+                            
+                            isSelected(id) {
+                                return this.selected.includes(String(id));
+                            },
+                            
+                            isMaxed() {
+                                return this.selected.length >= this.max && !this.selected.includes('abstain');
+                            }
+                         }"
+                         class="relative">
                         
-                        <div class="flex items-end justify-between mb-4">
+                        <div class="flex flex-col md:flex-row md:items-end justify-between mb-4 gap-2">
                             <div>
                                 <h4 class="text-lg font-black text-gray-900 uppercase tracking-tight">{{ $position->title }}</h4>
                                 <p class="text-[10px] font-bold text-gray-500 uppercase mt-1">Select up to {{ $position->max_winners }}</p>
                             </div>
-                            <span class="text-[10px] font-black px-3 py-1 rounded-full {{ count($selectedCandidates[$position->id] ?? []) == $position->max_winners && !in_array('abstain', $selectedCandidates[$position->id] ?? []) ? 'text-green-600 bg-green-50' : 'text-gray-500 bg-gray-100' }}">
-                                @if(in_array('abstain', $selectedCandidates[$position->id] ?? [])) Abstained
-                                @else {{ count($selectedCandidates[$position->id] ?? []) }} / {{ $position->max_winners }}
-                                @endif
+                            
+                            {{-- Dynamic Alpine Counter --}}
+                            <span class="text-[10px] font-black px-3 py-1 rounded-full transition-colors"
+                                  :class="isMaxed() || isSelected('abstain') ? 'text-green-600 bg-green-50' : 'text-gray-500 bg-gray-100'"
+                                  x-text="isSelected('abstain') ? 'Abstained' : `${selected.length} / ${max} Selected`">
                             </span>
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             @forelse($position->candidates as $candidate)
-                                @php
-                                    $currentSelected = $selectedCandidates[$position->id] ?? [];
-                                    $isSelected = in_array((string)$candidate->id, $currentSelected);
-                                    $reachedMax = count($currentSelected) >= $position->max_winners;
-                                @endphp
-
-                                <button type="button" wire:click="toggleSelection({{ $position->id }}, '{{ $candidate->id }}')"
-                                        class="w-full text-left flex items-center gap-4 p-4 rounded-2xl border-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed {{ $isSelected ? 'border-orange-500 bg-orange-50 shadow-md' : 'border-gray-100 bg-gray-50 hover:border-orange-200' }}"
-                                        @if($reachedMax && !$isSelected) disabled @endif>
+                                
+                                {{-- NATIVE ALPINE BUTTON --}}
+                                <button type="button" 
+                                        @click="toggle('{{ $candidate->id }}')"
+                                        :disabled="isMaxed() && !isSelected('{{ $candidate->id }}')"
+                                        class="w-full text-left flex items-center gap-4 p-4 rounded-2xl border-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed group"
+                                        :class="isSelected('{{ $candidate->id }}') ? 'border-orange-500 bg-orange-50 shadow-md' : 'border-gray-100 bg-gray-50 hover:border-orange-200'">
                                     
-                                    <div class="w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 {{ $isSelected ? 'border-orange-500 bg-orange-500' : 'border-gray-300' }}">
-                                        @if($isSelected) <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg> @endif
+                                    <div class="w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors"
+                                         :class="isSelected('{{ $candidate->id }}') ? 'border-orange-500 bg-orange-500' : 'border-gray-300 group-hover:border-orange-400'">
+                                        <svg x-show="isSelected('{{ $candidate->id }}')" x-cloak class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
                                     </div>
 
                                     @if($candidate->profile_photo_path)
-                                        <img src="{{ asset('storage/'.$candidate->profile_photo_path) }}" class="w-12 h-12 rounded-full object-cover">
+                                        <img src="{{ asset('storage/'.$candidate->profile_photo_path) }}" class="w-12 h-12 rounded-full object-cover bg-white">
                                     @else
                                         <div class="w-12 h-12 rounded-full bg-white border border-gray-200 text-gray-400 flex items-center justify-center font-black">{{ substr($candidate->user->name ?? '?', 0, 1) }}</div>
                                     @endif
                                     
                                     <div class="min-w-0 flex-1">
-                                        <p class="font-black truncate text-sm {{ $isSelected ? 'text-orange-900' : 'text-gray-900' }}">{{ $candidate->user->name ?? 'Unknown' }}</p>
+                                        <p class="font-black truncate text-sm md:text-base transition-colors"
+                                           :class="isSelected('{{ $candidate->id }}') ? 'text-orange-900' : 'text-gray-900'">
+                                            {{ $candidate->user->name ?? 'Unknown' }}
+                                        </p>
                                         <p class="text-[10px] font-bold text-gray-500 uppercase mt-0.5 truncate">{{ $candidate->program }}</p>
                                     </div>
                                 </button>
@@ -151,15 +195,18 @@
                                 </div>
                             @endforelse
 
-                            {{-- MANDATORY ABSTAIN --}}
-                            @php $isAbstain = in_array('abstain', $selectedCandidates[$position->id] ?? []); @endphp
-                            <button type="button" wire:click="toggleSelection({{ $position->id }}, 'abstain')"
-                                    class="w-full text-left flex items-center gap-4 p-4 rounded-2xl border-2 border-dashed transition-all {{ $isAbstain ? 'border-gray-500 bg-gray-200 shadow-inner' : 'border-gray-200 bg-gray-100 hover:border-gray-300' }}">
-                                <div class="w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 {{ $isAbstain ? 'border-gray-600 bg-gray-600' : 'border-gray-300' }}">
-                                    @if($isAbstain) <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg> @endif
+                            {{-- ALPINE ABSTAIN BUTTON --}}
+                            <button type="button" 
+                                    @click="toggle('abstain')"
+                                    class="w-full text-left flex items-center gap-4 p-4 rounded-2xl border-2 border-dashed transition-all group"
+                                    :class="isSelected('abstain') ? 'border-gray-500 bg-gray-200 shadow-inner' : 'border-gray-200 bg-gray-100 hover:border-gray-300'">
+                                
+                                <div class="w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors"
+                                     :class="isSelected('abstain') ? 'border-gray-600 bg-gray-600' : 'border-gray-300 group-hover:border-gray-400'">
+                                    <svg x-show="isSelected('abstain')" x-cloak class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
                                 </div>
                                 <div>
-                                    <p class="font-black text-gray-600 text-sm italic">Abstain</p>
+                                    <p class="font-black text-gray-600 text-sm md:text-base italic">Abstain</p>
                                     <p class="text-[9px] font-bold text-gray-400 uppercase mt-0.5">Skip this position</p>
                                 </div>
                             </button>
