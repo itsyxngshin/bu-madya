@@ -135,12 +135,12 @@
                                     {{-- FIX 1: Added wire:key to the label so Livewire tracks the state --}}
                                     <label wire:key="candidate-card-{{ $position->id }}-{{ $candidate->id }}" class="relative cursor-pointer group">
                                         
-                                        {{-- FIX 2: Changed "hidden" to "sr-only" so the checkbox is clickable but invisible --}}
+                                        {{-- CRITICAL FIX: Must be "peer sr-only", NOT "peer hidden" --}}
                                         <input type="checkbox" 
-                                               wire:model.live="selectedCandidates.{{ $position->id }}" 
-                                               value="{{ $candidate->id }}" 
-                                               class="peer sr-only"
-                                               @if(count($selectedCandidates[$position->id] ?? []) >= $position->max_winners && !in_array($candidate->id, $selectedCandidates[$position->id] ?? [])) disabled @endif>
+                                            wire:model.live="selectedCandidates.{{ $position->id }}" 
+                                            value="{{ $candidate->id }}" 
+                                            class="peer sr-only"
+                                            @if(count($selectedCandidates[$position->id] ?? []) >= $position->max_winners && !in_array($candidate->id, $selectedCandidates[$position->id] ?? [])) disabled @endif>
                                         
                                         <div class="flex items-center gap-4 p-4 rounded-2xl bg-gray-50 border-2 border-gray-100 transition-all duration-200 ease-in-out
                                                     peer-checked:border-orange-500 peer-checked:bg-orange-50 peer-checked:shadow-md
