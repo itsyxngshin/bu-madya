@@ -1,54 +1,43 @@
-<style>
-    [x-cloak] { display: none !important; }
-    .hide-scrollbar::-webkit-scrollbar { display: none; }
-    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-</style>
-
-<div class="max-w-5xl mx-auto py-6 md:py-8 px-4 font-sans pb-28 md:pb-12" x-data="{ tab: @entangle('activeTab') }">
+<div class="max-w-5xl mx-auto py-8 px-4 font-sans pb-32" x-data="{ tab: @entangle('activeTab') }">
     
-    {{-- Header --}}
-    <div class="mb-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+    <div class="mb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
-            <h1 class="text-2xl md:text-3xl font-black text-gray-900 tracking-tight flex items-center gap-3">
+            <h1 class="text-3xl font-black text-gray-900 tracking-tight flex items-center gap-3">
                 <a href="{{ route('admin.elections.index') }}" class="text-gray-400 hover:text-orange-600 transition-colors">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                 </a>
                 Edit Election
             </h1>
-            <p class="text-gray-500 font-medium ml-9 text-sm md:text-base">Modifying: <span class="font-bold">{{ $election->title }}</span></p>
+            <p class="text-gray-500 font-medium ml-9">Modifying: <span class="font-bold">{{ $election->title }}</span></p>
         </div>
-        
-        {{-- Desktop Save Button (Hidden on Mobile) --}}
-        <button wire:click="saveElection" class="hidden md:block px-8 py-3 bg-gray-900 hover:bg-orange-600 text-white font-bold rounded-xl shadow-lg transition-colors w-full md:w-auto">
+        <button wire:click="saveElection" class="px-8 py-3 bg-gray-900 hover:bg-orange-600 text-white font-bold rounded-xl shadow-lg transition-colors w-full md:w-auto">
             Save Changes
         </button>
     </div>
 
-    {{-- Tabs (Mobile Scrollable) --}}
-    <div class="relative w-full mb-6">
-        <div class="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-stone-50 to-transparent z-10 md:hidden pointer-events-none"></div>
-        <div class="flex space-x-2 bg-gray-200/50 p-1.5 rounded-2xl w-full md:w-max overflow-x-auto snap-x snap-mandatory hide-scrollbar">
-            <button @click="tab = 'details'" :class="tab === 'details' ? 'bg-white text-gray-900 shadow-sm font-black' : 'text-gray-500 font-bold'" class="snap-start shrink-0 px-6 py-2.5 rounded-xl text-sm transition-all whitespace-nowrap">1. Details</button>
-            <button @click="tab = 'timeline'" :class="tab === 'timeline' ? 'bg-white text-gray-900 shadow-sm font-black' : 'text-gray-500 font-bold'" class="snap-start shrink-0 px-6 py-2.5 rounded-xl text-sm transition-all whitespace-nowrap">2. Timeline</button>
-            <button @click="tab = 'positions'" :class="tab === 'positions' ? 'bg-white text-gray-900 shadow-sm font-black' : 'text-gray-500 font-bold'" class="snap-start shrink-0 px-6 py-2.5 rounded-xl text-sm transition-all whitespace-nowrap">3. Positions</button>
-        </div>
+    {{-- Tabs --}}
+    <div class="flex space-x-2 bg-gray-200/50 p-1 rounded-2xl w-full md:w-max mb-6 overflow-x-auto">
+        <button @click="tab = 'details'" :class="tab === 'details' ? 'bg-white text-gray-900 shadow-sm font-black' : 'text-gray-500 font-bold'" class="px-6 py-2.5 rounded-xl text-sm transition-all whitespace-nowrap">1. Details</button>
+        <button @click="tab = 'timeline'" :class="tab === 'timeline' ? 'bg-white text-gray-900 shadow-sm font-black' : 'text-gray-500 font-bold'" class="px-6 py-2.5 rounded-xl text-sm transition-all whitespace-nowrap">2. Timeline</button>
+        <button @click="tab = 'positions'" :class="tab === 'positions' ? 'bg-white text-gray-900 shadow-sm font-black' : 'text-gray-500 font-bold'" class="px-6 py-2.5 rounded-xl text-sm transition-all whitespace-nowrap">3. Positions</button>
     </div>
 
-    <div class="bg-white rounded-3xl shadow-sm border border-gray-200 p-5 md:p-8">
+    <div class="bg-white rounded-[2rem] shadow-sm border border-gray-200 p-6 md:p-8">
         
         {{-- STEP 1: DETAILS --}}
         <div x-show="tab === 'details'" x-cloak class="space-y-6">
             
+            {{-- Photo Upload Preview --}}
             <div class="mb-6">
-                <label class="block text-[10px] md:text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Cover Photo</label>
+                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Cover Photo</label>
                 @if($cover_photo)
-                    <img src="{{ $cover_photo->temporaryUrl() }}" class="w-full h-32 md:h-40 object-cover rounded-2xl mb-3 shadow-sm border border-gray-200">
+                    <img src="{{ $cover_photo->temporaryUrl() }}" class="w-full h-40 object-cover rounded-2xl mb-3 shadow-sm border border-gray-200">
                 @elseif($existing_cover_photo)
-                    <img src="{{ asset('storage/'.$existing_cover_photo) }}" class="w-full h-32 md:h-40 object-cover rounded-2xl mb-3 shadow-sm border border-gray-200">
+                    <img src="{{ asset('storage/'.$existing_cover_photo) }}" class="w-full h-40 object-cover rounded-2xl mb-3 shadow-sm border border-gray-200">
                 @else
                     <div class="w-full h-24 bg-gray-100 rounded-2xl border-2 border-dashed border-gray-300 flex items-center justify-center text-gray-400 mb-3">No Cover Photo</div>
                 @endif
-                <label class="cursor-pointer bg-gray-50 hover:bg-gray-100 text-gray-700 px-4 py-2.5 rounded-xl text-xs md:text-sm font-bold transition shadow-sm border border-gray-200 inline-block">
+                <label class="cursor-pointer bg-gray-50 hover:bg-gray-100 text-gray-700 px-4 py-2.5 rounded-xl text-sm font-bold transition shadow-sm border border-gray-200 inline-block">
                     Change Cover Photo
                     <input type="file" wire:model="cover_photo" class="hidden" accept="image/*">
                 </label>
@@ -56,96 +45,124 @@
             </div>
 
             <div>
-                <label class="block text-[10px] md:text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Election Title</label>
-                <input type="text" wire:model="title" class="w-full rounded-xl border-gray-200 bg-gray-50 focus:ring-orange-500 p-3 shadow-sm font-bold text-gray-900 text-sm md:text-base">
+                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Election Title</label>
+                <input type="text" wire:model="title" class="w-full rounded-xl border-gray-200 bg-gray-50 focus:ring-orange-500 p-3 shadow-sm font-bold text-gray-900">
                 @error('title') <span class="text-[10px] text-red-500 font-bold mt-1 block">{{ $message }}</span> @enderror
             </div>
 
+            {{-- Custom URL Slug Editor (Locked by default) --}}
             <div x-data="{ editSlug: false }">
-                <label class="block text-[10px] md:text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Public URL Slug</label>
+                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Public URL Slug</label>
                 <div class="flex rounded-xl shadow-sm relative transition-all" :class="editSlug ? 'ring-2 ring-orange-500' : ''">
-                    <span class="hidden md:inline-flex items-center px-4 rounded-l-xl border border-r-0 border-gray-200 bg-gray-100 text-gray-500 text-sm font-bold">
+                    <span class="inline-flex items-center px-4 rounded-l-xl border border-r-0 border-gray-200 bg-gray-100 text-gray-500 sm:text-sm font-bold">
                         /elections/
                     </span>
+                    
                     <input type="text" wire:model="slug" :readonly="!editSlug" 
-                           class="flex-1 min-w-0 block w-full px-4 py-3 border border-gray-200 focus:ring-0 font-bold text-gray-900 shadow-sm transition-colors text-sm md:text-base rounded-l-xl md:rounded-none" 
+                           class="flex-1 min-w-0 block w-full px-4 py-3 border border-gray-200 focus:ring-0 font-bold text-gray-900 shadow-sm transition-colors" 
                            :class="editSlug ? 'bg-white border-orange-500' : 'bg-gray-50 text-gray-500 cursor-not-allowed'" 
-                           placeholder="e.g. 2026-general">
+                           placeholder="e.g. 2026-general-elections">
+                    
+                    {{-- Unlock / Lock Button --}}
                     <button type="button" @click="editSlug = !editSlug" 
-                            class="inline-flex items-center px-4 rounded-r-xl border border-l-0 border-gray-200 font-bold text-xs transition-colors shrink-0"
+                            class="inline-flex items-center px-4 rounded-r-xl border border-l-0 border-gray-200 font-bold text-xs transition-colors"
                             :class="editSlug ? 'bg-orange-100 text-orange-700 hover:bg-orange-200 border-orange-500' : 'bg-white text-gray-600 hover:bg-gray-50'">
                         <span x-show="!editSlug">Edit</span>
                         <span x-show="editSlug" x-cloak>Lock</span>
                     </button>
                 </div>
-                <div x-show="editSlug" x-cloak class="mt-2 text-[10px] text-orange-600 font-black uppercase tracking-wider flex items-center gap-1 leading-tight">
-                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-                    Warning: Changing this breaks existing links!
+                
+                {{-- Warning message only shows when unlocked --}}
+                <div x-show="editSlug" style="display: none;" class="mt-2 text-[10px] text-orange-600 font-black uppercase tracking-wider flex items-center gap-1">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                    Warning: Changing this will instantly break any links already shared with students!
                 </div>
+                
+                @error('slug') <span class="text-[10px] text-red-500 font-bold mt-1 block">{{ $message }}</span> @enderror
             </div>
             
             <div>
-                <label class="block text-[10px] md:text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Description</label>
-                <textarea wire:model="description" rows="3" class="w-full rounded-xl border-gray-200 bg-gray-50 focus:ring-orange-500 p-3 shadow-sm resize-none text-sm md:text-base"></textarea>
+                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Description</label>
+                <textarea wire:model="description" rows="3" class="w-full rounded-xl border-gray-200 bg-gray-50 focus:ring-orange-500 p-3 shadow-sm resize-none"></textarea>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <label class="block text-[10px] md:text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Election Type</label>
-                    <select wire:model="type" class="w-full rounded-xl border-gray-200 bg-gray-50 focus:ring-orange-500 p-3 font-semibold text-gray-700 shadow-sm cursor-pointer text-sm md:text-base">
+                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Election Type</label>
+                    <select wire:model="type" class="w-full rounded-xl border-gray-200 bg-gray-50 focus:ring-orange-500 p-3 font-semibold text-gray-700 shadow-sm cursor-pointer">
                         <option value="general">General Election</option>
                         <option value="special">Special Election</option>
                         <option value="runoff">Run-off</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-[10px] md:text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Guest Access</label>
+                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Guest Access</label>
                     <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-xl bg-gray-50 cursor-pointer hover:bg-gray-100 transition-colors shadow-sm">
                         <input type="checkbox" wire:model="allow_guest_voting" class="w-5 h-5 text-orange-500 rounded border-gray-300 focus:ring-orange-500">
-                        <span class="text-sm font-bold text-gray-700">Allow Guest Voting</span>
+                        <span class="text-sm font-bold text-gray-700">Allow Guest Voting (Non-authenticated)</span>
                     </label>
                 </div>
             </div>
         </div>
 
         {{-- STEP 2: TIMELINE --}}
-        <div x-show="tab === 'timeline'" x-cloak class="space-y-4 md:space-y-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 p-4 md:p-6 bg-blue-50/50 rounded-2xl border border-blue-100">
-                <div class="md:col-span-2 text-blue-800 font-black text-[10px] md:text-sm uppercase tracking-wider flex items-center gap-2">
-                    <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+        <div x-show="tab === 'timeline'" x-cloak class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-blue-50/50 rounded-2xl border border-blue-100">
+                <div class="md:col-span-2 text-blue-800 font-black text-sm uppercase tracking-wider flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                     Application Phase
                 </div>
                 <div>
-                    <label class="block text-[10px] md:text-xs font-bold text-gray-600 mb-1">Candidacy Opens</label>
-                    <input type="datetime-local" wire:model="application_start" class="w-full rounded-xl border-gray-200 p-3 bg-white shadow-sm font-semibold text-sm">
+                    <label class="block text-xs font-bold text-gray-600 mb-1">Candidacy Opens</label>
+                    <input type="datetime-local" wire:model="application_start" class="w-full rounded-xl border-gray-200 p-3 bg-white shadow-sm font-semibold">
                 </div>
                 <div>
-                    <label class="block text-[10px] md:text-xs font-bold text-gray-600 mb-1">Candidacy Closes</label>
-                    <input type="datetime-local" wire:model="application_end" class="w-full rounded-xl border-gray-200 p-3 bg-white shadow-sm font-semibold text-sm">
+                    <label class="block text-xs font-bold text-gray-600 mb-1">Candidacy Closes</label>
+                    <input type="datetime-local" wire:model="application_end" class="w-full rounded-xl border-gray-200 p-3 bg-white shadow-sm font-semibold">
                 </div>
             </div>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 p-4 md:p-6 bg-orange-50/50 rounded-2xl border border-orange-100">
-                <div class="md:col-span-2 text-orange-800 font-black text-[10px] md:text-sm uppercase tracking-wider flex items-center gap-2">
-                    <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path></svg>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-orange-50/50 rounded-2xl border border-orange-100">
+                <div class="md:col-span-2 text-orange-800 font-black text-sm uppercase tracking-wider flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path></svg>
                     Live Voting Phase
                 </div>
                 <div>
-                    <label class="block text-[10px] md:text-xs font-bold text-gray-600 mb-1">Ballots Open</label>
-                    <input type="datetime-local" wire:model="voting_start" class="w-full rounded-xl border-gray-200 p-3 bg-white shadow-sm font-semibold text-sm">
+                    <label class="block text-xs font-bold text-gray-600 mb-1">Ballots Open</label>
+                    <input type="datetime-local" wire:model="voting_start" class="w-full rounded-xl border-gray-200 p-3 bg-white shadow-sm font-semibold">
                 </div>
                 <div>
-                    <label class="block text-[10px] md:text-xs font-bold text-gray-600 mb-1">Ballots Close</label>
-                    <input type="datetime-local" wire:model="voting_end" class="w-full rounded-xl border-gray-200 p-3 bg-white shadow-sm font-semibold text-sm">
+                    <label class="block text-xs font-bold text-gray-600 mb-1">Ballots Close</label>
+                    <input type="datetime-local" wire:model="voting_end" class="w-full rounded-xl border-gray-200 p-3 bg-white shadow-sm font-semibold">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-green-50/50 rounded-2xl border border-green-100">
+                <div class="md:col-span-2 text-green-800 font-black text-sm uppercase tracking-wider flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path></svg>
+                    Results Phase
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 mb-1">Automated Results Release</label>
+                    <input type="datetime-local" wire:model="results_release" class="w-full rounded-xl border-gray-200 p-3 bg-white shadow-sm font-semibold">
+                    <p class="text-[10px] text-gray-500 font-bold mt-1">Leave blank to keep results hidden manually.</p>
                 </div>
             </div>
         </div>
 
         {{-- STEP 3: POSITIONS --}}
         <div x-show="tab === 'positions'" x-cloak>
+            
+            @if (session()->has('position_error'))
+                <div class="mb-4 bg-red-50 text-red-700 p-3 rounded-xl border border-red-200 font-bold text-sm flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                    {{ session('position_error') }}
+                </div>
+            @endif
+
             <div class="flex justify-between items-center mb-6">
-                <h3 class="text-sm md:text-base font-bold text-gray-900 uppercase tracking-wider">Ballot Configuration</h3>
-                <button wire:click="addPosition" class="text-[10px] md:text-xs font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 px-3 py-2 md:px-4 md:py-2 rounded-xl transition-colors shadow-sm flex items-center gap-1">
+                <h3 class="text-sm font-bold text-gray-900 uppercase tracking-wider">Ballot Configuration</h3>
+                <button wire:click="addPosition" class="text-xs font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 px-4 py-2 rounded-xl transition-colors shadow-sm flex items-center gap-1">
                     <span>+</span> Add Position
                 </button>
             </div>
@@ -157,35 +174,40 @@
                         $rowKey = $pos['id'] ? 'db-'.$pos['id'] : 'temp-'.$pos['temp_id'];
                     @endphp
 
-                    <div wire:key="pos-{{ $rowKey }}" class="flex flex-col sm:flex-row items-start sm:items-center gap-3 md:gap-4 p-4 md:p-5 bg-gray-50 border border-gray-200 rounded-2xl relative shadow-sm">
+                    <div wire:key="pos-{{ $rowKey }}" class="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-5 bg-gray-50 border border-gray-200 rounded-2xl relative shadow-sm">
                         
-                        <div class="flex-1 w-full pr-8 sm:pr-0">
-                            <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Position Title</label>
-                            <input type="text" wire:model="positions.{{ $index }}.title" class="w-full rounded-xl border-gray-200 text-sm font-bold p-2.5 md:p-3 shadow-sm focus:ring-orange-500">
+                        <div class="flex-1 w-full">
+                            <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Position Title</label>
+                            <input type="text" wire:model="positions.{{ $index }}.title" class="w-full rounded-xl border-gray-200 text-sm font-bold p-3 shadow-sm focus:ring-orange-500" placeholder="e.g. Vice President">
+                            @error('positions.'.$index.'.title') <span class="text-[10px] text-red-500 font-bold mt-1 block">{{ $message }}</span> @enderror
+                            
+                            @if($hasCandidates)
+                                <p class="text-[10px] text-orange-600 font-black uppercase tracking-wider mt-2 flex items-center gap-1">
+                                    <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
+                                    {{ $pos['candidate_count'] }} Active Candidate(s)
+                                </p>
+                            @endif
                         </div>
 
                         <div class="w-full sm:w-32 shrink-0">
-                            <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Max Winners</label>
-                            <input type="number" wire:model="positions.{{ $index }}.max_winners" min="1" class="w-full rounded-xl border-gray-200 text-sm font-bold p-2.5 md:p-3 text-center shadow-sm focus:ring-orange-500">
+                            <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Max Winners</label>
+                            <input type="number" wire:model="positions.{{ $index }}.max_winners" min="1" class="w-full rounded-xl border-gray-200 text-sm font-bold p-3 text-center shadow-sm focus:ring-orange-500">
                         </div>
 
                         <div class="absolute top-4 right-4 sm:relative sm:top-0 sm:right-0 sm:mt-5">
                             @if($hasCandidates)
-                                <button disabled class="text-gray-300 p-2"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg></button>
+                                <button disabled class="text-gray-300 cursor-not-allowed p-2" title="Cannot delete: Candidates exist">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                                </button>
                             @else
-                                <button wire:click="removePosition({{ $index }})" class="text-gray-400 hover:text-red-500 p-2"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
+                                <button wire:click="removePosition({{ $index }})" class="text-gray-400 hover:text-red-500 transition-colors p-2 bg-white rounded-lg border border-gray-200 hover:border-red-200 shadow-sm" title="Remove Position">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                </button>
                             @endif
                         </div>
                     </div>
                 @endforeach
             </div>
         </div>
-    </div>
-
-    {{-- STICKY MOBILE SAVE BUTTON --}}
-    <div class="fixed bottom-0 left-0 w-full p-4 bg-white/90 backdrop-blur-md border-t border-gray-200 shadow-[0_-10px_20px_rgba(0,0,0,0.05)] z-50 md:hidden">
-        <button wire:click="saveElection" class="w-full py-4 bg-gray-900 text-white font-black rounded-xl shadow-lg transition-colors">
-            Save Changes
-        </button>
     </div>
 </div>
