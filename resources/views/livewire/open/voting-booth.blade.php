@@ -114,24 +114,10 @@
             @endif
 
             {{-- PHASE 2: THE OFFICIAL BALLOT --}}
-            <div class="bg-white rounded-[2rem] p-6 md:p-8 shadow-sm border border-gray-200">
-                <h3 class="text-lg md:text-xl font-black text-gray-900 border-b border-gray-100 pb-3 md:pb-4 mb-6 flex items-center gap-2">
-                    <span class="w-6 h-6 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center text-[10px]">
-                        {{ (!auth()->check() && $election->allow_guest_voting) ? '2' : '1' }}
-                    </span>
-                    Official Ballot
-                </h3>
-
-                @if(session()->has('error'))
-                    <div class="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm font-bold flex items-center gap-2">
-                        <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-                        {{ session('error') }}
-                    </div>
-                @endif
-
-                <div class="space-y-8 md:space-y-10">
+            <div class="space-y-8 md:space-y-10">
                     @foreach($positions as $position)
-                        <div class="relative">
+                        {{-- Added wire:key to the position wrapper --}}
+                        <div wire:key="ballot-position-{{ $position->id }}" class="relative">
                             <div class="flex flex-col md:flex-row md:items-end justify-between mb-4 gap-2">
                                 <div>
                                     <h4 class="text-lg font-black text-gray-900 uppercase tracking-tight">{{ $position->title }}</h4>
@@ -146,18 +132,19 @@
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 @forelse($position->candidates as $candidate)
-                                    {{-- Premium Clickable Card Label --}}
-                                    <label class="relative cursor-pointer group">
+                                    {{-- FIX 1: Added wire:key to the label so Livewire tracks the state --}}
+                                    <label wire:key="candidate-card-{{ $position->id }}-{{ $candidate->id }}" class="relative cursor-pointer group">
+                                        
+                                        {{-- FIX 2: Changed "hidden" to "sr-only" so the checkbox is clickable but invisible --}}
                                         <input type="checkbox" 
                                                wire:model.live="selectedCandidates.{{ $position->id }}" 
                                                value="{{ $candidate->id }}" 
-                                               class="peer hidden"
-                                               {{-- Disable this checkbox if the user has reached the limit AND this box is not already checked --}}
+                                               class="peer sr-only"
                                                @if(count($selectedCandidates[$position->id] ?? []) >= $position->max_winners && !in_array($candidate->id, $selectedCandidates[$position->id] ?? [])) disabled @endif>
                                         
                                         <div class="flex items-center gap-4 p-4 rounded-2xl bg-gray-50 border-2 border-gray-100 transition-all duration-200 ease-in-out
                                                     peer-checked:border-orange-500 peer-checked:bg-orange-50 peer-checked:shadow-md
-                                                    peer-disabled:opacity-50 peer-disabled:cursor-not-allowed
+                                                    peer-disabled:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:bg-gray-100
                                                     hover:border-orange-200">
                                             
                                             {{-- Custom Checkbox UI --}}
@@ -171,7 +158,7 @@
                                                 <div class="w-12 h-12 rounded-full bg-white border border-gray-200 text-gray-400 flex items-center justify-center font-black text-lg shrink-0">{{ substr($candidate->user->name ?? '?', 0, 1) }}</div>
                                             @endif
                                             
-                                            <div class="min-w-0">
+                                            <div class="min-w-0 flex-1">
                                                 <p class="font-black text-gray-900 leading-tight text-sm md:text-base truncate peer-checked:text-orange-900">{{ $candidate->user->name ?? 'Unknown' }}</p>
                                                 <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mt-0.5 truncate">{{ $candidate->program }}</p>
                                             </div>
@@ -186,7 +173,6 @@
                         </div>
                     @endforeach
                 </div>
-            </div>
 
             {{-- STICKY MOBILE SUBMIT BUTTON --}}
             <div class="fixed bottom-0 left-0 w-full p-4 bg-white/90 backdrop-blur-md border-t border-gray-200 shadow-[0_-10px_20px_rgba(0,0,0,0.05)] z-50 md:static md:bg-transparent md:border-0 md:shadow-none md:p-0 md:pt-4">

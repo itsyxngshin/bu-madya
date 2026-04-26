@@ -24,7 +24,38 @@ class ElectionDashboard extends Component
         $this->election = $election;
     }
 
-    // ... keep your approveCandidate, confirmRejection, and rejectCandidate methods exactly the same ...
+    // --- VETTING ACTIONS ---
+
+    public function approveCandidate($candidateId)
+    {
+        $candidate = \App\Models\Candidate::findOrFail($candidateId);
+        
+        // Update the status
+        $candidate->update([
+            'status' => 'approved'
+        ]);
+
+        // Trigger UI Success
+        session()->flash('success', 'Candidate ' . $candidate->user->name . ' has been officially APPROVED for the ballot.');
+        
+        // PRO TIP: If you set up emails later, this is exactly where you would trigger 
+        // Mail::to($candidate->user->email)->send(new CandidateApprovedMail($candidate));
+    }
+
+    public function rejectCandidate($candidateId)
+    {
+        $candidate = \App\Models\Candidate::findOrFail($candidateId);
+        
+        // Update the status
+        $candidate->update([
+            'status' => 'rejected'
+        ]);
+
+        // Trigger UI Warning/Success
+        session()->flash('success', 'Candidate ' . $candidate->user->name . ' has been REJECTED.');
+        
+        // PRO TIP: Send a rejection email here if needed.
+    }
 
     public function render()
     {
