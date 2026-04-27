@@ -6,37 +6,38 @@ use Illuminate\Database\Eloquent\Model;
 
 class Candidate extends Model
 {
-    protected $fillable = [
-        'user_id', 'election_id', 'college_id', 'election_position_id', 
-        'program', 'year_level', 'address', 'profile_photo_path', 
-        'e_signature_path', 'status', 'remarks'
-    ];
+    protected $guarded = [];
 
-    public function user() {
+    // THE FIX: This is the exact relationship Laravel was looking for!
+    public function electionPosition()
+    {
+        return $this->belongsTo(ElectionPosition::class);
+    }
+
+    // You will also need these relationships since the profile page loads them
+    public function user()
+    {
         return $this->belongsTo(User::class);
     }
 
-    public function election() {
-        return $this->belongsTo(Election::class);
-    }
-
-    public function college() {
+    public function college()
+    {
         return $this->belongsTo(College::class);
     }
 
-    public function position() {
-        return $this->belongsTo(ElectionPosition::class, 'election_position_id');
-    }
-
-    public function platforms() {
+    public function platforms()
+    {
         return $this->hasMany(CandidatePlatform::class);
     }
 
-    public function credentials() {
+    public function credentials()
+    {
         return $this->hasMany(CandidateCredential::class);
     }
 
-    public function votes() {
+    // The relationship we added earlier for the Live Analytics
+    public function votes() 
+    {
         return $this->hasMany(Vote::class);
     }
 }
