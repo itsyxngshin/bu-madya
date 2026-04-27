@@ -70,6 +70,7 @@ use App\Livewire\Admin\LinkagesManager;
 use App\Livewire\Admin\CampaignList;
 use App\Livewire\Admin\CampaignBuilder;
 use App\Livewire\Admin\CampaignAnalytics;
+use App\Livewire\Admin\ElectionVoterLogs;
 
 
 use App\Models\MembershipApplication;
@@ -209,6 +210,7 @@ Route::middleware(['auth', 'role:administrator'])->prefix('admin')->name('admin.
     Route::get('/elections/{election:slug}/vetting', \App\Livewire\Admin\ElectionDashboard::class)->name('elections.vetting');
     Route::get('/elections/{election:slug}/results', \App\Livewire\Admin\ElectionResults::class)->name('elections.results');
     Route::get('/elections/{election:slug}/edit', \App\Livewire\Admin\ElectionEditor::class)->name('elections.edit');
+    Route::get('/elections/{election:slug}/logs', ElectionVoterLogs::class)->name('elections.logs');
 });
 
 Route::middleware(['auth', 'role:organization'])->prefix('partner')->name('partner.')
