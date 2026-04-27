@@ -167,10 +167,11 @@ Route::middleware(['auth'])
     Route::get('/roundtable/{id}', RoundtableShow::class)->name('roundtable.show');
     Route::get('/evaluations', EvaluationList::class)->name('evaluations.index');
     Route::get('/elections/{election:slug}/apply', \App\Livewire\Open\CandidateApplicationForm::class)->name('elections.apply');
-    Route::get('/elections/{election:slug}/vote', \App\Livewire\Open\VotingBooth::class)->name('elections.vote');
     Route::get('/elections/{election:slug}/results', \App\Livewire\Open\PublicElectionResults::class)->name('elections.public-results');
 
 });
+
+Route::get('/elections/{election:slug}/vote', \App\Livewire\Open\VotingBooth::class)->name('elections.vote');
 
 
 

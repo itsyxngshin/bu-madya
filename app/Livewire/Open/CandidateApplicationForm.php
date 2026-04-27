@@ -15,15 +15,13 @@ class CandidateApplicationForm extends Component
 {
     use WithFileUploads;
 
-    public Election $election; // Bound securely via URL slug
+    public Election $election; 
     public $hasApplied = false;
     public $isApplicationOpen = false;
 
-    // Dropdown Data
     public $availablePositions = [];
     public $colleges = [];
 
-    // Form Fields
     public $election_position_id = '';
     public $college_id = '';
     public $program = '';
@@ -32,29 +30,26 @@ class CandidateApplicationForm extends Component
     public $profile_photo;
     public $e_signature;
 
-    // Dynamic Arrays (Using uniqid keys for Livewire DOM morphing)
+    // THE FIX: Use associative arrays to prevent index-shifting bugs
     public $platforms = [];
     public $credentials = [];
 
     public function mount(Election $election)
     {
         $this->election = $election;
-
-        // 1. Check Timeline Safety Lock
         $now = now();
+        
         $this->isApplicationOpen = ($this->election->status === 'active' && 
                                     $now >= $this->election->application_start && 
                                     $now <= $this->election->application_end);
 
-        // 2. Fetch Data
         $this->availablePositions = $this->election->positions;
         $this->colleges = College::orderBy('name')->get();
 
-        // 3. Initialize arrays with unique keys
-        $this->platforms[] = ['key' => uniqid(), 'title' => '', 'description' => ''];
-        $this->credentials[] = ['key' => uniqid(), 'type' => '', 'description' => ''];
+        // Initialize with one empty row each
+        $this->addPlatform();
+        $this->addCredential();
 
-        // 4. Check if already applied to prevent duplicate submissions
         if (auth()->check()) {
             $this->hasApplied = Candidate::where('user_id', auth()->id())
                                          ->where('election_id', $this->election->id)
@@ -65,35 +60,34 @@ class CandidateApplicationForm extends Component
     // --- PLATFORM MANAGEMENT ---
     public function addPlatform() 
     { 
-        $this->platforms[] = ['key' => uniqid(), 'title' => '', 'description' => '']; 
+        // Use a unique string as the array key
+        $this->platforms[uniqid('plat_')] = ['title' => '', 'description' => '']; 
     }
     
-    public function removePlatform($index) 
+    public function removePlatform($key) 
     {
         if (count($this->platforms) > 1) {
-            unset($this->platforms[$index]);
-            $this->platforms = array_values($this->platforms); // Re-index array
+            unset($this->platforms[$key]);
+            // Notice: We specifically DO NOT use array_values() here!
         }
     }
 
     // --- CREDENTIAL MANAGEMENT ---
     public function addCredential() 
     { 
-        $this->credentials[] = ['key' => uniqid(), 'type' => '', 'description' => '']; 
+        $this->credentials[uniqid('cred_')] = ['type' => '', 'description' => '']; 
     }
     
-    public function removeCredential($index) 
+    public function removeCredential($key) 
     {
         if (count($this->credentials) > 1) {
-            unset($this->credentials[$index]);
-            $this->credentials = array_values($this->credentials); // Re-index array
+            unset($this->credentials[$key]);
         }
     }
 
     // --- SUBMISSION ---
     public function submitApplication()
     {
-        // Ultimate security check to ensure they didn't bypass the UI
         if (!$this->isApplicationOpen) {
             session()->flash('error', 'The application window for this election is closed.');
             return;
@@ -105,10 +99,10 @@ class CandidateApplicationForm extends Component
             'program' => 'required|string|max:255',
             'year_level' => 'required|string|max:50',
             'address' => 'required|string',
-            'profile_photo' => 'required|image|max:2048', // 2MB Max
-            'e_signature' => 'required|image|max:2048', // 2MB Max
+            'profile_photo' => 'required|image|max:2048', 
+            'e_signature' => 'required|image|max:2048', 
             
-            // Validate array contents (Livewire safely ignores the 'key')
+            // Validate the associative arrays
             'platforms.*.title' => 'required|string|max:255',
             'platforms.*.description' => 'required|string',
             'credentials.*.type' => 'required|string|max:50',
@@ -122,11 +116,9 @@ class CandidateApplicationForm extends Component
         ]);
 
         DB::transaction(function () {
-            // Save Images
             $photoPath = $this->profile_photo->store('candidates/photos', 'public');
             $signaturePath = $this->e_signature->store('candidates/signatures', 'public');
 
-            // Create the Master Candidate Record
             $candidate = Candidate::create([
                 'user_id' => auth()->id(),
                 'election_id' => $this->election->id,
@@ -137,10 +129,9 @@ class CandidateApplicationForm extends Component
                 'address' => $this->address,
                 'profile_photo_path' => $photoPath,
                 'e_signature_path' => $signaturePath,
-                'status' => 'pending', // Awaits Electoral Board vetting
+                'status' => 'pending', 
             ]);
 
-            // Save Dynamic Platforms
             foreach ($this->platforms as $platform) {
                 CandidatePlatform::create([
                     'candidate_id' => $candidate->id, 
@@ -149,7 +140,6 @@ class CandidateApplicationForm extends Component
                 ]);
             }
 
-            // Save Dynamic Credentials
             foreach ($this->credentials as $credential) {
                 CandidateCredential::create([
                     'candidate_id' => $candidate->id, 
@@ -159,14 +149,12 @@ class CandidateApplicationForm extends Component
             }
         });
 
-        // Trigger Success UI
         $this->hasApplied = true;
         session()->flash('success', 'Your candidacy has been submitted to the Electoral Board!');
     }
 
     public function render()
     {
-        return view('livewire.open.candidate-application-form')
-            ->layout('layouts.madya-template'); // Change to layouts.madya-template if needed
+        return view('livewire.open.candidate-application-form')->layout('layouts.madya-template'); 
     }
 }

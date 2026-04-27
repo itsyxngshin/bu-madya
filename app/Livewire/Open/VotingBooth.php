@@ -15,12 +15,12 @@ class VotingBooth extends Component
     public $isVotingOpen = false;
     public $hasVoted = false;
 
-    // Ballot Data
     public $positions;
-    public $selectedCandidates = []; 
-
-    // Guest Voter Form
     public $colleges = [];
+    
+    // Livewire natively holds the state
+    public array $selections = []; 
+    
     public $guest_name;
     public $guest_email;
     public $college_id;
@@ -49,8 +49,9 @@ class VotingBooth extends Component
             $query->where('status', 'approved')->with('user');
         }])->orderBy('order')->get();
 
+        // Initialize empty arrays for each position
         foreach ($this->positions as $position) {
-            $this->selectedCandidates[$position->id] = [];
+            $this->selections[(string)$position->id] = [];
         }
 
         if ($this->election->allow_guest_voting && !auth()->check()) {
@@ -58,40 +59,44 @@ class VotingBooth extends Component
         }
     }
 
-    // THE CRITICAL MISSING METHOD FOR CLICKING CANDIDATES
+    // THE FIX: Move the selection logic to PHP
     public function toggleSelection($positionId, $candidateId)
     {
-        $current = $this->selectedCandidates[$positionId] ?? [];
-        $position = $this->positions->firstWhere('id', $positionId);
+        if (!$this->isVotingOpen) return;
+
+        $positionId = (string) $positionId;
         $candidateId = (string) $candidateId;
 
-        // 1. Handle "Abstain" explicitly
+        // Fallback initialization
+        if (!isset($this->selections[$positionId])) {
+            $this->selections[$positionId] = [];
+        }
+
+        $current = $this->selections[$positionId];
+        $position = $this->positions->firstWhere('id', $positionId);
+        $limit = $position ? $position->max_winners : 1;
+
+        // Handle Abstain
         if ($candidateId === 'abstain') {
-            if (in_array('abstain', $current)) {
-                $this->selectedCandidates[$positionId] = [];
-            } else {
-                $this->selectedCandidates[$positionId] = ['abstain'];
-            }
+            $this->selections[$positionId] = in_array('abstain', $current) ? [] : ['abstain'];
             return;
         }
 
-        // 2. Clear abstain if a real candidate is chosen
-        if (($key = array_search('abstain', $current)) !== false) {
-            unset($current[$key]);
-            $current = array_values($current); // re-index
-        }
+        // Remove 'abstain' if they pick a real candidate
+        $current = array_filter($current, fn($val) => $val !== 'abstain');
 
-        // 3. Toggle Candidate Selection
-        if (($key = array_search($candidateId, $current)) !== false) {
-            unset($current[$key]);
-            $current = array_values($current); // re-index
+        if (in_array($candidateId, $current)) {
+            // Deselect candidate
+            $current = array_diff($current, [$candidateId]);
         } else {
-            if (count($current) < $position->max_winners) {
+            // Select candidate (if under limit)
+            if (count($current) < $limit) {
                 $current[] = $candidateId;
             }
         }
 
-        $this->selectedCandidates[$positionId] = $current;
+        // array_values forces a clean, zero-indexed array to prevent JSON object conversion
+        $this->selections[$positionId] = array_values($current);
     }
 
     public function castBallot()
@@ -102,13 +107,13 @@ class VotingBooth extends Component
         }
 
         if ($this->hasVoted) {
-            session()->flash('error', 'You have already cast your ballot in this election.');
+            session()->flash('error', 'You have already cast your ballot.');
             return;
         }
 
         if (!auth()->check()) {
             if (!$this->election->allow_guest_voting) {
-                session()->flash('error', 'Guest voting is not enabled. Please log in.');
+                session()->flash('error', 'Guest voting disabled. Please log in.');
                 return;
             }
 
@@ -120,35 +125,39 @@ class VotingBooth extends Component
                 'year_level' => 'required|string|max:50',
             ]);
 
-            $alreadyVoted = VoterLog::where('election_id', $this->election->id)
-                                    ->where('guest_email', $this->guest_email)
-                                    ->exists();
-            
-            if ($alreadyVoted) {
-                session()->flash('error', 'A ballot has already been cast using this email address.');
+            if (VoterLog::where('election_id', $this->election->id)->where('guest_email', $this->guest_email)->exists()) {
+                session()->flash('error', 'A ballot has already been cast using this email.');
                 return;
             }
         }
 
-        // Validate Selections (Ensure not empty, and no over-voting)
-        $totalSelections = 0;
-        foreach ($this->selectedCandidates as $posId => $cands) {
-            $totalSelections += count(array_filter((array) $cands));
+        $selections = $this->selections;
+
+        if (empty($selections)) {
+            session()->flash('error', 'Your ballot is empty!');
+            return;
+        }
+
+        $totalVotes = 0;
+
+        foreach ($this->positions as $position) {
+            $picked = $selections[$position->id] ?? [];
+            $totalVotes += count(array_filter((array) $picked));
             
-            $position = $this->positions->firstWhere('id', $posId);
-            if ($position && count(array_filter((array) $cands)) > $position->max_winners) {
-                session()->flash('error', "You selected too many candidates for {$position->title}.");
+            // Limit check just in case
+            if (count((array) $picked) > $position->max_winners && !in_array('abstain', (array) $picked)) {
+                session()->flash('error', "Too many candidates selected for {$position->title}.");
                 return;
             }
         }
 
-        if ($totalSelections === 0) {
-            session()->flash('error', 'Your ballot is empty! Please select at least one option.');
+        if ($totalVotes === 0) {
+            session()->flash('error', 'Your ballot is empty! Please make your selections.');
             return;
         }
 
         try {
-            DB::transaction(function () {
+            DB::transaction(function () use ($selections) {
                 VoterLog::create([
                     'election_id' => $this->election->id,
                     'user_id' => auth()->id(), 
@@ -160,7 +169,7 @@ class VotingBooth extends Component
                     'voted_at' => now(),
                 ]);
 
-                foreach ($this->selectedCandidates as $positionId => $candidateIds) {
+                foreach ($selections as $positionId => $candidateIds) {
                     foreach ((array) $candidateIds as $candidateId) {
                         if (!empty($candidateId) && $candidateId !== 'abstain') { 
                             Vote::create([
