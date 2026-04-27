@@ -8,13 +8,18 @@ class Candidate extends Model
 {
     protected $guarded = [];
 
-    // THE FIX: This is the exact relationship Laravel was looking for!
+    // Used by the Public Profile
     public function electionPosition()
     {
         return $this->belongsTo(ElectionPosition::class);
     }
 
-    // You will also need these relationships since the profile page loads them
+    // Used by the Admin Dashboard
+    public function position()
+    {
+        return $this->belongsTo(ElectionPosition::class, 'election_position_id');
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -35,7 +40,6 @@ class Candidate extends Model
         return $this->hasMany(CandidateCredential::class);
     }
 
-    // The relationship we added earlier for the Live Analytics
     public function votes() 
     {
         return $this->hasMany(Vote::class);
