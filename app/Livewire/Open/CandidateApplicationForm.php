@@ -4,157 +4,160 @@ namespace App\Livewire\Open;
 
 use Livewire\Component;
 use Livewire\WithFileUploads;
-use App\Models\Candidate;
 use App\Models\Election;
-use App\Models\College;
+use App\Models\Candidate;
 use App\Models\CandidatePlatform;
 use App\Models\CandidateCredential;
+use App\Models\College;
 use Illuminate\Support\Facades\DB;
 
 class CandidateApplicationForm extends Component
 {
     use WithFileUploads;
 
-    public Election $election; 
+    public Election $election;
     public $hasApplied = false;
-    public $isApplicationOpen = false;
 
-    public $availablePositions = [];
-    public $colleges = [];
-
+    // Basic Info
+    public $display_name = '';
+    public $profile_photo;
     public $election_position_id = '';
     public $college_id = '';
     public $program = '';
     public $year_level = '';
-    public $address = '';
-    public $profile_photo;
-    public $e_signature;
 
-    // THE FIX: Use associative arrays to prevent index-shifting bugs
-    public $platforms = [];
+    // Dynamic Arrays for GPOA and Credentials
+    public $platforms = [
+        ['title' => '', 'description' => '']
+    ];
+    
     public $credentials = [];
 
     public function mount(Election $election)
     {
         $this->election = $election;
-        $now = now();
-        
-        $this->isApplicationOpen = ($this->election->status === 'active' && 
-                                    $now >= $this->election->application_start && 
-                                    $now <= $this->election->application_end);
 
-        $this->availablePositions = $this->election->positions;
-        $this->colleges = College::orderBy('name')->get();
+        if (!auth()->check()) {
+            abort(403, 'You must be logged in to apply.');
+        }
 
-        // Initialize with one empty row each
-        $this->addPlatform();
-        $this->addCredential();
+        // Pre-fill the display name with their registered account name
+        $this->display_name = auth()->user()->name;
 
-        if (auth()->check()) {
-            $this->hasApplied = Candidate::where('user_id', auth()->id())
-                                         ->where('election_id', $this->election->id)
-                                         ->exists();
+        // Check if they already applied
+        $existingCandidate = Candidate::where('election_id', $this->election->id)
+                                      ->where('user_id', auth()->id())
+                                      ->first();
+
+        if ($existingCandidate) {
+            $this->hasApplied = true;
         }
     }
 
-    // --- PLATFORM MANAGEMENT ---
-    public function addPlatform() 
-    { 
-        // Use a unique string as the array key
-        $this->platforms[uniqid('plat_')] = ['title' => '', 'description' => '']; 
-    }
-    
-    public function removePlatform($key) 
+    // --- DYNAMIC FIELD METHODS ---
+
+    public function addPlatform()
     {
-        if (count($this->platforms) > 1) {
-            unset($this->platforms[$key]);
-            // Notice: We specifically DO NOT use array_values() here!
-        }
+        $this->platforms[] = ['title' => '', 'description' => ''];
     }
 
-    // --- CREDENTIAL MANAGEMENT ---
-    public function addCredential() 
-    { 
-        $this->credentials[uniqid('cred_')] = ['type' => '', 'description' => '']; 
-    }
-    
-    public function removeCredential($key) 
+    public function removePlatform($index)
     {
-        if (count($this->credentials) > 1) {
-            unset($this->credentials[$key]);
-        }
+        unset($this->platforms[$index]);
+        $this->platforms = array_values($this->platforms);
     }
 
-    // --- SUBMISSION ---
+    public function addCredential()
+    {
+        $this->credentials[] = ['type' => '', 'description' => ''];
+    }
+
+    public function removeCredential($index)
+    {
+        unset($this->credentials[$index]);
+        $this->credentials = array_values($this->credentials);
+    }
+
+    // --- SUBMISSION LOGIC ---
+
     public function submitApplication()
     {
-        if (!$this->isApplicationOpen) {
-            session()->flash('error', 'The application window for this election is closed.');
-            return;
-        }
-
+        // 1. Validate Everything
         $this->validate([
+            'display_name' => 'required|string|max:255',
+            'profile_photo' => 'nullable|image', // 2MB Max
             'election_position_id' => 'required|exists:election_positions,id',
             'college_id' => 'required|exists:colleges,id',
             'program' => 'required|string|max:255',
             'year_level' => 'required|string|max:50',
-            'address' => 'required|string',
-            'profile_photo' => 'required|image|max:2048', 
-            'e_signature' => 'required|image|max:2048', 
             
-            // Validate the associative arrays
+            // Validate the dynamic arrays
             'platforms.*.title' => 'required|string|max:255',
             'platforms.*.description' => 'required|string',
-            'credentials.*.type' => 'required|string|max:50',
+            'credentials.*.type' => 'required|string|max:100',
             'credentials.*.description' => 'required|string',
         ], [
-            'election_position_id.required' => 'Please select a position.',
             'platforms.*.title.required' => 'Platform title is required.',
             'platforms.*.description.required' => 'Platform description is required.',
             'credentials.*.type.required' => 'Credential type is required.',
             'credentials.*.description.required' => 'Credential description is required.',
         ]);
 
-        DB::transaction(function () {
-            $photoPath = $this->profile_photo->store('candidates/photos', 'public');
-            $signaturePath = $this->e_signature->store('candidates/signatures', 'public');
+        // 2. Process Photo Upload
+        $photoPath = null;
+        if ($this->profile_photo) {
+            $photoPath = $this->profile_photo->store('profile-photos', 'public');
+        }
 
-            $candidate = Candidate::create([
-                'user_id' => auth()->id(),
-                'election_id' => $this->election->id,
-                'election_position_id' => $this->election_position_id,
-                'college_id' => $this->college_id,
-                'program' => $this->program,
-                'year_level' => $this->year_level,
-                'address' => $this->address,
-                'profile_photo_path' => $photoPath,
-                'e_signature_path' => $signaturePath,
-                'status' => 'pending', 
-            ]);
-
-            foreach ($this->platforms as $platform) {
-                CandidatePlatform::create([
-                    'candidate_id' => $candidate->id, 
-                    'title' => $platform['title'], 
-                    'description' => $platform['description']
+        // 3. Save to Database Safely
+        try {
+            DB::transaction(function () use ($photoPath) {
+                
+                // Create the Candidate Record (Defaults to 'pending')
+                $candidate = Candidate::create([
+                    'election_id' => $this->election->id,
+                    'user_id' => auth()->id(),
+                    'election_position_id' => $this->election_position_id,
+                    'college_id' => $this->college_id,
+                    'display_name' => $this->display_name,
+                    'profile_photo_path' => $photoPath,
+                    'program' => $this->program,
+                    'year_level' => $this->year_level,
+                    'status' => 'pending', 
                 ]);
-            }
 
-            foreach ($this->credentials as $credential) {
-                CandidateCredential::create([
-                    'candidate_id' => $candidate->id, 
-                    'type' => $credential['type'], 
-                    'description' => $credential['description']
-                ]);
-            }
-        });
+                // Save Platforms
+                foreach ($this->platforms as $platform) {
+                    CandidatePlatform::create([
+                        'candidate_id' => $candidate->id,
+                        'title' => $platform['title'],
+                        'description' => $platform['description'],
+                    ]);
+                }
 
-        $this->hasApplied = true;
-        session()->flash('success', 'Your candidacy has been submitted to the Electoral Board!');
+                // Save Credentials (if any)
+                foreach ($this->credentials as $credential) {
+                    CandidateCredential::create([
+                        'candidate_id' => $candidate->id,
+                        'type' => $credential['type'],
+                        'description' => $credential['description'],
+                    ]);
+                }
+            });
+
+            $this->hasApplied = true;
+            session()->flash('success', 'Your application has been submitted and is pending review by the electoral board.');
+
+        } catch (\Exception $e) {
+            session()->flash('error', 'An error occurred while saving your application. Please try again.');
+        }
     }
 
     public function render()
     {
-        return view('livewire.open.candidate-application-form')->layout('layouts.madya-template'); 
+        return view('livewire.open.candidate-application-form', [
+            'positions' => $this->election->positions()->orderBy('order')->get(),
+            'colleges' => College::orderBy('name')->get()
+        ])->layout('layouts.madya-template');
     }
 }
