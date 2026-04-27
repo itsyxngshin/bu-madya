@@ -1,5 +1,5 @@
 <div class="max-w-5xl mx-auto py-8 md:py-12 px-4 sm:px-6 font-sans pb-32">
-    
+
     {{-- PAGE HEADER --}}
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div>
@@ -25,11 +25,11 @@
 
     {{-- MAIN FORM --}}
     <form wire:submit.prevent="saveElection" class="space-y-8">
-        
+
         {{-- SECTION 1: ELECTION DETAILS --}}
         <div class="bg-white rounded-[2rem] p-6 md:p-8 shadow-sm border border-gray-200">
             <h2 class="text-xl font-black text-gray-900 mb-6 border-b border-gray-100 pb-4">1. General Details</h2>
-            
+
             <div class="space-y-6">
                 {{-- Cover Photo Upload --}}
                 <div>
@@ -91,7 +91,7 @@
         {{-- SECTION 2: TIMELINE --}}
         <div class="bg-white rounded-[2rem] p-6 md:p-8 shadow-sm border border-gray-200">
             <h2 class="text-xl font-black text-gray-900 mb-6 border-b border-gray-100 pb-4">2. Election Timeline</h2>
-            
+
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="p-5 bg-blue-50/50 border border-blue-100 rounded-2xl space-y-4">
                     <h3 class="text-xs font-black text-blue-800 uppercase tracking-widest mb-2 flex items-center gap-2"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg> Candidacy Filing Phase</h3>
@@ -140,7 +140,7 @@
                 @foreach($positions as $index => $position)
                     <div>
                         <div class="flex items-center gap-3 bg-gray-50 p-3 md:p-4 rounded-2xl border border-gray-200" wire:key="pos-{{ $position['temp_id'] ?? $index }}">
-                            
+
                             {{-- Position Title --}}
                             <div class="flex-1 min-w-0">
                                 <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Position Title</label>
@@ -162,7 +162,7 @@
                                 </div>
                             @endif
                         </div>
-                        
+
                         {{-- Validation errors placed below the row to preserve inline design --}}
                         <div class="px-2 mt-1">
                             @error('positions.'.$index.'.title') <span class="text-[10px] text-red-500 font-bold block">{{ $message }}</span> @enderror
@@ -213,10 +213,10 @@
                 <div class="w-16 h-16 bg-red-50 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4 border border-red-100">
                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
                 </div>
-                
+
                 <h3 class="text-xl font-black text-center text-gray-900 mb-2">Confirm Factory Reset</h3>
                 <p class="text-sm text-center text-gray-500 mb-6 leading-relaxed">You are about to permanently delete all candidates and votes associated with this election. To proceed, please enter your admin password.</p>
-                
+
                 <div>
                     <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Administrator Password</label>
                     <input wire:model="adminPassword" type="password" class="w-full bg-gray-50 border border-gray-200 focus:border-red-500 rounded-xl px-4 py-3 text-sm font-bold shadow-sm" placeholder="••••••••">
