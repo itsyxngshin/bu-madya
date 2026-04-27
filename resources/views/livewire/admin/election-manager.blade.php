@@ -1,5 +1,5 @@
 <div class="max-w-5xl mx-auto py-8 md:py-12 px-4 sm:px-6 font-sans pb-32">
-
+    
     {{-- PAGE HEADER --}}
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div>
@@ -25,11 +25,11 @@
 
     {{-- MAIN FORM --}}
     <form wire:submit.prevent="saveElection" class="space-y-8">
-
+        
         {{-- SECTION 1: ELECTION DETAILS --}}
         <div class="bg-white rounded-[2rem] p-6 md:p-8 shadow-sm border border-gray-200">
             <h2 class="text-xl font-black text-gray-900 mb-6 border-b border-gray-100 pb-4">1. General Details</h2>
-
+            
             <div class="space-y-6">
                 {{-- Cover Photo Upload --}}
                 <div>
@@ -91,7 +91,7 @@
         {{-- SECTION 2: TIMELINE --}}
         <div class="bg-white rounded-[2rem] p-6 md:p-8 shadow-sm border border-gray-200">
             <h2 class="text-xl font-black text-gray-900 mb-6 border-b border-gray-100 pb-4">2. Election Timeline</h2>
-
+            
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="p-5 bg-blue-50/50 border border-blue-100 rounded-2xl space-y-4">
                     <h3 class="text-xs font-black text-blue-800 uppercase tracking-widest mb-2 flex items-center gap-2"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg> Candidacy Filing Phase</h3>
@@ -129,36 +129,45 @@
             </div>
         </div>
 
-        {{-- SECTION 3: POSITIONS --}}
+        {{-- SECTION 3: POSITIONS (THE FIX) --}}
         <div class="bg-white rounded-[2rem] p-6 md:p-8 shadow-sm border border-gray-200">
             <div class="flex items-center justify-between mb-6 border-b border-gray-100 pb-4">
                 <h2 class="text-xl font-black text-gray-900">3. Electoral Positions</h2>
                 <button type="button" wire:click="addPosition" class="text-xs font-bold text-blue-600 bg-blue-50 px-3 py-1.5 rounded-lg hover:bg-blue-100 transition-colors">+ Add Position</button>
             </div>
 
-            <div class="space-y-4">
+            <div class="space-y-3">
                 @foreach($positions as $index => $position)
-                    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 bg-gray-50 p-4 rounded-2xl border border-gray-200 relative group" wire:key="pos-{{ $position['temp_id'] ?? $index }}">
-
-                        <div class="flex-1 w-full">
-                            <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Position Title</label>
-                            <input wire:model="positions.{{ $index }}.title" type="text" class="w-full bg-white border border-gray-200 focus:border-blue-500 rounded-xl px-4 py-2.5 text-sm font-bold shadow-sm" placeholder="e.g. President">
-                            @error('positions.'.$index.'.title') <span class="text-[10px] text-red-500 font-bold block mt-1">{{ $message }}</span> @enderror
-                        </div>
-
-                        <div class="w-full sm:w-32 shrink-0">
-                            <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Winners</label>
-                            <input wire:model="positions.{{ $index }}.max_winners" type="number" min="1" class="w-full bg-white border border-gray-200 focus:border-blue-500 rounded-xl px-4 py-2.5 text-sm font-bold shadow-sm text-center">
-                            @error('positions.'.$index.'.max_winners') <span class="text-[10px] text-red-500 font-bold block mt-1">{{ $message }}</span> @enderror
-                        </div>
-
-                        @if(count($positions) > 1)
-                            <div class="w-full sm:w-auto pt-2 sm:pt-6 flex justify-end">
-                                <button type="button" wire:click="removePosition({{ $index }})" class="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors" title="Remove Position">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                </button>
+                    <div>
+                        <div class="flex items-center gap-3 bg-gray-50 p-3 md:p-4 rounded-2xl border border-gray-200" wire:key="pos-{{ $position['temp_id'] ?? $index }}">
+                            
+                            {{-- Position Title --}}
+                            <div class="flex-1 min-w-0">
+                                <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Position Title</label>
+                                <input wire:model="positions.{{ $index }}.title" type="text" class="w-full bg-white border border-gray-200 focus:border-blue-500 rounded-xl px-4 py-2.5 text-sm font-bold shadow-sm" placeholder="e.g. President">
                             </div>
-                        @endif
+
+                            {{-- Winners (Strictly sized, tight layout) --}}
+                            <div class="w-20 md:w-24 shrink-0">
+                                <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1 text-center">Winners</label>
+                                <input wire:model="positions.{{ $index }}.max_winners" type="number" min="1" class="w-full bg-white border border-gray-200 focus:border-blue-500 rounded-xl px-2 py-2.5 text-sm font-bold shadow-sm text-center">
+                            </div>
+
+                            {{-- Remove Button --}}
+                            @if(count($positions) > 1)
+                                <div class="pt-5 shrink-0">
+                                    <button type="button" wire:click="removePosition({{ $index }})" class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors" title="Remove Position">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                    </button>
+                                </div>
+                            @endif
+                        </div>
+                        
+                        {{-- Validation errors placed below the row to preserve inline design --}}
+                        <div class="px-2 mt-1">
+                            @error('positions.'.$index.'.title') <span class="text-[10px] text-red-500 font-bold block">{{ $message }}</span> @enderror
+                            @error('positions.'.$index.'.max_winners') <span class="text-[10px] text-red-500 font-bold block">{{ $message }}</span> @enderror
+                        </div>
                     </div>
                 @endforeach
             </div>
@@ -204,10 +213,10 @@
                 <div class="w-16 h-16 bg-red-50 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4 border border-red-100">
                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
                 </div>
-
+                
                 <h3 class="text-xl font-black text-center text-gray-900 mb-2">Confirm Factory Reset</h3>
                 <p class="text-sm text-center text-gray-500 mb-6 leading-relaxed">You are about to permanently delete all candidates and votes associated with this election. To proceed, please enter your admin password.</p>
-
+                
                 <div>
                     <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Administrator Password</label>
                     <input wire:model="adminPassword" type="password" class="w-full bg-gray-50 border border-gray-200 focus:border-red-500 rounded-xl px-4 py-3 text-sm font-bold shadow-sm" placeholder="••••••••">
