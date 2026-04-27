@@ -1,3 +1,18 @@
+{{-- Custom Styles for the Tricolor Glow --}}
+<style>
+    .hover-glow-tricolor {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .hover-glow-tricolor:hover {
+        z-index: 10;
+        box-shadow: 
+            0 10px 15px -3px rgba(0, 0, 0, 0.1), 
+            0 0 20px -2px rgba(251, 191, 36, 0.5), /* Yellow top */
+            -12px 0 20px -5px rgba(239, 68, 68, 0.4), /* Red left */
+            12px 0 20px -5px rgba(34, 197, 94, 0.4); /* Green right */
+    }
+</style>
+
 <div class="max-w-5xl mx-auto py-8 md:py-12 px-4 sm:px-6 font-sans">
 
     {{-- ELECTION HEADER --}}
@@ -60,17 +75,19 @@
                     <h4 class="text-base md:text-lg font-black text-gray-900 uppercase tracking-tight border-b border-gray-100 pb-3 mb-5 md:mb-6">{{ $position->title }}</h4>
                     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                         @forelse($position->candidates as $candidate)
-                            <div class="flex items-center gap-3 md:gap-4 p-3 md:p-4 rounded-2xl bg-gray-50 border border-gray-100 hover:border-gray-300 transition-colors">
+                            {{-- ENHANCED CARD: Now an <a> tag with hover-glow-tricolor --}}
+                            <a href="{{ route('candidate.profile', $candidate->id) }}" target="_blank" 
+                               class="relative flex items-center gap-3 md:gap-4 p-3 md:p-4 rounded-2xl bg-gray-50 border border-gray-100 hover-glow-tricolor hover:scale-[1.03] group block">
                                 @if($candidate->profile_photo_path)
-                                    <img src="{{ asset('storage/'.$candidate->profile_photo_path) }}" class="w-12 h-12 md:w-14 md:h-14 rounded-full object-cover shadow-sm">
+                                    <img src="{{ asset('storage/'.$candidate->profile_photo_path) }}" class="w-12 h-12 md:w-14 md:h-14 rounded-full object-cover shadow-sm group-hover:ring-2 group-hover:ring-orange-500 transition-all">
                                 @else
-                                    <div class="w-12 h-12 md:w-14 md:h-14 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center font-bold text-lg">{{ substr($candidate->user->name ?? '?', 0, 1) }}</div>
+                                    <div class="w-12 h-12 md:w-14 md:h-14 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center font-bold text-lg group-hover:bg-orange-100 group-hover:text-orange-600 transition-colors">{{ substr($candidate->user->name ?? '?', 0, 1) }}</div>
                                 @endif
                                 <div>
-                                    <p class="font-black text-gray-900 leading-tight text-sm md:text-base">{{ $candidate->user->name ?? 'Unknown' }}</p>
+                                    <p class="font-black text-gray-900 leading-tight text-sm md:text-base group-hover:text-orange-600 transition-colors">{{ $candidate->user->name ?? 'Unknown' }}</p>
                                     <p class="text-[9px] md:text-[10px] font-bold text-gray-500 uppercase tracking-wider mt-0.5">{{ $candidate->program }}</p>
                                 </div>
-                            </div>
+                            </a>
                         @empty
                             <p class="text-gray-400 text-sm font-bold col-span-full">No candidates filed for this position.</p>
                         @endforelse
@@ -95,7 +112,6 @@
                         let distance = this.targetDate - now;
                         
                         if (distance < 0) {
-                            // TIMER HIT ZERO! Ping Livewire to unlock the results!
                             this.days = '00'; this.hours = '00'; this.minutes = '00'; this.seconds = '00';
                             this.$wire.checkReleaseStatus(); 
                             return;
@@ -111,7 +127,6 @@
 
     {{-- STATE 2: POST-RELEASE (LIVE OFFICIAL RESULTS) --}}
     @else
-        {{-- REAL-TIME POLLING: This refreshes the component every 5 seconds to show new votes! --}}
         <div wire:poll.5s class="space-y-8 md:space-y-12 animate-fade-in-up">
             <div class="bg-green-50 border border-green-200 rounded-2xl p-4 text-center mb-6 shadow-sm">
                 <span class="text-green-800 font-black text-xs md:text-sm uppercase tracking-widest flex items-center justify-center gap-2">
@@ -146,7 +161,9 @@
                                 $isWinner = $index < $position->max_winners && $candidate->votes_count > 0;
                             @endphp
 
-                            <div class="relative bg-gray-50 rounded-2xl p-4 border {{ $isWinner ? 'border-green-200 bg-green-50/50' : 'border-gray-200' }} overflow-hidden group hover:shadow-md transition-shadow">
+                            {{-- ENHANCED CARD: Now an <a> tag with hover-glow-tricolor --}}
+                            <a href="{{ route('candidate.profile', $candidate->id) }}" target="_blank" 
+                               class="relative block bg-gray-50 rounded-2xl p-4 border {{ $isWinner ? 'border-green-200 bg-green-50/50' : 'border-gray-200' }} overflow-hidden group hover-glow-tricolor hover:scale-[1.02]">
                                 
                                 {{-- Background Progress Bar --}}
                                 <div class="absolute top-0 left-0 bottom-0 opacity-10 transition-all duration-1000 ease-out {{ $isWinner ? 'bg-green-500' : 'bg-gray-400' }}" style="width: {{ $percentage }}%;"></div>
@@ -160,11 +177,11 @@
                                     </div>
 
                                     {{-- Avatar --}}
-                                    <div class="w-10 h-10 md:w-14 md:h-14 rounded-full overflow-hidden border-2 border-white shadow-sm shrink-0 bg-white">
+                                    <div class="w-10 h-10 md:w-14 md:h-14 rounded-full overflow-hidden border-2 border-white shadow-sm shrink-0 bg-white group-hover:ring-2 group-hover:ring-orange-500 transition-all">
                                         @if($candidate->profile_photo_path)
                                             <img src="{{ asset('storage/'.$candidate->profile_photo_path) }}" class="w-full h-full object-cover">
                                         @else
-                                            <div class="w-full h-full bg-gray-100 flex items-center justify-center text-gray-400 font-black text-sm md:text-xl">
+                                            <div class="w-full h-full bg-gray-100 flex items-center justify-center text-gray-400 font-black text-sm md:text-xl group-hover:text-orange-500 transition-colors">
                                                 {{ substr($candidate->user->name ?? '?', 0, 1) }}
                                             </div>
                                         @endif
@@ -172,7 +189,7 @@
 
                                     {{-- Info --}}
                                     <div class="flex-1 min-w-0">
-                                        <h3 class="font-bold text-gray-900 text-sm md:text-base truncate leading-tight flex items-center gap-1">
+                                        <h3 class="font-bold text-gray-900 text-sm md:text-base truncate leading-tight flex items-center gap-1 group-hover:text-orange-600 transition-colors">
                                             {{ $candidate->user->name ?? 'Unknown' }}
                                             @if($isWinner)
                                                 <svg class="w-4 h-4 text-yellow-500 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
@@ -193,7 +210,7 @@
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            </a>
                         @empty
                             <div class="text-center text-gray-400 font-bold py-6 text-sm bg-gray-50 rounded-2xl border border-dashed border-gray-200">
                                 No approved candidates for this position.
