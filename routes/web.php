@@ -22,6 +22,7 @@ use App\Livewire\Open\EventRsvp;
 use App\Livewire\Open\FrameBuilder;
 use App\Livewire\Open\EventDiscovery;
 use App\Livewire\Open\PrivacyPolicy;
+use App\Livewire\Open\CandidateProfile;
 
 use App\Livewire\Auth\RegisterOrganization;
 
@@ -172,7 +173,7 @@ Route::middleware(['auth'])
 });
 
 Route::get('/elections/{election:slug}/vote', \App\Livewire\Open\VotingBooth::class)->name('elections.vote');
-
+Route::get('/candidate/{candidate}', CandidateProfile::class)->name('candidate.profile');
 
 
 
