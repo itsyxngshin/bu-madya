@@ -17,6 +17,7 @@ class CandidateApplicationForm extends Component
 
     public Election $election;
     public $hasApplied = false;
+    public $applicationState = 'closed'; // 'upcoming', 'open', or 'closed'
 
     // Basic Info
     public $display_name = '';
@@ -41,10 +42,9 @@ class CandidateApplicationForm extends Component
             abort(403, 'You must be logged in to apply.');
         }
 
-        // Pre-fill the display name with their registered account name
         $this->display_name = auth()->user()->name;
 
-        // Check if they already applied
+        // 1. Check if they already applied
         $existingCandidate = Candidate::where('election_id', $this->election->id)
                                       ->where('user_id', auth()->id())
                                       ->first();
@@ -52,46 +52,41 @@ class CandidateApplicationForm extends Component
         if ($existingCandidate) {
             $this->hasApplied = true;
         }
+
+        // 2. Determine the precise state of the application window
+        $now = now();
+        
+        if ($this->election->application_start && $now < $this->election->application_start) {
+            $this->applicationState = 'upcoming';
+        } elseif ($this->election->application_end && $now > $this->election->application_end) {
+            $this->applicationState = 'closed';
+        } else {
+            $this->applicationState = 'open';
+        }
     }
 
     // --- DYNAMIC FIELD METHODS ---
-
-    public function addPlatform()
-    {
-        $this->platforms[] = ['title' => '', 'description' => ''];
-    }
-
-    public function removePlatform($index)
-    {
-        unset($this->platforms[$index]);
-        $this->platforms = array_values($this->platforms);
-    }
-
-    public function addCredential()
-    {
-        $this->credentials[] = ['type' => '', 'description' => ''];
-    }
-
-    public function removeCredential($index)
-    {
-        unset($this->credentials[$index]);
-        $this->credentials = array_values($this->credentials);
-    }
+    public function addPlatform() { $this->platforms[] = ['title' => '', 'description' => '']; }
+    public function removePlatform($index) { unset($this->platforms[$index]); $this->platforms = array_values($this->platforms); }
+    public function addCredential() { $this->credentials[] = ['type' => '', 'description' => '']; }
+    public function removeCredential($index) { unset($this->credentials[$index]); $this->credentials = array_values($this->credentials); }
 
     // --- SUBMISSION LOGIC ---
-
     public function submitApplication()
     {
-        // 1. Validate Everything
+        // Security: Double-check the window is still open at the exact moment of submission
+        if ($this->applicationState !== 'open') {
+            session()->flash('error', 'The application window is currently closed.');
+            return;
+        }
+
         $this->validate([
             'display_name' => 'required|string|max:255',
-            'profile_photo' => 'nullable|image', // 2MB Max
+            'profile_photo' => 'nullable|image', 
             'election_position_id' => 'required|exists:election_positions,id',
             'college_id' => 'required|exists:colleges,id',
             'program' => 'required|string|max:255',
             'year_level' => 'required|string|max:50',
-            
-            // Validate the dynamic arrays
             'platforms.*.title' => 'required|string|max:255',
             'platforms.*.description' => 'required|string',
             'credentials.*.type' => 'required|string|max:100',
@@ -103,17 +98,10 @@ class CandidateApplicationForm extends Component
             'credentials.*.description.required' => 'Credential description is required.',
         ]);
 
-        // 2. Process Photo Upload
-        $photoPath = null;
-        if ($this->profile_photo) {
-            $photoPath = $this->profile_photo->store('profile-photos', 'public');
-        }
+        $photoPath = $this->profile_photo ? $this->profile_photo->store('profile-photos', 'public') : null;
 
-        // 3. Save to Database Safely
         try {
             DB::transaction(function () use ($photoPath) {
-                
-                // Create the Candidate Record (Defaults to 'pending')
                 $candidate = Candidate::create([
                     'election_id' => $this->election->id,
                     'user_id' => auth()->id(),
@@ -126,22 +114,11 @@ class CandidateApplicationForm extends Component
                     'status' => 'pending', 
                 ]);
 
-                // Save Platforms
                 foreach ($this->platforms as $platform) {
-                    CandidatePlatform::create([
-                        'candidate_id' => $candidate->id,
-                        'title' => $platform['title'],
-                        'description' => $platform['description'],
-                    ]);
+                    CandidatePlatform::create(['candidate_id' => $candidate->id, 'title' => $platform['title'], 'description' => $platform['description']]);
                 }
-
-                // Save Credentials (if any)
                 foreach ($this->credentials as $credential) {
-                    CandidateCredential::create([
-                        'candidate_id' => $candidate->id,
-                        'type' => $credential['type'],
-                        'description' => $credential['description'],
-                    ]);
+                    CandidateCredential::create(['candidate_id' => $candidate->id, 'type' => $credential['type'], 'description' => $credential['description']]);
                 }
             });
 
