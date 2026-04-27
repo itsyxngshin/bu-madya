@@ -107,7 +107,7 @@ class ElectionManager extends Component
         });
 
         session()->flash('success', 'Election entity created successfully!');
-        return redirect()->route('admin.elections.index'); 
+        return redirect()->route('admin.elections.index');
     }
 
     public function render()

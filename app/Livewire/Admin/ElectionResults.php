@@ -12,6 +12,7 @@ class ElectionResults extends Component
 
     public function mount(Election $election)
     {
+        // Security check: Only admins or the creator can view the backend results
         if (auth()->user()->role?->role_name !== 'administrator' && $election->user_id !== auth()->id()) {
             abort(403, 'Unauthorized access.');
         }
@@ -21,24 +22,20 @@ class ElectionResults extends Component
 
     public function render()
     {
-        // 1. Get the total number of people who checked in
-        $totalVoters = VoterLog::where('election_id', $this->election->id)->count();
+        // Get exactly how many people cast a ballot
+        $totalTurnout = VoterLog::where('election_id', $this->election->id)->count();
 
-        // 2. LOAD the relationships and vote counts directly into the public $election variable!
-        $this->election->load([
-            'positions' => function ($query) {
-                $query->orderBy('order');
-            }, 
-            'positions.candidates' => function ($query) {
-                $query->where('status', 'approved')
-                      ->with('user')
-                      ->withCount('votes') // This dynamically creates the 'votes_count' attribute
-                      ->orderByDesc('votes_count');
-            }
-        ]);
+        // Fetch approved candidates and their exact vote counts
+        $positions = $this->election->positions()->with(['candidates' => function ($query) {
+            $query->where('status', 'approved')
+                  ->with('user')
+                  ->withCount('votes')
+                  ->orderByDesc('votes_count');
+        }])->orderBy('order')->get();
 
         return view('livewire.admin.election-results', [
-            'totalVoters' => $totalVoters
+            'positions' => $positions,
+            'totalTurnout' => $totalTurnout
         ])->layout('layouts.madya-admin-deck');
     }
 }

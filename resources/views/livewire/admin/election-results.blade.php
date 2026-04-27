@@ -1,124 +1,287 @@
 <div class="max-w-7xl mx-auto py-8 px-4 font-sans pb-32">
-    
-    {{-- HEADER & ELECTION SELECTOR --}}
+
+    {{-- HEADER --}}
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div>
             <h1 class="text-3xl font-black text-gray-900 tracking-tight flex items-center gap-3">
-                <a href="{{ route('admin.elections.index') }}" class="text-gray-400 hover:text-orange-600 transition-colors">
+                <a href="{{ route('admin.elections.index') }}" class="text-gray-400 hover:text-gray-600 transition-colors">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                 </a>
-                Live Election Analytics
+                Live Analytics & Results
             </h1>
-            <p class="text-gray-500 font-medium ml-9">Monitoring: <span class="font-bold">{{ $election->title }}</span></p>
+            <p class="text-gray-500 font-medium ml-9">Monitoring votes for: <span class="font-bold">{{ $election->title }}</span></p>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <a href="{{ route('elections.public-results', $election->slug) }}" target="_blank" class="px-5 py-2.5 bg-orange-100 text-orange-700 font-bold rounded-xl hover:bg-orange-200 transition-colors flex items-center gap-2 text-sm border border-orange-200">
+                View Public Portal <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+            </a>
         </div>
     </div>
 
-    @if($election)
-        {{-- ELECTION STATUS & STATS OVERVIEW --}}
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div class="bg-white rounded-3xl p-6 shadow-sm border border-gray-200 flex items-center gap-4">
-                <div class="w-14 h-14 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
-                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+    {{-- LIVE POLLING WRAPPER: Refreshes every 5 seconds --}}
+    <div wire:poll.5s class="space-y-8 animate-fade-in-up">
+
+        {{-- TURNOUT BANNER --}}
+        <div class="bg-gray-900 text-white rounded-[2rem] p-8 shadow-xl flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
+            <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+
+            <div class="relative z-10 flex items-center gap-4">
+                <div class="w-14 h-14 rounded-full bg-white/10 flex items-center justify-center backdrop-blur-sm border border-white/20">
+                    <span class="w-3 h-3 rounded-full bg-green-400 animate-ping absolute"></span>
+                    <span class="w-3 h-3 rounded-full bg-green-400 relative"></span>
                 </div>
                 <div>
-                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Total Turnout</p>
-                    <p class="text-2xl font-black text-gray-900">{{ number_format($totalVoters) }} <span class="text-sm font-bold text-gray-500">voters</span></p>
+                    <h2 class="text-xs uppercase font-black tracking-widest text-gray-400 mb-1">Official Voter Turnout</h2>
+                    <p class="text-4xl font-black leading-none">{{ number_format($totalTurnout) }} <span class="text-lg text-gray-400 font-bold">Ballots Cast</span></p>
                 </div>
             </div>
 
-            <div class="bg-white rounded-3xl p-6 shadow-sm border border-gray-200 flex items-center gap-4 md:col-span-2">
-                <div class="w-14 h-14 rounded-full bg-orange-50 text-orange-600 flex items-center justify-center shrink-0">
-                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                </div>
-                <div class="flex-1">
-                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Timeline Status</p>
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between mt-1">
-                        <p class="text-sm font-bold text-gray-800">
-                            @if(now() < $election->voting_start)
-                                <span class="text-yellow-600">Opens:</span> {{ $election->voting_start->format('M d, Y h:i A') }}
-                            @elseif(now() > $election->voting_end)
-                                <span class="text-red-600">Closed:</span> {{ $election->voting_end->format('M d, Y h:i A') }}
-                            @else
-                                <span class="text-green-600 flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> Voting Live Now</span>
-                            @endif
-                        </p>
-                        <p class="text-xs font-bold text-gray-400 mt-1 sm:mt-0">Results Publish: {{ $election->results_release ? $election->results_release->format('M d, h:i A') : 'TBA' }}</p>
-                    </div>
-                </div>
+            <div class="relative z-10 bg-white/10 backdrop-blur-sm border border-white/10 px-6 py-3 rounded-2xl text-center">
+                <p class="text-[10px] uppercase font-bold tracking-widest text-gray-300">Status</p>
+                <p class="text-sm font-black {{ now() > $election->voting_end ? 'text-red-400' : 'text-green-400' }}">
+                    {{ now() > $election->voting_end ? 'POLLS CLOSED' : 'VOTING ACTIVE' }}
+                </p>
             </div>
         </div>
 
-        {{-- THE TALLIES PER POSITION --}}
-        <div class="space-y-8">
-            @forelse($election->positions as $position)
+        {{-- POSITIONS GRID --}}
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            @foreach($positions as $position)
                 @php
-                    // Calculate the total votes cast specifically for this position
                     $totalPositionVotes = $position->candidates->sum('votes_count');
+
+                    // ABSTAIN MATH LOGIC
+                    $maxPossibleVotes = $totalTurnout * $position->max_winners;
+                    $abstainVotes = max(0, $maxPossibleVotes - $totalPositionVotes);
                 @endphp
 
-                <div class="bg-white rounded-[2rem] shadow-sm border border-gray-200 overflow-hidden">
-                    <div class="bg-gray-50/80 border-b border-gray-200 p-6 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+                <div class="bg-white rounded-[2rem] p-6 md:p-8 shadow-sm border border-gray-200 flex flex-col">
+
+                    {{-- Header --}}
+                    <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
                         <div>
-                            <h3 class="text-xl font-black text-gray-900 uppercase tracking-tight">{{ $position->title }}</h3>
-                            <p class="text-xs font-bold text-gray-500 mt-1">{{ number_format($totalPositionVotes) }} total votes cast • Top {{ $position->max_winners }} win</p>
+                            <h3 class="text-xl font-black text-gray-900 leading-tight">{{ $position->title }}</h3>
+                            <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mt-1">Electing {{ $position->max_winners }}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Valid Votes</p>
+                            <p class="text-lg font-black text-blue-600 leading-none mt-0.5">{{ number_format($totalPositionVotes) }}</p>
                         </div>
                     </div>
-                    
-                    <div class="p-6 md:p-8 space-y-6">
+
+                    {{-- Candidates List --}}
+                    <div class="space-y-3 flex-1">
                         @forelse($position->candidates as $index => $candidate)
                             @php
-                                // Math for the progress bar
-                                $percentage = $totalPositionVotes > 0 ? ($candidate->votes_count / $totalPositionVotes) * 100 : 0;
-                                
-                                // Determine if they are in a winning slot based on the max_winners setting
-                                $isWinning = $index < $position->max_winners && $candidate->votes_count > 0;
+                                $percentage = $maxPossibleVotes > 0 ? ($candidate->votes_count / $maxPossibleVotes) * 100 : 0;
+                                $isWinner = $index < $position->max_winners && $candidate->votes_count > 0;
                             @endphp
 
-                            <div class="relative">
-                                <div class="flex items-center justify-between mb-2">
-                                    <div class="flex items-center gap-3">
-                                        @if($candidate->profile_photo_path)
-                                            <img src="{{ asset('storage/'.$candidate->profile_photo_path) }}" class="w-10 h-10 rounded-full object-cover shadow-sm border border-gray-200">
-                                        @else
-                                            <div class="w-10 h-10 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center font-bold text-sm">{{ substr($candidate->user->name ?? '?', 0, 1) }}</div>
-                                        @endif
-                                        
-                                        <div>
-                                            <p class="font-black text-gray-900 flex items-center gap-2">
-                                                {{ $candidate->user->name ?? 'Unknown' }}
-                                                @if($isWinning)
-                                                    <span class="px-2 py-0.5 bg-green-100 text-green-700 text-[9px] uppercase tracking-widest font-black rounded-full">{{ now() > $election->voting_end ? 'Winner' : 'Leading' }}</span>
-                                                @endif
-                                            </p>
-                                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">{{ $candidate->program }}</p>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="text-right">
-                                        <p class="text-lg font-black {{ $isWinning ? 'text-green-600' : 'text-gray-900' }}">{{ number_format($candidate->votes_count) }}</p>
-                                        <p class="text-xs font-bold text-gray-400">{{ number_format($percentage, 1) }}%</p>
-                                    </div>
-                                </div>
+                            <div class="relative bg-gray-50 rounded-2xl p-4 border {{ $isWinner ? 'border-green-200' : 'border-gray-100' }} overflow-hidden">
 
-                                {{-- Progress Bar --}}
-                                <div class="w-full bg-gray-100 rounded-full h-3 overflow-hidden shadow-inner">
-                                    <div class="h-full rounded-full transition-all duration-1000 ease-out {{ $isWinning ? 'bg-green-500' : 'bg-gray-400' }}" style="width: {{ $percentage }}%;"></div>
+                                {{-- Background Progress Bar --}}
+                                <div class="absolute top-0 left-0 bottom-0 transition-all duration-1000 ease-out {{ $isWinner ? 'bg-green-100' : 'bg-gray-200/50' }}" style="width: {{ $percentage }}%;"></div>
+
+                                <div class="relative z-10 flex items-center gap-4">
+                                    <div class="w-10 h-10 rounded-full overflow-hidden border-2 border-white shadow-sm shrink-0 bg-white">
+                                        @if($candidate->profile_photo_path)
+                                            <img src="{{ asset('storage/'.$candidate->profile_photo_path) }}" class="w-full h-full object-cover">
+                                        @else
+                                            <div class="w-full h-full bg-gray-100 flex items-center justify-center text-gray-400 font-black text-sm">{{ substr($candidate->display_name ?? optional($candidate->user)->name ?? '?', 0, 1) }}</div>
+                                        @endif
+                                    </div>
+
+                                    <div class="flex-1 min-w-0">
+                                        <p class="font-bold text-gray-900 text-sm truncate flex items-center gap-1">
+                                            {{ $candidate->display_name ?? optional($candidate->user)->name ?? 'Unknown Candidate' }}
+                                            @if($isWinner) <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg> @endif
+                                        </p>
+                                    </div>
+
+                                    <div class="text-right shrink-0">
+                                        <div class="font-black text-lg {{ $isWinner ? 'text-green-700' : 'text-gray-700' }} leading-none">{{ number_format($candidate->votes_count) }}</div>
+                                        <div class="text-[9px] font-bold text-gray-400 uppercase mt-0.5">{{ number_format($percentage, 1) }}%</div>
+                                    </div>
                                 </div>
                             </div>
                         @empty
-                            <div class="text-center text-gray-400 font-bold py-4 text-sm">No approved candidates for this position.</div>
+                            <div class="text-center py-6 border border-dashed border-gray-200 rounded-2xl bg-gray-50">
+                                <p class="text-xs font-bold text-gray-400">No candidates on ballot.</p>
+                            </div>
                         @endforelse
                     </div>
+
+                    {{-- THE FIX: ABSTAIN / UNDERVOTES BLOCK --}}
+                    @php
+                        $abstainPercentage = $maxPossibleVotes > 0 ? ($abstainVotes / $maxPossibleVotes) * 100 : 0;
+                        $abstainLabel = $position->max_winners > 1 ? 'Abstain & Undervotes' : 'Abstentions';
+                    @endphp
+
+                    <div class="mt-4 relative bg-gray-50 rounded-2xl p-4 border border-dashed border-gray-300 overflow-hidden">
+                        <div class="absolute top-0 left-0 bottom-0 bg-gray-200/50 transition-all duration-1000 ease-out" style="width: {{ $abstainPercentage }}%;"></div>
+                        <div class="relative z-10 flex items-center justify-between gap-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center shrink-0">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                </div>
+                                <div>
+                                    <p class="font-bold text-gray-600 text-sm">{{ $abstainLabel }}</p>
+                                    <p class="text-[9px] font-bold text-gray-400 uppercase mt-0.5">Unused Ballot Slots</p>
+                                </div>
+                            </div>
+                            <div class="text-right shrink-0">
+                                <div class="font-black text-lg text-gray-500 leading-none">{{ number_format($abstainVotes) }}</div>
+                                <div class="text-[9px] font-bold text-gray-400 uppercase mt-0.5">{{ number_format($abstainPercentage, 1) }}%</div>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
-            @empty
-                <div class="bg-white rounded-3xl p-12 text-center border border-gray-200">
-                    <p class="text-gray-500 font-bold">No positions configured for this election yet.</p>
+            @endforeach
+        </div>
+    </div>
+</div><div class="max-w-7xl mx-auto py-8 px-4 font-sans pb-32">
+
+    {{-- HEADER --}}
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+        <div>
+            <h1 class="text-3xl font-black text-gray-900 tracking-tight flex items-center gap-3">
+                <a href="{{ route('admin.elections.index') }}" class="text-gray-400 hover:text-gray-600 transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                </a>
+                Live Analytics & Results
+            </h1>
+            <p class="text-gray-500 font-medium ml-9">Monitoring votes for: <span class="font-bold">{{ $election->title }}</span></p>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <a href="{{ route('elections.public-results', $election->slug) }}" target="_blank" class="px-5 py-2.5 bg-orange-100 text-orange-700 font-bold rounded-xl hover:bg-orange-200 transition-colors flex items-center gap-2 text-sm border border-orange-200">
+                View Public Portal <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+            </a>
+        </div>
+    </div>
+
+    {{-- LIVE POLLING WRAPPER: Refreshes every 5 seconds --}}
+    <div wire:poll.5s class="space-y-8 animate-fade-in-up">
+
+        {{-- TURNOUT BANNER --}}
+        <div class="bg-gray-900 text-white rounded-[2rem] p-8 shadow-xl flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
+            <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+
+            <div class="relative z-10 flex items-center gap-4">
+                <div class="w-14 h-14 rounded-full bg-white/10 flex items-center justify-center backdrop-blur-sm border border-white/20">
+                    <span class="w-3 h-3 rounded-full bg-green-400 animate-ping absolute"></span>
+                    <span class="w-3 h-3 rounded-full bg-green-400 relative"></span>
                 </div>
-            @endforelse
+                <div>
+                    <h2 class="text-xs uppercase font-black tracking-widest text-gray-400 mb-1">Official Voter Turnout</h2>
+                    <p class="text-4xl font-black leading-none">{{ number_format($totalTurnout) }} <span class="text-lg text-gray-400 font-bold">Ballots Cast</span></p>
+                </div>
+            </div>
+
+            <div class="relative z-10 bg-white/10 backdrop-blur-sm border border-white/10 px-6 py-3 rounded-2xl text-center">
+                <p class="text-[10px] uppercase font-bold tracking-widest text-gray-300">Status</p>
+                <p class="text-sm font-black {{ now() > $election->voting_end ? 'text-red-400' : 'text-green-400' }}">
+                    {{ now() > $election->voting_end ? 'POLLS CLOSED' : 'VOTING ACTIVE' }}
+                </p>
+            </div>
         </div>
-    @else
-        <div class="bg-white rounded-3xl p-12 text-center border border-gray-200">
-            <p class="text-gray-500 font-bold">Please select an election to view results.</p>
+
+        {{-- POSITIONS GRID --}}
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            @foreach($positions as $position)
+                @php
+                    $totalPositionVotes = $position->candidates->sum('votes_count');
+
+                    // ABSTAIN MATH LOGIC
+                    $maxPossibleVotes = $totalTurnout * $position->max_winners;
+                    $abstainVotes = max(0, $maxPossibleVotes - $totalPositionVotes);
+                @endphp
+
+                <div class="bg-white rounded-[2rem] p-6 md:p-8 shadow-sm border border-gray-200 flex flex-col">
+
+                    {{-- Header --}}
+                    <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
+                        <div>
+                            <h3 class="text-xl font-black text-gray-900 leading-tight">{{ $position->title }}</h3>
+                            <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mt-1">Electing {{ $position->max_winners }}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Valid Votes</p>
+                            <p class="text-lg font-black text-blue-600 leading-none mt-0.5">{{ number_format($totalPositionVotes) }}</p>
+                        </div>
+                    </div>
+
+                    {{-- Candidates List --}}
+                    <div class="space-y-3 flex-1">
+                        @forelse($position->candidates as $index => $candidate)
+                            @php
+                                $percentage = $maxPossibleVotes > 0 ? ($candidate->votes_count / $maxPossibleVotes) * 100 : 0;
+                                $isWinner = $index < $position->max_winners && $candidate->votes_count > 0;
+                            @endphp
+
+                            <div class="relative bg-gray-50 rounded-2xl p-4 border {{ $isWinner ? 'border-green-200' : 'border-gray-100' }} overflow-hidden">
+
+                                {{-- Background Progress Bar --}}
+                                <div class="absolute top-0 left-0 bottom-0 transition-all duration-1000 ease-out {{ $isWinner ? 'bg-green-100' : 'bg-gray-200/50' }}" style="width: {{ $percentage }}%;"></div>
+
+                                <div class="relative z-10 flex items-center gap-4">
+                                    <div class="w-10 h-10 rounded-full overflow-hidden border-2 border-white shadow-sm shrink-0 bg-white">
+                                        @if($candidate->profile_photo_path)
+                                            <img src="{{ asset('storage/'.$candidate->profile_photo_path) }}" class="w-full h-full object-cover">
+                                        @else
+                                            <div class="w-full h-full bg-gray-100 flex items-center justify-center text-gray-400 font-black text-sm">{{ substr($candidate->display_name ?? optional($candidate->user)->name ?? '?', 0, 1) }}</div>
+                                        @endif
+                                    </div>
+
+                                    <div class="flex-1 min-w-0">
+                                        <p class="font-bold text-gray-900 text-sm truncate flex items-center gap-1">
+                                            {{ $candidate->display_name ?? optional($candidate->user)->name ?? 'Unknown Candidate' }}
+                                            @if($isWinner) <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg> @endif
+                                        </p>
+                                    </div>
+
+                                    <div class="text-right shrink-0">
+                                        <div class="font-black text-lg {{ $isWinner ? 'text-green-700' : 'text-gray-700' }} leading-none">{{ number_format($candidate->votes_count) }}</div>
+                                        <div class="text-[9px] font-bold text-gray-400 uppercase mt-0.5">{{ number_format($percentage, 1) }}%</div>
+                                    </div>
+                                </div>
+                            </div>
+                        @empty
+                            <div class="text-center py-6 border border-dashed border-gray-200 rounded-2xl bg-gray-50">
+                                <p class="text-xs font-bold text-gray-400">No candidates on ballot.</p>
+                            </div>
+                        @endforelse
+                    </div>
+
+                    {{-- THE FIX: ABSTAIN / UNDERVOTES BLOCK --}}
+                    @php
+                        $abstainPercentage = $maxPossibleVotes > 0 ? ($abstainVotes / $maxPossibleVotes) * 100 : 0;
+                        $abstainLabel = $position->max_winners > 1 ? 'Abstain & Undervotes' : 'Abstentions';
+                    @endphp
+
+                    <div class="mt-4 relative bg-gray-50 rounded-2xl p-4 border border-dashed border-gray-300 overflow-hidden">
+                        <div class="absolute top-0 left-0 bottom-0 bg-gray-200/50 transition-all duration-1000 ease-out" style="width: {{ $abstainPercentage }}%;"></div>
+                        <div class="relative z-10 flex items-center justify-between gap-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center shrink-0">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                </div>
+                                <div>
+                                    <p class="font-bold text-gray-600 text-sm">{{ $abstainLabel }}</p>
+                                    <p class="text-[9px] font-bold text-gray-400 uppercase mt-0.5">Unused Ballot Slots</p>
+                                </div>
+                            </div>
+                            <div class="text-right shrink-0">
+                                <div class="font-black text-lg text-gray-500 leading-none">{{ number_format($abstainVotes) }}</div>
+                                <div class="text-[9px] font-bold text-gray-400 uppercase mt-0.5">{{ number_format($abstainPercentage, 1) }}%</div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            @endforeach
         </div>
-    @endif
+    </div>
 </div>
