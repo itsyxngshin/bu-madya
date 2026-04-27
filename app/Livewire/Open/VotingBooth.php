@@ -4,6 +4,7 @@ namespace App\Livewire\Open;
 
 use Livewire\Component;
 use App\Models\Election;
+use App\Models\ElectionPosition;
 use App\Models\College;
 use App\Models\VoterLog;
 use App\Models\Vote;
@@ -14,7 +15,6 @@ class VotingBooth extends Component
     public Election $election; 
     public $isVotingOpen = false;
     public $hasVoted = false;
-    public $positions;
     public $colleges = [];
     
     // Guest fields
@@ -24,8 +24,10 @@ class VotingBooth extends Component
     public $program;
     public $year_level;
 
-    // THE FIX: Array to hold live selections
+    // Selections
     public $selections = []; 
+
+    // NOTICE: We completely removed `public $positions;` from here!
 
     public function mount(Election $election)
     {
@@ -45,25 +47,20 @@ class VotingBooth extends Component
                                       ->exists();
         }
 
-        // Fetch APPROVED candidates
-        $this->positions = $this->election->positions()->with(['candidates' => function($query) {
-            $query->where('status', 'approved')->with('user');
-        }])->orderBy('order')->get();
-
         if ($this->election->allow_guest_voting && !auth()->check()) {
             $this->colleges = College::orderBy('name')->get();
         }
 
-        // Initialize the selections array for each position to prevent undefined array key errors
-        foreach ($this->positions as $position) {
+        // Initialize the selections array using the basic relationship
+        foreach ($this->election->positions as $position) {
             $this->selections[$position->id] = [];
         }
     }
 
-    // THE FIX: The missing method your Blade file was trying to call!
     public function toggleSelection($positionId, $candidateId)
     {
-        $position = $this->positions->firstWhere('id', $positionId);
+        // Fetch the specific position locally to check max_winners
+        $position = ElectionPosition::find($positionId);
         if (!$position) return;
 
         $currentSelections = $this->selections[$positionId] ?? [];
@@ -98,7 +95,6 @@ class VotingBooth extends Component
         }
     }
 
-    // THE FIX: Removed the Alpine $payload dependency, now uses $this->selections natively
     public function castBallot()
     {
         if (!$this->isVotingOpen || $this->hasVoted) {
@@ -106,7 +102,6 @@ class VotingBooth extends Component
             return;
         }
 
-        // Guest Validation
         if (!auth()->check()) {
             if (!$this->election->allow_guest_voting) {
                 session()->flash('error', 'Guest voting is disabled for this election.');
@@ -127,7 +122,6 @@ class VotingBooth extends Component
             }
         }
 
-        // Ensure the ballot isn't completely empty
         $totalVotes = 0;
         foreach ($this->selections as $posId => $picked) {
             $totalVotes += count(array_filter((array) $picked));
@@ -138,9 +132,7 @@ class VotingBooth extends Component
             return; 
         }
 
-        // Save safely inside a database transaction
         DB::transaction(function () {
-            // 1. Create the Voter Log
             VoterLog::create([
                 'election_id' => $this->election->id, 
                 'user_id' => auth()->id(), 
@@ -152,7 +144,6 @@ class VotingBooth extends Component
                 'voted_at' => now(),
             ]);
 
-            // 2. Deposit the encrypted/anonymous votes
             foreach ($this->selections as $posId => $candidateIds) {
                 foreach ((array) $candidateIds as $candId) {
                     if (!empty($candId) && $candId !== 'abstain') { 
@@ -171,6 +162,14 @@ class VotingBooth extends Component
 
     public function render() 
     { 
-        return view('livewire.open.voting-booth')->layout('layouts.madya-template'); 
+        // CRITICAL FIX: By fetching this inside the render method, the `approved` filter 
+        // is permanently enforced every single time the UI updates!
+        $positions = $this->election->positions()->with(['candidates' => function($query) {
+            $query->where('status', 'approved')->with('user');
+        }])->orderBy('order')->get();
+
+        return view('livewire.open.voting-booth', [
+            'positions' => $positions
+        ])->layout('layouts.madya-template'); 
     }
 }
