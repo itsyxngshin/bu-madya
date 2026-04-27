@@ -14,14 +14,12 @@
             </p>
         </div>
 
-        {{-- Floating Save Button for quick access --}}
         <button type="button" wire:click="saveElection" wire:loading.attr="disabled" class="hidden md:flex px-6 py-3 bg-gray-900 text-white font-black rounded-xl shadow-lg hover:bg-orange-600 transition-colors items-center gap-2">
             <span wire:loading.remove wire:target="saveElection">Save Changes</span>
             <span wire:loading wire:target="saveElection">Saving...</span>
         </button>
     </div>
 
-    {{-- ALERTS --}}
     @if (session()->has('success'))
         <div class="mb-6 bg-green-50 text-green-700 p-4 rounded-xl border border-green-200 font-bold flex items-center gap-2">
             <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
@@ -43,65 +41,82 @@
         {{-- TAB 1: ELECTION DETAILS --}}
         {{-- ========================================== --}}
         @if($activeTab === 'details')
-            <div class="bg-white rounded-[2rem] p-6 md:p-8 shadow-sm border border-gray-200 animate-fade-in-up">
-                <h2 class="text-xl font-black text-gray-900 mb-6 border-b border-gray-100 pb-4">General Configuration</h2>
+            <div class="space-y-8 animate-fade-in-up">
 
-                <div class="space-y-6">
-                    {{-- Cover Photo Upload --}}
-                    <div>
-                        <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Election Banner / Cover Photo</label>
-                        <div class="flex flex-col sm:flex-row items-center gap-4">
-                            <div class="w-full sm:w-48 h-32 rounded-2xl bg-gray-50 border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden shrink-0 relative">
-                                @if ($cover_photo)
-                                    <img src="{{ $cover_photo->temporaryUrl() }}" class="w-full h-full object-cover">
-                                @elseif($electionRecord && $electionRecord->cover_photo_path)
-                                    <img src="{{ asset('storage/'.$electionRecord->cover_photo_path) }}" class="w-full h-full object-cover">
-                                @else
-                                    <svg class="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                                @endif
-                            </div>
-                            <div class="flex-1 w-full">
-                                <input type="file" wire:model="cover_photo" accept="image/*" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2.5 file:px-5 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition-colors cursor-pointer">
-                                <div wire:loading wire:target="cover_photo" class="text-[10px] text-blue-500 font-bold mt-2 animate-pulse">Uploading preview...</div>
-                                @error('cover_photo') <span class="text-[10px] text-red-500 font-bold block mt-1">{{ $message }}</span> @enderror
-                            </div>
-                        </div>
-                    </div>
+                {{-- Detail Settings Card --}}
+                <div class="bg-white rounded-[2rem] p-6 md:p-8 shadow-sm border border-gray-200">
+                    <h2 class="text-xl font-black text-gray-900 mb-6 border-b border-gray-100 pb-4">General Configuration</h2>
 
-                    {{-- Title & Type --}}
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div class="md:col-span-2">
-                            <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Election Title</label>
-                            <input wire:model="title" type="text" class="w-full bg-gray-50 border border-gray-200 focus:bg-white focus:border-blue-500 rounded-xl px-4 py-3 text-sm font-black text-gray-900 shadow-sm transition-colors" placeholder="e.g. BU USC General Elections 2026">
-                            @error('title') <span class="text-[10px] text-red-500 font-bold block mt-1">{{ $message }}</span> @enderror
-                        </div>
+                    <div class="space-y-6">
                         <div>
-                            <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Election Type</label>
-                            <select wire:model="type" class="w-full bg-gray-50 border border-gray-200 focus:bg-white focus:border-blue-500 rounded-xl px-4 py-3 text-sm font-bold text-gray-900 shadow-sm transition-colors">
-                                <option value="general">General</option>
-                                <option value="special">Special</option>
-                                <option value="runoff">Run-off</option>
-                            </select>
-                            @error('type') <span class="text-[10px] text-red-500 font-bold block mt-1">{{ $message }}</span> @enderror
+                            <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Election Banner / Cover Photo</label>
+                            <div class="flex flex-col sm:flex-row items-center gap-4">
+                                <div class="w-full sm:w-48 h-32 rounded-2xl bg-gray-50 border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden shrink-0 relative">
+                                    @if ($cover_photo)
+                                        <img src="{{ $cover_photo->temporaryUrl() }}" class="w-full h-full object-cover">
+                                    @elseif($electionRecord && $electionRecord->cover_photo_path)
+                                        <img src="{{ asset('storage/'.$electionRecord->cover_photo_path) }}" class="w-full h-full object-cover">
+                                    @else
+                                        <svg class="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                    @endif
+                                </div>
+                                <div class="flex-1 w-full">
+                                    <input type="file" wire:model="cover_photo" accept="image/*" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2.5 file:px-5 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition-colors cursor-pointer">
+                                    <div wire:loading wire:target="cover_photo" class="text-[10px] text-blue-500 font-bold mt-2 animate-pulse">Uploading preview...</div>
+                                    @error('cover_photo') <span class="text-[10px] text-red-500 font-bold block mt-1">{{ $message }}</span> @enderror
+                                </div>
+                            </div>
                         </div>
-                    </div>
 
-                    {{-- Description --}}
-                    <div>
-                        <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Description / Guidelines</label>
-                        <textarea wire:model="description" rows="3" class="w-full bg-gray-50 border border-gray-200 focus:bg-white focus:border-blue-500 rounded-xl px-4 py-3 text-sm font-medium text-gray-900 shadow-sm transition-colors resize-none" placeholder="Provide a brief overview or voting instructions..."></textarea>
-                        @error('description') <span class="text-[10px] text-red-500 font-bold block mt-1">{{ $message }}</span> @enderror
-                    </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div class="md:col-span-2">
+                                <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Election Title</label>
+                                <input wire:model="title" type="text" class="w-full bg-gray-50 border border-gray-200 focus:bg-white focus:border-blue-500 rounded-xl px-4 py-3 text-sm font-black text-gray-900 shadow-sm transition-colors" placeholder="e.g. BU USC General Elections 2026">
+                                @error('title') <span class="text-[10px] text-red-500 font-bold block mt-1">{{ $message }}</span> @enderror
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Election Type</label>
+                                <select wire:model="type" class="w-full bg-gray-50 border border-gray-200 focus:bg-white focus:border-blue-500 rounded-xl px-4 py-3 text-sm font-bold text-gray-900 shadow-sm transition-colors">
+                                    <option value="general">General</option>
+                                    <option value="special">Special</option>
+                                    <option value="runoff">Run-off</option>
+                                </select>
+                                @error('type') <span class="text-[10px] text-red-500 font-bold block mt-1">{{ $message }}</span> @enderror
+                            </div>
+                        </div>
 
-                    {{-- Settings Toggles --}}
-                    <div class="flex items-center gap-3 bg-gray-50 p-4 rounded-xl border border-gray-200">
-                        <input wire:model="allow_guest_voting" type="checkbox" id="guest_voting" class="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer">
-                        <label for="guest_voting" class="cursor-pointer">
-                            <span class="block text-sm font-black text-gray-900">Allow Guest Voting</span>
-                            <span class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider">Unregistered users can vote by providing their email and college.</span>
-                        </label>
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Description / Guidelines</label>
+                            <textarea wire:model="description" rows="3" class="w-full bg-gray-50 border border-gray-200 focus:bg-white focus:border-blue-500 rounded-xl px-4 py-3 text-sm font-medium text-gray-900 shadow-sm transition-colors resize-none" placeholder="Provide a brief overview or voting instructions..."></textarea>
+                            @error('description') <span class="text-[10px] text-red-500 font-bold block mt-1">{{ $message }}</span> @enderror
+                        </div>
+
+                        <div class="flex items-center gap-3 bg-gray-50 p-4 rounded-xl border border-gray-200">
+                            <input wire:model="allow_guest_voting" type="checkbox" id="guest_voting" class="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer">
+                            <label for="guest_voting" class="cursor-pointer">
+                                <span class="block text-sm font-black text-gray-900">Allow Guest Voting</span>
+                                <span class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider">Unregistered users can vote by providing their email and college.</span>
+                            </label>
+                        </div>
                     </div>
                 </div>
+
+                {{-- MOVED: DANGER ZONE NOW INSIDE THE DETAILS TAB --}}
+                @if($electionRecord)
+                    <div class="bg-red-50 rounded-[2rem] p-6 md:p-8 border border-red-200 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6">
+                        <div>
+                            <h3 class="text-xl font-black text-red-900 flex items-center gap-2">
+                                <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                                Danger Zone: Factory Reset
+                            </h3>
+                            <p class="text-sm font-medium text-red-700 mt-1">Wipe all candidates, votes, and voter logs from this election. This action is irreversible.</p>
+                        </div>
+                        <button type="button" wire:click="confirmWipe" class="shrink-0 w-full md:w-auto px-6 py-3 bg-white border-2 border-red-200 text-red-700 font-black rounded-xl hover:bg-red-600 hover:text-white hover:border-red-600 transition-colors shadow-sm">
+                            Wipe Election Data
+                        </button>
+                    </div>
+                @endif
+
             </div>
         @endif
 
@@ -160,59 +175,45 @@
                     <button type="button" wire:click="addPosition" class="text-xs font-bold text-blue-600 bg-blue-50 px-4 py-2 rounded-xl hover:bg-blue-100 transition-colors">+ Add Position</button>
                 </div>
 
+                {{-- FIXED CSS GRID LAYOUT FOR POSITIONS --}}
                 <div class="space-y-4">
                     @foreach($positions as $index => $position)
-                        <div class="flex flex-col md:flex-row items-start md:items-center gap-4 bg-gray-50 p-5 rounded-2xl border border-gray-200 relative group" wire:key="pos-{{ $position['temp_id'] ?? $index }}">
+                        <div class="bg-gray-50 p-4 md:p-5 rounded-2xl border border-gray-200 relative group" wire:key="pos-{{ $position['temp_id'] ?? $index }}">
+                            <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-start">
 
-                            {{-- Position Title --}}
-                            <div class="flex-1 w-full min-w-0">
-                                <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Position Title</label>
-                                <input wire:model="positions.{{ $index }}.title" type="text" class="w-full bg-white border border-gray-200 focus:border-blue-500 rounded-xl px-4 py-3 text-sm font-black shadow-sm text-gray-900" placeholder="e.g. President">
-                                @error('positions.'.$index.'.title') <span class="text-[10px] text-red-500 font-bold block mt-1">{{ $message }}</span> @enderror
-                            </div>
-
-                            {{-- Winners (Strictly sized for mobile and desktop) --}}
-                            <div class="w-full md:w-32 shrink-0">
-                                <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Max Winners</label>
-                                <input wire:model="positions.{{ $index }}.max_winners" type="number" min="1" class="w-full bg-white border border-gray-200 focus:border-blue-500 rounded-xl px-4 py-3 text-sm font-black shadow-sm text-center text-gray-900">
-                                @error('positions.'.$index.'.max_winners') <span class="text-[10px] text-red-500 font-bold block mt-1">{{ $message }}</span> @enderror
-                            </div>
-
-                            {{-- Remove Button --}}
-                            @if(count($positions) > 1)
-                                <div class="pt-0 md:pt-6 shrink-0 self-end md:self-auto">
-                                    <button type="button" wire:click="removePosition({{ $index }})" class="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-colors" title="Remove Position">
-                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                    </button>
+                                {{-- Title (Takes up 8 columns on desktop) --}}
+                                <div class="md:col-span-8">
+                                    <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Position Title</label>
+                                    <input wire:model="positions.{{ $index }}.title" type="text" class="w-full bg-white border border-gray-200 focus:border-blue-500 rounded-xl px-4 py-3 text-sm font-black shadow-sm text-gray-900" placeholder="e.g. President">
+                                    @error('positions.'.$index.'.title') <span class="text-[10px] text-red-500 font-bold block mt-1">{{ $message }}</span> @enderror
                                 </div>
-                            @endif
+
+                                {{-- Max Winners (Takes up 3 columns on desktop) --}}
+                                <div class="md:col-span-3">
+                                    <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 md:text-center text-left">Max Winners</label>
+                                    <input wire:model="positions.{{ $index }}.max_winners" type="number" min="1" class="w-full bg-white border border-gray-200 focus:border-blue-500 rounded-xl px-4 py-3 text-sm font-black shadow-sm md:text-center text-gray-900">
+                                    @error('positions.'.$index.'.max_winners') <span class="text-[10px] text-red-500 font-bold block mt-1">{{ $message }}</span> @enderror
+                                </div>
+
+                                {{-- Trash Action (Takes up 1 column on desktop) --}}
+                                <div class="md:col-span-1 flex justify-end md:justify-center pt-0 md:pt-6">
+                                    @if(count($positions) > 1)
+                                        <button type="button" wire:click="removePosition({{ $index }})" class="w-10 h-10 flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-colors" title="Remove Position">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                        </button>
+                                    @else
+                                        <div class="w-10 h-10"></div> {{-- Spacer to keep alignment intact when only 1 position exists --}}
+                                    @endif
+                                </div>
+
+                            </div>
                         </div>
                     @endforeach
                 </div>
             </div>
         @endif
 
-        {{-- ========================================== --}}
-        {{-- GLOBAL FOOTER ACTIONS (ALWAYS VISIBLE) --}}
-        {{-- ========================================== --}}
-
-        {{-- DANGER ZONE: Properly placed outside the tabs! --}}
-        @if($electionRecord)
-            <div class="bg-red-50 rounded-[2rem] p-6 md:p-8 border border-red-200 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6 mt-8">
-                <div>
-                    <h3 class="text-xl font-black text-red-900 flex items-center gap-2">
-                        <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-                        Danger Zone: Factory Reset
-                    </h3>
-                    <p class="text-sm font-medium text-red-700 mt-1">Wipe all candidates, votes, and voter logs from this election. This action is irreversible.</p>
-                </div>
-                <button type="button" wire:click="confirmWipe" class="shrink-0 w-full md:w-auto px-6 py-3 bg-white border-2 border-red-200 text-red-700 font-black rounded-xl hover:bg-red-600 hover:text-white hover:border-red-600 transition-colors shadow-sm">
-                    Wipe Election Data
-                </button>
-            </div>
-        @endif
-
-        {{-- MAIN SUBMIT BAR --}}
+        {{-- MAIN SUBMIT BAR (STAYS AT THE BOTTOM OF ALL TABS) --}}
         <div class="bg-gray-900 rounded-[2rem] p-6 shadow-xl relative overflow-hidden mt-8">
             <div class="absolute inset-0 bg-gradient-to-r from-transparent to-white/5 pointer-events-none"></div>
             <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-4">
@@ -230,10 +231,8 @@
     </form>
 
     {{-- ========================================== --}}
-    {{-- MODALS --}}
-    {{-- ========================================== --}}
-
     {{-- PASSWORD VERIFICATION MODAL FOR WIPING DATA --}}
+    {{-- ========================================== --}}
     @if($showWipeModal)
         <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
             <div class="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl animate-fade-in-up">
