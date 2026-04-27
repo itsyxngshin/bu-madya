@@ -1,6 +1,5 @@
 <div class="max-w-7xl mx-auto py-8 px-4 font-sans pb-32">
 
-    {{-- HEADER --}}
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div>
             <h1 class="text-3xl font-black text-gray-900 tracking-tight flex items-center gap-3">
@@ -19,10 +18,8 @@
         </div>
     </div>
 
-    {{-- LIVE POLLING WRAPPER: Refreshes every 5 seconds --}}
     <div wire:poll.5s class="space-y-8 animate-fade-in-up">
 
-        {{-- TURNOUT BANNER --}}
         <div class="bg-gray-900 text-white rounded-[2rem] p-8 shadow-xl flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
             <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
 
@@ -45,20 +42,16 @@
             </div>
         </div>
 
-        {{-- POSITIONS GRID --}}
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
             @foreach($positions as $position)
                 @php
                     $totalPositionVotes = $position->candidates->sum('votes_count');
-
-                    // ABSTAIN MATH LOGIC
                     $maxPossibleVotes = $totalTurnout * $position->max_winners;
                     $abstainVotes = max(0, $maxPossibleVotes - $totalPositionVotes);
                 @endphp
 
                 <div class="bg-white rounded-[2rem] p-6 md:p-8 shadow-sm border border-gray-200 flex flex-col">
 
-                    {{-- Header --}}
                     <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
                         <div>
                             <h3 class="text-xl font-black text-gray-900 leading-tight">{{ $position->title }}</h3>
@@ -70,7 +63,6 @@
                         </div>
                     </div>
 
-                    {{-- Candidates List --}}
                     <div class="space-y-3 flex-1">
                         @forelse($position->candidates as $index => $candidate)
                             @php
@@ -79,8 +71,6 @@
                             @endphp
 
                             <div class="relative bg-gray-50 rounded-2xl p-4 border {{ $isWinner ? 'border-green-200' : 'border-gray-100' }} overflow-hidden">
-
-                                {{-- Background Progress Bar --}}
                                 <div class="absolute top-0 left-0 bottom-0 transition-all duration-1000 ease-out {{ $isWinner ? 'bg-green-100' : 'bg-gray-200/50' }}" style="width: {{ $percentage }}%;"></div>
 
                                 <div class="relative z-10 flex items-center gap-4">
@@ -97,6 +87,10 @@
                                             {{ $candidate->display_name ?? optional($candidate->user)->name ?? 'Unknown Candidate' }}
                                             @if($isWinner) <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg> @endif
                                         </p>
+                                        {{-- THE FIX: Combined College and Program, forced to truncate --}}
+                                        <p class="text-[9px] md:text-[10px] font-bold text-gray-500 uppercase mt-0.5 truncate">
+                                            {{ $candidate->college->name ?? 'N/A' }} • {{ $candidate->program }}
+                                        </p>
                                     </div>
 
                                     <div class="text-right shrink-0">
@@ -106,13 +100,10 @@
                                 </div>
                             </div>
                         @empty
-                            <div class="text-center py-6 border border-dashed border-gray-200 rounded-2xl bg-gray-50">
-                                <p class="text-xs font-bold text-gray-400">No candidates on ballot.</p>
-                            </div>
+                            <div class="text-center py-6 border border-dashed border-gray-200 rounded-2xl bg-gray-50"><p class="text-xs font-bold text-gray-400">No candidates on ballot.</p></div>
                         @endforelse
                     </div>
 
-                    {{-- THE FIX: ABSTAIN / UNDERVOTES BLOCK --}}
                     @php
                         $abstainPercentage = $maxPossibleVotes > 0 ? ($abstainVotes / $maxPossibleVotes) * 100 : 0;
                         $abstainLabel = $position->max_winners > 1 ? 'Abstain & Undervotes' : 'Abstentions';
@@ -125,9 +116,9 @@
                                 <div class="w-8 h-8 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center shrink-0">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                                 </div>
-                                <div>
-                                    <p class="font-bold text-gray-600 text-sm">{{ $abstainLabel }}</p>
-                                    <p class="text-[9px] font-bold text-gray-400 uppercase mt-0.5">Unused Ballot Slots</p>
+                                <div class="min-w-0">
+                                    <p class="font-bold text-gray-600 text-sm truncate">{{ $abstainLabel }}</p>
+                                    <p class="text-[9px] font-bold text-gray-400 uppercase mt-0.5 truncate">Unused Ballot Slots</p>
                                 </div>
                             </div>
                             <div class="text-right shrink-0">

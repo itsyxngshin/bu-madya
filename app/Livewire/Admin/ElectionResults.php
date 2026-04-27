@@ -12,7 +12,6 @@ class ElectionResults extends Component
 
     public function mount(Election $election)
     {
-        // Security check: Only admins or the creator can view the backend results
         if (auth()->user()->role?->role_name !== 'administrator' && $election->user_id !== auth()->id()) {
             abort(403, 'Unauthorized access.');
         }
@@ -22,13 +21,12 @@ class ElectionResults extends Component
 
     public function render()
     {
-        // Get exactly how many people cast a ballot
         $totalTurnout = VoterLog::where('election_id', $this->election->id)->count();
 
-        // Fetch approved candidates and their exact vote counts
+        // THE FIX: Explicitly eager load 'college' so it doesn't crash or run slow
         $positions = $this->election->positions()->with(['candidates' => function ($query) {
             $query->where('status', 'approved')
-                  ->with('user')
+                  ->with(['user', 'college'])
                   ->withCount('votes')
                   ->orderByDesc('votes_count');
         }])->orderBy('order')->get();

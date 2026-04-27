@@ -5,8 +5,8 @@
     }
     .hover-glow-tricolor:hover {
         z-index: 10;
-        box-shadow: 
-            0 10px 15px -3px rgba(0, 0, 0, 0.1), 
+        box-shadow:
+            0 10px 15px -3px rgba(0, 0, 0, 0.1),
             0 0 20px -2px rgba(251, 191, 36, 0.5), /* Yellow top */
             -12px 0 20px -5px rgba(239, 68, 68, 0.4), /* Red left */
             12px 0 20px -5px rgba(34, 197, 94, 0.4); /* Green right */
@@ -40,56 +40,74 @@
 
     {{-- STATE 1: PRE-RELEASE (COUNTDOWN & CANDIDATE ROSTER) --}}
     @if(!$isReleased)
-        <div class="bg-gray-900 text-white rounded-[2rem] p-8 md:p-10 text-center mb-12 shadow-2xl relative overflow-hidden isolate"
-             x-data="countdownTimer('{{ $election->results_release ? $election->results_release->format('Y-m-d\TH:i:s') : null }}')">
-            
+        <div class="bg-gray-900 text-white rounded-[2rem] p-8 md:p-10 text-center mb-12 shadow-2xl relative overflow-hidden isolate" x-data="countdownTimer('{{ $election->results_release ? $election->results_release->format('Y-m-d\TH:i:s') : null }}')">
             <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600"></div>
-
             <h2 class="text-[10px] md:text-sm font-bold text-orange-400 uppercase tracking-widest mb-4 md:mb-6">Official Results Drop In</h2>
-            
+
             <template x-if="targetDate">
                 <div class="flex justify-center gap-3 sm:gap-6 font-mono">
-                    <div class="flex flex-col"><span class="text-4xl sm:text-6xl font-black" x-text="days"></span><span class="text-[9px] md:text-[10px] uppercase text-gray-400 mt-1">Days</span></div>
-                    <div class="text-4xl sm:text-6xl font-black text-gray-600">:</div>
-                    <div class="flex flex-col"><span class="text-4xl sm:text-6xl font-black" x-text="hours"></span><span class="text-[9px] md:text-[10px] uppercase text-gray-400 mt-1">Hours</span></div>
-                    <div class="text-4xl sm:text-6xl font-black text-gray-600">:</div>
-                    <div class="flex flex-col"><span class="text-4xl sm:text-6xl font-black" x-text="minutes"></span><span class="text-[9px] md:text-[10px] uppercase text-gray-400 mt-1">Mins</span></div>
-                    <div class="text-4xl sm:text-6xl font-black text-gray-600">:</div>
+                    <div class="flex flex-col"><span class="text-4xl sm:text-6xl font-black" x-text="days"></span><span class="text-[9px] md:text-[10px] uppercase text-gray-400 mt-1">Days</span></div><div class="text-4xl sm:text-6xl font-black text-gray-600">:</div>
+                    <div class="flex flex-col"><span class="text-4xl sm:text-6xl font-black" x-text="hours"></span><span class="text-[9px] md:text-[10px] uppercase text-gray-400 mt-1">Hours</span></div><div class="text-4xl sm:text-6xl font-black text-gray-600">:</div>
+                    <div class="flex flex-col"><span class="text-4xl sm:text-6xl font-black" x-text="minutes"></span><span class="text-[9px] md:text-[10px] uppercase text-gray-400 mt-1">Mins</span></div><div class="text-4xl sm:text-6xl font-black text-gray-600">:</div>
                     <div class="flex flex-col"><span class="text-4xl sm:text-6xl font-black text-orange-500" x-text="seconds"></span><span class="text-[9px] md:text-[10px] uppercase text-gray-400 mt-1">Secs</span></div>
                 </div>
             </template>
-
-            <template x-if="!targetDate">
-                <div class="text-2xl md:text-3xl font-black text-gray-300">To Be Announced</div>
-            </template>
+            <template x-if="!targetDate"><div class="text-2xl md:text-3xl font-black text-gray-300">To Be Announced</div></template>
         </div>
 
         <div class="text-center mb-8">
             <h3 class="text-2xl md:text-3xl font-black text-gray-900 tracking-tight">Official Candidate Roster</h3>
-            <p class="text-gray-500 text-sm mt-1">The candidates currently on the ballot for this election.</p>
+            <p class="text-gray-500 text-sm mt-1">The candidates currently approved for this election.</p>
         </div>
+
+        {{-- THE FIX: "Locked" Informational Banner --}}
+        @if(!$isCandidacyClosed)
+            <div class="max-w-3xl mx-auto mb-8 bg-blue-50 border border-blue-200 rounded-2xl p-5 flex items-start gap-4">
+                <div class="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                </div>
+                <div>
+                    <h4 class="text-sm font-black text-blue-900">Candidacy Filing is Ongoing</h4>
+                    <p class="text-xs font-bold text-blue-700 mt-1">To ensure fairness and prevent premature campaigning, the identities of approved candidates are strictly classified until the official filing period concludes.</p>
+                </div>
+            </div>
+        @endif
 
         <div class="space-y-6 md:space-y-8">
             @foreach($positions as $position)
                 <div class="bg-white rounded-3xl p-5 md:p-8 shadow-sm border border-gray-200">
                     <h4 class="text-base md:text-lg font-black text-gray-900 uppercase tracking-tight border-b border-gray-100 pb-3 mb-5 md:mb-6">{{ $position->title }}</h4>
+
                     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                         @forelse($position->candidates as $candidate)
-                            {{-- ENHANCED CARD: Now an <a> tag with hover-glow-tricolor --}}
-                            <a href="{{ route('candidate.profile', $candidate->id) }}" target="_blank" 
-                               class="relative flex items-center gap-3 md:gap-4 p-3 md:p-4 rounded-2xl bg-gray-50 border border-gray-100 hover-glow-tricolor hover:scale-[1.03] group block">
-                                @if($candidate->profile_photo_path)
-                                    <img src="{{ asset('storage/'.$candidate->profile_photo_path) }}" class="w-12 h-12 md:w-14 md:h-14 rounded-full object-cover shadow-sm group-hover:ring-2 group-hover:ring-orange-500 transition-all">
-                                @else
-                                    <div class="w-12 h-12 md:w-14 md:h-14 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center font-bold text-lg group-hover:bg-orange-100 group-hover:text-orange-600 transition-colors">{{ substr($candidate->user->name ?? '?', 0, 1) }}</div>
-                                @endif
-                                <div>
-                                    <p class="font-black text-gray-900 leading-tight text-sm md:text-base group-hover:text-orange-600 transition-colors">{{ $candidate->user->name ?? 'Unknown' }}</p>
-                                    <p class="text-[9px] md:text-[10px] font-bold text-gray-500 uppercase tracking-wider mt-0.5">{{ $candidate->program }}</p>
+
+                            @if($isCandidacyClosed)
+                                {{-- UNLOCKED CARD (Normal Public Profile Link) --}}
+                                <a href="{{ route('candidate.profile', $candidate->id) }}" target="_blank" class="relative flex items-center gap-3 md:gap-4 p-3 md:p-4 rounded-2xl bg-gray-50 border border-gray-100 hover-glow-tricolor hover:scale-[1.03] group block min-w-0">
+                                    <div class="w-12 h-12 md:w-14 md:h-14 rounded-full overflow-hidden border-2 border-white shadow-sm shrink-0 bg-white group-hover:ring-2 group-hover:ring-orange-500 transition-all">
+                                        @if($candidate->profile_photo_path) <img src="{{ asset('storage/'.$candidate->profile_photo_path) }}" class="w-full h-full object-cover">
+                                        @else <div class="w-full h-full bg-gray-200 flex items-center justify-center text-gray-500 font-black text-lg">{{ substr($candidate->display_name ?? optional($candidate->user)->name ?? '?', 0, 1) }}</div> @endif
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="font-black text-gray-900 leading-tight text-sm md:text-base group-hover:text-orange-600 transition-colors truncate">{{ $candidate->display_name ?? optional($candidate->user)->name ?? 'Unknown' }}</p>
+                                        <p class="text-[9px] md:text-[10px] font-bold text-gray-500 uppercase tracking-wider mt-0.5 truncate">{{ $candidate->college->name ?? 'N/A' }} • {{ $candidate->program }}</p>
+                                    </div>
+                                </a>
+                            @else
+                                {{-- LOCKED CARD (Anonymized, Non-Clickable) --}}
+                                <div class="relative flex items-center gap-3 md:gap-4 p-3 md:p-4 rounded-2xl bg-gray-50/50 border border-gray-200 border-dashed block min-w-0 opacity-80">
+                                    <div class="w-12 h-12 md:w-14 md:h-14 rounded-full border-2 border-gray-200 shadow-sm shrink-0 bg-gray-100 flex items-center justify-center text-gray-400">
+                                        <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="font-black text-gray-600 leading-tight text-sm md:text-base truncate">Classified Applicant</p>
+                                        <p class="text-[9px] md:text-[10px] font-bold text-gray-400 uppercase tracking-wider mt-0.5 truncate">Identity locked until filing ends</p>
+                                    </div>
                                 </div>
-                            </a>
+                            @endif
+
                         @empty
-                            <p class="text-gray-400 text-sm font-bold col-span-full">No candidates filed for this position.</p>
+                            <p class="text-gray-400 text-sm font-bold col-span-full">No candidates filed for this position yet.</p>
                         @endforelse
                     </div>
                 </div>
@@ -110,10 +128,10 @@
                     update() {
                         let now = new Date().getTime();
                         let distance = this.targetDate - now;
-                        
+
                         if (distance < 0) {
                             this.days = '00'; this.hours = '00'; this.minutes = '00'; this.seconds = '00';
-                            this.$wire.checkReleaseStatus(); 
+                            this.$wire.checkReleaseStatus();
                             return;
                         }
                         this.days = String(Math.floor(distance / (1000 * 60 * 60 * 24))).padStart(2, '0');
@@ -141,7 +159,7 @@
                 @endphp
 
                 <div class="bg-white rounded-[2rem] p-5 md:p-8 shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-gray-100">
-                    
+
                     {{-- Position Header --}}
                     <div class="flex flex-col md:flex-row md:items-center justify-between mb-5 md:mb-6 pb-4 border-b border-gray-100 gap-3">
                         <div>
@@ -162,9 +180,9 @@
                             @endphp
 
                             {{-- ENHANCED CARD: Now an <a> tag with hover-glow-tricolor --}}
-                            <a href="{{ route('candidate.profile', $candidate->id) }}" target="_blank" 
+                            <a href="{{ route('candidate.profile', $candidate->id) }}" target="_blank"
                                class="relative block bg-gray-50 rounded-2xl p-4 border {{ $isWinner ? 'border-green-200 bg-green-50/50' : 'border-gray-200' }} overflow-hidden group hover-glow-tricolor hover:scale-[1.02]">
-                                
+
                                 {{-- Background Progress Bar --}}
                                 <div class="absolute top-0 left-0 bottom-0 opacity-10 transition-all duration-1000 ease-out {{ $isWinner ? 'bg-green-500' : 'bg-gray-400' }}" style="width: {{ $percentage }}%;"></div>
 
