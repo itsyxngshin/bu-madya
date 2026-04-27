@@ -8,15 +8,19 @@ use App\Models\Candidate;
 
 class ElectionDashboard extends Component
 {
-    public Election $election; // Bound via the URL slug
+    public Election $election; 
     
     // Rejection State
     public $candidateToReject = null;
     public $rejectRemarks = '';
 
+    // Edit State
+    public $candidateToEdit = null;
+    public $editProgram = '';
+    public $editYearLevel = '';
+
     public function mount(Election $election)
     {
-        // Security check
         if (auth()->user()->role?->role_name !== 'administrator' && $election->user_id !== auth()->id()) {
             abort(403, 'Unauthorized access.');
         }
@@ -28,39 +32,74 @@ class ElectionDashboard extends Component
 
     public function approveCandidate($candidateId)
     {
-        $candidate = \App\Models\Candidate::findOrFail($candidateId);
+        $candidate = Candidate::findOrFail($candidateId);
         
-        // Update the status
         $candidate->update([
-            'status' => 'approved'
+            'status' => 'approved',
+            'remarks' => null // Clear any previous rejection remarks
         ]);
 
-        // Trigger UI Success
-        session()->flash('success', 'Candidate ' . $candidate->user->name . ' has been officially APPROVED for the ballot.');
-        
-        // PRO TIP: If you set up emails later, this is exactly where you would trigger 
-        // Mail::to($candidate->user->email)->send(new CandidateApprovedMail($candidate));
+        session()->flash('success', 'Candidate ' . $candidate->user->name . ' has been officially APPROVED.');
     }
 
-    public function rejectCandidate($candidateId)
+    public function confirmRejection($candidateId)
     {
-        $candidate = \App\Models\Candidate::findOrFail($candidateId);
-        
-        // Update the status
-        $candidate->update([
-            'status' => 'rejected'
+        $this->candidateToReject = $candidateId;
+        $this->rejectRemarks = ''; // Reset the textarea
+        $this->resetErrorBag();
+    }
+
+    public function rejectCandidate()
+    {
+        $this->validate([
+            'rejectRemarks' => 'required|string|min:5|max:500'
+        ], [
+            'rejectRemarks.required' => 'You must provide a reason for rejection.'
         ]);
 
-        // Trigger UI Warning/Success
-        session()->flash('success', 'Candidate ' . $candidate->user->name . ' has been REJECTED.');
+        $candidate = Candidate::findOrFail($this->candidateToReject);
         
-        // PRO TIP: Send a rejection email here if needed.
+        $candidate->update([
+            'status' => 'rejected',
+            'remarks' => $this->rejectRemarks // Ensure you have a 'remarks' nullable text column in your candidates table!
+        ]);
+
+        $this->candidateToReject = null;
+        session()->flash('success', 'Candidate ' . $candidate->user->name . ' has been REJECTED.');
+    }
+
+    // --- EDIT ACTIONS ---
+
+    public function openEditModal($candidateId)
+    {
+        $candidate = Candidate::findOrFail($candidateId);
+        $this->candidateToEdit = $candidateId;
+        $this->editProgram = $candidate->program;
+        $this->editYearLevel = $candidate->year_level;
+        $this->resetErrorBag();
+    }
+
+    public function saveEdit()
+    {
+        $this->validate([
+            'editProgram' => 'required|string|max:255',
+            'editYearLevel' => 'required|string|max:50',
+        ]);
+
+        $candidate = Candidate::findOrFail($this->candidateToEdit);
+        
+        $candidate->update([
+            'program' => $this->editProgram,
+            'year_level' => $this->editYearLevel,
+        ]);
+
+        $this->candidateToEdit = null;
+        session()->flash('success', 'Candidate details successfully updated.');
     }
 
     public function render()
     {
-        // Fetch candidates ONLY for this specific election
-        $candidates = Candidate::with(['user', 'position', 'college', 'platforms', 'credentials'])
+        $candidates = Candidate::with(['user', 'position', 'college'])
             ->where('election_id', $this->election->id)
             ->orderByRaw("FIELD(status, 'pending', 'approved', 'rejected')")
             ->get();
