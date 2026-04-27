@@ -3,11 +3,17 @@
 namespace App\Livewire\Admin;
 
 use Livewire\Component;
+use Livewire\WithFileUploads; // IMPORT THE FILE UPLOAD TRAIT
 use App\Models\Election;
 use App\Models\Candidate;
+use App\Models\User;
+use App\Models\College;
+use Illuminate\Support\Str;
 
 class ElectionDashboard extends Component
 {
+    use WithFileUploads; // ACTIVATE THE TRAIT
+
     public Election $election; 
     
     // Rejection State
@@ -19,6 +25,15 @@ class ElectionDashboard extends Component
     public $editProgram = '';
     public $editYearLevel = '';
 
+    // Test Candidate State
+    public $showTestModal = false;
+    public $testName = '';
+    public $testPhoto; // NEW: Photo Property
+    public $testPositionId = '';
+    public $testCollegeId = '';
+    public $testProgram = '';
+    public $testYearLevel = '';
+
     public function mount(Election $election)
     {
         if (auth()->user()->role?->role_name !== 'administrator' && $election->user_id !== auth()->id()) {
@@ -26,6 +41,51 @@ class ElectionDashboard extends Component
         }
 
         $this->election = $election;
+    }
+
+    // --- TEST CANDIDATE GENERATOR ---
+
+    public function createTestCandidate()
+    {
+        $this->validate([
+            'testName' => 'required|string|max:255',
+            'testPhoto' => 'nullable|image|max:2048', // NEW: Validate the image (Max 2MB)
+            'testPositionId' => 'required|exists:election_positions,id',
+            'testCollegeId' => 'required|exists:colleges,id',
+            'testProgram' => 'required|string|max:255',
+            'testYearLevel' => 'required|string|max:50',
+        ]);
+
+        // Process the photo if one was uploaded
+        $photoPath = null;
+        if ($this->testPhoto) {
+            // Saves to storage/app/public/profile-photos
+            $photoPath = $this->testPhoto->store('profile-photos', 'public');
+        }
+
+        // Create a dummy user so foreign keys don't break
+        $dummyUser = User::create([
+            'name' => $this->testName,
+            'email' => 'test_' . Str::random(8) . '@example.com',
+            'password' => bcrypt(Str::random(16)), 
+        ]);
+
+        // Create the auto-approved candidate
+        Candidate::create([
+            'election_id' => $this->election->id,
+            'election_position_id' => $this->testPositionId,
+            'user_id' => $dummyUser->id,
+            'college_id' => $this->testCollegeId,
+            'display_name' => $this->testName, 
+            'profile_photo_path' => $photoPath, // NEW: Save the photo path
+            'program' => $this->testProgram,
+            'year_level' => $this->testYearLevel,
+            'status' => 'approved', 
+        ]);
+
+        $this->showTestModal = false;
+        $this->reset(['testName', 'testPhoto', 'testPositionId', 'testCollegeId', 'testProgram', 'testYearLevel']);
+        session()->flash('success', 'Test Candidate successfully generated and added to the ballot.');
     }
 
     // --- VETTING ACTIONS ---
@@ -36,16 +96,16 @@ class ElectionDashboard extends Component
         
         $candidate->update([
             'status' => 'approved',
-            'remarks' => null // Clear any previous rejection remarks
+            'remarks' => null
         ]);
 
-        session()->flash('success', 'Candidate ' . $candidate->user->name . ' has been officially APPROVED.');
+        session()->flash('success', 'Candidate ' . ($candidate->display_name ?? $candidate->user->name) . ' has been officially APPROVED.');
     }
 
     public function confirmRejection($candidateId)
     {
         $this->candidateToReject = $candidateId;
-        $this->rejectRemarks = ''; // Reset the textarea
+        $this->rejectRemarks = ''; 
         $this->resetErrorBag();
     }
 
@@ -61,11 +121,11 @@ class ElectionDashboard extends Component
         
         $candidate->update([
             'status' => 'rejected',
-            'remarks' => $this->rejectRemarks // Ensure you have a 'remarks' nullable text column in your candidates table!
+            'remarks' => $this->rejectRemarks
         ]);
 
         $this->candidateToReject = null;
-        session()->flash('success', 'Candidate ' . $candidate->user->name . ' has been REJECTED.');
+        session()->flash('success', 'Candidate ' . ($candidate->display_name ?? $candidate->user->name) . ' has been REJECTED.');
     }
 
     // --- EDIT ACTIONS ---
@@ -105,7 +165,9 @@ class ElectionDashboard extends Component
             ->get();
 
         return view('livewire.admin.election-dashboard', [
-            'candidates' => $candidates
+            'candidates' => $candidates,
+            'positions' => $this->election->positions,
+            'colleges' => College::orderBy('name')->get()
         ])->layout('layouts.madya-admin-deck');
     }
 }
