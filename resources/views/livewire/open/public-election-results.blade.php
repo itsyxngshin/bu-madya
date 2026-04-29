@@ -5,44 +5,37 @@
 
 <div class="max-w-5xl mx-auto py-8 md:py-12 px-4 sm:px-6 font-sans">
 
-    {{-- PREMIUM ELECTION HEADER --}}
-    <div class="bg-white rounded-[2.5rem] shadow-lg border border-gray-200 overflow-hidden mb-8 relative">
+    {{-- ELECTION HEADER (FIXED: Cover Photo as Banner, Tri-Color as Fallback) --}}
+    <div class="bg-white rounded-[2.5rem] shadow-lg border border-gray-200 overflow-hidden mb-8">
         
-        {{-- Tri-Color Gradient Banner --}}
-        <div class="h-32 md:h-40 bg-gradient-to-r from-red-600 via-yellow-400 to-green-600 relative overflow-hidden">
-            <div class="absolute inset-0 opacity-30 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')]"></div>
-            <div class="absolute -bottom-16 left-1/2 -translate-x-1/2 w-96 h-96 bg-white/20 rounded-full blur-3xl pointer-events-none"></div>
-        </div>
-        
-        <div class="px-6 md:px-10 pb-8 relative z-10 -mt-12 md:-mt-16 text-center md:text-left flex flex-col md:flex-row items-center md:items-start gap-6">
-            
-            {{-- Overlapping Cover Photo or Icon --}}
-            <div class="w-24 h-24 md:w-32 md:h-32 bg-white rounded-3xl shadow-xl border-[6px] border-white flex items-center justify-center rotate-3 shrink-0 overflow-hidden">
-                @if($election->cover_photo_path)
-                    <img src="{{ asset('storage/'.$election->cover_photo_path) }}" class="w-full h-full object-cover">
-                @else
-                    <svg class="w-12 h-12 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
-                @endif
+        {{-- Banner Area --}}
+        @if($election->cover_photo_path)
+            <img src="{{ asset('storage/'.$election->cover_photo_path) }}" class="w-full h-48 md:h-64 object-cover">
+        @else
+            <div class="w-full h-32 md:h-48 bg-gradient-to-r from-red-600 via-yellow-400 to-green-600 relative overflow-hidden">
+                <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+                <div class="absolute -bottom-16 left-1/2 -translate-x-1/2 w-96 h-96 bg-white/20 rounded-full blur-3xl pointer-events-none"></div>
             </div>
+        @endif
+        
+        {{-- Text Area --}}
+        <div class="p-6 md:p-10 text-center relative">
+            <p class="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em] mb-2">Official Electoral Return</p>
             
-            <div class="flex-1 min-w-0 pt-2">
-                <p class="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em] mb-1">Official Electoral Return</p>
-                <h1 class="text-3xl md:text-5xl font-black text-gray-900 tracking-tighter leading-none mb-3 break-words">
-                    {{ $election->title }}
-                </h1>
-                
-                {{-- ELECTION DESCRIPTION INCLUDED --}}
-                @if($election->description)
-                    <p class="text-sm md:text-base text-gray-600 font-medium leading-relaxed mb-4 max-w-3xl">
-                        {{ $election->description }}
-                    </p>
-                @endif
-                
-                {{-- Live Turnout Badge --}}
-                <div wire:poll.10s class="inline-flex items-center gap-2 bg-gray-50 border border-gray-200 px-4 py-2 rounded-xl shadow-sm">
-                    <div class="w-2 h-2 rounded-full {{ $isReleased ? 'bg-green-500' : 'bg-orange-500 animate-pulse' }}"></div>
-                    <span class="text-[10px] md:text-xs font-bold text-gray-700 uppercase tracking-wider">Total Turnout: <span class="text-gray-900 font-black">{{ number_format($totalTurnout ?? 0) }} Voters</span></span>
-                </div>
+            <h1 class="text-3xl md:text-5xl font-black text-gray-900 tracking-tighter leading-tight mb-4 break-words">
+                {{ $election->title }}
+            </h1>
+            
+            @if($election->description)
+                <p class="text-sm md:text-base text-gray-600 font-medium leading-relaxed mb-6 max-w-3xl mx-auto">
+                    {{ $election->description }}
+                </p>
+            @endif
+            
+            {{-- Turnout Badge --}}
+            <div wire:poll.10s class="inline-flex items-center gap-2 bg-gray-50 border border-gray-200 px-4 py-2 rounded-xl shadow-sm">
+                <div class="w-2 h-2 rounded-full {{ $isReleased ? 'bg-green-500' : 'bg-orange-500 animate-pulse' }}"></div>
+                <span class="text-[10px] md:text-xs font-bold text-gray-700 uppercase tracking-wider">Total Turnout: <span class="text-gray-900 font-black">{{ number_format($totalTurnout ?? 0) }} Voters</span></span>
             </div>
         </div>
     </div>
