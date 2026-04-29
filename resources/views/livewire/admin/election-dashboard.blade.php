@@ -72,8 +72,6 @@
                 <p class="text-sm text-gray-500 mb-6">Instantly create an auto-approved dummy candidate for testing purposes.</p>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-                    {{-- THE FIX: Avatar / Photo Upload Zone --}}
                     <div class="md:col-span-2 mb-2">
                         <label class="block text-[10px] font-bold text-gray-500 uppercase mb-2">Profile Photo (Optional)</label>
                         <div class="flex items-center gap-4">
@@ -130,6 +128,7 @@
                             <option value="2nd Year">2nd Year</option>
                             <option value="3rd Year">3rd Year</option>
                             <option value="4th Year">4th Year</option>
+                            <option value="5th Year">5th Year</option>
                         </select>
                         @error('testYearLevel') <span class="text-[10px] text-red-500 font-bold block mt-1">{{ $message }}</span> @enderror
                     </div>
@@ -168,28 +167,129 @@
         </div>
     @endif
 
-    {{-- EDIT MODAL --}}
+    {{-- ENHANCED EDIT MODAL --}}
     @if($candidateToEdit)
-        <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div class="bg-white rounded-3xl p-8 max-w-lg w-full shadow-2xl">
-                <h3 class="text-xl font-black text-yellow-600 mb-2">Edit Candidate Details</h3>
-                <div class="space-y-4">
+        <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm flex items-center justify-center z-[60] p-4 sm:p-6 overflow-y-auto">
+            <div class="bg-gray-50 rounded-[2.5rem] shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col my-8">
+
+                {{-- Header (Fixed) --}}
+                <div class="bg-white px-8 py-6 rounded-t-[2.5rem] border-b border-gray-200 flex items-center justify-between shrink-0">
                     <div>
-                        <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1.5">Academic Program</label>
-                        <input wire:model="editProgram" type="text" class="w-full bg-gray-50 border border-gray-200 focus:border-yellow-500 rounded-xl px-4 py-3 text-sm font-bold">
-                        @error('editProgram') <span class="text-[10px] text-red-500 font-bold block mt-1">{{ $message }}</span> @enderror
+                        <h3 class="text-2xl font-black text-yellow-600 tracking-tight">Edit Candidate Records</h3>
+                        <p class="text-xs font-bold text-gray-500 mt-1 uppercase tracking-widest">Administrator Override</p>
                     </div>
-                    <div>
-                        <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1.5">Year Level</label>
-                        <select wire:model="editYearLevel" class="w-full bg-gray-50 border border-gray-200 focus:border-yellow-500 rounded-xl px-4 py-3 text-sm font-bold">
-                            <option value="1st Year">1st Year</option><option value="2nd Year">2nd Year</option><option value="3rd Year">3rd Year</option><option value="4th Year">4th Year</option><option value="5th Year">5th Year</option>
-                        </select>
-                        @error('editYearLevel') <span class="text-[10px] text-red-500 font-bold block mt-1">{{ $message }}</span> @enderror
-                    </div>
+                    <button wire:click="$set('candidateToEdit', null)" class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
                 </div>
-                <div class="flex justify-end gap-3 mt-6">
-                    <button wire:click="$set('candidateToEdit', null)" class="px-5 py-2.5 text-sm font-bold text-gray-600 hover:bg-gray-100 rounded-xl transition-colors">Cancel</button>
-                    <button wire:click="saveEdit" class="px-5 py-2.5 text-sm font-black text-yellow-900 bg-yellow-400 hover:bg-yellow-500 rounded-xl shadow-lg transition-colors">Save Changes</button>
+
+                {{-- Scrollable Content Area --}}
+                <div class="p-6 md:p-8 overflow-y-auto flex-1 space-y-8">
+
+                    {{-- Academic Info --}}
+                    <div class="bg-white rounded-[2rem] p-6 shadow-sm border border-gray-200">
+                        <h4 class="text-lg font-black text-gray-900 mb-4 border-b border-gray-100 pb-4">Academic Details</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1.5">Academic Program</label>
+                                <input wire:model="editProgram" type="text" class="w-full bg-gray-50 border border-gray-200 focus:border-yellow-500 rounded-xl px-4 py-3 text-sm font-bold">
+                                @error('editProgram') <span class="text-[10px] text-red-500 font-bold block mt-1">{{ $message }}</span> @enderror
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1.5">Year Level</label>
+                                <select wire:model="editYearLevel" class="w-full bg-gray-50 border border-gray-200 focus:border-yellow-500 rounded-xl px-4 py-3 text-sm font-bold">
+                                    <option value="1st Year">1st Year</option><option value="2nd Year">2nd Year</option><option value="3rd Year">3rd Year</option><option value="4th Year">4th Year</option><option value="5th Year">5th Year</option>
+                                </select>
+                                @error('editYearLevel') <span class="text-[10px] text-red-500 font-bold block mt-1">{{ $message }}</span> @enderror
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Platforms (GPOA) --}}
+                    <div class="bg-white rounded-[2rem] p-6 shadow-sm border border-gray-200">
+                        <div class="flex items-center justify-between mb-6 border-b border-gray-100 pb-4">
+                            <h4 class="text-lg font-black text-gray-900 uppercase tracking-tight">Platforms (GPOA)</h4>
+                            <button type="button" wire:click="addEditPlatform" class="text-xs font-bold text-green-700 bg-green-50 hover:bg-green-100 px-4 py-2 rounded-lg transition-colors border border-green-200 shadow-sm">+ Add Platform</button>
+                        </div>
+
+                        <div class="space-y-4">
+                            @foreach($editPlatforms as $index => $platform)
+                                <div class="bg-gray-50 rounded-2xl p-5 border border-gray-200 relative group">
+                                    <button type="button" wire:click="removeEditPlatform({{ $index }})" class="absolute top-4 right-4 text-gray-400 hover:text-red-500 transition-colors bg-white rounded-lg p-1.5 shadow-sm border border-gray-200 hover:border-red-200">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                    </button>
+                                    <div class="space-y-4 pr-10">
+                                        <div>
+                                            <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Project Title</label>
+                                            <input wire:model="editPlatforms.{{ $index }}.title" type="text" class="w-full bg-white border border-gray-200 focus:border-green-500 rounded-xl px-4 py-3 text-sm font-bold shadow-sm">
+                                            @error('editPlatforms.'.$index.'.title') <span class="text-[10px] text-red-500 font-bold block mt-1">{{ $message }}</span> @enderror
+                                        </div>
+                                        <div>
+                                            <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Description</label>
+                                            <textarea wire:model="editPlatforms.{{ $index }}.description" rows="3" class="w-full bg-white border border-gray-200 focus:border-green-500 rounded-xl px-4 py-3 text-sm resize-none shadow-sm"></textarea>
+                                            @error('editPlatforms.'.$index.'.description') <span class="text-[10px] text-red-500 font-bold block mt-1">{{ $message }}</span> @enderror
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                            @if(empty($editPlatforms))
+                                <div class="text-center py-6 bg-gray-50 border border-dashed border-gray-200 rounded-2xl">
+                                    <p class="text-xs text-gray-400 font-bold uppercase tracking-widest">No platforms listed.</p>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+
+                    {{-- Credentials --}}
+                    <div class="bg-white rounded-[2rem] p-6 shadow-sm border border-gray-200">
+                        <div class="flex items-center justify-between mb-6 border-b border-gray-100 pb-4">
+                            <h4 class="text-lg font-black text-gray-900 uppercase tracking-tight">Credentials</h4>
+                            <button type="button" wire:click="addEditCredential" class="text-xs font-bold text-orange-700 bg-orange-50 hover:bg-orange-100 px-4 py-2 rounded-lg transition-colors border border-orange-200 shadow-sm">+ Add Credential</button>
+                        </div>
+
+                        <div class="space-y-4">
+                            @foreach($editCredentials as $index => $credential)
+                                <div class="bg-gray-50 rounded-2xl p-5 border border-gray-200 flex flex-col md:flex-row gap-4 items-start relative">
+                                    <div class="flex-1 w-full grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        <div class="md:col-span-1">
+                                            <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Type</label>
+                                            <select wire:model="editCredentials.{{ $index }}.type" class="w-full bg-white border border-gray-200 focus:border-orange-500 rounded-xl px-3 py-3 text-sm font-bold shadow-sm">
+                                                <option value="">Select...</option>
+                                                <option value="Leadership Experience">Leadership Experience</option>
+                                                <option value="Academic Award">Academic Award</option>
+                                                <option value="Affiliation">Affiliation</option>
+                                                <option value="Other">Other</option>
+                                            </select>
+                                            @error('editCredentials.'.$index.'.type') <span class="text-[10px] text-red-500 font-bold block mt-1">{{ $message }}</span> @enderror
+                                        </div>
+                                        <div class="md:col-span-2">
+                                            <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Description</label>
+                                            <input wire:model="editCredentials.{{ $index }}.description" type="text" class="w-full bg-white border border-gray-200 focus:border-orange-500 rounded-xl px-4 py-3 text-sm font-bold shadow-sm">
+                                            @error('editCredentials.'.$index.'.description') <span class="text-[10px] text-red-500 font-bold block mt-1">{{ $message }}</span> @enderror
+                                        </div>
+                                    </div>
+                                    <button type="button" wire:click="removeEditCredential({{ $index }})" class="mt-0 md:mt-7 text-gray-400 hover:text-red-500 transition-colors bg-white rounded-lg p-2 shadow-sm border border-gray-200 hover:border-red-200 absolute top-4 right-4 md:relative md:top-0 md:right-0">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                    </button>
+                                </div>
+                            @endforeach
+                            @if(empty($editCredentials))
+                                <div class="text-center py-6 bg-gray-50 border border-dashed border-gray-200 rounded-2xl">
+                                    <p class="text-xs text-gray-400 font-bold uppercase tracking-widest">No credentials listed.</p>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+
+                </div>
+
+                {{-- Footer Actions (Fixed) --}}
+                <div class="bg-white rounded-b-[2.5rem] px-8 py-6 border-t border-gray-200 flex items-center justify-end gap-3 shrink-0">
+                    <button wire:click="$set('candidateToEdit', null)" class="px-6 py-3 text-sm font-bold text-gray-600 hover:bg-gray-100 rounded-xl transition-colors">Cancel</button>
+                    <button wire:click="saveEdit" wire:loading.attr="disabled" class="px-8 py-3 text-sm font-black text-yellow-900 bg-yellow-400 hover:bg-yellow-500 rounded-xl shadow-lg transition-colors flex items-center gap-2">
+                        <span wire:loading.remove wire:target="saveEdit">Save Full Record</span>
+                        <span wire:loading wire:target="saveEdit">Saving...</span>
+                    </button>
                 </div>
             </div>
         </div>

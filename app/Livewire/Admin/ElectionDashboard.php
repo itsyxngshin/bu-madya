@@ -7,6 +7,8 @@ use Livewire\WithFileUploads;
 use App\Models\Election;
 use App\Models\Candidate;
 use App\Models\College;
+use App\Models\CandidatePlatform;
+use App\Models\CandidateCredential;
 use Illuminate\Support\Facades\DB;
 
 class ElectionDashboard extends Component
@@ -23,6 +25,8 @@ class ElectionDashboard extends Component
     public $candidateToEdit = null;
     public $editProgram = '';
     public $editYearLevel = '';
+    public $editPlatforms = [];
+    public $editCredentials = [];
 
     // Test Candidate State
     public $showTestModal = false;
@@ -61,8 +65,6 @@ class ElectionDashboard extends Component
             for ($i = 0; $i < $quantityCreated; $i++) {
                 $displayName = $quantityCreated > 1 ? $this->testName . ' #' . ($i + 1) : $this->testName;
 
-                // THE FIX: We no longer create a dummy User!
-                // user_id is explicitly set to null.
                 Candidate::create([
                     'election_id' => $this->election->id,
                     'election_position_id' => $this->testPositionId,
@@ -107,21 +109,100 @@ class ElectionDashboard extends Component
         session()->flash('success', 'Candidate REJECTED.');
     }
 
+    // --- ENHANCED EDITING METHODS ---
+
     public function openEditModal($candidateId)
     {
-        $candidate = Candidate::findOrFail($candidateId);
+        $candidate = Candidate::with(['platforms', 'credentials'])->findOrFail($candidateId);
         $this->candidateToEdit = $candidateId;
         $this->editProgram = $candidate->program;
         $this->editYearLevel = $candidate->year_level;
+
+        // Load existing platforms
+        $this->editPlatforms = $candidate->platforms->map(function ($platform) {
+            return ['id' => $platform->id, 'title' => $platform->title, 'description' => $platform->description];
+        })->toArray();
+
+        // Load existing credentials
+        $this->editCredentials = $candidate->credentials->map(function ($credential) {
+            return ['id' => $credential->id, 'type' => $credential->type, 'description' => $credential->description];
+        })->toArray();
+
         $this->resetErrorBag();
     }
 
+    public function addEditPlatform() { $this->editPlatforms[] = ['id' => null, 'title' => '', 'description' => '']; }
+    public function removeEditPlatform($index) { unset($this->editPlatforms[$index]); $this->editPlatforms = array_values($this->editPlatforms); }
+
+    public function addEditCredential() { $this->editCredentials[] = ['id' => null, 'type' => '', 'description' => '']; }
+    public function removeEditCredential($index) { unset($this->editCredentials[$index]); $this->editCredentials = array_values($this->editCredentials); }
+
     public function saveEdit()
     {
-        $this->validate(['editProgram' => 'required|string|max:255', 'editYearLevel' => 'required|string|max:50']);
-        Candidate::findOrFail($this->candidateToEdit)->update(['program' => $this->editProgram, 'year_level' => $this->editYearLevel]);
+        $this->validate([
+            'editProgram' => 'required|string|max:255', 
+            'editYearLevel' => 'required|string|max:50',
+            'editPlatforms.*.title' => 'required|string|max:255',
+            'editPlatforms.*.description' => 'required|string',
+            'editCredentials.*.type' => 'required|string|max:100',
+            'editCredentials.*.description' => 'required|string',
+        ], [
+            'editPlatforms.*.title.required' => 'Platform title is required.',
+            'editPlatforms.*.description.required' => 'Platform description is required.',
+        ]);
+
+        DB::transaction(function () {
+            $candidate = Candidate::findOrFail($this->candidateToEdit);
+            
+            // Update Basic Info
+            $candidate->update([
+                'program' => $this->editProgram, 
+                'year_level' => $this->editYearLevel
+            ]);
+
+            // Sync Platforms
+            $savedPlatformIds = [];
+            foreach ($this->editPlatforms as $platform) {
+                if (isset($platform['id']) && $platform['id'] !== null) {
+                    $existing = CandidatePlatform::find($platform['id']);
+                    if ($existing) {
+                        $existing->update(['title' => $platform['title'], 'description' => $platform['description']]);
+                        $savedPlatformIds[] = $existing->id;
+                    }
+                } else {
+                    $new = CandidatePlatform::create([
+                        'candidate_id' => $candidate->id,
+                        'title' => $platform['title'],
+                        'description' => $platform['description']
+                    ]);
+                    $savedPlatformIds[] = $new->id;
+                }
+            }
+            CandidatePlatform::where('candidate_id', $candidate->id)->whereNotIn('id', $savedPlatformIds)->delete();
+
+            // Sync Credentials
+            $savedCredentialIds = [];
+            foreach ($this->editCredentials as $credential) {
+                if (isset($credential['id']) && $credential['id'] !== null) {
+                    $existing = CandidateCredential::find($credential['id']);
+                    if ($existing) {
+                        $existing->update(['type' => $credential['type'], 'description' => $credential['description']]);
+                        $savedCredentialIds[] = $existing->id;
+                    }
+                } else {
+                    $new = CandidateCredential::create([
+                        'candidate_id' => $candidate->id,
+                        'type' => $credential['type'],
+                        'description' => $credential['description']
+                    ]);
+                    $savedCredentialIds[] = $new->id;
+                }
+            }
+            CandidateCredential::where('candidate_id', $candidate->id)->whereNotIn('id', $savedCredentialIds)->delete();
+        });
+
         $this->candidateToEdit = null;
-        session()->flash('success', 'Details updated.');
+        session()->flash('success', 'Candidate details, platforms, and credentials updated successfully.');
     }
 
     public function render()

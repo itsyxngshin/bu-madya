@@ -158,7 +158,7 @@ Route::middleware(['auth', 'role:director'])->prefix('director')->name('director
     Route::get('/evaluations/create', EvaluationBuilder::class)->name('evaluations.create');
     Route::get('/campaigns', CampaignList::class)->name('campaigns.index');
     Route::get('/campaigns/create', CampaignBuilder::class)->name('campaigns.create');
-    Route::get('/campaigns/{slug}/edit', CampaignBuilder::class)->name('campaigns.edit'); 
+    Route::get('/campaigns/{slug}/edit', CampaignBuilder::class)->name('campaigns.edit');
     Route::get('/campaigns/{slug}/results', CampaignAnalytics::class)->name('campaigns.results');
 
 });
@@ -169,7 +169,7 @@ Route::middleware(['auth'])
     Route::get('/roundtable/{id}', RoundtableShow::class)->name('roundtable.show');
     Route::get('/evaluations', EvaluationList::class)->name('evaluations.index');
     Route::get('/elections/{election:slug}/apply', \App\Livewire\Open\CandidateApplicationForm::class)->name('elections.apply');
-    
+
 
 });
 
@@ -206,7 +206,7 @@ Route::middleware(['auth', 'role:administrator'])->prefix('admin')->name('admin.
     Route::get('/linkages-proposals', LinkagesManager::class)->name('linkages.proposals');
     Route::get('/welfare', \App\Livewire\Admin\WelfareManager::class)->name('welfare.index');
     Route::get('/the-pillars', ThePillarsManager::class)->name('pillars.index');
-    Route::get('/campaigns/{slug}/results', CampaignAnalytics::class)->name('campaigns.results'); 
+    Route::get('/campaigns/{slug}/results', CampaignAnalytics::class)->name('campaigns.results');
     Route::get('/elections', \App\Livewire\Admin\ElectionList::class)->name('elections.index');
     Route::get('/elections/manage', \App\Livewire\Admin\ElectionManager::class)->name('elections.manage');
     Route::get('/elections/{election:slug}/vetting', \App\Livewire\Admin\ElectionDashboard::class)->name('elections.vetting');
@@ -241,7 +241,7 @@ Route::middleware(['auth', 'role:organization'])->prefix('partner')->name('partn
     Route::get('/elections/{election:slug}/vetting', \App\Livewire\Admin\ElectionDashboard::class)->name('elections.vetting');
     Route::get('/elections/{election:slug}/results', \App\Livewire\Admin\ElectionResults::class)->name('elections.results');
     Route::get('/elections/{election:slug}/edit', \App\Livewire\Admin\ElectionEditor::class)->name('elections.edit');
-    
+
 });
 
 Route::middleware(['auth', 'role:member'])->prefix('member')->name('member.')
