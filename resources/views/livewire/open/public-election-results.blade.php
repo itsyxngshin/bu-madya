@@ -8,7 +8,8 @@
     {{-- ELECTION HEADER --}}
     <div class="bg-white rounded-[2rem] shadow-sm border border-gray-200 overflow-hidden mb-8">
         @if($election->cover_photo_path)
-            <img src="{{ asset('storage/'.$election->cover_photo_path) }}" class="w-full h-48 md:h-64 object-cover">
+             <img src="{{ asset('storage/'.$election->cover_photo_path) }}" class="w-full h-auto">
+
         @else
             <div class="w-full h-12 bg-gray-900"></div>
         @endif
