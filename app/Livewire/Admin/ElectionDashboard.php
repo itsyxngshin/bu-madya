@@ -140,7 +140,7 @@ class ElectionDashboard extends Component
     public function saveEdit()
     {
         $this->validate([
-            'editProgram' => 'required|string|max:255', 
+            'editProgram' => 'required|string|max:255',
             'editYearLevel' => 'required|string|max:50',
             'editPlatforms.*.title' => 'required|string|max:255',
             'editPlatforms.*.description' => 'required|string',
@@ -153,10 +153,10 @@ class ElectionDashboard extends Component
 
         DB::transaction(function () {
             $candidate = Candidate::findOrFail($this->candidateToEdit);
-            
+
             // Update Basic Info
             $candidate->update([
-                'program' => $this->editProgram, 
+                'program' => $this->editProgram,
                 'year_level' => $this->editYearLevel
             ]);
 
