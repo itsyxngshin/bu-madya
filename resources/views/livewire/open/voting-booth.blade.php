@@ -38,20 +38,29 @@
         
         {{-- ELECTION HEADER --}}
         <div class="bg-white rounded-[2.5rem] shadow-lg border border-gray-200 overflow-hidden mb-8">
+            
+            {{-- Banner Area --}}
             @if($election->cover_photo_path)
                 <img src="{{ asset('storage/'.$election->cover_photo_path) }}" class="w-full h-48 md:h-64 object-cover">
             @else
                 <div class="w-full h-32 md:h-48 bg-gradient-to-r from-red-600 via-yellow-400 to-green-600 relative overflow-hidden">
                     <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+                    <div class="absolute -bottom-16 left-1/2 -translate-x-1/2 w-96 h-96 bg-white/20 rounded-full blur-3xl pointer-events-none"></div>
                 </div>
             @endif
             
+            {{-- Text Area --}}
             <div class="p-6 md:p-10 text-center relative">
                 <p class="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em] mb-2">Official Electronic Ballot</p>
-                <h1 class="text-3xl md:text-5xl font-black text-gray-900 tracking-tighter leading-tight mb-4 break-words">{{ $election->title }}</h1>
+                
+                <h1 class="text-3xl md:text-5xl font-black text-gray-900 tracking-tighter leading-tight mb-4 break-words">
+                    {{ $election->title }}
+                </h1>
                 
                 @if($election->description)
-                    <p class="text-sm md:text-base text-gray-600 font-medium leading-relaxed mb-6 max-w-3xl mx-auto">{{ $election->description }}</p>
+                    <p class="text-sm md:text-base text-gray-600 font-medium leading-relaxed mb-6 max-w-3xl mx-auto">
+                        {{ $election->description }}
+                    </p>
                 @endif
                 
                 <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-orange-50 border border-orange-100 rounded-lg shadow-sm mx-auto">
@@ -70,7 +79,7 @@
             </div>
         @endif
 
-        {{-- GUEST VOTER DETAILS --}}
+        {{-- GUEST VOTER DETAILS (If applicable) --}}
         @if(!auth()->check() && $election->allow_guest_voting)
             <div class="bg-white rounded-[2rem] p-6 md:p-8 shadow-sm border border-gray-200 mb-8">
                 <h3 class="text-lg font-black text-gray-900 uppercase tracking-tight flex items-center gap-2 mb-6 border-b border-gray-100 pb-4">
@@ -79,8 +88,6 @@
                     </div>
                     Voter Authentication
                 </h3>
-                
-                {{-- THE FIX: Improved Grid spacing so nothing is squeezed --}}
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div>
                         <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Full Name</label>
@@ -142,7 +149,7 @@
                         </div>
                     </div>
 
-                    {{-- THE FIX: Horizontal Candidates Grid --}}
+                    {{-- Horizontal Candidates Grid --}}
                     <div class="p-6 md:p-8">
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             
@@ -156,7 +163,7 @@
                                      class="relative p-4 rounded-2xl border-2 transition-all duration-300 cursor-pointer group flex items-center gap-4 
                                             {{ $isSelected ? 'border-green-500 bg-green-50/50 shadow-sm' : 'border-gray-100 bg-white hover:border-green-200 hover:bg-gray-50 hover:shadow-sm' }}">
                                     
-                                    {{-- Radio Checkbox on the Left --}}
+                                    {{-- Radio Checkbox --}}
                                     <div class="w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors
                                                 {{ $isSelected ? 'border-green-500 bg-green-500' : 'border-gray-300 bg-white group-hover:border-green-400' }}">
                                         @if($isSelected)
@@ -174,17 +181,17 @@
                                     </div>
 
                                     {{-- Info --}}
-                                    <div class="flex-1 min-w-0">
-                                        <h3 class="text-sm md:text-base font-black text-gray-900 leading-tight group-hover:text-green-700 transition-colors truncate">{{ $candidateName }}</h3>
-                                        <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider truncate mt-0.5">{{ $candidate->program }}</p>
-                                        <a href="{{ route('candidate.profile', $candidate->id) }}" target="_blank" @click.stop class="mt-1 text-[10px] font-black text-blue-500 hover:text-blue-700 uppercase tracking-widest inline-flex items-center gap-1">
+                                    <div class="flex-1 min-w-0 py-1">
+                                        <h3 class="text-sm md:text-base font-black text-gray-900 leading-tight group-hover:text-green-700 transition-colors break-words">{{ $candidateName }}</h3>
+                                        <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mt-1 leading-snug break-words">{{ $candidate->program }}</p>
+                                        <a href="{{ route('candidate.profile', $candidate->id) }}" target="_blank" @click.stop class="mt-1.5 text-[10px] font-black text-blue-500 hover:text-blue-700 uppercase tracking-widest inline-flex items-center gap-1">
                                             Profile <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
                                         </a>
                                     </div>
                                 </div>
                             @endforeach
 
-                            {{-- ABSTAIN OPTION (Horizontal Match) --}}
+                            {{-- ABSTAIN OPTION --}}
                             <div wire:click="toggleSelection({{ $position->id }}, 'abstain')" 
                                  class="relative p-4 rounded-2xl border-2 transition-all duration-300 cursor-pointer group flex items-center gap-4 sm:col-span-full lg:col-span-1
                                         {{ $isAbstain ? 'border-orange-500 bg-orange-50/50 shadow-sm' : 'border-gray-100 border-dashed bg-gray-50 hover:border-orange-300 hover:bg-orange-50/50' }}">
@@ -197,8 +204,8 @@
                                 </div>
 
                                 <div class="flex-1 min-w-0">
-                                    <h3 class="text-sm md:text-base font-black text-gray-900 leading-tight group-hover:text-orange-700 transition-colors truncate uppercase">Abstain</h3>
-                                    <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider truncate mt-0.5">Leave position blank</p>
+                                    <h3 class="text-sm md:text-base font-black text-gray-900 leading-tight group-hover:text-orange-700 transition-colors break-words uppercase">Abstain</h3>
+                                    <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mt-1 leading-snug break-words">Leave position blank</p>
                                 </div>
                             </div>
 
