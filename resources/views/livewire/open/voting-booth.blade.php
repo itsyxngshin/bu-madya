@@ -1,4 +1,4 @@
-<div class="max-w-5xl mx-auto py-8 md:py-12 px-4 sm:px-6 font-sans pb-40 animate-fade-in-up">
+<div class="max-w-5xl mx-auto py-8 md:py-12 px-4 sm:px-6 font-sans pb-16 animate-fade-in-up">
     
     {{-- TOP NAVIGATION --}}
     <div class="flex items-center justify-between mb-8">
@@ -184,7 +184,7 @@
                                     <div class="flex-1 min-w-0 py-1">
                                         <h3 class="text-sm md:text-base font-black text-gray-900 leading-tight group-hover:text-green-700 transition-colors break-words">{{ $candidateName }}</h3>
                                         <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mt-1 leading-snug break-words">{{ $candidate->program }}</p>
-                                        <a href="{{ route('candidate.profile', $candidate->id) }}" target="_blank" @click.stop class="mt-1.5 text-[10px] font-black text-blue-500 hover:text-blue-700 uppercase tracking-widest inline-flex items-center gap-1">
+                                        <a href="{{ route('candidate.profile', $candidate->id) }}" target="_blank" @click.stop class="mt-1.5 text-[10px] font-black text-blue-500 hover:text-blue-700 uppercase tracking-widest inline-flex items-center gap-1 w-max">
                                             Profile <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
                                         </a>
                                     </div>
@@ -215,27 +215,23 @@
             @endforeach
         </div>
 
-        {{-- FIXED SUBMIT BAR (FLOATING) --}}
-        <div class="fixed bottom-0 left-0 right-0 z-50 p-4 md:p-6 bg-gradient-to-t from-white via-white/90 to-transparent pointer-events-none">
-            <div class="max-w-5xl mx-auto pointer-events-auto">
-                <div class="bg-gray-900 rounded-[2rem] p-4 md:p-6 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-4 border border-gray-800">
-                    <div class="flex items-center gap-3 text-white hidden md:flex">
-                        <div class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center border border-gray-700">
-                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
-                        </div>
-                        <div>
-                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">End of Ballot</p>
-                            <p class="text-sm font-black">Ready to submit?</p>
-                        </div>
-                    </div>
-                    
-                    <button wire:click="castBallot" wire:loading.attr="disabled" class="w-full md:w-auto px-10 py-4 bg-green-500 hover:bg-green-400 text-gray-900 text-lg font-black rounded-xl shadow-lg transition-all transform active:scale-95 flex items-center justify-center gap-2">
-                        <span wire:loading.remove wire:target="castBallot">Cast My Ballot Now</span>
-                        <span wire:loading wire:target="castBallot">Encrypting & Saving...</span>
-                        <svg wire:loading.remove wire:target="castBallot" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                    </button>
+        {{-- FINAL SUBMIT SECTION (No longer floating) --}}
+        <div class="mt-12 bg-gray-900 rounded-[2rem] p-6 md:p-8 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-6 border border-gray-800">
+            <div class="flex items-center gap-4 text-white w-full md:w-auto justify-center md:justify-start">
+                <div class="w-12 h-12 rounded-full bg-gray-800 flex items-center justify-center border border-gray-700 shrink-0">
+                    <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                </div>
+                <div class="text-center md:text-left">
+                    <p class="text-[11px] font-bold text-gray-400 uppercase tracking-widest">End of Ballot</p>
+                    <p class="text-base font-black">Ready to submit?</p>
                 </div>
             </div>
+            
+            <button wire:click="castBallot" wire:loading.attr="disabled" class="w-full md:w-auto px-10 py-4 bg-green-500 hover:bg-green-400 text-gray-900 text-lg font-black rounded-xl shadow-lg transition-all transform active:scale-95 flex items-center justify-center gap-3">
+                <span wire:loading.remove wire:target="castBallot">Cast My Ballot Now</span>
+                <span wire:loading wire:target="castBallot">Encrypting & Saving...</span>
+                <svg wire:loading.remove wire:target="castBallot" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+            </button>
         </div>
 
     @endif
