@@ -12,9 +12,9 @@
 
     {{-- ELECTION HEADER --}}
     <div class="bg-white rounded-[2.5rem] shadow-lg border border-gray-200 overflow-hidden mb-8">
-        
-        @if($election->cover_photo_path)
-            <img src="{{ asset('storage/'.$election->cover_photo_path) }}" class="w-full h-48 md:h-64 object-cover">
+    
+    @if($election->cover_photo_path)
+        <img src="{{ asset('storage/'.$election->cover_photo_path) }}" class="w-full h-auto block">
         @else
             <div class="w-full h-32 md:h-48 bg-gradient-to-r from-red-600 via-yellow-400 to-green-600 relative overflow-hidden">
                 <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
