@@ -72,7 +72,7 @@ class ElectionEditor extends Component
             }
 
             // Load Existing Parties
-            foreach ($election->parties as $party) {
+            foreach ($election->parties ?? [] as $party) {
                 $this->electionParties[] = [
                     'id' => $party->id,
                     'name' => $party->name,
