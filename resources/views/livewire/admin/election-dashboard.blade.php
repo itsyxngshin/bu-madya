@@ -216,14 +216,16 @@
                             </div>
 
                             {{-- Party Dropdown --}}
+                            {{-- Dynamic Political Party Dropdown --}}
                             <div class="md:col-span-2 mt-2">
-                                <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1.5">Political Party / Slate</label>
-                                <select wire:model="editPartyId" class="w-full bg-gray-50 border border-gray-200 focus:border-yellow-500 rounded-xl px-4 py-3 text-sm font-bold">
+                                <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Political Party / Slate</label>
+                                <select wire:model="editPartyId" class="w-full bg-gray-50 border border-gray-200 focus:border-yellow-500 rounded-xl px-4 py-3 text-sm font-bold shadow-sm">
                                     <option value="">Independent (No Party Affiliation)</option>
-                                    @foreach($parties as $party)
+                                    @foreach($parties ?? [] as $party)
                                         <option value="{{ $party->id }}">{{ $party->name }}</option>
                                     @endforeach
                                 </select>
+                                <p class="text-[10px] text-gray-400 font-bold mt-1.5">Note: Parties must be created in the Election Editor first.</p>
                                 @error('editPartyId') <span class="text-[10px] text-red-500 font-bold block mt-1">{{ $message }}</span> @enderror
                             </div>
                         </div>
