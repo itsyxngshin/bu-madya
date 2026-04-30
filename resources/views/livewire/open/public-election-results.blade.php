@@ -12,9 +12,9 @@
 
     {{-- ELECTION HEADER --}}
     <div class="bg-white rounded-[2.5rem] shadow-lg border border-gray-200 overflow-hidden mb-8">
-    
-    @if($election->cover_photo_path)
-        <img src="{{ asset('storage/'.$election->cover_photo_path) }}" class="w-full h-auto block">
+        
+        @if($election->cover_photo_path)
+            <img src="{{ asset('storage/'.$election->cover_photo_path) }}" class="w-full h-auto block">
         @else
             <div class="w-full h-32 md:h-48 bg-gradient-to-r from-red-600 via-yellow-400 to-green-600 relative overflow-hidden">
                 <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
@@ -83,7 +83,7 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             @forelse($position->candidates as $candidate)
                                 @if($isCandidacyClosed)
-                                    <a href="{{ route('candidate.profile', $candidate->id) }}" target="_blank" class="relative flex items-center gap-4 p-4 rounded-2xl bg-gray-50 border border-gray-100 hover-glow-tricolor hover:-translate-y-0.5 transition-all duration-300 group block min-w-0">
+                                    <a href="{{ route('candidate.profile', $candidate->id) }}" target="_blank" class="relative flex items-center gap-4 p-4 rounded-2xl bg-gray-50 border border-gray-100 hover-glow-tricolor transition-all duration-300 group block min-w-0">
                                         <div class="w-14 h-14 rounded-full overflow-hidden border-2 border-white shadow-sm shrink-0 bg-white group-hover:ring-2 group-hover:ring-orange-500 transition-all">
                                             @if($candidate->profile_photo_path)
                                                 <img src="{{ asset('storage/'.$candidate->profile_photo_path) }}" class="w-full h-full object-cover">
@@ -104,10 +104,11 @@
                                                 }
                                             @endphp
                                             
-                                            <p class="text-[10px] md:text-xs font-bold text-gray-500 uppercase tracking-wider mt-1 leading-tight">
-                                                @if($hasParties)
-                                                    <span style="color: {{ $partyColor }};" class="font-black">{{ $partyName }}</span> <span class="hidden sm:inline">•</span><br class="block sm:hidden">
-                                                @endif
+                                            @if($hasParties)
+                                                <p style="color: {{ $partyColor }};" class="text-[10px] font-black uppercase tracking-widest mt-1 mb-0.5 truncate">{{ $partyName }}</p>
+                                            @endif
+                                            
+                                            <p class="text-[10px] md:text-xs font-bold text-gray-500 uppercase tracking-wider {{ $hasParties ? 'mt-0' : 'mt-1' }} leading-tight">
                                                 <span class="text-gray-700">{{ $candidate->college->name ?? 'N/A' }}</span> <span class="hidden sm:inline">•</span><br class="block sm:hidden"> 
                                                 {{ $candidate->program }}
                                             </p>
@@ -199,10 +200,9 @@
                                     $partyBg = $partyColor . '1A'; // 10% Opacity Background
                                 @endphp
 
-                                <a href="{{ route('candidate.profile', $candidate->id) }}" target="_blank" 
-                                   style="--party-color: {{ $partyColor }}; --party-bg: {{ $partyBg }};"
-                                   class="relative block bg-gray-50 rounded-2xl p-4 md:p-5 border transition-all duration-300 overflow-hidden group hover-glow-tricolor
-                                          {{ $isWinner ? 'border-[color:var(--party-color)] bg-[color:var(--party-bg)] shadow-sm transform -translate-y-0.5' : 'border-gray-200 hover:border-[color:var(--party-color)] hover:shadow-sm' }}">
+                                <a href="{{ route('candidate.profile', $candidate->id) }}" target="_blank" style="--party-color: {{ $partyColor }}; --party-bg: {{ $partyBg }};"
+                                     class="relative block bg-gray-50 rounded-2xl p-4 md:p-5 border transition-all duration-300 overflow-hidden group hover-glow-tricolor
+                                            {{ $isWinner ? 'border-[color:var(--party-color)] bg-[color:var(--party-bg)] shadow-sm transform -translate-y-0.5' : 'border-gray-200 hover:border-[color:var(--party-color)] hover:shadow-sm' }}">
 
                                     {{-- Progress Bar --}}
                                     <div class="absolute top-0 left-0 bottom-0 opacity-15 transition-all duration-1000 ease-out" 
@@ -237,10 +237,11 @@
                                                 @endif
                                             </h3>
 
-                                            <p class="text-[10px] md:text-xs text-gray-500 font-bold uppercase tracking-wider mt-1.5 leading-snug break-words">
-                                                @if($hasParties)
-                                                    <span style="color: var(--party-color);" class="font-black">{{ $partyName }}</span> <span class="hidden sm:inline">•</span><br class="block sm:hidden">
-                                                @endif
+                                            @if($hasParties)
+                                                <p style="color: var(--party-color);" class="text-[10px] md:text-xs font-black uppercase tracking-widest mt-1 mb-0.5 truncate">{{ $partyName }}</p>
+                                            @endif
+
+                                            <p class="text-[10px] md:text-xs text-gray-500 font-bold uppercase tracking-wider {{ $hasParties ? 'mt-0' : 'mt-1' }} leading-snug break-words">
                                                 <span class="text-gray-700">{{ $candidate->college->name ?? 'N/A' }}</span> <span class="hidden sm:inline">•</span><br class="block sm:hidden"> 
                                                 {{ $candidate->program }}
                                             </p>
