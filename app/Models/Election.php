@@ -7,9 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 class Election extends Model
 {
     protected $fillable = [
-        'user_id', 'academic_year_id', 'title', 'description', 'cover_photo_path', 
-        'type', 'status', 'allow_guest_voting', 'slug', 
-        'application_start', 'application_end', 
+        'user_id', 'academic_year_id', 'title', 'description', 'cover_photo_path',
+        'type', 'status', 'allow_guest_voting', 'slug',
+        'application_start', 'application_end',
         'voting_start', 'voting_end', 'results_release'
     ];
 
@@ -45,5 +45,10 @@ class Election extends Model
 
     public function votes() {
         return $this->hasMany(Vote::class);
+    }
+
+    public function parties()
+    {
+        return $this->hasMany(ElectionParty::class);
     }
 }
