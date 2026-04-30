@@ -1,4 +1,19 @@
+<style>
+    /* Bulletproof Dynamic CSS Variables for Admin Panel */
+    .dyn-card, .dyn-avatar, .dyn-text, .dyn-score { transition: all 0.3s ease; }
+
+    .dyn-card.is-winner { border-color: var(--party-color) !important; background-color: var(--party-bg) !important; }
+    .dyn-avatar.is-winner { border-color: var(--party-color) !important; }
+    .dyn-text.is-winner { color: var(--party-color) !important; }
+    .dyn-score.is-winner { color: var(--party-color) !important; }
+</style>
+
 <div class="max-w-7xl mx-auto py-8 px-4 font-sans pb-32">
+
+    @php
+        // Determine if this specific election uses a Party/Slate system
+        $hasParties = $election->parties && $election->parties->count() > 0;
+    @endphp
 
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div>
@@ -68,33 +83,55 @@
                             @php
                                 $percentage = $maxPossibleVotes > 0 ? ($candidate->votes_count / $maxPossibleVotes) * 100 : 0;
                                 $isWinner = $index < $position->max_winners && $candidate->votes_count > 0;
+                                $candidateName = $candidate->display_name ?? optional($candidate->user)->name ?? 'Unknown Candidate';
+
+                                // DYNAMIC PARTY LOGIC
+                                if ($hasParties) {
+                                    $partyName = optional($candidate->party)->name ?? 'Independent';
+                                    $partyColor = optional($candidate->party)->color ?? '#16a34a'; // Default to Tailwind Green-600 for winners without parties
+                                } else {
+                                    $partyName = null;
+                                    $partyColor = '#16a34a'; // Default Green
+                                }
+                                $partyBg = $partyColor . '1A'; // 10% Opacity Background
                             @endphp
 
-                            <div class="relative bg-gray-50 rounded-2xl p-4 border {{ $isWinner ? 'border-green-200' : 'border-gray-100' }} overflow-hidden">
-                                <div class="absolute top-0 left-0 bottom-0 transition-all duration-1000 ease-out {{ $isWinner ? 'bg-green-100' : 'bg-gray-200/50' }}" style="width: {{ $percentage }}%;"></div>
+                            <div style="--party-color: {{ $partyColor }}; --party-bg: {{ $partyBg }};"
+                                 class="dyn-card relative bg-gray-50 rounded-2xl p-4 border overflow-hidden transition-all duration-300 {{ $isWinner ? 'is-winner shadow-sm transform -translate-y-0.5' : 'border-gray-100' }}">
+
+                                {{-- Progress Bar --}}
+                                <div class="absolute top-0 left-0 bottom-0 opacity-15 transition-all duration-1000 ease-out"
+                                     style="width: {{ $percentage }}%; background-color: var(--party-color);"></div>
 
                                 <div class="relative z-10 flex items-center gap-4">
-                                    <div class="w-10 h-10 rounded-full overflow-hidden border-2 border-white shadow-sm shrink-0 bg-white">
+                                    {{-- Avatar --}}
+                                    <div class="dyn-avatar w-10 h-10 rounded-full overflow-hidden border-2 shadow-sm shrink-0 bg-white {{ $isWinner ? 'is-winner' : 'border-white' }}">
                                         @if($candidate->profile_photo_path)
                                             <img src="{{ asset('storage/'.$candidate->profile_photo_path) }}" class="w-full h-full object-cover">
                                         @else
-                                            <div class="w-full h-full bg-gray-100 flex items-center justify-center text-gray-400 font-black text-sm">{{ substr($candidate->display_name ?? optional($candidate->user)->name ?? '?', 0, 1) }}</div>
+                                            <div class="w-full h-full bg-gray-100 flex items-center justify-center font-black text-[color:var(--party-color)] text-sm">{{ substr($candidateName, 0, 1) }}</div>
                                         @endif
                                     </div>
 
+                                    {{-- Info --}}
                                     <div class="flex-1 min-w-0">
-                                        <p class="font-bold text-gray-900 text-sm truncate flex items-center gap-1">
-                                            {{ $candidate->display_name ?? optional($candidate->user)->name ?? 'Unknown Candidate' }}
-                                            @if($isWinner) <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg> @endif
+                                        <p class="dyn-text font-bold text-sm truncate flex items-center gap-1 {{ $isWinner ? 'is-winner' : 'text-gray-900' }}">
+                                            {{ $candidateName }}
+                                            @if($isWinner) <svg class="w-4 h-4 text-[color:var(--party-color)] shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg> @endif
                                         </p>
-                                        {{-- THE FIX: Combined College and Program, forced to truncate --}}
-                                        <p class="text-[9px] md:text-[10px] font-bold text-gray-500 uppercase mt-0.5 truncate">
+
+                                        @if($hasParties)
+                                            <p style="color: var(--party-color);" class="text-[9px] font-black uppercase tracking-widest mt-0.5 truncate">{{ $partyName }}</p>
+                                        @endif
+
+                                        <p class="text-[9px] md:text-[10px] font-bold text-gray-500 uppercase {{ $hasParties ? 'mt-0' : 'mt-0.5' }} truncate">
                                             {{ $candidate->college->name ?? 'N/A' }} • {{ $candidate->program }}
                                         </p>
                                     </div>
 
+                                    {{-- Stats --}}
                                     <div class="text-right shrink-0">
-                                        <div class="font-black text-lg {{ $isWinner ? 'text-green-700' : 'text-gray-700' }} leading-none">{{ number_format($candidate->votes_count) }}</div>
+                                        <div class="dyn-score font-black text-lg leading-none {{ $isWinner ? 'is-winner' : 'text-gray-700' }}">{{ number_format($candidate->votes_count) }}</div>
                                         <div class="text-[9px] font-bold text-gray-400 uppercase mt-0.5">{{ number_format($percentage, 1) }}%</div>
                                     </div>
                                 </div>

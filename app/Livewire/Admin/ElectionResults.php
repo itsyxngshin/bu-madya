@@ -26,7 +26,7 @@ class ElectionResults extends Component
         // THE FIX: Explicitly eager load 'college' so it doesn't crash or run slow
         $positions = $this->election->positions()->with(['candidates' => function ($query) {
             $query->where('status', 'approved')
-                  ->with(['user', 'college'])
+                  ->with(['user', 'college', 'party'])
                   ->withCount('votes')
                   ->orderByDesc('votes_count');
         }])->orderBy('order')->get();
