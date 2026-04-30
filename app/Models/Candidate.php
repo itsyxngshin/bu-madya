@@ -40,8 +40,14 @@ class Candidate extends Model
         return $this->hasMany(CandidateCredential::class);
     }
 
-    public function votes() 
+    public function votes()
     {
         return $this->hasMany(Vote::class);
+    }
+
+
+    public function party()
+    {
+        return $this->belongsTo(ElectionParty::class, 'election_party_id');
     }
 }

@@ -6,12 +6,14 @@ use Livewire\Component;
 use Livewire\WithFileUploads;
 use App\Models\Election;
 use App\Models\ElectionPosition;
+use App\Models\ElectionParty;
 use App\Models\AcademicYear;
 use App\Models\Candidate;
 use App\Models\Vote;
 use App\Models\VoterLog;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class ElectionManager extends Component
@@ -19,7 +21,7 @@ class ElectionManager extends Component
     use WithFileUploads;
 
     public ?Election $electionRecord = null; // Holds the election if editing
-    public $activeTab = 'details'; // details, timeline, positions
+    public $activeTab = 'details'; // details, timeline, positions, parties
 
     // Election Details
     public $title = '';
@@ -35,8 +37,9 @@ class ElectionManager extends Component
     public $voting_end;
     public $results_release;
 
-    // Dynamic Positions
+    // Dynamic Arrays
     public $positions = [];
+    public $electionParties = []; // Added for Political Parties
 
     // Wipe Out State
     public $showWipeModal = false;
@@ -59,6 +62,7 @@ class ElectionManager extends Component
             $this->voting_end = $election->voting_end?->format('Y-m-d\TH:i');
             $this->results_release = $election->results_release?->format('Y-m-d\TH:i');
 
+            // Load Positions
             foreach ($election->positions()->orderBy('order')->get() as $pos) {
                 $this->positions[] = [
                     'temp_id' => (string) Str::uuid(),
@@ -67,11 +71,23 @@ class ElectionManager extends Component
                     'max_winners' => $pos->max_winners
                 ];
             }
+
+            // Load Parties
+            foreach ($election->parties as $party) {
+                $this->electionParties[] = [
+                    'id' => $party->id,
+                    'name' => $party->name,
+                    'color' => $party->color,
+                    'existing_logo' => $party->logo_path,
+                    'new_logo' => null,
+                ];
+            }
         } else {
             $this->addPosition();
         }
     }
 
+    // --- POSITIONS LOGIC ---
     public function addPosition()
     {
         $this->positions[] = [
@@ -89,8 +105,25 @@ class ElectionManager extends Component
         }
     }
 
-    // --- WIPE OUT DATA (DANGER ZONE) ---
+    // --- PARTIES LOGIC ---
+    public function addParty()
+    {
+        $this->electionParties[] = [
+            'id' => null,
+            'name' => '',
+            'color' => '#4b5563',
+            'existing_logo' => null,
+            'new_logo' => null,
+        ];
+    }
 
+    public function removeParty($index)
+    {
+        unset($this->electionParties[$index]);
+        $this->electionParties = array_values($this->electionParties);
+    }
+
+    // --- WIPE OUT DATA (DANGER ZONE) ---
     public function confirmWipe()
     {
         $this->showWipeModal = true;
@@ -126,6 +159,7 @@ class ElectionManager extends Component
         return redirect()->route('admin.elections.edit', $this->electionRecord->slug);
     }
 
+    // --- SAVE ALL ELECTION DATA ---
     public function saveElection()
     {
         $this->validate([
@@ -136,10 +170,16 @@ class ElectionManager extends Component
             'application_end' => 'required|date|after:application_start',
             'voting_start' => 'required|date|after:application_end',
             'voting_end' => 'required|date|after:voting_start',
+
             'positions.*.title' => 'required|string|max:255',
             'positions.*.max_winners' => 'required|integer|min:1',
+
+            'electionParties.*.name' => 'required|string|max:255',
+            'electionParties.*.color' => 'required|string|size:7',
+            'electionParties.*.new_logo' => 'nullable|image|max:2048',
         ], [
             'positions.*.title.required' => 'All positions must have a title.',
+            'electionParties.*.name.required' => 'All parties must have a name.',
         ]);
 
         DB::transaction(function () {
@@ -175,6 +215,7 @@ class ElectionManager extends Component
                 $election = Election::create($data);
             }
 
+            // 1. Recreate Positions
             foreach ($this->positions as $index => $pos) {
                 ElectionPosition::create([
                     'election_id' => $election->id,
@@ -183,9 +224,46 @@ class ElectionManager extends Component
                     'order' => $index,
                 ]);
             }
+
+            // 2. Sync Parties (Preserve IDs for candidate relations)
+            $savedPartyIds = [];
+            foreach ($this->electionParties as $partyData) {
+                $logoPath = $partyData['existing_logo'];
+
+                // Handle new logo upload
+                if (isset($partyData['new_logo']) && $partyData['new_logo']) {
+                    if ($logoPath) { Storage::disk('public')->delete($logoPath); }
+                    $logoPath = $partyData['new_logo']->store('party-logos', 'public');
+                }
+
+                if (isset($partyData['id']) && $partyData['id']) {
+                    $party = ElectionParty::find($partyData['id']);
+                    if ($party) {
+                        $party->update(['name' => $partyData['name'], 'color' => $partyData['color'], 'logo_path' => $logoPath]);
+                        $savedPartyIds[] = $party->id;
+                    }
+                } else {
+                    $newParty = ElectionParty::create([
+                        'election_id' => $election->id,
+                        'name' => $partyData['name'],
+                        'color' => $partyData['color'],
+                        'logo_path' => $logoPath,
+                    ]);
+                    $savedPartyIds[] = $newParty->id;
+                }
+            }
+
+            // 3. Cleanup removed parties and their logos
+            $partiesToDelete = ElectionParty::where('election_id', $election->id)->whereNotIn('id', $savedPartyIds)->get();
+            foreach ($partiesToDelete as $partyToDelete) {
+                if ($partyToDelete->logo_path) {
+                    Storage::disk('public')->delete($partyToDelete->logo_path);
+                }
+                $partyToDelete->delete();
+            }
         });
 
-        session()->flash('success', 'Election saved successfully!');
+        session()->flash('success', 'Election, positions, and parties saved successfully!');
         return redirect()->route('admin.elections.index');
     }
 

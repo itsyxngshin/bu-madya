@@ -25,6 +25,7 @@ class ElectionDashboard extends Component
     public $candidateToEdit = null;
     public $editProgram = '';
     public $editYearLevel = '';
+    public $editPartyId = null; // ADDED: To hold the selected Political Party
     public $editPlatforms = [];
     public $editCredentials = [];
 
@@ -117,6 +118,7 @@ class ElectionDashboard extends Component
         $this->candidateToEdit = $candidateId;
         $this->editProgram = $candidate->program;
         $this->editYearLevel = $candidate->year_level;
+        $this->editPartyId = $candidate->election_party_id; // ADDED: Load existing party
 
         // Load existing platforms
         $this->editPlatforms = $candidate->platforms->map(function ($platform) {
@@ -142,6 +144,7 @@ class ElectionDashboard extends Component
         $this->validate([
             'editProgram' => 'required|string|max:255',
             'editYearLevel' => 'required|string|max:50',
+            'editPartyId' => 'nullable|exists:election_parties,id', // ADDED: Validate the party selection
             'editPlatforms.*.title' => 'required|string|max:255',
             'editPlatforms.*.description' => 'required|string',
             'editCredentials.*.type' => 'required|string|max:100',
@@ -154,10 +157,11 @@ class ElectionDashboard extends Component
         DB::transaction(function () {
             $candidate = Candidate::findOrFail($this->candidateToEdit);
 
-            // Update Basic Info
+            // Update Basic Info & Party Affiliation
             $candidate->update([
                 'program' => $this->editProgram,
-                'year_level' => $this->editYearLevel
+                'year_level' => $this->editYearLevel,
+                'election_party_id' => $this->editPartyId ?: null // ADDED: Save party or null for Independent
             ]);
 
             // Sync Platforms
@@ -202,12 +206,13 @@ class ElectionDashboard extends Component
         });
 
         $this->candidateToEdit = null;
-        session()->flash('success', 'Candidate details, platforms, and credentials updated successfully.');
+        session()->flash('success', 'Candidate details, party affiliation, platforms, and credentials updated successfully.');
     }
 
     public function render()
     {
-        $candidates = Candidate::with(['user', 'position', 'college'])
+        // ADDED: Eager load 'party' relation
+        $candidates = Candidate::with(['user', 'position', 'college', 'party'])
             ->where('election_id', $this->election->id)
             ->orderByRaw("FIELD(status, 'pending', 'approved', 'rejected')")
             ->get();
@@ -215,7 +220,8 @@ class ElectionDashboard extends Component
         return view('livewire.admin.election-dashboard', [
             'candidates' => $candidates,
             'positions' => $this->election->positions,
-            'colleges' => College::orderBy('name')->get()
+            'colleges' => College::orderBy('name')->get(),
+            'parties' => $this->election->parties // ADDED: Pass the available parties to the frontend edit modal
         ])->layout('layouts.madya-admin-deck');
     }
 }

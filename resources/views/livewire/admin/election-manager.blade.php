@@ -32,6 +32,9 @@
         <button type="button" wire:click="$set('activeTab', 'details')" class="px-5 py-2.5 text-sm font-black rounded-xl transition-all whitespace-nowrap {{ $activeTab === 'details' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700' }}">1. Details</button>
         <button type="button" wire:click="$set('activeTab', 'timeline')" class="px-5 py-2.5 text-sm font-black rounded-xl transition-all whitespace-nowrap {{ $activeTab === 'timeline' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700' }}">2. Timeline</button>
         <button type="button" wire:click="$set('activeTab', 'positions')" class="px-5 py-2.5 text-sm font-black rounded-xl transition-all whitespace-nowrap {{ $activeTab === 'positions' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700' }}">3. Positions</button>
+        <button wire:click="$set('activeTab', 'parties')" class="px-4 py-2 font-bold {{ $activeTab === 'parties' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700' }}">
+            Parties & Slates
+        </button>
     </div>
 
     {{-- MAIN FORM ENCLOSURE --}}
@@ -209,6 +212,72 @@
                             </div>
                         </div>
                     @endforeach
+                </div>
+            </div>
+
+        @elseif($activeTab === 'parties')
+            <div class="bg-white rounded-[2rem] p-6 md:p-8 shadow-sm border border-gray-200 mb-8 animate-fade-in">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-6 border-b border-gray-100 pb-4 gap-4">
+                    <div>
+                        <h3 class="text-xl font-black text-gray-900 uppercase tracking-tight flex items-center gap-2">
+                            <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                            Political Parties & Slates
+                        </h3>
+                        <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mt-1">Define participating groups, their official colors, and logos.</p>
+                    </div>
+                    <button type="button" wire:click="addParty" class="shrink-0 text-xs font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 px-5 py-2.5 rounded-xl transition-colors border border-blue-200 shadow-sm">
+                        + Add Party
+                    </button>
+                </div>
+
+                <div class="space-y-4">
+                    @forelse($electionParties as $index => $party)
+                        <div class="flex flex-col md:flex-row items-start md:items-center gap-4 bg-gray-50 p-5 rounded-2xl border border-gray-200 relative group transition-colors hover:border-gray-300">
+
+                            {{-- 1. Logo Upload & Preview --}}
+                            <div class="shrink-0 relative">
+                                <div class="w-16 h-16 rounded-xl border-2 border-dashed border-gray-300 bg-white flex items-center justify-center overflow-hidden relative">
+                                    @if(isset($party['new_logo']) && $party['new_logo'])
+                                        <img src="{{ $party['new_logo']->temporaryUrl() }}" class="w-full h-full object-cover">
+                                    @elseif(isset($party['existing_logo']) && $party['existing_logo'])
+                                        <img src="{{ asset('storage/'.$party['existing_logo']) }}" class="w-full h-full object-cover">
+                                    @else
+                                        <svg class="w-6 h-6 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                    @endif
+                                    <input wire:model="electionParties.{{ $index }}.new_logo" type="file" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+                                </div>
+                                <div wire:loading wire:target="electionParties.{{ $index }}.new_logo" class="absolute -bottom-5 left-0 w-full text-center text-[9px] font-bold text-blue-500 uppercase tracking-widest animate-pulse">Loading</div>
+                            </div>
+
+                            {{-- 2. Party Name --}}
+                            <div class="flex-1 w-full min-w-0">
+                                <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Party Name</label>
+                                <input wire:model="electionParties.{{ $index }}.name" type="text" placeholder="e.g. Student Alliance" class="w-full bg-white border border-gray-200 focus:border-blue-500 rounded-xl px-4 py-3 text-sm font-bold shadow-sm">
+                                @error('electionParties.'.$index.'.name') <span class="text-[10px] text-red-500 font-bold block mt-1">{{ $message }}</span> @enderror
+                            </div>
+
+                            {{-- 3. Party Color Picker --}}
+                            <div class="shrink-0 w-full md:w-auto">
+                                <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Brand Color</label>
+                                <div class="flex items-center gap-3">
+                                    <div class="relative w-12 h-12 rounded-xl overflow-hidden shadow-sm border border-gray-200 shrink-0">
+                                        <input wire:model="electionParties.{{ $index }}.color" type="color" class="absolute -top-4 -left-4 w-24 h-24 cursor-pointer p-0 border-0">
+                                    </div>
+                                    <span class="font-mono text-xs font-bold text-gray-500 uppercase">{{ $party['color'] ?? '#000000' }}</span>
+                                </div>
+                            </div>
+
+                            {{-- 4. Remove Button --}}
+                            <button type="button" wire:click="removeParty({{ $index }})" class="absolute top-4 right-4 md:relative md:top-auto md:right-auto md:mt-5 text-gray-400 hover:text-red-500 bg-white p-2.5 rounded-xl border border-gray-200 shadow-sm transition-colors shrink-0 group-hover:border-red-200">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                            </button>
+
+                        </div>
+                    @empty
+                        <div class="text-center py-10 bg-gray-50 rounded-2xl border border-dashed border-gray-300">
+                            <p class="text-sm font-bold text-gray-400">No parties registered yet.</p>
+                        </div>
+                    @endforelse
                 </div>
             </div>
         @endif

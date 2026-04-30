@@ -1,5 +1,10 @@
-<div class="max-w-5xl mx-auto py-8 md:py-12 px-4 sm:px-6 font-sans pb-16 animate-fade-in-up">
+<div class="max-w-5xl mx-auto py-8 md:py-12 px-4 sm:px-6 font-sans pb-40 animate-fade-in-up">
     
+    @php
+        // Determine if this specific election uses a Party/Slate system
+        $hasParties = $election->parties && $election->parties->count() > 0;
+    @endphp
+
     {{-- TOP NAVIGATION --}}
     <div class="flex items-center justify-between mb-8">
         <a href="{{ url('/') }}" class="inline-flex items-center gap-2 text-xs font-black text-gray-500 uppercase tracking-widest hover:text-red-600 transition-colors group bg-white px-5 py-2.5 rounded-full border border-gray-200 shadow-sm">
@@ -35,11 +40,7 @@
     @else
 
         {{-- ACTIVE VOTING BOOTH --}}
-        
-        {{-- ELECTION HEADER --}}
         <div class="bg-white rounded-[2.5rem] shadow-lg border border-gray-200 overflow-hidden mb-8">
-            
-            {{-- Banner Area --}}
             @if($election->cover_photo_path)
                 <img src="{{ asset('storage/'.$election->cover_photo_path) }}" class="w-full h-48 md:h-64 object-cover">
             @else
@@ -49,20 +50,12 @@
                 </div>
             @endif
             
-            {{-- Text Area --}}
             <div class="p-6 md:p-10 text-center relative">
                 <p class="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em] mb-2">Official Electronic Ballot</p>
-                
-                <h1 class="text-3xl md:text-5xl font-black text-gray-900 tracking-tighter leading-tight mb-4 break-words">
-                    {{ $election->title }}
-                </h1>
-                
+                <h1 class="text-3xl md:text-5xl font-black text-gray-900 tracking-tighter leading-tight mb-4 break-words">{{ $election->title }}</h1>
                 @if($election->description)
-                    <p class="text-sm md:text-base text-gray-600 font-medium leading-relaxed mb-6 max-w-3xl mx-auto">
-                        {{ $election->description }}
-                    </p>
+                    <p class="text-sm md:text-base text-gray-600 font-medium leading-relaxed mb-6 max-w-3xl mx-auto">{{ $election->description }}</p>
                 @endif
-                
                 <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-orange-50 border border-orange-100 rounded-lg shadow-sm mx-auto">
                     <svg class="w-4 h-4 text-orange-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
                     <p class="text-[11px] font-bold text-orange-700 uppercase tracking-wider">Please review your selections carefully.</p>
@@ -130,7 +123,6 @@
                 @php 
                     $currentSelections = $selections[$position->id] ?? [];
                     $isAbstain = in_array('abstain', $currentSelections);
-                    $selectionCount = count(array_filter($currentSelections, fn($val) => $val !== 'abstain'));
                 @endphp
                 
                 <div class="bg-white rounded-[2rem] shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-gray-200 flex flex-col overflow-hidden" wire:key="pos-{{ $position->id }}">
@@ -157,41 +149,60 @@
                                 @php 
                                     $isSelected = in_array($candidate->id, $currentSelections); 
                                     $candidateName = $candidate->display_name ?? optional($candidate->user)->name ?? 'Unknown';
+                                    
+                                    // DYNAMIC PARTY LOGIC
+                                    if ($hasParties) {
+                                        $partyName = optional($candidate->party)->name ?? 'Independent';
+                                        $partyColor = optional($candidate->party)->color ?? '#6b7280'; // Slate Gray for Independent
+                                    } else {
+                                        $partyName = null;
+                                        $partyColor = '#22c55e'; // Default Standard Green
+                                    }
+                                    
+                                    $partyBg = $partyColor . '1A'; // Append hex alpha for 10% opacity
                                 @endphp
                                 
                                 <div wire:click="toggleSelection({{ $position->id }}, {{ $candidate->id }})" 
+                                     style="--party-color: {{ $partyColor }}; --party-bg: {{ $partyBg }};"
                                      class="relative p-4 rounded-2xl border-2 transition-all duration-300 cursor-pointer group flex items-center gap-4 
-                                            {{ $isSelected ? 'border-green-500 bg-green-50/50 shadow-sm' : 'border-gray-100 bg-white hover:border-green-200 hover:bg-gray-50 hover:shadow-sm' }}">
+                                            {{ $isSelected ? 'border-[color:var(--party-color)] bg-[color:var(--party-bg)] shadow-sm transform -translate-y-1' : 'border-gray-100 bg-white hover:border-[color:var(--party-color)] hover:bg-gray-50 hover:shadow-sm' }}">
                                     
                                     {{-- Radio Checkbox --}}
                                     <div class="w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors
-                                                {{ $isSelected ? 'border-green-500 bg-green-500' : 'border-gray-300 bg-white group-hover:border-green-400' }}">
+                                                {{ $isSelected ? 'border-[color:var(--party-color)] bg-[color:var(--party-color)]' : 'border-gray-300 bg-white group-hover:border-[color:var(--party-color)]' }}">
                                         @if($isSelected)
                                             <svg class="w-3.5 h-3.5 text-white animate-fade-in" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="4"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
                                         @endif
                                     </div>
 
                                     {{-- Avatar --}}
-                                    <div class="w-12 h-12 rounded-full overflow-hidden shrink-0 border border-gray-100 bg-white">
+                                    <div class="w-12 h-12 rounded-full overflow-hidden shrink-0 border-2 {{ $isSelected ? 'border-[color:var(--party-color)]' : 'border-transparent group-hover:border-[color:var(--party-color)]' }} bg-gray-100 transition-colors">
                                         @if($candidate->profile_photo_path)
                                             <img src="{{ asset('storage/'.$candidate->profile_photo_path) }}" class="w-full h-full object-cover">
                                         @else
-                                            <div class="w-full h-full bg-gray-100 flex items-center justify-center font-black text-gray-400 text-lg">{{ substr($candidateName, 0, 1) }}</div>
+                                            <div class="w-full h-full flex items-center justify-center font-black text-[color:var(--party-color)] text-lg">{{ substr($candidateName, 0, 1) }}</div>
                                         @endif
                                     </div>
 
                                     {{-- Info --}}
                                     <div class="flex-1 min-w-0 py-1">
-                                        <h3 class="text-sm md:text-base font-black text-gray-900 leading-tight group-hover:text-green-700 transition-colors break-words">{{ $candidateName }}</h3>
-                                        <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mt-1 leading-snug break-words">{{ $candidate->program }}</p>
-                                        <a href="{{ route('candidate.profile', $candidate->id) }}" target="_blank" @click.stop class="mt-1.5 text-[10px] font-black text-blue-500 hover:text-blue-700 uppercase tracking-widest inline-flex items-center gap-1 w-max">
+                                        <h3 class="text-sm md:text-base font-black text-gray-900 leading-tight group-hover:text-[color:var(--party-color)] transition-colors break-words">{{ $candidateName }}</h3>
+                                        
+                                        <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mt-1 leading-snug break-words">
+                                            @if($hasParties)
+                                                <span style="color: var(--party-color)" class="font-black">{{ $partyName }}</span> <span class="hidden sm:inline">•</span><br class="block sm:hidden"> 
+                                            @endif
+                                            {{ $candidate->program }}
+                                        </p>
+                                        
+                                        <a href="{{ route('candidate.profile', $candidate->id) }}" target="_blank" @click.stop class="mt-1.5 text-[10px] font-black text-gray-400 hover:text-[color:var(--party-color)] uppercase tracking-widest inline-flex items-center gap-1 w-max transition-colors">
                                             Profile <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
                                         </a>
                                     </div>
                                 </div>
                             @endforeach
 
-                            {{-- ABSTAIN OPTION --}}
+                            {{-- ABSTAIN OPTION (Maintains standard warning orange independent of parties) --}}
                             <div wire:click="toggleSelection({{ $position->id }}, 'abstain')" 
                                  class="relative p-4 rounded-2xl border-2 transition-all duration-300 cursor-pointer group flex items-center gap-4 sm:col-span-full lg:col-span-1
                                         {{ $isAbstain ? 'border-orange-500 bg-orange-50/50 shadow-sm' : 'border-gray-100 border-dashed bg-gray-50 hover:border-orange-300 hover:bg-orange-50/50' }}">
@@ -205,7 +216,7 @@
 
                                 <div class="flex-1 min-w-0">
                                     <h3 class="text-sm md:text-base font-black text-gray-900 leading-tight group-hover:text-orange-700 transition-colors break-words uppercase">Abstain</h3>
-                                    <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mt-1 leading-snug break-words">Leave position blank</p>
+                                    <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mt-0.5 leading-snug break-words">Leave position blank</p>
                                 </div>
                             </div>
 
@@ -215,7 +226,7 @@
             @endforeach
         </div>
 
-        {{-- FINAL SUBMIT SECTION (No longer floating) --}}
+        {{-- FINAL SUBMIT SECTION --}}
         <div class="mt-12 bg-gray-900 rounded-[2rem] p-6 md:p-8 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-6 border border-gray-800">
             <div class="flex items-center gap-4 text-white w-full md:w-auto justify-center md:justify-start">
                 <div class="w-12 h-12 rounded-full bg-gray-800 flex items-center justify-center border border-gray-700 shrink-0">

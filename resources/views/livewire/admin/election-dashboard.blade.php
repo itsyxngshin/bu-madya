@@ -1,4 +1,6 @@
 <div class="max-w-7xl mx-auto py-8 px-4 font-sans pb-32">
+    
+    {{-- Header --}}
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div>
             <h1 class="text-2xl md:text-3xl font-black text-gray-900 tracking-tight flex items-center gap-3">
@@ -13,15 +15,20 @@
     </div>
 
     @if (session()->has('success'))
-        <div class="mb-6 bg-green-50 text-green-700 p-4 rounded-xl border border-green-200 font-bold flex items-center gap-2 text-sm"><svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> {{ session('success') }}</div>
+        <div class="mb-6 bg-green-50 text-green-700 p-4 rounded-xl border border-green-200 font-bold flex items-center gap-2 text-sm animate-fade-in"><svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> {{ session('success') }}</div>
     @endif
 
+    {{-- Candidates Table --}}
     <div class="bg-white rounded-3xl shadow-sm border border-gray-200 overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse whitespace-nowrap md:whitespace-normal">
                 <thead>
                     <tr class="bg-gray-50 text-xs font-bold text-gray-500 uppercase tracking-wider border-b border-gray-200">
-                        <th class="p-4 md:p-5">Applicant</th><th class="p-4 md:p-5">Position</th><th class="p-4 md:p-5">College & Program</th><th class="p-4 md:p-5">Status</th><th class="p-4 md:p-5 text-right">Electoral Action</th>
+                        <th class="p-4 md:p-5">Applicant</th>
+                        <th class="p-4 md:p-5">Position</th>
+                        <th class="p-4 md:p-5">College & Program</th>
+                        <th class="p-4 md:p-5">Status</th>
+                        <th class="p-4 md:p-5 text-right">Electoral Action</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
@@ -29,15 +36,25 @@
                         @php
                             $candidateName = $candidate->display_name ?? optional($candidate->user)->name ?? 'Unknown';
                             $initial = strtoupper(substr($candidateName, 0, 1));
+                            $partyName = optional($candidate->party)->name ?? 'Independent';
+                            $partyColor = optional($candidate->party)->color ?? '#9ca3af';
                         @endphp
                         <tr class="hover:bg-gray-50 transition-colors">
                             <td class="p-4 md:p-5">
                                 <div class="flex items-center gap-3">
-                                    @if($candidate->profile_photo_path) <img src="{{ asset('storage/'.$candidate->profile_photo_path) }}" class="w-10 h-10 rounded-full object-cover shadow-sm border border-gray-200 shrink-0">
-                                    @else <div class="w-10 h-10 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center font-bold shrink-0">{{ $initial }}</div> @endif
+                                    @if($candidate->profile_photo_path) 
+                                        <img src="{{ asset('storage/'.$candidate->profile_photo_path) }}" class="w-10 h-10 rounded-full object-cover shadow-sm border border-gray-200 shrink-0">
+                                    @else 
+                                        <div class="w-10 h-10 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center font-bold shrink-0">{{ $initial }}</div> 
+                                    @endif
                                     <div>
-                                        <p class="font-black text-gray-900 text-sm md:text-base">{{ $candidateName }}</p>
-                                        <a href="{{ route('candidate.profile', $candidate->id) }}" target="_blank" class="text-[10px] font-bold text-blue-500 hover:text-blue-700 uppercase tracking-wider flex items-center gap-1 mt-0.5">View Profile <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg></a>
+                                        <p class="font-black text-gray-900 text-sm md:text-base break-words">{{ $candidateName }}</p>
+                                        {{-- Party Name Badge --}}
+                                        <div class="flex items-center gap-1.5 mt-0.5">
+                                            <span class="w-1.5 h-1.5 rounded-full" style="background-color: {{ $partyColor }}"></span>
+                                            <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">{{ $partyName }}</span>
+                                        </div>
+                                        <a href="{{ route('candidate.profile', $candidate->id) }}" target="_blank" class="text-[10px] font-bold text-blue-500 hover:text-blue-700 uppercase tracking-wider flex items-center gap-1 mt-1 w-max">View Profile <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg></a>
                                     </div>
                                 </div>
                             </td>
@@ -67,7 +84,7 @@
     {{-- ADD TEST CANDIDATE MODAL --}}
     @if($showTestModal)
         <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
-            <div class="bg-white rounded-3xl p-8 max-w-2xl w-full shadow-2xl my-8">
+            <div class="bg-white rounded-3xl p-8 max-w-2xl w-full shadow-2xl my-8 animate-fade-in-up">
                 <h3 class="text-xl font-black text-gray-900 mb-2">Generate Test Candidate</h3>
                 <p class="text-sm text-gray-500 mb-6">Instantly create an auto-approved dummy candidate for testing purposes.</p>
 
@@ -137,12 +154,7 @@
                 <div class="flex justify-end gap-3 mt-8">
                     <button wire:click="$set('showTestModal', false)" class="px-5 py-2.5 text-sm font-bold text-gray-600 hover:bg-gray-100 rounded-xl transition-colors">Cancel</button>
                     <button wire:click="createTestCandidate" class="px-5 py-2.5 text-sm font-black text-white bg-gray-900 hover:bg-blue-600 rounded-xl shadow-lg transition-colors flex items-center gap-2">
-                        <span wire:loading.remove wire:target="createTestCandidate, testPhoto">
-                            <span class="flex items-center gap-2">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
-                                Generate & Approve
-                            </span>
-                        </span>
+                        <span wire:loading.remove wire:target="createTestCandidate, testPhoto">Generate & Approve</span>
                         <span wire:loading wire:target="createTestCandidate">Processing...</span>
                         <span wire:loading wire:target="testPhoto">Wait for upload...</span>
                     </button>
@@ -154,7 +166,7 @@
     {{-- REJECTION MODAL --}}
     @if($candidateToReject)
         <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div class="bg-white rounded-3xl p-8 max-w-lg w-full shadow-2xl">
+            <div class="bg-white rounded-3xl p-8 max-w-lg w-full shadow-2xl animate-fade-in-up">
                 <h3 class="text-xl font-black text-red-600 mb-2">Reject Application</h3>
                 <p class="text-sm text-gray-600 mb-6">Please provide an official reason for rejection.</p>
                 <textarea wire:model="rejectRemarks" rows="4" class="w-full bg-gray-50 border border-gray-200 focus:border-red-500 rounded-xl p-4 text-sm resize-none mb-1"></textarea>
@@ -167,11 +179,11 @@
         </div>
     @endif
 
-    {{-- ENHANCED EDIT MODAL --}}
+    {{-- ENHANCED EDIT MODAL (WITH POLITICAL PARTY) --}}
     @if($candidateToEdit)
         <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm flex items-center justify-center z-[60] p-4 sm:p-6 overflow-y-auto">
-            <div class="bg-gray-50 rounded-[2.5rem] shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col my-8">
-
+            <div class="bg-gray-50 rounded-[2.5rem] shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col my-8 animate-fade-in-up">
+                
                 {{-- Header (Fixed) --}}
                 <div class="bg-white px-8 py-6 rounded-t-[2.5rem] border-b border-gray-200 flex items-center justify-between shrink-0">
                     <div>
@@ -185,10 +197,10 @@
 
                 {{-- Scrollable Content Area --}}
                 <div class="p-6 md:p-8 overflow-y-auto flex-1 space-y-8">
-
-                    {{-- Academic Info --}}
+                    
+                    {{-- Identity & Affiliation --}}
                     <div class="bg-white rounded-[2rem] p-6 shadow-sm border border-gray-200">
-                        <h4 class="text-lg font-black text-gray-900 mb-4 border-b border-gray-100 pb-4">Academic Details</h4>
+                        <h4 class="text-lg font-black text-gray-900 mb-4 border-b border-gray-100 pb-4">Candidate Identity & Affiliation</h4>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1.5">Academic Program</label>
@@ -201,6 +213,18 @@
                                     <option value="1st Year">1st Year</option><option value="2nd Year">2nd Year</option><option value="3rd Year">3rd Year</option><option value="4th Year">4th Year</option><option value="5th Year">5th Year</option>
                                 </select>
                                 @error('editYearLevel') <span class="text-[10px] text-red-500 font-bold block mt-1">{{ $message }}</span> @enderror
+                            </div>
+
+                            {{-- Party Dropdown --}}
+                            <div class="md:col-span-2 mt-2">
+                                <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1.5">Political Party / Slate</label>
+                                <select wire:model="editPartyId" class="w-full bg-gray-50 border border-gray-200 focus:border-yellow-500 rounded-xl px-4 py-3 text-sm font-bold">
+                                    <option value="">Independent (No Party Affiliation)</option>
+                                    @foreach($parties as $party)
+                                        <option value="{{ $party->id }}">{{ $party->name }}</option>
+                                    @endforeach
+                                </select>
+                                @error('editPartyId') <span class="text-[10px] text-red-500 font-bold block mt-1">{{ $message }}</span> @enderror
                             </div>
                         </div>
                     </div>
