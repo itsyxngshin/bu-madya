@@ -152,6 +152,7 @@ class ElectionEditor extends Component
 
     // --- SAVE ALL ELECTION DATA ---
     // --- SAVE ALL ELECTION DATA ---
+    // --- SAVE ALL ELECTION DATA ---
     public function saveElection()
     {
         $this->validate([
@@ -167,7 +168,7 @@ class ElectionEditor extends Component
             'positions.*.title' => 'required|string|max:255',
             'positions.*.max_winners' => 'required|integer|min:1',
             'electionParties.*.name' => 'required|string|max:255',
-            'electionParties.*.color' => 'required|string|size:7',
+            'electionParties.*.color' => 'required|string|max:20', // Relaxed to max:20 to prevent silent validation fails
             'electionParties.*.new_logo' => 'nullable|image|max:2048',
         ], [
             'positions.*.title.required' => 'All positions must have a title.',
@@ -195,8 +196,6 @@ class ElectionEditor extends Component
                 // Update existing
                 $this->electionRecord->update($data);
                 $election = $this->electionRecord;
-                
-                // THE FIX: We REMOVED the ElectionPosition delete() line from here!
             } else {
                 // Create new
                 $activeYear = AcademicYear::where('is_active', true)->first();
@@ -206,54 +205,58 @@ class ElectionEditor extends Component
                 $election = Election::create($data);
             }
 
-            // 1. THE FIX: Sync Positions (Preserve IDs so Candidates don't get wiped!)
+            // 1. Sync Positions
             $savedPositionIds = [];
             foreach ($this->positions as $index => $pos) {
-                if (isset($pos['id']) && $pos['id']) {
-                    $position = ElectionPosition::find($pos['id']);
+                $posId = $pos['id'] ?? null;
+                $posTitle = $pos['title'] ?? 'Unnamed Position';
+                
+                if ($posId) {
+                    $position = ElectionPosition::find($posId);
                     if ($position) {
-                        $position->update([
-                            'title' => $pos['title'],
-                            'max_winners' => $pos['max_winners'],
-                            'order' => $index,
-                        ]);
+                        $position->update(['title' => $posTitle, 'max_winners' => $pos['max_winners'], 'order' => $index]);
                         $savedPositionIds[] = $position->id;
                     }
                 } else {
                     $newPosition = ElectionPosition::create([
                         'election_id' => $election->id,
-                        'title' => $pos['title'],
+                        'title' => $posTitle,
                         'max_winners' => $pos['max_winners'],
                         'order' => $index,
                     ]);
                     $savedPositionIds[] = $newPosition->id;
                 }
             }
-            
-            // Only delete positions that the admin actually clicked "Remove" on in the UI
             ElectionPosition::where('election_id', $election->id)->whereNotIn('id', $savedPositionIds)->delete();
 
-            // 2. Sync Parties 
+            // 2. Sync Parties (THE FIX IS HERE)
             $savedPartyIds = [];
             foreach ($this->electionParties as $partyData) {
-                $logoPath = $partyData['existing_logo'];
+                
+                // Bulletproof assignments using null coalescing (??)
+                // This prevents fatal PHP errors if Livewire stripped out empty keys
+                $partyId = $partyData['id'] ?? null;
+                $logoPath = $partyData['existing_logo'] ?? null;
+                $partyName = $partyData['name'] ?? 'Unnamed Party';
+                $partyColor = $partyData['color'] ?? '#4b5563';
 
+                // Handle fresh logo uploads
                 if (isset($partyData['new_logo']) && $partyData['new_logo']) {
                     if ($logoPath) { Storage::disk('public')->delete($logoPath); }
                     $logoPath = $partyData['new_logo']->store('party-logos', 'public');
                 }
 
-                if (isset($partyData['id']) && $partyData['id']) {
-                    $party = ElectionParty::find($partyData['id']);
+                if ($partyId) {
+                    $party = ElectionParty::find($partyId);
                     if ($party) {
-                        $party->update(['name' => $partyData['name'], 'color' => $partyData['color'], 'logo_path' => $logoPath]);
+                        $party->update(['name' => $partyName, 'color' => $partyColor, 'logo_path' => $logoPath]);
                         $savedPartyIds[] = $party->id;
                     }
                 } else {
                     $newParty = ElectionParty::create([
                         'election_id' => $election->id,
-                        'name' => $partyData['name'],
-                        'color' => $partyData['color'],
+                        'name' => $partyName,
+                        'color' => $partyColor,
                         'logo_path' => $logoPath,
                     ]);
                     $savedPartyIds[] = $newParty->id;
