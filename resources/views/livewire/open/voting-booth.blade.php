@@ -1,7 +1,21 @@
+<style>
+    /* Bulletproof Dynamic CSS Variables (Bypasses Tailwind JIT) */
+    .dyn-card, .dyn-radio, .dyn-avatar, .dyn-text { transition: all 0.3s ease; }
+
+    .dyn-card:hover { border-color: var(--party-color) !important; }
+    .dyn-card:hover .dyn-radio { border-color: var(--party-color) !important; }
+    .dyn-card:hover .dyn-avatar { border-color: var(--party-color) !important; }
+    .dyn-card:hover .dyn-text { color: var(--party-color) !important; }
+
+    .dyn-card.is-selected { border-color: var(--party-color) !important; background-color: var(--party-bg) !important; }
+    .dyn-radio.is-selected { border-color: var(--party-color) !important; background-color: var(--party-color) !important; }
+    .dyn-avatar.is-selected { border-color: var(--party-color) !important; }
+    .dyn-text.is-selected { color: var(--party-color) !important; }
+</style>
+
 <div class="max-w-5xl mx-auto py-8 md:py-12 px-4 sm:px-6 font-sans pb-40 animate-fade-in-up">
 
     @php
-        // Determine if this specific election uses a Party/Slate system
         $hasParties = $election->parties && $election->parties->count() > 0;
     @endphp
 
@@ -164,19 +178,20 @@
 
                                 <div wire:click="toggleSelection({{ $position->id }}, {{ $candidate->id }})"
                                      style="--party-color: {{ $partyColor }}; --party-bg: {{ $partyBg }};"
-                                     class="relative p-4 rounded-2xl border-2 transition-all duration-300 cursor-pointer group flex items-center gap-4
-                                            {{ $isSelected ? 'border-[color:var(--party-color)] bg-[color:var(--party-bg)] shadow-sm transform -translate-y-1' : 'border-gray-100 bg-white hover:border-[color:var(--party-color)] hover:bg-gray-50 hover:shadow-sm' }}">
+                                     class="dyn-card relative p-4 rounded-2xl border-2 cursor-pointer flex items-center gap-4 group
+                                            {{ $isSelected ? 'is-selected shadow-sm transform -translate-y-1' : 'border-gray-100 bg-white hover:bg-gray-50 hover:shadow-sm' }}">
 
                                     {{-- Radio Checkbox --}}
-                                    <div class="w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors
-                                                {{ $isSelected ? 'border-[color:var(--party-color)] bg-[color:var(--party-color)]' : 'border-gray-300 bg-white group-hover:border-[color:var(--party-color)]' }}">
+                                    <div class="dyn-radio w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0
+                                                {{ $isSelected ? 'is-selected' : 'border-gray-300 bg-white' }}">
                                         @if($isSelected)
                                             <svg class="w-3.5 h-3.5 text-white animate-fade-in" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="4"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
                                         @endif
                                     </div>
 
                                     {{-- Avatar --}}
-                                    <div class="w-12 h-12 rounded-full overflow-hidden shrink-0 border-2 {{ $isSelected ? 'border-[color:var(--party-color)]' : 'border-transparent group-hover:border-[color:var(--party-color)]' }} bg-gray-100 transition-colors">
+                                    <div class="dyn-avatar w-12 h-12 rounded-full overflow-hidden shrink-0 border-2 bg-gray-100
+                                                {{ $isSelected ? 'is-selected' : 'border-transparent' }}">
                                         @if($candidate->profile_photo_path)
                                             <img src="{{ asset('storage/'.$candidate->profile_photo_path) }}" class="w-full h-full object-cover">
                                         @else
@@ -186,7 +201,10 @@
 
                                     {{-- Info --}}
                                     <div class="flex-1 min-w-0 py-1">
-                                        <h3 class="text-sm md:text-base font-black text-gray-900 leading-tight group-hover:text-[color:var(--party-color)] transition-colors break-words">{{ $candidateName }}</h3>
+                                        <h3 class="dyn-text text-sm md:text-base font-black leading-tight break-words
+                                                   {{ $isSelected ? 'is-selected' : 'text-gray-900' }}">
+                                            {{ $candidateName }}
+                                        </h3>
 
                                         @if($hasParties)
                                             <p style="color: var(--party-color);" class="text-[10px] font-black uppercase tracking-widest mt-1 mb-0.5 truncate group-hover:opacity-100 {{ $isSelected ? 'opacity-100' : 'opacity-80' }} transition-opacity">{{ $partyName }}</p>
@@ -199,10 +217,10 @@
                                 </div>
                             @endforeach
 
-                            {{-- ABSTAIN OPTION (Maintains standard warning orange independent of parties) --}}
+                            {{-- ABSTAIN OPTION (Uses standard Tailwind classes, no dynamic variables needed) --}}
                             <div wire:click="toggleSelection({{ $position->id }}, 'abstain')"
                                  class="relative p-4 rounded-2xl border-2 transition-all duration-300 cursor-pointer group flex items-center gap-4 sm:col-span-full lg:col-span-1
-                                        {{ $isAbstain ? 'border-orange-500 bg-orange-50/50 shadow-sm' : 'border-gray-100 border-dashed bg-gray-50 hover:border-orange-300 hover:bg-orange-50/50' }}">
+                                        {{ $isAbstain ? 'border-orange-500 bg-orange-50/50 shadow-sm transform -translate-y-1' : 'border-gray-100 border-dashed bg-gray-50 hover:border-orange-300 hover:bg-orange-50/50' }}">
 
                                 <div class="w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors
                                             {{ $isAbstain ? 'border-orange-500 bg-orange-500' : 'border-gray-300 bg-white group-hover:border-orange-400' }}">
@@ -212,7 +230,10 @@
                                 </div>
 
                                 <div class="flex-1 min-w-0">
-                                    <h3 class="text-sm md:text-base font-black text-gray-900 leading-tight group-hover:text-orange-700 transition-colors break-words uppercase">Abstain</h3>
+                                    <h3 class="text-sm md:text-base font-black leading-tight transition-colors break-words uppercase
+                                               {{ $isAbstain ? 'text-orange-700' : 'text-gray-900 group-hover:text-orange-700' }}">
+                                        Abstain
+                                    </h3>
                                     <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mt-0.5 leading-snug break-words">Leave position blank</p>
                                 </div>
                             </div>
