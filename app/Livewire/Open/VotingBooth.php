@@ -12,11 +12,11 @@ use Illuminate\Support\Facades\DB;
 
 class VotingBooth extends Component
 {
-    public Election $election; 
+    public Election $election;
     public $isVotingOpen = false;
     public $hasVoted = false;
     public $colleges = [];
-    
+
     // Guest fields
     public $guest_name;
     public $guest_email;
@@ -25,9 +25,7 @@ class VotingBooth extends Component
     public $year_level;
 
     // Selections
-    public $selections = []; 
-
-    // NOTICE: We completely removed `public $positions;` from here!
+    public $selections = [];
 
     public function mount(Election $election)
     {
@@ -102,40 +100,51 @@ class VotingBooth extends Component
             return;
         }
 
+        // 1. Guest Validation
         if (!auth()->check()) {
             if (!$this->election->allow_guest_voting) {
                 session()->flash('error', 'Guest voting is disabled for this election.');
                 return;
             }
-            
+
             $this->validate([
-                'guest_name' => 'required|string|max:255', 
+                'guest_name' => 'required|string|max:255',
                 'guest_email' => 'required|email|max:255',
-                'college_id' => 'required|exists:colleges,id', 
+                'college_id' => 'required|exists:colleges,id',
                 'program' => 'required|string|max:255',
                 'year_level' => 'required|string|max:50',
             ]);
-            
+
             if (VoterLog::where('election_id', $this->election->id)->where('guest_email', $this->guest_email)->exists()) {
                 session()->flash('error', 'A ballot has already been cast using this email address.');
                 return;
             }
         }
 
-        $totalVotes = 0;
-        foreach ($this->selections as $posId => $picked) {
-            $totalVotes += count(array_filter((array) $picked));
+        // 2. STRICT BALLOT COMPLETION VALIDATION
+        $missingPositions = [];
+
+        foreach ($this->election->positions as $position) {
+            $picked = $this->selections[$position->id] ?? [];
+            $picked = array_filter((array) $picked); // Remove any null/empty values
+
+            if (empty($picked)) {
+                $missingPositions[] = $position->title;
+            }
         }
 
-        if ($totalVotes === 0) { 
-            session()->flash('error', 'Your ballot is completely empty. Please make selections or explicitly abstain from positions before casting.'); 
-            return; 
+        // If any position is completely empty, block the submission
+        if (count($missingPositions) > 0) {
+            $positionsList = implode(', ', $missingPositions);
+            session()->flash('error', "Incomplete Ballot: Please select a candidate or explicitly choose 'Abstain' for the following positions: {$positionsList}.");
+            return;
         }
 
+        // 3. Save the Ballot
         DB::transaction(function () {
             VoterLog::create([
-                'election_id' => $this->election->id, 
-                'user_id' => auth()->id(), 
+                'election_id' => $this->election->id,
+                'user_id' => auth()->id(),
                 'guest_name' => auth()->check() ? null : $this->guest_name,
                 'guest_email' => auth()->check() ? null : $this->guest_email,
                 'college_id' => auth()->check() ? null : $this->college_id,
@@ -146,10 +155,10 @@ class VotingBooth extends Component
 
             foreach ($this->selections as $posId => $candidateIds) {
                 foreach ((array) $candidateIds as $candId) {
-                    if (!empty($candId) && $candId !== 'abstain') { 
+                    if (!empty($candId) && $candId !== 'abstain') {
                         Vote::create([
-                            'election_id' => $this->election->id, 
-                            'election_position_id' => $posId, 
+                            'election_id' => $this->election->id,
+                            'election_position_id' => $posId,
                             'candidate_id' => $candId
                         ]);
                     }
@@ -160,16 +169,16 @@ class VotingBooth extends Component
         $this->hasVoted = true;
     }
 
-    public function render() 
-    { 
-        // CRITICAL FIX: By fetching this inside the render method, the `approved` filter 
-        // is permanently enforced every single time the UI updates!
+    public function render()
+    {
+        $this->election->loadMissing('parties');
+
         $positions = $this->election->positions()->with(['candidates' => function($query) {
-            $query->where('status', 'approved')->with('user');
+            $query->where('status', 'approved')->with(['user', 'party']);
         }])->orderBy('order')->get();
 
         return view('livewire.open.voting-booth', [
             'positions' => $positions
-        ])->layout('layouts.madya-template'); 
+        ])->layout('layouts.madya-template');
     }
 }
