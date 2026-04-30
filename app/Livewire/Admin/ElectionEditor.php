@@ -72,7 +72,8 @@ class ElectionEditor extends Component
             }
 
             // Load Existing Parties
-            foreach ($election->parties ?? [] as $party) {
+            $parties = \App\Models\ElectionParty::where('election_id', $election->id)->get();
+            foreach ($parties as $party) {
                 $this->electionParties[] = [
                     'id' => $party->id,
                     'name' => $party->name,

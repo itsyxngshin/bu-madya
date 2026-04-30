@@ -35,6 +35,7 @@ class ElectionDashboard extends Component
     public $testPhoto;
     public $testPositionId = '';
     public $testCollegeId = '';
+    public $testPartyId = '';
     public $testProgram = '';
     public $testYearLevel = '';
     public $testQuantity = 1;
@@ -56,6 +57,7 @@ class ElectionDashboard extends Component
             'testCollegeId' => 'required|exists:colleges,id',
             'testProgram' => 'required|string|max:255',
             'testYearLevel' => 'required|string|max:50',
+            'testPartyId' => 'nullable|exists:election_parties,id', // ADD THIS
             'testQuantity' => 'required|integer|min:1|max:50',
         ]);
 
@@ -69,6 +71,7 @@ class ElectionDashboard extends Component
                 Candidate::create([
                     'election_id' => $this->election->id,
                     'election_position_id' => $this->testPositionId,
+                    'election_party_id' => $this->testPartyId ?: null, // ADD THIS
                     'user_id' => null,
                     'college_id' => $this->testCollegeId,
                     'display_name' => $displayName,
@@ -81,7 +84,8 @@ class ElectionDashboard extends Component
         });
 
         $this->showTestModal = false;
-        $this->reset(['testName', 'testPhoto', 'testPositionId', 'testCollegeId', 'testProgram', 'testYearLevel']);
+        // UPDATE RESET TO INCLUDE testPartyId
+        $this->reset(['testName', 'testPhoto', 'testPositionId', 'testCollegeId', 'testProgram', 'testYearLevel', 'testPartyId']);
         $this->testQuantity = 1;
 
         session()->flash('success', $quantityCreated > 1 ? "Generated {$quantityCreated} dummy candidates!" : 'Test Candidate added to ballot.');
@@ -211,17 +215,20 @@ class ElectionDashboard extends Component
 
     public function render()
     {
-        // ADDED: Eager load 'party' relation
+        // Eager load 'party' relation
         $candidates = Candidate::with(['user', 'position', 'college', 'party'])
             ->where('election_id', $this->election->id)
             ->orderByRaw("FIELD(status, 'pending', 'approved', 'rejected')")
             ->get();
 
+        // Explicit query for parties
+        $parties = \App\Models\ElectionParty::where('election_id', $this->election->id)->get();
+
         return view('livewire.admin.election-dashboard', [
             'candidates' => $candidates,
             'positions' => $this->election->positions,
             'colleges' => College::orderBy('name')->get(),
-            'parties' => $this->election->parties // ADDED: Pass the available parties to the frontend edit modal
+            'parties' => $parties // Pass explicit query
         ])->layout('layouts.madya-admin-deck');
     }
 }

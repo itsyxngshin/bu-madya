@@ -149,6 +149,17 @@
                         </select>
                         @error('testYearLevel') <span class="text-[10px] text-red-500 font-bold block mt-1">{{ $message }}</span> @enderror
                     </div>
+
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1.5">Political Party</label>
+                        <select wire:model="testPartyId" class="w-full bg-gray-50 border border-gray-200 focus:border-blue-500 rounded-xl px-4 py-3 text-sm font-bold shadow-sm">
+                            <option value="">Independent (No Party)</option>
+                            @foreach($parties ?? [] as $party) 
+                                <option value="{{ $party->id }}">{{ $party->name }}</option> 
+                            @endforeach
+                        </select>
+                        @error('testPartyId') <span class="text-[10px] text-red-500 font-bold block mt-1">{{ $message }}</span> @enderror
+                    </div>
                 </div>
 
                 <div class="flex justify-end gap-3 mt-8">
