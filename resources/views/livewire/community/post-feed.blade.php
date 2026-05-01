@@ -45,16 +45,33 @@
                     {{-- 1. Post Header (Author Info & Options) --}}
                     <div class="p-4 flex items-start justify-between">
                         <div class="flex items-center gap-3">
-                            <a href="#" class="w-10 h-10 rounded-full bg-blue-50 text-blue-600 font-black flex items-center justify-center border border-blue-100 shrink-0 shadow-sm hover:ring-2 hover:ring-blue-200 transition-all">
-                                {{ substr($post->author->name ?? 'A', 0, 1) }}
+                            
+                            {{-- Profile Photo Logic --}}
+                            @php
+                                $author = $post->author;
+                                $authorName = $author->name ?? 'Unknown Author';
+                                $authorUsername = $author->username ?? 'unknown';
+                                $photoPath = $author->profile_photo_path ?? null;
+                                
+                                // Check if photo exists in storage, is a URL, or fallback to an auto-generated initial avatar
+                                $photoUrl = $photoPath 
+                                    ? (Str::startsWith($photoPath, ['http', 'images/']) ? asset($photoPath) : asset('storage/' . $photoPath)) 
+                                    : 'https://ui-avatars.com/api/?name='.urlencode($authorName).'&color=EF4444&background=FEF2F2';
+                            @endphp
+                            
+                            {{-- Clickable Avatar --}}
+                            <a href="{{ route('profile.public', $authorUsername) }}" class="w-10 h-10 rounded-full shrink-0 shadow-sm hover:ring-2 hover:ring-red-200 transition-all overflow-hidden border border-gray-100 bg-gray-50">
+                                <img src="{{ $photoUrl }}" alt="{{ $authorName }}" class="w-full h-full object-cover">
                             </a>
+                            
+                            {{-- Clickable Name & Meta Info --}}
                             <div>
-                                <p class="font-black text-gray-900 text-sm leading-tight flex items-center gap-1.5 hover:underline cursor-pointer">
-                                    {{ $post->author->name ?? 'Unknown Author' }}
+                                <a href="{{ route('profile.public', $authorUsername) }}" class="font-black text-gray-900 text-sm leading-tight flex items-center gap-1.5 hover:text-red-600 transition-colors group cursor-pointer">
+                                    {{ $authorName }}
                                     @if($post->is_featured)
-                                        <svg class="w-3.5 h-3.5 text-yellow-500" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                                        <svg class="w-3.5 h-3.5 text-yellow-500 group-hover:scale-110 transition-transform" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
                                     @endif
-                                </p>
+                                </a>
                                 <div class="flex items-center gap-1.5 text-[11px] font-bold text-gray-500 mt-0.5">
                                     <a href="{{ route('community.posts.show', $post->slug) }}" class="hover:underline">{{ $post->published_at ? $post->published_at->diffForHumans() : 'Draft' }}</a>
                                     @if($post->category)
