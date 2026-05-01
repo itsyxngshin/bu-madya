@@ -83,6 +83,7 @@ use \App\Livewire\Partner\PartnerDashboard;
 use App\Livewire\Community\PostFeed;
 use App\Livewire\Community\PostEditor;
 use App\Livewire\Community\PostView;
+use App\Livewire\Admin\CommunityManager;
 
 // SUBDOMAIN ROUTING: community.bu-madya.space
 Route::domain('community.' . env('APP_DOMAIN'))->name('community.')->group(function () {
@@ -178,6 +179,7 @@ Route::middleware(['auth', 'role:director'])->prefix('director')->name('director
     Route::get('/campaigns/create', CampaignBuilder::class)->name('campaigns.create');
     Route::get('/campaigns/{slug}/edit', CampaignBuilder::class)->name('campaigns.edit');
     Route::get('/campaigns/{slug}/results', CampaignAnalytics::class)->name('campaigns.results');
+    Route::get('/community/moderation', CommunityManager::class)->name('community.moderation');
 
 });
 
@@ -231,6 +233,7 @@ Route::middleware(['auth', 'role:administrator'])->prefix('admin')->name('admin.
     Route::get('/elections/{election:slug}/results', \App\Livewire\Admin\ElectionResults::class)->name('elections.results');
     Route::get('/elections/{election:slug}/edit', \App\Livewire\Admin\ElectionEditor::class)->name('elections.edit');
     Route::get('/elections/{election:slug}/logs', ElectionVoterLogs::class)->name('elections.logs');
+    Route::get('/community/moderation', CommunityManager::class)->name('community.moderation');
 });
 
 Route::middleware(['auth', 'role:organization'])->prefix('partner')->name('partner.')

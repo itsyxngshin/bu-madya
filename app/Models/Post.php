@@ -9,7 +9,7 @@ class Post extends Model
     protected $fillable = [
         'user_id', 'category_id', 'title', 'slug', 'excerpt',
         'content', 'cover_image_path', 'gallery', // Add gallery here
-        'is_published', 'is_featured', 'published_at'
+        'is_published', 'is_featured', 'published_at', 'is_flagged', 'flagged_words' // Add moderation fields here
     ];
 
     protected $casts = [

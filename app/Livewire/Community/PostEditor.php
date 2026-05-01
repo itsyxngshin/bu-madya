@@ -51,6 +51,27 @@ class PostEditor extends Component
         }
     }
 
+    private function scanForViolations($text)
+    {
+        // Your community guidelines blocklist
+        // You can expand this or eventually move it to a database table
+        $restrictedWords = [
+            'spam link', 'hate speech', 'profanity1', 'profanity2' 
+        ];
+
+        $caughtWords = [];
+        $lowerText = strtolower($text);
+
+        foreach ($restrictedWords as $word) {
+            // Using \b ensures we match whole words only (e.g., 'ass' won't flag 'class')
+            if (preg_match("/\b" . preg_quote($word, '/') . "\b/i", $lowerText)) {
+                $caughtWords[] = $word;
+            }
+        }
+
+        return $caughtWords;
+    }
+
     public function removeNewGalleryItem($index)
     {
         array_splice($this->gallery_uploads, $index, 1);
@@ -107,6 +128,15 @@ class PostEditor extends Component
             }
         }
 
+        // 1. Scan the title and content combined
+        $textToScan = $this->title . ' ' . $this->content;
+        $violations = $this->scanForViolations($textToScan);
+        
+        $isFlagged = count($violations) > 0;
+        
+        // 2. If flagged, force it to be hidden, regardless of user's choice
+        $finalPublishedState = $isFlagged ? false : $this->is_published;
+
         $data = [
             'user_id' => auth()->id(),
             'category_id' => $this->category_id ?: null,
@@ -115,8 +145,11 @@ class PostEditor extends Component
             'content' => $this->content,
             'cover_image_path' => $coverPath,
             'gallery' => $galleryPaths,
-            'is_published' => $this->is_published,
+            'is_published' => $finalPublishedState,
+            'is_flagged' => $isFlagged,
+            'flagged_words' => $isFlagged ? implode(', ', $violations) : null,
         ];
+
 
         if ($this->postRecord) {
             // Update
@@ -131,8 +164,11 @@ class PostEditor extends Component
             $message = 'Post published successfully!';
         }
 
-        session()->flash('success', $message);
-
+        if ($isFlagged) {
+            session()->flash('error', 'Your post contains restricted words and has been flagged for admin review. It will not be published until approved.');
+        } else {
+            session()->flash('success', 'Post saved successfully!');
+        }
         // Redirect back to the feed (or the post itself)
         return redirect()->route('community.feed');
     }
