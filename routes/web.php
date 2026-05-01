@@ -115,9 +115,7 @@ Route::domain($welfareDomain)->middleware(['web', 'throttle:5,1'])->group(functi
 
 });
 
-Route::get('/', function () {
-    return view('welcome');
-});
+
 
 Route::get('/secure-file/{application}', function (\App\Models\MembershipApplication $application) {
 
