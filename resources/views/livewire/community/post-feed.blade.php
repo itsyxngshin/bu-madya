@@ -9,14 +9,32 @@
     <div class="px-5">
         {{-- "WHAT'S ON YOUR MIND?" - QUICK CREATE BOX --}}
         <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 mb-6 transition-shadow hover:shadow-md">
+            
+            @php
+                // Resolve the current user's profile photo, or fallback to a default avatar
+                $photoUrl = 'https://ui-avatars.com/api/?name=Advocate&color=EF4444&background=FEF2F2';
+                if(auth()->check()) {
+                    $user = auth()->user();
+                    $photoPath = $user->profile_photo_path;
+                    $photoUrl = $photoPath 
+                        ? (Str::startsWith($photoPath, ['http', 'images/']) ? asset($photoPath) : asset('storage/' . $photoPath)) 
+                        : 'https://ui-avatars.com/api/?name='.urlencode($user->name).'&color=EF4444&background=FEF2F2';
+                }
+            @endphp
+
             <div class="flex gap-3">
-                <div class="w-10 h-10 rounded-full bg-blue-50 text-blue-600 font-black flex items-center justify-center shrink-0 border border-blue-100 shadow-sm">
-                    {{ auth()->check() ? substr(auth()->user()->name, 0, 1) : '?' }}
-                </div>
+                {{-- Clickable Profile Picture --}}
+                <a href="{{ auth()->check() ? route('profile.public', auth()->user()->username ?? 'unknown') : route('login') }}" 
+                class="w-10 h-10 rounded-full shrink-0 shadow-sm hover:ring-2 hover:ring-red-200 transition-all overflow-hidden border border-gray-100 bg-gray-50">
+                    <img src="{{ $photoUrl }}" alt="Your Avatar" class="w-full h-full object-cover">
+                </a>
+                
+                {{-- Create Post Prompt --}}
                 <a href="{{ route('community.posts.create') }}" class="flex-1 bg-gray-50 hover:bg-gray-100 border border-gray-100 transition-colors rounded-full px-5 flex items-center text-gray-500 text-sm font-medium cursor-pointer shadow-inner">
                     What's happening in your advocacy, {{ auth()->check() ? explode(' ', auth()->user()->name)[0] : 'Advocate' }}?
                 </a>
             </div>
+            
             <div class="border-t border-gray-100 mt-4 pt-3 flex gap-2">
                 <a href="{{ route('community.posts.create') }}" class="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 rounded-xl transition-colors text-gray-600 font-bold text-xs">
                     <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
@@ -24,7 +42,6 @@
                 </a>
             </div>
         </div>
-
         {{-- CATEGORY FILTER PILLS (Horizontal Scroll) --}}
         <div class="flex overflow-x-auto hide-scrollbar items-center gap-2 mb-8 pb-2">
             <button wire:click="clearCategory" class="shrink-0 px-4 py-2 rounded-full text-[11px] font-black uppercase tracking-wider transition-all {{ is_null($activeCategoryId) ? 'bg-gray-900 text-white shadow-md' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50' }}">
