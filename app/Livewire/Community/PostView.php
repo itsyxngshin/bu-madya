@@ -21,6 +21,6 @@ class PostView extends Component
     public function render()
     {
         return view('livewire.community.post-view')
-            ->layout('layouts.madya-template');
+            ->layout('layouts.madya-community');
     }
 }

@@ -177,6 +177,6 @@ class PostEditor extends Component
     {
         return view('livewire.community.post-editor', [
             'categories' => Category::orderBy('name')->get()
-        ])->layout('layouts.madya-template');
+        ])->layout('layouts.madya-community');
     }
 }
