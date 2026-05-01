@@ -26,7 +26,11 @@
 
     {{-- MOBILE TOP APP BAR (Hidden on Desktop) --}}
     <div x-data="{ mobileMenuOpen: false }" class="lg:hidden">
-        <div class="fixed top-0 inset-x-0 h-16 bg-white/90 backdrop-blur-xl border-b border-gray-200 flex items-center justify-between px-4 z-50">
+        
+        {{-- FIX: Added w-full, left-0, and right-0 to force edge-to-edge stretching --}}
+        <div class="fixed top-0 left-0 right-0 w-full h-16 bg-white/95 backdrop-blur-xl border-b border-gray-200 flex items-center justify-between px-4 sm:px-6 z-50 shadow-sm">
+            
+            {{-- Left Side: Logo --}}
             <a href="{{ route('open.home') }}" class="flex items-center gap-2">
                 <div class="w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-sm border border-gray-100">
                     <img src="{{ asset('images/MADYA Web Logo1.png') }}" class="w-full h-full object-contain" alt="Logo" />
@@ -34,8 +38,9 @@
                 <span class="font-heading font-black text-lg tracking-tighter">BU <span class="text-red-600">MADYA</span></span>
             </a>
 
-            <button @click="mobileMenuOpen = true" class="w-10 h-10 flex items-center justify-center rounded-full bg-gray-50 text-gray-600 hover:bg-gray-100 transition">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+            {{-- Right Side: Hamburger --}}
+            <button @click="mobileMenuOpen = true" class="w-10 h-10 flex items-center justify-center rounded-full bg-gray-50 text-gray-700 hover:bg-gray-100 transition shadow-sm border border-gray-200 outline-none active:scale-95">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16M4 18h16"></path></svg>
             </button>
         </div>
 
