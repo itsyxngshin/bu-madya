@@ -22,18 +22,18 @@
     </div>
 
     {{-- INTERACTION BUTTONS (The Elements Bar) --}}
-    <div class="px-4 py-2 flex flex-wrap items-center justify-center gap-1 md:gap-2 border-b border-gray-100 bg-gray-50/50">
+    <div class="px-4 md:px-6 py-2 flex flex-wrap items-center justify-start gap-1.5 md:gap-2 border-b border-gray-100 bg-gray-50/50">
         @foreach($availableElements as $key => $data)
             @php
                 $isActive = $userElement === $key;
             @endphp
             
             <button wire:click="toggleElement('{{ $key }}')" 
-                    class="flex items-center gap-1.5 px-3 md:px-4 py-2 rounded-xl transition-all duration-200 transform active:scale-95
-                           {{ $isActive ? $data['bg'] . ' ' . $data['color'] . ' shadow-sm' : 'hover:bg-gray-100 text-gray-500' }}">
+                    class="flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all duration-200 transform active:scale-95 border
+                        {{ $isActive ? $data['bg'] . ' ' . $data['color'] . ' border-transparent shadow-sm' : 'bg-white border-gray-200 hover:bg-gray-50 text-gray-600' }}">
                 
-                <span class="text-lg leading-none filter {{ $isActive ? 'drop-shadow-sm' : 'grayscale opacity-70' }}">{{ $data['icon'] }}</span>
-                <span class="text-xs font-black uppercase tracking-wider hidden sm:inline-block">{{ $data['label'] }}</span>
+                <span class="text-base leading-none filter {{ $isActive ? 'drop-shadow-sm' : 'grayscale opacity-70' }}">{{ $data['icon'] }}</span>
+                <span class="text-[10px] font-black uppercase tracking-wider">{{ $data['label'] }}</span>
             </button>
         @endforeach
     </div>
