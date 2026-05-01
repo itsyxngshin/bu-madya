@@ -74,6 +74,6 @@ class PostFeed extends Component
         return view('livewire.community.post-feed', [
             'posts' => $posts,
             'categories' => Category::orderBy('name')->get(),
-        ])->layout('layouts.madya-template');
+        ])->layout('layouts.madya-community');
     }
 }
