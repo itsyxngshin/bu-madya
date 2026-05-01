@@ -80,6 +80,26 @@ use Illuminate\Support\Facades\Response;
 use \App\Livewire\Partner\SubmitFrame;
 use \App\Livewire\Partner\PartnerDashboard;
 
+use App\Livewire\Community\PostFeed;
+use App\Livewire\Community\PostEditor;
+use App\Livewire\Community\PostView;
+
+// SUBDOMAIN ROUTING: community.bu-madya.space
+Route::domain('community.' . env('APP_DOMAIN'))->name('community.')->group(function () {
+    
+    // The feed is now the homepage of the subdomain (/)
+    Route::get('/', PostFeed::class)->name('feed');
+    
+    // The single post reader
+    Route::get('/post/{slug}', PostView::class)->name('posts.show');
+    
+    // The secured post editor
+    Route::middleware('auth')->group(function () {
+        Route::get('/create', PostEditor::class)->name('posts.create');
+        Route::get('/edit/{post}', PostEditor::class)->name('posts.edit');
+    });
+});
+
 // ==========================================
 // WELFARE & GRIEVANCE SUBDOMAIN
 // ==========================================
