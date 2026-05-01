@@ -11,10 +11,10 @@
     ];
 @endphp
 
-<aside class="hidden lg:flex flex-col w-64 h-screen sticky top-0 bg-transparent pr-6 py-8 overflow-y-auto hide-scrollbar">
+<aside class="flex flex-col w-full h-full lg:h-screen lg:sticky top-0 bg-transparent lg:pr-6 py-4 lg:py-8 overflow-y-auto hide-scrollbar">
     
-    {{-- 1. LOGO SECTION --}}
-    <div class="px-4 mb-8">
+    {{-- 1. LOGO SECTION (Hidden on mobile to prevent double-logos) --}}
+    <div class="px-4 mb-8 hidden lg:block">
         <a href="{{ url('/') }}" class="flex items-center gap-3 group">
             <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-md p-1 border border-gray-100 group-hover:scale-105 transition transform">
                 <img src="{{ asset('images/MADYA Web Logo1.png') }}" class="w-full h-full object-contain" alt="BU MADYA Logo" />

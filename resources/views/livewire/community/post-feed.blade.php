@@ -1,7 +1,8 @@
 <div class="relative animate-fade-in-up pb-32">
 
     {{-- STICKY MOBILE/DESKTOP FEED HEADER --}}
-    <div class="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-gray-100 px-5 py-4 mb-6">
+    {{-- FIX: Changed top-0 to top-[64px] for mobile, and lg:top-0 for desktop --}}
+    <div class="sticky top-[64px] lg:top-0 z-40 bg-white/90 backdrop-blur-md border-b border-gray-100 px-5 py-4 mb-6">
         <h2 class="text-xl font-black text-gray-900 tracking-tight">Home</h2>
     </div>
 
