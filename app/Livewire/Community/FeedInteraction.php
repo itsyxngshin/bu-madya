@@ -17,11 +17,11 @@ class FeedInteraction extends Component
 
     // Define your community's available reactions
     public $availableElements = [
-        'like' => ['icon' => '👍', 'label' => 'Like', 'color' => 'text-blue-600'],
-        'love' => ['icon' => '❤️', 'label' => 'Love', 'color' => 'text-red-600'],
-        'fire' => ['icon' => '🔥', 'label' => 'Fire', 'color' => 'text-orange-500'],
-        'lightbulb' => ['icon' => '💡', 'label' => 'Idea', 'color' => 'text-yellow-500'],
-        'clap' => ['icon' => '👏', 'label' => 'Clap', 'color' => 'text-green-600'],
+        'solidarity' => ['label' => 'Solidarity', 'icon' => '✊', 'color' => 'text-blue-600'],
+        'insight'    => ['label' => 'Insight',    'icon' => '💡', 'color' => 'text-yellow-600'],
+        'ignite'     => ['label' => 'Ignite',     'icon' => '🔥', 'color' => 'text-orange-600'],
+        'oragon'     => ['label' => 'Oragon',     'icon' => '🌶️', 'color' => 'text-red-600'],
+        'resonance'  => ['label' => 'Resonance',  'icon' => '🌻', 'color' => 'text-green-600'],
     ];
 
     public function mount(Post $post)
