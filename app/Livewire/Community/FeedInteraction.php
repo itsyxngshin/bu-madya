@@ -33,11 +33,42 @@ class FeedInteraction extends Component
         $existing = Element::where('post_id', $this->post->id)->where('user_id', auth()->id())->first();
 
         if ($existing) {
-            if ($existing->type === $type) { $existing->delete(); } 
+            if ($existing->type === $type) { $existing->delete(); }
             else { $existing->update(['type' => $type]); }
         } else {
             Element::create(['post_id' => $this->post->id, 'user_id' => auth()->id(), 'type' => $type]);
         }
+    }
+
+    public function requirkPost()
+    {
+        if (!auth()->check()) {
+            return redirect()->route('login');
+        }
+
+        // Prevent users from re-quirking their own post multiple times
+        $alreadyRequirked = \App\Models\Post::where('user_id', auth()->id())
+            ->where('reposted_post_id', $this->post->id)
+            ->exists();
+
+        if ($alreadyRequirked) {
+            $this->dispatch('notify', ['message' => 'You already Re-quirked this!', 'type' => 'error']);
+            return;
+        }
+
+        // Create the Re-quirk
+        \App\Models\Post::create([
+            'user_id' => auth()->id(),
+            'reposted_post_id' => $this->post->id,
+            // We can leave title/content null or copy them depending on how you want to display it
+            'title' => 'Re-quirk: ' . $this->post->title,
+            'content' => '',
+            'slug' => \Illuminate\Support\Str::slug('requirk-' . uniqid()),
+            'is_published' => true,
+            'published_at' => now(),
+        ]);
+
+        $this->dispatch('notify', ['message' => 'Successfully Re-quirked!', 'type' => 'success']);
     }
 
     public function postComment()
@@ -51,14 +82,14 @@ class FeedInteraction extends Component
             'content' => $this->newComment
         ]);
 
-        $this->newComment = ''; 
+        $this->newComment = '';
     }
 
     public function render()
     {
         $elementCounts = $this->post->elements()->selectRaw('type, count(*) as count')->groupBy('type')->pluck('count', 'type')->toArray();
         $userElement = auth()->check() ? Element::where('post_id', $this->post->id)->where('user_id', auth()->id())->value('type') : null;
-        
+
         // Fetch only the latest 3 comments for the feed, ordered chronologically
         $recentComments = $this->post->comments()->with('user')->latest()->take(3)->get()->reverse();
         $totalComments = $this->post->comments()->count();
