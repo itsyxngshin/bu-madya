@@ -1,10 +1,10 @@
-@section('meta_title', $post->title)
-@section('meta_description', $post->excerpt ?? \Illuminate\Support\Str::limit(strip_tags($post->content), 150))
+@section('meta_title', e($post->title))
+@section('meta_description', e(\Illuminate\Support\Str::limit(strip_tags($post->content), 150)))
 
-{{-- Smart Image Fallback: Tries cover image first, then gallery, otherwise your master layout handles the default logo --}}
+{{-- Safe Image Fallback --}}
 @if($post->cover_image_path)
     @section('meta_image', asset('storage/'.$post->cover_image_path))
-@elseif(!empty($post->gallery) && isset($post->gallery[0]))
+@elseif(is_array($post->gallery) && count($post->gallery) > 0)
     @section('meta_image', asset('storage/'.$post->gallery[0]))
 @endif
 

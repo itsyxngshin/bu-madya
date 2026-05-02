@@ -14,14 +14,16 @@
     <meta property="og:url" content="{{ url()->current() }}" />
     <meta property="og:title" content="@yield('meta_title', 'BU MADYA Community')" />
     <meta property="og:description" content="@yield('meta_description', 'Join the movement for youth-led advocacy.')" />
-    <meta property="og:image" content="@yield('meta_image', asset('images/default_share_image.jpg'))" />
+    
+    {{-- Optional: If you don't actually have a file named 'default_share_image.jpg', use your MADYA Logo as the default fallback! --}}
+    <meta property="og:image" content="@yield('meta_image', asset('images/MADYA Web Logo1.png'))" />
 
     {{-- 4. TWITTER CARD DATA --}}
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="@yield('meta_title', config('app.name'))">
     <meta name="twitter:description" content="@yield('meta_description', 'Join the movement for youth-led advocacy.')">
-    <meta name="twitter:image" content="@yield('meta_image', asset('images/default_share_image.jpg'))">
-
+    <meta name="twitter:image" content="@yield('meta_image', asset('images/MADYA Web Logo1.png'))">
+    
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
