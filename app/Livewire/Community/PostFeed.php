@@ -24,29 +24,23 @@ class PostFeed extends Component
 
     public function deletePost($postId)
     {
-        $post = Post::findOrFail($postId);
+        $post = \App\Models\Post::findOrFail($postId);
 
-        // Security Check: Only the author or an admin can delete it
-        $userRole = auth()->user()->role->role_name ?? '';
-        if (auth()->id() !== $post->user_id && !in_array($userRole, ['administrator', 'director'])) {
+        // Security check: Only the author or an Admin/Director can delete it
+        $isOwnerOrAdmin = auth()->check() && (
+            auth()->id() == $post->user_id || 
+            in_array(auth()->user()->role->role_name ?? '', ['administrator', 'director'])
+        );
+
+        if (!$isOwnerOrAdmin) {
             abort(403, 'Unauthorized action.');
         }
 
-        // Cleanup associated media to save server space
-        if ($post->cover_image_path) {
-            Storage::disk('public')->delete($post->cover_image_path);
-        }
-        
-        if (!empty($post->gallery)) {
-            foreach ($post->gallery as $photo) {
-                Storage::disk('public')->delete($photo);
-            }
-        }
-
+        // Delete the post (this cascades to delete comments/reactions too)
         $post->delete();
 
-        // Optional: If you have a toast notification listener set up
-        // $this->dispatch('notify', ['message' => 'Post deleted successfully.', 'type' => 'success']);
+        // Flash a success message
+        session()->flash('success', 'Post permanently deleted.');
     }
 
     public function clearCategory()

@@ -1,4 +1,4 @@
-<div x-data="{ showReacts: false, showComments: false }" class="mt-1">
+<div x-data="{ showReacts: false, showComments: false }" class="mt-1 relative z-20">
 
     {{-- STATS SUMMARY --}}
     <div class="px-3 py-1.5 flex items-center justify-between text-[10px] font-bold text-gray-500 border-b border-gray-100 mx-1">
@@ -6,7 +6,7 @@
             @if(array_sum($elementCounts) > 0)
                 <span class="flex -space-x-1">
                     @foreach($elementCounts as $type => $count)
-                        @if($count > 0)
+                        @if($count > 0 && isset($availableElements[$type]))
                             <span class="w-4 h-4 rounded-full bg-gray-50 flex items-center justify-center text-[9px] shadow-sm border border-white z-10">{{ $availableElements[$type]['icon'] }}</span>
                         @endif
                     @endforeach
@@ -19,8 +19,8 @@
         </div>
     </div>
 
-    {{-- ACTION BUTTONS (Z-20 Wrapper prevents hiding behind images) --}}
-    <div class="px-2 py-1 flex items-center justify-between relative gap-1 z-20">
+    {{-- ACTION BUTTONS --}}
+    <div class="px-2 py-1 flex items-center justify-between relative gap-1">
         
         {{-- 1. React Button --}}
         <div class="flex-1 relative" @mouseenter="showReacts = true" @mouseleave="showReacts = false">
@@ -56,21 +56,16 @@
                 <span class="hidden sm:inline">Re-quirk</span>
             </button>
 
-            {{-- The Dropdown Menu (Bumped to z-[100]) --}}
             <div x-show="showShare" @click.away="showShare = false" style="display: none;" class="absolute bottom-full right-0 mb-1 w-36 bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-gray-100 py-1.5 z-[100] overflow-hidden origin-bottom-right">
-                
-                <button wire:click="requirkPost" @click="showShare = false" class="flex items-center gap-2 w-full text-left px-3 py-2 text-[11px] font-bold text-gray-700 hover:bg-gray-50 hover:text-green-600 transition-colors">
+                <button wire:click="requirkPost" @click="showShare = false" class="flex items-center gap-2 w-full text-left px-3 py-2 text-[11px] font-bold text-gray-700 hover:bg-gray-50 hover:text-green-600 transition-colors outline-none">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
                     Re-quirk
                 </button>
-                
                 <div class="border-t border-gray-50 my-0.5"></div>
-                
-                <button @click="navigator.clipboard.writeText('{{ route('community.posts.show', $post->slug) }}'); copied = true; setTimeout(() => { copied = false; showShare = false; }, 1500)" class="flex items-center gap-2 w-full text-left px-3 py-2 text-[11px] font-bold text-gray-700 hover:bg-gray-50 hover:text-blue-600 transition-colors">
+                <button @click="navigator.clipboard.writeText('{{ route('community.posts.show', $post->slug) }}'); copied = true; setTimeout(() => { copied = false; showShare = false; }, 1500)" class="flex items-center gap-2 w-full text-left px-3 py-2 text-[11px] font-bold text-gray-700 hover:bg-gray-50 hover:text-blue-600 transition-colors outline-none">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
                     <span x-text="copied ? 'Copied!' : 'Copy Link'"></span>
                 </button>
-
             </div>
         </div>
     </div>

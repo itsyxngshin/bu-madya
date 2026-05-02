@@ -5,17 +5,15 @@ namespace App\Livewire\Community;
 use Livewire\Component;
 use App\Models\Post;
 use App\Models\Element;
-use Illuminate\Support\Facades\DB;
+use App\Models\PostComment;
 use Illuminate\Support\Str;
 
 class FeedInteraction extends Component
 {
     public Post $post;
-    public $userElement = null;
-    public $elementCounts = [];
     public $newComment = '';
 
-    // Define your community's available reactions
+    // Restored your exact BU MADYA branding elements!
     public $availableElements = [
         'solidarity' => ['label' => 'Solidarity', 'icon' => '✊', 'color' => 'text-blue-600'],
         'insight'    => ['label' => 'Insight',    'icon' => '💡', 'color' => 'text-yellow-600'],
@@ -27,66 +25,48 @@ class FeedInteraction extends Component
     public function mount(Post $post)
     {
         $this->post = $post;
-        if (auth()->check()) {
-            $this->userElement = Element::where('post_id', $post->id)
-                ->where('user_id', auth()->id())
-                ->value('type');
-        }
-        $this->refreshElementCounts();
     }
 
-    public function refreshElementCounts()
+    public function toggleElement($type)
     {
-        $this->elementCounts = Element::where('post_id', $this->post->id)
-            ->select('type', DB::raw('count(*) as total'))
-            ->groupBy('type')
-            ->pluck('total', 'type')
-            ->toArray();
-    }
+        if (!auth()->check()) return redirect()->route('login');
+        if (!array_key_exists($type, $this->availableElements)) return;
 
-    public function toggleElement($elementKey)
-    {
-        if (!auth()->check()) {
-            return redirect()->route('login');
-        }
+        $existing = Element::where('post_id', $this->post->id)->where('user_id', auth()->id())->first();
 
-        $existingReaction = Element::where('post_id', $this->post->id)
-            ->where('user_id', auth()->id())
-            ->first();
-
-        // THE UN-REACT LOGIC
-        if ($existingReaction) {
-            if ($existingReaction->type === $elementKey) {
-                $existingReaction->delete();
-                $this->userElement = null;
-            } else {
-                $existingReaction->update(['type' => $elementKey]);
-                $this->userElement = $elementKey;
-            }
+        // The Un-react Logic
+        if ($existing) {
+            if ($existing->type === $type) { $existing->delete(); } 
+            else { $existing->update(['type' => $type]); }
         } else {
-            Element::create([
-                'post_id' => $this->post->id,
-                'user_id' => auth()->id(),
-                'type' => $elementKey
-            ]);
-            $this->userElement = $elementKey;
+            Element::create(['post_id' => $this->post->id, 'user_id' => auth()->id(), 'type' => $type]);
         }
+    }
 
-        $this->refreshElementCounts();
+    public function postComment()
+    {
+        if (!auth()->check()) return redirect()->route('login');
+        $this->validate(['newComment' => 'required|string|max:500']);
+
+        PostComment::create([
+            'post_id' => $this->post->id,
+            'user_id' => auth()->id(),
+            'content' => $this->newComment
+        ]);
+
+        $this->newComment = ''; 
     }
 
     public function requirkPost()
     {
-        if (!auth()->check()) {
-            return redirect()->route('login');
-        }
+        if (!auth()->check()) return redirect()->route('login');
 
         $alreadyRequirked = Post::where('user_id', auth()->id())
             ->where('reposted_post_id', $this->post->id)
             ->exists();
 
         if ($alreadyRequirked) {
-            session()->flash('error', 'You already Re-quirked this post!');
+            session()->flash('error', 'You already Re-quirked this!');
             return;
         }
 
@@ -100,33 +80,22 @@ class FeedInteraction extends Component
             'published_at' => now(),
         ]);
 
-        session()->flash('success', 'Successfully Re-quirked to your feed!');
-    }
-
-    public function postComment()
-    {
-        $this->validate(['newComment' => 'required|string|max:1000']);
-
-        if (!auth()->check()) {
-            return redirect()->route('login');
-        }
-
-        $this->post->comments()->create([
-            'user_id' => auth()->id(),
-            'content' => $this->newComment
-        ]);
-
-        $this->newComment = '';
+        session()->flash('success', 'Successfully Re-quirked!');
     }
 
     public function render()
     {
+        $elementCounts = $this->post->elements()->selectRaw('type, count(*) as count')->groupBy('type')->pluck('count', 'type')->toArray();
+        $userElement = auth()->check() ? Element::where('post_id', $this->post->id)->where('user_id', auth()->id())->value('type') : null;
+        
+        $recentComments = $this->post->comments()->with('user')->latest()->take(3)->get()->reverse();
         $totalComments = $this->post->comments()->count();
-        $recentComments = $this->post->comments()->with('user')->latest()->take(3)->get();
 
         return view('livewire.community.feed-interaction', [
-            'totalComments' => $totalComments,
-            'recentComments' => $recentComments
+            'elementCounts' => $elementCounts,
+            'userElement' => $userElement,
+            'recentComments' => $recentComments,
+            'totalComments' => $totalComments
         ]);
     }
 }
