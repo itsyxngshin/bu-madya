@@ -108,25 +108,29 @@
     <livewire:community.feed-interaction :post="$post" />
 
     {{-- GLOBAL LIGHTBOX MODAL --}}
-    <div x-show="lightboxOpen" style="display: none;" class="fixed inset-0 z-[999] flex items-center justify-center bg-black/95 backdrop-blur-sm p-4" x-transition.opacity.duration.300ms @click="lightboxOpen = false" @keydown.escape.window="lightboxOpen = false">
-        <button type="button" @click="lightboxOpen = false" class="absolute top-4 right-4 p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-colors z-50 outline-none">
-            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
-        </button>
-        <img :src="lightboxImage" @click.stop class="max-w-full max-h-[90vh] object-contain rounded-md shadow-2xl transform transition-transform" alt="Expanded view">
-    </div>
+    <template x-teleport="body">
+        <div x-show="lightboxOpen" style="display: none;" class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/95 backdrop-blur-sm p-4" x-transition.opacity.duration.300ms @click="lightboxOpen = false" @keydown.escape.window="lightboxOpen = false">
+            <button type="button" @click="lightboxOpen = false" class="absolute top-4 right-4 p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-colors z-[10000] outline-none">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            <img :src="lightboxImage" @click.stop class="max-w-full max-h-[90vh] object-contain rounded-md shadow-2xl transform transition-transform" alt="Expanded view">
+        </div>
+    </template>
 
     {{-- DELETE CONFIRMATION MODAL --}}
-    <div x-show="deleteModalOpen" style="display: none;" class="fixed inset-0 z-[999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" x-transition.opacity.duration.200ms>
-        <div @click.away="deleteModalOpen = false" class="bg-white rounded-[1.25rem] shadow-2xl max-w-sm w-full p-6 text-center transform transition-all relative">
-            <div class="w-14 h-14 rounded-full bg-red-50 text-red-500 flex items-center justify-center mx-auto mb-4 border border-red-100">
-                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-            </div>
-            <h3 class="text-[17px] font-black text-gray-900 mb-1.5 tracking-tight">Delete this post?</h3>
-            <p class="text-[13px] text-gray-500 mb-6 leading-relaxed">This action cannot be undone. This will permanently remove the post, comments, and all reactions.</p>
-            <div class="flex gap-2.5">
-                <button @click="deleteModalOpen = false; postToDelete = null" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-2.5 rounded-xl transition-colors text-[13px] outline-none">Cancel</button>
-                <button wire:click="deletePost(postToDelete)" @click="deleteModalOpen = false" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-xl transition-colors text-[13px] shadow-sm outline-none">Yes, Delete</button>
+    <template x-teleport="body">
+        <div x-show="deleteModalOpen" style="display: none;" class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" x-transition.opacity.duration.200ms>
+            <div @click.away="deleteModalOpen = false" class="bg-white rounded-[1.25rem] shadow-2xl max-w-sm w-full p-6 text-center transform transition-all relative">
+                <div class="w-14 h-14 rounded-full bg-red-50 text-red-500 flex items-center justify-center mx-auto mb-4 border border-red-100">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                </div>
+                <h3 class="text-[17px] font-black text-gray-900 mb-1.5 tracking-tight">Delete this post?</h3>
+                <p class="text-[13px] text-gray-500 mb-6 leading-relaxed">This action cannot be undone. This will permanently remove the post, comments, and all reactions.</p>
+                <div class="flex gap-2.5">
+                    <button @click="deleteModalOpen = false; postToDelete = null" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-2.5 rounded-xl transition-colors text-[13px] outline-none">Cancel</button>
+                    <button wire:click="deletePost(postToDelete)" @click="deleteModalOpen = false" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-xl transition-colors text-[13px] shadow-sm outline-none">Yes, Delete</button>
+                </div>
             </div>
         </div>
-    </div>
+    </template>
 </div>
