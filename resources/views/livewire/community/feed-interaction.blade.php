@@ -19,57 +19,59 @@
         </div>
     </div>
 
-    {{-- ACTION BUTTONS (Now split into 3) --}}
+    {{-- ACTION BUTTONS (Icons shrunk to w-4 h-4 / 16px) --}}
     <div class="px-2 py-1 flex items-center justify-between relative gap-1">
-        
+
         {{-- 1. React Button --}}
         <div class="flex-1 relative" @mouseenter="showReacts = true" @mouseleave="showReacts = false">
-            <div x-show="showReacts" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-2 scale-95" x-transition:enter-end="opacity-100 translate-y-0 scale-100" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 translate-y-0 scale-100" x-transition:leave-end="opacity-0 translate-y-2 scale-95" class="absolute bottom-full left-0 mb-1 bg-white rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-gray-100 p-1.5 flex gap-1 z-50 origin-bottom-left" style="display: none;">
+            {{-- Floating Menu (Shrunk from w-9/18px to w-8/text-base) --}}
+            <div x-show="showReacts" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-2 scale-95" x-transition:enter-end="opacity-100 translate-y-0 scale-100" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 translate-y-0 scale-100" x-transition:leave-end="opacity-0 translate-y-2 scale-95" class="absolute bottom-full left-0 mb-1 bg-white rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-gray-100 p-1 flex gap-0.5 z-50 origin-bottom-left" style="display: none;">
                 @foreach($availableElements as $key => $data)
-                    <button wire:click="toggleElement('{{ $key }}')" @click="showReacts = false" class="w-9 h-9 rounded-full hover:bg-gray-50 flex items-center justify-center text-[18px] hover:scale-125 hover:-translate-y-1 transition-all duration-200 transform origin-bottom focus:outline-none" title="{{ $data['label'] }}">
+                    <button wire:click="toggleElement('{{ $key }}')" @click="showReacts = false" class="w-8 h-8 rounded-full hover:bg-gray-50 flex items-center justify-center text-base hover:scale-125 hover:-translate-y-1 transition-all duration-200 transform origin-bottom focus:outline-none" title="{{ $data['label'] }}">
                         {{ $data['icon'] }}
                     </button>
                 @endforeach
             </div>
 
-            <button @click="showReacts = !showReacts" class="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-md hover:bg-gray-50 font-bold text-[12px] transition-colors {{ $userElement ? $availableElements[$userElement]['color'] : 'text-gray-600' }}">
+            <button @click="showReacts = !showReacts" class="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-md hover:bg-gray-50 font-bold text-[11px] md:text-[12px] transition-colors {{ $userElement ? $availableElements[$userElement]['color'] : 'text-gray-600' }}">
                 @if($userElement)
-                    <span class="text-[16px] leading-none">{{ $availableElements[$userElement]['icon'] }}</span>
+                    {{-- Active React Icon shrunk to 14px --}}
+                    <span class="text-[14px] leading-none">{{ $availableElements[$userElement]['icon'] }}</span>
                     <span class="hidden sm:inline">{{ $availableElements[$userElement]['label'] }}</span>
                 @else
-                    <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"></path></svg>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"></path></svg>
                     <span class="hidden sm:inline">React</span>
                 @endif
             </button>
         </div>
 
         {{-- 2. Comment Button --}}
-        <button @click="showComments = !showComments" class="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md hover:bg-gray-50 text-gray-600 font-bold text-[12px] transition-colors">
-            <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+        <button @click="showComments = !showComments" class="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md hover:bg-gray-50 text-gray-600 font-bold text-[11px] md:text-[12px] transition-colors">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
             <span class="hidden sm:inline">Comment</span>
         </button>
 
         {{-- 3. Re-quirk / Share Button --}}
         <div class="flex-1 relative" x-data="{ showShare: false, copied: false }">
-            <button @click="showShare = !showShare" class="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-md hover:bg-gray-50 text-gray-600 font-bold text-[12px] transition-colors">
-                <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
+            <button @click="showShare = !showShare" class="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-md hover:bg-gray-50 text-gray-600 font-bold text-[11px] md:text-[12px] transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
                 <span class="hidden sm:inline">Re-quirk</span>
             </button>
 
-            {{-- The Dropdown Menu --}}
+            {{-- The Dropdown Menu (SVGs shrunk to w-3.5) --}}
             <div x-show="showShare" @click.away="showShare = false" style="display: none;" class="absolute bottom-full right-0 mb-1 w-36 bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-gray-100 py-1.5 z-50 overflow-hidden origin-bottom-right">
-                
+
                 {{-- Internal Repost --}}
-                <button wire:click="requirkPost" @click="showShare = false" class="flex items-center gap-2 w-full text-left px-3.5 py-2 text-[12px] font-bold text-gray-700 hover:bg-gray-50 hover:text-green-600 transition-colors">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                <button wire:click="requirkPost" @click="showShare = false" class="flex items-center gap-2 w-full text-left px-3 py-2 text-[11px] font-bold text-gray-700 hover:bg-gray-50 hover:text-green-600 transition-colors">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
                     Re-quirk
                 </button>
-                
+
                 <div class="border-t border-gray-50 my-0.5"></div>
-                
-                {{-- Copy Link (With dynamic Copied state) --}}
-                <button @click="navigator.clipboard.writeText('{{ route('community.posts.show', $post->slug) }}'); copied = true; setTimeout(() => { copied = false; showShare = false; }, 1500)" class="flex items-center gap-2 w-full text-left px-3.5 py-2 text-[12px] font-bold text-gray-700 hover:bg-gray-50 hover:text-blue-600 transition-colors">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+
+                {{-- Copy Link --}}
+                <button @click="navigator.clipboard.writeText('{{ route('community.posts.show', $post->slug) }}'); copied = true; setTimeout(() => { copied = false; showShare = false; }, 1500)" class="flex items-center gap-2 w-full text-left px-3 py-2 text-[11px] font-bold text-gray-700 hover:bg-gray-50 hover:text-blue-600 transition-colors">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
                     <span x-text="copied ? 'Copied!' : 'Copy Link'"></span>
                 </button>
 
