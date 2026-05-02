@@ -1,3 +1,4 @@
+{{-- BULLETPROOF SEO TAGS --}}
 @section('meta_title', e($post->title))
 @section('meta_description', e(\Illuminate\Support\Str::limit(strip_tags($post->content), 150)))
 
@@ -8,7 +9,8 @@
     @section('meta_image', asset('storage/'.$post->gallery[0]))
 @endif
 
-<div class="bg-white min-h-screen pb-32 animate-fade-in-up">
+{{-- ADDED ALPINE LIGHTBOX STATE HERE --}}
+<div x-data="{ lightboxOpen: false, lightboxImage: '' }" class="bg-white min-h-screen pb-32 animate-fade-in-up relative">
 
     {{-- 1. STICKY TOP BAR --}}
     <div class="sticky top-[64px] lg:top-0 z-30 bg-white/90 backdrop-blur-md border-b border-gray-100 px-4 md:px-5 py-2.5 flex items-center gap-3">
@@ -20,7 +22,6 @@
 
     {{-- 2. AUTHOR HEADER --}}
     <div class="px-4 md:px-5 pt-4 pb-3 flex items-start justify-between">
-
         {{-- Left Side: Author Info --}}
         <div class="flex items-center gap-2.5">
             @php
@@ -51,7 +52,7 @@
             </div>
         </div>
 
-        {{-- Right Side: Options Menu (Strictly Owner/Admin Only) --}}
+        {{-- Right Side: Options Menu --}}
         @php
             $isOwnerOrAdmin = auth()->check() && (auth()->id() == $post->user_id || in_array(auth()->user()->role->role_name ?? '', ['administrator', 'director']));
         @endphp
@@ -87,36 +88,68 @@
 
     {{-- 3. THE CONTENT --}}
     <div class="px-4 md:px-5 pt-3 pb-3">
+        @if($post->reposted_post_id)
+            <div class="text-[11px] font-bold text-gray-400 mb-2 flex items-center gap-1">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
+                Re-quirked
+            </div>
+        @endif
+
         <h1 class="text-xl md:text-2xl font-black text-gray-900 tracking-tight leading-snug mb-3">
             {{ $post->title }}
         </h1>
         <div class="text-[14px] md:text-[15px] text-gray-800 leading-[1.7] font-medium whitespace-pre-wrap break-words">{{ trim($post->content) }}</div>
     </div>
 
-    {{-- 4. EDGE-TO-EDGE MEDIA --}}
+    {{-- 4. EDGE-TO-EDGE LIGHTBOX MEDIA --}}
     @if($post->cover_image_path || !empty($post->gallery))
-        <div class="w-full bg-gray-50 border-t border-b border-gray-100 mt-3 mb-1">
+        <div class="w-full bg-gray-50 border-t border-b border-gray-100 mt-3 mb-1 overflow-hidden relative z-10">
             @if($post->cover_image_path)
-                <a href="{{ asset('storage/'.$post->cover_image_path) }}" target="_blank" class="block w-full max-h-[450px] overflow-hidden">
-                    <img src="{{ asset('storage/'.$post->cover_image_path) }}" class="w-full h-full object-cover bg-gray-100">
-                </a>
+                {{-- Switched to Lightbox Button --}}
+                <button type="button" @click="lightboxImage = '{{ asset('storage/'.$post->cover_image_path) }}'; lightboxOpen = true" class="block w-full max-h-[450px] overflow-hidden focus:outline-none">
+                    <img src="{{ asset('storage/'.$post->cover_image_path) }}" class="w-full h-full object-cover bg-gray-100 hover:opacity-95 transition-opacity">
+                </button>
             @endif
 
             @if(!empty($post->gallery))
                 <div class="grid grid-cols-2 gap-[1px] mt-[1px] bg-white">
                     @foreach($post->gallery as $photo)
-                        <a href="{{ asset('storage/'.$photo) }}" target="_blank" class="block aspect-square overflow-hidden bg-gray-100 relative group">
+                        {{-- Switched to Lightbox Button --}}
+                        <button type="button" @click="lightboxImage = '{{ asset('storage/'.$photo) }}'; lightboxOpen = true" class="block aspect-square overflow-hidden bg-gray-100 relative group focus:outline-none">
                             <img src="{{ asset('storage/'.$photo) }}" class="w-full h-full object-cover group-hover:opacity-90 transition-opacity">
-                        </a>
+                        </button>
                     @endforeach
                 </div>
             @endif
         </div>
     @endif
 
-    {{-- 5. THE ENGAGEMENT BAR --}}
-    <div>
-        <livewire:community.post-engagement :post="$post" />
+    {{-- 5. THE ENGAGEMENT BAR (Swapped to feed-interaction component & z-index added) --}}
+    <div class="relative z-20">
+        <livewire:community.feed-interaction :post="$post" />
+    </div>
+
+    {{-- 6. GLOBAL LIGHTBOX WINDOW --}}
+    <div x-show="lightboxOpen" 
+         style="display: none;" 
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="fixed inset-0 z-[999] flex items-center justify-center bg-black/95 backdrop-blur-sm p-4"
+         @click="lightboxOpen = false" 
+         @keydown.escape.window="lightboxOpen = false">
+        
+        <button type="button" @click="lightboxOpen = false" class="absolute top-4 right-4 md:top-6 md:right-6 p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-colors z-50 outline-none">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+
+        <img :src="lightboxImage" 
+             @click.stop 
+             class="max-w-full max-h-[90vh] object-contain rounded-md shadow-2xl transform transition-transform" 
+             alt="Expanded view">
     </div>
 
 </div>
