@@ -6,6 +6,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>{{ $title ?? 'BU MADYA Community' }}</title>
+    <link rel="icon" href="{{ asset('images/MADYA Web Logo1.png') }}">
     <meta name="description" content="{{ $metaDescription ?? 'Join the BU MADYA community. Share your advocacies, connect with student leaders, and stay updated with campus events.' }}">
 
     {{-- 3. FACEBOOK / OPEN GRAPH META TAGS --}}
