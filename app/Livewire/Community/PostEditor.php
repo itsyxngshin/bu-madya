@@ -8,6 +8,7 @@ use App\Models\Post;
 use App\Models\Category;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
+use App\Models\Tag;
 
 class PostEditor extends Component
 {
@@ -150,7 +151,6 @@ class PostEditor extends Component
             'flagged_words' => $isFlagged ? implode(', ', $violations) : null,
         ];
 
-
         if ($this->postRecord) {
             // Update
             $this->postRecord->update($data);
@@ -164,11 +164,34 @@ class PostEditor extends Component
             $message = 'Post published successfully!';
         }
 
+        // ==========================================
+        // EXTRACT AND SYNC HASHTAGS
+        // ==========================================
+        preg_match_all('/#([\w]+)/u', $this->content, $matches);
+
+        if (!empty($matches[1])) {
+            $tags = array_unique($matches[1]); 
+            $tagIds = [];
+
+            foreach ($tags as $tagName) {
+                $tag = Tag::firstOrCreate(['name' => strtolower($tagName)]);
+                $tagIds[] = $tag->id;
+            }
+
+            // Sync adds new tags and removes deleted ones
+            $post->tags()->sync($tagIds);
+        } else {
+            // If they removed all tags, clear them out
+            $post->tags()->detach();
+        }
+        // ==========================================
+
         if ($isFlagged) {
             session()->flash('error', 'Your post contains restricted words and has been flagged for admin review. It will not be published until approved.');
         } else {
-            session()->flash('success', 'Post saved successfully!');
+            session()->flash('success', $message);
         }
+        
         // Redirect back to the feed (or the post itself)
         return redirect()->route('community.feed');
     }

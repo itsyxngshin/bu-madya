@@ -56,24 +56,45 @@ class PostFeed extends Component
 
     public function render()
     {
-        // Eager load author, category, and the counts of elements/comments
-        $query = Post::with(['author', 'category'])
-                     ->withCount(['elements', 'comments'])
-                     ->where('is_published', true);
+        $favoriteCategoryId = 0;
 
-        // Apply category filter if one is selected
-        if ($this->activeCategoryId) {
-            $query->where('category_id', $this->activeCategoryId);
+        // 1. Calculate Personal Affinity (If logged in)
+        if (auth()->check()) {
+            // Cache this calculation for 12 hours so it doesn't slow down the feed
+            $favoriteCategoryId = Cache::remember('user_fav_cat_'.auth()->id(), 43200, function() {
+                return Post::whereHas('comments', fn($q) => $q->where('user_id', auth()->id()))
+                    ->select('category_id')
+                    ->selectRaw('COUNT(category_id) as interactions')
+                    ->groupBy('category_id')
+                    ->orderByDesc('interactions')
+                    ->value('category_id') ?? 0; // Default to 0 if no interactions
+            });
         }
 
-        // Order by featured first, then newest
-        $posts = $query->orderByDesc('is_featured')
-                       ->orderByDesc('published_at')
-                       ->paginate(12);
+        // 2. Fetch the Algorithmic Feed
+        $posts = Post::query()
+            ->with(['author', 'category', 'elements'])
+            ->where('is_published', true) // Assuming you have a published state
+            ->when($this->activeCategoryId, function ($query) {
+                // If they click a filter pill, respect that filter
+                $query->where('category_id', $this->activeCategoryId);
+            })
+            ->when(!$this->activeCategoryId, function ($query) use ($favoriteCategoryId) {
+                // Algorithmic Sorting (Only applies when viewing "All Updates")
+                // Adds a massive 15-point boost if the post matches their favorite category
+                $query->orderByRaw("
+                    popularity_score + 
+                    (CASE WHEN category_id = ? THEN 15 ELSE 0 END) 
+                    DESC
+                ", [$favoriteCategoryId]);
+            })
+            // Tie-breaker: Always fall back to newest posts if scores are exactly equal
+            ->orderByDesc('created_at')
+            ->paginate(10);
 
         return view('livewire.community.post-feed', [
             'posts' => $posts,
-            'categories' => Category::orderBy('name')->get(),
+            'categories' => Category::orderBy('name')->get()
         ])->layout('layouts.madya-community');
     }
 }

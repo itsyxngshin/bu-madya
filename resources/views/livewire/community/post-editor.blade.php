@@ -117,7 +117,7 @@
 
     {{-- 5. SCOPED STICKY BOTTOM BAR --}}
     <div class="sticky bottom-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-t border-gray-100 p-4 md:px-6 md:py-4 flex items-center justify-between gap-4 mt-auto shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.02)]">
-        
+
         {{-- Status Toggle --}}
         <div class="flex items-center gap-2.5 cursor-pointer group" wire:click="$toggle('is_published')">
             <div class="relative w-10 h-5 md:w-11 md:h-6 rounded-full transition-colors duration-300 {{ $is_published ? 'bg-green-500' : 'bg-gray-300' }}">

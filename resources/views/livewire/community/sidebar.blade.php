@@ -12,7 +12,7 @@
 @endphp
 
 <aside class="flex flex-col w-full h-full lg:h-screen lg:sticky top-0 bg-transparent lg:pr-6 py-4 lg:py-8 overflow-y-auto hide-scrollbar">
-    
+
     {{-- 1. LOGO SECTION (Hidden on mobile to prevent double-logos) --}}
     <div class="px-4 mb-8 hidden lg:block">
         <a href="{{ url('/') }}" class="flex items-center gap-3 group">
@@ -36,11 +36,11 @@
             @endphp
             <a href="{{ route($link['route']) }}"
                class="flex items-center gap-4 px-4 py-3 rounded-2xl transition-all duration-200 group {{ $isActive ? 'bg-red-50 text-red-600 font-black' : 'text-gray-600 hover:bg-white hover:shadow-sm font-bold' }}">
-                
+
                 <svg class="w-6 h-6 transition-transform group-hover:scale-110 {{ $isActive ? 'text-red-600' : 'text-gray-400 group-hover:text-red-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="{{ $isActive ? '2.5' : '2' }}" d="{{ $link['icon'] }}"></path>
                 </svg>
-                
+
                 <span class="text-sm tracking-wide">{{ $link['name'] }}</span>
             </a>
         @endforeach
@@ -68,7 +68,7 @@
                     'organization'  => route('partner.dashboard'),
                     default         => route('dashboard'),
                 };
-                
+
                 $photoPath = Auth::user()->profile_photo_path;
                 $photoUrl = $photoPath ? (Str::startsWith($photoPath, ['http', 'images/']) ? asset($photoPath) : asset('storage/' . $photoPath)) : 'https://ui-avatars.com/api/?name='.urlencode(Auth::user()->name).'&color=4F46E5&background=E0E7FF';
             @endphp
@@ -94,15 +94,15 @@
                      x-transition:leave-end="opacity-0 translate-y-2"
                      class="absolute bottom-full left-0 mb-2 w-full bg-white rounded-2xl shadow-xl border border-gray-100 py-2 z-50"
                      style="display: none;">
-                    
+
                     <a href="{{ route('profile.public', Auth::user()->username) }}" class="block px-4 py-2 text-sm font-bold text-gray-700 hover:bg-gray-50 hover:text-red-600">Your Profile</a>
-                    
+
                     @if($canViewDashboard)
                         <a href="{{ $navDashboardRoute }}" class="block px-4 py-2 text-sm font-bold text-gray-700 hover:bg-gray-50 hover:text-red-600">Management Dashboard</a>
                     @endif
-                    
+
                     <div class="border-t border-gray-100 my-1"></div>
-                    
+
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
                         <button type="submit" class="w-full text-left px-4 py-2 text-sm font-black text-red-600 hover:bg-red-50">Log Out</button>
