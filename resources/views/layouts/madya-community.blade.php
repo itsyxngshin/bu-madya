@@ -14,7 +14,7 @@
     <meta property="og:url" content="{{ url()->current() }}" />
     <meta property="og:title" content="@yield('meta_title', 'BU MADYA Community')" />
     <meta property="og:description" content="@yield('meta_description', 'Join the movement for youth-led advocacy.')" />
-    
+
     {{-- Optional: If you don't actually have a file named 'default_share_image.jpg', use your MADYA Logo as the default fallback! --}}
     <meta property="og:image" content="@yield('meta_image', asset('images/MADYA Web Logo1.png'))" />
 
@@ -23,7 +23,7 @@
     <meta name="twitter:title" content="@yield('meta_title', config('app.name'))">
     <meta name="twitter:description" content="@yield('meta_description', 'Join the movement for youth-led advocacy.')">
     <meta name="twitter:image" content="@yield('meta_image', asset('images/MADYA Web Logo1.png'))">
-    
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -193,12 +193,9 @@
 
         {{-- 3. RIGHT SIDEBAR (Widgets, Trending, Events - Hidden on Mobile/Tablet) --}}
         <div class="hidden xl:block w-80 shrink-0 h-screen sticky top-0 pl-8 py-8 overflow-y-auto hide-scrollbar">
-            
+
             {{-- Search Box --}}
-            <div class="relative mb-6">
-                <svg class="w-4 h-4 text-gray-400 absolute left-4 top-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                <input type="text" placeholder="Search community..." class="w-full pl-11 pr-4 py-2.5 bg-white border border-gray-100 rounded-full text-[13px] focus:border-red-500 focus:ring-1 focus:ring-red-500 outline-none transition shadow-sm placeholder-gray-400 font-medium">
-            </div>
+            <livewire:community.search-bar />
 
             {{-- Widget: Community Guidelines --}}
             <div class="bg-gradient-to-br from-red-600 to-red-800 rounded-[1.5rem] p-5 text-white shadow-lg shadow-red-900/20 mb-6 border border-red-500/20">
