@@ -100,7 +100,7 @@ Route::domain('webmaster.' . env('APP_DOMAIN'))->group(function () {
 
     // Public Coordinator View (Unauthenticated so your coordinator can view it)
     Route::get('/ojt/{username}', CoordinatorView::class)->name('ojt.public');
-}); 
+});  
 
 
 // SUBDOMAIN ROUTING: community.bu-madya.space
