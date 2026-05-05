@@ -32,7 +32,7 @@ class User extends Authenticatable
         'password',
         'role_id',
         'can_manage_welfare',
-        'username', 
+        'username',
         'profile_photo_path'
     ];
 
@@ -76,7 +76,7 @@ class User extends Authenticatable
     }
 
     // Helper to get role easily (optional)
-    public function isAdmin() 
+    public function isAdmin()
     {
         return $this->role === 'admin' || $this->role === 'director';
     }
@@ -101,14 +101,14 @@ class User extends Authenticatable
     // Helper: "Is this user the current Director-General?"
     public function isDirectorGeneral()
     {
-        return $this->currentAssignment && 
+        return $this->currentAssignment &&
                $this->currentAssignment->committee_id === null; // The logic: No committee = DG
     }
-    
+
     // Helper: "Is this user a Committee Director?"
     public function isCommitteeDirector()
     {
-        return $this->currentAssignment && 
+        return $this->currentAssignment &&
                $this->currentAssignment->committee_id !== null;
     }
 
@@ -121,8 +121,8 @@ class User extends Authenticatable
         // Since PortfolioSet belongs to a Profile, and User belongs to a Profile,
         // we access it via the Profile relationship.
         return $this->hasOneThrough(
-            PortfolioSet::class, 
-            Profile::class, 
+            PortfolioSet::class,
+            Profile::class,
             'id', // Foreign key on profiles table (user.profile_id is actually on users table, so we might need a different approach if schema is strict)
             'profile_id', // Foreign key on portfolio_sets table
             'profile_id', // Local key on users table
@@ -133,9 +133,9 @@ class User extends Authenticatable
     public function directorAssignment()
     {
         // A User "has one" current assignment
-        return $this->hasOne(DirectorAssignment::class); 
+        return $this->hasOne(DirectorAssignment::class);
     }
-    
+
     /**
      * Optional: If you want to access ALL past assignments
      */
@@ -169,5 +169,21 @@ class User extends Authenticatable
     public function roundtable_replies()
     {
         return $this->hasMany(RoundtableReply::class);
+    }
+
+    public function timeLogs()
+    {
+        return $this->hasMany(TimeLog::class);
+    }
+
+    public function ojtBlogs()
+    {
+        return $this->hasMany(OjtBlog::class);
+    }
+
+    // A quick helper to get the total accumulated hours
+    public function getTotalOjtHoursAttribute()
+    {
+        return round($this->timeLogs()->sum('total_minutes_rendered') / 60, 2);
     }
 }
