@@ -85,15 +85,32 @@ use App\Livewire\Community\PostEditor;
 use App\Livewire\Community\PostView;
 use App\Livewire\Admin\CommunityManager;
 
+use App\Livewire\Ojt\CoordinatorView;
+
+Route::domain('webmaster.' . env('APP_DOMAIN'))->group(function () {
+
+    // Protect the entire subdomain with authentication
+    Route::middleware(['auth'])->group(function () {
+
+        // The main OJT Dashboard containing your Time Tracker and Blog Manager
+        Route::get('/', function () {
+            return view('webmaster.dashboard');
+        })->name('webmaster.dashboard');
+    });
+});
+
+// Public Coordinator View (Unauthenticated so your coordinator can view it)
+Route::get('/ojt/{username}', CoordinatorView::class)->name('ojt.public');
+
 // SUBDOMAIN ROUTING: community.bu-madya.space
 Route::domain('community.' . env('APP_DOMAIN'))->name('community.')->group(function () {
-    
+
     // The feed is now the homepage of the subdomain (/)
     Route::get('/', PostFeed::class)->name('feed');
-    
+
     // The single post reader
     Route::get('/post/{slug}', PostView::class)->name('posts.show');
-    
+
     // The secured post editor
     Route::middleware('auth')->group(function () {
         Route::get('/create', PostEditor::class)->name('posts.create');
