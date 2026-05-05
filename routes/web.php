@@ -86,6 +86,7 @@ use App\Livewire\Community\PostView;
 use App\Livewire\Admin\CommunityManager;
 
 use App\Livewire\Ojt\CoordinatorView;
+use App\Livewire\Webmaster\Dashboard as WebmasterDashboard; 
 
 Route::domain('webmaster.' . env('APP_DOMAIN'))->group(function () {
 
@@ -93,14 +94,14 @@ Route::domain('webmaster.' . env('APP_DOMAIN'))->group(function () {
     Route::middleware(['auth'])->group(function () {
 
         // The main OJT Dashboard containing your Time Tracker and Blog Manager
-        Route::get('/', function () {
-            return view('webmaster.dashboard');
-        })->name('webmaster.dashboard');
-    });
-});
+        Route::get('/', WebmasterDashboard::class)->name('webmaster.dashboard');
 
-// Public Coordinator View (Unauthenticated so your coordinator can view it)
-Route::get('/ojt/{username}', CoordinatorView::class)->name('ojt.public');
+    });
+
+    // Public Coordinator View (Unauthenticated so your coordinator can view it)
+    Route::get('/ojt/{username}', CoordinatorView::class)->name('ojt.public');
+}); 
+
 
 // SUBDOMAIN ROUTING: community.bu-madya.space
 Route::domain('community.' . env('APP_DOMAIN'))->name('community.')->group(function () {
