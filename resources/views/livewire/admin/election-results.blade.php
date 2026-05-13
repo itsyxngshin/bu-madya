@@ -1,10 +1,9 @@
 <style>
     /* Bulletproof Dynamic CSS Variables for Admin Panel */
-    .dyn-card, .dyn-avatar, .dyn-text, .dyn-score { transition: all 0.3s ease; }
+    .dyn-card, .dyn-avatar, .dyn-score { transition: all 0.3s ease; }
 
     .dyn-card.is-winner { border-color: var(--party-color) !important; background-color: var(--party-bg) !important; }
     .dyn-avatar.is-winner { border-color: var(--party-color) !important; }
-    .dyn-text.is-winner { color: var(--party-color) !important; }
     .dyn-score.is-winner { color: var(--party-color) !important; }
 </style>
 
@@ -99,8 +98,8 @@
                             <div style="--party-color: {{ $partyColor }}; --party-bg: {{ $partyBg }};"
                                  class="dyn-card relative bg-gray-50 rounded-2xl p-4 border overflow-hidden transition-all duration-300 {{ $isWinner ? 'is-winner shadow-sm transform -translate-y-0.5' : 'border-gray-100' }}">
 
-                                {{-- Progress Bar --}}
-                                <div class="absolute top-0 left-0 bottom-0 opacity-15 transition-all duration-1000 ease-out"
+                                {{-- Progress Bar (Fixed Opacity) --}}
+                                <div class="absolute top-0 left-0 bottom-0 opacity-20 transition-all duration-1000 ease-out"
                                      style="width: {{ $percentage }}%; background-color: var(--party-color);"></div>
 
                                 <div class="relative z-10 flex items-center gap-4">
@@ -115,7 +114,8 @@
 
                                     {{-- Info --}}
                                     <div class="flex-1 min-w-0">
-                                        <p class="dyn-text font-bold text-sm truncate flex items-center gap-1 {{ $isWinner ? 'is-winner' : 'text-gray-900' }}">
+                                        {{-- Name is now always dark gray for readability --}}
+                                        <p class="font-bold text-sm text-gray-900 truncate flex items-center gap-1">
                                             {{ $candidateName }}
                                             @if($isWinner) <svg class="w-4 h-4 text-[color:var(--party-color)] shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg> @endif
                                         </p>

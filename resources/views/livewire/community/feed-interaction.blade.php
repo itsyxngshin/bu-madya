@@ -1,8 +1,11 @@
-<div x-data="{ showReacts: false, showComments: false }" class="mt-1 relative z-20">
+{{-- REMOVED hardcoded z-20. ADDED root shareOpen state and dynamic :class --}}
+<div x-data="{ showReacts: false, showComments: false, shareOpen: false, copied: false }" 
+     class="mt-1 relative transition-all duration-75"
+     :class="(showReacts || shareOpen) ? 'z-[60]' : 'z-0'">
 
     {{-- STATS SUMMARY --}}
     <div class="px-3 py-1.5 flex items-center justify-between text-[10px] font-bold text-gray-500 border-b border-gray-100 mx-1">
-        <div class="flex items-center gap-1.5">
+        <div wire:click="openReactors" class="flex items-center gap-1.5 cursor-pointer hover:bg-gray-50 px-1 py-0.5 rounded transition-colors">
             @if(array_sum($elementCounts) > 0)
                 <span class="flex -space-x-1">
                     @foreach($elementCounts as $type => $count)
@@ -11,7 +14,7 @@
                         @endif
                     @endforeach
                 </span>
-                <span class="ml-0.5">{{ array_sum($elementCounts) }}</span>
+                <span class="ml-0.5 hover:underline">{{ array_sum($elementCounts) }}</span>
             @endif
         </div>
         <div @click="showComments = !showComments" class="hover:underline cursor-pointer transition-colors">
@@ -22,16 +25,15 @@
     {{-- ACTION BUTTONS --}}
     <div class="px-2 py-1 flex items-center justify-between relative gap-1">
         
-        {{-- 1. React Button --}}
+        {{-- 1. React Dropdown --}}
         <div class="flex-1 relative" @mouseenter="showReacts = true" @mouseleave="showReacts = false">
-            <div x-show="showReacts" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-2 scale-95" x-transition:enter-end="opacity-100 translate-y-0 scale-100" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 translate-y-0 scale-100" x-transition:leave-end="opacity-0 translate-y-2 scale-95" class="absolute bottom-full left-0 mb-1 bg-white rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-gray-100 p-1 flex gap-0.5 z-[100] origin-bottom-left" style="display: none;">
+            <div x-show="showReacts" x-transition.opacity class="absolute bottom-full left-0 mb-1 bg-white rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-gray-100 p-1 flex gap-0.5 z-[100]" style="display: none;">
                 @foreach($availableElements as $key => $data)
-                    <button wire:click="toggleElement('{{ $key }}')" @click="showReacts = false" class="w-8 h-8 rounded-full hover:bg-gray-50 flex items-center justify-center text-base hover:scale-125 hover:-translate-y-1 transition-all duration-200 transform origin-bottom focus:outline-none" title="{{ $data['label'] }}">
+                    <button wire:click="toggleElement('{{ $key }}')" @click="showReacts = false" class="w-8 h-8 rounded-full hover:bg-gray-50 flex items-center justify-center text-base hover:scale-125 hover:-translate-y-1 transition-all outline-none" title="{{ $data['label'] }}">
                         {{ $data['icon'] }}
                     </button>
                 @endforeach
             </div>
-
             <button @click="showReacts = !showReacts" class="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-md hover:bg-gray-50 font-bold text-[11px] md:text-[12px] transition-colors {{ $userElement ? $availableElements[$userElement]['color'] : 'text-gray-600' }}">
                 @if($userElement)
                     <span class="text-[14px] leading-none">{{ $availableElements[$userElement]['icon'] }}</span>
@@ -49,21 +51,20 @@
             <span class="hidden sm:inline">Comment</span>
         </button>
 
-        {{-- 3. Re-quirk / Share Button --}}
-        <div class="flex-1 relative" x-data="{ showShare: false, copied: false }">
-            <button @click="showShare = !showShare" class="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-md hover:bg-gray-50 text-gray-600 font-bold text-[11px] md:text-[12px] transition-colors">
+        {{-- 3. Share Dropdown (Nested x-data removed, now using root state) --}}
+        <div class="flex-1 relative">
+            <button @click="shareOpen = !shareOpen" @click.away="shareOpen = false" class="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-md hover:bg-gray-50 text-gray-600 font-bold text-[11px] md:text-[12px] transition-colors outline-none">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
-                <span class="hidden sm:inline">Re-quirk</span>
+                <span class="hidden sm:inline">Share</span>
             </button>
-
-            <div x-show="showShare" @click.away="showShare = false" style="display: none;" class="absolute bottom-full right-0 mb-1 w-36 bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-gray-100 py-1.5 z-[100] overflow-hidden origin-bottom-right">
-                <button wire:click="requirkPost" @click="showShare = false" class="flex items-center gap-2 w-full text-left px-3 py-2 text-[11px] font-bold text-gray-700 hover:bg-gray-50 hover:text-green-600 transition-colors outline-none">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+            <div x-show="shareOpen" x-transition.opacity class="absolute bottom-full right-0 mb-1 w-40 bg-white border border-gray-100 rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] z-[100] py-1" style="display: none;">
+                <button wire:click="requirkPost" @click="shareOpen = false" class="w-full text-left px-4 py-2 text-[12px] font-bold text-gray-700 hover:bg-gray-50 hover:text-green-600 flex items-center gap-2 outline-none">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
                     Re-quirk
                 </button>
-                <div class="border-t border-gray-50 my-0.5"></div>
-                <button @click="navigator.clipboard.writeText('{{ route('community.posts.show', $post->slug) }}'); copied = true; setTimeout(() => { copied = false; showShare = false; }, 1500)" class="flex items-center gap-2 w-full text-left px-3 py-2 text-[11px] font-bold text-gray-700 hover:bg-gray-50 hover:text-blue-600 transition-colors outline-none">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+                <div class="border-t border-gray-50 my-1"></div>
+                <button @click="navigator.clipboard.writeText('{{ route('community.posts.show', $post->slug) }}'); copied = true; setTimeout(() => { copied = false; shareOpen = false; }, 1500)" class="w-full text-left px-4 py-2 text-[12px] font-bold text-gray-700 hover:bg-gray-50 hover:text-blue-600 flex items-center gap-2 outline-none">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
                     <span x-text="copied ? 'Copied!' : 'Copy Link'"></span>
                 </button>
             </div>
@@ -78,7 +79,6 @@
                     View previous {{ $totalComments - 3 }} comments...
                 </a>
             @endif
-
             <div class="space-y-2.5">
                 @foreach($recentComments as $comment)
                     <div class="flex gap-2">
@@ -96,7 +96,6 @@
                     </div>
                 @endforeach
             </div>
-
             @auth
                 <div class="flex gap-2 mt-3 pt-2 border-t border-gray-100/50">
                     @php
@@ -118,4 +117,43 @@
             @endauth
         </div>
     </div>
+
+    {{-- STANDARD IN-PLACE MODAL: WHO REACTED --}}
+    @if($showReactorsModal)
+        <div class="fixed inset-0 z-[999999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
+            <div @click.away="$wire.closeReactors()" class="bg-white rounded-[1.25rem] shadow-2xl max-w-sm w-full relative overflow-hidden flex flex-col max-h-[80vh]">
+                <div class="flex items-center justify-between p-4 border-b border-gray-100 bg-white z-10 shrink-0">
+                    <h3 class="text-base font-black text-gray-900 tracking-tight">Reactions</h3>
+                    <button wire:click="closeReactors" class="text-gray-400 hover:text-gray-900 bg-gray-50 hover:bg-gray-100 rounded-full p-1.5 transition-colors outline-none">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+                <div class="overflow-y-auto p-2 space-y-1 bg-gray-50/30 flex-1">
+                    @forelse($this->reactorsList as $element)
+                        <div class="flex items-center justify-between p-2.5 hover:bg-gray-50 rounded-xl transition-colors">
+                            <div class="flex items-center gap-3">
+                                @php
+                                    $reactorName = $element->user->name ?? 'Unknown User';
+                                    $photoPath = $element->user->profile_photo_path ?? null;
+                                    $photoUrl = $photoPath ? (Str::startsWith($photoPath, ['http', 'images/']) ? asset($photoPath) : asset('storage/' . $photoPath)) : 'https://ui-avatars.com/api/?name='.urlencode($reactorName).'&color=EF4444&background=FEF2F2';
+                                @endphp
+                                <a href="{{ route('profile.public', $element->user->username ?? 'unknown') }}" class="w-10 h-10 rounded-full shrink-0 shadow-sm border border-gray-100 bg-gray-100 overflow-hidden relative">
+                                    <img src="{{ $photoUrl }}" class="w-full h-full object-cover">
+                                    <span class="absolute -bottom-1 -right-1 text-[12px] bg-white rounded-full p-0.5 shadow-sm">
+                                        {{ $availableElements[$element->type]['icon'] ?? '👍' }}
+                                    </span>
+                                </a>
+                                <div>
+                                    <a href="{{ route('profile.public', $element->user->username ?? 'unknown') }}" class="text-[13px] font-black text-gray-900 hover:text-red-600 transition-colors block leading-tight">{{ $reactorName }}</a>
+                                    <span class="text-[11px] text-gray-500 font-medium">{{ $element->created_at->diffForHumans() }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="text-center py-8 text-gray-400 text-[12px] font-bold">No reactions yet.</div>
+                    @endforelse
+                </div>
+            </div>
+        </div>
+    @endif
 </div>

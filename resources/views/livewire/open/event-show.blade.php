@@ -23,106 +23,114 @@
     {{-- 2. MAIN CONTENT --}}
     <div class="relative z-10">
 
-        {{-- HERO SECTION --}}
-        <header class="relative pt-24 md:pt-32 pb-8 md:pb-12 px-6 max-w-7xl mx-auto">
+        {{-- HERO SECTION (Side-by-Side Layout) --}}
+        {{-- HERO SECTION (Mobile-Optimized Side-by-Side) --}}
+        <header class="relative pt-24 md:pt-32 pb-8 md:pb-12 px-5 md:px-6 max-w-7xl mx-auto">
 
-            {{-- A. Back Button --}}
-            <div class="mb-6 md:mb-8">
+            {{-- Back Button --}}
+            <div class="mb-6 md:mb-8 relative z-20">
                 <a href="{{ route('events.index') }}" class="inline-flex items-center gap-2 text-[10px] md:text-xs font-bold text-gray-400 hover:text-red-600 uppercase tracking-widest transition">
                     &larr; Back to Events
                 </a>
             </div>
 
-            {{-- B. Panoramic Cover Image --}}
-            <div class="relative w-full h-64 md:h-96 lg:h-[500px] rounded-2xl md:rounded-[2.5rem] overflow-hidden shadow-2xl border-2 md:border-4 border-white bg-gray-200 group mb-8 md:mb-12">
-                @if($event->cover_image)
-                    <img src="{{ Str::startsWith($event->cover_image, 'http') ? $event->cover_image : asset('storage/'.$event->cover_image) }}"
-                         class="w-full h-full object-cover transform group-hover:scale-105 transition duration-1000">
-                @else
-                    <div class="flex items-center justify-center h-full text-gray-400 font-bold bg-gray-100 flex-col">
-                        <span class="text-4xl md:text-6xl mb-2 md:mb-4">📅</span>
-                        <span class="tracking-widest opacity-50 text-xs md:text-base">BU MADYA EVENT</span>
-                    </div>
-                @endif
-                <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none"></div>
+            {{-- The 2-Column Grid --}}
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center relative z-20">
+                
+                {{-- LEFT COLUMN: Title, Dates, and Button --}}
+                <div class="order-2 lg:order-1 text-center lg:text-left">
+                    
+                    {{-- Responsive Title Scaling --}}
+                    <h1 class="font-heading text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-gray-900 leading-[1.15] md:leading-[1.1] mb-6 md:mb-8 drop-shadow-sm">
+                        {{ $event->title }}
+                    </h1>
 
-                <div class="absolute top-4 right-4 md:top-6 md:right-6">
-                    @if($event->isOpen())
-                        <span class="px-3 py-1.5 md:px-4 md:py-2 bg-white/90 backdrop-blur text-green-700 text-[10px] md:text-xs font-black uppercase tracking-widest rounded-full flex items-center gap-2 shadow-lg">
-                            <span class="w-1.5 h-1.5 md:w-2 md:h-2 bg-green-500 rounded-full animate-pulse"></span> Open
-                        </span>
-                    @else
-                        <span class="px-3 py-1.5 md:px-4 md:py-2 bg-gray-900/90 backdrop-blur text-white text-[10px] md:text-xs font-black uppercase tracking-widest rounded-full flex items-center gap-2 shadow-lg">
-                            <span class="w-1.5 h-1.5 md:w-2 md:h-2 bg-gray-500 rounded-full"></span> Closed
-                        </span>
-                    @endif
-                </div>
-            </div>
-
-            {{-- C. Centered Title & Primary Info --}}
-            <div class="max-w-4xl mx-auto text-center">
-                {{-- UPDATED: Smaller font size on mobile (text-3xl) --}}
-                <h1 class="font-heading text-3xl md:text-6xl lg:text-7xl font-black text-gray-900 leading-tight mb-6 md:mb-8 drop-shadow-sm">
-                    {{ $event->title }}
-                </h1>
-
-                <div class="flex flex-wrap justify-center gap-3 md:gap-4 text-stone-600 mb-6 md:mb-8">
-                    {{-- START BLOCK --}}
-                    <div class="flex items-center gap-3 md:gap-4 bg-white px-4 py-2 md:px-6 md:py-3 rounded-xl md:rounded-2xl shadow-sm border border-gray-100 min-w-[160px] md:min-w-[200px]">
-                        <div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-green-50 text-green-600 flex items-center justify-center shrink-0">
-                            <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                        </div>
-                        <div class="text-left">
-                            <p class="text-[8px] md:text-[10px] font-bold uppercase text-gray-400 tracking-wider mb-0.5">Starts</p>
-                            <div class="flex flex-col leading-tight">
-                                <span class="font-bold text-gray-900 text-xs md:text-sm">
+                    {{-- Dates and Times --}}
+                    <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3 md:gap-4 mb-8 md:mb-10">
+                        
+                        {{-- STARTS --}}
+                        <div class="flex items-center gap-3 md:gap-4 bg-white/80 backdrop-blur px-4 py-3 md:px-5 md:py-4 rounded-xl md:rounded-2xl shadow-sm border border-gray-100 w-full sm:w-auto">
+                            <div class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-green-50 text-green-600 flex items-center justify-center shrink-0">
+                                <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                            </div>
+                            <div class="text-left">
+                                <p class="text-[9px] md:text-[10px] font-bold uppercase text-gray-400 tracking-wider mb-0.5">Starts</p>
+                                <span class="font-bold text-gray-900 text-sm md:text-base block leading-tight">
                                     {{ $event->start_date ? $event->start_date->format('F d, Y') : 'TBA' }}
                                 </span>
-                                <span class="text-[10px] md:text-xs font-medium text-gray-500">
+                                <span class="text-[11px] md:text-xs font-medium text-gray-500 block">
                                     {{ $event->start_date ? $event->start_date->format('h:i A') : '' }}
                                 </span>
                             </div>
                         </div>
-                    </div>
 
-                    {{-- END BLOCK --}}
-                    @if($event->end_date)
-                    <div class="flex items-center gap-3 md:gap-4 bg-white px-4 py-2 md:px-6 md:py-3 rounded-xl md:rounded-2xl shadow-sm border border-gray-100 min-w-[160px] md:min-w-[200px]">
-                        <div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-red-50 text-red-600 flex items-center justify-center shrink-0">
-                            <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                        </div>
-                        <div class="text-left">
-                            <p class="text-[8px] md:text-[10px] font-bold uppercase text-gray-400 tracking-wider mb-0.5">Ends</p>
-                            <div class="flex flex-col leading-tight">
-                                <span class="font-bold text-gray-900 text-xs md:text-sm">
+                        {{-- ENDS --}}
+                        @if($event->end_date)
+                        <div class="flex items-center gap-3 md:gap-4 bg-white/80 backdrop-blur px-4 py-3 md:px-5 md:py-4 rounded-xl md:rounded-2xl shadow-sm border border-gray-100 w-full sm:w-auto">
+                            <div class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-red-50 text-red-600 flex items-center justify-center shrink-0">
+                                <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            </div>
+                            <div class="text-left">
+                                <p class="text-[9px] md:text-[10px] font-bold uppercase text-gray-400 tracking-wider mb-0.5">Ends</p>
+                                <span class="font-bold text-gray-900 text-sm md:text-base block leading-tight">
                                     {{ $event->end_date->format('F d, Y') }}
                                 </span>
-                                <span class="text-[10px] md:text-xs font-medium text-gray-500">
+                                <span class="text-[11px] md:text-xs font-medium text-gray-500 block">
                                     {{ $event->end_date->format('h:i A') }}
                                 </span>
                             </div>
                         </div>
+                        @endif
                     </div>
+
+                    {{-- CTA Button (Full width on mobile, auto on desktop) --}}
+                    @if($event->isOpen())
+                        @if($event->is_internal_rsvp)
+                            <a href="{{ route('events.rsvp', $event->slug) }}" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 md:px-8 md:py-4 bg-red-600 hover:bg-red-700 text-white text-sm md:text-base font-black uppercase tracking-wider rounded-xl shadow-xl hover:shadow-red-500/30 transition-all transform hover:-translate-y-1">
+                                <span>Get Ticket</span>
+                                <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"></path></svg>
+                            </a>
+                        @elseif($event->registration_link)
+                            <a href="{{ $event->registration_link }}" target="_blank" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 md:px-8 md:py-4 bg-red-600 hover:bg-red-700 text-white text-sm md:text-base font-black uppercase tracking-wider rounded-xl shadow-xl hover:shadow-red-500/30 transition-all transform hover:-translate-y-1">
+                                <span>{{ $event->registration_button_text ?? 'Register Now' }}</span>
+                                <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+                            </a>
+                        @endif
                     @endif
                 </div>
 
-                {{-- Primary CTA Button --}}
-                @if($event->isOpen())
-                    {{-- 1. NEW: Internal Luma-Style RSVP --}}
-                    @if($event->is_internal_rsvp)
-                        <a href="{{ route('events.rsvp', $event->slug) }}" class="inline-flex items-center gap-2 px-6 py-3 md:px-8 md:py-4 bg-red-600 hover:bg-red-700 text-white font-bold uppercase tracking-wider rounded-xl shadow-xl hover:shadow-red-500/30 transition-all transform hover:-translate-y-1 text-xs md:text-sm">
-                            <span>Get Ticket</span>
-                            <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"></path></svg>
-                        </a>
+                {{-- RIGHT COLUMN: The Cover Image --}}
+                <div class="order-1 lg:order-2 w-full">
+                    {{-- Responsive Aspect Ratio: 16:9 on Mobile, 4:3 on Desktop --}}
+                    <div class="relative w-full aspect-video lg:aspect-[4/3] rounded-2xl md:rounded-[2rem] overflow-hidden shadow-2xl border-4 border-white bg-gray-100 group">
+                        
+                        @if($event->cover_image)
+                            <img src="{{ Str::startsWith($event->cover_image, 'http') ? $event->cover_image : asset('storage/'.$event->cover_image) }}"
+                                 class="absolute inset-0 w-full h-full object-cover transform group-hover:scale-105 transition duration-1000">
+                        @else
+                            <div class="absolute inset-0 flex flex-col items-center justify-center text-gray-400 font-bold bg-gray-100">
+                                <span class="text-4xl md:text-6xl mb-2 md:mb-4">📅</span>
+                                <span class="tracking-widest opacity-50 text-[10px] md:text-sm">BU MADYA EVENT</span>
+                            </div>
+                        @endif
+                        
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none"></div>
 
-                    {{-- 2. OLD: External Link --}}
-                    @elseif($event->registration_link)
-                        <a href="{{ $event->registration_link }}" target="_blank" class="inline-flex items-center gap-2 px-6 py-3 md:px-8 md:py-4 bg-red-600 hover:bg-red-700 text-white font-bold uppercase tracking-wider rounded-xl shadow-xl hover:shadow-red-500/30 transition-all transform hover:-translate-y-1 text-xs md:text-sm">
-                            <span>{{ $event->registration_button_text ?? 'Register Now' }}</span>
-                            <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
-                        </a>
-                    @endif
-                @endif
+                        {{-- Responsive Status Badge --}}
+                        <div class="absolute top-4 right-4 md:top-6 md:right-6 z-10">
+                            @if($event->isOpen())
+                                <span class="px-3 py-1.5 md:px-4 md:py-2 bg-white/95 backdrop-blur text-green-700 text-[10px] md:text-xs font-black uppercase tracking-widest rounded-full flex items-center gap-1.5 md:gap-2 shadow-lg">
+                                    <span class="w-1.5 h-1.5 md:w-2 md:h-2 bg-green-500 rounded-full animate-pulse"></span> Open
+                                </span>
+                            @else
+                                <span class="px-3 py-1.5 md:px-4 md:py-2 bg-gray-900/95 backdrop-blur text-white text-[10px] md:text-xs font-black uppercase tracking-widest rounded-full flex items-center gap-1.5 md:gap-2 shadow-lg">
+                                    <span class="w-1.5 h-1.5 md:w-2 md:h-2 bg-gray-500 rounded-full"></span> Closed
+                                </span>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </header>
 

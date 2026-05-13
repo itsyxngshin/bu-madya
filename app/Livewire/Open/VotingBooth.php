@@ -57,39 +57,40 @@ class VotingBooth extends Component
 
     public function toggleSelection($positionId, $candidateId)
     {
-        // Fetch the specific position locally to check max_winners
-        $position = ElectionPosition::find($positionId);
-        if (!$position) return;
-
+        $position = $this->election->positions->find($positionId);
         $currentSelections = $this->selections[$positionId] ?? [];
 
-        // Logic 1: If they click "Abstain"
+        // Handle Abstain logic
         if ($candidateId === 'abstain') {
             if (in_array('abstain', $currentSelections)) {
                 $this->selections[$positionId] = []; // Un-abstain
             } else {
-                $this->selections[$positionId] = ['abstain']; // Clear candidates, set to abstain
+                $this->selections[$positionId] = ['abstain']; // Clear and set to abstain
             }
             return;
         }
 
-        // Logic 2: If they click a candidate while currently abstaining, clear abstain first
-        if (in_array('abstain', $currentSelections)) {
-            $currentSelections = [];
+        // Remove 'abstain' if they pick a real candidate
+        $currentSelections = array_diff($currentSelections, ['abstain']);
+
+        // If the candidate is already selected, unselect them
+        if (in_array($candidateId, $currentSelections)) {
+            $this->selections[$positionId] = array_diff($currentSelections, [$candidateId]);
+            return;
         }
 
-        // Logic 3: Toggle the candidate
-        if (in_array($candidateId, $currentSelections)) {
-            // Deselect candidate
-            $this->selections[$positionId] = array_values(array_diff($currentSelections, [$candidateId]));
+        // Auto-Swap Logic: If they can only pick 1, just replace the existing choice instantly!
+        if ($position->max_winners == 1) {
+            $this->selections[$positionId] = [$candidateId];
+            return;
+        }
+
+        // Multi-Select Logic: Add them if they haven't reached the limit
+        if (count($currentSelections) < $position->max_winners) {
+            $currentSelections[] = $candidateId;
+            $this->selections[$positionId] = $currentSelections;
         } else {
-            // Select candidate (but check limits first)
-            if (count($currentSelections) < $position->max_winners) {
-                $currentSelections[] = $candidateId;
-                $this->selections[$positionId] = array_values($currentSelections);
-            } else {
-                session()->flash('error', "You can only select up to {$position->max_winners} candidate(s) for {$position->title}.");
-            }
+            session()->flash('error', 'You can only select up to ' . $position->max_winners . ' candidates for this position.');
         }
     }
 

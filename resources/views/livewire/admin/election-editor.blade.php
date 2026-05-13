@@ -1,5 +1,5 @@
 <div class="max-w-5xl mx-auto py-8 md:py-12 px-4 sm:px-6 font-sans pb-32 animate-fade-in-up">
-    
+
     {{-- Header --}}
     <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
         <div>
@@ -11,7 +11,7 @@
             </h1>
             <p class="text-gray-500 font-medium ml-9 text-sm md:text-base">Configure ballot settings, timeline, positions, and parties.</p>
         </div>
-        
+
         @if($electionRecord)
             <button wire:click="confirmWipe" class="shrink-0 px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 font-bold text-xs uppercase tracking-widest rounded-xl border border-red-200 transition-colors flex items-center gap-2 outline-none focus:ring-2 focus:ring-red-500/30">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
@@ -23,7 +23,7 @@
     {{-- SUCCESS MESSAGE --}}
     @if (session()->has('success'))
         <div class="mb-6 bg-green-50 text-green-700 p-4 rounded-xl border border-green-200 font-bold flex items-center gap-2 text-sm animate-fade-in">
-            <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg> 
+            <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
             {{ session('success') }}
         </div>
     @endif
@@ -40,7 +40,7 @@
     @if($activeTab === 'details')
         <div class="bg-white rounded-[2rem] p-6 md:p-8 shadow-sm border border-gray-200 animate-fade-in">
             <h3 class="text-xl font-black text-gray-900 uppercase tracking-tight mb-6 border-b border-gray-100 pb-4">Basic Information</h3>
-            
+
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {{-- Cover Photo --}}
                 <div class="md:col-span-2 mb-2">
@@ -104,7 +104,7 @@
     @if($activeTab === 'timeline')
         <div class="bg-white rounded-[2rem] p-6 md:p-8 shadow-sm border border-gray-200 animate-fade-in">
             <h3 class="text-xl font-black text-gray-900 uppercase tracking-tight mb-6 border-b border-gray-100 pb-4">Election Timeline</h3>
-            
+
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Candidacy Filing Start</label>
@@ -154,7 +154,7 @@
             <div class="space-y-4">
                 @foreach($positions as $index => $pos)
                     <div class="flex flex-col md:flex-row items-start md:items-center gap-4 bg-gray-50 p-5 rounded-2xl border border-gray-200 relative group transition-colors hover:border-blue-300">
-                        
+
                         <div class="flex-1 w-full min-w-0">
                             <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Position Title</label>
                             <input wire:model="positions.{{ $index }}.title" type="text" placeholder="e.g. President, Senator" class="w-full bg-white border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all rounded-xl px-4 py-3 text-sm font-bold shadow-sm">
@@ -192,7 +192,7 @@
             <div class="space-y-4">
                 @forelse($electionParties as $index => $party)
                     <div class="flex flex-col md:flex-row items-start md:items-center gap-4 bg-gray-50 p-5 rounded-2xl border border-gray-200 relative group transition-colors hover:border-blue-300">
-                        
+
                         {{-- Logo Upload --}}
                         <div class="shrink-0 relative">
                             <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 text-center">Party Logo</label>
@@ -265,7 +265,7 @@
                     </div>
                     <h3 class="text-xl font-black text-red-600">Factory Reset Election</h3>
                 </div>
-                
+
                 <p class="text-sm text-gray-600 mb-6 leading-relaxed">
                     This action is <span class="font-bold text-gray-900">irreversible</span>. It will permanently delete all:
                     <ul class="list-disc list-inside mt-2 ml-2 font-bold text-gray-800 text-xs space-y-1">

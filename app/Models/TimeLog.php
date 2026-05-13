@@ -18,6 +18,7 @@ class TimeLog extends Model
         'afternoon_in',
         'afternoon_out',
         'total_minutes_rendered',
+        'is_overtime_approved',
         'status',
     ];
 
@@ -29,6 +30,7 @@ class TimeLog extends Model
         'afternoon_in' => 'datetime',
         'afternoon_out' => 'datetime',
         'total_minutes_rendered' => 'integer',
+        'is_overtime_approved' => 'boolean',
     ];
 
     // 3. Setup the Inverse Relationship

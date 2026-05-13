@@ -1,7 +1,7 @@
 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mt-6">
     <div class="flex items-center justify-between mb-6">
         <h2 class="text-lg font-black text-gray-900">OJT Journal</h2>
-        <button wire:click="$set('showModal', true)" class="px-4 py-2 bg-red-50 text-red-600 hover:bg-red-100 font-bold rounded-lg transition-colors text-sm">
+        <button wire:click="createNewEntry" class="px-4 py-2 bg-red-50 text-red-600 hover:bg-red-100 font-bold rounded-lg transition-colors text-sm shadow-sm active:scale-95">
             + New Entry
         </button>
     </div>
@@ -12,12 +12,18 @@
         </div>
     @endif
 
-    {{-- Recent Entries List with Image Support --}}
+    {{-- Recent Entries List --}}
     <div class="space-y-4">
         @forelse($recentBlogs as $blog)
-            <div class="p-4 border border-gray-100 rounded-xl hover:bg-gray-50 transition">
+            <div class="p-4 border border-gray-100 rounded-xl hover:bg-gray-50 transition group">
                 <div class="flex justify-between items-start mb-2">
-                    <h3 class="font-bold text-gray-900">{{ $blog->title }}</h3>
+                    <div class="flex items-center gap-2">
+                        <h3 class="font-bold text-gray-900">{{ $blog->title }}</h3>
+                        {{-- EDIT BUTTON --}}
+                        <button wire:click="editBlog({{ $blog->id }})" class="text-gray-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity p-1 bg-white rounded-md shadow-sm border border-gray-100" title="Edit Entry">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                        </button>
+                    </div>
                     <span class="text-[10px] font-black uppercase px-2 py-1 bg-gray-100 text-gray-500 rounded">
                         {{ str_replace('_', ' ', $blog->type) }}
                     </span>
@@ -25,7 +31,6 @@
                 <p class="text-xs text-gray-500 mb-2">{{ \Carbon\Carbon::parse($blog->report_date)->format('M d, Y') }}</p>
                 <p class="text-sm text-gray-700 mb-3 line-clamp-3">{{ $blog->content }}</p>
 
-                {{-- Display the image if it exists --}}
                 @if($blog->attachment_path)
                     <div class="mt-2 rounded-lg overflow-hidden border border-gray-100 max-h-48 relative">
                         <img src="{{ asset('storage/' . $blog->attachment_path) }}" alt="Attachment" class="w-full h-full object-cover">
@@ -39,12 +44,15 @@
 
     {{-- The Blog Editor Modal --}}
     @if($showModal)
-        @teleport('body')
-            <div class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
-                <div @click.away="$wire.set('showModal', false)" class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 my-8 relative">
+        <teleport to="body">
+            <div class="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto" style="z-index: 99999;">
+                <div @click.away="$wire.resetForm()" class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 my-8 relative">
                     <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-lg font-black text-gray-900">Write OJT Log</h3>
-                        <button wire:click="$set('showModal', false)" class="text-gray-400 hover:text-gray-900"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+                        {{-- Dynamic Modal Title --}}
+                        <h3 class="text-lg font-black text-gray-900">
+                            {{ $editingBlogId ? 'Edit OJT Log' : 'Write OJT Log' }}
+                        </h3>
+                        <button wire:click="resetForm" class="text-gray-400 hover:text-gray-900"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
                     </div>
 
                     <form wire:submit.prevent="saveBlog" class="space-y-4">
@@ -76,7 +84,6 @@
                         <div>
                             <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Attach Photo (Optional)</label>
 
-                            {{-- Custom File Upload Button --}}
                             <div class="flex items-center justify-center w-full">
                                 <label class="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors">
                                     <div class="flex flex-col items-center justify-center pt-5 pb-6">
@@ -98,19 +105,24 @@
                                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                                     </button>
                                 </div>
+                            @elseif ($existingPhotoPath)
+                                <div class="mt-3 relative rounded-lg overflow-hidden border border-gray-200 inline-block h-32 opacity-75 hover:opacity-100 transition">
+                                    <img src="{{ asset('storage/' . $existingPhotoPath) }}" class="h-full object-cover">
+                                    <span class="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-[10px] font-bold text-center py-1">Current Photo</span>
+                                </div>
                             @endif
                         </div>
 
                         <div class="flex justify-end gap-2 mt-6 pt-4 border-t border-gray-100">
-                            <button type="button" wire:click="$set('showModal', false)" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-lg text-sm transition">Cancel</button>
+                            <button type="button" wire:click="resetForm" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-lg text-sm transition">Cancel</button>
                             <button type="submit" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg text-sm shadow-md transition-colors relative">
-                                <span wire:loading.remove wire:target="saveBlog">Save Log</span>
+                                <span wire:loading.remove wire:target="saveBlog">{{ $editingBlogId ? 'Update Log' : 'Save Log' }}</span>
                                 <span wire:loading wire:target="saveBlog">Saving...</span>
                             </button>
                         </div>
                     </form>
                 </div>
             </div>
-        @endteleport
+        </teleport>
     @endif
 </div>

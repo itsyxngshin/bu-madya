@@ -1,5 +1,5 @@
 <div class="max-w-7xl mx-auto py-8 px-4 font-sans pb-32">
-    
+
     {{-- Header --}}
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div>
@@ -42,10 +42,10 @@
                         <tr class="hover:bg-gray-50 transition-colors">
                             <td class="p-4 md:p-5">
                                 <div class="flex items-center gap-3">
-                                    @if($candidate->profile_photo_path) 
+                                    @if($candidate->profile_photo_path)
                                         <img src="{{ asset('storage/'.$candidate->profile_photo_path) }}" class="w-10 h-10 rounded-full object-cover shadow-sm border border-gray-200 shrink-0">
-                                    @else 
-                                        <div class="w-10 h-10 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center font-bold shrink-0">{{ $initial }}</div> 
+                                    @else
+                                        <div class="w-10 h-10 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center font-bold shrink-0">{{ $initial }}</div>
                                     @endif
                                     <div>
                                         <p class="font-black text-gray-900 text-sm md:text-base break-words">{{ $candidateName }}</p>
@@ -154,8 +154,8 @@
                         <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1.5">Political Party</label>
                         <select wire:model="testPartyId" class="w-full bg-gray-50 border border-gray-200 focus:border-blue-500 rounded-xl px-4 py-3 text-sm font-bold shadow-sm">
                             <option value="">Independent (No Party)</option>
-                            @foreach($parties ?? [] as $party) 
-                                <option value="{{ $party->id }}">{{ $party->name }}</option> 
+                            @foreach($parties ?? [] as $party)
+                                <option value="{{ $party->id }}">{{ $party->name }}</option>
                             @endforeach
                         </select>
                         @error('testPartyId') <span class="text-[10px] text-red-500 font-bold block mt-1">{{ $message }}</span> @enderror
@@ -194,7 +194,7 @@
     @if($candidateToEdit)
         <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm flex items-center justify-center z-[60] p-4 sm:p-6 overflow-y-auto">
             <div class="bg-gray-50 rounded-[2.5rem] shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col my-8 animate-fade-in-up">
-                
+
                 {{-- Header (Fixed) --}}
                 <div class="bg-white px-8 py-6 rounded-t-[2.5rem] border-b border-gray-200 flex items-center justify-between shrink-0">
                     <div>
@@ -208,7 +208,7 @@
 
                 {{-- Scrollable Content Area --}}
                 <div class="p-6 md:p-8 overflow-y-auto flex-1 space-y-8">
-                    
+
                     {{-- Identity & Affiliation --}}
                     <div class="bg-white rounded-[2rem] p-6 shadow-sm border border-gray-200">
                         <h4 class="text-lg font-black text-gray-900 mb-4 border-b border-gray-100 pb-4">Candidate Identity & Affiliation</h4>

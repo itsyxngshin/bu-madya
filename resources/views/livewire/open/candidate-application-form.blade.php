@@ -1,5 +1,5 @@
 <div class="max-w-4xl mx-auto py-8 md:py-12 px-4 sm:px-6 font-sans pb-32">
-    
+
     {{-- HEADER --}}
     <div class="bg-white rounded-[2rem] shadow-sm border border-gray-200 overflow-hidden mb-8 relative">
         @if($election->cover_photo_path)
@@ -51,7 +51,7 @@
     {{-- STATE 4: APPLICATION FORM IS OPEN --}}
     @else
         <form wire:submit.prevent="submitApplication" class="space-y-8 animate-fade-in-up">
-            
+
             <div class="bg-green-50 border border-green-200 rounded-2xl p-4 text-center shadow-sm">
                 <p class="text-green-800 font-bold text-sm flex items-center justify-center gap-2">
                     <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
@@ -69,9 +69,9 @@
             {{-- SECTION 1: BASIC PROFILE --}}
             <div class="bg-white rounded-[2rem] p-6 md:p-8 shadow-sm border border-gray-200">
                 <h3 class="text-xl font-black text-gray-900 mb-6 border-b border-gray-100 pb-4">1. Academic & Ballot Profile</h3>
-                
+
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    
+
                     <div class="md:col-span-2">
                         <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Campaign Photo (Optional)</label>
                         <div class="flex items-center gap-5">

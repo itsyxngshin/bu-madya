@@ -77,8 +77,8 @@ use App\Models\MembershipApplication;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Response;
 
-use \App\Livewire\Partner\SubmitFrame;
-use \App\Livewire\Partner\PartnerDashboard;
+use App\Livewire\Partner\SubmitFrame;
+use App\Livewire\Partner\PartnerDashboard;
 
 use App\Livewire\Community\PostFeed;
 use App\Livewire\Community\PostEditor;
@@ -86,7 +86,9 @@ use App\Livewire\Community\PostView;
 use App\Livewire\Admin\CommunityManager;
 
 use App\Livewire\Ojt\CoordinatorView;
-use App\Livewire\Webmaster\Dashboard as WebmasterDashboard; 
+use App\Livewire\Webmaster\Dashboard as WebmasterDashboard;
+
+$baseDomain = parse_url(config('app.url'), PHP_URL_HOST) ?? 'localhost';
 
 Route::domain('webmaster.' . env('APP_DOMAIN'))->group(function () {
 
@@ -100,7 +102,7 @@ Route::domain('webmaster.' . env('APP_DOMAIN'))->group(function () {
 
     // Public Coordinator View (Unauthenticated so your coordinator can view it)
     Route::get('/ojt/{username}', CoordinatorView::class)->name('ojt.public');
-});  
+});
 
 
 // SUBDOMAIN ROUTING: community.bu-madya.space
@@ -169,175 +171,181 @@ Route::middleware([
 });
 */
 
-Route::get('/events/{event:slug}/scan', EventScanner::class)->name('admin.events.scan');
+Route::domain($baseDomain)->group(function () {
 
-// Middleware accessible to both members and directors
-Route::middleware(['auth', 'role:director'])->prefix('director')->name('director.')
-    ->group(function () {
-    Route::get('/dashboard', Dashboard::class)->name('dashboard');
-    Route::get('/project/create', ProjectsCreate::class)->name('projects.create');
-    Route::get('/projects/{project:slug}/edit', ProjectsEdit::class)->name('projects.edit');
-    Route::get('/profile/edit', EditProfile::class)->name('profile.edit');
-    Route::get('/news/create', NewsCreate::class)->name('news.create');
-    Route::get('/linkage/create', LinkagesCreate::class)->name('linkages.create');
-    Route::get('/director/the-pillars', ThePillarsManager::class)->name('pillars.index');
-    Route::get('/proposals/{proposal}', ProposalsShow::class)->name('admin.proposals.show');
-    Route::get('/proposals', ProposalsIndex::class)->name('proposals.index');
-    Route::get('/news/{slug}/edit', NewsEdit::class)->name('news.edit');
-    Route::get('/linkage/{linkage:slug}/edit', LinkagesEdit::class)->name('linkages.edit');
-    Route::get('/projects', ProjectRoster::class)->name('projects.index');
-    Route::get('/linkages', LinkagesRoster::class)->name('linkages.index');
-    Route::get('/news', NewsRoster::class)->name('news.index');
-    Route::get('/user', UserRoster::class)->name('user.index');
-    Route::get('/evaluations/{evaluation}/edit', EvaluationBuilder::class)->name('evaluations.edit');
-    Route::get('/evaluations/{evaluation}/results', EvaluationResults::class)->name('evaluations.results');
-    Route::get('/evaluations', AdminEvaluationIndex::class)->name('evaluations.index');
-    Route::get('/evaluations/create', EvaluationBuilder::class)->name('evaluations.create');
-    Route::get('/campaigns', CampaignList::class)->name('campaigns.index');
-    Route::get('/campaigns/create', CampaignBuilder::class)->name('campaigns.create');
-    Route::get('/campaigns/{slug}/edit', CampaignBuilder::class)->name('campaigns.edit');
-    Route::get('/campaigns/{slug}/results', CampaignAnalytics::class)->name('campaigns.results');
-    Route::get('/community/moderation', CommunityManager::class)->name('community.moderation');
+    Route::get('/events/{event:slug}/scan', EventScanner::class)->name('admin.events.scan');
 
-});
+    // Middleware accessible to both members and directors
+    Route::middleware(['auth', 'role:director'])->prefix('director')->name('director.')
+        ->group(function () {
+        Route::get('/dashboard', Dashboard::class)->name('dashboard');
+        Route::get('/project/create', ProjectsCreate::class)->name('projects.create');
+        Route::get('/projects/{project:slug}/edit', ProjectsEdit::class)->name('projects.edit');
+        Route::get('/profile/edit', EditProfile::class)->name('profile.edit');
+        Route::get('/news/create', NewsCreate::class)->name('news.create');
+        Route::get('/linkage/create', LinkagesCreate::class)->name('linkages.create');
+        Route::get('/director/the-pillars', ThePillarsManager::class)->name('pillars.index');
+        Route::get('/proposals/{proposal}', ProposalsShow::class)->name('admin.proposals.show');
+        Route::get('/proposals', ProposalsIndex::class)->name('proposals.index');
+        Route::get('/news/{slug}/edit', NewsEdit::class)->name('news.edit');
+        Route::get('/linkage/{linkage:slug}/edit', LinkagesEdit::class)->name('linkages.edit');
+        Route::get('/projects', ProjectRoster::class)->name('projects.index');
+        Route::get('/linkages', LinkagesRoster::class)->name('linkages.index');
+        Route::get('/news', NewsRoster::class)->name('news.index');
+        Route::get('/user', UserRoster::class)->name('user.index');
+        Route::get('/evaluations/{evaluation}/edit', EvaluationBuilder::class)->name('evaluations.edit');
+        Route::get('/evaluations/{evaluation}/results', EvaluationResults::class)->name('evaluations.results');
+        Route::get('/evaluations', AdminEvaluationIndex::class)->name('evaluations.index');
+        Route::get('/evaluations/create', EvaluationBuilder::class)->name('evaluations.create');
+        Route::get('/campaigns', CampaignList::class)->name('campaigns.index');
+        Route::get('/campaigns/create', CampaignBuilder::class)->name('campaigns.create');
+        Route::get('/campaigns/{slug}/edit', CampaignBuilder::class)->name('campaigns.edit');
+        Route::get('/campaigns/{slug}/results', CampaignAnalytics::class)->name('campaigns.results');
+        Route::get('/community/moderation', CommunityManager::class)->name('community.moderation');
 
-Route::middleware(['auth'])
-    ->group(function () {
-    Route::get('/roundtable', RoundtableIndex::class)->name('roundtable.index');
-    Route::get('/roundtable/{id}', RoundtableShow::class)->name('roundtable.show');
-    Route::get('/evaluations', EvaluationList::class)->name('evaluations.index');
+    });
+
+    Route::middleware(['auth'])
+        ->group(function () {
+        Route::get('/roundtable', RoundtableIndex::class)->name('roundtable.index');
+        Route::get('/roundtable/{id}', RoundtableShow::class)->name('roundtable.show');
+        Route::get('/evaluations', EvaluationList::class)->name('evaluations.index');
+        Route::get('/elections/{election:slug}/apply', \App\Livewire\Open\CandidateApplicationForm::class)->name('elections.apply');
+
+
+    });
+
+    Route::get('/elections/{election:slug}/vote', \App\Livewire\Open\VotingBooth::class)->name('elections.vote');
+    Route::get('/candidate/{candidate}', CandidateProfile::class)->name('candidate.profile');
+    Route::get('/elections/{election:slug}/results', \App\Livewire\Open\PublicElectionResults::class)->name('elections.public-results');
     Route::get('/elections/{election:slug}/apply', \App\Livewire\Open\CandidateApplicationForm::class)->name('elections.apply');
 
 
+
+    Route::middleware(['auth', 'role:administrator'])->prefix('admin')->name('admin.')->group(function () {
+        Route::get('/projects', ProjectRoster::class)->name('projects.index');
+        Route::get('/linkages', LinkagesRoster::class)->name('linkages.index');
+        Route::get('/news', NewsRoster::class)->name('news.index');
+        Route::get('/user', UserRoster::class)->name('user.index');
+        Route::get('/settings', Settings::class)->name('settings');
+        Route::get('/profile/edit', EditProfile::class)->name('profile.edit');
+        Route::get('/campaigns', CampaignList::class)->name('campaigns.index');
+        Route::get('/campaigns/create', CampaignBuilder::class)->name('campaigns.create');
+        Route::get('/campaigns/{slug}/edit', CampaignBuilder::class)->name('campaigns.edit');
+        Route::get('/membership/settings', MembershipSetting::class)->name('membership-settings');
+        Route::get('/membership/requests', MembershipRequests::class)->name('membership-requests');
+        Route::get('/dashboard', AdminDashboard::class)->name('dashboard');
+        Route::get('/events', AdminEventIndex::class)->name('events.index');
+        Route::get('/events/create', CreateEvent::class)->name('events.create');
+        Route::get('/events/{id}/edit', EditEvent::class)->name('events.edit');
+        Route::get('/transparency', DocumentIndex::class)->name('transparency.index');
+        Route::get('/transparency/create', DocumentForm::class)->name('transparency.create');
+        Route::get('/transparency/{document}/edit', DocumentForm::class)->name('transparency.edit');
+        Route::get('/evaluations/create', EvaluationBuilder::class)->name('evaluations.create');
+        Route::get('/frames', FrameManager::class)->name('frames.index');
+        Route::get('/events/{event:slug}/raffle', EventRaffle::class)->name('events.raffle');
+        Route::get('/submit-frame', SubmitFrame::class)->name('frames.submit');
+        Route::get('/linkages-proposals', LinkagesManager::class)->name('linkages.proposals');
+        Route::get('/welfare', \App\Livewire\Admin\WelfareManager::class)->name('welfare.index');
+        Route::get('/the-pillars', ThePillarsManager::class)->name('pillars.index');
+        Route::get('/campaigns/{slug}/results', CampaignAnalytics::class)->name('campaigns.results');
+        Route::get('/elections', \App\Livewire\Admin\ElectionList::class)->name('elections.index');
+        Route::get('/elections/manage', \App\Livewire\Admin\ElectionManager::class)->name('elections.manage');
+        Route::get('/elections/{election:slug}/vetting', \App\Livewire\Admin\ElectionDashboard::class)->name('elections.vetting');
+        Route::get('/elections/{election:slug}/results', \App\Livewire\Admin\ElectionResults::class)->name('elections.results');
+        Route::get('/elections/{election:slug}/edit', \App\Livewire\Admin\ElectionEditor::class)->name('elections.edit');
+        Route::get('/elections/{election:slug}/logs', ElectionVoterLogs::class)->name('elections.logs');
+        Route::get('/community/moderation', CommunityManager::class)->name('community.moderation');
+    });
+
+    Route::middleware(['auth', 'role:organization'])->prefix('partner')->name('partner.')
+        ->group(function () {
+        Route::get('/dashboard', PartnerDashboard::class)->name('dashboard');
+        Route::get('/submit-frame', SubmitFrame::class)->name('frames.submit');
+        Route::get('/event/{event:slug}/registrants', EventRegistrants::class)->name('events.registrants');
+        Route::get('/events', AdminEventIndex::class)->name('events.index');
+        Route::get('/event/create', CreateEvent::class)->name('events.create');
+        Route::get('/events/{id}/edit', EditEvent::class)->name('events.edit');
+        Route::get('/events/{event:slug}/raffle', EventRaffle::class)->name('events.raffle');
+        Route::get('/profile/edit', EditProfile::class)->name('profile.edit');
+        Route::get('/events/{event:slug}/registrants', EventRegistrants::class)->name('events.registrants');
+        Route::get('/events/{event:slug}/raffle', EventRaffle::class)->name('events.raffle');
+        Route::get('/welfare', \App\Livewire\Admin\WelfareManager::class)->name('welfare.index');
+        Route::get('/evaluations/create', EvaluationBuilder::class)->name('evaluations.create');
+        Route::get('/manage/evaluations/{evaluation}/edit', EvaluationBuilder::class)->name('evaluations.edit');
+        Route::get('/manage/evaluations/{evaluation}/results', EvaluationResults::class)->name('evaluations.results');
+        Route::get('/manage/evaluations', AdminEvaluationIndex::class)->name('evaluations.index');
+        Route::get('/campaigns', CampaignList::class)->name('campaigns.index');
+        Route::get('/campaigns/create', CampaignBuilder::class)->name('campaigns.create');
+        Route::get('/campaigns/{slug}/edit', CampaignBuilder::class)->name('campaigns.edit');
+        Route::get('/campaigns/{slug}/results', CampaignAnalytics::class)->name('campaigns.results');
+        Route::get('/elections', \App\Livewire\Admin\ElectionList::class)->name('elections.index');
+        Route::get('/elections/manage', \App\Livewire\Admin\ElectionManager::class)->name('elections.manage');
+        Route::get('/elections/{election:slug}/vetting', \App\Livewire\Admin\ElectionDashboard::class)->name('elections.vetting');
+        Route::get('/elections/{election:slug}/results', \App\Livewire\Admin\ElectionResults::class)->name('elections.results');
+        Route::get('/elections/{election:slug}/edit', \App\Livewire\Admin\ElectionEditor::class)->name('elections.edit');
+
+    });
+
+    Route::middleware(['auth', 'role:member'])->prefix('member')->name('member.')
+        ->group(function () {
+        Route::get('/profile/edit', EditProfile::class)->name('profile.edit');
+
+    });
+
+    Route::middleware(['auth', 'role:administrator,director'])
+        ->group(function () {
+        Route::get('/dashboard', Dashboard::class)->name('dashboard');
+        Route::get('/project/create', ProjectsCreate::class)->name('projects.create');
+        Route::get('/projects/{project:slug}/edit', ProjectsEdit::class)->name('projects.edit');
+        Route::get('/profile/edit', EditProfile::class)->name('profile.edit');
+        Route::get('/news/create', NewsCreate::class)->name('news.create');
+        Route::get('/linkage/create', LinkagesCreate::class)->name('linkages.create');
+        Route::get('/director/the-pillars', ThePillarsManager::class)->name('director.pillars.index');
+        Route::get('/proposals/{proposal}', ProposalsShow::class)->name('admin.proposals.show');
+        Route::get('/proposals', ProposalsIndex::class)->name('admin.proposals.index');
+        Route::get('/news/{slug}/edit', NewsEdit::class)->name('news.edit');
+        Route::get('/linkage/{linkage:slug}/edit', LinkagesEdit::class)->name('linkages.edit');
+        Route::get('/manage/evaluations/{evaluation}/edit', EvaluationBuilder::class)->name('admin.evaluations.edit');
+        Route::get('/manage/evaluations/{evaluation}/results', EvaluationResults::class)->name('admin.evaluations.results');
+        Route::get('/manage/evaluations', AdminEvaluationIndex::class)->name('admin.evaluations.index');
+        Route::get('/events/{event:slug}/registrants', EventRegistrants::class)->name('admin.events.registrants');
+        Route::get('/director/submit-frame', SubmitFrame::class)->name('frames.submit');
+
+    });
+
+    // Public view blades with access control on parts of the navigation
+    Route::get('/', LandingPage::class)->name('open.home');
+    Route::get('/about', About::class)->name('about');
+    Route::get('/directory', Directory::class)->name('open.directory');
+    Route::get('/committees', Committees::class)->name('open.committees');
+    Route::get('/committees/{committee:slug}', CommitteeMembers::class)->name('open.committees.show');
+    Route::get('/news', NewsIndex::class)->name('news.index');
+    Route::get('/news/{slug}', NewsShow::class)->name('news.show');
+    Route::get('/projects', ProjectsIndex::class)->name('projects.index');
+    Route::get('/projects/{project:slug}', ProjectsShow::class)->name('projects.show');
+    Route::get('/linkages', LinkagesIndex::class)->name('linkages.index');
+    Route::get('/linkages/{linkage:slug}', LinkagesShow::class)->name('linkages.show');
+    Route::get('/partner-with-us', LinkagesProposal::class)->name('linkages.proposal');
+    Route::get('/profile/{username}', UserProfile::class)->name('profile.public');
+    Route::get('/submit-proposal', ProposalsCreate::class)->name('proposals.create');
+    Route::get('/the-pillars', ThePillars::class)->name('pillars.index');
+    Route::get('/calendar', EventsCalendar::class)->name('event-calendar');
+    Route::get('/membership-form', RegistrationForm::class)->name('membership-form');
+    Route::get('/events', EventsIndex::class)->name('events.index');
+    Route::get('/events/{slug}', EventShow::class)->name('events.show');
+    Route::get('/transparency', TransparencyIndex::class)->name('transparency.index');
+    Route::get('/events/{event:slug}/register', EventRsvp::class)->name('events.rsvp');
+    Route::get('/frames/{slug}', FrameBuilder::class)->name('open.frames.show');
+    Route::get('/partners/register', RegisterOrganization::class)->name('register.partner');
+    Route::get('/discover', EventDiscovery::class)->name('open.events.index');
+    Route::get('/privacy', PrivacyPolicy::class)->name('privacy');
+    Route::get('/campaigns/{slug}', CampaignView::class)->name('campaigns.show');
+    Route::get('/evaluations/{evaluation}', EvaluationForm::class)->name('evaluations.show');
+
+
 });
 
-Route::get('/elections/{election:slug}/vote', \App\Livewire\Open\VotingBooth::class)->name('elections.vote');
-Route::get('/candidate/{candidate}', CandidateProfile::class)->name('candidate.profile');
-Route::get('/elections/{election:slug}/results', \App\Livewire\Open\PublicElectionResults::class)->name('elections.public-results');
-Route::get('/elections/{election:slug}/apply', \App\Livewire\Open\CandidateApplicationForm::class)->name('elections.apply');
-
-
-
-Route::middleware(['auth', 'role:administrator'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/projects', ProjectRoster::class)->name('projects.index');
-    Route::get('/linkages', LinkagesRoster::class)->name('linkages.index');
-    Route::get('/news', NewsRoster::class)->name('news.index');
-    Route::get('/user', UserRoster::class)->name('user.index');
-    Route::get('/settings', Settings::class)->name('settings');
-    Route::get('/profile/edit', EditProfile::class)->name('profile.edit');
-    Route::get('/campaigns', CampaignList::class)->name('campaigns.index');
-    Route::get('/campaigns/create', CampaignBuilder::class)->name('campaigns.create');
-    Route::get('/campaigns/{slug}/edit', CampaignBuilder::class)->name('campaigns.edit');
-    Route::get('/membership/settings', MembershipSetting::class)->name('membership-settings');
-    Route::get('/membership/requests', MembershipRequests::class)->name('membership-requests');
-    Route::get('/dashboard', AdminDashboard::class)->name('dashboard');
-    Route::get('/events', AdminEventIndex::class)->name('events.index');
-    Route::get('/events/create', CreateEvent::class)->name('events.create');
-    Route::get('/events/{id}/edit', EditEvent::class)->name('events.edit');
-    Route::get('/transparency', DocumentIndex::class)->name('transparency.index');
-    Route::get('/transparency/create', DocumentForm::class)->name('transparency.create');
-    Route::get('/transparency/{document}/edit', DocumentForm::class)->name('transparency.edit');
-    Route::get('/evaluations/create', EvaluationBuilder::class)->name('evaluations.create');
-    Route::get('/frames', FrameManager::class)->name('frames.index');
-    Route::get('/events/{event:slug}/raffle', EventRaffle::class)->name('events.raffle');
-    Route::get('/submit-frame', SubmitFrame::class)->name('frames.submit');
-    Route::get('/linkages-proposals', LinkagesManager::class)->name('linkages.proposals');
-    Route::get('/welfare', \App\Livewire\Admin\WelfareManager::class)->name('welfare.index');
-    Route::get('/the-pillars', ThePillarsManager::class)->name('pillars.index');
-    Route::get('/campaigns/{slug}/results', CampaignAnalytics::class)->name('campaigns.results');
-    Route::get('/elections', \App\Livewire\Admin\ElectionList::class)->name('elections.index');
-    Route::get('/elections/manage', \App\Livewire\Admin\ElectionManager::class)->name('elections.manage');
-    Route::get('/elections/{election:slug}/vetting', \App\Livewire\Admin\ElectionDashboard::class)->name('elections.vetting');
-    Route::get('/elections/{election:slug}/results', \App\Livewire\Admin\ElectionResults::class)->name('elections.results');
-    Route::get('/elections/{election:slug}/edit', \App\Livewire\Admin\ElectionEditor::class)->name('elections.edit');
-    Route::get('/elections/{election:slug}/logs', ElectionVoterLogs::class)->name('elections.logs');
-    Route::get('/community/moderation', CommunityManager::class)->name('community.moderation');
-});
-
-Route::middleware(['auth', 'role:organization'])->prefix('partner')->name('partner.')
-    ->group(function () {
-    Route::get('/dashboard', PartnerDashboard::class)->name('dashboard');
-    Route::get('/submit-frame', SubmitFrame::class)->name('frames.submit');
-    Route::get('/event/{event:slug}/registrants', EventRegistrants::class)->name('events.registrants');
-    Route::get('/events', AdminEventIndex::class)->name('events.index');
-    Route::get('/event/create', CreateEvent::class)->name('events.create');
-    Route::get('/events/{id}/edit', EditEvent::class)->name('events.edit');
-    Route::get('/events/{event:slug}/raffle', EventRaffle::class)->name('events.raffle');
-    Route::get('/profile/edit', EditProfile::class)->name('profile.edit');
-    Route::get('/events/{event:slug}/registrants', EventRegistrants::class)->name('events.registrants');
-    Route::get('/events/{event:slug}/raffle', EventRaffle::class)->name('events.raffle');
-    Route::get('/welfare', \App\Livewire\Admin\WelfareManager::class)->name('welfare.index');
-    Route::get('/evaluations/create', EvaluationBuilder::class)->name('evaluations.create');
-    Route::get('/manage/evaluations/{evaluation}/edit', EvaluationBuilder::class)->name('evaluations.edit');
-    Route::get('/manage/evaluations/{evaluation}/results', EvaluationResults::class)->name('evaluations.results');
-    Route::get('/manage/evaluations', AdminEvaluationIndex::class)->name('evaluations.index');
-    Route::get('/campaigns', CampaignList::class)->name('campaigns.index');
-    Route::get('/campaigns/create', CampaignBuilder::class)->name('campaigns.create');
-    Route::get('/campaigns/{slug}/edit', CampaignBuilder::class)->name('campaigns.edit');
-    Route::get('/campaigns/{slug}/results', CampaignAnalytics::class)->name('campaigns.results');
-    Route::get('/elections', \App\Livewire\Admin\ElectionList::class)->name('elections.index');
-    Route::get('/elections/manage', \App\Livewire\Admin\ElectionManager::class)->name('elections.manage');
-    Route::get('/elections/{election:slug}/vetting', \App\Livewire\Admin\ElectionDashboard::class)->name('elections.vetting');
-    Route::get('/elections/{election:slug}/results', \App\Livewire\Admin\ElectionResults::class)->name('elections.results');
-    Route::get('/elections/{election:slug}/edit', \App\Livewire\Admin\ElectionEditor::class)->name('elections.edit');
-
-});
-
-Route::middleware(['auth', 'role:member'])->prefix('member')->name('member.')
-    ->group(function () {
-    Route::get('/profile/edit', EditProfile::class)->name('profile.edit');
-
-});
-
-Route::middleware(['auth', 'role:administrator,director'])
-    ->group(function () {
-    Route::get('/dashboard', Dashboard::class)->name('dashboard');
-    Route::get('/project/create', ProjectsCreate::class)->name('projects.create');
-    Route::get('/projects/{project:slug}/edit', ProjectsEdit::class)->name('projects.edit');
-    Route::get('/profile/edit', EditProfile::class)->name('profile.edit');
-    Route::get('/news/create', NewsCreate::class)->name('news.create');
-    Route::get('/linkage/create', LinkagesCreate::class)->name('linkages.create');
-    Route::get('/director/the-pillars', ThePillarsManager::class)->name('director.pillars.index');
-    Route::get('/proposals/{proposal}', ProposalsShow::class)->name('admin.proposals.show');
-    Route::get('/proposals', ProposalsIndex::class)->name('admin.proposals.index');
-    Route::get('/news/{slug}/edit', NewsEdit::class)->name('news.edit');
-    Route::get('/linkage/{linkage:slug}/edit', LinkagesEdit::class)->name('linkages.edit');
-    Route::get('/manage/evaluations/{evaluation}/edit', EvaluationBuilder::class)->name('admin.evaluations.edit');
-    Route::get('/manage/evaluations/{evaluation}/results', EvaluationResults::class)->name('admin.evaluations.results');
-    Route::get('/manage/evaluations', AdminEvaluationIndex::class)->name('admin.evaluations.index');
-    Route::get('/events/{event:slug}/registrants', EventRegistrants::class)->name('admin.events.registrants');
-    Route::get('/director/submit-frame', SubmitFrame::class)->name('frames.submit');
-
-});
-
-// Public view blades with access control on parts of the navigation
-Route::get('/', LandingPage::class)->name('open.home');
-Route::get('/about', About::class)->name('about');
-Route::get('/directory', Directory::class)->name('open.directory');
-Route::get('/committees', Committees::class)->name('open.committees');
-Route::get('/committees/{committee:slug}', CommitteeMembers::class)->name('open.committees.show');
-Route::get('/news', NewsIndex::class)->name('news.index');
-Route::get('/news/{slug}', NewsShow::class)->name('news.show');
-Route::get('/projects', ProjectsIndex::class)->name('projects.index');
-Route::get('/projects/{project:slug}', ProjectsShow::class)->name('projects.show');
-Route::get('/linkages', LinkagesIndex::class)->name('linkages.index');
-Route::get('/linkages/{linkage:slug}', LinkagesShow::class)->name('linkages.show');
-Route::get('/partner-with-us', LinkagesProposal::class)->name('linkages.proposal');
-Route::get('/profile/{username}', UserProfile::class)->name('profile.public');
-Route::get('/submit-proposal', ProposalsCreate::class)->name('proposals.create');
-Route::get('/the-pillars', ThePillars::class)->name('pillars.index');
-Route::get('/calendar', EventsCalendar::class)->name('event-calendar');
-Route::get('/membership-form', RegistrationForm::class)->name('membership-form');
-Route::get('/events', EventsIndex::class)->name('events.index');
-Route::get('/events/{slug}', EventShow::class)->name('events.show');
-Route::get('/transparency', TransparencyIndex::class)->name('transparency.index');
-Route::get('/events/{event:slug}/register', EventRsvp::class)->name('events.rsvp');
-Route::get('/frames/{slug}', FrameBuilder::class)->name('open.frames.show');
-Route::get('/partners/register', RegisterOrganization::class)->name('register.partner');
-Route::get('/discover', EventDiscovery::class)->name('open.events.index');
-Route::get('/privacy', PrivacyPolicy::class)->name('privacy');
-Route::get('/campaigns/{slug}', CampaignView::class)->name('campaigns.show');
-Route::get('/evaluations/{evaluation}', EvaluationForm::class)->name('evaluations.show');
 
 
 

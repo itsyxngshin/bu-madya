@@ -18,12 +18,22 @@
             {{-- ========================================== --}}
             <h2 class="text-sm font-bold text-gray-500 uppercase tracking-widest mb-1">Current Status</h2>
 
-            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider mb-6
+            {{-- Status Badge (Dynamic Tricolor) --}}
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider mb-2
                 @if(str_contains($currentStatus, 'Clocked In')) bg-green-100 text-green-700
                 @elseif($currentStatus === 'On Lunch Break') bg-yellow-100 text-yellow-700
                 @else bg-red-100 text-red-700 @endif">
                 {{ $currentStatus }}
             </span>
+
+            {{-- NEW: Office Hours / Overtime Indicator --}}
+            <div class="mb-6 flex justify-center">
+                <span class="px-2.5 py-1 bg-gray-50 border border-gray-200 text-gray-500 rounded text-[10px] font-bold uppercase tracking-widest shadow-sm flex items-center gap-1.5">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    Standard Hours: 08:00 AM - 05:00 PM
+                </span>
+            </div>
+
 
             {{-- Only show live ticking clock if looking at TODAY --}}
             @if($selectedDate === \Carbon\Carbon::today()->format('Y-m-d'))

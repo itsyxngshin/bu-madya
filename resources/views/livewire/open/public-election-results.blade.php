@@ -12,7 +12,7 @@
 
     {{-- ELECTION HEADER --}}
     <div class="bg-white rounded-[2.5rem] shadow-lg border border-gray-200 overflow-hidden mb-8">
-        
+
         @if($election->cover_photo_path)
             <img src="{{ asset('storage/'.$election->cover_photo_path) }}" class="w-full h-auto block">
         @else
@@ -21,15 +21,15 @@
                 <div class="absolute -bottom-16 left-1/2 -translate-x-1/2 w-96 h-96 bg-white/20 rounded-full blur-3xl pointer-events-none"></div>
             </div>
         @endif
-        
+
         <div class="p-6 md:p-10 text-center relative">
             <p class="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em] mb-2">Official Electoral Return</p>
             <h1 class="text-3xl md:text-5xl font-black text-gray-900 tracking-tighter leading-tight mb-4 break-words">{{ $election->title }}</h1>
-            
+
             @if($election->description)
                 <p class="text-sm md:text-base text-gray-600 font-medium leading-relaxed mb-6 max-w-3xl mx-auto">{{ $election->description }}</p>
             @endif
-            
+
             <div wire:poll.10s class="inline-flex items-center gap-2 bg-gray-50 border border-gray-200 px-4 py-2 rounded-xl shadow-sm">
                 <div class="w-2 h-2 rounded-full {{ $isReleased ? 'bg-green-500' : 'bg-orange-500 animate-pulse' }}"></div>
                 <span class="text-[10px] md:text-xs font-bold text-gray-700 uppercase tracking-wider">Total Turnout: <span class="text-gray-900 font-black">{{ number_format($totalTurnout ?? 0) }} Voters</span></span>
@@ -95,7 +95,7 @@
                                             <p class="font-black text-gray-900 leading-snug text-base group-hover:text-orange-600 transition-colors break-words">
                                                 {{ $candidate->display_name ?? optional($candidate->user)->name ?? 'Unknown' }}
                                             </p>
-                                            
+
                                             {{-- Pre-Release Party Display --}}
                                             @php
                                                 if ($hasParties) {
@@ -103,13 +103,13 @@
                                                     $partyColor = optional($candidate->party)->color ?? '#6b7280';
                                                 }
                                             @endphp
-                                            
+
                                             @if($hasParties)
                                                 <p style="color: {{ $partyColor }};" class="text-[10px] font-black uppercase tracking-widest mt-1 mb-0.5 truncate">{{ $partyName }}</p>
                                             @endif
-                                            
+
                                             <p class="text-[10px] md:text-xs font-bold text-gray-500 uppercase tracking-wider {{ $hasParties ? 'mt-0' : 'mt-1' }} leading-tight">
-                                                <span class="text-gray-700">{{ $candidate->college->name ?? 'N/A' }}</span> <span class="hidden sm:inline">•</span><br class="block sm:hidden"> 
+                                                <span class="text-gray-700">{{ $candidate->college->name ?? 'N/A' }}</span> <span class="hidden sm:inline">•</span><br class="block sm:hidden">
                                                 {{ $candidate->program }}
                                             </p>
                                         </div>
@@ -170,7 +170,7 @@
                 @endphp
 
                 <div class="bg-white rounded-[2rem] shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-gray-200 flex flex-col overflow-hidden">
-                    
+
                     <div class="h-2 w-full bg-gradient-to-r from-red-600 via-yellow-400 to-green-600"></div>
 
                     <div class="bg-gray-50 border-b-[3px] border-dashed border-gray-200 px-6 md:px-8 py-5 flex flex-col md:flex-row md:items-center justify-between gap-3">
@@ -188,7 +188,7 @@
                                     $percentage = $maxPossibleVotes > 0 ? ($candidate->votes_count / $maxPossibleVotes) * 100 : 0;
                                     $isWinner = $index < $position->max_winners && $candidate->votes_count > 0;
                                     $candidateName = $candidate->display_name ?? optional($candidate->user)->name ?? 'Unknown';
-                                    
+
                                     // DYNAMIC PARTY LOGIC
                                     if ($hasParties) {
                                         $partyName = optional($candidate->party)->name ?? 'Independent';
@@ -205,7 +205,7 @@
                                             {{ $isWinner ? 'border-[color:var(--party-color)] bg-[color:var(--party-bg)] shadow-sm transform -translate-y-0.5' : 'border-gray-200 hover:border-[color:var(--party-color)] hover:shadow-sm' }}">
 
                                     {{-- Progress Bar --}}
-                                    <div class="absolute top-0 left-0 bottom-0 opacity-15 transition-all duration-1000 ease-out" 
+                                    <div class="absolute top-0 left-0 bottom-0 opacity-15 transition-all duration-1000 ease-out"
                                          style="width: {{ $percentage }}%; background-color: var(--party-color);"></div>
 
                                     <div class="relative z-10 flex items-center gap-3 md:gap-5">
@@ -242,7 +242,7 @@
                                             @endif
 
                                             <p class="text-[10px] md:text-xs text-gray-500 font-bold uppercase tracking-wider {{ $hasParties ? 'mt-0' : 'mt-1' }} leading-snug break-words">
-                                                <span class="text-gray-700">{{ $candidate->college->name ?? 'N/A' }}</span> <span class="hidden sm:inline">•</span><br class="block sm:hidden"> 
+                                                <span class="text-gray-700">{{ $candidate->college->name ?? 'N/A' }}</span> <span class="hidden sm:inline">•</span><br class="block sm:hidden">
                                                 {{ $candidate->program }}
                                             </p>
                                         </div>

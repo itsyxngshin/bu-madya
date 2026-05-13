@@ -12,7 +12,7 @@ class ElectionVoterLogs extends Component
     use WithPagination;
 
     public Election $election;
-    
+
     // Search & Filtering State
     public $search = '';
     public $filterType = 'all'; // 'all', 'registered', 'guest'

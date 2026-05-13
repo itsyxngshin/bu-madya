@@ -151,27 +151,33 @@
 
                                     if ($hasParties) {
                                         $partyName = optional($candidate->party)->name ?? 'Independent';
-                                        $partyColor = optional($candidate->party)->color ?? '#6b7280'; // Still use color for the TEXT ONLY
+                                        $partyColor = optional($candidate->party)->color ?? '#2563eb'; // Default to blue
+                                    } else {
+                                        $partyName = null;
+                                        $partyColor = '#2563eb'; // Default active color
                                     }
+
+                                    // Create a 10% opacity version of the color for the background
+                                    $partyBg = $partyColor . '1A';
                                 @endphp
 
-                                {{-- CRITICAL FIX: wire:key added here so selections don't vanish --}}
                                 <div wire:key="cand-{{ $position->id }}-{{ $candidate->id }}"
                                      wire:click="toggleSelection({{ $position->id }}, {{ $candidate->id }})"
+                                     style="{{ $isSelected ? 'border-color: ' . $partyColor . '; background-color: ' . $partyBg . ';' : '' }}"
                                      class="relative p-4 rounded-2xl border-2 transition-all duration-300 cursor-pointer flex items-center gap-4 group
-                                            {{ $isSelected ? 'border-blue-600 bg-blue-50/50 shadow-sm transform -translate-y-1' : 'border-gray-200 bg-white hover:border-blue-300 hover:bg-gray-50 hover:shadow-sm' }}">
+                                            {{ $isSelected ? 'shadow-sm transform -translate-y-1' : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50 hover:shadow-sm' }}">
 
-                                    {{-- Radio Checkbox --}}
-                                    <div class="w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors
-                                                {{ $isSelected ? 'border-blue-600 bg-blue-600' : 'border-gray-300 bg-white group-hover:border-blue-400' }}">
+                                    {{-- Radio Checkbox (Dynamic Color) --}}
+                                    <div class="w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors"
+                                         style="{{ $isSelected ? 'border-color: ' . $partyColor . '; background-color: ' . $partyColor . ';' : 'border-color: #d1d5db; background-color: #ffffff;' }}">
                                         @if($isSelected)
                                             <svg class="w-3.5 h-3.5 text-white animate-fade-in" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="4"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
                                         @endif
                                     </div>
 
-                                    {{-- Avatar --}}
-                                    <div class="w-12 h-12 rounded-full overflow-hidden shrink-0 border-2 transition-colors
-                                                {{ $isSelected ? 'border-blue-600' : 'border-transparent group-hover:border-blue-300' }} bg-gray-100">
+                                    {{-- Avatar (Dynamic Border) --}}
+                                    <div class="w-12 h-12 rounded-full overflow-hidden shrink-0 border-2 transition-colors bg-gray-100"
+                                         style="{{ $isSelected ? 'border-color: ' . $partyColor . ';' : 'border-color: transparent;' }}">
                                         @if($candidate->profile_photo_path)
                                             <img src="{{ asset('storage/'.$candidate->profile_photo_path) }}" class="w-full h-full object-cover">
                                         @else
@@ -181,13 +187,13 @@
 
                                     {{-- Info --}}
                                     <div class="flex-1 min-w-0 py-1">
-                                        <h3 class="text-sm md:text-base font-black leading-tight break-words transition-colors
-                                                   {{ $isSelected ? 'text-blue-900' : 'text-gray-900 group-hover:text-blue-700' }}">
+                                        {{-- Name Text (Dynamic Color) --}}
+                                        <h3 class="text-sm md:text-base font-black leading-tight break-words transition-colors"
+                                            style="{{ $isSelected ? 'color: ' . $partyColor . ';' : 'color: #111827;' }}">
                                             {{ $candidateName }}
                                         </h3>
 
                                         @if($hasParties)
-                                            {{-- We keep the text color specific to the party, but everything else is standard --}}
                                             <p style="color: {{ $partyColor }};" class="text-[10px] font-black uppercase tracking-widest mt-1 mb-0.5 truncate">{{ $partyName }}</p>
                                         @endif
 

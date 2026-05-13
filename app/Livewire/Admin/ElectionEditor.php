@@ -105,8 +105,8 @@ class ElectionEditor extends Component
     public function addParty()
     {
         $this->electionParties[] = [
-            'id' => null, 
-            'name' => '', 
+            'id' => null,
+            'name' => '',
             'color' => '#3b82f6', // Default starting color (Blue)
             'existing_logo' => null,
             'new_logo' => null,
@@ -164,7 +164,7 @@ class ElectionEditor extends Component
             'application_end' => 'required|date|after:application_start',
             'voting_start' => 'required|date|after:application_end',
             'voting_end' => 'required|date|after:voting_start',
-            
+
             // Validate Arrays
             'positions.*.title' => 'required|string|max:255',
             'positions.*.max_winners' => 'required|integer|min:1',
@@ -211,7 +211,7 @@ class ElectionEditor extends Component
             foreach ($this->positions as $index => $pos) {
                 $posId = $pos['id'] ?? null;
                 $posTitle = $pos['title'] ?? 'Unnamed Position';
-                
+
                 if ($posId) {
                     $position = ElectionPosition::find($posId);
                     if ($position) {
@@ -233,7 +233,7 @@ class ElectionEditor extends Component
             // 2. Sync Parties (THE FIX IS HERE)
             $savedPartyIds = [];
             foreach ($this->electionParties as $partyData) {
-                
+
                 // Bulletproof assignments using null coalescing (??)
                 // This prevents fatal PHP errors if Livewire stripped out empty keys
                 $partyId = $partyData['id'] ?? null;

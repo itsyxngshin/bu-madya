@@ -32,74 +32,76 @@
 
                 {{-- Cover Image --}}
                 @if($event->cover_image)
-                    <div class="w-full aspect-video md:aspect-[21/9] lg:aspect-[16/9] rounded-[2rem] overflow-hidden mb-8 shadow-2xl shadow-slate-200/50 ring-1 ring-slate-900/5 bg-slate-200">
+                    <div class="w-full aspect-video md:aspect-[21/9] lg:aspect-[16/9] rounded-2xl md:rounded-[2rem] overflow-hidden mb-6 md:mb-8 shadow-2xl shadow-slate-200/50 ring-1 ring-slate-900/5 bg-slate-200">
                         <img src="{{ asset('storage/'.$event->cover_image) }}" class="w-full h-full object-cover hover:scale-105 transition-transform duration-700 ease-out">
                     </div>
                 @endif
 
                 {{-- Host Info --}}
                 @if($event->organizer)
-                    <div class="flex items-center gap-3 mb-6">
-                        <div class="w-12 h-12 rounded-full bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center text-white font-black text-sm uppercase shadow-md shrink-0 ring-4 ring-red-50">
+                    <div class="flex items-center gap-3 mb-4 md:mb-6">
+                        <div class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center text-white font-black text-xs md:text-sm uppercase shadow-md shrink-0 ring-4 ring-red-50">
                             {{ substr($event->organizer->name, 0, 2) }}
                         </div>
                         <div class="min-w-0">
-                            <p class="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-0.5">Hosted By</p>
-                            <p class="text-sm font-bold text-slate-900 truncate pr-4">{{ $event->organizer->name }}</p>
+                            <p class="text-[9px] md:text-[10px] text-slate-500 font-black uppercase tracking-widest mb-0.5">Hosted By</p>
+                            <p class="text-xs md:text-sm font-bold text-slate-900 truncate pr-4">{{ $event->organizer->name }}</p>
                         </div>
                     </div>
                 @endif
 
-                {{-- Title --}}
-                <h1 class="text-4xl md:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight leading-[1.1] mb-8 break-words text-balance">
+                {{-- Title (Scaled down for smaller screens) --}}
+                <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight leading-[1.1] mb-6 md:mb-8 break-words text-balance">
                     {{ $event->title }}
                 </h1>
 
-                {{-- Date & Location Quick Details --}}
-                <div class="flex flex-col sm:flex-row gap-6 mb-12 pb-10 border-b border-slate-200/60">
+                {{-- Date & Location Quick Details (Mobile-Refined) --}}
+                <div class="flex flex-col sm:flex-row gap-3 md:gap-6 mb-8 md:mb-12 pb-8 border-b border-slate-200/60">
 
                     {{-- Date --}}
-                    <div class="flex items-start gap-4 flex-1 min-w-0 bg-white/50 p-4 rounded-2xl border border-slate-100 shadow-sm">
+                    <div class="flex items-center gap-4 flex-1 min-w-0 bg-white p-4 md:p-5 rounded-2xl border border-slate-100 shadow-sm">
                         <div class="w-12 h-12 bg-red-50 rounded-xl flex items-center justify-center text-red-600 shrink-0">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                         </div>
-                        <div class="min-w-0">
-                            <p class="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-1">Date & Time</p>
-                            <p class="text-sm font-bold text-slate-900 truncate">
+                        <div class="min-w-0 flex-1">
+                            <p class="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-0.5">Date & Time</p>
+                            <p class="text-sm md:text-base font-bold text-slate-900 leading-tight">
                                 {{ $event->start_date ? $event->start_date->format('l, F j, Y') : 'Date TBA' }}
                             </p>
-                            <p class="text-sm text-slate-500 mt-0.5 truncate">
+                            <p class="text-xs text-slate-500 font-medium mt-0.5">
                                 {{ $event->start_date ? $event->start_date->format('g:i A') : 'Time TBA' }}
                             </p>
                         </div>
                     </div>
 
                     {{-- Location --}}
-                    <div class="flex items-start gap-4 flex-1 min-w-0 bg-white/50 p-4 rounded-2xl border border-slate-100 shadow-sm">
+                    <div class="flex items-center gap-4 flex-1 min-w-0 bg-white p-4 md:p-5 rounded-2xl border border-slate-100 shadow-sm">
                         <div class="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600 shrink-0">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                         </div>
-                        <div class="min-w-0">
-                            <p class="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-1">Location</p>
-                            <p class="text-sm font-bold text-slate-900 break-words leading-snug">{{ $event->location }}</p>
+                        <div class="min-w-0 flex-1">
+                            <p class="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-0.5">Location</p>
+                            <p class="text-sm md:text-base font-bold text-slate-900 leading-snug">
+                                {{ $event->location }}
+                            </p>
                         </div>
                     </div>
                 </div>
 
                 {{-- Event Description Card --}}
-                <div class="bg-white p-6 md:p-10 rounded-[1.5rem] md:rounded-[2rem] shadow-xl border border-gray-100">
+                <div class="bg-white p-5 md:p-10 rounded-[1.5rem] md:rounded-[2rem] shadow-xl border border-gray-100">
 
-                    <h3 class="font-bold text-black uppercase tracking-widest text-[10px] md:text-sm border-b border-gray-200 pb-3 mb-6">
+                    <h3 class="font-bold text-black uppercase tracking-widest text-[10px] md:text-sm border-b border-gray-200 pb-3 mb-4 md:mb-6">
                         About this Event
                     </h3>
 
-                    {{-- Markdown Description --}}
-                    <div class="prose prose-slate md:prose-lg max-w-none text-gray-900
+                    {{-- Markdown Description (Scaled prose for mobile readability) --}}
+                    <div class="prose prose-sm sm:prose-base md:prose-lg max-w-none text-gray-900
                         prose-headings:font-black prose-headings:text-black prose-headings:tracking-tight
                         prose-p:text-gray-900 prose-p:leading-relaxed prose-p:font-medium
                         prose-strong:text-black prose-strong:font-black
                         prose-a:text-red-600 hover:prose-a:text-red-700 prose-a:font-bold prose-a:underline-offset-4
-                        prose-img:rounded-3xl prose-img:shadow-xl
+                        prose-img:rounded-2xl md:prose-img:rounded-3xl prose-img:shadow-xl
                         break-words overflow-hidden">
 
                         {!! Str::markdown($event->description ?? '') !!}

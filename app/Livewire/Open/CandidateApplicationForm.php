@@ -31,7 +31,7 @@ class CandidateApplicationForm extends Component
     public $platforms = [
         ['title' => '', 'description' => '']
     ];
-    
+
     public $credentials = [];
 
     public function mount(Election $election)
@@ -55,7 +55,7 @@ class CandidateApplicationForm extends Component
 
         // 2. Determine the precise state of the application window
         $now = now();
-        
+
         if ($this->election->application_start && $now < $this->election->application_start) {
             $this->applicationState = 'upcoming';
         } elseif ($this->election->application_end && $now > $this->election->application_end) {
@@ -82,7 +82,7 @@ class CandidateApplicationForm extends Component
 
         $this->validate([
             'display_name' => 'required|string|max:255',
-            'profile_photo' => 'nullable|image', 
+            'profile_photo' => 'nullable|image',
             'election_position_id' => 'required|exists:election_positions,id',
             'college_id' => 'required|exists:colleges,id',
             'program' => 'required|string|max:255',
@@ -111,7 +111,7 @@ class CandidateApplicationForm extends Component
                     'profile_photo_path' => $photoPath,
                     'program' => $this->program,
                     'year_level' => $this->year_level,
-                    'status' => 'pending', 
+                    'status' => 'pending',
                 ]);
 
                 foreach ($this->platforms as $platform) {

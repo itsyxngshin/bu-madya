@@ -81,18 +81,21 @@
                         @endif
                     </div>
 
+                    {{-- LIGHTBOX MEDIA GRID (FEED VERSION) --}}
                     @if($post->cover_image_path || !empty($post->gallery))
-                        <div class="w-full mt-1.5 bg-gray-50 border-y border-gray-100 overflow-hidden relative z-10">
+                        <div class="w-full mt-1.5 bg-gray-50 border-y border-gray-100 overflow-hidden">
                             @if($post->cover_image_path)
-                                <button type="button" @click="lightboxImage = '{{ asset('storage/'.$post->cover_image_path) }}'; lightboxOpen = true" class="block w-full max-h-[350px] overflow-hidden focus:outline-none">
+                                <button type="button" @click="globalLightboxImage = '{{ asset('storage/'.$post->cover_image_path) }}'; globalLightboxOpen = true" class="block w-full max-h-[350px] overflow-hidden focus:outline-none">
                                     <img src="{{ asset('storage/'.$post->cover_image_path) }}" class="w-full h-full object-cover hover:opacity-95 transition-opacity">
                                 </button>
                             @elseif(!empty($post->gallery))
                                 @php $galleryCount = count($post->gallery); @endphp
                                 <div class="grid gap-[2px] bg-white {{ $galleryCount === 1 ? 'grid-cols-1' : 'grid-cols-2' }}">
                                     @foreach(array_slice($post->gallery, 0, 4) as $index => $photo)
-                                        <button type="button" @click="lightboxImage = '{{ asset('storage/'.$photo) }}'; lightboxOpen = true" class="block relative overflow-hidden group focus:outline-none {{ $galleryCount === 1 ? 'aspect-video max-h-[350px]' : '' }} {{ $galleryCount === 3 && $index === 0 ? 'col-span-2 aspect-video' : '' }} {{ $galleryCount > 1 && !($galleryCount === 3 && $index === 0) ? 'aspect-square' : '' }}">
+                                        <button type="button" @click="globalLightboxImage = '{{ asset('storage/'.$photo) }}'; globalLightboxOpen = true" class="block relative overflow-hidden group focus:outline-none {{ $galleryCount === 1 ? 'aspect-video max-h-[350px]' : '' }} {{ $galleryCount === 3 && $index === 0 ? 'col-span-2 aspect-video' : '' }} {{ $galleryCount > 1 && !($galleryCount === 3 && $index === 0) ? 'aspect-square' : '' }}">
                                             <img src="{{ asset('storage/'.$photo) }}" class="w-full h-full object-cover group-hover:opacity-90 transition-opacity">
+                                            
+                                            {{-- +More Overlay for 5+ images --}}
                                             @if($index === 3 && count($post->gallery) > 4)
                                                 <div class="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center">
                                                     <span class="text-white font-black text-2xl drop-shadow-md">+{{ count($post->gallery) - 4 }}</span>

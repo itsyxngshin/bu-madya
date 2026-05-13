@@ -1,12 +1,12 @@
 <div class="max-w-7xl mx-auto py-8 px-4 font-sans pb-32">
-    
+
     {{-- HEADER & SEARCH --}}
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div>
             <h1 class="text-3xl font-black text-gray-900 tracking-tight">Elections Overview</h1>
             <p class="text-gray-500 font-medium">Manage and monitor all your electoral events.</p>
         </div>
-        
+
         <div class="flex items-center gap-3 w-full md:w-auto">
             <div class="relative w-full md:w-64">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -14,7 +14,7 @@
                 </div>
                 <input wire:model.live.debounce.300ms="search" type="text" class="w-full bg-white border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-orange-500 focus:border-orange-500 block pl-10 p-2.5 shadow-sm transition-colors" placeholder="Search elections...">
             </div>
-            
+
             <a href="{{ route('admin.elections.manage') }}" class="px-5 py-2.5 bg-gray-900 hover:bg-orange-600 text-white font-bold rounded-xl shadow-md transition-colors whitespace-nowrap flex items-center gap-2">
                 <span class="text-lg leading-none">+</span> New Election
             </a>
@@ -40,7 +40,7 @@
         @forelse($elections as $election)
             {{-- ENHANCED CARD: Added hover lift and shadow boost --}}
             <div class="bg-white rounded-[2rem] shadow-sm border border-gray-200 overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group flex flex-col">
-                
+
                 {{-- Cover Photo & Badge --}}
                 <div class="relative h-44 bg-gray-100 overflow-hidden">
                     @if($election->cover_photo_path)
@@ -48,10 +48,10 @@
                     @else
                         <div class="w-full h-full bg-gradient-to-br from-gray-800 to-gray-900 group-hover:scale-105 transition-transform duration-500"></div>
                     @endif
-                    
+
                     {{-- Gradient Overlay for better text readability --}}
                     <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
-                    
+
                     <div class="absolute top-4 left-4">
                         @if(now() < $election->voting_start)
                             <span class="px-3 py-1.5 bg-white/90 backdrop-blur-md text-gray-800 text-[10px] uppercase font-black tracking-widest rounded-full shadow-sm">Upcoming</span>
@@ -75,7 +75,7 @@
                 <div class="p-6 flex-1 flex flex-col">
                     <h3 class="text-xl font-black text-gray-900 tracking-tight leading-tight mb-2 group-hover:text-orange-600 transition-colors">{{ $election->title }}</h3>
                     <p class="text-xs font-medium text-gray-500 mb-6 line-clamp-2 leading-relaxed">{{ $election->description ?: 'No description provided.' }}</p>
-                    
+
                     {{-- ENHANCED STATS --}}
                     <div class="flex items-center gap-6 mt-auto mb-6 bg-gray-50 p-4 rounded-2xl border border-gray-100">
                         <div class="flex items-center gap-3">
@@ -98,7 +98,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     {{-- RESTRUCTURED ACTIONS GRID --}}
                     <div class="flex flex-col gap-2">
                         {{-- Admin Actions Row 1 --}}
@@ -112,7 +112,7 @@
                                 Vetting
                             </a>
                         </div>
-                        
+
                         {{-- Admin Actions Row 2 --}}
                         <div class="grid grid-cols-2 gap-2">
                             <a href="{{ route('admin.elections.results', $election->slug) }}" class="flex items-center justify-center gap-1.5 px-3 py-2.5 bg-green-50 hover:bg-green-100 text-green-700 font-bold text-[11px] uppercase tracking-wider rounded-xl transition-colors border border-green-200">
@@ -145,7 +145,7 @@
             </div>
         @endforelse
     </div>
-    
+
     <div class="mt-8">
         {{ $elections->links() }}
     </div>

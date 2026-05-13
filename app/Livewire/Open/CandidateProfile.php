@@ -16,10 +16,10 @@ class CandidateProfile extends Component
         }
 
         $this->candidate->load([
-            'user', 
-            'college', 
-            'electionPosition.election', 
-            'platforms', 
+            'user',
+            'college',
+            'electionPosition.election',
+            'platforms',
             'credentials'
         ]);
     }
