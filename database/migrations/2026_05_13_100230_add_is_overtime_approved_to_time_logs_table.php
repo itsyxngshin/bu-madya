@@ -9,20 +9,17 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
+    public function up()
     {
         Schema::table('time_logs', function (Blueprint $table) {
-            //
+            $table->boolean('is_overtime_approved')->default(false)->after('total_minutes_rendered');
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
+    public function down()
     {
         Schema::table('time_logs', function (Blueprint $table) {
-            //
+            $table->dropColumn('is_overtime_approved');
         });
     }
 };
