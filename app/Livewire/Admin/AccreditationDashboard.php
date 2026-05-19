@@ -8,7 +8,9 @@ use App\Models\Organization;
 use App\Models\AccreditationDeadline;
 use App\Models\Advisory;
 use App\Models\AcademicYear;
+use Livewire\Attributes\Layout;
 
+#[Layout('layouts.madya-admin-deck')]
 class AccreditationDashboard extends Component
 {
     // Advisory Form
