@@ -53,7 +53,7 @@ return new class extends Migration
             $table->timestamps();
 
             // Prevent an organization from applying twice for the same academic year
-            $table->unique(['organization_id', 'academic_year_id']);
+            $table->unique(['organization_id', 'academic_year_id'], 'org_acad_year_unique');
         });
     }
 
