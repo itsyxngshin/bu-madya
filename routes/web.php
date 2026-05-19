@@ -127,7 +127,7 @@ Route::domain('partners.' . env('APP_DOMAIN'))->group(function () {
 
     // 1. Public Landing (Optional: Information about accreditation)
     Route::get('/', function () {
-        return view('partners.welcome'); // A simple blade view explaining the process
+        return view('partner.welcome'); // A simple blade view explaining the process
     })->name('partners.home');
 
 
