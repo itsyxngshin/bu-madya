@@ -17,28 +17,21 @@ class CoordinatorView extends Component
         $this->student = User::where('username', $username)->firstOrFail();
     }
 
-    // Flips the database state for a single specific time log
-    public function toggleRowOvertime($logId)
-    {
-        // Security check: only edit logs belonging to this specific student
-        $log = TimeLog::where('user_id', $this->student->id)->find($logId);
-
-        if ($log) {
-            $log->is_overtime_approved = !$log->is_overtime_approved;
-            $log->save();
-        }
-    }
-
     public function render()
     {
         $timeLogs = TimeLog::where('user_id', $this->student->id)->get();
         $blogs = OjtBlog::where('user_id', $this->student->id)->get();
 
+        // Map blogs by date to attach narratives to raw DTR logs
+        $blogsByDate = $blogs->keyBy(function($b) {
+            return Carbon::parse($b->report_date)->format('Y-m-d');
+        });
+
         $weeklyData = [];
         $grandTotalCredited = 0;
         $grandTotalRaw = 0;
 
-        // 1. Group Time Logs by Week & Calculate Manually
+        // 1. Process and group DTR Time Logs
         foreach ($timeLogs as $log) {
             $date = Carbon::parse($log->log_date);
             $weekStart = $date->copy()->startOfWeek();
@@ -48,11 +41,13 @@ class CoordinatorView extends Component
                 $weeklyData[$weekKey] = $this->initializeWeekData($weekStart);
             }
 
-            // RUN MANUAL MATH ON THE FLY
+            $logDateString = $date->format('Y-m-d');
+            $log->associated_blog = $blogsByDate[$logDateString] ?? null;
+
+            // Run manual math conversions
             $creditedMins = $this->calculateClampedMinutes($log);
             $rawMins = $this->calculateRawMinutes($log);
 
-            // Attach the math to the log object so the Blade view can use it
             $log->credited_minutes = $creditedMins;
             $log->raw_minutes = $rawMins;
 
@@ -64,7 +59,7 @@ class CoordinatorView extends Component
             $grandTotalRaw += $rawMins;
         }
 
-        // 2. Group Blogs by Week
+        // 2. Process and group Journal Entries + Media Attachments
         foreach ($blogs as $blog) {
             $date = Carbon::parse($blog->report_date);
             $weekStart = $date->copy()->startOfWeek();
@@ -73,71 +68,91 @@ class CoordinatorView extends Component
             if (!isset($weeklyData[$weekKey])) {
                 $weeklyData[$weekKey] = $this->initializeWeekData($weekStart);
             }
+            
             $weeklyData[$weekKey]['blogs'][] = $blog;
+
+            // Extract valid photo paths for the weekly collage pool
+            if ($blog->attachment_path) {
+                $weeklyData[$weekKey]['photos'][] = [
+                    'url'   => asset('storage/' . $blog->attachment_path),
+                    'title' => $blog->title,
+                    'date'  => $date->format('M d')
+                ];
+            }
         }
 
-        krsort($weeklyData); // Sort newest to oldest
+        krsort($weeklyData); // Order weeks newest to oldest
 
         return view('livewire.ojt.coordinator-view', [
-            'weeklyData' => $weeklyData,
-            'grandTotalHours' => round($grandTotalCredited / 60, 2),
+            'weeklyData'         => $weeklyData,
+            'grandTotalHours'    => round($grandTotalCredited / 60, 2),
             'grandTotalRawHours' => round($grandTotalRaw / 60, 2),
-        ])->layout('layouts.guest'); // Change layout to webmaster if you prefer!
+        ])->layout('layouts.guest');
     }
 
     private function initializeWeekData($weekStart)
     {
         return [
-            'label' => $weekStart->format('M d') . ' - ' . $weekStart->copy()->endOfWeek()->format('M d, Y'),
-            'logs' => [],
-            'blogs' => [],
+            'label'          => $weekStart->format('M d') . ' - ' . $weekStart->copy()->endOfWeek()->format('M d, Y'),
+            'logs'           => [],
+            'blogs'          => [],
+            'photos'         => [], // <-- Assembles current week's photos
             'total_credited' => 0,
-            'total_raw' => 0,
+            'total_raw'      => 0,
         ];
     }
 
-    // ==========================================
-    // MANUAL CALCULATION ENGINES
-    // ==========================================
-
     private function calculateClampedMinutes($log)
     {
-        // Use setTime() to avoid Carbon double-time parsing errors
-        $officeOpen = Carbon::parse($log->log_date)->setTime(8, 0, 0);
-        $officeClose = Carbon::parse($log->log_date)->setTime(17, 0, 0);
+        // Define the strict boundaries of the OJT shifts
+        $morningStart   = Carbon::parse($log->log_date)->setTime(8, 0, 0);
+        $morningEnd     = Carbon::parse($log->log_date)->setTime(12, 0, 0);
+        $afternoonStart = Carbon::parse($log->log_date)->setTime(13, 0, 0); // 1:00 PM
+        $afternoonEnd   = Carbon::parse($log->log_date)->setTime(17, 0, 0); // 5:00 PM
 
-        // Check the database for this specific row!
         $isOvertimeAllowed = $log->is_overtime_approved;
-
-        $clamp = function ($time) use ($officeOpen, $officeClose, $isOvertimeAllowed) {
-            if (!$time) return null;
-            $t = Carbon::parse($time);
-
-            // 1. ALWAYS clamp early arrivals to 8:00 AM
-            if ($t->lessThan($officeOpen)) return $officeOpen->copy();
-
-            // 2. ONLY clamp late departures if THIS SPECIFIC SHIFT isn't approved for OT
-            if (!$isOvertimeAllowed && $t->greaterThan($officeClose)) return $officeClose->copy();
-
-            return $t;
-        };
-
         $minutes = 0;
+
+        // 1. Process Morning Shift (Strictly clamped to 8 AM - 12 PM)
         if ($log->morning_in && $log->morning_out) {
-            $mIn = $clamp($log->morning_in);
-            $mOut = $clamp($log->morning_out);
-            if ($mOut->greaterThan($mIn)) $minutes += $mIn->diffInMinutes($mOut);
+            $mIn = Carbon::parse($log->morning_in);
+            $mOut = Carbon::parse($log->morning_out);
+
+            // Clamp early arrivals to 8:00 AM
+            if ($mIn->lessThan($morningStart)) $mIn = $morningStart->copy();
+            
+            // Clamp late lunch outs to exactly 12:00 PM
+            if ($mOut->greaterThan($morningEnd)) $mOut = $morningEnd->copy();
+
+            if ($mOut->greaterThan($mIn)) {
+                $minutes += $mIn->diffInMinutes($mOut);
+            }
         }
+
+        // 2. Process Afternoon Shift (Strictly starts at 1 PM)
         if ($log->afternoon_in && $log->afternoon_out) {
-            $aIn = $clamp($log->afternoon_in);
-            $aOut = $clamp($log->afternoon_out);
-            if ($aOut->greaterThan($aIn)) $minutes += $aIn->diffInMinutes($aOut);
+            $aIn = Carbon::parse($log->afternoon_in);
+            $aOut = Carbon::parse($log->afternoon_out);
+
+            // Clamp early afternoon returns to exactly 1:00 PM
+            if ($aIn->lessThan($afternoonStart)) $aIn = $afternoonStart->copy();
+            
+            // Clamp late departures to exactly 5:00 PM (UNLESS Overtime is approved)
+            if (!$isOvertimeAllowed && $aOut->greaterThan($afternoonEnd)) {
+                $aOut = $afternoonEnd->copy();
+            }
+
+            if ($aOut->greaterThan($aIn)) {
+                $minutes += $aIn->diffInMinutes($aOut);
+            }
         }
+
         return $minutes;
     }
 
     private function calculateRawMinutes($log)
     {
+        // Raw minutes remain strictly based on actual punches (no clamps applied)
         $minutes = 0;
         if ($log->morning_in && $log->morning_out) {
             $minutes += Carbon::parse($log->morning_in)->diffInMinutes(Carbon::parse($log->morning_out));

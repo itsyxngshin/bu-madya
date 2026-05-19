@@ -48,7 +48,7 @@
                             </div>
                             <div class="min-w-0">
                                 <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-0.5">Program / Course</p>
-                                <p class="text-xs font-black text-gray-900 truncate">{{ $student->program ?: 'N/A' }}</p>
+                                <p class="text-xs font-black text-gray-900 truncate">{{ $student->profile->course ?? 'N/A' }}</p>
                             </div>
                         </div>
 
@@ -96,7 +96,7 @@
                             </p>
                         </div>
                         <div class="sm:mb-2 sm:text-right">
-                            <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-0.5">Physical Time</p>
+                            <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-0.5">Physical Time (Raw)</p>
                             <p class="text-xl font-black text-gray-500">{{ $grandTotalRawHours }} hrs</p>
                         </div>
                     </div>
@@ -135,92 +135,154 @@
 
                             {{-- Week Body --}}
                             <div x-show="expanded" x-collapse>
-                                <div class="border-t border-gray-100 p-6 md:p-8 bg-[#F8FAFC]/50">
-                                    <div class="grid grid-cols-1 xl:grid-cols-2 gap-8 xl:gap-12">
+                                <div class="border-t border-gray-100 p-6 md:p-8 bg-[#F8FAFC]/50 space-y-10">
 
-                                        {{-- LEFT: Attendance --}}
-                                        <div>
-                                            <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-5 flex items-center gap-2">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
-                                                Attendance Records
-                                            </h4>
+                                    {{-- 1. ATTENDANCE GRID (Horizontal Chronological Row) --}}
+                                    <div>
+                                        <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                                            <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                            Attendance Log
+                                        </h4>
 
-                                            <div class="space-y-3">
-                                                @forelse($data['logs'] as $log)
-                                                    <div class="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4 transition-colors">
-                                                        <div class="flex items-center gap-3 min-w-0 w-full sm:w-auto">
-                                                            <div class="w-10 h-10 rounded-xl bg-[#F8FAFC] border border-gray-100 flex flex-col items-center justify-center shrink-0">
-                                                                <span class="text-[8px] font-bold text-gray-400 uppercase">{{ \Carbon\Carbon::parse($log->log_date)->format('D') }}</span>
-                                                                <span class="text-sm font-black text-gray-900 leading-none">{{ \Carbon\Carbon::parse($log->log_date)->format('d') }}</span>
-                                                            </div>
-                                                            <div class="min-w-0 flex-1">
-                                                                <p class="font-mono text-[11px] md:text-xs font-bold text-gray-600 truncate">
-                                                                    <span class="text-green-600">{{ $log->morning_in ? \Carbon\Carbon::parse($log->morning_in)->format('h:ia') : '--' }}</span>
-                                                                    <span class="text-gray-300 mx-1">→</span>
-                                                                    <span class="text-red-600">{{ $log->afternoon_out ? \Carbon\Carbon::parse($log->afternoon_out)->format('h:ia') : '--' }}</span>
-                                                                </p>
-                                                            </div>
+                                        @if(count($data['logs']) > 0)
+                                            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                                                @foreach($data['logs'] as $log)
+                                                    <div class="bg-white border border-gray-200 rounded-xl p-3 shadow-sm flex flex-col justify-between hover:border-blue-300 transition-colors">
+                                                        <div class="flex justify-between items-center mb-3">
+                                                            <span class="text-[9px] font-black text-gray-400 uppercase tracking-widest">{{ \Carbon\Carbon::parse($log->log_date)->format('D') }}</span>
+                                                            <span class="text-xs font-black text-gray-900">{{ \Carbon\Carbon::parse($log->log_date)->format('M d') }}</span>
                                                         </div>
-
-                                                        {{-- Row-Level Credited & Overtime Toggle --}}
-                                                        <div class="bg-gray-50 px-4 py-2.5 rounded-xl border border-gray-100 text-center sm:text-right shrink-0 w-full sm:w-auto flex flex-col sm:justify-between items-center sm:items-end">
+                                                        <div class="text-[9px] font-mono font-bold text-gray-500 mb-3 text-center bg-gray-50 rounded py-1 border border-gray-100">
+                                                            {{ $log->morning_in ? \Carbon\Carbon::parse($log->morning_in)->format('h:ia') : '--' }}
+                                                            <span class="text-gray-300 mx-0.5">→</span>
+                                                            {{ $log->afternoon_out ? \Carbon\Carbon::parse($log->afternoon_out)->format('h:ia') : '--' }}
+                                                        </div>
+                                                        <div class="flex justify-between items-end">
                                                             <div>
-                                                                <p class="text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-0.5">Credited</p>
-                                                                <p class="text-sm font-black text-gray-900 leading-none">{{ floor($log->credited_minutes / 60) }}h {{ $log->credited_minutes % 60 }}m</p>
+                                                                <span class="block text-[8px] font-bold text-gray-400 uppercase leading-none mb-0.5">Credited</span>
+                                                                <span class="text-sm font-black text-green-600 leading-none">{{ floor($log->credited_minutes / 60) }}h {{ $log->credited_minutes % 60 }}m</span>
                                                             </div>
-                                                            <button wire:click="toggleRowOvertime({{ $log->id }})"
-                                                                    class="mt-2 w-full text-[8px] font-black uppercase tracking-widest py-1 px-2 rounded-md border shadow-sm transition-all active:scale-95
-                                                                    {{ $log->is_overtime_approved ? 'bg-green-100 text-green-700 border-green-200 hover:bg-green-200' : 'bg-white text-gray-400 border-gray-200 hover:text-green-600 hover:border-green-300' }}">
-                                                                {{ $log->is_overtime_approved ? '✓ OT Auth' : '+ Auth OT' }}
-                                                            </button>
+                                                            @if($log->is_overtime_approved)
+                                                                <span class="text-[8px] font-black bg-yellow-100 text-yellow-700 border border-yellow-200 px-1.5 py-0.5 rounded uppercase tracking-wider shadow-sm">OT</span>
+                                                            @endif
                                                         </div>
                                                     </div>
-                                                @empty
-                                                    <div class="text-center py-6 border-2 border-dashed border-gray-200 rounded-2xl">
-                                                        <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">No attendance logged</p>
-                                                    </div>
-                                                @endforelse
+                                                @endforeach
                                             </div>
-                                        </div>
+                                        @else
+                                            <div class="text-center py-6 border-2 border-dashed border-gray-200 rounded-2xl bg-white">
+                                                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">No attendance logged</p>
+                                            </div>
+                                        @endif
+                                    </div>
 
-                                        {{-- RIGHT: Journals --}}
-                                        <div>
-                                            <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-5 flex items-center gap-2">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                                                Journal Entries
-                                            </h4>
+                                    {{-- 2. FULL WIDTH JOURNALS --}}
+                                    <div>
+                                        <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                                            <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                            Journal Entries
+                                        </h4>
 
-                                            <div class="border-l-2 border-gray-200 ml-3 pl-5 space-y-5">
-                                                @forelse($data['blogs'] as $blog)
-                                                    <div class="relative">
-                                                        <div class="absolute -left-[35px] top-1.5 w-6 h-6 rounded-full bg-white border-[3px] border-[#F8FAFC] shadow-sm z-10 {{ $blog->type === 'weekly_summary' ? 'bg-red-500 border-red-100' : 'bg-blue-500 border-blue-100' }}"></div>
-
-                                                        <div class="bg-white border border-gray-100 p-4 rounded-2xl shadow-sm hover:shadow-md transition-shadow min-w-0">
-                                                            <div class="flex items-center justify-between mb-2">
-                                                                <span class="text-[8px] font-black uppercase tracking-widest px-2 py-1 rounded-md {{ $blog->type === 'weekly_summary' ? 'bg-red-50 text-red-600' : 'bg-blue-50 text-blue-600' }}">
+                                        <div class="space-y-4">
+                                            @forelse($data['blogs'] as $blog)
+                                                @if($blog->type === 'weekly_summary')
+                                                    {{-- HIGHLIGHTED WEEKLY SUMMARY --}}
+                                                    <div class="bg-gradient-to-br from-red-50 to-orange-50 border border-red-200 p-6 rounded-2xl shadow-sm relative overflow-hidden">
+                                                        <div class="absolute top-0 right-0 bg-red-600 text-white text-[8px] font-black uppercase tracking-widest px-4 py-1.5 rounded-bl-xl shadow-sm">Weekly Highlight</div>
+                                                        
+                                                        <div class="flex items-center justify-between mb-3 mt-1">
+                                                            <h5 class="font-black text-lg text-gray-900 leading-snug tracking-tight">{{ $blog->title }}</h5>
+                                                        </div>
+                                                        <span class="inline-block mb-3 text-[10px] font-bold text-red-600/80">{{ \Carbon\Carbon::parse($blog->report_date)->format('M d, Y') }}</span>
+                                                        
+                                                        {{-- Weekly Summary Read More Toggle --}}
+                                                        <div x-data="{ expandedText: false }">
+                                                            <p class="text-sm text-gray-700 leading-relaxed font-medium whitespace-pre-line transition-all" 
+                                                               :class="expandedText ? '' : 'line-clamp-3'">
+                                                                {{ $blog->content }}
+                                                            </p>
+                                                            @if(strlen($blog->content) > 150)
+                                                                <button @click="expandedText = !expandedText" 
+                                                                        class="text-[10px] font-black text-red-600 hover:text-red-800 uppercase tracking-widest mt-2 focus:outline-none transition-colors">
+                                                                    <span x-text="expandedText ? 'Show Less' : 'Read More'"></span>
+                                                                </button>
+                                                            @endif
+                                                        </div>
+                                                    </div>
+                                                @else
+                                                    {{-- STANDARD DAILY LOG --}}
+                                                    <div class="bg-white border border-gray-200 p-5 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
+                                                        <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-2 gap-2">
+                                                            <h5 class="font-black text-base text-gray-900 leading-snug tracking-tight">{{ $blog->title }}</h5>
+                                                            <div class="flex items-center gap-3">
+                                                                <span class="text-[9px] font-bold text-gray-400">{{ \Carbon\Carbon::parse($blog->report_date)->format('M d, Y') }}</span>
+                                                                <span class="text-[8px] font-black uppercase tracking-widest px-2 py-1 rounded bg-blue-50 text-blue-600 border border-blue-100">
                                                                     {{ str_replace('_', ' ', $blog->type) }}
                                                                 </span>
-                                                                <span class="text-[9px] font-bold text-gray-400">{{ \Carbon\Carbon::parse($blog->report_date)->format('M d') }}</span>
                                                             </div>
-                                                            <h5 class="font-black text-sm text-gray-900 mb-1.5 leading-snug break-words">{{ $blog->title }}</h5>
-                                                            <p class="text-xs text-gray-500 leading-relaxed break-words line-clamp-3">{{ $blog->content }}</p>
+                                                        </div>
+                                                        
+                                                        {{-- Daily Log Read More Toggle --}}
+                                                        <div x-data="{ expandedText: false }">
+                                                            <p class="text-xs md:text-sm text-gray-500 leading-relaxed whitespace-pre-line transition-all" 
+                                                               :class="expandedText ? '' : 'line-clamp-3'">
+                                                                {{ $blog->content }}
+                                                            </p>
+                                                            @if(strlen($blog->content) > 150)
+                                                                <button @click="expandedText = !expandedText" 
+                                                                        class="text-[10px] font-black text-blue-600 hover:text-blue-800 uppercase tracking-widest mt-2 focus:outline-none transition-colors">
+                                                                    <span x-text="expandedText ? 'Show Less' : 'Read More'"></span>
+                                                                </button>
+                                                            @endif
                                                         </div>
                                                     </div>
-                                                @empty
-                                                    <div class="text-center py-6 border-2 border-dashed border-gray-200 rounded-2xl bg-white">
-                                                        <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">No entries filed</p>
-                                                    </div>
-                                                @endforelse
-                                            </div>
+                                                @endif
+                                            @empty
+                                                <div class="text-center py-8 border-2 border-dashed border-gray-200 rounded-2xl bg-white">
+                                                    <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">No entries filed</p>
+                                                </div>
+                                            @endforelse
                                         </div>
-
                                     </div>
+
+                                    {{-- 3. WEEKLY MEDIA COLLAGE --}}
+                                    <div class="pt-6 border-t border-gray-200/60">
+                                        <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                                            <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                            Media Documentation
+                                        </h4>
+                                        
+                                        @if(count($data['photos'] ?? []) > 0)
+                                            <div class="grid gap-2 {{ count($data['photos']) === 1 ? 'grid-cols-1' : (count($data['photos']) === 2 ? 'grid-cols-2' : 'grid-cols-3') }}">
+                                                @foreach($data['photos'] as $index => $photo)
+                                                    <div class="relative rounded-2xl overflow-hidden group border border-gray-200 shadow-sm bg-gray-50
+                                                                {{ (count($data['photos']) > 2 && $index === 0) ? 'col-span-2 row-span-2 aspect-video md:aspect-auto md:h-72' : 'aspect-square md:h-36' }}">
+                                                        
+                                                        <img src="{{ $photo['url'] }}" alt="{{ $photo['title'] }}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" loading="lazy">
+                                                        
+                                                        <div class="absolute inset-0 bg-gradient-to-t from-gray-900/90 via-gray-900/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-5">
+                                                            <span class="text-[9px] font-black text-yellow-400 uppercase tracking-widest mb-1">{{ $photo['date'] }}</span>
+                                                            <h4 class="text-white font-bold text-xs md:text-sm truncate leading-tight">{{ $photo['title'] }}</h4>
+                                                        </div>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        @else
+                                            <div class="h-32 rounded-2xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center text-gray-400 bg-white">
+                                                <svg class="w-6 h-6 mb-2 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                                <p class="text-[10px] font-black uppercase tracking-widest text-gray-400">No photos submitted</p>
+                                            </div>
+                                        @endif
+                                    </div>
+                                    
                                 </div>
                             </div>
                         </div>
                     @empty
                         <div class="text-center py-20 bg-white rounded-[2rem] border border-gray-100 shadow-sm mt-8">
+                            <svg class="w-12 h-12 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
                             <p class="text-lg font-black text-gray-900">No Practicum Data Found</p>
+                            <p class="text-sm text-gray-500 mt-1">The intern has not logged any time or entries yet.</p>
                         </div>
                     @endforelse
                 </div>

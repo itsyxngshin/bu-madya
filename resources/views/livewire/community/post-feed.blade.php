@@ -29,7 +29,7 @@
         <div class="sm:space-y-4">
             @forelse($posts as $post)
                 <div class="bg-white border-b border-gray-100 sm:border sm:rounded-[1.25rem] sm:shadow-[0_2px_15px_-3px_rgba(0,0,0,0.05)] transition-shadow hover:shadow-sm">
-                    
+
                     <div class="p-3 flex items-start justify-between">
                         <div class="flex items-center gap-2.5">
                             @php
@@ -91,10 +91,10 @@
                             @elseif(!empty($post->gallery))
                                 @php $galleryCount = count($post->gallery); @endphp
                                 <div class="grid gap-[2px] bg-white {{ $galleryCount === 1 ? 'grid-cols-1' : 'grid-cols-2' }}">
-                                    @foreach(array_slice($post->gallery, 0, 4) as $index => $photo)
+                                    @foreach(array_slice($post->gall-ery, 0, 4) as $index => $photo)
                                         <button type="button" @click="globalLightboxImage = '{{ asset('storage/'.$photo) }}'; globalLightboxOpen = true" class="block relative overflow-hidden group focus:outline-none {{ $galleryCount === 1 ? 'aspect-video max-h-[350px]' : '' }} {{ $galleryCount === 3 && $index === 0 ? 'col-span-2 aspect-video' : '' }} {{ $galleryCount > 1 && !($galleryCount === 3 && $index === 0) ? 'aspect-square' : '' }}">
                                             <img src="{{ asset('storage/'.$photo) }}" class="w-full h-full object-cover group-hover:opacity-90 transition-opacity">
-                                            
+
                                             {{-- +More Overlay for 5+ images --}}
                                             @if($index === 3 && count($post->gallery) > 4)
                                                 <div class="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center">

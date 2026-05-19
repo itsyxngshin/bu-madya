@@ -69,10 +69,11 @@
         <div class="grid lg:grid-cols-12 gap-12 items-start pt-12">
 
             {{-- LEFT COLUMN (Main Content) --}}
-            <div class="lg:col-span-8 space-y-20">
+            {{-- Wrapper simplified. Spacing is now handled directly on each section. --}}
+            <div class="lg:col-span-8">
 
-                {{-- PILLARS SECTION (Improved Cards) --}}
-                <section id="pillars"
+                {{-- PILLARS SECTION --}}
+                <section id="pillars" class="mb-32 md:mb-48"
                     x-data="{
                         activePillar: null,
                         pillars: [
@@ -84,9 +85,9 @@
                         ]
                     }">
 
-                    <div class="mb-8 pl-4 border-l-4 border-red-600">
-                        <h2 class="font-heading text-3xl font-black text-gray-800">Our Core Pillars</h2>
-                        <p class="text-gray-500">The 5 Foundations of our Advocacy</p>
+                    <div class="mb-8 pl-4 border-l-4 border-green-600">
+                        <h2 class="font-heading text-3xl md:text-4xl font-black text-gray-900 tracking-tight">Our Core Pillars</h2>
+                        <p class="text-gray-500 font-medium mt-1 uppercase tracking-widest text-[10px]">The 5 Foundations of our Advocacy</p>
                     </div>
 
                     {{-- IMPROVED CARD GRID --}}
@@ -94,10 +95,10 @@
                         <template x-for="pillar in pillars" :key="pillar.id">
                             <button
                                 @click="activePillar = (activePillar === pillar.id ? null : pillar.id)"
-                                class="bg-white rounded-2xl p-5 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group text-left border h-36 md:h-44 flex flex-col justify-between"
+                                class="bg-white rounded-2xl p-4 md:p-5 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group text-left border h-36 md:h-44 flex flex-col justify-between"
                                 :class="activePillar === pillar.id ? 'ring-2 ring-offset-2 ring-gray-200 ' + pillar.border : 'border-gray-100'"
                             >
-                                <div class="w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110"
+                                <div class="w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110 shrink-0"
                                      :class="pillar.bg + ' ' + pillar.color">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 md:w-6 md:h-6">
                                         <path stroke-linecap="round" stroke-linejoin="round" :d="pillar.icon" />
@@ -110,15 +111,15 @@
                         </template>
                     </div>
 
-                    {{-- Expanded Details Panel (Kept clean) --}}
+                    {{-- Expanded Details Panel --}}
                     <div x-show="activePillar !== null" x-collapse class="mt-4">
                         <template x-for="pillar in pillars" :key="pillar.id">
                             <div x-show="activePillar === pillar.id"
-                                 class="bg-white rounded-2xl p-8 shadow-lg border border-gray-100 relative overflow-hidden"
+                                 class="bg-white rounded-[2rem] p-6 md:p-8 shadow-lg border border-gray-100 relative overflow-hidden"
                                  x-transition:enter="transition ease-out duration-300"
                                  x-transition:enter-start="opacity-0 -translate-y-2"
                                  x-transition:enter-end="opacity-100 translate-y-0">
-                                <div class="relative z-10 flex gap-6 items-start">
+                                <div class="relative z-10 flex flex-col md:flex-row gap-6 items-start">
                                     <div class="hidden md:flex w-14 h-14 rounded-full items-center justify-center shrink-0" :class="pillar.bg + ' ' + pillar.color">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-7 h-7">
                                             <path stroke-linecap="round" stroke-linejoin="round" :d="pillar.icon" />
@@ -126,9 +127,9 @@
                                     </div>
                                     <div>
                                         <h3 class="text-2xl font-bold text-gray-900 mb-2" x-text="pillar.title"></h3>
-                                        <p class="text-gray-600 text-lg leading-relaxed" x-text="pillar.desc"></p>
+                                        <p class="text-gray-600 text-base md:text-lg leading-relaxed" x-text="pillar.desc"></p>
                                         <div class="mt-6">
-                                            <a href="{{ route('projects.index') }}" class="inline-flex items-center text-sm font-bold uppercase tracking-wider transition-colors" :class="pillar.color">
+                                            <a href="{{ route('projects.index') }}" class="inline-flex items-center text-xs font-black uppercase tracking-widest transition-colors" :class="pillar.color">
                                                 View Related Projects <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
                                             </a>
                                         </div>
@@ -139,86 +140,282 @@
                     </div>
                 </section>
 
-                {{-- FEATURES SECTION --}}
-                <div class="grid gap-12">
-                    <section class="bg-white rounded-3xl p-8 md:p-12 shadow-sm border border-gray-100 flex flex-col md:flex-row items-center gap-12">
-                        <div class="w-full md:w-1/2">
-                            <span class="text-yellow-500 font-bold uppercase tracking-wider text-xs mb-2 block">Our Mission</span>
-                            <h3 class="font-heading text-3xl md:text-4xl font-bold text-gray-900 mb-6">Advocacy for <span class="text-red-600">Everyone.</span></h3>
-                            <p class="text-gray-600 mb-8 leading-relaxed text-lg">BU MADYA creates space for meaningful engagement and representation. We believe that true change starts when every student feels empowered to speak, act, and lead.</p>
-                            <a href="{{ route('about') }}" class="inline-flex items-center justify-center px-6 py-3 bg-gray-900 text-white font-bold rounded-lg hover:bg-gray-800 transition shadow-lg text-sm">
-                                Read our Manifesto
-                            </a>
-                        </div>
-                        <div class="w-full md:w-1/2 relative">
-                            <div class="absolute inset-0 bg-yellow-100 rounded-3xl transform rotate-3 scale-95"></div>
-                            <img src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?q=80&w=1932" class="relative rounded-3xl shadow-lg w-full object-cover aspect-[4/3] transform hover:-rotate-1 transition duration-500">
-                        </div>
-                    </section>
-                </div>
+                {{-- FEATURED PROJECTS CAROUSEL --}}
+                <section class="mb-8 md:mb-48"
+                    x-data="{
+                        activeSlide: 0,
+                        slidesCount: {{ $featuredProjects->count() }},
+                        next() { this.activeSlide = this.activeSlide === this.slidesCount - 1 ? 0 : this.activeSlide + 1 },
+                        prev() { this.activeSlide = this.activeSlide === 0 ? this.slidesCount - 1 : this.activeSlide - 1 }
+                    }">
 
-                {{-- DYNAMIC NEWS SECTION (Updated Cards) --}}
-                <section class="space-y-8 pt-8">
-                    <div class="flex items-center justify-between px-2">
-                        <div class="pl-4 border-l-4 border-red-600">
-                            <h2 class="font-heading text-2xl font-bold text-gray-800">Latest Updates</h2>
+                    <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
+                        <div class="pl-4 border-l-4 border-yellow-400">
+                            <h2 class="font-heading text-3xl md:text-4xl font-black text-gray-900 tracking-tight">Featured Projects</h2>
+                            <p class="text-gray-500 font-medium mt-1 uppercase tracking-widest text-[10px]">Our Proudest Initiatives</p>
                         </div>
-                        <a href="{{ route('news.index') }}" class="text-xs font-bold text-gray-500 hover:text-red-600 uppercase tracking-wider flex items-center gap-2 group transition">
-                            View Archive <svg class="w-4 h-4 group-hover:translate-x-1 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+
+                        {{-- Carousel Controls --}}
+                        <div class="flex gap-2" x-show="slidesCount > 1">
+                            <button @click="prev()" class="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-green-500 hover:text-white hover:border-green-500 transition-all shadow-sm active:scale-95">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
+                            </button>
+                            <button @click="next()" class="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-red-600 hover:text-white hover:border-red-600 transition-all shadow-sm active:scale-95">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    {{-- Carousel Track --}}
+                    <div class="relative overflow-hidden rounded-[2rem] bg-white shadow-sm border border-gray-100 h-[500px] md:h-[400px]">
+                        @forelse($featuredProjects as $index => $project)
+                            <div x-show="activeSlide === {{ $index }}"
+                                 x-transition:enter="transition ease-out duration-500"
+                                 x-transition:enter-start="opacity-0 translate-x-8"
+                                 x-transition:enter-end="opacity-100 translate-x-0"
+                                 x-transition:leave="transition ease-in duration-300 absolute inset-0"
+                                 x-transition:leave-start="opacity-100 translate-x-0"
+                                 x-transition:leave-end="opacity-0 -translate-x-8"
+                                 class="w-full h-full flex flex-col md:flex-row absolute inset-0">
+
+                                {{-- Image Side --}}
+                                <div class="w-full md:w-1/2 h-48 md:h-full relative overflow-hidden bg-gray-100 shrink-0">
+                                    @if($project->cover_img)
+                                        <img src="{{ asset('storage/' . $project->cover_img) }}" alt="{{ $project->title }}" class="w-full h-full object-cover">
+                                    @else
+                                        <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-200 text-gray-400">
+                                            <svg class="w-16 h-16 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                        </div>
+                                    @endif
+                                </div>
+
+                                {{-- Content Side --}}
+                                <div class="w-full md:w-1/2 p-6 md:p-10 flex flex-col justify-center bg-white relative flex-1">
+                                    <div class="absolute top-0 right-0 w-32 h-32 bg-yellow-400/10 rounded-full blur-2xl -mr-10 -mt-10"></div>
+
+                                    <div class="inline-flex items-center gap-2 mb-4">
+                                        <span class="w-2 h-2 rounded-full bg-red-600 animate-pulse"></span>
+                                        <span class="text-[10px] font-black uppercase tracking-widest text-gray-400">Completed Initiative</span>
+                                    </div>
+
+                                    <h3 class="font-heading text-2xl md:text-3xl font-black text-gray-900 mb-4 leading-tight group-hover:text-red-600 transition-colors">
+                                        {{ $project->title }}
+                                    </h3>
+
+                                    <p class="text-gray-500 text-sm leading-relaxed mb-8 line-clamp-3 md:line-clamp-4">
+                                        {{ Str::limit(strip_tags($project->description), 150) }}
+                                    </p>
+
+                                    <div class="mt-auto">
+                                        <a href="{{ route('projects.show', $project->slug) }}" class="inline-flex items-center gap-2 text-[10px] font-black text-gray-900 hover:text-green-600 uppercase tracking-widest transition-colors group/link">
+                                            View Project
+                                            <svg class="w-4 h-4 group-hover/link:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        @empty
+                            <div class="w-full h-full flex flex-col items-center justify-center text-gray-400 bg-gray-50">
+                                <svg class="w-12 h-12 mb-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                                <p class="text-[10px] font-black uppercase tracking-widest">No projects currently active.</p>
+                            </div>
+                        @endforelse
+                    </div>
+
+                    {{-- Optional Slider Dots --}}
+                    <div class="flex justify-center gap-2 mt-6" x-show="slidesCount > 1">
+                        <template x-for="i in slidesCount" :key="i">
+                            <button @click="activeSlide = i - 1"
+                                    class="w-2 h-2 rounded-full transition-all duration-300"
+                                    :class="activeSlide === i - 1 ? 'bg-red-600 w-6' : 'bg-gray-300 hover:bg-yellow-400'"></button>
+                        </template>
+                    </div>
+                </section>
+
+
+                {{-- FEATURES SECTION --}}
+                <section class="bg-white rounded-[2rem] p-8 md:p-12 shadow-sm border border-gray-100 flex flex-col md:flex-row items-center gap-12 overflow-hidden relative mb-8 md:mb-48">
+                    <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5 mix-blend-overlay pointer-events-none"></div>
+
+                    <div class="w-full md:w-1/2 relative z-10">
+                        <span class="text-yellow-500 font-black uppercase tracking-widest text-[10px] mb-3 block">Our Mission</span>
+                        <h3 class="font-heading text-3xl md:text-4xl font-black text-gray-900 mb-6 tracking-tight">Advocacy for <span class="text-red-600">Everyone.</span></h3>
+                        <p class="text-gray-500 mb-8 leading-relaxed text-base md:text-lg">BU MADYA creates space for meaningful engagement and representation. We believe that true change starts when every student feels empowered to speak, act, and lead.</p>
+                        <a href="{{ route('about') }}" class="inline-flex items-center justify-center px-6 py-3.5 bg-gray-900 text-white font-bold rounded-xl hover:bg-gray-800 transition-all shadow-md active:scale-95 text-[10px] uppercase tracking-widest">
+                            Read our Manifesto
+                        </a>
+                    </div>
+                    <div class="w-full md:w-1/2 relative z-10">
+                        <div class="absolute inset-0 bg-gradient-to-tr from-yellow-100 to-red-50 rounded-[2rem] transform rotate-3 scale-105"></div>
+                        <img src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?q=80&w=1932" class="relative rounded-[1.5rem] shadow-lg w-full object-cover aspect-[4/3] transform hover:-rotate-1 transition-transform duration-500">
+                    </div>
+                </section>
+
+
+                {{-- UPCOMING EVENTS CAROUSEL --}}
+                <section class="mb-32 md:mb-48"
+                    x-data="{
+                        activeEvent: 0,
+                        eventCount: {{ $upcomingEvents->count() }},
+                        nextEvent() { this.activeEvent = this.activeEvent === this.eventCount - 1 ? 0 : this.activeEvent + 1 },
+                        prevEvent() { this.activeEvent = this.activeEvent === 0 ? this.eventCount - 1 : this.activeEvent - 1 }
+                    }">
+
+                    <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
+                        <div class="pl-4 border-l-4 border-red-600">
+                            <h2 class="font-heading text-3xl md:text-4xl font-black text-gray-900 tracking-tight">Upcoming Events</h2>
+                            <p class="text-gray-500 font-medium mt-1 uppercase tracking-widest text-[10px]">Mark Your Calendars</p>
+                        </div>
+
+                        <div class="flex gap-2" x-show="eventCount > 1">
+                            <button @click="prevEvent()" class="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-red-600 hover:text-white hover:border-red-600 transition-all shadow-sm active:scale-95">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
+                            </button>
+                            <button @click="nextEvent()" class="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-red-600 hover:text-white hover:border-red-600 transition-all shadow-sm active:scale-95">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="relative overflow-hidden rounded-[2rem] bg-white shadow-sm border border-gray-100 h-[500px] md:h-[400px]">
+                        @forelse($upcomingEvents as $index => $event)
+                            <div x-show="activeEvent === {{ $index }}"
+                                 x-transition:enter="transition ease-out duration-500"
+                                 x-transition:enter-start="opacity-0 translate-x-8"
+                                 x-transition:enter-end="opacity-100 translate-x-0"
+                                 x-transition:leave="transition ease-in duration-300 absolute inset-0"
+                                 x-transition:leave-start="opacity-100 translate-x-0"
+                                 x-transition:leave-end="opacity-0 -translate-x-8"
+                                 class="w-full h-full flex flex-col md:flex-row absolute inset-0">
+
+                                <div class="w-full md:w-1/2 h-48 md:h-full relative overflow-hidden bg-gray-900 group shrink-0">
+                                    @if($event->cover_image)
+                                        <img src="{{ asset('storage/' . $event->cover_image) }}" alt="{{ $event->title }}" class="w-full h-full object-cover opacity-90 group-hover:scale-105 group-hover:opacity-100 transition duration-700">
+                                    @else
+                                        <div class="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-red-900 to-gray-900 text-red-500/50">
+                                            <svg class="w-20 h-20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                        </div>
+                                    @endif
+
+                                    <div class="absolute top-6 left-6 bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 text-center overflow-hidden flex flex-col w-20">
+                                        <div class="bg-red-600 text-white text-[10px] font-black uppercase tracking-widest py-1.5">
+                                            {{ $event->start_date ? $event->start_date->format('M') : 'TBA' }}
+                                        </div>
+                                        <div class="text-3xl font-black text-gray-900 py-2 leading-none">
+                                            {{ $event->start_date ? $event->start_date->format('d') : '--' }}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="w-full md:w-1/2 p-6 md:p-10 flex flex-col justify-center bg-white relative flex-1">
+                                    <div class="flex items-center gap-3 mb-4">
+                                        @if($event->isOpen())
+                                            <span class="px-3 py-1 bg-green-50 text-green-600 text-[10px] font-black uppercase tracking-widest rounded-lg shadow-sm border border-green-100 flex items-center gap-1.5">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span> Registration Open
+                                            </span>
+                                        @else
+                                            <span class="px-3 py-1 bg-gray-50 text-gray-500 text-[10px] font-black uppercase tracking-widest rounded-lg shadow-sm border border-gray-200">
+                                                Closed
+                                            </span>
+                                        @endif
+                                    </div>
+
+                                    <h3 class="font-heading text-2xl md:text-3xl font-black text-gray-900 mb-4 leading-tight group-hover:text-red-600 transition-colors">
+                                        {{ $event->title }}
+                                    </h3>
+
+                                    <p class="text-gray-500 text-sm leading-relaxed mb-8 line-clamp-3 md:line-clamp-4">
+                                        {{ Str::limit(strip_tags($event->description), 150) }}
+                                    </p>
+
+                                    <div class="mt-auto flex flex-col sm:flex-row gap-4">
+                                        <a href="{{ route('events.show', $event->slug ?? $event->id) }}" class="inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-gray-900 text-white font-bold rounded-xl text-[10px] uppercase tracking-widest hover:bg-red-600 transition-all shadow-md hover:-translate-y-0.5 active:scale-95">
+                                            Event Details
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        @empty
+                            <div class="w-full h-full flex flex-col items-center justify-center text-gray-400 bg-gray-50">
+                                <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center mb-4 shadow-sm border border-gray-100">
+                                    <svg class="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                </div>
+                                <p class="text-[10px] font-black uppercase tracking-widest text-gray-500">No upcoming events right now.</p>
+                            </div>
+                        @endforelse
+                    </div>
+
+                    <div class="flex justify-center gap-2 mt-6" x-show="eventCount > 1">
+                        <template x-for="i in eventCount" :key="i">
+                            <button @click="activeEvent = i - 1"
+                                    class="w-2 h-2 rounded-full transition-all duration-300"
+                                    :class="activeEvent === i - 1 ? 'bg-red-600 w-6' : 'bg-gray-300 hover:bg-red-400'"></button>
+                        </template>
+                    </div>
+                </section>
+
+                {{-- DYNAMIC NEWS SECTION --}}
+                <section class="mb-12">
+                    <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
+                        <div class="pl-4 border-l-4 border-blue-500">
+                            <h2 class="font-heading text-3xl md:text-4xl font-black text-gray-900 tracking-tight">Latest Updates</h2>
+                            <p class="text-gray-500 font-medium mt-1 uppercase tracking-widest text-[10px]">News & Announcements</p>
+                        </div>
+                        <a href="{{ route('news.index') }}" class="text-[10px] font-black text-gray-400 hover:text-blue-600 uppercase tracking-widest flex items-center gap-1.5 group transition-colors">
+                            View Archive <svg class="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
                         </a>
                     </div>
 
-                    <div class="grid md:grid-cols-2 gap-8">
+                    <div class="grid sm:grid-cols-2 gap-6 md:gap-8">
                     @forelse($latestNews as $news)
-                        <article class="group bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col h-full">
+                        <article class="group bg-white rounded-[2rem] shadow-sm border border-gray-100 overflow-hidden hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col h-full">
 
-                            {{-- Image --}}
-                            <div class="h-56 overflow-hidden relative">
+                            <div class="h-56 overflow-hidden relative bg-gray-100 shrink-0">
                                 @php
                                     $catName = is_object($news->category) ? $news->category->name : $news->category;
                                     $coverUrl = $news->cover_img ? (Str::startsWith($news->cover_img, ['http', 'https']) ? $news->cover_img : asset('storage/' . $news->cover_img)) : null;
                                 @endphp
 
                                 <div class="absolute top-4 left-4 z-10">
-                                    <span class="bg-white/90 backdrop-blur text-gray-900 text-[10px] font-bold px-3 py-1 rounded-full shadow-sm uppercase tracking-wide">
+                                    <span class="bg-white/95 backdrop-blur-sm text-gray-900 text-[9px] font-black px-3 py-1.5 rounded-lg shadow-sm uppercase tracking-widest">
                                         {{ $catName }}
                                     </span>
                                 </div>
 
                                 @if($coverUrl)
-                                    <img src="{{ $coverUrl }}" alt="{{ $news->title }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-700">
+                                    <img src="{{ $coverUrl }}" alt="{{ $news->title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
                                 @else
-                                    <div class="w-full h-full bg-gray-100 flex items-center justify-center">
-                                        <svg class="w-12 h-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                    <div class="w-full h-full bg-gray-50 flex items-center justify-center">
+                                        <svg class="w-12 h-12 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                                     </div>
                                 @endif
                             </div>
 
-                            {{-- Content --}}
-                            <div class="p-6 flex flex-col flex-1">
-                                <div class="flex items-center gap-2 text-xs text-gray-400 font-medium mb-3">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                            <div class="p-6 md:p-8 flex flex-col flex-1">
+                                <div class="flex items-center gap-2 text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-3">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                                     {{ $news->published_at ? $news->published_at->format('M d, Y') : 'TBA' }}
                                 </div>
 
-                                <h3 class="font-bold text-xl text-gray-900 mb-3 leading-tight group-hover:text-red-600 transition">
+                                <h3 class="font-black text-xl text-gray-900 mb-3 leading-tight group-hover:text-blue-600 transition-colors">
                                     <a href="{{ route('news.show', $news->slug) }}">{{ $news->title }}</a>
                                 </h3>
 
-                                <p class="text-gray-600 text-sm line-clamp-3 mb-6 flex-1 leading-relaxed">
+                                <p class="text-gray-500 text-sm line-clamp-3 mb-6 flex-1 leading-relaxed">
                                     {{ $news->summary ?? Str::limit(strip_tags($news->content), 100) }}
                                 </p>
 
-                                <div class="pt-4 border-t border-gray-100 flex items-center justify-between">
-                                    <a href="{{ route('news.show', $news->slug) }}" class="text-xs font-bold text-red-600 uppercase tracking-wider flex items-center gap-1 group/link">
-                                        Read Article <svg class="w-3 h-3 group-hover/link:translate-x-1 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                                <div class="pt-5 border-t border-gray-100 flex items-center justify-between mt-auto">
+                                    <a href="{{ route('news.show', $news->slug) }}" class="text-[10px] font-black text-gray-900 hover:text-blue-600 uppercase tracking-widest flex items-center gap-1.5 group/link transition-colors">
+                                        Read Article <svg class="w-3.5 h-3.5 group-hover/link:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                                     </a>
                                 </div>
                             </div>
                         </article>
                     @empty
-                        <div class="col-span-2 text-center py-12 bg-white rounded-2xl border border-dashed border-gray-300">
-                            <p class="text-gray-400 font-medium">No updates posted yet.</p>
+                        <div class="col-span-1 sm:col-span-2 text-center py-12 bg-white rounded-[2rem] border border-dashed border-gray-200">
+                            <p class="text-[10px] font-black uppercase tracking-widest text-gray-400">No updates posted yet.</p>
                         </div>
                     @endforelse
                     </div>
@@ -228,8 +425,8 @@
             {{-- RIGHT COLUMN (Sidebar) --}}
             <aside class="lg:col-span-4 space-y-8 lg:sticky lg:top-24">
 
-                {{-- Membership Card (Redesigned) --}}
-                <div class="bg-gray-900 rounded-3xl p-8 text-white relative overflow-hidden shadow-2xl group">
+                {{-- Membership Card --}}
+                <div class="bg-gray-900 rounded-[2rem] p-8 text-white relative overflow-hidden shadow-2xl group">
                     {{-- Decorative Blob --}}
                     <div class="absolute top-0 right-0 w-64 h-64 bg-red-600/20 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-red-600/30 transition duration-700"></div>
 
@@ -239,31 +436,148 @@
                         </div>
                         <h3 class="font-heading text-2xl font-bold mb-2">Be One of Us</h3>
                         <p class="text-gray-400 text-sm mb-8 leading-relaxed">Join a network of passionate youth leaders. Get exclusive access to workshops, events, and mentorship.</p>
-                        <a href="{{ route('membership-form') }}" class="block w-full py-3 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 transition shadow-lg text-center text-sm uppercase tracking-widest">
+                        <a href="{{ route('membership-form') }}" class="block w-full py-3.5 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 transition shadow-lg text-center text-[10px] uppercase tracking-widest">
                             Apply for Membership
                         </a>
+                    </div>
+                </div>
+                
+                {{-- DYNAMIC CALENDAR WIDGET --}}
+                <div class="bg-white rounded-2xl md:rounded-[2rem] p-5 md:p-8 shadow-sm border border-gray-100"
+                     x-data="{
+                        currentMonth: new Date().getMonth(),
+                        currentYear: new Date().getFullYear(),
+                        monthNames: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+                        activities: @js($calendarData ?? []),
+                        activeDate: null,
+                        
+                        get daysInMonth() { return new Date(this.currentYear, this.currentMonth + 1, 0).getDate(); },
+                        get blankDays() { return new Date(this.currentYear, this.currentMonth, 1).getDay(); },
+                        
+                        get daysArray() { return Array.from({length: this.daysInMonth}, (_, i) => i + 1); },
+                        get blanksArray() { return Array.from({length: this.blankDays}, (_, i) => i); },
+                        
+                        formatDate(day) {
+                            return this.currentYear + '-' + String(this.currentMonth + 1).padStart(2, '0') + '-' + String(day).padStart(2, '0');
+                        },
+                        hasActivity(day) {
+                            return this.activities[this.formatDate(day)] !== undefined;
+                        },
+                        
+                        // New Navigation Logic
+                        prevMonth() {
+                            if (this.currentMonth === 0) {
+                                this.currentMonth = 11;
+                                this.currentYear--;
+                            } else {
+                                this.currentMonth--;
+                            }
+                            this.activeDate = null; // Close agenda when changing months
+                        },
+                        nextMonth() {
+                            if (this.currentMonth === 11) {
+                                this.currentMonth = 0;
+                                this.currentYear++;
+                            } else {
+                                this.currentMonth++;
+                            }
+                            this.activeDate = null;
+                        }
+                     }">
+                     
+                    {{-- Calendar Header --}}
+                    <div class="flex items-center justify-between mb-4 md:mb-5">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-red-50 text-red-600 flex items-center justify-center shrink-0 border border-red-100">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                            </div>
+                            <div>
+                                <h3 class="font-heading font-black text-gray-900 text-lg md:text-xl tracking-tight leading-none mb-1" x-text="monthNames[currentMonth]"></h3>
+                                <p class="text-[9px] md:text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none" x-text="currentYear"></p>
+                            </div>
+                        </div>
+                        
+                        {{-- Navigation Arrows --}}
+                        <div class="flex items-center gap-1 bg-gray-50 rounded-lg border border-gray-200 p-0.5">
+                            <button @click="prevMonth()" class="p-1.5 md:p-2 text-gray-400 hover:text-red-600 hover:bg-white rounded-md transition-colors focus:outline-none shadow-sm border border-transparent hover:border-gray-100">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7"></path></svg>
+                            </button>
+                            <div class="w-[1px] h-4 bg-gray-200"></div>
+                            <button @click="nextMonth()" class="p-1.5 md:p-2 text-gray-400 hover:text-red-600 hover:bg-white rounded-md transition-colors focus:outline-none shadow-sm border border-transparent hover:border-gray-100">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"></path></svg>
+                            </button>
+                        </div>
+                    </div>
+                     
+                    {{-- Days of Week (Bulletproof Grid) --}}
+                    <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px;" class="text-center mb-2 mt-4">
+                        <template x-for="day in ['Su','Mo','Tu','We','Th','Fr','Sa']" :key="day">
+                            <div class="text-[8px] md:text-[9px] font-bold text-gray-400 uppercase tracking-widest py-1" x-text="day"></div>
+                        </template>
+                    </div>
+
+                    {{-- Calendar Grid (Bulletproof Grid & Fixed Heights) --}}
+                    <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px;">
+                        <template x-for="i in blanksArray" :key="'blank-'+i">
+                            <div></div>
+                        </template>
+                        <template x-for="day in daysArray" :key="'day-'+day">
+                            <div class="relative w-full">
+                                <button @click="hasActivity(day) ? (activeDate === formatDate(day) ? activeDate = null : activeDate = formatDate(day)) : null" 
+                                        class="w-full h-8 md:h-10 flex flex-col items-center justify-center rounded-lg transition-all focus:outline-none"
+                                        :class="{
+                                            'hover:bg-gray-50 text-gray-500 cursor-default': !hasActivity(day),
+                                            'bg-red-50 text-red-700 font-black border border-red-100 hover:bg-red-100 shadow-sm cursor-pointer': hasActivity(day) && activeDate !== formatDate(day),
+                                            'bg-red-600 text-white font-black shadow-md cursor-pointer': activeDate === formatDate(day),
+                                        }">
+                                    <span x-text="day" class="text-[10px] md:text-xs z-10"></span>
+                                    <span x-show="hasActivity(day) && activeDate !== formatDate(day)" class="absolute bottom-1 w-1 h-1 md:w-1.5 md:h-1.5 bg-red-500 rounded-full"></span>
+                                </button>
+                            </div>
+                        </template>
+                    </div>
+
+                    {{-- Tooltip / Activity List Panel --}}
+                    <div x-show="activeDate && activities[activeDate]" x-collapse class="mt-4 md:mt-5 pt-4 md:pt-5 border-t border-gray-100">
+                        <div class="flex items-center justify-between mb-3 md:mb-4">
+                            <span class="text-[9px] font-bold text-gray-500 uppercase tracking-widest" x-text="'Agenda for ' + monthNames[currentMonth] + ' ' + parseInt(activeDate.split('-')[2])"></span>
+                            <button @click="activeDate = null" class="text-gray-400 hover:text-red-600 transition-colors p-1 bg-gray-50 hover:bg-red-50 rounded-full">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+                            </button>
+                        </div>
+                        <div class="space-y-2.5">
+                            <template x-for="(activity, index) in activities[activeDate]" :key="index">
+                                <a :href="activity.url" class="block p-3 md:p-4 rounded-xl border border-gray-100 hover:border-red-200 bg-gray-50 hover:bg-white hover:shadow-sm transition-all group/link">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <span class="w-1.5 h-1.5 rounded-full" :class="activity.type === 'Event' ? 'bg-red-500' : 'bg-yellow-400'"></span>
+                                        <span class="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-gray-500 group-hover/link:text-gray-900 transition-colors" x-text="activity.type"></span>
+                                    </div>
+                                    <h4 class="font-bold text-xs md:text-sm text-gray-900 group-hover/link:text-red-600 transition-colors leading-tight line-clamp-2" x-text="activity.title"></h4>
+                                </a>
+                            </template>
+                        </div>
                     </div>
                 </div>
 
                 {{-- Gallery Widget --}}
                 <div x-data="{ activeSlide: 0, slides: [{ img: 'https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?q=80&w=1949', caption: 'Tree Planting' }, { img: 'https://images.unsplash.com/photo-1523580494863-6f3031224c94?q=80&w=2070', caption: 'Student Leadership' }, { img: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?q=80&w=2070', caption: 'General Assembly' }] }"
-                     class="bg-white rounded-3xl p-1 shadow-lg border border-gray-100">
-                    <div class="relative rounded-2xl overflow-hidden aspect-square">
+                     class="bg-white rounded-[2rem] p-2 shadow-lg border border-gray-100">
+                    <div class="relative rounded-[1.5rem] overflow-hidden aspect-square">
                         <template x-for="(slide, index) in slides" :key="index">
                             <div x-show="activeSlide === index" x-transition:enter="transition ease-out duration-500" x-transition:enter-start="opacity-0 scale-105" x-transition:enter-end="opacity-100 scale-100" class="absolute inset-0">
                                 <img :src="slide.img" class="w-full h-full object-cover">
                                 <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
                                 <div class="absolute bottom-6 left-6 right-6">
                                     <span class="text-[10px] font-bold text-yellow-400 uppercase tracking-wider mb-1 block">Gallery</span>
-                                    <p x-text="slide.caption" class="text-white font-bold text-lg leading-tight"></p>
+                                    <p x-text="slide.caption" class="text-white font-bold text-lg md:text-xl leading-tight"></p>
                                 </div>
                             </div>
                         </template>
 
                         {{-- Controls --}}
                         <div class="absolute bottom-6 right-6 flex gap-2">
-                            <button @click="activeSlide = activeSlide === 0 ? slides.length - 1 : activeSlide - 1" class="w-8 h-8 bg-white/20 backdrop-blur rounded-full flex items-center justify-center text-white hover:bg-white hover:text-black transition"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg></button>
-                            <button @click="activeSlide = activeSlide === slides.length - 1 ? 0 : activeSlide + 1" class="w-8 h-8 bg-white/20 backdrop-blur rounded-full flex items-center justify-center text-white hover:bg-white hover:text-black transition"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></button>
+                            <button @click="activeSlide = activeSlide === 0 ? slides.length - 1 : activeSlide - 1" class="w-8 h-8 bg-white/20 backdrop-blur rounded-full flex items-center justify-center text-white hover:bg-white hover:text-black transition"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg></button>
+                            <button @click="activeSlide = activeSlide === slides.length - 1 ? 0 : activeSlide + 1" class="w-8 h-8 bg-white/20 backdrop-blur rounded-full flex items-center justify-center text-white hover:bg-white hover:text-black transition"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg></button>
                         </div>
                     </div>
                 </div>

@@ -130,6 +130,8 @@
                     <button @click="deleteModalOpen = false; postToDelete = null" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-2.5 rounded-xl transition-colors text-[13px] outline-none">Cancel</button>
                     <button wire:click="deletePost(postToDelete)" @click="deleteModalOpen = false" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-xl transition-colors text-[13px] shadow-sm outline-none">Yes, Delete</button>
                 </div>
+
+                
             </div>
         </div>
     </template>

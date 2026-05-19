@@ -8,7 +8,7 @@ use Livewire\Attributes\Layout;
 
 #[Layout('layouts.madya-admin')] // Assuming you have an admin layout
 class ProposalsShow extends Component
-{
+{\
     public Proposal $proposal;
     public $admin_remarks = '';
 
