@@ -79,6 +79,8 @@ use Illuminate\Support\Facades\Response;
 
 use App\Livewire\Partner\SubmitFrame;
 use App\Livewire\Partner\PartnerDashboard;
+use App\Livewire\Partner\AccreditationDashboard as OrgDashboard;
+
 
 use App\Livewire\Community\PostFeed;
 use App\Livewire\Community\PostEditor;
@@ -132,22 +134,22 @@ Route::domain('partners.' . env('APP_DOMAIN'))->group(function () {
 
 
     // 2. Student Organization Routes (Must be logged in)
-    Route::middleware(['auth'])->group(function () {
+    Route::middleware(['auth', 'role:organization'])->group(function () {
         
         // The main dashboard where the org sees their application status
-        Route::get('/dashboard', function () {
-            return view('partner.dashboard'); // You can turn this into a Livewire component later
-        })->name('accreditation.dashboard');
+    
 
         // The Multi-Step Accreditation Wizard
         Route::get('/apply', AccreditationWizard::class)->name('accreditation.apply');
+        // The Organization's Monitoring Dashboard
+        Route::get('/dashboard', OrgDashboard::class)->name('accreditation.dashboard');
 
     });
 
 
     // 3. OSAS Admin Command Center (Must be logged in AND an Admin)
     // Note: You will need a custom middleware like 'is_admin' or a Role/Permission package
-    Route::middleware(['auth', 'role:admin'])->prefix('osas')->name('osas.')->group(function () {
+    Route::middleware(['auth', 'role:administrator'])->prefix('osas')->name('osas.')->group(function () {
         
         // The Command Center Dashboard
         Route::get('/dashboard', AccreditationDashboard::class)->name('dashboard');
