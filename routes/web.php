@@ -136,7 +136,7 @@ Route::domain('partners.' . env('APP_DOMAIN'))->group(function () {
         
         // The main dashboard where the org sees their application status
         Route::get('/dashboard', function () {
-            return view('partners.dashboard'); // You can turn this into a Livewire component later
+            return view('partner.dashboard'); // You can turn this into a Livewire component later
         })->name('accreditation.dashboard');
 
         // The Multi-Step Accreditation Wizard

@@ -63,7 +63,7 @@
 
             <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
                 @auth
-                    <a href="{{ route('accreditation.dashboard') }}" class="w-full sm:w-auto px-8 py-3.5 bg-gray-900 text-white text-sm font-black uppercase tracking-widest rounded-xl shadow-lg shadow-gray-900/20 hover:bg-black transition active:scale-95">
+                    <a href="{{ route('partner.dashboard') }}" class="w-full sm:w-auto px-8 py-3.5 bg-gray-900 text-white text-sm font-black uppercase tracking-widest rounded-xl shadow-lg shadow-gray-900/20 hover:bg-black transition active:scale-95">
                         Access Dashboard
                     </a>
                 @else
