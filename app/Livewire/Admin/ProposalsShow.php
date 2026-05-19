@@ -8,17 +8,17 @@ use Livewire\Attributes\Layout;
 
 #[Layout('layouts.madya-admin')] // Assuming you have an admin layout
 class ProposalsShow extends Component
-{\
+{
     public Proposal $proposal;
     public $admin_remarks = '';
 
     public function mount(Proposal $proposal)
     {
         $this->proposal = $proposal;
-        
+
         // Eager load relationships for the view
         $this->proposal->load(['objectives', 'user', 'college']);
-        
+
         // Pre-fill remarks if they exist
         $this->admin_remarks = $proposal->admin_remarks;
     }
