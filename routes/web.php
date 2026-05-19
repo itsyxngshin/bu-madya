@@ -87,6 +87,8 @@ use App\Livewire\Admin\CommunityManager;
 
 use App\Livewire\Ojt\CoordinatorView;
 use App\Livewire\Webmaster\Dashboard as WebmasterDashboard;
+use App\Livewire\AccreditationWizard;
+use App\Livewire\Admin\AccreditationDashboard;
 
 $baseDomain = parse_url(config('app.url'), PHP_URL_HOST) ?? 'localhost';
 
@@ -119,6 +121,42 @@ Route::domain('community.' . env('APP_DOMAIN'))->name('community.')->group(funct
         Route::get('/create', PostEditor::class)->name('posts.create');
         Route::get('/edit/{post}', PostEditor::class)->name('posts.edit');
     });
+});
+
+Route::domain('partners.' . env('APP_DOMAIN'))->group(function () {
+
+    // 1. Public Landing (Optional: Information about accreditation)
+    Route::get('/', function () {
+        return view('partners.welcome'); // A simple blade view explaining the process
+    })->name('partners.home');
+
+
+    // 2. Student Organization Routes (Must be logged in)
+    Route::middleware(['auth'])->group(function () {
+        
+        // The main dashboard where the org sees their application status
+        Route::get('/dashboard', function () {
+            return view('partners.dashboard'); // You can turn this into a Livewire component later
+        })->name('accreditation.dashboard');
+
+        // The Multi-Step Accreditation Wizard
+        Route::get('/apply', AccreditationWizard::class)->name('accreditation.apply');
+
+    });
+
+
+    // 3. OSAS Admin Command Center (Must be logged in AND an Admin)
+    // Note: You will need a custom middleware like 'is_admin' or a Role/Permission package
+    Route::middleware(['auth', 'role:admin'])->prefix('osas')->name('osas.')->group(function () {
+        
+        // The Command Center Dashboard
+        Route::get('/dashboard', AccreditationDashboard::class)->name('dashboard');
+        
+        // Future route: If you want a dedicated full-page view for a specific application
+        // Route::get('/application/{id}', ViewApplication::class)->name('application.show');
+        
+    });
+
 });
 
 // ==========================================
