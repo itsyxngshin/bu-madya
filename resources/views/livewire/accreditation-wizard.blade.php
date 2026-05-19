@@ -33,35 +33,77 @@
         {{-- STEP 1: General & Finance --}}
         @if($currentStep === 1)
             <h2 class="text-2xl font-black text-gray-900 mb-6">General Information & Finance</h2>
-
+            
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                {{-- Organization Name --}}
                 <div class="md:col-span-2">
                     <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Organization Name</label>
-                    <input type="text" wire:model="name" class="w-full rounded-xl border-gray-200 bg-gray-50 focus:border-blue-500 focus:ring-blue-500">
-                    @error('name') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                    <input type="text" wire:model="name" class="w-full rounded-xl border-gray-200 bg-gray-50 focus:border-blue-500 focus:ring-blue-500 transition-colors">
+                    @error('name') <span class="text-red-500 text-xs mt-1 block font-medium">{{ $message }}</span> @enderror
                 </div>
 
-                <div>
+                {{-- PREMIUM ALPINE.JS DROPDOWN: Organization Type --}}
+                <div x-data="{ 
+                        open: false, 
+                        options: [
+                            { value: 'academic', label: 'Academic' },
+                            { value: 'socio-civic', label: 'Socio-Civic' },
+                            { value: 'political', label: 'Political' },
+                            { value: 'fraternity/sorority', label: 'Fraternity / Sorority' },
+                            { value: 'environmental', label: 'Environmental' },
+                            { value: 'spiritual/religious', label: 'Spiritual / Religious' },
+                            { value: 'lifestyle', label: 'Lifestyle' },
+                            { value: 'others', label: 'Others (Specify)' }
+                        ],
+                        get selectedLabel() {
+                            let opt = this.options.find(o => o.value === $wire.type);
+                            return opt ? opt.label : 'Select Type...';
+                        }
+                    }" class="relative">
+                    
                     <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Organization Type</label>
-                    <select wire:model.live="type" class="w-full rounded-xl border-gray-200 bg-gray-50 focus:border-blue-500 focus:ring-blue-500">
-                        <option value="">Select Type...</option>
-                        <option value="academic">Academic</option>
-                        <option value="socio-civic">Socio-Civic</option>
-                        <option value="political">Political</option>
-                        <option value="fraternity/sorority">Fraternity / Sorority</option>
-                        <option value="others">Others (Specify)</option>
-                    </select>
-                    @error('type') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                    
+                    {{-- Premium Trigger Button --}}
+                    <button @click="open = !open" @click.away="open = false" type="button" 
+                            class="w-full flex items-center justify-between px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl hover:border-blue-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-sm text-left">
+                        <span x-text="selectedLabel" :class="$wire.type ? 'text-gray-900 font-bold' : 'text-gray-500'"></span>
+                        <svg class="w-4 h-4 text-gray-400 transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+
+                    {{-- Premium Dropdown Menu --}}
+                    <div x-show="open" 
+                         x-transition:enter="transition ease-out duration-100" 
+                         x-transition:enter-start="opacity-0 scale-95" 
+                         x-transition:enter-end="opacity-100 scale-100" 
+                         x-transition:leave="transition ease-in duration-75" 
+                         x-transition:leave-start="opacity-100 scale-100" 
+                         x-transition:leave-end="opacity-0 scale-95" 
+                         class="absolute z-50 w-full mt-2 bg-white/95 backdrop-blur-xl border border-gray-100 rounded-xl shadow-xl overflow-hidden" style="display: none;">
+                        <div class="p-1 max-h-60 overflow-y-auto">
+                            <template x-for="option in options" :key="option.value">
+                                <button @click="$wire.set('type', option.value); open = false" type="button" 
+                                        class="w-full text-left px-4 py-2.5 text-sm rounded-lg transition-colors flex items-center justify-between group"
+                                        :class="$wire.type === option.value ? 'bg-blue-50 text-blue-700 font-bold' : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600'">
+                                    <span x-text="option.label"></span>
+                                    <svg x-show="$wire.type === option.value" class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                                </button>
+                            </template>
+                        </div>
+                    </div>
+                    @error('type') <span class="text-red-500 text-xs mt-1 block font-medium">{{ $message }}</span> @enderror
                 </div>
 
+                {{-- Type Specification (Only shows if 'others' is selected) --}}
                 @if($type === 'others')
-                    <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Specify Type</label>
-                        <input type="text" wire:model="type_specification" class="w-full rounded-xl border-gray-200 bg-gray-50 focus:border-blue-500 focus:ring-blue-500">
-                        @error('type_specification') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                    <div class="md:col-span-2 p-4 bg-gray-50 rounded-xl border border-gray-200 animate-fade-in-up">
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Please Specify Organization Type</label>
+                        <input type="text" wire:model="type_specification" placeholder="e.g. Esports, Tech Community, etc." class="w-full rounded-lg border-gray-200 focus:border-blue-500 focus:ring-blue-500">
+                        @error('type_specification') <span class="text-red-500 text-xs mt-1 block font-medium">{{ $message }}</span> @enderror
                     </div>
                 @endif
 
+                {{-- Academic Year --}}
                 <div>
                     <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Academic Year</label>
                     <select wire:model="academic_year_id" class="w-full rounded-xl border-gray-200 bg-gray-50 focus:border-blue-500 focus:ring-blue-500">
@@ -70,21 +112,28 @@
                             <option value="{{ $ay->id }}">{{ $ay->year }}</option>
                         @endforeach
                     </select>
+                    @error('academic_year_id') <span class="text-red-500 text-xs mt-1 block font-medium">{{ $message }}</span> @enderror
                 </div>
 
+                {{-- Year Established --}}
                 <div>
                     <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Year Established</label>
                     <input type="number" wire:model="year_established" placeholder="e.g. 1998" class="w-full rounded-xl border-gray-200 bg-gray-50 focus:border-blue-500 focus:ring-blue-500">
+                    @error('year_established') <span class="text-red-500 text-xs mt-1 block font-medium">{{ $message }}</span> @enderror
                 </div>
 
                 <div class="md:col-span-2 pt-6 mt-2 border-t border-gray-100">
-                    <h3 class="font-bold text-gray-900 mb-4">Financial & Bank Details</h3>
+                    <h3 class="font-black text-gray-900 mb-4">Financial & Bank Details</h3>
                 </div>
 
+                {{-- Membership Fee --}}
                 <div>
                     <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Membership Fee (PHP)</label>
                     <input type="number" step="0.01" wire:model="membership_fee" class="w-full rounded-xl border-gray-200 bg-gray-50 focus:border-blue-500 focus:ring-blue-500">
+                    @error('membership_fee') <span class="text-red-500 text-xs mt-1 block font-medium">{{ $message }}</span> @enderror
                 </div>
+
+                {{-- Collection Frequency --}}
                 <div>
                     <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Collection Frequency</label>
                     <select wire:model="collection_frequency" class="w-full rounded-xl border-gray-200 bg-gray-50 focus:border-blue-500 focus:ring-blue-500">
@@ -92,19 +141,23 @@
                         <option value="semestral">Semestral</option>
                         <option value="annual">Annual</option>
                     </select>
+                    @error('collection_frequency') <span class="text-red-500 text-xs mt-1 block font-medium">{{ $message }}</span> @enderror
                 </div>
 
+                {{-- Bank Details --}}
                 <div>
                     <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Bank Name</label>
-                    <input type="text" wire:model="bank_name" placeholder="e.g. Landbank" class="w-full rounded-xl border-gray-200 bg-gray-50 focus:border-blue-500 focus:ring-blue-500">
+                    <input type="text" wire:model="bank_name" placeholder="e.g. Landbank, BPI" class="w-full rounded-xl border-gray-200 bg-gray-50 focus:border-blue-500 focus:ring-blue-500">
+                    @error('bank_name') <span class="text-red-500 text-xs mt-1 block font-medium">{{ $message }}</span> @enderror
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Account Number</label>
                     <input type="text" wire:model="bank_account_number" class="w-full rounded-xl border-gray-200 bg-gray-50 focus:border-blue-500 focus:ring-blue-500">
+                    @error('bank_account_number') <span class="text-red-500 text-xs mt-1 block font-medium">{{ $message }}</span> @enderror
                 </div>
             </div>
         @endif
-
+        
         {{-- STEP 2: Documents --}}
         @if($currentStep === 2)
             <div class="flex items-center justify-between mb-6">
