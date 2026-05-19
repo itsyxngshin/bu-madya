@@ -142,7 +142,7 @@ Route::domain('partners.' . env('APP_DOMAIN'))->group(function () {
         // The Multi-Step Accreditation Wizard
         Route::get('/apply', AccreditationWizard::class)->name('accreditation.apply');
         // The Organization's Monitoring Dashboard
-        Route::get('/dashboard', OrgDashboard::class)->name('accreditation.dashboard');
+        Route::get('/accreditation/dashboard', OrgDashboard::class)->name('accreditation.dashboard');
 
     });
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Org;
+namespace App\Livewire\Partner;
 
 use Livewire\Component;
 use Illuminate\Support\Facades\Auth;
@@ -35,7 +35,7 @@ class AccreditationDashboard extends Component
             ->take(5)
             ->get();
 
-        return view('livewire.org.accreditation-dashboard', [
+        return view('livewire.partner.accreditation-dashboard', [
             'organization' => $organization,
             'application' => $latestApplication,
             'activeDeadlines' => $activeDeadlines,
