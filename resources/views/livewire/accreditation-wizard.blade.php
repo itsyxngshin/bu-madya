@@ -1,30 +1,36 @@
 <div class="max-w-5xl mx-auto p-4 sm:p-6 lg:p-8">
 
     {{-- STEP PROGRESS BAR --}}
-    <div class="mb-8 bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between text-xs font-black uppercase tracking-widest text-gray-400">
-        <div class="flex items-center gap-2 {{ $currentStep >= 1 ? 'text-blue-600' : '' }}">
+    {{-- STEP PROGRESS BAR --}}
+    <div class="mb-8 bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between text-[10px] sm:text-xs font-black uppercase tracking-widest text-gray-400 overflow-x-auto hide-scrollbar">
+        <div class="flex items-center gap-2 {{ $currentStep >= 1 ? 'text-blue-600' : '' }} shrink-0">
             <div class="w-6 h-6 rounded-full flex items-center justify-center border-2 {{ $currentStep >= 1 ? 'border-blue-600 bg-blue-50' : 'border-gray-200' }}">1</div>
             <span class="hidden md:block">General Info</span>
         </div>
-        <div class="flex-1 h-px bg-gray-200 mx-4"></div>
-        <div class="flex items-center gap-2 {{ $currentStep >= 2 ? 'text-blue-600' : '' }}">
+        <div class="flex-1 h-px bg-gray-200 mx-2 md:mx-4 min-w-[20px]"></div>
+        <div class="flex items-center gap-2 {{ $currentStep >= 2 ? 'text-blue-600' : '' }} shrink-0">
             <div class="w-6 h-6 rounded-full flex items-center justify-center border-2 {{ $currentStep >= 2 ? 'border-blue-600 bg-blue-50' : 'border-gray-200' }}">2</div>
             <span class="hidden md:block">Documents</span>
         </div>
-        <div class="flex-1 h-px bg-gray-200 mx-4"></div>
-        <div class="flex items-center gap-2 {{ $currentStep >= 3 ? 'text-blue-600' : '' }}">
+        <div class="flex-1 h-px bg-gray-200 mx-2 md:mx-4 min-w-[20px]"></div>
+        <div class="flex items-center gap-2 {{ $currentStep >= 3 ? 'text-blue-600' : '' }} shrink-0">
             <div class="w-6 h-6 rounded-full flex items-center justify-center border-2 {{ $currentStep >= 3 ? 'border-blue-600 bg-blue-50' : 'border-gray-200' }}">3</div>
             <span class="hidden md:block">Officers</span>
         </div>
-        <div class="flex-1 h-px bg-gray-200 mx-4"></div>
-        <div class="flex items-center gap-2 {{ $currentStep >= 4 ? 'text-blue-600' : '' }}">
+        <div class="flex-1 h-px bg-gray-200 mx-2 md:mx-4 min-w-[20px]"></div>
+        <div class="flex items-center gap-2 {{ $currentStep >= 4 ? 'text-blue-600' : '' }} shrink-0">
             <div class="w-6 h-6 rounded-full flex items-center justify-center border-2 {{ $currentStep >= 4 ? 'border-blue-600 bg-blue-50' : 'border-gray-200' }}">4</div>
             <span class="hidden md:block">Members</span>
         </div>
-        <div class="flex-1 h-px bg-gray-200 mx-4"></div>
-        <div class="flex items-center gap-2 {{ $currentStep == 5 ? 'text-blue-600' : '' }}">
-            <div class="w-6 h-6 rounded-full flex items-center justify-center border-2 {{ $currentStep == 5 ? 'border-blue-600 bg-blue-50' : 'border-gray-200' }}">5</div>
+        <div class="flex-1 h-px bg-gray-200 mx-2 md:mx-4 min-w-[20px]"></div>
+        <div class="flex items-center gap-2 {{ $currentStep >= 5 ? 'text-blue-600' : '' }} shrink-0">
+            <div class="w-6 h-6 rounded-full flex items-center justify-center border-2 {{ $currentStep >= 5 ? 'border-blue-600 bg-blue-50' : 'border-gray-200' }}">5</div>
             <span class="hidden md:block">Activities</span>
+        </div>
+        <div class="flex-1 h-px bg-gray-200 mx-2 md:mx-4 min-w-[20px]"></div>
+        <div class="flex items-center gap-2 {{ $currentStep == 6 ? 'text-blue-600' : '' }} shrink-0">
+            <div class="w-6 h-6 rounded-full flex items-center justify-center border-2 {{ $currentStep == 6 ? 'border-blue-600 bg-blue-50' : 'border-gray-200' }}">6</div>
+            <span class="hidden md:block">Signatories</span>
         </div>
     </div>
 
@@ -154,6 +160,19 @@
                     <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Account Number</label>
                     <input type="text" wire:model="bank_account_number" class="w-full rounded-xl border-gray-200 bg-gray-50 focus:border-blue-500 focus:ring-blue-500">
                     @error('bank_account_number') <span class="text-red-500 text-xs mt-1 block font-medium">{{ $message }}</span> @enderror
+                </div>
+
+                {{-- Official Contacts --}}
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Official Email Address</label>
+                    <input type="email" wire:model="email_address" placeholder="e.g. bu-unesco@bicol-u.edu.ph" class="w-full rounded-xl border-gray-200 bg-gray-50 focus:border-blue-500 focus:ring-blue-500">
+                    @error('email_address') <span class="text-red-500 text-xs mt-1 block font-medium">{{ $message }}</span> @enderror
+                </div>
+                
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Facebook Account/Page</label>
+                    <input type="text" wire:model="facebook_account" placeholder="e.g. BU UNESCO Club" class="w-full rounded-xl border-gray-200 bg-gray-50 focus:border-blue-500 focus:ring-blue-500">
+                    @error('facebook_account') <span class="text-red-500 text-xs mt-1 block font-medium">{{ $message }}</span> @enderror
                 </div>
             </div>
         @endif
@@ -401,7 +420,8 @@
                 <div></div> {{-- Empty div for flex-between alignment --}}
             @endif
 
-            @if($currentStep < 5)
+            {{-- Changed to < 6 --}}
+            @if($currentStep < 6)
                 <button wire:click="nextStep" class="px-8 py-2.5 bg-blue-600 text-white font-black uppercase tracking-widest text-xs rounded-xl shadow-md hover:bg-blue-700 transition-colors flex items-center gap-2">
                     Next Step <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"></path></svg>
                 </button>
