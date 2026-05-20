@@ -180,45 +180,163 @@
         {{-- STEP 2: Documents --}}
         @if($currentStep === 2)
             <div class="flex items-center justify-between mb-6">
-                <h2 class="text-2xl font-black text-gray-900">Required Documents</h2>
+                <div>
+                    <h2 class="text-2xl font-black text-gray-900">Required Documents</h2>
+                    <p class="text-xs text-gray-500 mt-1 font-medium">Please ensure all files are clear and readable before uploading.</p>
+                </div>
 
-                <div class="bg-gray-100 p-1 rounded-lg flex gap-1">
-                    <button wire:click="$set('application_type', 'accreditation')" class="px-4 py-1.5 text-xs font-bold rounded-md transition-colors {{ $application_type === 'accreditation' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500' }}">New Accreditation</button>
-                    <button wire:click="$set('application_type', 'reaccreditation')" class="px-4 py-1.5 text-xs font-bold rounded-md transition-colors {{ $application_type === 'reaccreditation' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500' }}">Re-accreditation</button>
+                <div class="bg-gray-100 p-1.5 rounded-xl flex gap-1 shadow-inner">
+                    <button wire:click="$set('application_type', 'accreditation')" class="px-4 py-2 text-xs font-black uppercase tracking-widest rounded-lg transition-all {{ $application_type === 'accreditation' ? 'bg-white shadow text-blue-600' : 'text-gray-400 hover:text-gray-600' }}">New</button>
+                    <button wire:click="$set('application_type', 'reaccreditation')" class="px-4 py-2 text-xs font-black uppercase tracking-widest rounded-lg transition-all {{ $application_type === 'reaccreditation' ? 'bg-white shadow text-orange-600' : 'text-gray-400 hover:text-gray-600' }}">Renew</button>
                 </div>
             </div>
 
             <div class="space-y-6">
-                <div class="bg-blue-50/50 p-4 rounded-xl border border-blue-100">
-                    <label class="block text-xs font-bold text-blue-800 uppercase tracking-widest mb-1">Bankbook Photo (Proof of Account)</label>
-                    <input type="file" wire:model="bankbook_photo" accept="image/*" class="w-full text-sm">
-                    @error('bankbook_photo') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                
+                {{-- Bankbook Photo --}}
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Proof of Account (Bankbook)</label>
+                    <div class="relative group rounded-2xl border-2 border-dashed transition-all p-8 flex flex-col items-center justify-center text-center overflow-hidden
+                                {{ $bankbook_photo ? 'border-green-400 bg-green-50' : 'border-blue-200 bg-blue-50/30 hover:border-blue-400 hover:bg-blue-50' }}">
+                        
+                        <input type="file" wire:model="bankbook_photo" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+                        
+                        @if($bankbook_photo)
+                            <div class="flex flex-col items-center text-green-600">
+                                <svg class="w-10 h-10 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                <span class="text-xs font-black uppercase tracking-widest">Image Attached</span>
+                                <span class="text-sm mt-1 text-green-700 font-medium truncate max-w-xs">{{ $bankbook_photo->getClientOriginalName() }}</span>
+                            </div>
+                        @else
+                            <div wire:loading.remove wire:target="bankbook_photo" class="flex flex-col items-center text-blue-600 transition-transform group-hover:-translate-y-1">
+                                <svg class="w-10 h-10 mb-3 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                                <span class="text-sm font-bold">Click to upload photo</span>
+                                <span class="text-[10px] uppercase tracking-widest text-blue-400 mt-1">PNG, JPG up to 5MB</span>
+                            </div>
+                            <div wire:loading wire:target="bankbook_photo" class="flex flex-col items-center text-blue-600">
+                                <svg class="animate-spin w-10 h-10 mb-3" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                <span class="text-xs font-black uppercase tracking-widest">Uploading...</span>
+                            </div>
+                        @endif
+                    </div>
+                    @error('bankbook_photo') <span class="text-red-500 text-xs font-medium mt-1.5 block">{{ $message }}</span> @enderror
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="bg-gray-50 p-4 rounded-xl border border-gray-100">
-                        <label class="block text-xs font-bold text-gray-700 uppercase tracking-widest mb-1">Constitution & By-Laws (PDF)</label>
-                        <input type="file" wire:model="cbl" accept=".pdf" class="w-full text-sm">
-                        @error('cbl') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                    
+                    {{-- Constitution & By-Laws --}}
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Constitution & By-Laws</label>
+                        <div class="relative group rounded-2xl border-2 border-dashed transition-all p-6 flex flex-col items-center justify-center text-center overflow-hidden
+                                    {{ $cbl ? 'border-green-400 bg-green-50' : 'border-gray-300 bg-gray-50/50 hover:border-gray-400 hover:bg-gray-100' }}">
+                            
+                            <input type="file" wire:model="cbl" accept=".pdf" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+                            
+                            @if($cbl)
+                                <div class="flex flex-col items-center text-green-600">
+                                    <svg class="w-8 h-8 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                    <span class="text-[10px] font-black uppercase tracking-widest">Document Attached</span>
+                                    <span class="text-xs mt-1 text-green-700 font-medium truncate max-w-[200px]">{{ $cbl->getClientOriginalName() }}</span>
+                                </div>
+                            @else
+                                <div wire:loading.remove wire:target="cbl" class="flex flex-col items-center text-gray-500 transition-transform group-hover:-translate-y-1">
+                                    <svg class="w-8 h-8 mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                    <span class="text-xs font-bold">Select PDF File</span>
+                                </div>
+                                <div wire:loading wire:target="cbl" class="flex flex-col items-center text-gray-600">
+                                    <svg class="animate-spin w-8 h-8 mb-2" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                    <span class="text-[10px] font-black uppercase tracking-widest">Uploading...</span>
+                                </div>
+                            @endif
+                        </div>
+                        @error('cbl') <span class="text-red-500 text-xs font-medium mt-1.5 block">{{ $message }}</span> @enderror
                     </div>
 
-                    <div class="bg-gray-50 p-4 rounded-xl border border-gray-100">
-                        <label class="block text-xs font-bold text-gray-700 uppercase tracking-widest mb-1">Recent Fliers/Materials (PDF/IMG)</label>
-                        <input type="file" wire:model="recent_fliers" accept=".pdf,image/*" class="w-full text-sm">
-                        @error('recent_fliers') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                    {{-- Recent Fliers --}}
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Recent Fliers / Promo</label>
+                        <div class="relative group rounded-2xl border-2 border-dashed transition-all p-6 flex flex-col items-center justify-center text-center overflow-hidden
+                                    {{ $recent_fliers ? 'border-green-400 bg-green-50' : 'border-gray-300 bg-gray-50/50 hover:border-gray-400 hover:bg-gray-100' }}">
+                            
+                            <input type="file" wire:model="recent_fliers" accept=".pdf,image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+                            
+                            @if($recent_fliers)
+                                <div class="flex flex-col items-center text-green-600">
+                                    <svg class="w-8 h-8 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                    <span class="text-[10px] font-black uppercase tracking-widest">File Attached</span>
+                                    <span class="text-xs mt-1 text-green-700 font-medium truncate max-w-[200px]">{{ $recent_fliers->getClientOriginalName() }}</span>
+                                </div>
+                            @else
+                                <div wire:loading.remove wire:target="recent_fliers" class="flex flex-col items-center text-gray-500 transition-transform group-hover:-translate-y-1">
+                                    <svg class="w-8 h-8 mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                    <span class="text-xs font-bold">Select PDF or Image</span>
+                                </div>
+                                <div wire:loading wire:target="recent_fliers" class="flex flex-col items-center text-gray-600">
+                                    <svg class="animate-spin w-8 h-8 mb-2" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                    <span class="text-[10px] font-black uppercase tracking-widest">Uploading...</span>
+                                </div>
+                            @endif
+                        </div>
+                        @error('recent_fliers') <span class="text-red-500 text-xs font-medium mt-1.5 block">{{ $message }}</span> @enderror
                     </div>
 
+                    {{-- Reaccreditation Specifics --}}
                     @if($application_type === 'reaccreditation')
-                        <div class="bg-orange-50/50 p-4 rounded-xl border border-orange-100">
-                            <label class="block text-xs font-bold text-orange-800 uppercase tracking-widest mb-1">Accomplishment Report (PDF)</label>
-                            <input type="file" wire:model="accomplishment_report" accept=".pdf" class="w-full text-sm">
-                            @error('accomplishment_report') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                        
+                        {{-- Accomplishment Report --}}
+                        <div class="mt-4">
+                            <label class="block text-xs font-bold text-orange-800 uppercase tracking-widest mb-2">Accomplishment Report</label>
+                            <div class="relative group rounded-2xl border-2 border-dashed transition-all p-6 flex flex-col items-center justify-center text-center overflow-hidden
+                                        {{ $accomplishment_report ? 'border-green-400 bg-green-50' : 'border-orange-300 bg-orange-50 hover:border-orange-500 hover:bg-orange-100' }}">
+                                
+                                <input type="file" wire:model="accomplishment_report" accept=".pdf" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+                                
+                                @if($accomplishment_report)
+                                    <div class="flex flex-col items-center text-green-600">
+                                        <svg class="w-8 h-8 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                        <span class="text-[10px] font-black uppercase tracking-widest">Report Attached</span>
+                                        <span class="text-xs mt-1 text-green-700 font-medium truncate max-w-[200px]">{{ $accomplishment_report->getClientOriginalName() }}</span>
+                                    </div>
+                                @else
+                                    <div wire:loading.remove wire:target="accomplishment_report" class="flex flex-col items-center text-orange-600 transition-transform group-hover:-translate-y-1">
+                                        <svg class="w-8 h-8 mb-2 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+                                        <span class="text-xs font-bold">Select PDF Report</span>
+                                    </div>
+                                    <div wire:loading wire:target="accomplishment_report" class="flex flex-col items-center text-orange-600">
+                                        <svg class="animate-spin w-8 h-8 mb-2" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                        <span class="text-[10px] font-black uppercase tracking-widest">Uploading...</span>
+                                    </div>
+                                @endif
+                            </div>
+                            @error('accomplishment_report') <span class="text-red-500 text-xs font-medium mt-1.5 block">{{ $message }}</span> @enderror
                         </div>
 
-                        <div class="bg-orange-50/50 p-4 rounded-xl border border-orange-100">
-                            <label class="block text-xs font-bold text-orange-800 uppercase tracking-widest mb-1">Audited Financial Report (PDF)</label>
-                            <input type="file" wire:model="audited_financial_report" accept=".pdf" class="w-full text-sm">
-                            @error('audited_financial_report') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                        {{-- Audited Financial Report --}}
+                        <div class="mt-4">
+                            <label class="block text-xs font-bold text-orange-800 uppercase tracking-widest mb-2">Audited Financial Report</label>
+                            <div class="relative group rounded-2xl border-2 border-dashed transition-all p-6 flex flex-col items-center justify-center text-center overflow-hidden
+                                        {{ $audited_financial_report ? 'border-green-400 bg-green-50' : 'border-orange-300 bg-orange-50 hover:border-orange-500 hover:bg-orange-100' }}">
+                                
+                                <input type="file" wire:model="audited_financial_report" accept=".pdf" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+                                
+                                @if($audited_financial_report)
+                                    <div class="flex flex-col items-center text-green-600">
+                                        <svg class="w-8 h-8 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                        <span class="text-[10px] font-black uppercase tracking-widest">Financials Attached</span>
+                                        <span class="text-xs mt-1 text-green-700 font-medium truncate max-w-[200px]">{{ $audited_financial_report->getClientOriginalName() }}</span>
+                                    </div>
+                                @else
+                                    <div wire:loading.remove wire:target="audited_financial_report" class="flex flex-col items-center text-orange-600 transition-transform group-hover:-translate-y-1">
+                                        <svg class="w-8 h-8 mb-2 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                        <span class="text-xs font-bold">Select Financial PDF</span>
+                                    </div>
+                                    <div wire:loading wire:target="audited_financial_report" class="flex flex-col items-center text-orange-600">
+                                        <svg class="animate-spin w-8 h-8 mb-2" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                        <span class="text-[10px] font-black uppercase tracking-widest">Uploading...</span>
+                                    </div>
+                                @endif
+                            </div>
+                            @error('audited_financial_report') <span class="text-red-500 text-xs font-medium mt-1.5 block">{{ $message }}</span> @enderror
                         </div>
                     @endif
                 </div>
