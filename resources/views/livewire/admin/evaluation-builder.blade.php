@@ -192,23 +192,51 @@
                                 <div wire:loading wire:target="newTemplate" class="text-xs text-orange-600 font-semibold mt-2 animate-pulse">Uploading template...</div>
                             </div>
 
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                                {{-- 1. Font Family --}}
                                 <div>
                                     <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Font Family</label>
                                     <select wire:model.live="certFontFamily" class="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-sm font-medium focus:ring-orange-500 focus:border-orange-500 cursor-pointer shadow-sm">
                                         <option value="Montserrat">Montserrat</option>
                                         <option value="Arial">Arial</option>
                                         <option value="Times New Roman">Times Roman</option>
-                                        <option value="Playfair Display">Playfair</option>
+                                        <option value="Playfair Display">Playfair Display</option>
+                                        <option value="Georgia">Georgia</option>
+                                        <option value="Roboto">Roboto</option>
+                                        <option value="Open Sans">Open Sans</option>
+                                        <option value="Lato">Lato</option>
+                                        <option value="Merriweather">Merriweather</option>
+                                        <option value="Courier New">Courier New</option>
+                                        <option value="Verdana">Verdana</option>
                                     </select>
                                 </div>
+
+                                {{-- 2. Text Alignment Toggle --}}
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Alignment</label>
+                                    <div class="flex bg-white border border-gray-200 rounded-xl p-1 shadow-sm h-[38px]">
+                                        <button type="button" wire:click="$set('certTextAlign', 'left')" class="flex-1 flex items-center justify-center rounded-lg transition-colors" :class="$wire.certTextAlign === 'left' ? 'bg-orange-50 text-orange-600 font-bold' : 'text-gray-500 hover:bg-gray-50'">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h10M4 18h16"></path></svg>
+                                        </button>
+                                        <button type="button" wire:click="$set('certTextAlign', 'center')" class="flex-1 flex items-center justify-center rounded-lg transition-colors" :class="$wire.certTextAlign === 'center' ? 'bg-orange-50 text-orange-600 font-bold' : 'text-gray-500 hover:bg-gray-50'">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M7 12h10M4 18h16"></path></svg>
+                                        </button>
+                                        <button type="button" wire:click="$set('certTextAlign', 'right')" class="flex-1 flex items-center justify-center rounded-lg transition-colors" :class="$wire.certTextAlign === 'right' ? 'bg-orange-50 text-orange-600 font-bold' : 'text-gray-500 hover:bg-gray-50'">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M10 12h10M4 18h16"></path></svg>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {{-- 3. Text Color --}}
                                 <div>
                                     <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Text Color</label>
-                                    <input type="color" wire:model.live="certTextColor" class="h-10 w-full rounded-xl border border-gray-200 cursor-pointer p-1 bg-white shadow-sm">
+                                    <input type="color" wire:model.live="certTextColor" class="h-[38px] w-full rounded-xl border border-gray-200 cursor-pointer p-1 bg-white shadow-sm">
                                 </div>
+
+                                {{-- 4. Size --}}
                                 <div>
                                     <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Size (px)</label>
-                                    <input type="number" wire:model.live="certFontSize" class="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-sm font-medium focus:ring-orange-500 focus:border-orange-500 shadow-sm">
+                                    <input type="number" wire:model.live="certFontSize" class="w-full h-[38px] bg-white border border-gray-200 rounded-xl px-3 py-2 text-sm font-medium focus:ring-orange-500 focus:border-orange-500 shadow-sm">
                                 </div>
                             </div>
 
@@ -266,13 +294,14 @@
 
                                             <img src="{{ $imageUrl }}" class="max-h-80 w-auto h-auto pointer-events-none block bg-white rounded">
 
+                                            {{-- DYNAMIC ALIGNMENT APPLIED HERE --}}
                                             <div @mousedown="startDrag($event)" @touchstart.prevent="startDrag($event)"
                                                  class="absolute cursor-move group/text rounded z-20"
-                                                 :style="`top: ${y}%; left: ${x}%; transform: translate(-50%, -50%);`">
+                                                 :style="`top: ${y}%; left: ${x}%; transform: translate(${$wire.certTextAlign === 'left' ? '0%' : ($wire.certTextAlign === 'right' ? '-100%' : '-50%')}, -50%);`">
 
                                                 <div class="relative inline-block">
                                                     <span class="font-bold border border-dashed border-transparent group-hover/text:border-blue-400 p-2 whitespace-nowrap block bg-transparent rounded"
-                                                          :style="`color: ${$wire.certTextColor}; font-size: ${$wire.certFontSize / 5}px; line-height: 1; font-family: ${$wire.certFontFamily};`">
+                                                          :style="`color: ${$wire.certTextColor}; font-size: ${$wire.certFontSize / 5}px; line-height: 1; font-family: ${$wire.certFontFamily}; text-align: ${$wire.certTextAlign};`">
                                                         [Participant Name]
                                                     </span>
 
@@ -292,6 +321,8 @@
                                         <span>Y: <span class="font-bold text-gray-800" x-text="Math.round($wire.certPosY)"></span>%</span>
                                         <span class="text-gray-300">|</span>
                                         <span>Size: <span class="font-bold text-gray-800" x-text="$wire.certFontSize"></span>px</span>
+                                        <span class="text-gray-300">|</span>
+                                        <span class="uppercase tracking-widest text-[10px] text-gray-600 mt-0.5" x-text="$wire.certTextAlign"></span>
                                     </p>
                                 </div>
                             @else
@@ -698,7 +729,7 @@
             </div>
         </div>
     </div>
-    
+
     {{-- ========================================== --}}
     {{-- DELETE SECTION CONFIRMATION MODAL          --}}
     {{-- ========================================== --}}

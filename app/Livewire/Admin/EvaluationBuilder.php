@@ -41,6 +41,7 @@ class EvaluationBuilder extends Component
     public $certTextColor = '#1f2937';
     public $certFontSize = 80;
     public $certFontFamily = 'Montserrat';
+    public $certTextAlign = 'center'; // NEW
     public $certDeliveryMode = 'automatic';
     public $certUseCustomEmail = false;
     public $certEmailSubject = '';
@@ -75,6 +76,8 @@ class EvaluationBuilder extends Component
             'certFontFamily' => 'string',
             'certDeliveryMode' => 'string',
             'certUseCustomEmail' => 'boolean',
+            // Add this inside your rules() array
+            'certTextAlign' => 'string|in:left,center,right',
             'certEmailSubject' => 'nullable|string',
             'certEmailBody' => 'nullable|string',
             'certNameQuestionId' => 'nullable',
@@ -204,6 +207,9 @@ class EvaluationBuilder extends Component
         $this->certFontSize = $this->evaluation->cert_font_size ?? 80;
         $this->certFontFamily = $this->evaluation->cert_font_family ?? 'Montserrat';
         $this->certDeliveryMode = $this->evaluation->cert_delivery_mode ?? 'automatic';
+        $this->certFontSize = $this->evaluation->cert_font_size ?? 80;
+        $this->certFontFamily = $this->evaluation->cert_font_family ?? 'Montserrat';
+        $this->certTextAlign = $this->evaluation->cert_text_align ?? 'center'; // NEW
         $this->certUseCustomEmail = $this->evaluation->cert_use_custom_email ?? false;
         $this->certEmailSubject = $this->evaluation->cert_email_subject ?? 'Your Certificate of Participation';
         $this->certEmailBody = $this->evaluation->cert_email_body ?? "Hi [Name],\n\nThank you for participating in our event and taking the time to provide your feedback. Please find your e-certificate attached.\n\nBest regards,\nBU MADYA";
@@ -231,8 +237,8 @@ class EvaluationBuilder extends Component
     {
         $original = $this->questions[$index];
         $copy = json_decode(json_encode($original), true);
-        $copy['id'] = null; 
-        $copy['temp_id'] = (string) Str::uuid(); 
+        $copy['id'] = null;
+        $copy['temp_id'] = (string) Str::uuid();
         $copy['question_text'] = $copy['question_text'] . ' (Copy)';
 
         array_splice($this->questions, $index + 1, 0, [$copy]);
@@ -253,13 +259,13 @@ class EvaluationBuilder extends Component
             $i++;
         }
 
-        $insertionIndex = $i; 
+        $insertionIndex = $i;
 
         $newItems = [];
         foreach ($itemsToDuplicate as $item) {
             $copy = json_decode(json_encode($item), true);
             $copy['id'] = null;
-            $copy['temp_id'] = (string) Str::uuid(); 
+            $copy['temp_id'] = (string) Str::uuid();
 
             if ($copy['type'] === 'section') {
                 $copy['question_text'] = $copy['question_text'] . ' (Copy)';
@@ -361,8 +367,8 @@ class EvaluationBuilder extends Component
             $this->removeQuestion($this->sectionToDeleteIndex);
             $this->sectionToDeleteIndex = null;
             $this->dispatch('swal:modal', [
-                'type' => 'success', 
-                'title' => 'Deleted', 
+                'type' => 'success',
+                'title' => 'Deleted',
                 'text' => 'Section and all contained questions were removed.'
             ]);
         }
@@ -377,7 +383,7 @@ class EvaluationBuilder extends Component
         if ($isSection) {
             $indicesToRemove = [$index];
             $i = $index + 1;
-            
+
             while ($i < count($this->questions)) {
                 if (in_array($this->questions[$i]['type'], ['section', 'page_break'])) {
                     break;
@@ -421,8 +427,8 @@ class EvaluationBuilder extends Component
         if (!$this->evaluation->exists) return;
 
         abort_if(
-            auth()->user()->role?->role_name !== 'administrator' && $this->evaluation->created_by !== auth()->id(), 
-            403, 
+            auth()->user()->role?->role_name !== 'administrator' && $this->evaluation->created_by !== auth()->id(),
+            403,
             'Unauthorized Action. Only the form owner or an administrator can reset responses.'
         );
 
@@ -468,6 +474,9 @@ class EvaluationBuilder extends Component
         $this->evaluation->cert_font_size = $this->certFontSize;
         $this->evaluation->cert_font_family = $this->certFontFamily;
         $this->evaluation->cert_delivery_mode = $this->certDeliveryMode;
+        $this->evaluation->cert_font_size = $this->certFontSize;
+        $this->evaluation->cert_font_family = $this->certFontFamily;
+        $this->evaluation->cert_text_align = $this->certTextAlign; // NEW
         $this->evaluation->cert_use_custom_email = $this->certUseCustomEmail;
         $this->evaluation->cert_email_subject = $this->certEmailSubject;
         $this->evaluation->cert_email_body = $this->certEmailBody;
