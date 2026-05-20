@@ -347,6 +347,7 @@ EOT;
     }
 
     // Helper to generate the Intervention Image
+    // Helper to generate the Intervention Image
     private function createCertificateImage()
     {
         $manager = new ImageManager(new Driver());
@@ -354,21 +355,35 @@ EOT;
         $pixelX = $image->width() * ($this->evaluation->cert_pos_x / 100);
         $pixelY = $image->height() * ($this->evaluation->cert_pos_y / 100);
 
-        // Map the font
+        // Map the expanded font library
         $fontFamily = $this->evaluation->cert_font_family ?? 'Montserrat';
         $fontFile = match($fontFamily) {
-            'Arial' => public_path('fonts/Arial.ttf'),
-            'Times New Roman' => public_path('fonts/TimesNewRoman.ttf'),
+            'Arial'            => public_path('fonts/Arial.ttf'),
+            'Times New Roman'  => public_path('fonts/TimesNewRoman.ttf'),
             'Playfair Display' => public_path('fonts/PlayfairDisplay-Bold.ttf'),
-            default => public_path('fonts/Montserrat-Bold.ttf'),
+            'Georgia'          => public_path('fonts/Georgia.ttf'),
+            'Roboto'           => public_path('fonts/Roboto-Bold.ttf'),
+            'Open Sans'        => public_path('fonts/OpenSans-Bold.ttf'),
+            'Lato'             => public_path('fonts/Lato-Bold.ttf'),
+            'Merriweather'     => public_path('fonts/Merriweather-Bold.ttf'),
+            'Courier New'      => public_path('fonts/CourierNew.ttf'),
+            'Verdana'          => public_path('fonts/Verdana.ttf'),
+            default            => public_path('fonts/Montserrat-Bold.ttf'),
         };
-        if (!file_exists($fontFile)) $fontFile = public_path('fonts/Montserrat-Bold.ttf'); // Fallback
 
-        $image->text($this->issueName, $pixelX, $pixelY, function($font) use ($fontFile) {
+        // Fallback to Montserrat if the requested font file is missing from the server
+        if (!file_exists($fontFile)) {
+            $fontFile = public_path('fonts/Montserrat-Bold.ttf');
+        }
+
+        // Fetch dynamic alignment, default to center
+        $textAlign = $this->evaluation->cert_text_align ?? 'center';
+
+        $image->text($this->issueName, $pixelX, $pixelY, function($font) use ($fontFile, $textAlign) {
             $font->file($fontFile);
             $font->size($this->evaluation->cert_font_size);
             $font->color($this->evaluation->cert_text_color);
-            $font->align('center');
+            $font->align($textAlign); // Dynamically applies 'left', 'center', or 'right'
             $font->valign('middle');
         });
 
