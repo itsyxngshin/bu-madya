@@ -10,6 +10,9 @@ use App\Models\Organization;
 use App\Models\AccreditationApplication;
 use App\Models\AcademicYear;
 use App\Models\College;
+use Livewire\Attributes\Layout;
+
+#[Layout('layouts.madya-admin-deck')]
 
 class AccreditationWizard extends Component
 {
