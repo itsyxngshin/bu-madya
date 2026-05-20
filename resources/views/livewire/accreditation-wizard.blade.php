@@ -111,7 +111,7 @@
                     <select wire:model="academic_year_id" class="w-full rounded-xl border-gray-200 bg-gray-50">
                         <option value="">Select A.Y...</option>
                         @foreach($academicYears as $ay)
-                            <option value="{{ $ay->id }}">{{ $ay->year }}</option>
+                            <option value="{{ $ay->id }}">{{ $ay->name }}</option>
                         @endforeach
                     </select>
                     @error('academic_year_id') <span class="text-red-500 text-xs mt-1 block font-medium">{{ $message }}</span> @enderror
