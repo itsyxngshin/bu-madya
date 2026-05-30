@@ -1,25 +1,32 @@
 <div>
     {{-- HERO HEADER (With Impact Stats) --}}
+    {{-- HERO HEADER (With Impact Stats) --}}
     <header class="relative h-[400px] flex items-center justify-center text-white overflow-hidden rounded-3xl shadow-xl mx-6 -mt-20 z-10">
-        <div class="absolute inset-0 z-0">
-            {{-- Use a static background for the header, or a featured project image --}}
+
+        {{-- ALPINE IMAGE SKELETON --}}
+        <div class="absolute inset-0 z-0 bg-gray-900" x-data="{ loaded: false }">
+            {{-- Pulsing Placeholder --}}
+            <div x-show="!loaded" class="absolute inset-0 bg-gray-800 animate-pulse"></div>
+
+            {{-- Actual Image (Fades in when fully downloaded) --}}
             <img src="{{ asset('images/IMG_4095.JPG') }}"
-                class="w-full h-full object-cover" alt="Projects Background">
-            <div class="absolute inset-0 bg-gradient-to-r from-green-900/90 to-blue-900/80 mix-blend-multiply"></div>
+                @load="loaded = true"
+                :class="loaded ? 'opacity-100' : 'opacity-0'"
+                class="w-full h-full object-cover transition-opacity duration-1000 ease-out"
+                alt="Projects Background">
+
+            <div class="absolute inset-0 bg-gradient-to-r from-green-900/90 to-blue-900/80 mix-blend-multiply z-10"></div>
         </div>
 
-        {{-- ... (Header Content remains mostly the same, stats can be dynamic later if you calculate them in the component) ... --}}
-        
-        <div class="relative z-10 text-center px-4 mt-16">
+        <div class="relative z-20 text-center px-4 mt-16">
             <h2 class="text-yellow-300 font-bold tracking-[0.3em] text-xs uppercase mb-2">Our Initiatives</h2>
             <h1 class="font-heading text-3xl md:text-5xl font-black uppercase tracking-tight mb-4 drop-shadow-lg">
                 Projects & Engagements
             </h1>
-            {{-- ... --}}
+
             @auth
                 @if(in_array(Auth::user()->role->role_name ?? '', ['administrator', 'director', 'member']))
                     <div class="mt-8">
-                        {{-- Make sure this route exists in your web.php --}}
                         <a href="{{ route('projects.create') }}" class="inline-flex items-center gap-2 px-6 py-3 bg-white/20 backdrop-blur-md border border-white/40 rounded-full text-white text-xs font-bold uppercase tracking-widest hover:bg-white hover:text-red-600 transition shadow-lg">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                             Add Project
@@ -32,7 +39,7 @@
 
     {{-- MAIN CONTENT --}}
     <div class="relative min-h-screen px-6 pb-24 mt-12 max-w-[1800px] w-[95%] mx-auto">
-        
+
         {{-- Background Blobs --}}
         <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
             <div class="absolute top-40 left-0 w-96 h-96 bg-blue-100 rounded-full mix-blend-multiply filter blur-3xl opacity-50"></div>
@@ -42,22 +49,22 @@
         {{-- FILTER BAR --}}
         <div class="relative z-10 mb-12 bg-white/40 backdrop-blur-md border border-white/50 rounded-2xl p-4 shadow-sm max-w-4xl mx-auto">
             <div class="flex flex-col md:flex-row gap-4 items-center justify-center">
-                
+
                 {{-- 1. Search Input (NEW) --}}
                 <div class="relative w-full md:w-64 group">
                     <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                     </div>
-                    <input type="text" 
-                        wire:model.live.debounce.300ms="search" 
-                        placeholder="Search projects..." 
+                    <input type="text"
+                        wire:model.live.debounce.300ms="search"
+                        placeholder="Search projects..."
                         class="w-full bg-white/80 border-0 rounded-xl pl-10 pr-4 py-2.5 text-sm font-bold text-gray-700 focus:ring-2 focus:ring-red-500 shadow-sm placeholder-gray-400 hover:bg-white transition"
                     >
                 </div>
 
                 {{-- Divider for aesthetics (Optional) --}}
                 <div class="hidden md:block w-px h-8 bg-gray-300/50 mx-2"></div>
-                
+
                 {{-- Label --}}
                 <div class="flex items-center gap-2 text-gray-500 uppercase text-[10px] font-bold tracking-widest mr-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
@@ -66,7 +73,7 @@
 
                 {{-- 1. Category Dropdown --}}
                 <div class="relative w-full md:w-64 group">
-                    <select wire:model.live="category" 
+                    <select wire:model.live="category"
                         class="w-full bg-white/80 border-0 rounded-xl px-4 py-2.5 text-sm font-bold text-gray-700 focus:ring-2 focus:ring-red-500 shadow-sm cursor-pointer hover:bg-white transition appearance-none">
                         <option value="All">All Categories</option>
                         @foreach($categories as $cat)
@@ -80,7 +87,7 @@
 
                 {{-- 2. Academic Year Dropdown (FIXED) --}}
                 <div class="relative w-full md:w-48 group">
-                    <select wire:model.live="academicYearId" 
+                    <select wire:model.live="academicYearId"
                         class="w-full bg-white/80 border-0 rounded-xl px-4 py-2.5 text-sm font-bold text-gray-700 focus:ring-2 focus:ring-red-500 shadow-sm cursor-pointer hover:bg-white transition appearance-none">
                         <option value="All">All Years</option>
                         {{-- Iterate through the relationship models --}}
@@ -98,9 +105,8 @@
         </div>
 
         {{-- PROJECTS GRID --}}
-        {{-- PROJECTS GRID (Wrapped with Loading States) --}}
         <div class="relative z-10">
-            
+
             {{-- 1. SKELETON LOADER (Shows only while Livewire is fetching data) --}}
             <div wire:loading.grid wire:target="search, category, academicYearId" class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 w-full">
                 @for ($i = 0; $i < 6; $i++)
@@ -110,22 +116,22 @@
                             <div class="absolute top-4 right-4 w-20 h-6 bg-gray-300 rounded-full"></div>
                             <div class="absolute bottom-4 left-4 w-24 h-6 bg-gray-300 rounded-lg"></div>
                         </div>
-                        
+
                         {{-- Content Skeleton --}}
                         <div class="p-6 flex flex-col flex-grow">
                             <div class="h-6 bg-gray-200 rounded-md w-3/4 mb-4"></div>
-                            
+
                             <div class="flex gap-4 mb-6 border-b border-gray-200/50 pb-4">
                                 <div class="h-4 bg-gray-200 rounded w-20"></div>
                                 <div class="h-4 bg-gray-200 rounded w-20"></div>
                             </div>
-                            
+
                             <div class="space-y-2 mb-6">
                                 <div class="h-3 bg-gray-200 rounded w-full"></div>
                                 <div class="h-3 bg-gray-200 rounded w-5/6"></div>
                                 <div class="h-3 bg-gray-200 rounded w-4/6"></div>
                             </div>
-                            
+
                             <div class="mt-auto pt-2 flex justify-between items-end">
                                 <div>
                                     <div class="h-2 bg-gray-200 rounded w-12 mb-2"></div>
@@ -142,16 +148,25 @@
             <div wire:loading.remove wire:target="search, category, academicYearId" class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                 @forelse($projects as $project)
                     <div class="group bg-white/60 backdrop-blur-md border border-white/60 rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl hover:-translate-y-2 transition duration-300 flex flex-col h-full">
-                        
-                        {{-- Image Header --}}
-                        <div class="h-56 overflow-hidden relative">
-                            <img src="{{ $project->cover_img ? asset('storage/' . $project->cover_img) : 'https://ui-avatars.com/api/?name='.urlencode($project->title).'&background=random' }}" 
-                                class="w-full h-full object-cover group-hover:scale-110 transition duration-700"
-                                alt="{{ $project->title }}" loading="lazy">
-                            <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                            
-                            {{-- Status Badge --}}
-                            <div class="absolute top-4 right-4">
+
+                        {{-- Image Header with Skeleton --}}
+                        <div class="h-56 overflow-hidden relative bg-gray-200" x-data="{ imgLoaded: false }">
+
+                            {{-- Skeleton Pulse --}}
+                            <div x-show="!imgLoaded" class="absolute inset-0 bg-gray-300 animate-pulse z-0"></div>
+
+                            {{-- Actual Cover Image --}}
+                            <img src="{{ $project->cover_img ? asset('storage/' . $project->cover_img) : 'https://ui-avatars.com/api/?name='.urlencode($project->title).'&background=random' }}"
+                                @load="imgLoaded = true"
+                                :class="imgLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-105'"
+                                class="w-full h-full object-cover group-hover:scale-110 transition-all duration-700 ease-out relative z-10"
+                                alt="{{ $project->title }}"
+                                loading="lazy">
+
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-20"></div>
+
+                            {{-- Status Badge (Will sit on top of the skeleton while loading) --}}
+                            <div class="absolute top-4 right-4 z-30">
                                 @if($project->status === 'Completed')
                                     <span class="px-3 py-1 bg-green-500 text-white text-[10px] font-bold uppercase tracking-widest rounded-full shadow-sm flex items-center gap-1">
                                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg> Completed
@@ -168,8 +183,8 @@
                             </div>
 
                             {{-- Category Badge --}}
-                            <div class="absolute bottom-4 left-4">
-                                <span class="px-3 py-1 bg-white/20 backdrop-blur-md border border-white/30 text-white text-[10px] font-bold uppercase tracking-wider rounded-lg">
+                            <div class="absolute bottom-4 left-4 z-30">
+                                <span class="px-3 py-1 bg-white/20 backdrop-blur-md border border-white/30 text-white text-[10px] font-bold uppercase tracking-wider rounded-lg shadow-sm">
                                     {{ $project->category?->name ?? 'Uncategorized' }}
                                 </span>
                             </div>
@@ -180,7 +195,7 @@
                             <h3 class="font-heading font-bold text-xl text-gray-900 mb-2 leading-tight group-hover:text-red-600 transition">
                                 {{ $project->title }}
                             </h3>
-                            
+
                             <div class="flex items-center gap-4 text-xs text-gray-500 mb-4 border-b border-gray-200/50 pb-4">
                                 <div class="flex items-center gap-1">
                                     <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
@@ -222,13 +237,13 @@
             </div>
         </div>
         <div class="mt-12 relative z-10">
-            {{ $projects->links() }} 
+            {{ $projects->links() }}
         </div>
     </div>
 
     <footer class="bg-gray-900 text-white pt-20 pb-10 border-t-8 border-red-600 relative z-20">
         <div class="max-w-[1800px] w-[95%] mx-auto px-6 grid md:grid-cols-4 gap-12 mb-16">
-            
+
             <div class="col-span-1 md:col-span-2">
                 <div class="flex items-center gap-3 mb-6">
                     <div class="w-10 h-10 bg-red-600 text-white rounded-full flex items-center justify-center shadow-[0_0_15px_rgba(220,38,38,0.5)]">
@@ -239,7 +254,7 @@
                 <p class="text-gray-400 leading-relaxed max-w-sm mb-6 text-sm">
                     The Bicol University - Movement for the Advancement of Youth-led Advocacy is a duly-accredited University Based Organization in Bicol University committed to service and reaching communities through advocacy.
                 </p>
-                
+
                 {{-- Social Media Links --}}
                 <div class="flex space-x-4">
                     {{-- Facebook --}}
@@ -258,7 +273,7 @@
                     </a>
                 </div>
             </div>
-            
+
             <div>
                 <h4 class="font-bold text-lg mb-6 text-red-500 uppercase tracking-widest text-xs">Quick Links</h4>
                 <ul class="space-y-3 text-gray-400 text-sm">
