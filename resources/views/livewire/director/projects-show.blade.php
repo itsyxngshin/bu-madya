@@ -564,80 +564,125 @@
 
     
 </div>
-
 @push('scripts')
     {{-- Include Chart.js --}}
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <script>
-        // Safely pass the PHP array to JavaScript
         const groupedResults = @json($groupedLikertResults ?? []);
         
         function initEvaluationChart() {
-            const ctx = document.getElementById('evaluationRadarChart');
-            if(!ctx) return;
+            const canvas = document.getElementById('evaluationRadarChart');
+            if(!canvas) return;
+            
+            const ctx = canvas.getContext('2d');
 
-            // Extract labels (Section Titles) and data (Section Averages)
+            // Extract labels and data
             const labels = [];
             const dataScores = [];
             
             groupedResults.forEach(section => {
-                labels.push(section.title);
+                // Shorten long labels to keep the chart clean
+                let title = section.title;
+                if(title.length > 20) title = title.substring(0, 20) + '...';
+                labels.push(title);
                 dataScores.push(section.section_average);
             });
+
+            // CREATE A PREMIUM RADIAL GRADIENT FILL
+            // Center is slightly transparent orange, fading out to a richer orange
+            const gradientFill = ctx.createRadialGradient(
+                canvas.width / 2, canvas.height / 2, 0, 
+                canvas.width / 2, canvas.height / 2, canvas.width / 2
+            );
+            gradientFill.addColorStop(0, 'rgba(234, 88, 12, 0.4)');   // Orange-500, 40%
+            gradientFill.addColorStop(1, 'rgba(220, 38, 38, 0.05)');  // Red-600, 5%
 
             new Chart(ctx, {
                 type: 'radar',
                 data: {
                     labels: labels,
                     datasets: [{
-                        label: 'Section Average (Out of 5)',
+                        label: 'Section Average',
                         data: dataScores,
-                        backgroundColor: 'rgba(234, 88, 12, 0.2)', // Orange-500 with opacity
-                        borderColor: 'rgba(234, 88, 12, 1)',
-                        pointBackgroundColor: 'rgba(220, 38, 38, 1)', // Red-600
-                        pointBorderColor: '#fff',
-                        pointHoverBackgroundColor: '#fff',
-                        pointHoverBorderColor: 'rgba(220, 38, 38, 1)',
-                        borderWidth: 2,
+                        backgroundColor: gradientFill,
+                        borderColor: '#EA580C', // Solid Orange-500
+                        borderWidth: 3,
+                        // Make the lines curve smoothly instead of sharp geometric angles
+                        tension: 0.3, 
+                        
+                        // Beautiful glowing points
+                        pointBackgroundColor: '#FFFFFF',
+                        pointBorderColor: '#EA580C',
+                        pointBorderWidth: 3,
+                        pointRadius: 5,
+                        pointHoverRadius: 8,
+                        pointHoverBackgroundColor: '#DC2626', // Red on hover
+                        pointHoverBorderColor: '#FFFFFF',
+                        pointHoverBorderWidth: 3,
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    // Premium entry animation
+                    animation: {
+                        duration: 2000,
+                        easing: 'easeOutQuart'
+                    },
                     scales: {
                         r: {
-                            angleLines: { color: 'rgba(0, 0, 0, 0.1)' },
-                            grid: { color: 'rgba(0, 0, 0, 0.05)' },
+                            // Circular grid instead of a spiderweb polygon
+                            circular: true,
+                            angleLines: { 
+                                color: 'rgba(0, 0, 0, 0.05)',
+                                lineWidth: 1
+                            },
+                            grid: { 
+                                color: 'rgba(0, 0, 0, 0.05)',
+                                circular: true,
+                                lineWidth: 1.5,
+                                borderDash: [5, 5] // Dashed grid lines look more modern
+                            },
                             pointLabels: {
                                 font: {
                                     family: "'Inter', sans-serif",
                                     size: 11,
-                                    weight: 'bold'
+                                    weight: '800' // Extra bold for readability
                                 },
-                                color: '#4B5563' // gray-600
+                                color: '#4B5563', // Gray-600
+                                padding: 15
                             },
                             ticks: {
                                 min: 0,
                                 max: 5,
                                 stepSize: 1,
+                                display: true,
+                                // Hide the background behind the numbers
                                 backdropColor: 'transparent',
-                                font: { size: 10 }
+                                color: '#9CA3AF', // Gray-400
+                                font: { 
+                                    size: 10,
+                                    weight: 'bold',
+                                    family: "'Inter', sans-serif"
+                                },
+                                z: 10
                             }
                         }
                     },
                     plugins: {
                         legend: { display: false },
                         tooltip: {
-                            backgroundColor: 'rgba(17, 24, 39, 0.9)', // gray-900
-                            titleFont: { family: "'Inter', sans-serif", size: 13 },
-                            bodyFont: { family: "'Inter', sans-serif", size: 12, weight: 'bold' },
-                            padding: 12,
-                            cornerRadius: 8,
+                            backgroundColor: 'rgba(17, 24, 39, 0.95)', // Dark gray/black
+                            titleFont: { family: "'Inter', sans-serif", size: 14, weight: 'bold' },
+                            bodyFont: { family: "'Inter', sans-serif", size: 13 },
+                            padding: 16,
+                            cornerRadius: 12,
                             displayColors: false,
                             callbacks: {
                                 label: function(context) {
-                                    return 'Average Score: ' + context.parsed.r.toFixed(1);
+                                    // Add a star emoji and format the number
+                                    return '⭐ Average Score: ' + context.parsed.r.toFixed(2) + ' / 5.00';
                                 }
                             }
                         }
