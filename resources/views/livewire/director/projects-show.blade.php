@@ -163,7 +163,8 @@
                     <div class="grid grid-cols-1 gap-3">
                         @foreach($project->proponents as $proponent)
                             @php
-                                $path = $proponent->profile_photo_path;
+                                // Use the null-safe operator (?->) to fetch the photo from the linked User model!
+                                $path = $proponent->user?->profile_photo_path;
                                 
                                 // Robust Avatar Resolution matching your backend
                                 $avatarUrl = $path 
@@ -185,7 +186,10 @@
                                     <p class="text-xs font-black text-gray-900 leading-snug break-words">
                                         {{ $project->title == 'Evaluation Results' ? 'Administrator' : $proponent->name }}
                                     </p>
-                                    <p class="text-[9px] font-bold text-red-500 uppercase tracking-widest mt-1">Facilitator</p>
+                                    {{-- You can even dynamically display their specific role from the pivot table now! --}}
+                                    <p class="text-[9px] font-bold text-red-500 uppercase tracking-widest mt-1">
+                                        {{ $proponent->type ?? 'Event Leads' }}
+                                    </p>
                                 </div>
                             </div>
                         @endforeach

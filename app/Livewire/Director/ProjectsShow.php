@@ -37,7 +37,7 @@ class ProjectsShow extends Component
             'galleries',
             'sdgs',
             'academicYear',
-            'proponents',
+            'proponents.user',
             'projectLinkages.linkage',
             'evaluation.collaborators',
             'evaluation.questions.answers' 
