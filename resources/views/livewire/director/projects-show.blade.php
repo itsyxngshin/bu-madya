@@ -127,77 +127,73 @@
 
             {{-- 1. QUICK INFO CARD --}}
             <div class="bg-white p-5 md:p-6 rounded-2xl md:rounded-3xl shadow-sm border border-gray-100 relative overflow-hidden">
-                <div class="absolute top-0 right-0 bg-yellow-400 text-yellow-900 text-[8px] md:text-[9px] font-black uppercase px-2 py-1 rounded-bl-lg shadow-sm">
+                <div class="absolute top-0 right-0 bg-yellow-400 text-yellow-900 text-[8px] md:text-[9px] font-black uppercase px-3 py-1.5 rounded-bl-xl shadow-sm z-10">
                     AY {{ $project->academicYear->name ?? 'TBA' }}
                 </div>
 
-                <h3 class="font-bold text-gray-900 uppercase tracking-widest text-[10px] md:text-xs border-b border-gray-100 pb-3 mb-4">
-                    Project Details
+                <h3 class="font-bold text-gray-900 uppercase tracking-widest text-[10px] md:text-xs border-b border-gray-100 pb-3 mb-5">
+                    Project Overview
                 </h3>
 
-                <ul class="space-y-4 md:space-y-5">
-                    {{-- Proponents (Facilitators) --}}
-                    <li class="flex items-start gap-3">
-                        <div class="w-6 h-6 md:w-8 md:h-8 rounded-full bg-red-50 text-red-600 flex items-center justify-center shrink-0">
-                            <svg class="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                {{-- Date & Status Row --}}
+                <div class="grid grid-cols-2 gap-4 mb-6 bg-gray-50 p-4 rounded-2xl border border-gray-100">
+                    <div>
+                        <span class="block text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1">Date</span>
+                        <span class="text-xs font-black text-gray-800">
+                            {{ $project->implementation_date ? $project->implementation_date->format('M d, Y') : 'TBA' }}
+                        </span>
+                    </div>
+                    <div>
+                        <span class="block text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1">Status</span>
+                        <span class="text-xs font-black {{ $project->status === 'Completed' ? 'text-green-600' : ($project->status === 'Ongoing' ? 'text-red-600' : 'text-yellow-600') }}">
+                            {{ $project->status }}
+                        </span>
+                    </div>
+                </div>
+
+                {{-- Proponents (Facilitators) Card Grid --}}
+                <div>
+                    <span class="flex items-center gap-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">
+                        <div class="w-5 h-5 rounded-full bg-red-50 text-red-600 flex items-center justify-center">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
                         </div>
-                        <div>
-                            <span class="block text-[8px] md:text-[10px] font-bold text-gray-400 uppercase mb-1.5">Lead Proponents</span>
-                            <div class="flex flex-wrap gap-2 mt-1">
-                                @foreach($project->proponents as $proponent)
-                                    @php
-                                        // Change 'profile_photo_path' to whatever your database column is named
-                                        $avatarUrl = !empty($proponent->profile_photo_path) 
-                                            ? asset('storage/' . $proponent->profile_photo_path) 
-                                            : 'https://ui-avatars.com/api/?name='.urlencode($proponent->name).'&background=fef2f2&color=dc2626&bold=true';
-                                    @endphp
-                                    <div class="flex items-center gap-1.5 md:gap-2 bg-white border border-gray-200 rounded-full pr-2.5 md:pr-3 p-0.5 shadow-sm hover:border-red-200 hover:shadow transition group cursor-default">
-                                        <img src="{{ $avatarUrl }}" class="w-5 h-5 md:w-6 md:h-6 rounded-full object-cover border border-gray-100 shadow-sm group-hover:scale-105 transition-transform" alt="{{ $proponent->name }}">
-                                        <span class="text-[10px] md:text-xs font-bold text-gray-800">
-                                            {{ $proponent->name }}
-                                        </span>
-                                    </div>
-                                @endforeach
+                        Lead Proponents
+                    </span>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-3">
+                        @foreach($project->proponents as $proponent)
+                            @php
+                                $avatarUrl = !empty($proponent->profile_photo_path) 
+                                    ? asset('storage/' . $proponent->profile_photo_path) 
+                                    : 'https://ui-avatars.com/api/?name='.urlencode($proponent->name).'&background=fef2f2&color=dc2626&bold=true';
+                            @endphp
+                            
+                            {{-- Proponent Card Box --}}
+                            <div class="flex items-center gap-3 p-3 bg-white border border-gray-200 rounded-2xl hover:border-red-200 hover:shadow-md transition-all group cursor-default">
+                                <img src="{{ $avatarUrl }}" class="w-10 h-10 rounded-xl object-cover shadow-sm group-hover:scale-105 transition-transform" alt="{{ $proponent->name }}">
+                                <div>
+                                    <p class="text-xs font-black text-gray-900 leading-none">{{ $project->title == 'Evaluation Results' ? 'Administrator' : $proponent->name }}</p>
+                                    <p class="text-[9px] font-bold text-red-500 uppercase tracking-widest mt-1">Facilitator</p>
+                                </div>
                             </div>
-                        </div>
-                    </li>
-
-                    {{-- Date --}}
-                    <li class="flex items-start gap-3">
-                        <div class="w-6 h-6 md:w-8 md:h-8 rounded-full bg-gray-50 text-gray-500 flex items-center justify-center shrink-0">
-                            <svg class="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                        </div>
-                        <div>
-                            <span class="block text-[8px] md:text-[10px] font-bold text-gray-400 uppercase">Implementation Date</span>
-                            <span class="text-xs md:text-sm font-bold text-gray-800">
-                                {{ $project->implementation_date ? $project->implementation_date->format('F d, Y') : 'TBA' }}
-                            </span>
-                        </div>
-                    </li>
-
-                    {{-- Status --}}
-                    <li class="flex items-start gap-3">
-                        <div class="w-6 h-6 md:w-8 md:h-8 rounded-full bg-yellow-50 text-yellow-600 flex items-center justify-center shrink-0">
-                            <svg class="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                        </div>
-                        <div>
-                            <span class="block text-[8px] md:text-[10px] font-bold text-gray-400 uppercase">Current Status</span>
-                            <span class="text-xs md:text-sm font-bold text-gray-800">{{ $project->status }}</span>
-                        </div>
-                    </li>
-                </ul>
+                        @endforeach
+                    </div>
+                </div>
             </div>
 
             {{-- 2. PARTNERS CARD --}}
             @if($project->partners_list->isNotEmpty())
             <div class="bg-white p-5 md:p-6 rounded-2xl md:rounded-3xl shadow-sm border border-gray-100">
-                <h3 class="font-bold text-gray-900 uppercase tracking-widest text-[10px] md:text-xs border-b border-gray-100 pb-3 mb-4">
+                <h3 class="font-bold text-gray-900 uppercase tracking-widest text-[10px] md:text-xs border-b border-gray-100 pb-3 mb-5 flex items-center gap-2">
+                    <div class="w-5 h-5 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                    </div>
                     In Partnership With
                 </h3>
-                <div class="flex flex-wrap gap-2.5">
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-3">
                     @foreach($project->partners_list as $partner)
                         @php
-                            // Check if a logo is saved in the JSON array, otherwise generate initials based on the partner type
                             $partnerLogo = !empty($partner['logo_path']) 
                                 ? asset('storage/' . $partner['logo_path']) 
                                 : ($partner['is_official'] 
@@ -205,22 +201,27 @@
                                     : 'https://ui-avatars.com/api/?name='.urlencode($partner['name']).'&background=f3f4f6&color=4b5563&bold=true');
                         @endphp
                         
-                        <div class="inline-flex items-center gap-1.5 md:gap-2 rounded-full border pr-3 md:pr-4 p-0.5 shadow-sm hover:shadow transition group cursor-default
-                                    {{ $partner['is_official'] ? 'border-blue-200 bg-blue-50/50 hover:border-blue-300' : 'border-gray-200 bg-gray-50 hover:border-gray-300' }}">
+                        {{-- Partner Card Box --}}
+                        <div class="flex items-center gap-3 p-3 rounded-2xl border transition-all group cursor-default
+                                    {{ $partner['is_official'] ? 'border-blue-100 bg-blue-50/30 hover:bg-blue-50 hover:border-blue-300' : 'border-gray-100 bg-gray-50 hover:bg-white hover:border-gray-300 hover:shadow-sm' }}">
                             
-                            {{-- Logo or Icon --}}
-                            @if(!empty($partner['logo_path']) || true) {{-- Assuming we always want an image avatar now --}}
-                                <img src="{{ $partnerLogo }}" class="w-5 h-5 md:w-6 md:h-6 rounded-full object-cover border border-white shadow-sm bg-white group-hover:scale-105 transition-transform" alt="{{ $partner['name'] }}">
-                            @endif
-
-                            <span class="text-[10px] md:text-xs font-bold {{ $partner['is_official'] ? 'text-blue-800' : 'text-gray-700' }}">
-                                {{ $partner['name'] }}
-                            </span>
+                            <div class="w-12 h-12 rounded-xl shrink-0 bg-white border border-gray-100 p-0.5 shadow-sm overflow-hidden flex items-center justify-center">
+                                <img src="{{ $partnerLogo }}" class="w-full h-full object-cover rounded-lg group-hover:scale-110 transition-transform" alt="{{ $partner['name'] }}">
+                            </div>
                             
-                            {{-- Official Badge (Optional nice-to-have marker) --}}
-                            @if($partner['is_official'])
-                                <svg class="w-3 h-3 text-blue-500" fill="currentColor" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                            @endif
+                            <div class="flex-1 min-w-0">
+                                <p class="text-xs font-black text-gray-900 leading-tight truncate" title="{{ $partner['name'] }}">
+                                    {{ $partner['name'] }}
+                                </p>
+                                <p class="text-[9px] font-bold uppercase tracking-widest mt-1 flex items-center gap-1 {{ $partner['is_official'] ? 'text-blue-600' : 'text-gray-500' }}">
+                                    @if($partner['is_official'])
+                                        <svg class="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                        Official Partner
+                                    @else
+                                        Collaborator
+                                    @endif
+                                </p>
+                            </div>
                         </div>
                     @endforeach
                 </div>
