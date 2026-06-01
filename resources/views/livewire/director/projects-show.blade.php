@@ -136,20 +136,28 @@
                 </h3>
 
                 {{-- Date & Status Row --}}
-                <div class="grid grid-cols-2 gap-4 mb-6 bg-gray-50 p-4 rounded-2xl border border-gray-100">
-                    <div>
-                        <span class="block text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1">Date</span>
-                        <span class="text-xs font-black text-gray-800">
-                            {{ $project->implementation_date ? $project->implementation_date->format('M d, Y') : 'TBA' }}
-                        </span>
+                    <div class="flex items-start gap-3">
+                        <div class="w-6 h-6 md:w-8 md:h-8 rounded-full bg-gray-50 text-gray-500 flex items-center justify-center shrink-0">
+                            <svg class="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        </div>
+                        <div>
+                            <span class="block text-[8px] md:text-[10px] font-bold text-gray-400 uppercase">Implementation Date</span>
+                            <span class="text-xs md:text-sm font-bold text-gray-800">
+                                {{ $project->implementation_date ? $project->implementation_date->format('F d, Y') : 'TBA' }}
+                            </span>
+                        </div>
                     </div>
-                    <div>
-                        <span class="block text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1">Status</span>
-                        <span class="text-xs font-black {{ $project->status === 'Completed' ? 'text-green-600' : ($project->status === 'Ongoing' ? 'text-red-600' : 'text-yellow-600') }}">
-                            {{ $project->status }}
-                        </span>
+
+                    {{-- Status --}}
+                    <div class="flex items-start gap-3">
+                        <div class="w-6 h-6 md:w-8 md:h-8 rounded-full bg-yellow-50 text-yellow-600 flex items-center justify-center shrink-0">
+                            <svg class="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        </div>
+                        <div>
+                            <span class="block text-[8px] md:text-[10px] font-bold text-gray-400 uppercase">Current Status</span>
+                            <span class="text-xs md:text-sm font-bold text-gray-800">{{ $project->status }}</span>
+                        </div>
                     </div>
-                </div>
 
                 {{-- Proponents (Facilitators) Card Grid --}}
                 <div>
