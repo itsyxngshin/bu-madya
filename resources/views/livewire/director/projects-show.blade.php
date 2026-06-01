@@ -136,6 +136,7 @@
                 </h3>
 
                 {{-- Date & Status Row --}}
+                <div class="grid grid-cols-2 gap-4 mb-6 bg-gray-50 p-4 rounded-2xl border border-gray-100">
                     <div class="flex items-start gap-3">
                         <div class="w-6 h-6 md:w-8 md:h-8 rounded-full bg-gray-50 text-gray-500 flex items-center justify-center shrink-0">
                             <svg class="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
@@ -158,6 +159,7 @@
                             <span class="text-xs md:text-sm font-bold text-gray-800">{{ $project->status }}</span>
                         </div>
                     </div>
+                </div>
 
                 {{-- Proponents (Facilitators) Card Grid --}}
                 <div>
