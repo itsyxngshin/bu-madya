@@ -160,19 +160,24 @@
                         Lead Proponents
                     </span>
                     
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-3">
+                    <div class="grid grid-cols-1 gap-3">
                         @foreach($project->proponents as $proponent)
                             @php
-                                $avatarUrl = !empty($proponent->profile_photo_path) 
-                                    ? asset('storage/' . $proponent->profile_photo_path) 
-                                    : 'https://ui-avatars.com/api/?name='.urlencode($proponent->name).'&background=fef2f2&color=dc2626&bold=true';
+                                // Safely resolve the photo path. Update 'profile_photo_path' if your User model uses 'avatar' or 'photo' instead.
+                                $avatarPath = $proponent->profile_photo_path ?? null;
+                                $avatarUrl = $avatarPath && !Str::startsWith($avatarPath, 'http') 
+                                    ? asset('storage/' . $avatarPath) 
+                                    : ($avatarPath ?: 'https://ui-avatars.com/api/?name='.urlencode($proponent->name).'&background=fef2f2&color=dc2626&bold=true');
                             @endphp
                             
-                            {{-- Proponent Card Box --}}
-                            <div class="flex items-center gap-3 p-3 bg-white border border-gray-200 rounded-2xl hover:border-red-200 hover:shadow-md transition-all group cursor-default">
-                                <img src="{{ $avatarUrl }}" class="w-10 h-10 rounded-xl object-cover shadow-sm group-hover:scale-105 transition-transform" alt="{{ $proponent->name }}">
-                                <div>
-                                    <p class="text-xs font-black text-gray-900 leading-none">{{ $project->title == 'Evaluation Results' ? 'Administrator' : $proponent->name }}</p>
+                            {{-- Changed to items-start so if a name is very long, the avatar stays at the top --}}
+                            <div class="flex items-start gap-3 p-3 bg-white border border-gray-200 rounded-2xl hover:border-red-200 hover:shadow-md transition-all group cursor-default">
+                                <img src="{{ $avatarUrl }}" class="w-10 h-10 rounded-xl object-cover shadow-sm group-hover:scale-105 transition-transform shrink-0" alt="{{ $proponent->name }}">
+                                <div class="pt-0.5">
+                                    {{-- Removed leading-none and added break-words to allow full names to wrap --}}
+                                    <p class="text-xs font-black text-gray-900 leading-snug break-words">
+                                        {{ $project->title == 'Evaluation Results' ? 'Administrator' : $proponent->name }}
+                                    </p>
                                     <p class="text-[9px] font-bold text-red-500 uppercase tracking-widest mt-1">Facilitator</p>
                                 </div>
                             </div>
@@ -180,6 +185,64 @@
                     </div>
                 </div>
             </div>
+
+            {{-- 2. PARTNERS CARD (Updated to use projectLinkages) --}}
+            @if($project->projectLinkages && $project->projectLinkages->isNotEmpty())
+            <div class="bg-white p-5 md:p-6 rounded-2xl md:rounded-3xl shadow-sm border border-gray-100">
+                <h3 class="font-bold text-gray-900 uppercase tracking-widest text-[10px] md:text-xs border-b border-gray-100 pb-3 mb-5 flex items-center gap-2">
+                    <div class="w-5 h-5 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                    </div>
+                    In Partnership With
+                </h3>
+                
+                <div class="grid grid-cols-1 gap-3">
+                    @foreach($project->projectLinkages as $projLink)
+                        @php
+                            // Extract the actual Linkage/Partner model from the pivot relationship
+                            $linkage = $projLink->linkage;
+                            
+                            if(!$linkage) continue; // Safety check in case of orphaned relationships
+
+                            // Update this condition if your DB uses a different column to denote 'official' status
+                            $isOfficial = isset($linkage->is_official) ? $linkage->is_official : false;
+
+                            // Update 'logo' to 'logo_path' or 'image' if that's what your Linkage model uses
+                            $logoPath = $linkage->logo ?? $linkage->logo_path ?? null;
+                            $partnerLogo = $logoPath && !Str::startsWith($logoPath, 'http')
+                                ? asset('storage/' . $logoPath) 
+                                : ($logoPath ?: ($isOfficial 
+                                    ? 'https://ui-avatars.com/api/?name='.urlencode($linkage->name).'&background=eff6ff&color=2563eb&bold=true'
+                                    : 'https://ui-avatars.com/api/?name='.urlencode($linkage->name).'&background=f3f4f6&color=4b5563&bold=true'));
+                        @endphp
+                        
+                        {{-- Items-start ensures the logo stays pinned to the top if the name spans 3 lines --}}
+                        <div class="flex items-start gap-3 p-3 rounded-2xl border transition-all group cursor-default
+                                    {{ $isOfficial ? 'border-blue-100 bg-blue-50/30 hover:bg-blue-50 hover:border-blue-300' : 'border-gray-100 bg-gray-50 hover:bg-white hover:border-gray-300 hover:shadow-sm' }}">
+                            
+                            <div class="w-12 h-12 rounded-xl shrink-0 bg-white border border-gray-100 p-0.5 shadow-sm overflow-hidden flex items-center justify-center">
+                                <img src="{{ $partnerLogo }}" class="w-full h-full object-cover rounded-lg group-hover:scale-110 transition-transform" alt="{{ $linkage->name }}">
+                            </div>
+                            
+                            <div class="flex-1 min-w-0 pt-0.5">
+                                {{-- Removed truncate, added break-words --}}
+                                <p class="text-xs font-black text-gray-900 leading-snug break-words">
+                                    {{ $linkage->name }}
+                                </p>
+                                <p class="text-[9px] font-bold uppercase tracking-widest mt-1.5 flex items-center gap-1 {{ $isOfficial ? 'text-blue-600' : 'text-gray-500' }}">
+                                    @if($isOfficial)
+                                        <svg class="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                        Official Partner
+                                    @else
+                                        Collaborator
+                                    @endif
+                                </p>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+            @endif
 
             {{-- 2. PARTNERS CARD --}}
             @if($project->partners_list->isNotEmpty())
