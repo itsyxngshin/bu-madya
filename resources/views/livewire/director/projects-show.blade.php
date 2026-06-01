@@ -163,18 +163,25 @@
                     <div class="grid grid-cols-1 gap-3">
                         @foreach($project->proponents as $proponent)
                             @php
-                                // Safely resolve the photo path. Update 'profile_photo_path' if your User model uses 'avatar' or 'photo' instead.
-                                $avatarPath = $proponent->profile_photo_path ?? null;
-                                $avatarUrl = $avatarPath && !Str::startsWith($avatarPath, 'http') 
-                                    ? asset('storage/' . $avatarPath) 
-                                    : ($avatarPath ?: 'https://ui-avatars.com/api/?name='.urlencode($proponent->name).'&background=fef2f2&color=dc2626&bold=true');
+                                $path = $proponent->profile_photo_path;
+                                
+                                // Robust Avatar Resolution matching your backend
+                                $avatarUrl = $path 
+                                    ? (
+                                        Str::startsWith($path, 'http') 
+                                            ? $path 
+                                            : (
+                                                Str::startsWith($path, 'images/') 
+                                                    ? asset($path) 
+                                                    : asset('storage/' . $path)
+                                            )
+                                    ) 
+                                    : 'https://ui-avatars.com/api/?name='.urlencode($proponent->name).'&background=fef2f2&color=dc2626&bold=true';
                             @endphp
                             
-                            {{-- Changed to items-start so if a name is very long, the avatar stays at the top --}}
                             <div class="flex items-start gap-3 p-3 bg-white border border-gray-200 rounded-2xl hover:border-red-200 hover:shadow-md transition-all group cursor-default">
                                 <img src="{{ $avatarUrl }}" class="w-10 h-10 rounded-xl object-cover shadow-sm group-hover:scale-105 transition-transform shrink-0" alt="{{ $proponent->name }}">
                                 <div class="pt-0.5">
-                                    {{-- Removed leading-none and added break-words to allow full names to wrap --}}
                                     <p class="text-xs font-black text-gray-900 leading-snug break-words">
                                         {{ $project->title == 'Evaluation Results' ? 'Administrator' : $proponent->name }}
                                     </p>
