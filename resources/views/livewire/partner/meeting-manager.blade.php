@@ -9,7 +9,6 @@
                 <h1 class="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight">Meeting Proceedings</h1>
                 <p class="text-sm text-gray-500 mt-1">Manage agendas, minutes, and track attendance.</p>
             </div>
-            {{-- CHANGED: Now calls openCreateModal --}}
             <button wire:click="openCreateModal" class="w-full sm:w-auto px-6 py-3 bg-gray-900 text-white text-sm font-black uppercase tracking-widest rounded-xl shadow-lg hover:bg-black transition active:scale-95 flex items-center justify-center gap-2">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                 Schedule Meeting
@@ -49,16 +48,20 @@
                         <span class="truncate">{{ $meeting->start_time->format('h:i A') }} • {{ $meeting->location ?? 'TBA' }}</span>
                     </p>
 
-                    {{-- CHANGED: Added Edit & Delete to Action Bar --}}
                     <div class="mt-auto pt-4 border-t border-gray-100 flex items-center gap-2">
                         <button wire:click="openMeeting({{ $meeting->id }})" class="flex-1 py-2.5 bg-gray-50 hover:bg-blue-50 text-gray-700 hover:text-blue-700 text-xs font-black uppercase tracking-widest rounded-xl transition-colors">
                             Enter Meeting
                         </button>
-
+                        
+                        {{-- NEW: Public View Button --}}
+                        <a href="{{ route('meeting.live', $meeting->slug) }}" target="_blank" class="p-2.5 bg-gray-50 hover:bg-green-50 text-gray-500 hover:text-green-600 rounded-xl transition-colors" title="Public Live View">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                        </a>
+                        
                         <button wire:click="openEditModal({{ $meeting->id }})" class="p-2.5 bg-gray-50 hover:bg-orange-50 text-gray-500 hover:text-orange-600 rounded-xl transition-colors" title="Edit Meeting">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                         </button>
-
+                        
                         <button wire:click="deleteMeeting({{ $meeting->id }})" wire:confirm="Are you sure you want to permanently delete this meeting? All attendance records and minutes will be lost." class="p-2.5 bg-gray-50 hover:bg-red-50 text-gray-500 hover:text-red-600 rounded-xl transition-colors" title="Delete Meeting">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                         </button>
@@ -79,13 +82,20 @@
             <button wire:click="closeMeeting" class="flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs font-bold uppercase tracking-widest text-gray-500 hover:text-gray-900 transition">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg> Dashboard
             </button>
-            <span class="px-2 sm:px-3 py-1 text-[9px] sm:text-[10px] font-black uppercase tracking-widest rounded-lg {{ $activeMeeting->status === 'completed' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700' }}">
-                Status: {{ $activeMeeting->status }}
-            </span>
+            
+            <div class="flex items-center gap-2">
+                <a href="{{ route('meeting.live', $activeMeeting->slug) }}" target="_blank" class="px-2 sm:px-3 py-1 text-[9px] sm:text-[10px] font-black uppercase tracking-widest rounded-lg bg-green-100 text-green-700 flex items-center gap-1.5 hover:bg-green-200 transition">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                    Live View
+                </a>
+                <span class="px-2 sm:px-3 py-1 text-[9px] sm:text-[10px] font-black uppercase tracking-widest rounded-lg {{ $activeMeeting->status === 'completed' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700' }}">
+                    Status: {{ $activeMeeting->status }}
+                </span>
+            </div>
         </div>
 
         <div class="bg-white rounded-[2rem] shadow-sm border border-gray-100 overflow-hidden" x-data="{ tab: 'attendance' }">
-
+            
             {{-- Meeting Header --}}
             <div class="p-5 sm:p-6 md:p-8 bg-gray-900 text-white relative overflow-hidden">
                 <div class="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -mr-20 -mt-20"></div>
@@ -110,7 +120,7 @@
             </div>
 
             <div class="p-4 sm:p-6 md:p-8">
-
+                
                 {{-- TAB 1: MINUTES --}}
                 <div x-show="tab === 'minutes'" x-cloak class="space-y-6">
                     @if(session()->has('minutes_success'))
@@ -139,20 +149,20 @@
 
                 {{-- TAB 2: ATTENDANCE & QR SCANNER --}}
                 <div x-show="tab === 'attendance'" x-cloak class="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
-
+                    
                     {{-- Left Side: Control Panel (Scanner & Search) --}}
                     <div class="space-y-6 order-2 lg:order-1">
-
+                        
                         {{-- 1. Live Search Dropdown --}}
                         <div class="bg-gray-50 p-4 sm:p-5 rounded-3xl border border-gray-200 relative">
                             <h4 class="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-3 flex items-center gap-1.5">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                                 Add Attendee Manually
                             </h4>
-
+                            
                             <div class="relative w-full">
                                 <input type="text" wire:model.live.debounce.300ms="searchQuery" placeholder="Search Name or ID..." class="w-full bg-white border border-gray-200 text-xs sm:text-sm font-semibold rounded-xl px-4 py-3 focus:ring-blue-500 focus:border-blue-500 shadow-sm transition">
-
+                                
                                 <div wire:loading wire:target="searchQuery" class="absolute right-4 top-3.5">
                                     <svg class="animate-spin h-4 w-4 sm:h-5 sm:w-5 text-gray-400" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                                 </div>
@@ -162,12 +172,13 @@
                                 <div class="absolute z-50 left-4 right-4 sm:left-5 sm:right-5 mt-2 bg-white border border-gray-100 shadow-xl rounded-2xl overflow-hidden max-h-60 overflow-y-auto custom-scrollbar">
                                     @forelse($searchResults as $user)
                                         @php
+                                            $fallback = 'https://ui-avatars.com/api/?name='.urlencode($user['name']).'&background=eff6ff&color=2563eb&bold=true';
                                             $path = $user['profile_photo_path'] ?? null;
-                                            $avatar = $path ? (Str::startsWith($path, ['http', 'images/']) ? asset($path) : asset('storage/' . $path)) : 'https://ui-avatars.com/api/?name='.urlencode($user['name']).'&background=eff6ff&color=2563eb';
+                                            $src = $path ? (\Illuminate\Support\Str::startsWith($path, ['http', 'images/']) ? asset($path) : asset('storage/' . $path)) : $fallback;
                                         @endphp
                                         <div class="flex items-center justify-between p-3 border-b border-gray-50 hover:bg-blue-50 transition group">
                                             <div class="flex items-center gap-3">
-                                                <img src="{{ $avatar }}" class="w-8 h-8 rounded-full object-cover shadow-sm shrink-0">
+                                                <img src="{{ $src }}" onerror="this.onerror=null; this.src='{{ $fallback }}';" class="w-8 h-8 rounded-full object-cover shadow-sm shrink-0">
                                                 <div>
                                                     <p class="text-[11px] sm:text-xs font-bold text-gray-900 leading-none group-hover:text-blue-700">{{ $user['name'] }}</p>
                                                     <p class="text-[9px] font-mono text-gray-500 mt-0.5">ID: {{ $user['id'] ?? $user['username'] }}</p>
@@ -186,7 +197,7 @@
                         <div class="bg-gray-900 p-1 rounded-3xl shadow-lg relative overflow-hidden hidden sm:block">
                             <div class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-red-500 via-orange-500 to-blue-500"></div>
                             <div id="reader" class="w-full h-auto min-h-[250px] sm:min-h-[300px] bg-black rounded-[1.3rem] overflow-hidden border-none"></div>
-
+                            
                             <div class="p-3 sm:p-4 text-center">
                                 <p class="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center justify-center gap-2">
                                     <span class="relative flex h-2 w-2"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span></span>
@@ -195,7 +206,7 @@
                                 <p class="text-[9px] sm:text-[10px] text-gray-500 mt-1">Hold the student's QR ID up to the camera.</p>
                             </div>
                         </div>
-
+                        
                         <div class="sm:hidden text-center p-4 bg-orange-50 rounded-2xl border border-orange-100">
                              <p class="text-[10px] font-bold text-orange-600 uppercase tracking-widest">Scanner Optimization</p>
                              <p class="text-xs text-gray-600 mt-1">For optimal scanning, please use a tablet or laptop device.</p>
@@ -206,12 +217,12 @@
                     {{-- Right Side: The Live Attendance Directory --}}
                     <div class="flex flex-col h-[400px] sm:h-[500px] lg:h-[600px] order-1 lg:order-2">
                         <h3 class="text-xs sm:text-sm font-black text-gray-900 uppercase tracking-widest mb-3 sm:mb-4 flex items-center justify-between shrink-0">
-                            Present Attendees
+                            Present Attendees 
                             <span class="bg-green-100 text-green-700 px-2 py-0.5 rounded-md text-[10px]">{{ $activeMeeting->attendees->count() }} Scanned</span>
                         </h3>
-
+                        
                         <div class="bg-gray-50 border border-gray-100 rounded-3xl shadow-inner overflow-hidden flex-1 flex flex-col relative">
-
+                            
                             {{-- Success/Error Alerts (Triggered via JS Events) --}}
                             <div id="scan-alert" style="display: none;" class="absolute top-0 inset-x-0 z-10 px-4 py-2 text-center text-[10px] sm:text-xs font-bold uppercase tracking-widest text-white transition-colors duration-300 shadow-md"></div>
 
@@ -223,10 +234,10 @@
                                                 ->where('id', $attendee->student_id)
                                                 ->orWhere('username', $attendee->student_id)
                                                 ->first();
-
-                                            $path = $user?->profile_photo_path;
-                                            $avatarUrl = $path ? (Str::startsWith($path, 'http') ? $path : (Str::startsWith($path, 'images/') ? asset($path) : asset('storage/' . $path))) : 'https://ui-avatars.com/api/?name='.urlencode($attendee->name ?? $attendee->student_id).'&background=eff6ff&color=2563eb&bold=true';
-
+                                            
+                                            $fallbackUrl = 'https://ui-avatars.com/api/?name='.urlencode($attendee->name ?? $attendee->student_id).'&background=eff6ff&color=2563eb&bold=true';
+                                            $avatarUrl = $user ? $user->avatar : $fallbackUrl;
+                                                
                                             $roleName = 'Guest / Unregistered';
                                             $roleColor = 'bg-gray-100 text-gray-500';
 
@@ -248,13 +259,13 @@
                                                 }
                                             }
                                         @endphp
-
+                                        
                                         {{-- Directory Card --}}
                                         <div class="bg-white border border-gray-100 rounded-2xl p-3 sm:p-4 flex flex-col items-center text-center shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all group relative">
-
+                                            
                                             {{-- Remove Button --}}
-                                            <button wire:click="removeAttendee({{ $attendee->id }})"
-                                                    wire:confirm="Are you sure you want to remove {{ $attendee->name ?? 'this attendee' }} from the meeting?"
+                                            <button wire:click="removeAttendee({{ $attendee->id }})" 
+                                                    wire:confirm="Are you sure you want to remove {{ $attendee->name ?? 'this attendee' }} from the meeting?" 
                                                     class="absolute top-1.5 left-1.5 text-gray-300 hover:text-red-600 hover:bg-red-50 p-1 rounded-full transition-colors z-10" title="Remove Attendee">
                                                 <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                                             </button>
@@ -263,7 +274,7 @@
                                                 {{ $attendee->time_in->format('h:i A') }}
                                             </div>
                                             <div class="w-12 h-12 sm:w-14 sm:h-14 mt-3 mb-2 sm:mb-3 rounded-full overflow-hidden border-2 border-white shadow-sm ring-2 ring-gray-50 group-hover:ring-blue-100 transition-colors shrink-0">
-                                                <img src="{{ $avatarUrl }}" class="w-full h-full object-cover" alt="{{ $attendee->name }}">
+                                                <img src="{{ $avatarUrl }}" onerror="this.onerror=null; this.src='{{ $fallbackUrl }}';" class="w-full h-full object-cover bg-gray-50" alt="{{ $attendee->name }}">
                                             </div>
                                             <h4 class="text-[10px] sm:text-xs font-black text-gray-900 leading-tight mb-1.5 line-clamp-2">
                                                 {{ $attendee->name ?? 'Unknown' }}
@@ -301,6 +312,7 @@
                 <button @click="isModalOpen = false" class="text-gray-400 hover:text-red-500"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
             </div>
             <div class="p-5 sm:p-6 space-y-4 overflow-y-auto custom-scrollbar">
+                
                 <div>
                     <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Academic Year <span class="text-red-500">*</span></label>
                     <select wire:model="academic_year_id" class="w-full text-sm rounded-xl border-gray-200 bg-gray-50 focus:border-blue-500">
@@ -311,11 +323,24 @@
                     </select>
                     @error('academic_year_id') <span class="text-red-500 text-[10px] font-bold">{{ $message }}</span> @enderror
                 </div>
+                
                 <div>
                     <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Meeting Title</label>
-                    <input type="text" wire:model="title" class="w-full text-sm rounded-xl border-gray-200 bg-gray-50 focus:border-blue-500">
+                    <input type="text" wire:model.live.debounce.300ms="title" class="w-full text-sm rounded-xl border-gray-200 bg-gray-50 focus:border-blue-500">
                     @error('title') <span class="text-red-500 text-[10px] font-bold">{{ $message }}</span> @enderror
                 </div>
+                
+                {{-- NEW: Custom Slug Input --}}
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Custom URL Slug</label>
+                    <div class="flex rounded-xl shadow-sm border border-gray-200 overflow-hidden focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500">
+                        <span class="px-3 py-2 sm:py-2.5 bg-gray-100 text-gray-500 text-[10px] sm:text-xs border-r border-gray-200 flex items-center font-mono select-none">bu-madya.space/m/</span>
+                        <input type="text" wire:model="slug" class="w-full text-sm border-0 bg-gray-50 focus:ring-0 px-3 py-2 sm:py-2.5 font-mono text-blue-600 placeholder-gray-300" placeholder="my-awesome-meeting">
+                    </div>
+                    <p class="text-[9px] text-gray-400 mt-1 font-medium">This creates the public shareable link for the live feed.</p>
+                    @error('slug') <span class="text-red-500 text-[10px] font-bold">{{ $message }}</span> @enderror
+                </div>
+
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Date</label>
@@ -328,16 +353,17 @@
                         @error('start_time') <span class="text-red-500 text-[10px] font-bold">{{ $message }}</span> @enderror
                     </div>
                 </div>
+                
                 <div>
                     <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Location</label>
                     <input type="text" wire:model="location" placeholder="e.g. BU CS Room 2" class="w-full text-sm rounded-xl border-gray-200 bg-gray-50 focus:border-blue-500">
                 </div>
+                
                 <div>
                     <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Agenda Summary</label>
                     <textarea wire:model="agenda" rows="2" class="w-full text-sm rounded-xl border-gray-200 bg-gray-50 focus:border-blue-500 resize-none"></textarea>
                 </div>
-
-                {{-- CHANGED: Calls saveMeeting instead of createMeeting --}}
+                
                 <button wire:click="saveMeeting" class="w-full mt-2 py-3 bg-blue-600 text-white text-xs font-black uppercase tracking-widest rounded-xl shadow-lg hover:bg-blue-700 transition">
                     {{ $isEditMode ? 'Update Meeting' : 'Save Schedule' }}
                 </button>
@@ -358,12 +384,12 @@
 
     function initScanner() {
         const readerElement = document.getElementById('reader');
-
+        
         const qrSize = window.innerWidth < 640 ? 150 : 250;
 
         if (readerElement && !html5QrcodeScanner) {
-            html5QrcodeScanner = new Html5QrcodeScanner("reader", {
-                fps: 10,
+            html5QrcodeScanner = new Html5QrcodeScanner("reader", { 
+                fps: 10, 
                 qrbox: {width: qrSize, height: qrSize},
                 aspectRatio: 1.0
             }, false);
