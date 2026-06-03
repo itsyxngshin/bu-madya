@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('meetings', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('organization_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete(); // Changed from organization_id
             // NEW: Academic Year Link
             $table->foreignId('academic_year_id')->constrained()->cascadeOnDelete();
 
