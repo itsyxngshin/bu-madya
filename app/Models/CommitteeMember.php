@@ -7,9 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 class CommitteeMember extends Model
 {
     protected $fillable = [
-        'committee_id', 
+        'committee_id',
         'academic_year_id',
-        'title', 
+        'title',
         'user_id', // Optional: if linking to a registered user
     ];
 
@@ -18,7 +18,7 @@ class CommitteeMember extends Model
     {
         return $this->belongsTo(Committee::class);
     }
-    
+
     public function academicYear()
     {
         return $this->belongsTo(AcademicYear::class);
@@ -28,5 +28,5 @@ class CommitteeMember extends Model
     {
         return $this->belongsTo(User::class);
     }
-    
+
 }
