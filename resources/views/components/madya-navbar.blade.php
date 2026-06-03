@@ -170,8 +170,22 @@
         {{-- Mobile Auth Footer --}}
         <div class="px-4 pb-6 pt-2 bg-gray-50/50 border-t border-gray-100">
             @auth
+                @php
+                    $mobilePath = Auth::user()->profile_photo_path;
+                    $mobileAvatarUrl = $mobilePath 
+                        ? (
+                            Str::startsWith($mobilePath, 'http') 
+                                ? $mobilePath 
+                                : (
+                                    Str::startsWith($mobilePath, 'images/') 
+                                        ? asset($mobilePath) 
+                                        : asset('storage/' . $mobilePath)
+                                )
+                        ) 
+                        : 'https://ui-avatars.com/api/?name='.urlencode(Auth::user()->name).'&color=7F9CF5&background=EBF4FF';
+                @endphp
                 <div class="flex items-center gap-3 mb-4">
-                    <img class="h-10 w-10 rounded-full object-cover border-2 border-white shadow-sm" src="{{ Auth::user()->profile_photo_path ? (filter_var(Auth::user()->profile_photo_path, FILTER_VALIDATE_URL) ? Auth::user()->profile_photo_path : asset(Auth::user()->profile_photo_path)) : 'https://ui-avatars.com/api/?name='.urlencode(Auth::user()->name).'&color=7F9CF5&background=EBF4FF' }}" />
+                    <img class="h-10 w-10 rounded-full object-cover border-2 border-white shadow-sm" src="{{ $mobileAvatarUrl }}" alt="{{ Auth::user()->name }}" />
                     <div class="overflow-hidden">
                         <div class="font-bold text-gray-900 leading-tight truncate text-sm">{{ Auth::user()->name }}</div>
                         <div class="text-[10px] text-gray-500 font-bold uppercase tracking-wider">{{ Auth::user()->email }}</div>

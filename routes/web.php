@@ -80,6 +80,7 @@ use Illuminate\Support\Facades\Response;
 use App\Livewire\Partner\SubmitFrame;
 use App\Livewire\Partner\PartnerDashboard;
 use App\Livewire\Partner\AccreditationDashboard as OrgDashboard;
+use App\Livewire\Partner\MeetingManager;
 
 
 use App\Livewire\Community\PostFeed;
@@ -251,7 +252,7 @@ Route::domain($baseDomain)->group(function () {
         Route::get('/roundtable/{id}', RoundtableShow::class)->name('roundtable.show');
         Route::get('/evaluations', EvaluationList::class)->name('evaluations.index');
         Route::get('/elections/{election:slug}/apply', \App\Livewire\Open\CandidateApplicationForm::class)->name('elections.apply');
-
+        Route::get('/meetings', MeetingManager::class)->name('partner.meetings');
 
     });
 
@@ -324,6 +325,7 @@ Route::domain($baseDomain)->group(function () {
         Route::get('/elections/{election:slug}/vetting', \App\Livewire\Admin\ElectionDashboard::class)->name('elections.vetting');
         Route::get('/elections/{election:slug}/results', \App\Livewire\Admin\ElectionResults::class)->name('elections.results');
         Route::get('/elections/{election:slug}/edit', \App\Livewire\Admin\ElectionEditor::class)->name('elections.edit');
+        
 
     });
 
