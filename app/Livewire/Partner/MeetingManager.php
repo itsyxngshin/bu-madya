@@ -7,9 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Organization;
 use App\Models\Meeting;
 use App\Models\MeetingAttendee;
-use Livewire\Attributes\Layout;
-
-#[Layout('layouts.madya-admin-deck')] 
+use App\Models\AcademicYear;
 
 class MeetingManager extends Component
 {
@@ -17,6 +15,7 @@ class MeetingManager extends Component
     public $activeMeetingId = null;
     
     // New Meeting Form
+    public $academic_year_id; // Added Academic Year
     public $title, $meeting_date, $start_time, $location, $agenda;
     public $isCreateModalOpen = false;
 
@@ -29,20 +28,30 @@ class MeetingManager extends Component
         $this->organization = Organization::where('user_id', Auth::id())->first();
         $this->meeting_date = date('Y-m-d');
         $this->start_time = date('H:i');
+
+        // Automatically pre-select the most recent Academic Year
+        $latestAy = AcademicYear::latest('id')->first();
+        if ($latestAy) {
+            $this->academic_year_id = $latestAy->id;
+        }
     }
 
     public function createMeeting()
     {
         $this->validate([
+            'academic_year_id' => 'required|exists:academic_years,id',
             'title' => 'required|string|max:255',
             'meeting_date' => 'required|date',
             'start_time' => 'required',
             'location' => 'nullable|string',
             'agenda' => 'nullable|string',
+        ], [
+            'academic_year_id.required' => 'Please select the applicable Academic Year.'
         ]);
 
         Meeting::create([
             'organization_id' => $this->organization->id,
+            'academic_year_id' => $this->academic_year_id,
             'title' => $this->title,
             'meeting_date' => $this->meeting_date,
             'start_time' => $this->start_time,
@@ -51,7 +60,9 @@ class MeetingManager extends Component
         ]);
 
         $this->isCreateModalOpen = false;
-        $this->reset(['title', 'location', 'agenda']);
+        
+        // Reset fields, but keep the academic year selected for convenience
+        $this->reset(['title', 'location', 'agenda']); 
         session()->flash('success', 'Meeting scheduled successfully.');
     }
 
@@ -110,8 +121,9 @@ class MeetingManager extends Component
 
     public function render()
     {
-        $meetings = $this->organization ? $this->organization->meetings()->orderBy('meeting_date', 'desc')->get() : [];
+        $meetings = $this->organization ? $this->organization->meetings()->with('academicYear')->orderBy('meeting_date', 'desc')->get() : [];
         $activeMeeting = $this->activeMeetingId ? Meeting::with('attendees')->find($this->activeMeetingId) : null;
+        $academicYears = AcademicYear::orderBy('id', 'desc')->get();
         $layoutFile = in_array(auth()->user()->role?->role_name, ['administrator', 'organization', 'director'])
             ? 'layouts.madya-admin-deck'
             : 'layouts.madya-admin';
@@ -119,6 +131,7 @@ class MeetingManager extends Component
         return view('livewire.partner.meeting-manager', [
             'meetings' => $meetings,
             'activeMeeting' => $activeMeeting,
-        ])->layout($layoutFile);
+            'academicYears' => $academicYears,
+        ])->layout($layoutFile); // Adjust layout name if necessary
     }
 }

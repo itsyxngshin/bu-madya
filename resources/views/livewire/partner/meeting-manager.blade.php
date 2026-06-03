@@ -34,9 +34,15 @@
                             <span class="block text-[10px] font-black text-gray-400 uppercase tracking-widest">{{ $meeting->meeting_date->format('M') }}</span>
                             <span class="block text-xl font-black text-gray-900 leading-none">{{ $meeting->meeting_date->format('d') }}</span>
                         </div>
-                        <span class="px-2.5 py-1 text-[9px] font-black uppercase tracking-widest rounded-md {{ $meeting->status === 'completed' ? 'bg-green-50 text-green-600' : 'bg-blue-50 text-blue-600' }}">
-                            {{ $meeting->status }}
-                        </span>
+                        <div class="flex flex-col items-end gap-1">
+                            <span class="px-2.5 py-1 text-[9px] font-black uppercase tracking-widest rounded-md {{ $meeting->status === 'completed' ? 'bg-green-50 text-green-600' : 'bg-blue-50 text-blue-600' }}">
+                                {{ $meeting->status }}
+                            </span>
+                            {{-- ACADEMIC YEAR BADGE --}}
+                            <span class="text-[9px] font-bold text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded uppercase tracking-wider">
+                                AY {{ $meeting->academicYear->name ?? $meeting->academicYear->year ?? 'N/A' }}
+                            </span>
+                        </div>
                     </div>
 
                     <h3 class="font-black text-lg text-gray-900 leading-tight mb-2">{{ $meeting->title }}</h3>
@@ -164,7 +170,7 @@
                                 @forelse($activeMeeting->attendees->sortByDesc('time_in') as $attendee)
                                     <li class="p-3 hover:bg-gray-50 rounded-xl transition flex items-center justify-between">
                                         <div class="flex items-center gap-3">
-                                            <div class="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-xs">
+                                            <div class="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-xs shrink-0">
                                                 {{ substr($attendee->name ?? $attendee->student_id, 0, 1) }}
                                             </div>
                                             <div>
@@ -172,7 +178,7 @@
                                                 <p class="text-[10px] text-gray-500 mt-1 font-mono">{{ $attendee->student_id }}</p>
                                             </div>
                                         </div>
-                                        <span class="text-[10px] font-bold text-gray-400">{{ $attendee->time_in->format('h:i A') }}</span>
+                                        <span class="text-[10px] font-bold text-gray-400 shrink-0">{{ $attendee->time_in->format('h:i A') }}</span>
                                     </li>
                                 @empty
                                     <li class="text-center py-12 text-gray-400">
@@ -198,29 +204,49 @@
                 <button @click="isModalOpen = false" class="text-gray-400 hover:text-red-500"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
             </div>
             <div class="p-6 space-y-4">
+                
+                {{-- ACADEMIC YEAR DROPDOWN --}}
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Academic Year <span class="text-red-500">*</span></label>
+                    <select wire:model="academic_year_id" class="w-full text-sm rounded-xl border-gray-200 bg-gray-50 focus:border-blue-500">
+                        <option value="">Select A.Y...</option>
+                        @foreach($academicYears as $ay)
+                            <option value="{{ $ay->id }}">{{ $ay->name ?? $ay->year }}</option>
+                        @endforeach
+                    </select>
+                    @error('academic_year_id') <span class="text-red-500 text-[10px] font-bold">{{ $message }}</span> @enderror
+                </div>
+
                 <div>
                     <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Meeting Title</label>
                     <input type="text" wire:model="title" class="w-full text-sm rounded-xl border-gray-200 bg-gray-50 focus:border-blue-500">
+                    @error('title') <span class="text-red-500 text-[10px] font-bold">{{ $message }}</span> @enderror
                 </div>
+
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Date</label>
                         <input type="date" wire:model="meeting_date" class="w-full text-sm rounded-xl border-gray-200 bg-gray-50 focus:border-blue-500">
+                        @error('meeting_date') <span class="text-red-500 text-[10px] font-bold">{{ $message }}</span> @enderror
                     </div>
                     <div>
                         <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Time</label>
                         <input type="time" wire:model="start_time" class="w-full text-sm rounded-xl border-gray-200 bg-gray-50 focus:border-blue-500">
+                        @error('start_time') <span class="text-red-500 text-[10px] font-bold">{{ $message }}</span> @enderror
                     </div>
                 </div>
+
                 <div>
                     <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Location</label>
                     <input type="text" wire:model="location" placeholder="e.g. BU CS Room 2" class="w-full text-sm rounded-xl border-gray-200 bg-gray-50 focus:border-blue-500">
                 </div>
+
                 <div>
                     <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Agenda Summary</label>
                     <textarea wire:model="agenda" rows="2" class="w-full text-sm rounded-xl border-gray-200 bg-gray-50 focus:border-blue-500 resize-none"></textarea>
                 </div>
-                <button wire:click="createMeeting" class="w-full py-3 bg-blue-600 text-white text-xs font-black uppercase tracking-widest rounded-xl shadow-lg hover:bg-blue-700 transition">Save Schedule</button>
+                
+                <button wire:click="createMeeting" class="w-full mt-2 py-3 bg-blue-600 text-white text-xs font-black uppercase tracking-widest rounded-xl shadow-lg hover:bg-blue-700 transition">Save Schedule</button>
             </div>
         </div>
     </div>
@@ -233,15 +259,12 @@
 <script>
     let html5QrcodeScanner = null;
 
-    // Initialize Scanner when Livewire loads or updates DOM
     document.addEventListener('livewire:navigated', initScanner);
     document.addEventListener('livewire:initialized', initScanner);
 
     function initScanner() {
         const readerElement = document.getElementById('reader');
         
-        // Only initialize if the reader div exists (meaning we are on the Attendance Tab)
-        // and it hasn't been initialized yet
         if (readerElement && !html5QrcodeScanner) {
             html5QrcodeScanner = new Html5QrcodeScanner("reader", { 
                 fps: 10, 
@@ -254,15 +277,11 @@
     }
 
     function onScanSuccess(decodedText, decodedResult) {
-        // Send the scanned text (Student ID) to Livewire backend
         @this.call('recordAttendance', decodedText);
     }
 
-    function onScanFailure(error) {
-        // Handle scan failure silently to prevent console spam
-    }
+    function onScanFailure(error) {}
 
-    // Listen for Livewire events to flash success/error UI
     window.addEventListener('attendance-recorded', event => {
         let alertBox = document.getElementById('scan-alert');
         if(alertBox) {
