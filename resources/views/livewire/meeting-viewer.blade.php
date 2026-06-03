@@ -87,21 +87,23 @@
                             @forelse($meeting->attendees as $attendee)
                                 @php
                                     // 1. Look up the user to grab their real avatar
-                                    $user = \App\Models\User::find($attendee->student_id);
+                                    $user = \App\Models\User::find($attendee->id);
                                     
                                     // 2. Generate the fallback UI-Avatar
                                     $fallbackUrl = 'https://ui-avatars.com/api/?name='.urlencode($attendee->name ?? 'Unknown').'&background=f8fafc&color=334155&bold=true';
                                     
-                                    // 3. Resolve the actual image (using the accessor we created earlier)
-                                    $avatarUrl = $user ? $user->avatar : $fallbackUrl;
+                                    // 3. Resolve the actual image
+                                    $avatarUrl = $user ? $user->profile_photo_url : $fallbackUrl;
                                 @endphp
 
-                                <li class="flex items-center gap-3 p-2.5 bg-white border border-gray-100 hover:border-blue-200 rounded-2xl shadow-sm transition-all group">
+                                {{-- FIXED: Added wire:key so Livewire doesn't forcefully re-render existing items --}}
+                                <li wire:key="attendee-{{ $attendee->id }}" class="flex items-center gap-3 p-2.5 bg-white border border-gray-100 hover:border-blue-200 rounded-2xl shadow-sm transition-all group">
                                     
-                                    {{-- Real User Avatar --}}
-                                    <div class="w-10 h-10 rounded-full bg-white border border-gray-100 shadow-sm shrink-0 overflow-hidden group-hover:scale-105 transition-transform">
-                                        <img src="{{ $avatarUrl }}" 
-                                             onerror="this.onerror=null; this.src='{{ $fallbackUrl }}';" 
+                                    {{-- FIXED: Using Alpine.js to handle the fallback safely during Livewire polling --}}
+                                    <div class="w-10 h-10 rounded-full bg-white border border-gray-100 shadow-sm shrink-0 overflow-hidden group-hover:scale-105 transition-transform"
+                                         x-data="{ imgFailed: false }">
+                                        <img :src="imgFailed ? '{{ $fallbackUrl }}' : '{{ $avatarUrl }}'" 
+                                             @error="imgFailed = true" 
                                              class="w-full h-full object-cover bg-gray-50"
                                              alt="{{ $attendee->name }}">
                                     </div>
