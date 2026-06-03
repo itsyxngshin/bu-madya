@@ -243,23 +243,21 @@
         </div>
     </div>
 
+
     {{-- ========================================================== --}}
-    {{-- MY DIGITAL ID MODAL (Teleported to body to fix clipping)   --}}
+    {{-- MY DIGITAL ID MODAL (Teleported & Z-Index Enforced)        --}}
     {{-- ========================================================== --}}
     @auth
     <template x-teleport="body">
-        <div x-show="showQrModal" style="display: none;" class="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+        {{-- FIXED: Using inline styles for z-index guarantees it sits above everything --}}
+        <div x-show="showQrModal" style="display: none; z-index: 999999;" class="fixed inset-0 flex items-center justify-center p-4">
             
             {{-- Backdrop --}}
             <div x-show="showQrModal" 
-                 x-transition:enter="ease-out duration-300"
-                 x-transition:enter-start="opacity-0"
-                 x-transition:enter-end="opacity-100"
-                 x-transition:leave="ease-in duration-200"
-                 x-transition:leave-start="opacity-100"
-                 x-transition:leave-end="opacity-0"
-                 class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm" 
-                 @click="showQrModal = false"></div>
+                 x-transition.opacity.duration.300ms
+                 class="fixed inset-0 bg-gray-900/80 backdrop-blur-sm" 
+                 @click="showQrModal = false"
+                 style="z-index: 999999;"></div>
 
             {{-- Modal Content --}}
             <div x-show="showQrModal" 
@@ -269,7 +267,8 @@
                  x-transition:leave="ease-in duration-200"
                  x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
                  x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                 class="relative bg-white p-6 md:p-8 rounded-[2rem] border border-gray-100 shadow-2xl flex flex-col items-center text-center max-w-sm w-full mx-auto z-10">
+                 style="z-index: 1000000;"
+                 class="relative bg-white p-6 md:p-8 rounded-[2rem] border border-gray-100 shadow-2xl flex flex-col items-center text-center max-w-sm w-full mx-auto">
                 
                 {{-- Close Button --}}
                 <button @click="showQrModal = false" class="absolute top-4 right-4 text-gray-400 hover:text-red-500 bg-gray-50 hover:bg-red-50 p-2 rounded-full transition-colors">
@@ -294,5 +293,6 @@
         </div>
     </template>
     @endauth
+    
 
 </nav>
