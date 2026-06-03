@@ -75,7 +75,7 @@
         </div>
 
         <div class="bg-white rounded-[2rem] shadow-sm border border-gray-100 overflow-hidden" x-data="{ tab: 'attendance' }">
-            
+
             {{-- Meeting Header --}}
             <div class="p-5 sm:p-6 md:p-8 bg-gray-900 text-white relative overflow-hidden">
                 <div class="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -mr-20 -mt-20"></div>
@@ -100,7 +100,7 @@
             </div>
 
             <div class="p-4 sm:p-6 md:p-8">
-                
+
                 {{-- TAB 1: MINUTES --}}
                 <div x-show="tab === 'minutes'" x-cloak class="space-y-6">
                     @if(session()->has('minutes_success'))
@@ -129,20 +129,20 @@
 
                 {{-- TAB 2: ATTENDANCE & QR SCANNER --}}
                 <div x-show="tab === 'attendance'" x-cloak class="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
-                    
+
                     {{-- Left Side: Control Panel (Scanner & Search) --}}
                     <div class="space-y-6 order-2 lg:order-1">
-                        
+
                         {{-- 1. Live Search Dropdown --}}
                         <div class="bg-gray-50 p-4 sm:p-5 rounded-3xl border border-gray-200 relative">
                             <h4 class="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-3 flex items-center gap-1.5">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                                 Add Attendee Manually
                             </h4>
-                            
+
                             <div class="relative w-full">
                                 <input type="text" wire:model.live.debounce.300ms="searchQuery" placeholder="Search Name or Student ID..." class="w-full bg-white border border-gray-200 text-xs sm:text-sm font-semibold rounded-xl px-4 py-3 focus:ring-blue-500 focus:border-blue-500 shadow-sm transition">
-                                
+
                                 <div wire:loading wire:target="searchQuery" class="absolute right-4 top-3.5">
                                     <svg class="animate-spin h-4 w-4 sm:h-5 sm:w-5 text-gray-400" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                                 </div>
@@ -177,7 +177,7 @@
                         <div class="bg-gray-900 p-1 rounded-3xl shadow-lg relative overflow-hidden hidden sm:block">
                             <div class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-red-500 via-orange-500 to-blue-500"></div>
                             <div id="reader" class="w-full h-auto min-h-[250px] sm:min-h-[300px] bg-black rounded-[1.3rem] overflow-hidden border-none"></div>
-                            
+
                             <div class="p-3 sm:p-4 text-center">
                                 <p class="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center justify-center gap-2">
                                     <span class="relative flex h-2 w-2"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span></span>
@@ -186,7 +186,7 @@
                                 <p class="text-[9px] sm:text-[10px] text-gray-500 mt-1">Hold the student's ID barcode/QR up to the camera.</p>
                             </div>
                         </div>
-                        
+
                         <div class="sm:hidden text-center p-4 bg-orange-50 rounded-2xl border border-orange-100">
                              <p class="text-[10px] font-bold text-orange-600 uppercase tracking-widest">Scanner Optimization</p>
                              <p class="text-xs text-gray-600 mt-1">For optimal scanning, please use a tablet or laptop device.</p>
@@ -197,12 +197,12 @@
                     {{-- Right Side: The Live Attendance Directory --}}
                     <div class="flex flex-col h-[400px] sm:h-[500px] lg:h-[600px] order-1 lg:order-2">
                         <h3 class="text-xs sm:text-sm font-black text-gray-900 uppercase tracking-widest mb-3 sm:mb-4 flex items-center justify-between shrink-0">
-                            Present Attendees 
+                            Present Attendees
                             <span class="bg-green-100 text-green-700 px-2 py-0.5 rounded-md text-[10px]">{{ $activeMeeting->attendees->count() }} Scanned</span>
                         </h3>
-                        
+
                         <div class="bg-gray-50 border border-gray-100 rounded-3xl shadow-inner overflow-hidden flex-1 flex flex-col relative">
-                            
+
                             {{-- Success/Error Alerts (Triggered via JS Events) --}}
                             <div id="scan-alert" style="display: none;" class="absolute top-0 inset-x-0 z-10 px-4 py-2 text-center text-[10px] sm:text-xs font-bold uppercase tracking-widest text-white transition-colors duration-300 shadow-md"></div>
 
@@ -214,10 +214,10 @@
                                                 ->where('student_id', $attendee->student_id)
                                                 ->orWhere('username', $attendee->student_id)
                                                 ->first();
-                                            
+
                                             $path = $user?->profile_photo_path;
                                             $avatarUrl = $path ? (Str::startsWith($path, 'http') ? $path : (Str::startsWith($path, 'images/') ? asset($path) : asset('storage/' . $path))) : 'https://ui-avatars.com/api/?name='.urlencode($attendee->name ?? $attendee->student_id).'&background=eff6ff&color=2563eb&bold=true';
-                                                
+
                                             $roleName = 'Guest / Unregistered';
                                             $roleColor = 'bg-gray-100 text-gray-500';
 
@@ -239,13 +239,13 @@
                                                 }
                                             }
                                         @endphp
-                                        
+
                                         {{-- Directory Card --}}
                                         <div class="bg-white border border-gray-100 rounded-2xl p-3 sm:p-4 flex flex-col items-center text-center shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all group relative">
-                                            
+
                                             {{-- NEW: Remove Button --}}
-                                            <button wire:click="removeAttendee({{ $attendee->id }})" 
-                                                    wire:confirm="Are you sure you want to remove {{ $attendee->name ?? 'this attendee' }} from the meeting?" 
+                                            <button wire:click="removeAttendee({{ $attendee->id }})"
+                                                    wire:confirm="Are you sure you want to remove {{ $attendee->name ?? 'this attendee' }} from the meeting?"
                                                     class="absolute top-1.5 left-1.5 text-gray-300 hover:text-red-600 hover:bg-red-50 p-1 rounded-full transition-colors z-10" title="Remove Attendee">
                                                 <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                                             </button>
@@ -345,13 +345,13 @@
 
     function initScanner() {
         const readerElement = document.getElementById('reader');
-        
+
         // Dynamically adjust QR box size based on screen width for mobile optimization
         const qrSize = window.innerWidth < 640 ? 150 : 250;
 
         if (readerElement && !html5QrcodeScanner) {
-            html5QrcodeScanner = new Html5QrcodeScanner("reader", { 
-                fps: 10, 
+            html5QrcodeScanner = new Html5QrcodeScanner("reader", {
+                fps: 10,
                 qrbox: {width: qrSize, height: qrSize},
                 aspectRatio: 1.0
             }, false);

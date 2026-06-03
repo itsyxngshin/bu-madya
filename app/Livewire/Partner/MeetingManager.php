@@ -4,7 +4,6 @@ namespace App\Livewire\Partner;
 
 use Livewire\Component;
 use Illuminate\Support\Facades\Auth;
-use App\Models\Organization;
 use App\Models\Meeting;
 use App\Models\MeetingAttendee;
 use App\Models\AcademicYear;
@@ -13,7 +12,6 @@ use Illuminate\Support\Str;
 
 class MeetingManager extends Component
 {
-    public $organization;
     public $activeMeetingId = null;
 
     // New Meeting Form
@@ -30,7 +28,6 @@ class MeetingManager extends Component
 
     public function mount()
     {
-        $this->organization = Organization::where('user_id', Auth::id())->first();
         $this->meeting_date = date('Y-m-d');
         $this->start_time = date('H:i');
 
@@ -66,7 +63,7 @@ class MeetingManager extends Component
         ]);
 
         Meeting::create([
-            'organization_id' => $this->organization->id,
+            'user_id' => Auth::id(), // Directly tie to the authenticated Org user!
             'academic_year_id' => $this->academic_year_id,
             'title' => $this->title,
             'meeting_date' => $this->meeting_date,
@@ -152,7 +149,6 @@ class MeetingManager extends Component
         }
     }
 
-    // NEW: Remove an attendee
     public function removeAttendee($attendeeId)
     {
         if (!$this->activeMeetingId) return;
@@ -169,7 +165,12 @@ class MeetingManager extends Component
 
     public function render()
     {
-        $meetings = $this->organization ? $this->organization->meetings()->with('academicYear')->orderBy('meeting_date', 'desc')->get() : [];
+        // Fetch meetings directly belonging to this logged-in organization user
+        $meetings = Meeting::where('user_id', Auth::id())
+                           ->with('academicYear')
+                           ->orderBy('meeting_date', 'desc')
+                           ->get();
+
         $activeMeeting = $this->activeMeetingId ? Meeting::with('attendees')->find($this->activeMeetingId) : null;
         $academicYears = AcademicYear::orderBy('id', 'desc')->get();
         $layoutFile = in_array(auth()->user()->role?->role_name, ['administrator', 'organization', 'director'])
