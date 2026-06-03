@@ -7,14 +7,15 @@ use Illuminate\Database\Eloquent\Model;
 class Meeting extends Model
 {
     protected $fillable = [
-        'user_id',
+        'user_id', 
         'academic_year_id',
-        'title',
-        'meeting_date',
-        'start_time',
-        'location',
-        'agenda',
-        'minutes',
+        'title', 
+        'slug', // <--- ADD THIS
+        'meeting_date', 
+        'start_time', 
+        'location', 
+        'agenda', 
+        'minutes', 
         'status'
     ];
 

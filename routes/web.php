@@ -23,6 +23,7 @@ use App\Livewire\Open\FrameBuilder;
 use App\Livewire\Open\EventDiscovery;
 use App\Livewire\Open\PrivacyPolicy;
 use App\Livewire\Open\CandidateProfile;
+use App\Livewire\MeetingViewer;
 
 use App\Livewire\Auth\RegisterOrganization;
 
@@ -253,6 +254,7 @@ Route::domain($baseDomain)->group(function () {
         Route::get('/evaluations', EvaluationList::class)->name('evaluations.index');
         Route::get('/elections/{election:slug}/apply', \App\Livewire\Open\CandidateApplicationForm::class)->name('elections.apply');
         Route::get('/meetings', MeetingManager::class)->name('partner.meetings');
+        Route::get('/m/{slug}', MeetingViewer::class)->name('meeting.live');
 
     });
 

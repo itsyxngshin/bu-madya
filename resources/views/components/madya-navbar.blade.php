@@ -1,4 +1,4 @@
-<nav x-data="{ open: false, scrolled: false }"
+<nav x-data="{ open: false, scrolled: false, showQrModal: false }"
      @scroll.window="scrolled = (window.pageYOffset > 20)"
      :class="{ 'bg-white/90 backdrop-blur-xl shadow-sm border-b border-gray-200': scrolled, 'bg-white/50 backdrop-blur-md border-b border-transparent': !scrolled }"
      class="sticky top-0 z-50 transition-all duration-300">
@@ -81,7 +81,7 @@
                         <div class="relative ml-2" x-data="{ dropdownOpen: false }">
                             @php
                                     $photoPath = Auth::user()->profile_photo_path;
-                                    $photoUrl = $photoPath ? (Str::startsWith($photoPath, ['http', 'images/']) ? asset($photoPath) : asset('storage/' . $photoPath)) : 'https://ui-avatars.com/api/?name='.urlencode($user?->name ?? 'Org').'&color=4F46E5&background=E0E7FF';
+                                    $photoUrl = $photoPath ? (Str::startsWith($photoPath, ['http', 'images/']) ? asset($photoPath) : asset('storage/' . $photoPath)) : 'https://ui-avatars.com/api/?name='.urlencode(Auth::user()->name ?? 'Org').'&color=4F46E5&background=E0E7FF';
                                 @endphp
                             <button @click="dropdownOpen = !dropdownOpen" type="button" class="flex text-sm border-2 border-transparent rounded-full focus:outline-none focus:border-red-300 transition hover:shadow-md">
                                 <img class="h-9 w-9 rounded-full object-cover" src="{{$photoUrl}}" alt="{{ Auth::user()->name }}" />
@@ -95,6 +95,12 @@
                                     <p class="text-xs text-gray-500 uppercase font-bold">Signed in as</p>
                                     <p class="text-sm font-bold text-gray-900 truncate">{{ Auth::user()->name }}</p>
                                 </div>
+                                
+                                {{-- DESKTOP TRIGGER: MY DIGITAL ID --}}
+                                <button @click.prevent="showQrModal = true; dropdownOpen = false" class="w-full text-left block px-4 py-2 text-sm text-blue-700 hover:bg-blue-50 font-bold flex items-center gap-2 transition-colors">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm14 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
+                                    My Digital ID
+                                </button>
 
                                 <a href="{{ route('profile.public', Auth::user()->username) }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-red-600">Your Profile</a>
                                 <form method="POST" action="{{ route('logout') }}">
@@ -203,17 +209,22 @@
                     };
                 @endphp
 
-                <div class="grid {{ $canViewDashboard ? 'grid-cols-2' : 'grid-cols-1' }} gap-3">
+                <div class="grid {{ $canViewDashboard ? 'grid-cols-3' : 'grid-cols-2' }} gap-2 mt-4">
 
                     @if($canViewDashboard)
-                        <a href="{{ $navDashboardRoute }}" class="flex justify-center py-2.5 bg-white border border-gray-200 rounded-lg text-xs font-bold uppercase tracking-wide text-gray-600 hover:bg-gray-100 shadow-sm transition">
+                        <a href="{{ $navDashboardRoute }}" class="flex justify-center items-center py-2.5 bg-white border border-gray-200 rounded-lg text-[10px] font-bold uppercase tracking-wide text-gray-600 hover:bg-gray-100 shadow-sm transition">
                             Dashboard
                         </a>
                     @endif
 
-                    <form method="POST" action="{{ route('logout') }}">
+                    {{-- MOBILE TRIGGER: MY DIGITAL ID --}}
+                    <button @click.prevent="showQrModal = true; open = false" class="flex justify-center items-center py-2.5 bg-blue-50 border border-blue-100 rounded-lg text-[10px] font-bold uppercase tracking-wide text-blue-700 hover:bg-blue-100 shadow-sm transition">
+                        My QR ID
+                    </button>
+
+                    <form method="POST" action="{{ route('logout') }}" class="h-full">
                         @csrf
-                        <button type="submit" class="w-full py-2.5 bg-red-100 border border-transparent rounded-lg text-xs font-bold uppercase tracking-wide text-red-700 hover:bg-red-200 shadow-sm transition">
+                        <button type="submit" class="w-full h-full py-2.5 bg-red-100 border border-transparent rounded-lg text-[10px] font-bold uppercase tracking-wide text-red-700 hover:bg-red-200 shadow-sm transition">
                             Log Out
                         </button>
                     </form>
@@ -231,4 +242,55 @@
             @endauth
         </div>
     </div>
+
+    {{-- ========================================================== --}}
+    {{-- MY DIGITAL ID MODAL                                        --}}
+    {{-- ========================================================== --}}
+    @auth
+    <div x-show="showQrModal" style="display: none;" class="fixed inset-0 z-[100] flex items-center justify-center p-4">
+        {{-- Backdrop --}}
+        <div x-show="showQrModal" 
+             x-transition:enter="ease-out duration-300"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="ease-in duration-200"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm" 
+             @click="showQrModal = false"></div>
+
+        {{-- Modal Content --}}
+        <div x-show="showQrModal" 
+             x-transition:enter="ease-out duration-300"
+             x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+             x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+             x-transition:leave="ease-in duration-200"
+             x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+             x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+             class="relative bg-white p-6 md:p-8 rounded-[2rem] border border-gray-100 shadow-2xl flex flex-col items-center text-center max-w-sm w-full mx-auto z-10 animate-fade-in-up">
+            
+            {{-- Close Button --}}
+            <button @click="showQrModal = false" class="absolute top-4 right-4 text-gray-400 hover:text-red-500 bg-gray-50 hover:bg-red-50 p-2 rounded-full transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+
+            <h3 class="text-[10px] font-black text-blue-500 uppercase tracking-widest mb-4">Your Digital Check-in ID</h3>
+            
+            <div class="p-4 bg-white rounded-3xl shadow-sm border border-gray-200 inline-block">
+                {{-- Generates a QR code from the User ID --}}
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data={{ Auth::user()->id }}&margin=0" 
+                     class="w-48 h-48 md:w-56 md:h-56" 
+                     alt="User QR Code">
+            </div>
+            
+            <p class="text-lg md:text-xl font-black text-gray-900 mt-5">{{ Auth::user()->name }}</p>
+            <p class="text-xs text-gray-500 font-mono mt-1 font-bold bg-gray-100 px-3 py-1 rounded-lg">ID: {{ Auth::user()->id }}</p>
+            
+            <p class="text-[10px] md:text-xs text-gray-500 mt-5 leading-relaxed bg-blue-50/50 text-blue-800 p-4 rounded-2xl border border-blue-100">
+                Present this QR code to the secretariat to instantly log your attendance at meetings and events.
+            </p>
+        </div>
+    </div>
+    @endauth
+
 </nav>

@@ -9,11 +9,12 @@ use App\Models\MeetingAttendee;
 use App\Models\AcademicYear;
 use App\Models\User;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule; // Needed for unique constraint exceptions
 
 class MeetingManager extends Component
 {
     public $activeMeetingId = null;
-
+    
     // Form & Modal State
     public $isCreateModalOpen = false;
     public $isEditMode = false;
@@ -21,11 +22,11 @@ class MeetingManager extends Component
 
     // Meeting Fields
     public $academic_year_id;
-    public $title, $meeting_date, $start_time, $location, $agenda;
+    public $title, $slug, $meeting_date, $start_time, $location, $agenda;
 
     // Active Meeting Data
     public $minutes;
-
+    
     // Manual Search State
     public $searchQuery = '';
     public $searchResults = [];
@@ -38,6 +39,14 @@ class MeetingManager extends Component
         $latestAy = AcademicYear::latest('id')->first();
         if ($latestAy) {
             $this->academic_year_id = $latestAy->id;
+        }
+    }
+
+    // Auto-generate the slug when typing the title (only in create mode)
+    public function updatedTitle()
+    {
+        if (!$this->isEditMode) {
+            $this->slug = Str::slug($this->title);
         }
     }
 
@@ -55,15 +64,14 @@ class MeetingManager extends Component
         }
     }
 
-    // Opens Modal for Creation
     public function openCreateModal()
     {
         $this->resetValidation();
-        $this->reset(['title', 'location', 'agenda', 'editingMeetingId']);
+        $this->reset(['title', 'slug', 'location', 'agenda', 'editingMeetingId']);
         $this->isEditMode = false;
         $this->meeting_date = date('Y-m-d');
         $this->start_time = date('H:i');
-
+        
         $latestAy = AcademicYear::latest('id')->first();
         if ($latestAy) {
             $this->academic_year_id = $latestAy->id;
@@ -72,30 +80,34 @@ class MeetingManager extends Component
         $this->isCreateModalOpen = true;
     }
 
-    // Opens Modal for Editing
     public function openEditModal($id)
     {
         $this->resetValidation();
         $meeting = Meeting::where('user_id', Auth::id())->findOrFail($id);
-
+        
         $this->editingMeetingId = $meeting->id;
         $this->academic_year_id = $meeting->academic_year_id;
         $this->title = $meeting->title;
+        $this->slug = $meeting->slug; // Load the existing slug
         $this->meeting_date = $meeting->meeting_date->format('Y-m-d');
         $this->start_time = $meeting->start_time->format('H:i');
         $this->location = $meeting->location;
         $this->agenda = $meeting->agenda;
-
+        
         $this->isEditMode = true;
         $this->isCreateModalOpen = true;
     }
 
-    // Handles both Create and Update
     public function saveMeeting()
     {
+        // Enforce safe URL formatting before saving
+        $this->slug = Str::slug($this->slug);
+
         $this->validate([
             'academic_year_id' => 'required|exists:academic_years,id',
             'title' => 'required|string|max:255',
+            // Unique rule ignores the current meeting ID if in edit mode
+            'slug' => ['required', 'string', 'max:255', Rule::unique('meetings', 'slug')->ignore($this->editingMeetingId)],
             'meeting_date' => 'required|date',
             'start_time' => 'required',
             'location' => 'nullable|string',
@@ -107,6 +119,7 @@ class MeetingManager extends Component
             $meeting->update([
                 'academic_year_id' => $this->academic_year_id,
                 'title' => $this->title,
+                'slug' => $this->slug,
                 'meeting_date' => $this->meeting_date,
                 'start_time' => $this->start_time,
                 'location' => $this->location,
@@ -118,6 +131,7 @@ class MeetingManager extends Component
                 'user_id' => Auth::id(),
                 'academic_year_id' => $this->academic_year_id,
                 'title' => $this->title,
+                'slug' => $this->slug,
                 'meeting_date' => $this->meeting_date,
                 'start_time' => $this->start_time,
                 'location' => $this->location,
@@ -127,15 +141,14 @@ class MeetingManager extends Component
         }
 
         $this->isCreateModalOpen = false;
-        $this->reset(['title', 'location', 'agenda', 'isEditMode', 'editingMeetingId']);
+        $this->reset(['title', 'slug', 'location', 'agenda', 'isEditMode', 'editingMeetingId']); 
     }
 
-    // Delete entire meeting
     public function deleteMeeting($id)
     {
         $meeting = Meeting::where('user_id', Auth::id())->findOrFail($id);
-        $meeting->delete(); // This deletes the meeting (and cascades to attendees if DB is set up)
-
+        $meeting->delete(); 
+        
         session()->flash('success', 'Meeting deleted successfully.');
         if ($this->activeMeetingId == $id) {
             $this->activeMeetingId = null;
@@ -177,7 +190,7 @@ class MeetingManager extends Component
         if ($user) {
             $identifier = $user->id ?? $user->username;
             $this->recordAttendance($identifier, $user->name);
-
+            
             $this->searchQuery = '';
             $this->searchResults = [];
         }
@@ -207,7 +220,7 @@ class MeetingManager extends Component
                 'name' => $actualName,
                 'time_in' => now(),
             ]);
-
+            
             $this->dispatch('attendance-recorded', ['student' => $actualName]);
         } else {
             $this->dispatch('attendance-duplicate', ['student' => $scannedText]);
@@ -234,7 +247,7 @@ class MeetingManager extends Component
                            ->with('academicYear')
                            ->orderBy('meeting_date', 'desc')
                            ->get();
-
+                           
         $activeMeeting = $this->activeMeetingId ? Meeting::with('attendees')->find($this->activeMeetingId) : null;
         $academicYears = AcademicYear::orderBy('id', 'desc')->get();
 
