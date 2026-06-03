@@ -244,53 +244,55 @@
     </div>
 
     {{-- ========================================================== --}}
-    {{-- MY DIGITAL ID MODAL                                        --}}
+    {{-- MY DIGITAL ID MODAL (Teleported to body to fix clipping)   --}}
     {{-- ========================================================== --}}
     @auth
-    <div x-show="showQrModal" style="display: none;" class="fixed inset-0 z-[100] flex items-center justify-center p-4">
-        {{-- Backdrop --}}
-        <div x-show="showQrModal" 
-             x-transition:enter="ease-out duration-300"
-             x-transition:enter-start="opacity-0"
-             x-transition:enter-end="opacity-100"
-             x-transition:leave="ease-in duration-200"
-             x-transition:leave-start="opacity-100"
-             x-transition:leave-end="opacity-0"
-             class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm" 
-             @click="showQrModal = false"></div>
-
-        {{-- Modal Content --}}
-        <div x-show="showQrModal" 
-             x-transition:enter="ease-out duration-300"
-             x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-             x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
-             x-transition:leave="ease-in duration-200"
-             x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
-             x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-             class="relative bg-white p-6 md:p-8 rounded-[2rem] border border-gray-100 shadow-2xl flex flex-col items-center text-center max-w-sm w-full mx-auto z-10 animate-fade-in-up">
+    <template x-teleport="body">
+        <div x-show="showQrModal" style="display: none;" class="fixed inset-0 z-[9999] flex items-center justify-center p-4">
             
-            {{-- Close Button --}}
-            <button @click="showQrModal = false" class="absolute top-4 right-4 text-gray-400 hover:text-red-500 bg-gray-50 hover:bg-red-50 p-2 rounded-full transition-colors">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-            </button>
+            {{-- Backdrop --}}
+            <div x-show="showQrModal" 
+                 x-transition:enter="ease-out duration-300"
+                 x-transition:enter-start="opacity-0"
+                 x-transition:enter-end="opacity-100"
+                 x-transition:leave="ease-in duration-200"
+                 x-transition:leave-start="opacity-100"
+                 x-transition:leave-end="opacity-0"
+                 class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm" 
+                 @click="showQrModal = false"></div>
 
-            <h3 class="text-[10px] font-black text-blue-500 uppercase tracking-widest mb-4">Your Digital Check-in ID</h3>
-            
-            <div class="p-4 bg-white rounded-3xl shadow-sm border border-gray-200 inline-block">
-                {{-- Generates a QR code from the User ID --}}
-                <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data={{ Auth::user()->id }}&margin=0" 
-                     class="w-48 h-48 md:w-56 md:h-56" 
-                     alt="User QR Code">
+            {{-- Modal Content --}}
+            <div x-show="showQrModal" 
+                 x-transition:enter="ease-out duration-300"
+                 x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                 x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                 x-transition:leave="ease-in duration-200"
+                 x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                 x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                 class="relative bg-white p-6 md:p-8 rounded-[2rem] border border-gray-100 shadow-2xl flex flex-col items-center text-center max-w-sm w-full mx-auto z-10">
+                
+                {{-- Close Button --}}
+                <button @click="showQrModal = false" class="absolute top-4 right-4 text-gray-400 hover:text-red-500 bg-gray-50 hover:bg-red-50 p-2 rounded-full transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+
+                <h3 class="text-[10px] font-black text-blue-500 uppercase tracking-widest mb-4">Your Digital Check-in ID</h3>
+                
+                <div class="p-4 bg-white rounded-3xl shadow-sm border border-gray-200 inline-block">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data={{ Auth::user()->id }}&margin=0" 
+                         class="w-48 h-48 md:w-56 md:h-56" 
+                         alt="User QR Code">
+                </div>
+                
+                <p class="text-lg md:text-xl font-black text-gray-900 mt-5">{{ Auth::user()->name }}</p>
+                <p class="text-xs text-gray-500 font-mono mt-1 font-bold bg-gray-100 px-3 py-1 rounded-lg">ID: {{ Auth::user()->id }}</p>
+                
+                <p class="text-[10px] md:text-xs text-gray-500 mt-5 leading-relaxed bg-blue-50/50 text-blue-800 p-4 rounded-2xl border border-blue-100">
+                    Present this QR code to the secretariat to instantly log your attendance at meetings and events.
+                </p>
             </div>
-            
-            <p class="text-lg md:text-xl font-black text-gray-900 mt-5">{{ Auth::user()->name }}</p>
-            <p class="text-xs text-gray-500 font-mono mt-1 font-bold bg-gray-100 px-3 py-1 rounded-lg">ID: {{ Auth::user()->id }}</p>
-            
-            <p class="text-[10px] md:text-xs text-gray-500 mt-5 leading-relaxed bg-blue-50/50 text-blue-800 p-4 rounded-2xl border border-blue-100">
-                Present this QR code to the secretariat to instantly log your attendance at meetings and events.
-            </p>
         </div>
-    </div>
+    </template>
     @endauth
 
 </nav>

@@ -82,23 +82,39 @@
                     </h4>
                     
                     {{-- The Live Polling Container for Attendees --}}
-                    <div class="max-h-[400px] overflow-y-auto custom-scrollbar pr-1" wire:poll.3s>
-                        <ul class="space-y-2.5">
-                            @forelse($meeting->attendees->sortByDesc('time_in') as $attendee)
-                                <li class="flex items-center gap-3 p-2 hover:bg-white rounded-xl transition-colors group">
-                                    {{-- Avatar Placeholder --}}
-                                    <div class="w-9 h-9 rounded-full bg-white border border-gray-200 shadow-sm shrink-0 overflow-hidden">
-                                        <img src="https://ui-avatars.com/api/?name={{ urlencode($attendee->name) }}&background=f8fafc&color=334155&bold=true" class="w-full h-full object-cover">
+                    <div class="overflow-y-auto custom-scrollbar pr-2 flex-1" wire:poll.3s>
+                        <ul class="space-y-3">
+                            @forelse($meeting->attendees as $attendee)
+                                @php
+                                    // 1. Look up the user to grab their real avatar
+                                    $user = \App\Models\User::find($attendee->student_id);
+                                    
+                                    // 2. Generate the fallback UI-Avatar
+                                    $fallbackUrl = 'https://ui-avatars.com/api/?name='.urlencode($attendee->name ?? 'Unknown').'&background=f8fafc&color=334155&bold=true';
+                                    
+                                    // 3. Resolve the actual image (using the accessor we created earlier)
+                                    $avatarUrl = $user ? $user->avatar : $fallbackUrl;
+                                @endphp
+
+                                <li class="flex items-center gap-3 p-2.5 bg-white border border-gray-100 hover:border-blue-200 rounded-2xl shadow-sm transition-all group">
+                                    
+                                    {{-- Real User Avatar --}}
+                                    <div class="w-10 h-10 rounded-full bg-white border border-gray-100 shadow-sm shrink-0 overflow-hidden group-hover:scale-105 transition-transform">
+                                        <img src="{{ $avatarUrl }}" 
+                                             onerror="this.onerror=null; this.src='{{ $fallbackUrl }}';" 
+                                             class="w-full h-full object-cover bg-gray-50"
+                                             alt="{{ $attendee->name }}">
                                     </div>
+                                    
                                     <div class="flex-1 min-w-0">
                                         <p class="text-xs font-bold text-gray-900 truncate">{{ $attendee->name }}</p>
-                                        <p class="text-[9px] font-mono text-gray-400 mt-0.5">Time in: {{ $attendee->time_in->format('h:i A') }}</p>
+                                        <p class="text-[9px] font-mono text-gray-400 mt-0.5">Checked in: {{ $attendee->time_in->format('h:i A') }}</p>
                                     </div>
-                                    <div class="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]"></div>
+                                    <div class="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)] shrink-0 mr-2"></div>
                                 </li>
                             @empty
-                                <li class="flex flex-col items-center justify-center py-8 text-gray-400">
-                                    <svg class="w-8 h-8 mb-2 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                                <li class="flex flex-col items-center justify-center py-12 text-gray-400">
+                                    <svg class="w-10 h-10 mb-3 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
                                     <span class="text-[10px] font-bold uppercase tracking-widest text-center block">No check-ins yet.</span>
                                 </li>
                             @endforelse

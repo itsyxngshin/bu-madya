@@ -1,4 +1,4 @@
-<div class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 space-y-8 animate-fade-in-up">
+<div x-data="{ showQrModal: false }" class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 space-y-8 animate-fade-in-up">
 
     @if(!$activeMeetingId)
         {{-- ========================================================== --}}
@@ -9,10 +9,18 @@
                 <h1 class="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight">Meeting Proceedings</h1>
                 <p class="text-sm text-gray-500 mt-1">Manage agendas, minutes, and track attendance.</p>
             </div>
-            <button wire:click="openCreateModal" class="w-full sm:w-auto px-6 py-3 bg-gray-900 text-white text-sm font-black uppercase tracking-widest rounded-xl shadow-lg hover:bg-black transition active:scale-95 flex items-center justify-center gap-2">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                Schedule Meeting
-            </button>
+            
+            <div class="flex flex-col sm:flex-row w-full sm:w-auto gap-3">
+                <button @click="showQrModal = true" class="w-full sm:w-auto px-6 py-3 bg-white border border-gray-200 text-gray-700 text-sm font-black uppercase tracking-widest rounded-xl shadow-sm hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200 transition active:scale-95 flex items-center justify-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm14 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
+                    My ID
+                </button>
+
+                <button wire:click="openCreateModal" class="w-full sm:w-auto px-6 py-3 bg-gray-900 text-white text-sm font-black uppercase tracking-widest rounded-xl shadow-lg hover:bg-black transition active:scale-95 flex items-center justify-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                    Schedule Meeting
+                </button>
+            </div>
         </div>
 
         @if(session()->has('success'))
@@ -53,7 +61,6 @@
                             Enter Meeting
                         </button>
                         
-                        {{-- NEW: Public View Button --}}
                         <a href="{{ route('meeting.live', $meeting->slug) }}" target="_blank" class="p-2.5 bg-gray-50 hover:bg-green-50 text-gray-500 hover:text-green-600 rounded-xl transition-colors" title="Public Live View">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
                         </a>
@@ -78,16 +85,22 @@
         {{-- ========================================================== --}}
         {{-- VIEW 2: THE MEETING ROOM (Minutes & Attendance)            --}}
         {{-- ========================================================== --}}
-        <div class="mb-6 flex items-center justify-between">
-            <button wire:click="closeMeeting" class="flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs font-bold uppercase tracking-widest text-gray-500 hover:text-gray-900 transition">
+        <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <button wire:click="closeMeeting" class="flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs font-bold uppercase tracking-widest text-gray-500 hover:text-gray-900 transition w-fit">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg> Dashboard
             </button>
             
-            <div class="flex items-center gap-2">
+            <div class="flex flex-wrap items-center gap-2">
+                <button @click="showQrModal = true" class="px-2 sm:px-3 py-1 text-[9px] sm:text-[10px] font-black uppercase tracking-widest rounded-lg bg-white border border-gray-200 text-gray-700 flex items-center gap-1.5 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200 transition">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm14 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
+                    My ID
+                </button>
+
                 <a href="{{ route('meeting.live', $activeMeeting->slug) }}" target="_blank" class="px-2 sm:px-3 py-1 text-[9px] sm:text-[10px] font-black uppercase tracking-widest rounded-lg bg-green-100 text-green-700 flex items-center gap-1.5 hover:bg-green-200 transition">
                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
                     Live View
                 </a>
+                
                 <span class="px-2 sm:px-3 py-1 text-[9px] sm:text-[10px] font-black uppercase tracking-widest rounded-lg {{ $activeMeeting->status === 'completed' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700' }}">
                     Status: {{ $activeMeeting->status }}
                 </span>
@@ -150,7 +163,7 @@
                 {{-- TAB 2: ATTENDANCE & QR SCANNER --}}
                 <div x-show="tab === 'attendance'" x-cloak class="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
                     
-                    {{-- Left Side: Control Panel (Scanner & Search) --}}
+                    {{-- Left Side: Control Panel --}}
                     <div class="space-y-6 order-2 lg:order-1">
                         
                         {{-- 1. Live Search Dropdown --}}
@@ -168,27 +181,30 @@
                                 </div>
                             </div>
 
-                            @if(strlen($searchQuery) >= 2)
+                            @if(count($searchResults) > 0)
                                 <div class="absolute z-50 left-4 right-4 sm:left-5 sm:right-5 mt-2 bg-white border border-gray-100 shadow-xl rounded-2xl overflow-hidden max-h-60 overflow-y-auto custom-scrollbar">
-                                    @forelse($searchResults as $user)
+                                    @foreach($searchResults as $user)
                                         @php
-                                            $fallback = 'https://ui-avatars.com/api/?name='.urlencode($user['name']).'&background=eff6ff&color=2563eb&bold=true';
-                                            $path = $user['profile_photo_path'] ?? null;
-                                            $src = $path ? (\Illuminate\Support\Str::startsWith($path, ['http', 'images/']) ? asset($path) : asset('storage/' . $path)) : $fallback;
+                                            $fallback = 'https://ui-avatars.com/api/?name='.urlencode($user->name).'&background=eff6ff&color=2563eb&bold=true';
                                         @endphp
                                         <div class="flex items-center justify-between p-3 border-b border-gray-50 hover:bg-blue-50 transition group">
                                             <div class="flex items-center gap-3">
-                                                <img src="{{ $src }}" onerror="this.onerror=null; this.src='{{ $fallback }}';" class="w-8 h-8 rounded-full object-cover shadow-sm shrink-0">
+                                                {{-- FIXED: Uses profile_photo_url with onerror fallback --}}
+                                                <img src="{{ $user->profile_photo_url ?? $fallback }}" 
+                                                     onerror="this.onerror=null; this.src='{{ $fallback }}';" 
+                                                     class="w-8 h-8 rounded-full object-cover shadow-sm shrink-0">
                                                 <div>
-                                                    <p class="text-[11px] sm:text-xs font-bold text-gray-900 leading-none group-hover:text-blue-700">{{ $user['name'] }}</p>
-                                                    <p class="text-[9px] font-mono text-gray-500 mt-0.5">ID: {{ $user['id'] ?? $user['username'] }}</p>
+                                                    <p class="text-[11px] sm:text-xs font-bold text-gray-900 leading-none group-hover:text-blue-700">{{ $user->name }}</p>
+                                                    <p class="text-[9px] font-mono text-gray-500 mt-0.5">ID: {{ $user->id ?? $user->username }}</p>
                                                 </div>
                                             </div>
-                                            <button wire:click="addManualAttendee({{ $user['id'] }})" class="px-3 py-1.5 bg-gray-100 hover:bg-gray-900 text-gray-700 hover:text-white text-[10px] font-bold uppercase tracking-widest rounded-lg transition">Add</button>
+                                            <button wire:click="addManualAttendee({{ $user->id }})" class="px-3 py-1.5 bg-gray-100 hover:bg-gray-900 text-gray-700 hover:text-white text-[10px] font-bold uppercase tracking-widest rounded-lg transition">Add</button>
                                         </div>
-                                    @empty
-                                        <div class="p-4 text-center text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-widest">No members found.</div>
-                                    @endforelse
+                                    @endforeach
+                                </div>
+                            @elseif(strlen($searchQuery) >= 2)
+                                <div class="absolute z-50 left-4 right-4 sm:left-5 sm:right-5 mt-2 bg-white border border-gray-100 shadow-xl rounded-2xl overflow-hidden">
+                                    <div class="p-4 text-center text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-widest">No members found.</div>
                                 </div>
                             @endif
                         </div>
@@ -223,7 +239,7 @@
                         
                         <div class="bg-gray-50 border border-gray-100 rounded-3xl shadow-inner overflow-hidden flex-1 flex flex-col relative">
                             
-                            {{-- Success/Error Alerts (Triggered via JS Events) --}}
+                            {{-- Success/Error Alerts --}}
                             <div id="scan-alert" style="display: none;" class="absolute top-0 inset-x-0 z-10 px-4 py-2 text-center text-[10px] sm:text-xs font-bold uppercase tracking-widest text-white transition-colors duration-300 shadow-md"></div>
 
                             <div class="overflow-y-auto custom-scrollbar p-3 sm:p-4 flex-1">
@@ -235,8 +251,9 @@
                                                 ->orWhere('username', $attendee->student_id)
                                                 ->first();
                                             
+                                            // FIXED: UI Avatar Fallback logic utilizing profile_photo_url
                                             $fallbackUrl = 'https://ui-avatars.com/api/?name='.urlencode($attendee->name ?? $attendee->student_id).'&background=eff6ff&color=2563eb&bold=true';
-                                            $avatarUrl = $user ? $user->avatar : $fallbackUrl;
+                                            $avatarUrl = $user ? $user->profile_photo_url : $fallbackUrl;
                                                 
                                             $roleName = 'Guest / Unregistered';
                                             $roleColor = 'bg-gray-100 text-gray-500';
@@ -263,7 +280,6 @@
                                         {{-- Directory Card --}}
                                         <div class="bg-white border border-gray-100 rounded-2xl p-3 sm:p-4 flex flex-col items-center text-center shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all group relative">
                                             
-                                            {{-- Remove Button --}}
                                             <button wire:click="removeAttendee({{ $attendee->id }})" 
                                                     wire:confirm="Are you sure you want to remove {{ $attendee->name ?? 'this attendee' }} from the meeting?" 
                                                     class="absolute top-1.5 left-1.5 text-gray-300 hover:text-red-600 hover:bg-red-50 p-1 rounded-full transition-colors z-10" title="Remove Attendee">
@@ -274,7 +290,11 @@
                                                 {{ $attendee->time_in->format('h:i A') }}
                                             </div>
                                             <div class="w-12 h-12 sm:w-14 sm:h-14 mt-3 mb-2 sm:mb-3 rounded-full overflow-hidden border-2 border-white shadow-sm ring-2 ring-gray-50 group-hover:ring-blue-100 transition-colors shrink-0">
-                                                <img src="{{ $avatarUrl }}" onerror="this.onerror=null; this.src='{{ $fallbackUrl }}';" class="w-full h-full object-cover bg-gray-50" alt="{{ $attendee->name }}">
+                                                {{-- FIXED: Unbreakable image tag prioritizing real photo, falling back to UI Avatar --}}
+                                                <img src="{{ $avatarUrl }}" 
+                                                     onerror="this.onerror=null; this.src='{{ $fallbackUrl }}';" 
+                                                     class="w-full h-full object-cover bg-gray-50" 
+                                                     alt="{{ $attendee->name }}">
                                             </div>
                                             <h4 class="text-[10px] sm:text-xs font-black text-gray-900 leading-tight mb-1.5 line-clamp-2">
                                                 {{ $attendee->name ?? 'Unknown' }}
@@ -304,7 +324,7 @@
     {{-- ========================================================== --}}
     {{-- MODAL (CREATE / EDIT)                                      --}}
     {{-- ========================================================== --}}
-    <div x-show="isModalOpen" style="display: none;" x-data="{ isModalOpen: @entangle('isCreateModalOpen') }" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div x-show="isModalOpen" style="display: none;" class="fixed inset-0 z-40 flex items-center justify-center p-4">
         <div class="fixed inset-0 bg-gray-900/80 backdrop-blur-sm" @click="isModalOpen = false"></div>
         <div class="relative bg-white rounded-3xl shadow-2xl w-full max-w-md flex flex-col overflow-hidden animate-fade-in-up max-h-[90vh]">
             <div class="p-4 sm:p-5 border-b border-gray-100 bg-gray-50/50 flex justify-between items-center shrink-0">
@@ -330,7 +350,6 @@
                     @error('title') <span class="text-red-500 text-[10px] font-bold">{{ $message }}</span> @enderror
                 </div>
                 
-                {{-- NEW: Custom Slug Input --}}
                 <div>
                     <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Custom URL Slug</label>
                     <div class="flex rounded-xl shadow-sm border border-gray-200 overflow-hidden focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500">
@@ -370,6 +389,51 @@
             </div>
         </div>
     </div>
+
+    {{-- ========================================================== --}}
+    {{-- MY DIGITAL ID MODAL (Teleported to avoid layout clipping)  --}}
+    {{-- ========================================================== --}}
+    @auth
+    <template x-teleport="body">
+        {{-- FIXED: Uses extremely high z-index (99999) and ensures proper flex alignment --}}
+        <div x-show="showQrModal" style="display: none;" class="fixed inset-0 z-[99999] flex items-center justify-center p-4">
+            
+            <div x-show="showQrModal" 
+                 x-transition.opacity.duration.300ms
+                 class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm" 
+                 @click="showQrModal = false"></div>
+
+            <div x-show="showQrModal" 
+                 x-transition:enter="ease-out duration-300"
+                 x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                 x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                 x-transition:leave="ease-in duration-200"
+                 x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                 x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                 class="relative bg-white p-6 md:p-8 rounded-[2rem] border border-gray-100 shadow-2xl flex flex-col items-center text-center max-w-sm w-full mx-auto z-10">
+                
+                <button @click="showQrModal = false" class="absolute top-4 right-4 text-gray-400 hover:text-red-500 bg-gray-50 hover:bg-red-50 p-2 rounded-full transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+
+                <h3 class="text-[10px] font-black text-blue-500 uppercase tracking-widest mb-4">Your Digital Check-in ID</h3>
+                
+                <div class="p-4 bg-white rounded-3xl shadow-sm border border-gray-200 inline-block">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data={{ Auth::user()->id }}&margin=0" 
+                         class="w-48 h-48 md:w-56 md:h-56" 
+                         alt="User QR Code">
+                </div>
+                
+                <p class="text-lg md:text-xl font-black text-gray-900 mt-5">{{ Auth::user()->name }}</p>
+                <p class="text-xs text-gray-500 font-mono mt-1 font-bold bg-gray-100 px-3 py-1 rounded-lg">ID: {{ Auth::user()->id }}</p>
+                
+                <p class="text-[10px] md:text-xs text-gray-500 mt-5 leading-relaxed bg-blue-50/50 text-blue-800 p-4 rounded-2xl border border-blue-100">
+                    Present this QR code to the secretariat to instantly log your attendance at meetings and events.
+                </p>
+            </div>
+        </div>
+    </template>
+    @endauth
 
 </div>
 

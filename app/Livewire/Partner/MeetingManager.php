@@ -9,7 +9,7 @@ use App\Models\MeetingAttendee;
 use App\Models\AcademicYear;
 use App\Models\User;
 use Illuminate\Support\Str;
-use Illuminate\Validation\Rule; // Needed for unique constraint exceptions
+use Illuminate\Validation\Rule;
 
 class MeetingManager extends Component
 {
@@ -42,7 +42,6 @@ class MeetingManager extends Component
         }
     }
 
-    // Auto-generate the slug when typing the title (only in create mode)
     public function updatedTitle()
     {
         if (!$this->isEditMode) {
@@ -53,12 +52,12 @@ class MeetingManager extends Component
     public function updatedSearchQuery()
     {
         if (strlen($this->searchQuery) >= 2) {
+            // FIXED: Removed toArray() so we can use Eloquent properties like profile_photo_url
             $this->searchResults = User::where('name', 'like', '%' . $this->searchQuery . '%')
                 ->orWhere('id', 'like', '%' . $this->searchQuery . '%')
                 ->orWhere('username', 'like', '%' . $this->searchQuery . '%')
                 ->take(5)
-                ->get()
-                ->toArray();
+                ->get();
         } else {
             $this->searchResults = [];
         }
@@ -88,7 +87,7 @@ class MeetingManager extends Component
         $this->editingMeetingId = $meeting->id;
         $this->academic_year_id = $meeting->academic_year_id;
         $this->title = $meeting->title;
-        $this->slug = $meeting->slug; // Load the existing slug
+        $this->slug = $meeting->slug;
         $this->meeting_date = $meeting->meeting_date->format('Y-m-d');
         $this->start_time = $meeting->start_time->format('H:i');
         $this->location = $meeting->location;
@@ -100,13 +99,11 @@ class MeetingManager extends Component
 
     public function saveMeeting()
     {
-        // Enforce safe URL formatting before saving
         $this->slug = Str::slug($this->slug);
 
         $this->validate([
             'academic_year_id' => 'required|exists:academic_years,id',
             'title' => 'required|string|max:255',
-            // Unique rule ignores the current meeting ID if in edit mode
             'slug' => ['required', 'string', 'max:255', Rule::unique('meetings', 'slug')->ignore($this->editingMeetingId)],
             'meeting_date' => 'required|date',
             'start_time' => 'required',
