@@ -14,10 +14,14 @@ class MeetingManager extends Component
 {
     public $activeMeetingId = null;
 
-    // New Meeting Form
+    // Form & Modal State
+    public $isCreateModalOpen = false;
+    public $isEditMode = false;
+    public $editingMeetingId = null;
+
+    // Meeting Fields
     public $academic_year_id;
     public $title, $meeting_date, $start_time, $location, $agenda;
-    public $isCreateModalOpen = false;
 
     // Active Meeting Data
     public $minutes;
@@ -41,7 +45,7 @@ class MeetingManager extends Component
     {
         if (strlen($this->searchQuery) >= 2) {
             $this->searchResults = User::where('name', 'like', '%' . $this->searchQuery . '%')
-                ->orWhere('student_id', 'like', '%' . $this->searchQuery . '%')
+                ->orWhere('id', 'like', '%' . $this->searchQuery . '%')
                 ->orWhere('username', 'like', '%' . $this->searchQuery . '%')
                 ->take(5)
                 ->get()
@@ -51,7 +55,43 @@ class MeetingManager extends Component
         }
     }
 
-    public function createMeeting()
+    // Opens Modal for Creation
+    public function openCreateModal()
+    {
+        $this->resetValidation();
+        $this->reset(['title', 'location', 'agenda', 'editingMeetingId']);
+        $this->isEditMode = false;
+        $this->meeting_date = date('Y-m-d');
+        $this->start_time = date('H:i');
+
+        $latestAy = AcademicYear::latest('id')->first();
+        if ($latestAy) {
+            $this->academic_year_id = $latestAy->id;
+        }
+
+        $this->isCreateModalOpen = true;
+    }
+
+    // Opens Modal for Editing
+    public function openEditModal($id)
+    {
+        $this->resetValidation();
+        $meeting = Meeting::where('user_id', Auth::id())->findOrFail($id);
+
+        $this->editingMeetingId = $meeting->id;
+        $this->academic_year_id = $meeting->academic_year_id;
+        $this->title = $meeting->title;
+        $this->meeting_date = $meeting->meeting_date->format('Y-m-d');
+        $this->start_time = $meeting->start_time->format('H:i');
+        $this->location = $meeting->location;
+        $this->agenda = $meeting->agenda;
+
+        $this->isEditMode = true;
+        $this->isCreateModalOpen = true;
+    }
+
+    // Handles both Create and Update
+    public function saveMeeting()
     {
         $this->validate([
             'academic_year_id' => 'required|exists:academic_years,id',
@@ -62,19 +102,44 @@ class MeetingManager extends Component
             'agenda' => 'nullable|string',
         ]);
 
-        Meeting::create([
-            'user_id' => Auth::id(), // Directly tie to the authenticated Org user!
-            'academic_year_id' => $this->academic_year_id,
-            'title' => $this->title,
-            'meeting_date' => $this->meeting_date,
-            'start_time' => $this->start_time,
-            'location' => $this->location,
-            'agenda' => $this->agenda,
-        ]);
+        if ($this->isEditMode) {
+            $meeting = Meeting::where('user_id', Auth::id())->findOrFail($this->editingMeetingId);
+            $meeting->update([
+                'academic_year_id' => $this->academic_year_id,
+                'title' => $this->title,
+                'meeting_date' => $this->meeting_date,
+                'start_time' => $this->start_time,
+                'location' => $this->location,
+                'agenda' => $this->agenda,
+            ]);
+            session()->flash('success', 'Meeting updated successfully.');
+        } else {
+            Meeting::create([
+                'user_id' => Auth::id(),
+                'academic_year_id' => $this->academic_year_id,
+                'title' => $this->title,
+                'meeting_date' => $this->meeting_date,
+                'start_time' => $this->start_time,
+                'location' => $this->location,
+                'agenda' => $this->agenda,
+            ]);
+            session()->flash('success', 'Meeting scheduled successfully.');
+        }
 
         $this->isCreateModalOpen = false;
-        $this->reset(['title', 'location', 'agenda']);
-        session()->flash('success', 'Meeting scheduled successfully.');
+        $this->reset(['title', 'location', 'agenda', 'isEditMode', 'editingMeetingId']);
+    }
+
+    // Delete entire meeting
+    public function deleteMeeting($id)
+    {
+        $meeting = Meeting::where('user_id', Auth::id())->findOrFail($id);
+        $meeting->delete(); // This deletes the meeting (and cascades to attendees if DB is set up)
+
+        session()->flash('success', 'Meeting deleted successfully.');
+        if ($this->activeMeetingId == $id) {
+            $this->activeMeetingId = null;
+        }
     }
 
     public function openMeeting($id)
@@ -110,7 +175,7 @@ class MeetingManager extends Component
     {
         $user = User::find($userId);
         if ($user) {
-            $identifier = $user->student_id ?? $user->username;
+            $identifier = $user->id ?? $user->username;
             $this->recordAttendance($identifier, $user->name);
 
             $this->searchQuery = '';
@@ -128,7 +193,7 @@ class MeetingManager extends Component
 
         if (!$exists) {
             if (!$name) {
-                $user = clone User::where('student_id', $scannedText)
+                $user = clone User::where('id', $scannedText)
                                   ->orWhere('username', $scannedText)
                                   ->first();
                 $actualName = $user ? $user->name : 'Scanned Member';
@@ -165,7 +230,6 @@ class MeetingManager extends Component
 
     public function render()
     {
-        // Fetch meetings directly belonging to this logged-in organization user
         $meetings = Meeting::where('user_id', Auth::id())
                            ->with('academicYear')
                            ->orderBy('meeting_date', 'desc')
@@ -173,6 +237,7 @@ class MeetingManager extends Component
 
         $activeMeeting = $this->activeMeetingId ? Meeting::with('attendees')->find($this->activeMeetingId) : null;
         $academicYears = AcademicYear::orderBy('id', 'desc')->get();
+
         $layoutFile = in_array(auth()->user()->role?->role_name, ['administrator', 'organization', 'director'])
             ? 'layouts.madya-admin-deck'
             : 'layouts.madya-admin';

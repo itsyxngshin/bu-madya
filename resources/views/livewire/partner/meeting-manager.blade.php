@@ -9,7 +9,8 @@
                 <h1 class="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight">Meeting Proceedings</h1>
                 <p class="text-sm text-gray-500 mt-1">Manage agendas, minutes, and track attendance.</p>
             </div>
-            <button wire:click="$set('isCreateModalOpen', true)" class="w-full sm:w-auto px-6 py-3 bg-gray-900 text-white text-sm font-black uppercase tracking-widest rounded-xl shadow-lg hover:bg-black transition active:scale-95 flex items-center justify-center gap-2">
+            {{-- CHANGED: Now calls openCreateModal --}}
+            <button wire:click="openCreateModal" class="w-full sm:w-auto px-6 py-3 bg-gray-900 text-white text-sm font-black uppercase tracking-widest rounded-xl shadow-lg hover:bg-black transition active:scale-95 flex items-center justify-center gap-2">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                 Schedule Meeting
             </button>
@@ -48,9 +49,18 @@
                         <span class="truncate">{{ $meeting->start_time->format('h:i A') }} • {{ $meeting->location ?? 'TBA' }}</span>
                     </p>
 
-                    <div class="mt-auto pt-4 border-t border-gray-100">
-                        <button wire:click="openMeeting({{ $meeting->id }})" class="w-full py-2.5 bg-gray-50 hover:bg-blue-50 text-gray-700 hover:text-blue-700 text-xs font-black uppercase tracking-widest rounded-xl transition-colors">
-                            Enter Meeting Room
+                    {{-- CHANGED: Added Edit & Delete to Action Bar --}}
+                    <div class="mt-auto pt-4 border-t border-gray-100 flex items-center gap-2">
+                        <button wire:click="openMeeting({{ $meeting->id }})" class="flex-1 py-2.5 bg-gray-50 hover:bg-blue-50 text-gray-700 hover:text-blue-700 text-xs font-black uppercase tracking-widest rounded-xl transition-colors">
+                            Enter Meeting
+                        </button>
+
+                        <button wire:click="openEditModal({{ $meeting->id }})" class="p-2.5 bg-gray-50 hover:bg-orange-50 text-gray-500 hover:text-orange-600 rounded-xl transition-colors" title="Edit Meeting">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                        </button>
+
+                        <button wire:click="deleteMeeting({{ $meeting->id }})" wire:confirm="Are you sure you want to permanently delete this meeting? All attendance records and minutes will be lost." class="p-2.5 bg-gray-50 hover:bg-red-50 text-gray-500 hover:text-red-600 rounded-xl transition-colors" title="Delete Meeting">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                         </button>
                     </div>
                 </div>
@@ -141,14 +151,13 @@
                             </h4>
 
                             <div class="relative w-full">
-                                <input type="text" wire:model.live.debounce.300ms="searchQuery" placeholder="Search Name or Student ID..." class="w-full bg-white border border-gray-200 text-xs sm:text-sm font-semibold rounded-xl px-4 py-3 focus:ring-blue-500 focus:border-blue-500 shadow-sm transition">
+                                <input type="text" wire:model.live.debounce.300ms="searchQuery" placeholder="Search Name or ID..." class="w-full bg-white border border-gray-200 text-xs sm:text-sm font-semibold rounded-xl px-4 py-3 focus:ring-blue-500 focus:border-blue-500 shadow-sm transition">
 
                                 <div wire:loading wire:target="searchQuery" class="absolute right-4 top-3.5">
                                     <svg class="animate-spin h-4 w-4 sm:h-5 sm:w-5 text-gray-400" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                                 </div>
                             </div>
 
-                            {{-- Search Results Dropdown --}}
                             @if(strlen($searchQuery) >= 2)
                                 <div class="absolute z-50 left-4 right-4 sm:left-5 sm:right-5 mt-2 bg-white border border-gray-100 shadow-xl rounded-2xl overflow-hidden max-h-60 overflow-y-auto custom-scrollbar">
                                     @forelse($searchResults as $user)
@@ -161,7 +170,7 @@
                                                 <img src="{{ $avatar }}" class="w-8 h-8 rounded-full object-cover shadow-sm shrink-0">
                                                 <div>
                                                     <p class="text-[11px] sm:text-xs font-bold text-gray-900 leading-none group-hover:text-blue-700">{{ $user['name'] }}</p>
-                                                    <p class="text-[9px] font-mono text-gray-500 mt-0.5">{{ $user['student_id'] ?? $user['username'] }}</p>
+                                                    <p class="text-[9px] font-mono text-gray-500 mt-0.5">ID: {{ $user['id'] ?? $user['username'] }}</p>
                                                 </div>
                                             </div>
                                             <button wire:click="addManualAttendee({{ $user['id'] }})" class="px-3 py-1.5 bg-gray-100 hover:bg-gray-900 text-gray-700 hover:text-white text-[10px] font-bold uppercase tracking-widest rounded-lg transition">Add</button>
@@ -183,7 +192,7 @@
                                     <span class="relative flex h-2 w-2"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span></span>
                                     Live QR Scanner Active
                                 </p>
-                                <p class="text-[9px] sm:text-[10px] text-gray-500 mt-1">Hold the student's ID barcode/QR up to the camera.</p>
+                                <p class="text-[9px] sm:text-[10px] text-gray-500 mt-1">Hold the student's QR ID up to the camera.</p>
                             </div>
                         </div>
 
@@ -211,7 +220,7 @@
                                     @forelse($activeMeeting->attendees->sortByDesc('time_in') as $attendee)
                                         @php
                                             $user = \App\Models\User::with(['currentAssignment.director', 'currentAssignment.committee', 'committeeMember'])
-                                                ->where('student_id', $attendee->student_id)
+                                                ->where('id', $attendee->student_id)
                                                 ->orWhere('username', $attendee->student_id)
                                                 ->first();
 
@@ -243,7 +252,7 @@
                                         {{-- Directory Card --}}
                                         <div class="bg-white border border-gray-100 rounded-2xl p-3 sm:p-4 flex flex-col items-center text-center shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all group relative">
 
-                                            {{-- NEW: Remove Button --}}
+                                            {{-- Remove Button --}}
                                             <button wire:click="removeAttendee({{ $attendee->id }})"
                                                     wire:confirm="Are you sure you want to remove {{ $attendee->name ?? 'this attendee' }} from the meeting?"
                                                     class="absolute top-1.5 left-1.5 text-gray-300 hover:text-red-600 hover:bg-red-50 p-1 rounded-full transition-colors z-10" title="Remove Attendee">
@@ -282,13 +291,13 @@
     @endif
 
     {{-- ========================================================== --}}
-    {{-- CREATE MEETING MODAL                                       --}}
+    {{-- MODAL (CREATE / EDIT)                                      --}}
     {{-- ========================================================== --}}
     <div x-show="isModalOpen" style="display: none;" x-data="{ isModalOpen: @entangle('isCreateModalOpen') }" class="fixed inset-0 z-50 flex items-center justify-center p-4">
         <div class="fixed inset-0 bg-gray-900/80 backdrop-blur-sm" @click="isModalOpen = false"></div>
         <div class="relative bg-white rounded-3xl shadow-2xl w-full max-w-md flex flex-col overflow-hidden animate-fade-in-up max-h-[90vh]">
             <div class="p-4 sm:p-5 border-b border-gray-100 bg-gray-50/50 flex justify-between items-center shrink-0">
-                <h3 class="font-black text-gray-900">Schedule Meeting</h3>
+                <h3 class="font-black text-gray-900">{{ $isEditMode ? 'Edit Meeting Details' : 'Schedule Meeting' }}</h3>
                 <button @click="isModalOpen = false" class="text-gray-400 hover:text-red-500"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
             </div>
             <div class="p-5 sm:p-6 space-y-4 overflow-y-auto custom-scrollbar">
@@ -327,7 +336,11 @@
                     <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Agenda Summary</label>
                     <textarea wire:model="agenda" rows="2" class="w-full text-sm rounded-xl border-gray-200 bg-gray-50 focus:border-blue-500 resize-none"></textarea>
                 </div>
-                <button wire:click="createMeeting" class="w-full mt-2 py-3 bg-blue-600 text-white text-xs font-black uppercase tracking-widest rounded-xl shadow-lg hover:bg-blue-700 transition">Save Schedule</button>
+
+                {{-- CHANGED: Calls saveMeeting instead of createMeeting --}}
+                <button wire:click="saveMeeting" class="w-full mt-2 py-3 bg-blue-600 text-white text-xs font-black uppercase tracking-widest rounded-xl shadow-lg hover:bg-blue-700 transition">
+                    {{ $isEditMode ? 'Update Meeting' : 'Save Schedule' }}
+                </button>
             </div>
         </div>
     </div>
@@ -346,7 +359,6 @@
     function initScanner() {
         const readerElement = document.getElementById('reader');
 
-        // Dynamically adjust QR box size based on screen width for mobile optimization
         const qrSize = window.innerWidth < 640 ? 150 : 250;
 
         if (readerElement && !html5QrcodeScanner) {
@@ -386,7 +398,6 @@
         }
     });
 
-    // NEW: Alert for removal
     window.addEventListener('attendance-removed', event => {
         let alertBox = document.getElementById('scan-alert');
         if(alertBox) {
