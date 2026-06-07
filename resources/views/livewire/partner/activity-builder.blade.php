@@ -2,9 +2,20 @@
 
     {{-- 1. EDITOR NAVBAR (Sticky & Responsive) --}}
     <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-200 h-16 px-4 md:px-6 flex items-center justify-between">
+        
+        @php
+            $role = auth()->user()->role?->role_name ?? 'guest';
+            $manageRoute = match($role) {
+                'administrator' => route('admin.activities.manage'),
+                'organization'  => route('partner.activities.manage'),
+                'director'      => route('director.activities.manage'),
+                default         => route('dashboard'),
+            };
+        @endphp
 
         <div class="flex items-center gap-3">
-            <a href="{{ route('activities.manage') }}" class="text-gray-400 hover:text-red-600 transition p-1" title="Back to Manager">
+            {{-- FIXED: Dynamic Role-Based Route --}}
+            <a href="{{ $manageRoute }}" class="text-gray-400 hover:text-red-600 transition p-1" title="Back to Manager">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
             </a>
             <div class="h-4 w-px bg-gray-300 hidden md:block"></div>
@@ -12,7 +23,7 @@
                 Activity <span class="text-red-600">Builder</span>
             </span>
         </div>
-
+        
         <div class="md:hidden bg-gray-100 p-1 rounded-lg flex items-center shadow-inner">
             <button @click="mobilePreview = false" :class="!mobilePreview ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'" class="px-3 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-wide transition-all">Editor</button>
             <button @click="mobilePreview = true" :class="mobilePreview ? 'bg-white text-red-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'" class="px-3 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-wide transition-all">Preview</button>
