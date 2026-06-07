@@ -306,6 +306,7 @@ Route::domain($baseDomain)->group(function () {
         Route::get('/elections/{election:slug}/logs', ElectionVoterLogs::class)->name('elections.logs');
         Route::get('/community/moderation', CommunityManager::class)->name('community.moderation');
         Route::get('/activities', ActivityManager::class)->name('activities.manage');
+        Route::get('/activities/builder/{slug?}', ActivityBuilder::class)->name('activities.builder');
     });
 
     Route::middleware(['auth', 'role:organization'])->prefix('partner')->name('partner.')

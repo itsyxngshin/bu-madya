@@ -284,7 +284,6 @@
                 </div>
                 
                 <p class="text-lg md:text-xl font-black text-gray-900 mt-5">{{ Auth::user()->name }}</p>
-                <p class="text-xs text-gray-500 font-mono mt-1 font-bold bg-gray-100 px-3 py-1 rounded-lg">ID: {{ Auth::user()->id }}</p>
                 
                 <p class="text-[10px] md:text-xs text-gray-500 mt-5 leading-relaxed bg-blue-50/50 text-blue-800 p-4 rounded-2xl border border-blue-100">
                     Present this QR code to the secretariat to instantly log your attendance at meetings and events.

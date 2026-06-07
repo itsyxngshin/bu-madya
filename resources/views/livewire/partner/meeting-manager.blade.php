@@ -302,9 +302,6 @@
                                             <span class="text-[8px] sm:text-[9px] font-bold uppercase tracking-widest px-1.5 sm:px-2 py-1 rounded-md mt-auto w-full truncate {{ $roleColor }}" title="{{ $roleName }}">
                                                 {{ $roleName }}
                                             </span>
-                                            <span class="text-[8px] sm:text-[9px] font-medium text-gray-400 font-mono mt-2 pt-2 border-t border-gray-50 w-full block">
-                                                ID: {{ $attendee->student_id }}
-                                            </span>
                                         </div>
                                     @empty
                                         <div class="col-span-full flex flex-col items-center justify-center py-12 sm:py-16 text-gray-400">

@@ -106,6 +106,7 @@ class ActivityBuilder extends Component
         $this->searchResults = [];
     }
 
+    
     public function removeUserFromRole($userId, $role)
     {
         if ($role === 'focal') {
