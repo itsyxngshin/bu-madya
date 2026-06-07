@@ -18,4 +18,9 @@ class Sdg extends Model
     {
         return $this->belongsToMany(News::class, 'news_sdg');
     }
+
+    public function activities()
+    {
+        return $this->belongsToMany(Activity::class, 'activity_sdg');
+    }
 }

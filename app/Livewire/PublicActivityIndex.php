@@ -19,7 +19,7 @@ class PublicActivityIndex extends Component
 
     public function render()
     {
-        $activities = Activity::with(['user', 'sdg', 'focals'])
+        $activities = Activity::with(['user', 'sdgs', 'focals'])
             ->where('status', '!=', 'draft') // Optional: if you add a draft status later
             ->when($this->search, function ($query) {
                 $query->where('title', 'like', '%' . $this->search . '%')

@@ -92,14 +92,27 @@
                         </div>
                     </div>
 
-                    <div>
-                        <label class="block text-xs font-bold text-gray-700 mb-1">SDG Mapping</label>
-                        <select wire:model.live="sdg_id" class="w-full text-xs border-gray-200 rounded-lg focus:ring-red-400">
-                            <option value="">None...</option>
+                    {{-- NEW: Interactive SDG Mapping Grid --}}
+                    <div class="col-span-full mt-4">
+                        <label class="block text-xs font-bold text-gray-700 mb-2">Target SDGs (Select Multiple)</label>
+                        <div class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-9 gap-2">
                             @foreach($sdgs as $sdg)
-                                <option value="{{ $sdg->id }}">SDG {{ $sdg->number }}: {{ $sdg->name }}</option>
+                                <button type="button" wire:click="toggleSdg({{ $sdg->id }})" 
+                                        style="background-color: {{ in_array($sdg->id, $selectedSdgs) ? $sdg->color_hex : '#f3f4f6' }};
+                                               color: {{ in_array($sdg->id, $selectedSdgs) ? 'white' : '#9ca3af' }};"
+                                        class="h-16 md:h-20 flex flex-col items-center justify-center p-1 rounded-lg transition-all transform hover:scale-105 border border-transparent shadow-sm hover:shadow-md text-center">
+                                    
+                                    {{-- Number --}}
+                                    <span class="text-sm md:text-base font-black leading-none mb-1">{{ $sdg->goal_number }}</span>
+                                    
+                                    {{-- Name --}}
+                                    <span class="text-[6px] md:text-[7px] font-bold uppercase leading-tight line-clamp-2 px-1"
+                                          style="color: {{ in_array($sdg->id, $selectedSdgs) ? 'rgba(255,255,255,0.9)' : '#6b7280' }}">
+                                        {{ $sdg->name }}
+                                    </span>
+                                </button>
                             @endforeach
-                        </select>
+                        </div>
                     </div>
                 </div>
             </div>

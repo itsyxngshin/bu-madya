@@ -20,8 +20,9 @@ class ActivityBuilder extends Component
 
     // Form Fields
     public $title, $slug, $lead_organization, $nature_of_activity;
-    public $start_date, $end_date, $sdg_id, $description, $status = 'upcoming';
+    public $start_date, $end_date, $description, $status = 'upcoming';
 
+    public array $selectedSdgs = [];
     // File Uploads
     public $photos = [];
     public $existing_photos = [];
@@ -35,10 +36,10 @@ class ActivityBuilder extends Component
     public function mount($slug = null)
     {
         if ($slug) {
-            $activity = Activity::with(['focals', 'participants'])
-                ->where('slug', $slug)
-                ->where('user_id', Auth::id())
-                ->firstOrFail();
+        $activity = Activity::with(['focals', 'participants', 'sdgs']) // Eager load sdgs
+            ->where('slug', $slug)
+            ->where('user_id', Auth::id())
+            ->firstOrFail();
 
             $this->activityId = $activity->id;
             $this->isEditMode = true;
@@ -49,7 +50,7 @@ class ActivityBuilder extends Component
             $this->nature_of_activity = $activity->nature_of_activity;
             $this->start_date = $activity->start_date->format('Y-m-d');
             $this->end_date = $activity->end_date ? $activity->end_date->format('Y-m-d') : null;
-            $this->sdg_id = $activity->sdg_id;
+            $this->selectedSdgs = $activity->sdgs->pluck('id')->toArray();
             $this->description = $activity->description;
             $this->status = $activity->status;
 
@@ -78,6 +79,15 @@ class ActivityBuilder extends Component
     {
         if (!$this->isEditMode) {
             $this->slug = Str::slug($this->title);
+        }
+    }
+
+    public function toggleSdg($id)
+    {
+        if (($key = array_search($id, $this->selectedSdgs)) !== false) {
+            unset($this->selectedSdgs[$key]);
+        } else {
+            $this->selectedSdgs[] = $id;
         }
     }
 
@@ -139,6 +149,8 @@ class ActivityBuilder extends Component
             'end_date' => 'nullable|date|after_or_equal:start_date',
             'nature_of_activity' => 'required|string|max:255',
             'photos.*' => 'image|max:2048',
+            'selectedSdgs' => 'array',
+            'selectedSdgs.*' => 'exists:sdgs,id',
         ]);
 
         $photoPaths = $this->existing_photos;
@@ -155,7 +167,6 @@ class ActivityBuilder extends Component
             'nature_of_activity' => $this->nature_of_activity,
             'start_date' => $this->start_date,
             'end_date' => $this->end_date,
-            'sdg_id' => $this->sdg_id,
             'description' => $this->description,
             'status' => $this->status,
             'highlight_photos' => $photoPaths,
@@ -172,6 +183,7 @@ class ActivityBuilder extends Component
         $focalSync = collect($this->selectedFocals)->mapWithKeys(fn($u) => [$u['id'] => ['role' => 'focal']])->toArray();
         $participantSync = collect($this->selectedParticipants)->mapWithKeys(fn($u) => [$u['id'] => ['role' => 'participant']])->toArray();
         $activity->focals()->sync($focalSync + $participantSync);
+        $activity->sdgs()->sync($this->selectedSdgs);
 
         session()->flash('success', $this->isEditMode ? 'Activity updated successfully.' : 'Activity published successfully.');
         return redirect()->route('activities.manage');

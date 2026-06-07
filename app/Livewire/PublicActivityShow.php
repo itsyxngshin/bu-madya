@@ -11,7 +11,7 @@ class PublicActivityShow extends Component
 
     public function mount($slug)
     {
-        $this->activity = Activity::with(['user', 'sdg', 'focals', 'participants'])
+        $this->activity = Activity::with(['user', 'sdgs', 'focals', 'participants'])
                                   ->where('slug', $slug)
                                   ->firstOrFail();
     }

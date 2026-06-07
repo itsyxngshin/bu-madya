@@ -149,11 +149,18 @@
                             </div>
 
                             {{-- SDG Badge --}}
-                            @if($activity->sdg)
-                                <div class="absolute bottom-4 left-4 z-30">
-                                    <span class="px-3 py-1 text-white text-[10px] font-bold uppercase tracking-wider rounded-lg shadow-sm" style="background-color: {{ $activity->sdg->color_hex ?? '#3b82f6' }};">
-                                        SDG {{ $activity->sdg->goal_number }}
-                                    </span>
+                            @if($activity->sdgs->count() > 0)
+                                <div class="flex flex-wrap gap-1 justify-end">
+                                    @foreach($activity->sdgs->take(3) as $sdg) {{-- Limit to 3 so it doesn't break the card --}}
+                                        <span class="text-[8px] font-bold text-white px-1.5 py-0.5 rounded shadow-sm shrink-0 whitespace-nowrap" style="background-color: {{ $sdg->color_hex ?? '#3b82f6' }}" title="{{ $sdg->name }}">
+                                            SDG {{ $sdg->goal_number }}
+                                        </span>
+                                    @endforeach
+                                    @if($activity->sdgs->count() > 3)
+                                        <span class="text-[8px] font-bold text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded shadow-sm">
+                                            +{{ $activity->sdgs->count() - 3 }}
+                                        </span>
+                                    @endif
                                 </div>
                             @endif
                         </div>

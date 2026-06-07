@@ -29,4 +29,9 @@ class Activity extends Model
     {
         return $this->belongsToMany(User::class)->wherePivot('role', 'participant');
     }
+
+    public function sdgs()
+    {
+        return $this->belongsToMany(Sdg::class);
+    }
 }
