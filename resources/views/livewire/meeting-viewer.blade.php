@@ -87,13 +87,13 @@
                             @forelse($meeting->attendees as $attendee)
                                 @php
                                     // 1. Look up the user to grab their real avatar
-                                    $user = \App\Models\User::find($attendee->id);
+                                    $user = \App\Models\User::find($attendee->student_id);
                                     
                                     // 2. Generate the fallback UI-Avatar
                                     $fallbackUrl = 'https://ui-avatars.com/api/?name='.urlencode($attendee->name ?? 'Unknown').'&background=f8fafc&color=334155&bold=true';
                                     
                                     // 3. Resolve the actual image
-                                    $avatarUrl = $user ? $user->profile_photo_url : $fallbackUrl;
+                                    $avatarUrl = $user ? $user->profile_photo_path : $fallbackUrl;
                                 @endphp
 
                                 {{-- FIXED: Added wire:key so Livewire doesn't forcefully re-render existing items --}}

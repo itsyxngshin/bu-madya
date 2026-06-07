@@ -82,6 +82,7 @@ use App\Livewire\Partner\SubmitFrame;
 use App\Livewire\Partner\PartnerDashboard;
 use App\Livewire\Partner\AccreditationDashboard as OrgDashboard;
 use App\Livewire\Partner\MeetingManager;
+use App\Livewire\Partner\ActivityManager;
 
 
 use App\Livewire\Community\PostFeed;
@@ -93,6 +94,9 @@ use App\Livewire\Ojt\CoordinatorView;
 use App\Livewire\Webmaster\Dashboard as WebmasterDashboard;
 use App\Livewire\AccreditationWizard;
 use App\Livewire\Admin\AccreditationDashboard;
+
+use App\Livewire\PublicActivityIndex;
+use App\Livewire\PublicActivityShow;
 
 $baseDomain = parse_url(config('app.url'), PHP_URL_HOST) ?? 'localhost';
 
@@ -137,9 +141,9 @@ Route::domain('partners.' . env('APP_DOMAIN'))->group(function () {
 
     // 2. Student Organization Routes (Must be logged in)
     Route::middleware(['auth', 'role:organization'])->group(function () {
-        
+
         // The main dashboard where the org sees their application status
-    
+
 
         // The Multi-Step Accreditation Wizard
         Route::get('/apply', AccreditationWizard::class)->name('accreditation.apply');
@@ -152,13 +156,13 @@ Route::domain('partners.' . env('APP_DOMAIN'))->group(function () {
     // 3. OSAS Admin Command Center (Must be logged in AND an Admin)
     // Note: You will need a custom middleware like 'is_admin' or a Role/Permission package
     Route::middleware(['auth', 'role:administrator'])->prefix('osas')->name('osas.')->group(function () {
-        
+
         // The Command Center Dashboard
         Route::get('/dashboard', AccreditationDashboard::class)->name('dashboard');
-        
+
         // Future route: If you want a dedicated full-page view for a specific application
         // Route::get('/application/{id}', ViewApplication::class)->name('application.show');
-        
+
     });
 
 });
@@ -299,6 +303,7 @@ Route::domain($baseDomain)->group(function () {
         Route::get('/elections/{election:slug}/edit', \App\Livewire\Admin\ElectionEditor::class)->name('elections.edit');
         Route::get('/elections/{election:slug}/logs', ElectionVoterLogs::class)->name('elections.logs');
         Route::get('/community/moderation', CommunityManager::class)->name('community.moderation');
+        Route::get('/activities', ActivityManager::class)->name('activities.manage');
     });
 
     Route::middleware(['auth', 'role:organization'])->prefix('partner')->name('partner.')
@@ -327,7 +332,7 @@ Route::domain($baseDomain)->group(function () {
         Route::get('/elections/{election:slug}/vetting', \App\Livewire\Admin\ElectionDashboard::class)->name('elections.vetting');
         Route::get('/elections/{election:slug}/results', \App\Livewire\Admin\ElectionResults::class)->name('elections.results');
         Route::get('/elections/{election:slug}/edit', \App\Livewire\Admin\ElectionEditor::class)->name('elections.edit');
-        
+        Route::get('/activities', ActivityManager::class)->name('activities.manage');
 
     });
 
@@ -386,6 +391,8 @@ Route::domain($baseDomain)->group(function () {
     Route::get('/privacy', PrivacyPolicy::class)->name('privacy');
     Route::get('/campaigns/{slug}', CampaignView::class)->name('campaigns.show');
     Route::get('/evaluations/{evaluation}', EvaluationForm::class)->name('evaluations.show');
+    Route::get('/activities', PublicActivityIndex::class)->name('activities.index');
+    Route::get('/a/{slug}', PublicActivityShow::class)->name('activities.show');
 
 
 });
