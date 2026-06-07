@@ -149,7 +149,7 @@
                                     {{-- Left Side: Colored Number Block --}}
                                     <div class="w-14 shrink-0 flex items-center justify-center text-white font-black text-lg"
                                          style="background-color: {{ $sdg->color_hex }}">
-                                        {{ $sdg->goal_number }}
+                                        {{ $sdg->number }}
                                     </div>
 
                                     {{-- Right Side: Tinted Text Block --}}
