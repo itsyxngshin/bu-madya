@@ -188,7 +188,7 @@ class ActivityManager extends Component
                               ->orderBy('start_date', 'desc')
                               ->get();
 
-        $sdgs = Sdg::orderBy('goal_number')->get();
+        $sdgs = Sdg::orderBy('number')->get();
 
         return view('livewire.partner.activity-manager', [
             'activities' => $activities,
