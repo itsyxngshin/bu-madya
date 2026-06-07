@@ -174,6 +174,12 @@
                             </div>
 
                             <div>
+                                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Activity Overview</label>
+                                <textarea wire:model="description" rows="4" placeholder="Provide a detailed description of the activity..." class="w-full text-sm rounded-xl border-gray-200 bg-gray-50 focus:border-blue-500 resize-none"></textarea>
+                                @error('description') <span class="text-red-500 text-[10px] font-bold">{{ $message }}</span> @enderror
+                            </div>
+
+                            <div>
                                 <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Highlight Photos (Multiple Allowed)</label>
                                 <input type="file" wire:model="photos" multiple accept="image/*" class="w-full text-xs text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition">
                                 <div wire:loading wire:target="photos" class="text-[10px] text-blue-500 font-bold mt-1 animate-pulse">Uploading photos...</div>
