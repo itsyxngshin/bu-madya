@@ -93,21 +93,24 @@
                     </div>
 
                     {{-- NEW: Interactive SDG Mapping Grid --}}
-                    <div class="col-span-full mt-4">
-                        <label class="block text-xs font-bold text-gray-700 mb-2">Target SDGs (Select Multiple)</label>
-                        <div class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-9 gap-2">
+                    {{-- SECTION: TARGET SDGS --}}
+                    <div class="col-span-full mt-6">
+                        <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest border-b border-gray-100 pb-2 mb-4">Target SDGs</label>
+                        
+                        <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
                             @foreach($sdgs as $sdg)
                                 <button type="button" wire:click="toggleSdg({{ $sdg->id }})" 
-                                        style="background-color: {{ in_array($sdg->id, $selectedSdgs) ? $sdg->color_hex : '#f3f4f6' }};
-                                               color: {{ in_array($sdg->id, $selectedSdgs) ? 'white' : '#9ca3af' }};"
-                                        class="h-16 md:h-20 flex flex-col items-center justify-center p-1 rounded-lg transition-all transform hover:scale-105 border border-transparent shadow-sm hover:shadow-md text-center">
+                                        style="background-color: {{ in_array($sdg->id, $selectedSdgs) ? $sdg->color_hex : '#f8fafc' }};
+                                               color: {{ in_array($sdg->id, $selectedSdgs) ? 'white' : '#64748b' }};
+                                               border-color: {{ in_array($sdg->id, $selectedSdgs) ? $sdg->color_hex : '#f1f5f9' }};"
+                                        class="flex flex-col items-center justify-center p-3 rounded-xl border transition-all transform hover:-translate-y-1 shadow-sm text-center gap-1.5 h-full min-h-[80px]">
                                     
                                     {{-- Number --}}
-                                    <span class="text-sm md:text-base font-black leading-none mb-1">{{ $sdg->goal_number }}</span>
+                                    <span class="text-xl font-black leading-none">{{ $sdg->number }}</span>
                                     
                                     {{-- Name --}}
-                                    <span class="text-[6px] md:text-[7px] font-bold uppercase leading-tight line-clamp-2 px-1"
-                                          style="color: {{ in_array($sdg->id, $selectedSdgs) ? 'rgba(255,255,255,0.9)' : '#6b7280' }}">
+                                    <span class="text-[8px] font-bold uppercase leading-tight"
+                                          style="color: {{ in_array($sdg->id, $selectedSdgs) ? 'rgba(255,255,255,0.9)' : '#64748b' }}">
                                         {{ $sdg->name }}
                                     </span>
                                 </button>
@@ -336,22 +339,38 @@
                         </div>
 
                         {{-- Multiple SDG Preview Cards --}}
+                        {{-- Multiple SDG Preview Cards --}}
                         @if(count($selectedSdgs) > 0)
-                            <div class="space-y-4">
-                                <h4 class="font-bold text-gray-400 uppercase tracking-widest text-[10px] border-b border-gray-100 pb-2 text-center">Aligned Goals</h4>
+                            <div class="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm mt-6">
+                                <h4 class="font-bold text-gray-900 uppercase tracking-widest text-[10px] border-b border-gray-100 pb-3 mb-4">
+                                    Sustainable Development Goals
+                                </h4>
                                 
-                                @foreach($selectedSdgs as $id)
-                                    @php $sdg = $sdgs->find($id); @endphp
-                                    @if($sdg)
-                                        <div class="rounded-3xl p-6 border text-white text-center shadow-sm relative overflow-hidden" style="background-color: {{ $sdg->color_hex ?? '#3b82f6' }};">
-                                            <div class="absolute inset-0 bg-black/10 mix-blend-multiply"></div>
-                                            <div class="relative z-10 flex flex-col items-center">
-                                                <span class="text-4xl font-black mb-1 leading-none">{{ $sdg->goal_number }}</span>
-                                                <h4 class="text-[10px] font-bold uppercase tracking-wider">{{ $sdg->name }}</h4>
+                                <div class="space-y-3">
+                                    @foreach($selectedSdgs as $id)
+                                        @php $sdg = $sdgs->find($id); @endphp
+                                        @if($sdg)
+                                            {{-- Horizontal Pill Design --}}
+                                            <div class="flex items-stretch rounded-xl border overflow-hidden shadow-sm" 
+                                                 style="background-color: {{ $sdg->color_hex }}15; border-color: {{ $sdg->color_hex }}40;">
+                                                
+                                                {{-- Left Side: Colored Number Block --}}
+                                                <div class="w-14 shrink-0 flex items-center justify-center text-white font-black text-lg"
+                                                     style="background-color: {{ $sdg->color_hex }}">
+                                                    {{ $sdg->goal_number }}
+                                                </div>
+
+                                                {{-- Right Side: Tinted Text Block --}}
+                                                <div class="flex items-center px-4 py-3 flex-1">
+                                                    <span class="text-[10px] font-black uppercase tracking-wider leading-tight"
+                                                          style="color: {{ $sdg->color_hex }}">
+                                                        {{ $sdg->name }}
+                                                    </span>
+                                                </div>
                                             </div>
-                                        </div>
-                                    @endif
-                                @endforeach
+                                        @endif
+                                    @endforeach
+                                </div>
                             </div>
                         @endif
                     </div>

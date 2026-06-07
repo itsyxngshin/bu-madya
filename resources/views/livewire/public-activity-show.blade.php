@@ -135,18 +135,33 @@
 
                 {{-- SDG Cards --}}
                 @if($activity->sdgs->count() > 0)
-                    <div class="space-y-4">
-                        <h4 class="font-bold text-gray-900 uppercase tracking-widest text-xs border-b border-gray-100 pb-2">Aligned Goals</h4>
+                    <div class="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm">
+                        <h4 class="font-bold text-gray-900 uppercase tracking-widest text-[10px] border-b border-gray-100 pb-3 mb-4">
+                            Sustainable Development Goals
+                        </h4>
                         
-                        @foreach($activity->sdgs as $sdg)
-                            <div class="rounded-2xl p-4 border text-white text-center shadow-sm relative overflow-hidden" style="background-color: {{ $sdg->color_hex ?? '#3b82f6' }}; border-color: rgba(0,0,0,0.1);">
-                                <div class="absolute inset-0 bg-black/10 mix-blend-multiply"></div>
-                                <div class="relative z-10 flex flex-col items-center">
-                                    <span class="text-3xl font-black mb-1 leading-none">{{ $sdg->goal_number }}</span>
-                                    <h4 class="text-[10px] font-bold uppercase tracking-wider">{{ $sdg->name }}</h4>
+                        <div class="space-y-3">
+                            @foreach($activity->sdgs as $sdg)
+                                {{-- Horizontal Pill Design --}}
+                                <div class="flex items-stretch rounded-xl border overflow-hidden shadow-sm transition-transform hover:-translate-y-0.5" 
+                                     style="background-color: {{ $sdg->color_hex }}15; border-color: {{ $sdg->color_hex }}40;">
+                                    
+                                    {{-- Left Side: Colored Number Block --}}
+                                    <div class="w-14 shrink-0 flex items-center justify-center text-white font-black text-lg"
+                                         style="background-color: {{ $sdg->color_hex }}">
+                                        {{ $sdg->goal_number }}
+                                    </div>
+
+                                    {{-- Right Side: Tinted Text Block --}}
+                                    <div class="flex items-center px-4 py-3 flex-1">
+                                        <span class="text-[10px] font-black uppercase tracking-wider leading-tight"
+                                              style="color: {{ $sdg->color_hex }}">
+                                            {{ $sdg->name }}
+                                        </span>
+                                    </div>
                                 </div>
-                            </div>
-                        @endforeach
+                            @endforeach
+                        </div>
                     </div>
                 @endif
 
