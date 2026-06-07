@@ -83,6 +83,8 @@ use App\Livewire\Partner\PartnerDashboard;
 use App\Livewire\Partner\AccreditationDashboard as OrgDashboard;
 use App\Livewire\Partner\MeetingManager;
 use App\Livewire\Partner\ActivityManager;
+use App\Livewire\Partner\ActivityBuilder;
+
 
 
 use App\Livewire\Community\PostFeed;
@@ -333,6 +335,7 @@ Route::domain($baseDomain)->group(function () {
         Route::get('/elections/{election:slug}/results', \App\Livewire\Admin\ElectionResults::class)->name('elections.results');
         Route::get('/elections/{election:slug}/edit', \App\Livewire\Admin\ElectionEditor::class)->name('elections.edit');
         Route::get('/activities', ActivityManager::class)->name('activities.manage');
+        Route::get('/activities/builder/{slug?}', ActivityBuilder::class)->name('activities.builder');
 
     });
 

@@ -11,13 +11,12 @@ use App\Models\User;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
-class ActivityManager extends Component
+class ActivityBuilder extends Component
 {
     use WithFileUploads;
 
-    public $isModalOpen = false;
+    public $activityId = null;
     public $isEditMode = false;
-    public $editingId = null;
 
     // Form Fields
     public $title, $slug, $lead_organization, $nature_of_activity;
@@ -30,31 +29,43 @@ class ActivityManager extends Component
     // Relational Tagging
     public $searchQuery = '';
     public $searchResults = [];
-    public $selectedFocals = []; // Array of User Arrays
-    public $selectedParticipants = []; // Array of User Arrays
+    public $selectedFocals = [];
+    public $selectedParticipants = [];
 
-    public function mount()
+    public function mount($slug = null)
     {
-        $this->start_date = date('Y-m-d');
-        $this->end_date = date('Y-m-d');
-    }
+        if ($slug) {
+            $activity = Activity::with(['focals', 'participants'])
+                ->where('slug', $slug)
+                ->where('user_id', Auth::id())
+                ->firstOrFail();
 
-    private function getBuilderRoute()
-    {
-        $role = auth()->user()->role?->role_name ?? 'guest';
+            $this->activityId = $activity->id;
+            $this->isEditMode = true;
 
-        return match($role) {
-            'administrator' => 'admin.activities.builder', // Ensure these routes exist in web.php
-            'organization'  => 'partner.activities.builder',
-            'director'      => 'director.activities.builder',
-            default         => 'dashboard',
-        };
+            $this->title = $activity->title;
+            $this->slug = $activity->slug;
+            $this->lead_organization = $activity->lead_organization;
+            $this->nature_of_activity = $activity->nature_of_activity;
+            $this->start_date = $activity->start_date->format('Y-m-d');
+            $this->end_date = $activity->end_date ? $activity->end_date->format('Y-m-d') : null;
+            $this->sdg_id = $activity->sdg_id;
+            $this->description = $activity->description;
+            $this->status = $activity->status;
+
+            $this->existing_photos = $activity->highlight_photos ?? [];
+            $this->selectedFocals = $activity->focals->toArray();
+            $this->selectedParticipants = $activity->participants->toArray();
+        } else {
+            $this->start_date = date('Y-m-d');
+            $this->end_date = date('Y-m-d');
+        }
     }
 
     private function getManagerRoute()
     {
         $role = auth()->user()->role?->role_name ?? 'guest';
-
+        
         return match($role) {
             'administrator' => 'admin.activities.manage',
             'organization'  => 'partner.activities.manage',
@@ -70,7 +81,6 @@ class ActivityManager extends Component
         }
     }
 
-    // Live search for tagging users
     public function updatedSearchQuery()
     {
         if (strlen($this->searchQuery) >= 2) {
@@ -87,9 +97,9 @@ class ActivityManager extends Component
         $user = User::find($userId);
         if ($user) {
             if ($role === 'focal' && !collect($this->selectedFocals)->contains('id', $user->id)) {
-                $this->selectedFocals[] = $user;
+                $this->selectedFocals[] = $user->toArray();
             } elseif ($role === 'participant' && !collect($this->selectedParticipants)->contains('id', $user->id)) {
-                $this->selectedParticipants[] = $user;
+                $this->selectedParticipants[] = $user->toArray();
             }
         }
         $this->searchQuery = '';
@@ -105,44 +115,16 @@ class ActivityManager extends Component
         }
     }
 
-    public function openCreateModal()
+    public function removeExistingPhoto($index)
     {
-        $this->resetValidation();
-        $this->reset(['title', 'slug', 'lead_organization', 'nature_of_activity', 'sdg_id', 'description', 'editingId', 'photos', 'existing_photos', 'selectedFocals', 'selectedParticipants']);
-        $this->isEditMode = false;
-        $this->status = 'upcoming';
-        $this->start_date = date('Y-m-d');
-        $this->end_date = date('Y-m-d');
-        $this->isModalOpen = true;
-
-        return redirect()->route($this->getBuilderRoute());
+        unset($this->existing_photos[$index]);
+        $this->existing_photos = array_values($this->existing_photos);
     }
 
-    public function openEditModal($id)
+    public function removeUploadedPhoto($index)
     {
-        $this->resetValidation();
-        $activity = Activity::with(['focals', 'participants'])->where('user_id', Auth::id())->findOrFail($id);
-
-        $this->editingId = $activity->id;
-        $this->title = $activity->title;
-        $this->slug = $activity->slug;
-        $this->lead_organization = $activity->lead_organization;
-        $this->nature_of_activity = $activity->nature_of_activity;
-        $this->start_date = $activity->start_date->format('Y-m-d');
-        $this->end_date = $activity->end_date ? $activity->end_date->format('Y-m-d') : null;
-        $this->sdg_id = $activity->sdg_id;
-        $this->description = $activity->description;
-        $this->status = $activity->status;
-
-        $this->existing_photos = $activity->highlight_photos ?? [];
-        $this->selectedFocals = $activity->focals->toArray();
-        $this->selectedParticipants = $activity->participants->toArray();
-
-        $this->isEditMode = true;
-        $this->isModalOpen = true;
-
-        return redirect()->route($this->getBuilderRoute(), ['slug' => $activity->slug]);
-
+        unset($this->photos[$index]);
+        $this->photos = array_values($this->photos);
     }
 
     public function saveActivity()
@@ -151,14 +133,13 @@ class ActivityManager extends Component
 
         $this->validate([
             'title' => 'required|string|max:255',
-            'slug' => ['required', 'string', 'max:255', Rule::unique('activities', 'slug')->ignore($this->editingId)],
+            'slug' => ['required', 'string', 'max:255', Rule::unique('activities', 'slug')->ignore($this->activityId)],
             'start_date' => 'required|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
             'nature_of_activity' => 'required|string|max:255',
-            'photos.*' => 'image|max:2048', // Max 2MB per image
+            'photos.*' => 'image|max:2048',
         ]);
 
-        // Process Image Uploads
         $photoPaths = $this->existing_photos;
         if ($this->photos) {
             foreach ($this->photos as $photo) {
@@ -180,48 +161,25 @@ class ActivityManager extends Component
         ];
 
         if ($this->isEditMode) {
-            $activity = Activity::where('user_id', Auth::id())->findOrFail($this->editingId);
+            $activity = Activity::where('user_id', Auth::id())->findOrFail($this->activityId);
             $activity->update($data);
         } else {
             $data['user_id'] = Auth::id();
             $activity = Activity::create($data);
         }
 
-        // SYNC RELATIONSHIPS to the Pivot Table
         $focalSync = collect($this->selectedFocals)->mapWithKeys(fn($u) => [$u['id'] => ['role' => 'focal']])->toArray();
         $participantSync = collect($this->selectedParticipants)->mapWithKeys(fn($u) => [$u['id'] => ['role' => 'participant']])->toArray();
-
-        // Combine them and sync
         $activity->focals()->sync($focalSync + $participantSync);
 
-        session()->flash('success', $this->isEditMode ? 'Activity updated successfully.' : 'Activity logged successfully.');
-        $this->isModalOpen = false;
-    }
-
-    public function removeExistingPhoto($index)
-    {
-        unset($this->existing_photos[$index]);
-        $this->existing_photos = array_values($this->existing_photos);
-    }
-
-    public function deleteActivity($id)
-    {
-        Activity::where('user_id', Auth::id())->findOrFail($id)->delete();
-        session()->flash('success', 'Activity removed permanently.');
+        session()->flash('success', $this->isEditMode ? 'Activity updated successfully.' : 'Activity published successfully.');
+        return redirect()->route('activities.manage');
     }
 
     public function render()
     {
-        $activities = Activity::where('user_id', Auth::id())
-                              ->with(['sdg', 'focals', 'participants'])
-                              ->orderBy('start_date', 'desc')
-                              ->get();
-
-        $sdgs = Sdg::orderBy('number')->get();
-
-        return view('livewire.partner.activity-manager', [
-            'activities' => $activities,
-            'sdgs' => $sdgs,
-        ])->layout('layouts.madya-admin-deck');
+        return view('livewire.partner.activity-builder', [
+            'sdgs' => Sdg::orderBy('number')->get(),
+        ])->layout('layouts.madya-template'); // Using guest layout since the builder has its own full-screen navbar
     }
 }
