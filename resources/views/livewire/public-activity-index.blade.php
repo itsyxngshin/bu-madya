@@ -1,89 +1,263 @@
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16 animate-fade-in-up">
+<div>
+    {{-- HERO HEADER (With Impact Stats) --}}
+    <header class="relative h-[400px] flex items-center justify-center text-white overflow-hidden rounded-3xl shadow-xl mx-6 -mt-20 z-10">
 
-    {{-- Header Section --}}
-    <div class="text-center max-w-3xl mx-auto mb-12 sm:mb-16">
-        <span class="text-red-600 font-black text-[10px] sm:text-xs uppercase tracking-widest bg-red-50 px-3 py-1.5 rounded-lg mb-4 inline-block shadow-sm">Impact & Engagements</span>
-        <h1 class="text-3xl sm:text-4xl md:text-5xl font-black text-gray-900 tracking-tight leading-tight mb-4">
-            Movement in <span class="text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-orange-500">Action</span>
-        </h1>
-        <p class="text-sm sm:text-base text-gray-500 font-medium">Explore our latest activities, partnerships, and advocacy-driven initiatives contributing to sustainable development across the Bicol Region.</p>
-    </div>
+        {{-- ALPINE IMAGE SKELETON --}}
+        <div class="absolute inset-0 z-0 bg-gray-900" x-data="{ loaded: false }">
+            {{-- Pulsing Placeholder --}}
+            <div x-show="!loaded" class="absolute inset-0 bg-gray-800 animate-pulse"></div>
 
-    {{-- Search Bar --}}
-    <div class="max-w-md mx-auto mb-10">
-        <div class="relative shadow-sm rounded-2xl overflow-hidden focus-within:ring-2 focus-within:ring-red-500 border border-gray-200">
-            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            {{-- Actual Image (Fades in when fully downloaded) --}}
+            <img src="{{ asset('images/IMG_4095.JPG') }}"
+                @load="loaded = true"
+                :class="loaded ? 'opacity-100' : 'opacity-0'"
+                class="w-full h-full object-cover transition-opacity duration-1000 ease-out"
+                alt="Activities Background">
+
+            <div class="absolute inset-0 bg-gradient-to-r from-red-900/90 to-orange-900/80 mix-blend-multiply z-10"></div>
+        </div>
+
+        <div class="relative z-20 text-center px-4 mt-16">
+            <h2 class="text-yellow-300 font-bold tracking-[0.3em] text-xs uppercase mb-2">Our Impact</h2>
+            <h1 class="font-heading text-3xl md:text-5xl font-black uppercase tracking-tight mb-4 drop-shadow-lg">
+                Activities & Engagements
+            </h1>
+
+            @auth
+                @if(in_array(Auth::user()->role->role_name ?? '', ['administrator', 'director', 'organization']))
+                    <div class="mt-8">
+                        <a href="{{ route('activities.manage') }}" class="inline-flex items-center gap-2 px-6 py-3 bg-white/20 backdrop-blur-md border border-white/40 rounded-full text-white text-xs font-bold uppercase tracking-widest hover:bg-white hover:text-red-600 transition shadow-lg">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                            Log Activity
+                        </a>
+                    </div>
+                @endif
+            @endauth
+        </div>
+    </header>
+
+    {{-- MAIN CONTENT --}}
+    <div class="relative min-h-screen px-6 pb-24 mt-12 max-w-[1800px] w-[95%] mx-auto">
+
+        {{-- Background Blobs --}}
+        <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+            <div class="absolute top-40 left-0 w-96 h-96 bg-red-100 rounded-full mix-blend-multiply filter blur-3xl opacity-50"></div>
+            <div class="absolute bottom-40 right-0 w-96 h-96 bg-orange-100 rounded-full mix-blend-multiply filter blur-3xl opacity-50"></div>
+        </div>
+
+        {{-- FILTER BAR --}}
+        <div class="relative z-10 mb-12 bg-white/40 backdrop-blur-md border border-white/50 rounded-2xl p-4 shadow-sm max-w-4xl mx-auto">
+            <div class="flex flex-col md:flex-row gap-4 items-center justify-center">
+
+                {{-- Search Input --}}
+                <div class="relative w-full md:w-96 group">
+                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    </div>
+                    <input type="text"
+                        wire:model.live.debounce.300ms="search"
+                        placeholder="Search events, campaigns, or partnerships..."
+                        class="w-full bg-white/80 border-0 rounded-xl pl-10 pr-4 py-2.5 text-sm font-bold text-gray-700 focus:ring-2 focus:ring-red-500 shadow-sm placeholder-gray-400 hover:bg-white transition"
+                    >
+                </div>
+
             </div>
-            <input wire:model.live.debounce.300ms="search" type="text" class="block w-full pl-11 pr-4 py-3 border-none bg-white text-sm focus:ring-0 text-gray-900 placeholder-gray-400 font-medium" placeholder="Search events, campaigns, or partnerships...">
+        </div>
+
+        {{-- ACTIVITIES GRID --}}
+        <div class="relative z-10">
+
+            {{-- 1. SKELETON LOADER (Shows only while Livewire is fetching data) --}}
+            <div wire:loading.grid wire:target="search" class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 w-full">
+                @for ($i = 0; $i < 6; $i++)
+                    <div class="bg-white/60 backdrop-blur-md border border-white/60 rounded-3xl overflow-hidden shadow-lg h-[450px] flex flex-col animate-pulse">
+                        {{-- Image Skeleton --}}
+                        <div class="h-56 bg-gray-200 w-full relative">
+                            <div class="absolute top-4 right-4 w-20 h-6 bg-gray-300 rounded-full"></div>
+                            <div class="absolute bottom-4 left-4 w-24 h-6 bg-gray-300 rounded-lg"></div>
+                        </div>
+
+                        {{-- Content Skeleton --}}
+                        <div class="p-6 flex flex-col flex-grow">
+                            <div class="h-6 bg-gray-200 rounded-md w-3/4 mb-4"></div>
+
+                            <div class="flex gap-4 mb-6 border-b border-gray-200/50 pb-4">
+                                <div class="h-4 bg-gray-200 rounded w-20"></div>
+                                <div class="h-4 bg-gray-200 rounded w-20"></div>
+                            </div>
+
+                            <div class="space-y-2 mb-6">
+                                <div class="h-3 bg-gray-200 rounded w-full"></div>
+                                <div class="h-3 bg-gray-200 rounded w-5/6"></div>
+                                <div class="h-3 bg-gray-200 rounded w-4/6"></div>
+                            </div>
+
+                            <div class="mt-auto pt-2 flex justify-between items-end">
+                                <div>
+                                    <div class="h-2 bg-gray-200 rounded w-12 mb-2"></div>
+                                    <div class="h-4 bg-gray-200 rounded w-24"></div>
+                                </div>
+                                <div class="w-10 h-10 bg-gray-200 rounded-full"></div>
+                            </div>
+                        </div>
+                    </div>
+                @endfor
+            </div>
+
+            {{-- 2. ACTUAL CONTENT (Hides while loading) --}}
+            <div wire:loading.remove wire:target="search" class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                @forelse($activities as $activity)
+                    <div class="group bg-white/60 backdrop-blur-md border border-white/60 rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl hover:-translate-y-2 transition duration-300 flex flex-col h-full">
+
+                        {{-- Image Header with Skeleton --}}
+                        <div class="h-56 overflow-hidden relative bg-gray-200" x-data="{ imgLoaded: false }">
+
+                            {{-- Skeleton Pulse --}}
+                            <div x-show="!imgLoaded" class="absolute inset-0 bg-gray-300 animate-pulse z-0"></div>
+
+                            {{-- Actual Cover Image (Using highlight_photos array) --}}
+                            @php
+                                $coverImg = (!empty($activity->highlight_photos) && count($activity->highlight_photos) > 0)
+                                    ? asset('storage/' . $activity->highlight_photos[0])
+                                    : 'https://ui-avatars.com/api/?name='.urlencode($activity->title).'&background=random';
+                            @endphp
+
+                            <img src="{{ $coverImg }}"
+                                @load="imgLoaded = true"
+                                :class="imgLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-105'"
+                                class="w-full h-full object-cover group-hover:scale-110 transition-all duration-700 ease-out relative z-10"
+                                alt="{{ $activity->title }}"
+                                loading="lazy">
+
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-20"></div>
+
+                            {{-- Status Badge (Will sit on top of the skeleton while loading) --}}
+                            <div class="absolute top-4 right-4 z-30">
+                                @if($activity->status === 'completed')
+                                    <span class="px-3 py-1 bg-green-500 text-white text-[10px] font-bold uppercase tracking-widest rounded-full shadow-sm flex items-center gap-1">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg> Completed
+                                    </span>
+                                @elseif($activity->status === 'ongoing')
+                                    <span class="px-3 py-1 bg-orange-500 text-white text-[10px] font-bold uppercase tracking-widest rounded-full shadow-sm flex items-center gap-1 animate-pulse">
+                                        <span class="w-2 h-2 bg-white rounded-full"></span> Ongoing
+                                    </span>
+                                @else
+                                    <span class="px-3 py-1 bg-blue-500 text-white text-[10px] font-bold uppercase tracking-widest rounded-full shadow-sm flex items-center gap-1">
+                                        Upcoming
+                                    </span>
+                                @endif
+                            </div>
+
+                            {{-- SDG Badge --}}
+                            @if($activity->sdg)
+                                <div class="absolute bottom-4 left-4 z-30">
+                                    <span class="px-3 py-1 text-white text-[10px] font-bold uppercase tracking-wider rounded-lg shadow-sm" style="background-color: {{ $activity->sdg->color_hex ?? '#3b82f6' }};">
+                                        SDG {{ $activity->sdg->goal_number }}
+                                    </span>
+                                </div>
+                            @endif
+                        </div>
+
+                        {{-- Card Content --}}
+                        <div class="p-6 flex flex-col flex-grow">
+                            <h3 class="font-heading font-bold text-xl text-gray-900 mb-2 leading-tight group-hover:text-red-600 transition">
+                                {{ $activity->title }}
+                            </h3>
+
+                            <div class="flex flex-wrap items-center gap-4 text-xs text-gray-500 mb-4 border-b border-gray-200/50 pb-4">
+                                <div class="flex items-center gap-1">
+                                    <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                    {{ $activity->start_date ? $activity->start_date->format('M d, Y') : 'TBA' }}
+                                </div>
+                                <div class="flex items-center gap-1">
+                                    <span class="bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-[10px] font-bold uppercase">
+                                        {{ $activity->nature_of_activity }}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <p class="text-sm text-gray-600 mb-6 flex-grow leading-relaxed">
+                                {{ Str::limit($activity->description, 120) }}
+                            </p>
+
+                            <div class="flex items-center justify-between mt-auto pt-2">
+                                <div class="flex flex-col">
+                                    <span class="text-[10px] text-gray-400 font-bold uppercase">Initiated By</span>
+                                    <span class="text-sm font-bold text-red-600 truncate max-w-[150px]">
+                                        {{ $activity->user->name ?? 'BU MADYA' }}
+                                    </span>
+                                </div>
+                                <a href="{{ route('activities.show', $activity->slug ?? $activity->id) }}" class="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center text-gray-400 group-hover:bg-red-600 group-hover:text-white group-hover:border-red-600 transition duration-300 shadow-sm">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                @empty
+                    <div class="col-span-full text-center py-20">
+                        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-400">
+                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        </div>
+                        <h3 class="font-bold text-gray-800">No Activities Found</h3>
+                        <p class="text-sm text-gray-500">Try adjusting your search criteria.</p>
+                    </div>
+                @endforelse
+            </div>
+        </div>
+        <div class="mt-12 relative z-10">
+            {{ $activities->links() }}
         </div>
     </div>
 
-    {{-- Activities Grid --}}
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-        @forelse($activities as $activity)
-            <a href="{{ route('activities.show', $activity->slug) }}" class="group bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col h-full overflow-hidden hover:-translate-y-1">
+    <footer class="bg-gray-900 text-white pt-20 pb-10 border-t-8 border-red-600 relative z-20">
+        <div class="max-w-[1800px] w-[95%] mx-auto px-6 grid md:grid-cols-4 gap-12 mb-16">
 
-                {{-- Highlight Photo Header --}}
-                <div class="h-48 w-full bg-gray-100 relative overflow-hidden shrink-0">
-                    @if(!empty($activity->highlight_photos) && count($activity->highlight_photos) > 0)
-                        <img src="{{ asset('storage/' . $activity->highlight_photos[0]) }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-                    @else
-                        <div class="absolute inset-0 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
-                            <svg class="w-12 h-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                        </div>
-                    @endif
-
-                    <div class="absolute top-4 left-4 bg-white/95 backdrop-blur-sm rounded-xl px-3 py-2 text-center border border-white/50 shadow-sm">
-                        <span class="block text-[10px] font-black text-red-600 uppercase tracking-widest leading-none">{{ $activity->start_date->format('M') }}</span>
-                        <span class="block text-xl font-black text-gray-900 leading-none mt-0.5">{{ $activity->start_date->format('d') }}</span>
+            <div class="col-span-1 md:col-span-2">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-10 h-10 bg-red-600 text-white rounded-full flex items-center justify-center shadow-[0_0_15px_rgba(220,38,38,0.5)]">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z"></path></svg>
                     </div>
-
-                    <div class="absolute bottom-4 right-4 flex gap-2">
-                        <span class="px-2.5 py-1 bg-white/95 backdrop-blur-sm text-[9px] font-black uppercase tracking-widest rounded-lg shadow-sm {{ $activity->status === 'completed' ? 'text-green-600' : ($activity->status === 'ongoing' ? 'text-orange-600' : 'text-blue-600') }}">
-                            {{ $activity->status }}
-                        </span>
-                    </div>
+                    <span class="font-heading font-bold text-2xl tracking-tight">BU MADYA</span>
                 </div>
+                <p class="text-gray-400 leading-relaxed max-w-sm mb-6 text-sm">
+                    The Bicol University - Movement for the Advancement of Youth-led Advocacy is a duly-accredited University Based Organization in Bicol University committed to service and reaching communities through advocacy.
+                </p>
 
-                {{-- Content Body --}}
-                <div class="p-5 sm:p-6 flex flex-col flex-1">
-                    <div class="flex justify-between items-start mb-3 gap-2">
-                        <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest leading-tight line-clamp-1">{{ $activity->nature_of_activity }}</p>
-                        @if($activity->sdg)
-                            <span class="text-[9px] font-bold text-white px-2 py-0.5 rounded shadow-sm shrink-0 whitespace-nowrap" style="background-color: {{ $activity->sdg->color_hex ?? '#3b82f6' }}" title="{{ $activity->sdg->name }}">
-                                SDG {{ $activity->sdg->goal_number }}
-                            </span>
-                        @endif
-                    </div>
-
-                    <h3 class="font-black text-lg text-gray-900 leading-tight mb-3 group-hover:text-red-600 transition-colors">{{ $activity->title }}</h3>
-
-                    <p class="text-xs text-gray-500 line-clamp-2 mb-4">{{ $activity->description ?? 'No description provided.' }}</p>
-
-                    <div class="mt-auto pt-4 border-t border-gray-100 flex items-center justify-between">
-                        <div class="flex items-center gap-2">
-                            @php
-                                $orgPhoto = $activity->user->profile_photo_url ?? 'https://ui-avatars.com/api/?name='.urlencode($activity->user->name).'&background=eff6ff&color=2563eb&bold=true';
-                            @endphp
-                            <img src="{{ $orgPhoto }}" onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name={{ urlencode($activity->user->name) }}&background=eff6ff&color=2563eb&bold=true';" class="w-6 h-6 rounded-full border border-gray-200">
-                            <span class="text-[10px] font-bold text-gray-600 truncate max-w-[120px]">{{ $activity->user->name }}</span>
-                        </div>
-
-                        <span class="text-[10px] font-black uppercase tracking-widest text-red-600 group-hover:translate-x-1 transition-transform flex items-center gap-1">Read <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg></span>
-                    </div>
+                {{-- Social Media Links --}}
+                <div class="flex space-x-4">
+                    <a href="https://www.facebook.com/BUMadya" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-blue-600 hover:text-white text-gray-400 transition">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                    </a>
+                    <a href="https://www.instagram.com/bu_madya" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-pink-600 hover:text-white text-gray-400 transition">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                    </a>
+                    <a href="https://www.x.com/bu_madya" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-black hover:text-white text-gray-400 transition">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                    </a>
                 </div>
-            </a>
-        @empty
-            <div class="col-span-full py-20 text-center border-2 border-dashed border-gray-200 rounded-[2rem] bg-gray-50">
-                <svg class="w-12 h-12 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
-                <p class="text-sm font-bold text-gray-500 uppercase tracking-widest">No activities found.</p>
             </div>
-        @endforelse
-    </div>
 
-    <div class="mt-10">
-        {{ $activities->links() }}
-    </div>
+            <div>
+                <h4 class="font-bold text-lg mb-6 text-red-500 uppercase tracking-widest text-xs">Quick Links</h4>
+                <ul class="space-y-3 text-gray-400 text-sm">
+                    <li><a href="{{ route('about') }}" class="hover:text-white hover:translate-x-1 transition inline-block">About BU MADYA</a></li>
+                    <li><a href="{{ route('open.directory') }}" class="hover:text-white hover:translate-x-1 transition inline-block">Our Officers</a></li>
+                    <li><a href="{{ route('transparency.index') }}" class="hover:text-white hover:translate-x-1 transition inline-block">Transparency Board</a></li>
+                </ul>
+            </div>
 
+            <div>
+                <h4 class="font-bold text-lg mb-6 text-green-500 uppercase tracking-widest text-xs">Live Stats</h4>
+                <div class="bg-gray-800 p-6 rounded-2xl border border-gray-700 shadow-inner">
+                    <span class="block text-[10px] uppercase tracking-widest text-gray-500 mb-2">Total Visitors</span>
+                    <div class="text-4xl font-mono text-yellow-400 tracking-widest">
+                        {{ str_pad($visitorCount ?? 0, 7, '0', STR_PAD_LEFT) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="border-t border-gray-800 pt-8 text-center text-gray-600 text-xs uppercase tracking-widest">
+            &copy; {{ date('Y') }} BU MADYA. All Rights Reserved.
+        </div>
+    </footer>
 </div>
