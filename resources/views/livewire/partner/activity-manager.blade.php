@@ -6,7 +6,7 @@
             <h1 class="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight">Activity & Engagements</h1>
             <p class="text-sm text-gray-500 mt-1">Track partnerships, external events, and SDG impacts.</p>
         </div>
-        
+
         <button wire:click="openCreateModal" class="w-full sm:w-auto px-6 py-3 bg-gray-900 text-white text-sm font-black uppercase tracking-widest rounded-xl shadow-lg hover:bg-black transition active:scale-95 flex items-center justify-center gap-2">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
             Log Activity
@@ -24,7 +24,7 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         @forelse($activities as $activity)
             <div class="bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow flex flex-col h-full relative overflow-hidden group">
-                
+
                 {{-- Status Ribbon --}}
                 <div class="absolute top-0 left-0 w-full h-1 z-10 {{ $activity->status === 'completed' ? 'bg-green-500' : ($activity->status === 'ongoing' ? 'bg-orange-500' : 'bg-blue-500') }}"></div>
 
@@ -37,7 +37,7 @@
                             <svg class="w-12 h-12 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                         </div>
                     @endif
-                    
+
                     {{-- Date Badge Floating on Image --}}
                     <div class="absolute top-4 left-4 bg-white/90 backdrop-blur-sm rounded-xl px-3 py-2 text-center border border-white/50 shadow-sm">
                         <span class="block text-[10px] font-black text-gray-500 uppercase tracking-widest leading-none">{{ $activity->start_date->format('M') }}</span>
@@ -50,13 +50,13 @@
                         <p class="text-[10px] font-bold text-blue-600 uppercase tracking-widest">{{ $activity->nature_of_activity }}</p>
                         @if($activity->sdg)
                             <span class="text-[9px] font-bold text-white px-1.5 py-0.5 rounded uppercase tracking-wider shadow-sm" style="background-color: {{ $activity->sdg->color_hex ?? '#3b82f6' }}" title="{{ $activity->sdg->name }}">
-                                SDG {{ $activity->sdg->goal_number }}
+                                SDG {{ $activity->sdg->number }}
                             </span>
                         @endif
                     </div>
 
                     <h3 class="font-black text-lg text-gray-900 leading-tight mb-4">{{ $activity->title }}</h3>
-                    
+
                     <div class="space-y-3 mb-4 mt-auto">
                         @if($activity->focals->count() > 0)
                             <div>
@@ -94,7 +94,7 @@
                         <button wire:click="openEditModal({{ $activity->id }})" class="flex-1 py-2 bg-gray-50 hover:bg-orange-50 text-gray-600 hover:text-orange-600 text-xs font-black uppercase tracking-widest rounded-xl transition-colors">
                             Manage
                         </button>
-                        
+
                         <button wire:click="deleteActivity({{ $activity->id }})" wire:confirm="Are you sure you want to delete this activity?" class="p-2 bg-gray-50 hover:bg-red-50 text-gray-400 hover:text-red-600 rounded-xl transition-colors" title="Delete Activity">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                         </button>
@@ -118,9 +118,9 @@
                     <h3 class="font-black text-gray-900">{{ $isEditMode ? 'Edit Activity Details' : 'Log New Activity' }}</h3>
                     <button @click="$wire.isModalOpen = false" class="text-gray-400 hover:text-red-500"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
                 </div>
-                
+
                 <div class="p-5 sm:p-6 overflow-y-auto custom-scrollbar">
-                    
+
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                         {{-- LEFT COLUMN: Details --}}
                         <div class="space-y-4">
@@ -129,7 +129,7 @@
                                 <input type="text" wire:model.live.debounce.300ms="title" class="w-full text-sm rounded-xl border-gray-200 bg-gray-50 focus:border-blue-500">
                                 @error('title') <span class="text-red-500 text-[10px] font-bold">{{ $message }}</span> @enderror
                             </div>
-                            
+
                             <div>
                                 <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">URL Slug</label>
                                 <div class="flex rounded-xl shadow-sm border border-gray-200 overflow-hidden focus-within:border-blue-500 focus-within:ring-1">
@@ -159,11 +159,11 @@
                                 <select wire:model="sdg_id" class="w-full text-sm rounded-xl border-gray-200 bg-gray-50 focus:border-blue-500">
                                     <option value="">None...</option>
                                     @foreach($sdgs as $sdg)
-                                        <option value="{{ $sdg->id }}">SDG {{ $sdg->goal_number }}: {{ $sdg->name }}</option>
+                                        <option value="{{ $sdg->id }}">SDG {{ $sdg->number }}: {{ $sdg->name }}</option>
                                     @endforeach
                                 </select>
                             </div>
-                            
+
                             <div>
                                 <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Status</label>
                                 <select wire:model="status" class="w-full text-sm rounded-xl border-gray-200 bg-gray-50 focus:border-blue-500">
@@ -172,13 +172,13 @@
                                     <option value="completed">Completed</option>
                                 </select>
                             </div>
-                            
+
                             <div>
                                 <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Highlight Photos (Multiple Allowed)</label>
                                 <input type="file" wire:model="photos" multiple accept="image/*" class="w-full text-xs text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition">
                                 <div wire:loading wire:target="photos" class="text-[10px] text-blue-500 font-bold mt-1 animate-pulse">Uploading photos...</div>
                             </div>
-                            
+
                             @if(count($existing_photos) > 0)
                                 <div class="flex flex-wrap gap-2 mt-2">
                                     @foreach($existing_photos as $index => $photo)
@@ -194,11 +194,11 @@
 
                         {{-- RIGHT COLUMN: Participants & Relational Tagging --}}
                         <div class="space-y-6">
-                            
+
                             {{-- User Tagging Search Box --}}
                             <div class="bg-blue-50 p-4 rounded-2xl border border-blue-100 relative">
                                 <h4 class="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-2">Tag Users (Focals & Participants)</h4>
-                                
+
                                 <div class="relative w-full mb-3">
                                     <input type="text" wire:model.live.debounce.300ms="searchQuery" placeholder="Search by name or ID..." class="w-full text-xs rounded-xl border-blue-200 focus:ring-blue-500 focus:border-blue-500 shadow-sm">
                                 </div>
