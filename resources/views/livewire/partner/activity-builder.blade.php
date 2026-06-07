@@ -234,7 +234,6 @@
             $previewDesc = $description ?: 'Detailed description for this activity is currently being updated.';
             $previewStartDate = $start_date ? \Carbon\Carbon::parse($start_date)->format('F d, Y') : 'Date';
             $previewEndDate = $end_date ? \Carbon\Carbon::parse($end_date)->format('F d, Y') : null;
-            $previewSdg = $sdgs->find($sdg_id);
 
             // Build Cover Image Array for Carousel
             $previewImages = [];
@@ -336,14 +335,23 @@
                             <h4 class="text-sm font-black text-gray-900">{{ Auth::user()->name }}</h4>
                         </div>
 
-                        @if($previewSdg)
-                            <div class="rounded-3xl p-6 border text-white text-center shadow-sm relative overflow-hidden" style="background-color: {{ $previewSdg->color_hex ?? '#3b82f6' }};">
-                                <div class="absolute inset-0 bg-black/10 mix-blend-multiply"></div>
-                                <div class="relative z-10 flex flex-col items-center">
-                                    <span class="bg-white/20 text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-md mb-3">Aligned Goal</span>
-                                    <span class="text-5xl font-black mb-1">{{ $previewSdg->number }}</span>
-                                    <h4 class="text-sm font-bold mt-2">{{ $previewSdg->name }}</h4>
-                                </div>
+                        {{-- Multiple SDG Preview Cards --}}
+                        @if(count($selectedSdgs) > 0)
+                            <div class="space-y-4">
+                                <h4 class="font-bold text-gray-400 uppercase tracking-widest text-[10px] border-b border-gray-100 pb-2 text-center">Aligned Goals</h4>
+                                
+                                @foreach($selectedSdgs as $id)
+                                    @php $sdg = $sdgs->find($id); @endphp
+                                    @if($sdg)
+                                        <div class="rounded-3xl p-6 border text-white text-center shadow-sm relative overflow-hidden" style="background-color: {{ $sdg->color_hex ?? '#3b82f6' }};">
+                                            <div class="absolute inset-0 bg-black/10 mix-blend-multiply"></div>
+                                            <div class="relative z-10 flex flex-col items-center">
+                                                <span class="text-4xl font-black mb-1 leading-none">{{ $sdg->goal_number }}</span>
+                                                <h4 class="text-[10px] font-bold uppercase tracking-wider">{{ $sdg->name }}</h4>
+                                            </div>
+                                        </div>
+                                    @endif
+                                @endforeach
                             </div>
                         @endif
                     </div>
