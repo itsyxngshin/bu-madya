@@ -5,6 +5,7 @@ namespace App\Livewire;
 use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\Activity;
+use Illuminate\Support\Facades\Session;
 use App\Models\SiteStat;
 
 class PublicActivityIndex extends Component
