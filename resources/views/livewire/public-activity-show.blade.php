@@ -10,7 +10,7 @@
 
 @section('meta_image', $ogImage)
 
-<div class="w-full px-4 sm:px-6 lg:px-8 py-8 lg:py-12 animate-fade-in-up">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12 animate-fade-in-up">
 
     {{-- Breadcrumb Navigation --}}
     <div class="mb-6">
@@ -113,11 +113,13 @@
         <div class="p-6 md:p-10 grid grid-cols-1 lg:grid-cols-3 gap-10">
 
             {{-- Left/Main Column: Description & Participants --}}
-            <div class="max-w-4xl space-y-10">
+            <div class="lg:col-span-2 space-y-10">
+
+                {{-- Activity Overview --}}
                 <div>
                     <h3 class="text-xs font-black text-gray-400 uppercase tracking-widest mb-4 border-b border-gray-100 pb-2">Activity Overview</h3>
-                    <div class="prose prose-sm md:prose-base text-gray-700 leading-relaxed whitespace-pre-line">
-                        {{ $activity->description }}
+                    <div class="prose prose-sm md:prose-base max-w-none text-gray-700 leading-relaxed whitespace-pre-line">
+                        {{ $activity->description ?? 'Detailed description for this activity is currently being updated.' }}
                     </div>
                 </div>
 
