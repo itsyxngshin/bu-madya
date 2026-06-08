@@ -89,6 +89,7 @@
                         <div>
                             <label class="block text-xs font-bold text-gray-700 mb-1">End Date</label>
                             <input wire:model.live="end_date" type="date" class="w-full text-xs border-gray-200 rounded-lg focus:ring-red-400">
+                            @error('end_date') <span class="text-red-500 text-[10px]">{{ $message }}</span> @enderror
                         </div>
                     </div>
 
@@ -117,6 +118,7 @@
                             @endforeach
                         </div>
                     </div>
+                    @error('selectedSdgs') <span class="text-red-500 text-[10px] mt-2 block">{{ $message }}</span> @enderror
                 </div>
             </div>
 
@@ -143,9 +145,11 @@
                             <p class="text-[10px] font-bold text-gray-600"><span class="text-red-600">Tap to upload</span> or drag images here</p>
                         </div>
                         <input type="file" x-ref="multiFile" wire:model="photos" multiple accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+                        @error('photos.*') <span class="text-red-500 text-[10px] mt-1 block font-bold z-50 relative">{{ $message }}</span> @enderror
                     </label>
                     <div wire:loading wire:target="photos" class="text-[10px] text-red-500 font-bold mt-2 animate-pulse text-center w-full">Uploading...</div>
                 </div>
+                
 
                 {{-- Image Previews --}}
                 <div class="flex flex-wrap gap-2">

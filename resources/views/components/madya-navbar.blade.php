@@ -8,6 +8,7 @@
         $navLinks = [
             ['name' => 'Home', 'route' => 'open.home', 'active' => 'open.home.*', 'icon' => 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6'],
             ['name' => 'Projects', 'route' => 'projects.index', 'active' => 'projects.*', 'icon' => 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10'],
+            ['name' => 'Activities', 'route' => 'activities.index', 'active' => 'activities.*', 'icon' => 'M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z'],
             ['name' => 'Events', 'route' => 'events.index', 'active' => 'events.*', 'icon' => 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'],
             ['name' => 'Directory', 'route' => 'open.directory', 'active' => 'open.directory.*', 'icon' => 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z'],
             ['name' => 'Linkages', 'route' => 'linkages.index', 'active' => 'linkages.*', 'icon' => 'M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1'],
@@ -31,7 +32,8 @@
             </div>
 
             {{-- 2. CENTER: Desktop Navigation --}}
-            <div class="hidden md:flex items-center justify-center space-x-6 lg:space-x-8">
+            {{-- FIXED: Reduced space-x-6 to space-x-4 to prevent overcrowding with the 9th link --}}
+            <div class="hidden md:flex items-center justify-center space-x-4 lg:space-x-6 xl:space-x-8">
                 @foreach($navLinks as $link)
                     <a href="{{ route($link['route']) }}"
                        class="group flex flex-col items-center justify-center transition-all duration-200
@@ -190,7 +192,8 @@
                         ) 
                         : 'https://ui-avatars.com/api/?name='.urlencode(Auth::user()->name).'&color=7F9CF5&background=EBF4FF';
                 @endphp
-                <div class="flex items-center gap-3 mb-4">
+                {{-- MOBILE AUTH FOOTER --}}
+                <div class="flex items-center gap-3 mb-6 pt-4">
                     <img class="h-10 w-10 rounded-full object-cover border-2 border-white shadow-sm" src="{{ $mobileAvatarUrl }}" alt="{{ Auth::user()->name }}" />
                     <div class="overflow-hidden">
                         <div class="font-bold text-gray-900 leading-tight truncate text-sm">{{ Auth::user()->name }}</div>
@@ -198,37 +201,27 @@
                     </div>
                 </div>
 
-                @php
-                    $userRole = Auth::user()->role->role_name ?? 'guest';
-                    $canViewDashboard = in_array($userRole, ['administrator', 'director', 'organization']);
+                {{-- PRIMARY QR ACTION (Standalone) --}}
+                <button @click.prevent="showQrModal = true; open = false" 
+                        class="w-full mb-3 flex items-center justify-center gap-3 py-3.5 bg-gray-900 text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-lg hover:bg-red-600 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm14 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
+                    Show Digital ID
+                </button>
 
-                    $navDashboardRoute = match($userRole) {
-                        'administrator' => route('admin.dashboard'),
-                        'organization'  => route('partner.dashboard'),
-                         default         => route('dashboard'),
-                    };
-                @endphp
-
-                <div class="grid {{ $canViewDashboard ? 'grid-cols-3' : 'grid-cols-2' }} gap-2 mt-4">
-
+                {{-- DASHBOARD & LOGOUT --}}
+                <div class="grid grid-cols-2 gap-3">
                     @if($canViewDashboard)
                         <a href="{{ $navDashboardRoute }}" class="flex justify-center items-center py-2.5 bg-white border border-gray-200 rounded-lg text-[10px] font-bold uppercase tracking-wide text-gray-600 hover:bg-gray-100 shadow-sm transition">
                             Dashboard
                         </a>
                     @endif
 
-                    {{-- MOBILE TRIGGER: MY DIGITAL ID --}}
-                    <button @click.prevent="showQrModal = true; open = false" class="flex justify-center items-center py-2.5 bg-blue-50 border border-blue-100 rounded-lg text-[10px] font-bold uppercase tracking-wide text-blue-700 hover:bg-blue-100 shadow-sm transition">
-                        My QR ID
-                    </button>
-
                     <form method="POST" action="{{ route('logout') }}" class="h-full">
                         @csrf
-                        <button type="submit" class="w-full h-full py-2.5 bg-red-100 border border-transparent rounded-lg text-[10px] font-bold uppercase tracking-wide text-red-700 hover:bg-red-200 shadow-sm transition">
+                        <button type="submit" class="w-full h-full py-2.5 bg-gray-100 border border-transparent rounded-lg text-[10px] font-bold uppercase tracking-wide text-gray-700 hover:bg-red-100 hover:text-red-700 shadow-sm transition">
                             Log Out
                         </button>
                     </form>
-
                 </div>
             @else
                 <div class="grid grid-cols-2 gap-3">
@@ -293,5 +286,4 @@
     </template>
     @endauth
     
-
 </nav>

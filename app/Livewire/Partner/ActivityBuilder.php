@@ -148,7 +148,7 @@ class ActivityBuilder extends Component
             'start_date' => 'required|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
             'nature_of_activity' => 'required|string|max:255',
-            'photos.*' => 'image|max:2048',
+            'photos.*' => 'image|max:6168', // Max 6MB per image
             'selectedSdgs' => 'array',
             'selectedSdgs.*' => 'exists:sdgs,id',
         ]);
@@ -180,13 +180,18 @@ class ActivityBuilder extends Component
             $activity = Activity::create($data);
         }
 
+        // FIXED: Sync them separately so Laravel respects the role constraints!
         $focalSync = collect($this->selectedFocals)->mapWithKeys(fn($u) => [$u['id'] => ['role' => 'focal']])->toArray();
         $participantSync = collect($this->selectedParticipants)->mapWithKeys(fn($u) => [$u['id'] => ['role' => 'participant']])->toArray();
-        $activity->focals()->sync($focalSync + $participantSync);
+        
+        $activity->focals()->sync($focalSync);
+        $activity->participants()->sync($participantSync);
         $activity->sdgs()->sync($this->selectedSdgs);
 
         session()->flash('success', $this->isEditMode ? 'Activity updated successfully.' : 'Activity published successfully.');
-        return redirect()->route('activities.manage');
+        
+        // FIXED: Use the dynamic helper to redirect to the correct role dashboard
+        return redirect()->route($this->getManagerRoute());
     }
 
     public function render()

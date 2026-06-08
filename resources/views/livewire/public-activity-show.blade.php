@@ -1,3 +1,15 @@
+@section('meta_title', '[ACTIVITY] ' . $activity->title)
+@section('meta_description', $activity->description ? Str::limit(strip_tags($activity->description), 160) : 'Explore our latest youth-led activities, partnerships, and advocacy-driven initiatives contributing to sustainable development.')
+
+@php
+    // Safely grab the first highlight photo, or fall back to the default logo
+    $ogImage = (!empty($activity->highlight_photos) && count($activity->highlight_photos) > 0)
+        ? (Str::startsWith($activity->highlight_photos[0], 'http') ? $activity->highlight_photos[0] : asset('storage/' . $activity->highlight_photos[0]))
+        : asset('images/MADYA Web Logo1.png');
+@endphp
+
+@section('meta_image', $ogImage)
+
 <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12 animate-fade-in-up">
 
     {{-- Breadcrumb Navigation --}}
@@ -10,24 +22,46 @@
     <div class="bg-white rounded-[2.5rem] shadow-sm border border-gray-100 overflow-hidden">
 
         {{-- Hero Photo Gallery Container --}}
-        <div class="w-full relative bg-gray-900 overflow-hidden flex" style="max-height: 500px;">
+        <div class="w-full relative bg-gray-900 overflow-hidden" style="max-height: 500px;">
             @if(!empty($activity->highlight_photos) && count($activity->highlight_photos) > 0)
-                <div class="w-full h-full snap-x snap-mandatory flex overflow-x-auto custom-scrollbar">
-                    @foreach($activity->highlight_photos as $photo)
-                        <div class="shrink-0 w-full h-[300px] sm:h-[400px] md:h-[500px] snap-center relative">
-                            <img src="{{ asset('storage/' . $photo) }}" class="w-full h-full object-cover opacity-90" alt="Highlight Photo">
-                            <div class="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/40 to-transparent"></div>
+                
+                {{-- ALPINE CAROUSEL WRAPPER --}}
+                <div x-data="{ activeSlide: 0, slides: {{ count($activity->highlight_photos) }} }" class="w-full h-full relative group">
+                    
+                    {{-- Images Track --}}
+                    <div class="w-full h-full flex transition-transform duration-500 ease-out"
+                         :style="'transform: translateX(-' + (activeSlide * 100) + '%)'">
+                        @foreach($activity->highlight_photos as $photo)
+                            <div class="shrink-0 w-full h-[300px] sm:h-[400px] md:h-[500px] relative">
+                                <img src="{{ asset('storage/' . $photo) }}" class="w-full h-full object-cover opacity-90" alt="Highlight Photo">
+                                <div class="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/40 to-transparent"></div>
+                            </div>
+                        @endforeach
+                    </div>
+
+                    @if(count($activity->highlight_photos) > 1)
+                        {{-- Desktop Navigation Arrows (Visible on Hover) --}}
+                        <button @click="activeSlide = activeSlide === 0 ? slides - 1 : activeSlide - 1"
+                                class="absolute left-4 sm:left-6 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/40 hover:bg-red-600 text-white rounded-full flex items-center justify-center backdrop-blur-sm transition-all opacity-0 group-hover:opacity-100 z-20 shadow-lg">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                        </button>
+                        
+                        <button @click="activeSlide = activeSlide === slides - 1 ? 0 : activeSlide + 1"
+                                class="absolute right-4 sm:right-6 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/40 hover:bg-red-600 text-white rounded-full flex items-center justify-center backdrop-blur-sm transition-all opacity-0 group-hover:opacity-100 z-20 shadow-lg">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                        </button>
+
+                        {{-- Pagination Dots --}}
+                        <div class="absolute top-6 right-6 flex gap-1.5 z-20">
+                            <template x-for="i in slides" :key="i">
+                                <button @click="activeSlide = i - 1"
+                                        :class="activeSlide === i - 1 ? 'w-6 bg-red-600 shadow-[0_0_8px_rgba(220,38,38,0.8)]' : 'w-2 bg-white/50 hover:bg-white/90'"
+                                        class="h-2 rounded-full transition-all duration-300"></button>
+                            </template>
                         </div>
-                    @endforeach
+                    @endif
                 </div>
 
-                @if(count($activity->highlight_photos) > 1)
-                    <div class="absolute bottom-6 inset-x-0 flex justify-center pointer-events-none">
-                        <span class="bg-black/50 backdrop-blur-md text-white text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full shadow-lg border border-white/20">
-                            Swipe for {{ count($activity->highlight_photos) }} Photos
-                        </span>
-                    </div>
-                @endif
             @else
                 <div class="w-full h-[250px] md:h-[350px] bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center relative">
                     <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
@@ -35,8 +69,8 @@
                 </div>
             @endif
 
-            {{-- Floating Title Card --}}
-            <div class="absolute bottom-0 inset-x-0 p-6 md:p-10 z-10 pointer-events-none">
+            {{-- Floating Title Card (Visible only on Desktop) --}}
+            <div class="absolute bottom-0 inset-x-0 p-10 z-10 pointer-events-none hidden md:block">
                 <div class="flex flex-wrap items-center gap-2 mb-3">
                     <span class="px-2.5 py-1 text-[9px] font-black uppercase tracking-widest rounded-lg bg-white/20 backdrop-blur-md text-white border border-white/30">
                         {{ $activity->status }}
@@ -45,13 +79,32 @@
                         {{ $activity->nature_of_activity }}
                     </span>
                 </div>
-                <h1 class="text-3xl md:text-5xl font-black text-white leading-tight drop-shadow-lg mb-2">{{ $activity->title }}</h1>
-                <p class="text-gray-300 text-sm md:text-base font-medium flex items-center gap-2 drop-shadow-md">
+                <h1 class="text-4xl font-black text-white leading-tight drop-shadow-lg mb-2">
+                    {{ $activity->title }}
+                </h1>
+                <p class="text-gray-300 text-base font-medium flex items-center gap-2 drop-shadow-md">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                     {{ $activity->start_date->format('F d, Y') }}
-                    @if($activity->end_date && $activity->end_date != $activity->start_date)
-                        - {{ $activity->end_date->format('F d, Y') }}
-                    @endif
+                </p>
+            </div>
+            
+            {{-- Mobile Title Card (Visible only on Mobile) --}}
+            {{-- Updated: bg-gray-900 and text-white for high contrast --}}
+            <div class="md:hidden px-6 pt-4 pb-6 bg-gray-900">
+                <div class="flex flex-wrap items-center gap-2 mb-3">
+                    <span class="px-2.5 py-1 text-[9px] font-black uppercase tracking-widest rounded-lg bg-white/10 text-white border border-white/20">
+                        {{ $activity->status }}
+                    </span>
+                    <span class="px-2.5 py-1 text-[9px] font-black uppercase tracking-widest rounded-lg bg-red-600 text-white">
+                        {{ $activity->nature_of_activity }}
+                    </span>
+                </div>
+                <h1 class="text-2xl font-black text-white leading-tight mb-3">
+                    {{ $activity->title }}
+                </h1>
+                <p class="text-gray-300 text-xs font-bold flex items-center gap-2 mb-4">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    {{ $activity->start_date->format('F d, Y') }}
                 </p>
             </div>
         </div>
@@ -120,18 +173,6 @@
 
             {{-- Right Sidebar: Metadata & SDG --}}
             <div class="space-y-6">
-
-                {{-- Host Org Card --}}
-                <div class="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm flex flex-col items-center text-center">
-                    <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-3">Initiated By</p>
-                    @php
-                        $orgFallback = 'https://ui-avatars.com/api/?name='.urlencode($activity->user->name).'&background=eff6ff&color=2563eb&bold=true';
-                        $orgAvatar = $activity->user->avatar ?? $orgFallback;
-                    @endphp
-                    <img src="{{ $orgAvatar }}" onerror="this.onerror=null; this.src='{{ $orgFallback }}';" class="w-16 h-16 rounded-full border border-gray-200 shadow-sm mb-3">
-                    <h4 class="text-sm font-black text-gray-900">{{ $activity->user->name }}</h4>
-                    <p class="text-[10px] font-medium text-gray-500 mt-1">{{ $activity->user->email }}</p>
-                </div>
 
                 {{-- SDG Cards --}}
                 @if($activity->sdgs->count() > 0)

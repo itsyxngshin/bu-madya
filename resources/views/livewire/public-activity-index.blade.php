@@ -26,10 +26,26 @@
             @auth
                 @if(in_array(Auth::user()->role->role_name ?? '', ['administrator', 'director', 'organization']))
                     <div class="mt-8">
-                        <a href="{{ route('activities.manage') }}" class="inline-flex items-center gap-2 px-6 py-3 bg-white/20 backdrop-blur-md border border-white/40 rounded-full text-white text-xs font-bold uppercase tracking-widest hover:bg-white hover:text-red-600 transition shadow-lg">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                            Log Activity
-                        </a>
+                        @auth
+                            @if(in_array(Auth::user()->role->role_name ?? '', ['administrator', 'director', 'organization']))
+                                @php
+                                    $role = Auth::user()->role->role_name ?? 'guest';
+                                    $manageRoute = match($role) {
+                                        'administrator' => route('admin.activities.manage'),
+                                        'organization'  => route('partner.activities.manage'),
+                                        'director'      => route('director.activities.manage'),
+                                        default         => route('dashboard'),
+                                    };
+                                @endphp
+                                <div class="mt-8">
+                                    {{-- FIXED: Using the dynamic $manageRoute --}}
+                                    <a href="{{ $manageRoute }}" class="inline-flex items-center gap-2 px-6 py-3 bg-white/20 backdrop-blur-md border border-white/40 rounded-full text-white text-xs font-bold uppercase tracking-widest hover:bg-white hover:text-red-600 transition shadow-lg">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                                        Log Activity
+                                    </a>
+                                </div>
+                            @endif
+                        @endauth
                     </div>
                 @endif
             @endauth
