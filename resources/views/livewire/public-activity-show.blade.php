@@ -179,18 +179,6 @@
                 {{-- Right Sidebar: Metadata & SDG --}}
                 <div class="lg:col-span-4 space-y-6">
 
-                    {{-- Host Org Card --}}
-                    <div class="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm flex flex-col items-center text-center">
-                        <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-3">Initiated By</p>
-                        @php
-                            $orgFallback = 'https://ui-avatars.com/api/?name='.urlencode($activity->user->name).'&background=eff6ff&color=2563eb&bold=true';
-                            $orgAvatar = $activity->user->avatar ?? $orgFallback;
-                        @endphp
-                        <img src="{{ $orgAvatar }}" onerror="this.onerror=null; this.src='{{ $orgFallback }}';" class="w-16 h-16 rounded-full border border-gray-200 shadow-sm mb-3">
-                        <h4 class="text-sm font-black text-gray-900">{{ $activity->user->name }}</h4>
-                        <p class="text-[10px] font-medium text-gray-500 mt-1">{{ $activity->user->email }}</p>
-                    </div>
-
                     {{-- SDG Cards --}}
                     @if($activity->sdgs->count() > 0)
                         <div class="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm">
@@ -207,7 +195,7 @@
                                         {{-- Left Side: Colored Number Block --}}
                                         <div class="w-14 shrink-0 flex items-center justify-center text-white font-black text-lg"
                                             style="background-color: {{ $sdg->color_hex }}">
-                                            {{ $sdg->goal_number }}
+                                            {{ $sdg->number }}
                                         </div>
 
                                         {{-- Right Side: Tinted Text Block --}}
