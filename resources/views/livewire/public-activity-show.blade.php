@@ -209,7 +209,9 @@
             </div>
         </div>
     </div>
-    <footer class="bg-gray-900 text-white pt-20 pb-10 border-t-8 border-red-600 relative z-20">
+
+</div>
+<footer class="bg-gray-900 text-white pt-20 pb-10 border-t-8 border-red-600 relative z-20">
         <div class="max-w-[1800px] w-[95%] mx-auto px-6 grid md:grid-cols-4 gap-12 mb-16">
 
             <div class="col-span-1 md:col-span-2">
@@ -260,4 +262,3 @@
             &copy; {{ date('Y') }} BU MADYA. All Rights Reserved.
         </div>
     </footer>
-</div>
