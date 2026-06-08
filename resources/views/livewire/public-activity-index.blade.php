@@ -204,12 +204,6 @@
                             </p>
 
                             <div class="flex items-center justify-between mt-auto pt-2">
-                                <div class="flex flex-col">
-                                    <span class="text-[10px] text-gray-400 font-bold uppercase">Initiated By</span>
-                                    <span class="text-sm font-bold text-red-600 truncate max-w-[150px]">
-                                        {{ $activity->user->name ?? 'BU MADYA' }}
-                                    </span>
-                                </div>
                                 <a href="{{ route('activities.show', $activity->slug ?? $activity->id) }}" class="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center text-gray-400 group-hover:bg-red-600 group-hover:text-white group-hover:border-red-600 transition duration-300 shadow-sm">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                                 </a>
