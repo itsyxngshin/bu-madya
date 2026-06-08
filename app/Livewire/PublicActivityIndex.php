@@ -14,6 +14,7 @@ class PublicActivityIndex extends Component
 
     public $search = '';
     public $visitorCount = 1;
+
     public function mount()
     {
         // 1. Check if this specific user has already been counted in this session
