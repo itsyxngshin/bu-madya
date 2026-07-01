@@ -96,7 +96,7 @@
                                     <p class="text-xs text-gray-500 uppercase font-bold">Signed in as</p>
                                     <p class="text-sm font-bold text-gray-900 truncate">{{ Auth::user()->name }}</p>
                                 </div>
-                                
+
                                 {{-- DESKTOP TRIGGER: MY DIGITAL ID --}}
                                 <button @click.prevent="showQrModal = true; dropdownOpen = false" class="w-full text-left block px-4 py-2 text-sm text-blue-700 hover:bg-blue-50 font-bold flex items-center gap-2 transition-colors">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm14 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
@@ -179,16 +179,16 @@
             @auth
                 @php
                     $mobilePath = Auth::user()->profile_photo_path;
-                    $mobileAvatarUrl = $mobilePath 
+                    $mobileAvatarUrl = $mobilePath
                         ? (
-                            Str::startsWith($mobilePath, 'http') 
-                                ? $mobilePath 
+                            Str::startsWith($mobilePath, 'http')
+                                ? $mobilePath
                                 : (
-                                    Str::startsWith($mobilePath, 'images/') 
-                                        ? asset($mobilePath) 
+                                    Str::startsWith($mobilePath, 'images/')
+                                        ? asset($mobilePath)
                                         : asset('storage/' . $mobilePath)
                                 )
-                        ) 
+                        )
                         : 'https://ui-avatars.com/api/?name='.urlencode(Auth::user()->name).'&color=7F9CF5&background=EBF4FF';
                 @endphp
                 {{-- MOBILE AUTH FOOTER --}}
@@ -201,7 +201,7 @@
                 </div>
 
                 {{-- PRIMARY QR ACTION (Standalone) --}}
-                <button @click.prevent="showQrModal = true; open = false" 
+                <button @click.prevent="showQrModal = true; open = false"
                         class="w-full mb-3 flex items-center justify-center gap-3 py-3.5 bg-gray-900 text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-lg hover:bg-red-600 transition">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm14 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
                     Show Digital ID
@@ -243,16 +243,16 @@
     <template x-teleport="body">
         {{-- FIXED: Using inline styles for z-index guarantees it sits above everything --}}
         <div x-show="showQrModal" style="display: none; z-index: 999999;" class="fixed inset-0 flex items-center justify-center p-4">
-            
+
             {{-- Backdrop --}}
-            <div x-show="showQrModal" 
+            <div x-show="showQrModal"
                  x-transition.opacity.duration.300ms
-                 class="fixed inset-0 bg-gray-900/80 backdrop-blur-sm" 
+                 class="fixed inset-0 bg-gray-900/80 backdrop-blur-sm"
                  @click="showQrModal = false"
                  style="z-index: 999999;"></div>
 
             {{-- Modal Content --}}
-            <div x-show="showQrModal" 
+            <div x-show="showQrModal"
                  x-transition:enter="ease-out duration-300"
                  x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
                  x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
@@ -261,22 +261,22 @@
                  x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
                  style="z-index: 1000000;"
                  class="relative bg-white p-6 md:p-8 rounded-[2rem] border border-gray-100 shadow-2xl flex flex-col items-center text-center max-w-sm w-full mx-auto">
-                
+
                 {{-- Close Button --}}
                 <button @click="showQrModal = false" class="absolute top-4 right-4 text-gray-400 hover:text-red-500 bg-gray-50 hover:bg-red-50 p-2 rounded-full transition-colors">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
 
                 <h3 class="text-[10px] font-black text-blue-500 uppercase tracking-widest mb-4">Your Digital Check-in ID</h3>
-                
+
                 <div class="p-4 bg-white rounded-3xl shadow-sm border border-gray-200 inline-block">
-                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data={{ Auth::user()->id }}&margin=0" 
-                         class="w-48 h-48 md:w-56 md:h-56" 
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data={{ Auth::user()->id }}&margin=0"
+                         class="w-48 h-48 md:w-56 md:h-56"
                          alt="User QR Code">
                 </div>
-                
+
                 <p class="text-lg md:text-xl font-black text-gray-900 mt-5">{{ Auth::user()->name }}</p>
-                
+
                 <p class="text-[10px] md:text-xs text-gray-500 mt-5 leading-relaxed bg-blue-50/50 text-blue-800 p-4 rounded-2xl border border-blue-100">
                     Present this QR code to the secretariat to instantly log your attendance at meetings and events.
                 </p>
@@ -284,5 +284,5 @@
         </div>
     </template>
     @endauth
-    
+
 </nav>
