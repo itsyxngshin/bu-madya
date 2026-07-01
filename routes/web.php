@@ -100,7 +100,8 @@ use App\Livewire\Admin\AccreditationDashboard;
 use App\Livewire\PublicActivityIndex;
 use App\Livewire\PublicActivityShow;
 
-$baseDomain = parse_url(config('app.url'), PHP_URL_HOST) ?? 'localhost';
+$host = parse_url(config('app.url'), PHP_URL_HOST) ?? 'localhost';
+$baseDomain = [str_replace('www.', '', $host), 'www.' . str_replace('www.', '', $host)];
 
 Route::domain('webmaster.' . env('APP_DOMAIN'))->group(function () {
 
@@ -219,7 +220,7 @@ Route::middleware([
 });
 */
 
-Route::domain($baseDomain)->group(function () {
+Route::middleware(['web'])->group(function () {
 
     Route::get('/events/{event:slug}/scan', EventScanner::class)->name('admin.events.scan');
 

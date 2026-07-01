@@ -13,6 +13,12 @@ class FeedInteraction extends Component
     public Post $post;
     public $newComment = '';
 
+    // ==========================================
+    // ADDED: Modal State & Data Properties
+    // ==========================================
+    public bool $showReactorsModal = false;
+    public $reactorsList = [];
+
     // Restored your exact BU MADYA branding elements!
     public $availableElements = [
         'solidarity' => ['label' => 'Solidarity', 'icon' => '✊', 'color' => 'text-blue-600'],
@@ -27,6 +33,27 @@ class FeedInteraction extends Component
         $this->post = $post;
     }
 
+    // ==========================================
+    // ADDED: Modal Control Methods
+    // ==========================================
+    public function openReactors()
+    {
+        // Fetch elements with the associated user, sorted by newest first
+        $this->reactorsList = $this->post->elements()->with('user')->latest()->get();
+        $this->showReactorsModal = true;
+    }
+
+    public function closeReactors()
+    {
+        $this->showReactorsModal = false;
+        
+        // Optional: clear the list from memory when closing to keep things lightweight
+        $this->reactorsList = []; 
+    }
+
+    // ==========================================
+    // Existing Feed Logic
+    // ==========================================
     public function toggleElement($type)
     {
         if (!auth()->check()) return redirect()->route('login');
@@ -36,13 +63,16 @@ class FeedInteraction extends Component
 
         // The Un-react Logic
         if ($existing) {
-            if ($existing->type === $type) { $existing->delete(); } 
-            else { $existing->update(['type' => $type]); }
+            if ($existing->type === $type) { 
+                $existing->delete(); 
+            } else { 
+                $existing->update(['type' => $type]); 
+            }
         } else {
             Element::create(['post_id' => $this->post->id, 'user_id' => auth()->id(), 'type' => $type]);
         }
     }
-
+    
     public function postComment()
     {
         if (!auth()->check()) return redirect()->route('login');

@@ -1,67 +1,51 @@
 <div class="min-h-screen bg-stone-50 font-sans text-gray-900 selection:bg-red-600 selection:text-white overflow-x-hidden">
+{{-- 1. HERO SECTION (Mobile Responsive) --}}
+<header class="relative min-h-[85vh] md:min-h-[85vh] flex items-center bg-gray-900 overflow-hidden shadow-2xl">
 
-    {{-- 1. HERO SECTION (Redesigned) --}}
-    <header class="relative min-h-[85vh] md:min-h-[800px] flex items-center justify-center text-white overflow-hidden rounded-b-[50px] md:rounded-b-[80px] shadow-2xl">
+    {{-- Image Container (Hidden on Mobile, Spanning Right on Desktop) --}}
+    <div class="hidden md:block absolute top-0 right-0 w-1/2 h-full z-0">
+        <img src="{{ asset('images/1760712981522.JPG') }}"
+             class="w-full h-full object-cover brightness-110"
+             style="mask-image: linear-gradient(to right, transparent 0%, black 30%); -webkit-mask-image: linear-gradient(to right, transparent 0%, black 30%);">
+        <div class="absolute inset-0 bg-gradient-to-r from-gray-900 via-gray-900/60 to-transparent"></div>
+    </div>
 
-        {{-- Background & Overlay --}}
-        <div class="absolute inset-0 z-0">
-            {{-- UPDATED IMAGE SOURCE HERE --}}
-            <img src="{{ asset('images/1760712981522.JPG') }}"
-                 class="w-full h-full object-cover transform scale-105 animate-slow-pan"
-                 alt="BU MADYA Team">
+    {{-- Mobile Image Overlay (Only visible on small screens) --}}
+    <div class="md:hidden absolute inset-0 z-0 opacity-30">
+        <img src="{{ asset('images/1760712981522.JPG') }}" class="w-full h-full object-cover">
+        <div class="absolute inset-0 bg-gradient-to-b from-gray-900/90 via-gray-900/80 to-gray-900"></div>
+    </div>
 
-            {{-- Tri-Color Gradient Overlay --}}
-            <div class="absolute inset-0 bg-gradient-to-b from-green-900/90 via-green-800/50 to-gray-900/95 mix-blend-multiply"></div>
+    {{-- Text Content Container --}}
+    <div class="relative z-10 container mx-auto px-6 md:px-12">
+        <div class="w-full md:w-5/12 text-left space-y-6 md:space-y-8">
+            {{-- Stylized Badge (Architectural Look) --}}
+            <h1 class="font-heading text-5xl md:text-8xl font-black uppercase tracking-tighter leading-[0.9] text-white">
+                ADVOCACY <br>
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-orange-400 to-red-500">
+                    IN ACTION
+                </span>
+            </h1>
 
-            {{-- Decorative Glows --}}
-            <div class="absolute top-1/3 left-1/4 w-96 h-96 bg-yellow-400/20 rounded-full blur-[120px] animate-pulse"></div>
-            <div class="absolute bottom-1/3 right-1/4 w-96 h-96 bg-red-600/20 rounded-full blur-[120px] animate-pulse delay-1000"></div>
-        </div>
+            <p class="text-lg md:text-xl text-gray-400 font-light leading-relaxed max-w-lg">
+                We are Bicol University’s dedicated force for social change. Bridging student voices with community action to foster a sustainable and empowered future.
+            </p>
 
-        {{-- Hero Content --}}
-        <div x-data="{ show: false }" x-init="setTimeout(() => show = true, 100)"
-             class="relative z-10 container mx-auto px-6 text-center mt-10 pb-20 md:pb-32">
-
-            {{-- Logo Animation --}}
-            <div x-show="show"
-                 x-transition:enter="transition ease-out duration-1000"
-                 x-transition:enter-start="opacity-0 -translate-y-10 scale-50"
-                 x-transition:enter-end="opacity-100 translate-y-0 scale-100"
-                 class="w-24 h-24 md:w-32 md:h-32 mx-auto mb-8 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center border border-white/20 shadow-2xl p-4 ring-4 ring-white/5">
-                <img src="{{ asset('images/MADYA Web Logo1.png') }}" alt="Logo" class="w-full h-full object-contain drop-shadow-lg">
-            </div>
-
-            <div x-show="show"
-                 x-transition:enter="transition ease-out duration-1000 delay-300"
-                 x-transition:enter-start="opacity-0 translate-y-4"
-                 x-transition:enter-end="opacity-100 translate-y-0">
-
-                <h2 class="text-yellow-300 font-bold tracking-[0.3em] text-xs md:text-sm mb-4 uppercase drop-shadow-md">
-                    Bicol University
-                </h2>
-
-                <h1 class="font-heading text-4xl md:text-6xl lg:text-7xl font-black uppercase tracking-tight leading-none mb-6 drop-shadow-2xl text-white">
-                    Movement for the <br class="hidden md:block">
-                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-orange-400 to-red-500 drop-shadow-sm">
-                        Advancement of Youth-led Advocacy
-                    </span>
-                </h1>
-
-                <p class="text-base md:text-xl text-green-50 max-w-2xl mx-auto mb-10 font-light drop-shadow-md bg-black/20 backdrop-blur-sm py-2 px-4 rounded-xl border border-white/5">
-                    Empowering youth-led advocacy and fostering sustainable development through active dialogue.
-                </p>
-
-                <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                    <a href="{{ route('membership-form') }}" class="px-8 py-4 bg-yellow-400 text-green-900 font-bold rounded-full shadow-[0_0_20px_rgba(250,204,21,0.5)] hover:bg-yellow-300 hover:scale-105 transition transform uppercase tracking-wider text-sm">
-                        Join the Movement
-                    </a>
-                    <a href="#pillars" class="px-8 py-4 bg-white/10 backdrop-blur-md border border-white/30 text-white font-bold rounded-full hover:bg-white/20 transition uppercase tracking-wider text-sm">
-                        Learn More
-                    </a>
-                </div>
+            <div class="flex flex-wrap gap-4 pt-2 md:pt-4">
+                <a href="{{ route('membership-form') }}" class="w-full md:w-auto px-8 py-4 bg-red-600 text-white font-black hover:bg-red-700 transition-all shadow-[0_10px_30px_-10px_rgba(220,38,38,0.5)] uppercase tracking-widest text-center text-sm">
+                    JOIN THE MOVEMENT
+                </a>
             </div>
         </div>
-    </header>
+    </div>
+
+    {{-- Tricolor Stroke at the Bottom --}}
+    <div class="absolute bottom-0 left-0 w-full h-2 flex z-20">
+        <div class="w-1/3 bg-green-600"></div>
+        <div class="w-1/3 bg-yellow-400"></div>
+        <div class="w-1/3 bg-red-600"></div>
+    </div>
+</header>
 
     {{-- MAIN CONTENT --}}
     <main class="max-w-[1800px] w-[95%] mx-auto px-4 relative z-20 pb-24">
@@ -441,7 +425,7 @@
                         </a>
                     </div>
                 </div>
-                
+
                 {{-- DYNAMIC CALENDAR WIDGET --}}
                 <div class="bg-white rounded-2xl md:rounded-[2rem] p-5 md:p-8 shadow-sm border border-gray-100"
                      x-data="{
@@ -450,20 +434,20 @@
                         monthNames: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
                         activities: @js($calendarData ?? []),
                         activeDate: null,
-                        
+
                         get daysInMonth() { return new Date(this.currentYear, this.currentMonth + 1, 0).getDate(); },
                         get blankDays() { return new Date(this.currentYear, this.currentMonth, 1).getDay(); },
-                        
+
                         get daysArray() { return Array.from({length: this.daysInMonth}, (_, i) => i + 1); },
                         get blanksArray() { return Array.from({length: this.blankDays}, (_, i) => i); },
-                        
+
                         formatDate(day) {
                             return this.currentYear + '-' + String(this.currentMonth + 1).padStart(2, '0') + '-' + String(day).padStart(2, '0');
                         },
                         hasActivity(day) {
                             return this.activities[this.formatDate(day)] !== undefined;
                         },
-                        
+
                         // New Navigation Logic
                         prevMonth() {
                             if (this.currentMonth === 0) {
@@ -484,7 +468,7 @@
                             this.activeDate = null;
                         }
                      }">
-                     
+
                     {{-- Calendar Header --}}
                     <div class="flex items-center justify-between mb-4 md:mb-5">
                         <div class="flex items-center gap-3">
@@ -496,7 +480,7 @@
                                 <p class="text-[9px] md:text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none" x-text="currentYear"></p>
                             </div>
                         </div>
-                        
+
                         {{-- Navigation Arrows --}}
                         <div class="flex items-center gap-1 bg-gray-50 rounded-lg border border-gray-200 p-0.5">
                             <button @click="prevMonth()" class="p-1.5 md:p-2 text-gray-400 hover:text-red-600 hover:bg-white rounded-md transition-colors focus:outline-none shadow-sm border border-transparent hover:border-gray-100">
@@ -508,7 +492,7 @@
                             </button>
                         </div>
                     </div>
-                     
+
                     {{-- Days of Week (Bulletproof Grid) --}}
                     <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px;" class="text-center mb-2 mt-4">
                         <template x-for="day in ['Su','Mo','Tu','We','Th','Fr','Sa']" :key="day">
@@ -523,7 +507,7 @@
                         </template>
                         <template x-for="day in daysArray" :key="'day-'+day">
                             <div class="relative w-full">
-                                <button @click="hasActivity(day) ? (activeDate === formatDate(day) ? activeDate = null : activeDate = formatDate(day)) : null" 
+                                <button @click="hasActivity(day) ? (activeDate === formatDate(day) ? activeDate = null : activeDate = formatDate(day)) : null"
                                         class="w-full h-8 md:h-10 flex flex-col items-center justify-center rounded-lg transition-all focus:outline-none"
                                         :class="{
                                             'hover:bg-gray-50 text-gray-500 cursor-default': !hasActivity(day),
