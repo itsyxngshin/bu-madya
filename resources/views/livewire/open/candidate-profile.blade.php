@@ -1,7 +1,7 @@
 <div class="max-w-5xl mx-auto py-8 md:py-12 px-4 sm:px-6 font-sans">
 
     @php
-        // THE FIX: Robust display name fallback for both real users and dummy candidates
+        // Robust display name fallback for both real users and dummy candidates
         $candidateName = $candidate->display_name ?? optional($candidate->user)->name ?? 'Unknown Candidate';
         $initial = strtoupper(substr($candidateName, 0, 1));
     @endphp
@@ -15,39 +15,40 @@
     {{-- PROFILE HEADER CARD --}}
     <div class="bg-white rounded-[2rem] shadow-sm border border-gray-200 overflow-hidden mb-8 relative">
 
-        {{-- THE FIX: Tri-Color Gradient Banner --}}
+        {{-- Tri-Color Gradient Banner --}}
         <div class="h-32 md:h-48 bg-gradient-to-r from-red-600 via-yellow-400 to-green-600 relative">
             <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
         </div>
 
         <div class="px-6 md:px-10 pb-8 md:pb-10">
-            <div class="flex flex-col md:flex-row gap-6 md:gap-8">
+            {{-- FIXED FOR MOBILE: Added items-center and text-center for mobile screens --}}
+            <div class="flex flex-col md:flex-row items-center md:items-start text-center md:text-left gap-4 md:gap-8">
 
-                {{-- Avatar Wrapper (Isolated negative margin) --}}
+                {{-- Avatar Wrapper (Portrait Photo Frame) --}}
                 <div class="-mt-16 md:-mt-20 shrink-0 relative z-10">
-                    <div class="w-32 h-32 md:w-40 md:h-40 rounded-full border-[6px] border-white shadow-xl bg-white overflow-hidden flex items-center justify-center">
+                    <div class="w-32 h-44 md:w-44 md:h-56 rounded-2xl border-[6px] border-white shadow-xl bg-white overflow-hidden flex items-center justify-center">
                         @if($candidate->profile_photo_path)
                             <img src="{{ asset('storage/'.$candidate->profile_photo_path) }}" class="w-full h-full object-cover">
                         @else
-                            {{-- THE FIX: Uses the calculated initial for dummy data --}}
-                            <span class="text-5xl font-black text-gray-300">{{ $initial }}</span>
+                            <span class="text-6xl md:text-7xl font-black text-gray-300">{{ $initial }}</span>
                         @endif
                     </div>
                 </div>
 
-                {{-- Basic Info (Safely positioned in the white area) --}}
-                <div class="flex-1 pt-2 md:pt-4">
-                    <div class="inline-flex items-center gap-2 bg-yellow-50 text-yellow-800 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest mb-3 border border-yellow-200">
+                {{-- Basic Info --}}
+                {{-- FIXED FOR MOBILE: Added flex-col and items-center to center the elements properly --}}
+                <div class="flex-1 pt-2 md:pt-4 flex flex-col items-center md:items-start">
+                    <div class="inline-flex items-center justify-center gap-2 bg-yellow-50 text-yellow-800 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest mb-3 border border-yellow-200">
                         Running for {{ $candidate->electionPosition->title ?? $candidate->position->title ?? 'Position' }}
                     </div>
 
-                    {{-- THE FIX: Uses the robust display name fallback --}}
                     <h1 class="text-3xl md:text-5xl font-black text-gray-900 tracking-tight leading-none mb-2">
                         {{ $candidateName }}
                     </h1>
 
-                    <p class="text-sm md:text-base font-bold text-gray-500 flex items-center gap-2">
-                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"></path></svg>
+                    {{-- FIXED FOR MOBILE: Added justify-center for the icon and text alignment --}}
+                    <p class="text-sm md:text-base font-bold text-gray-500 flex items-center justify-center md:justify-start gap-2">
+                        <svg class="w-4 h-4 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"></path></svg>
                         {{ $candidate->program }} ({{ $candidate->year_level }})
                     </p>
                     <p class="text-xs font-bold text-gray-400 mt-1 uppercase tracking-wider">{{ $candidate->college->name ?? '' }}</p>

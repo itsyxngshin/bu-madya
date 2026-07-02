@@ -12,49 +12,49 @@
     {{-- 1. NAVIGATION BAR --}}
     <div class="w-full bg-white border-b border-gray-200 h-14 md:h-16 flex items-center justify-between px-4 md:px-6 shadow-sm relative z-30">
 
-            {{-- A. Left: Back Link --}}
-            <a href="{{ route('projects.index') }}" class="group flex items-center gap-2 text-[10px] md:text-xs font-bold uppercase tracking-widest text-gray-500 hover:text-red-600 transition">
-                <div class="w-6 h-6 md:w-8 md:h-8 rounded-full bg-gray-100 flex items-center justify-center group-hover:bg-red-50 transition">
-                    <svg class="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-                </div>
-                <span class="hidden sm:inline">Back to Projects</span>
-            </a>
-
-            {{-- B. Center: Title (Hidden on small mobile) --}}
-            <span class="font-heading font-black text-sm md:text-lg tracking-tighter text-gray-900 hidden sm:block">
-                Project <span class="text-red-600">Spotlight</span>
-            </span>
-
-            {{-- C. Right: Edit Button & Status --}}
-            <div class="flex items-center gap-2 md:gap-4">
-
-                @auth
-                    <a href="{{ route('projects.edit', $project->slug) }}"
-                    class="group flex items-center gap-2 text-[10px] md:text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-blue-600 transition">
-                        <span class="hidden md:inline">Edit</span>
-                        <div class="w-6 h-6 md:w-8 md:h-8 rounded-full bg-white border border-gray-200 flex items-center justify-center group-hover:border-blue-200 group-hover:bg-blue-50 transition">
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                        </div>
-                    </a>
-                @endauth
-
-                <div class="h-3 md:h-4 w-px bg-gray-200"></div>
-
-                {{-- STATUS BADGE --}}
-                @if($project->status === 'Completed')
-                    <span class="px-2 py-0.5 md:px-3 md:py-1 bg-green-100 text-green-700 text-[9px] md:text-[10px] font-black uppercase tracking-widest rounded-full border border-green-200 shadow-sm flex items-center gap-1">
-                        <svg class="w-2.5 h-2.5 md:w-3 md:h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg> <span class="hidden sm:inline">Completed</span>
-                    </span>
-                @elseif($project->status === 'Ongoing')
-                    <span class="px-2 py-0.5 md:px-3 md:py-1 bg-red-100 text-red-600 text-[9px] md:text-[10px] font-black uppercase tracking-widest rounded-full border border-red-200 shadow-sm flex items-center gap-1 animate-pulse">
-                        <span class="w-1.5 h-1.5 md:w-2 md:h-2 bg-red-500 rounded-full"></span> Ongoing
-                    </span>
-                @else
-                    <span class="px-2 py-0.5 md:px-3 md:py-1 bg-yellow-100 text-yellow-800 text-[9px] md:text-[10px] font-black uppercase tracking-widest rounded-full border border-yellow-200 shadow-sm">
-                        Upcoming
-                    </span>
-                @endif
+        {{-- A. Left: Back Link --}}
+        <a href="{{ route('projects.index') }}" class="group flex items-center gap-2 text-[10px] md:text-xs font-bold uppercase tracking-widest text-gray-500 hover:text-red-600 transition">
+            <div class="w-6 h-6 md:w-8 md:h-8 rounded-full bg-gray-100 flex items-center justify-center group-hover:bg-red-50 transition">
+                <svg class="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
             </div>
+            <span class="hidden sm:inline">Back to Projects</span>
+        </a>
+
+        {{-- B. Center: Title (Hidden on small mobile) --}}
+        <span class="font-heading font-black text-sm md:text-lg tracking-tighter text-gray-900 hidden sm:block">
+            Project <span class="text-red-600">Spotlight</span>
+        </span>
+
+        {{-- C. Right: Edit Button & Status --}}
+        <div class="flex items-center gap-2 md:gap-4">
+
+            @auth
+                <a href="{{ route('projects.edit', $project->slug) }}"
+                class="group flex items-center gap-2 text-[10px] md:text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-blue-600 transition">
+                    <span class="hidden md:inline">Edit</span>
+                    <div class="w-6 h-6 md:w-8 md:h-8 rounded-full bg-white border border-gray-200 flex items-center justify-center group-hover:border-blue-200 group-hover:bg-blue-50 transition">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                    </div>
+                </a>
+            @endauth
+
+            <div class="h-3 md:h-4 w-px bg-gray-200"></div>
+
+            {{-- STATUS BADGE --}}
+            @if($project->status === 'Completed')
+                <span class="px-2 py-0.5 md:px-3 md:py-1 bg-green-100 text-green-700 text-[9px] md:text-[10px] font-black uppercase tracking-widest rounded-full border border-green-200 shadow-sm flex items-center gap-1">
+                    <svg class="w-2.5 h-2.5 md:w-3 md:h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg> <span class="hidden sm:inline">Completed</span>
+                </span>
+            @elseif($project->status === 'Ongoing')
+                <span class="px-2 py-0.5 md:px-3 md:py-1 bg-red-100 text-red-600 text-[9px] md:text-[10px] font-black uppercase tracking-widest rounded-full border border-red-200 shadow-sm flex items-center gap-1 animate-pulse">
+                    <span class="w-1.5 h-1.5 md:w-2 md:h-2 bg-red-500 rounded-full"></span> Ongoing
+                </span>
+            @else
+                <span class="px-2 py-0.5 md:px-3 md:py-1 bg-yellow-100 text-yellow-800 text-[9px] md:text-[10px] font-black uppercase tracking-widest rounded-full border border-yellow-200 shadow-sm">
+                    Upcoming
+                </span>
+            @endif
+        </div>
     </div>
 
     {{-- 2. HERO SECTION --}}
@@ -74,12 +74,12 @@
                     {{ $project->title }}
                 </h1>
 
-                {{-- Description (Responsive Prose) --}}
+                {{-- Description --}}
                 <div class="text-sm md:text-lg text-gray-600 leading-relaxed font-sans mb-6 md:mb-8 border-l-4 border-yellow-400 pl-4 md:pl-6 whitespace-pre-line">
                     "{{ $project->description }}"
                 </div>
 
-                {{-- Impact Stats (Grid Adjustment) --}}
+                {{-- Impact Stats --}}
                 @if(!empty($project->impact_stats))
                 <div class="grid grid-cols-3 gap-2 md:gap-4 border-t border-gray-200 pt-6 md:pt-8">
                     @foreach($project->impact_stats as $stat)
@@ -163,20 +163,9 @@
                     <div class="grid grid-cols-1 gap-3">
                         @foreach($project->proponents as $proponent)
                             @php
-                                // Use the null-safe operator (?->) to fetch the photo from the linked User model!
                                 $path = $proponent->user?->profile_photo_path;
-                                
-                                // Robust Avatar Resolution matching your backend
                                 $avatarUrl = $path 
-                                    ? (
-                                        Str::startsWith($path, 'http') 
-                                            ? $path 
-                                            : (
-                                                Str::startsWith($path, 'images/') 
-                                                    ? asset($path) 
-                                                    : asset('storage/' . $path)
-                                            )
-                                    ) 
+                                    ? (Str::startsWith($path, 'http') ? $path : (Str::startsWith($path, 'images/') ? asset($path) : asset('storage/' . $path))) 
                                     : 'https://ui-avatars.com/api/?name='.urlencode($proponent->name).'&background=fef2f2&color=dc2626&bold=true';
                             @endphp
                             
@@ -186,7 +175,6 @@
                                     <p class="text-xs font-black text-gray-900 leading-snug break-words">
                                         {{ $project->title == 'Evaluation Results' ? 'Administrator' : $proponent->name }}
                                     </p>
-                                    {{-- You can even dynamically display their specific role from the pivot table now! --}}
                                     <p class="text-[9px] font-bold text-red-500 uppercase tracking-widest mt-1">
                                         {{ $proponent->type ?? 'Event Leads' }}
                                     </p>
@@ -197,7 +185,7 @@
                 </div>
             </div>
 
-            {{-- 2. PARTNERS CARD (Updated to use projectLinkages) --}}
+            {{-- 2. PARTNERS CARD --}}
             @if($project->projectLinkages && $project->projectLinkages->isNotEmpty())
             <div class="bg-white p-5 md:p-6 rounded-2xl md:rounded-3xl shadow-sm border border-gray-100">
                 <h3 class="font-bold text-gray-900 uppercase tracking-widest text-[10px] md:text-xs border-b border-gray-100 pb-3 mb-5 flex items-center gap-2">
@@ -210,15 +198,9 @@
                 <div class="grid grid-cols-1 gap-3">
                     @foreach($project->projectLinkages as $projLink)
                         @php
-                            // Extract the actual Linkage/Partner model from the pivot relationship
                             $linkage = $projLink->linkage;
-                            
-                            if(!$linkage) continue; // Safety check in case of orphaned relationships
-
-                            // Update this condition if your DB uses a different column to denote 'official' status
+                            if(!$linkage) continue;
                             $isOfficial = isset($linkage->is_official) ? $linkage->is_official : false;
-
-                            // Update 'logo' to 'logo_path' or 'image' if that's what your Linkage model uses
                             $logoPath = $linkage->logo ?? $linkage->logo_path ?? null;
                             $partnerLogo = $logoPath && !Str::startsWith($logoPath, 'http')
                                 ? asset('storage/' . $logoPath) 
@@ -227,7 +209,6 @@
                                     : 'https://ui-avatars.com/api/?name='.urlencode($linkage->name).'&background=f3f4f6&color=4b5563&bold=true'));
                         @endphp
                         
-                        {{-- Items-start ensures the logo stays pinned to the top if the name spans 3 lines --}}
                         <div class="flex items-start gap-3 p-3 rounded-2xl border transition-all group cursor-default
                                     {{ $isOfficial ? 'border-blue-100 bg-blue-50/30 hover:bg-blue-50 hover:border-blue-300' : 'border-gray-100 bg-gray-50 hover:bg-white hover:border-gray-300 hover:shadow-sm' }}">
                             
@@ -236,7 +217,6 @@
                             </div>
                             
                             <div class="flex-1 min-w-0 pt-0.5">
-                                {{-- Removed truncate, added break-words --}}
                                 <p class="text-xs font-black text-gray-900 leading-snug break-words">
                                     {{ $linkage->name }}
                                 </p>
@@ -352,9 +332,9 @@
             </div>
             @endif
 
-            {{-- 4.5 PUBLIC EVALUATION RESULTS --}}
+            {{-- 4.5 PUBLIC EVALUATION RESULTS (PREMIUM UI UPGRADE) --}}
             @if($project->evaluation && $totalResponses > 0 && $overallRating > 0)
-                <div class="mt-8 md:mt-12 bg-white rounded-2xl md:rounded-[2rem] p-6 md:p-8 border border-gray-100 shadow-xl shadow-gray-200/50"
+                <div class="mt-8 md:mt-12 bg-white rounded-2xl md:rounded-[2rem] p-6 md:p-8 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)]"
                      x-data="{ showChartDrawer: false, chartInitialized: false }"
                      x-init="$watch('showChartDrawer', value => {
                          if(value && !chartInitialized) {
@@ -364,73 +344,74 @@
                      })">
 
                     <div class="flex items-center gap-3 mb-6 md:mb-8">
-                        <div class="p-1.5 md:p-2 bg-orange-50 rounded-lg text-orange-600">
-                            <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path></svg>
+                        <div class="p-2 md:p-2.5 bg-gray-900 rounded-xl text-white shadow-md">
+                            <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
                         </div>
-                        <div class="flex-1 flex justify-between items-center">
-                            <div>
-                                <h3 class="font-heading text-lg md:text-xl font-black text-gray-900 leading-tight">Community Feedback</h3>
-                                <p class="text-[10px] md:text-sm text-gray-500 font-medium">Based on {{ $totalResponses }} official evaluations</p>
+                        <div>
+                            <h3 class="font-heading text-xl md:text-2xl font-black text-gray-900 tracking-tight">Performance Analytics</h3>
+                            <p class="text-[10px] md:text-xs text-gray-500 font-bold uppercase tracking-widest mt-1">Based on {{ $totalResponses }} official evaluations</p>
+                        </div>
+                    </div>
+
+                    {{-- TOP ROW: High-Contrast Premium Score Card --}}
+                    <div class="bg-gray-900 rounded-[1.5rem] p-6 md:p-10 flex flex-col lg:flex-row items-center justify-between gap-8 mb-10 relative overflow-hidden shadow-2xl">
+                        {{-- Decorative background glow --}}
+                        <div class="absolute top-0 right-0 w-64 h-64 bg-orange-600/20 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none"></div>
+                        
+                        <div class="relative z-10 text-center lg:text-left w-full lg:w-auto">
+                            <h4 class="text-gray-400 font-bold uppercase tracking-widest text-[10px] md:text-xs mb-2">Overall Satisfaction</h4>
+                            <div class="flex items-center justify-center lg:justify-start gap-4 md:gap-6">
+                                <div class="text-6xl md:text-8xl font-black text-orange-500 leading-none tracking-tighter drop-shadow-md">
+                                    {{ number_format($overallRating, 1) }}
+                                </div>
+                                <div class="flex flex-col items-start gap-1">
+                                    <span class="text-sm font-bold text-gray-300">Out of 5.0</span>
+                                    <div class="flex text-orange-500">
+                                        @for($i=1; $i<=5; $i++)
+                                            <svg class="w-5 h-5 md:w-6 md:h-6 {{ $i <= round($overallRating) ? 'fill-current' : 'text-gray-700' }}" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                                        @endfor
+                                    </div>
+                                </div>
                             </div>
-                            {{-- Chart Drawer Toggle Button --}}
-                            <button @click="showChartDrawer = !showChartDrawer" class="hidden sm:flex items-center gap-2 px-4 py-2 bg-gray-50 hover:bg-gray-100 text-gray-700 rounded-xl text-xs font-bold uppercase tracking-widest transition-colors border border-gray-200">
-                                <svg class="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path></svg>
-                                <span x-text="showChartDrawer ? 'Hide Chart' : 'View Chart'"></span>
+                        </div>
+
+                        <div class="relative z-10 flex flex-col items-center lg:items-end w-full lg:w-auto border-t lg:border-t-0 lg:border-l border-gray-800 pt-6 lg:pt-0 lg:pl-8">
+                            <span class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Performance Rating</span>
+                            <div class="text-lg md:text-xl font-black text-white bg-white/10 backdrop-blur-md px-6 py-2.5 rounded-full border border-white/10 shadow-inner">
+                                {{ $overallRating >= 4.5 ? 'Excellent' : ($overallRating >= 4.0 ? 'Very Good' : ($overallRating >= 3.0 ? 'Good' : 'Needs Improvement')) }}
+                            </div>
+                            
+                            {{-- Chart Toggle integrated cleanly into the dark card --}}
+                            <button @click="showChartDrawer = !showChartDrawer" class="mt-6 flex items-center gap-2 px-5 py-2.5 bg-orange-600 hover:bg-orange-500 text-white rounded-xl text-[10px] md:text-xs font-bold uppercase tracking-widest transition-all shadow-lg hover:shadow-orange-500/30">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path></svg>
+                                <span x-text="showChartDrawer ? 'Hide Radar Chart' : 'View Radar Chart'"></span>
                             </button>
                         </div>
                     </div>
 
-                    {{-- TOP ROW: Massive Score Display Card --}}
-                    <div class="bg-gradient-to-br from-orange-50 to-red-50 border border-orange-100 rounded-2xl p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 mb-8">
-                        <div class="text-center md:text-left">
-                            <h4 class="text-orange-900 font-black text-xl md:text-2xl mb-1">Overall Satisfaction</h4>
-                            <p class="text-sm font-bold text-orange-700 bg-orange-200/50 inline-block px-4 py-1.5 rounded-full border border-orange-200 mt-2 md:mt-1">
-                                {{ $overallRating >= 4.5 ? 'Excellent' : ($overallRating >= 4.0 ? 'Very Good' : ($overallRating >= 3.0 ? 'Good' : 'Needs Improvement')) }} Experience
-                            </p>
-                        </div>
-
-                        <div class="flex items-center gap-4 md:gap-6">
-                            <div class="flex flex-col items-end">
-                                <div class="flex text-orange-500 mb-1">
-                                    @for($i=1; $i<=5; $i++)
-                                        <svg class="w-6 h-6 md:w-8 md:h-8 {{ $i <= round($overallRating) ? 'fill-current' : 'text-orange-200' }}" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
-                                    @endfor
-                                </div>
-                                <span class="text-[10px] font-bold text-orange-600/80 uppercase tracking-widest">Out of 5.0</span>
-                            </div>
-                            <div class="text-6xl md:text-7xl font-black text-orange-600 leading-none drop-shadow-sm">
-                                {{ number_format($overallRating, 1) }}
-                            </div>
-                        </div>
-                    </div>
-
-                    {{-- MOBILE TOGGLE BUTTON --}}
-                    <button @click="showChartDrawer = !showChartDrawer" class="sm:hidden w-full mb-8 flex items-center justify-center gap-2 px-4 py-3 bg-gray-50 hover:bg-gray-100 text-gray-700 rounded-xl text-xs font-bold uppercase tracking-widest transition-colors border border-gray-200">
-                        <svg class="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path></svg>
-                        <span x-text="showChartDrawer ? 'Hide Interactive Chart' : 'View Interactive Chart'"></span>
-                    </button>
-
                     {{-- INTERACTIVE CHART DRAWER (Alpine Collapse) --}}
                     <div x-show="showChartDrawer" x-collapse x-cloak>
-                        <div class="mb-10 bg-gray-50 rounded-2xl border border-gray-200 p-4 md:p-6 relative">
-                            <h4 class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4 text-center">Performance Radar</h4>
-                            <div class="relative h-[300px] md:h-[400px] w-full flex justify-center">
+                        <div class="mb-10 bg-gray-50 rounded-[1.5rem] border border-gray-200 p-6 md:p-8 relative shadow-inner">
+                            <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-6 text-center">Section Radar Analysis</h4>
+                            <div class="relative h-[300px] md:h-[450px] w-full flex justify-center">
                                 <canvas id="evaluationRadarChart"></canvas>
                             </div>
                         </div>
                     </div>
 
-                    {{-- BOTTOM ROW: The Sectioned Evaluation Breakdown --}}
+                    {{-- BOTTOM ROW: The Card-Based Section Breakdown --}}
                     <div>
-                        <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-6 shrink-0">Detailed Evaluation Breakdown</h4>
+                        <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-6 border-b border-gray-100 pb-3">Detailed Metric Breakdown</h4>
 
-                        <div class="space-y-10 max-h-[400px] md:max-h-[500px] overflow-y-auto custom-scrollbar pr-2 sm:pr-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             @foreach($groupedLikertResults as $section)
-                                <div>
+                                <div class="bg-white border border-gray-100 rounded-2xl p-5 md:p-6 shadow-sm hover:shadow-md transition-shadow">
                                     {{-- Section Header --}}
-                                    <div class="flex justify-between items-end border-b-2 border-gray-100 pb-2 mb-5">
-                                        <h5 class="text-sm font-black text-gray-800 uppercase tracking-widest">{{ $section['title'] }}</h5>
-                                        <span class="text-xs font-bold text-gray-500 bg-gray-100 px-2 py-1 rounded">Score: {{ number_format($section['section_average'], 1) }}</span>
+                                    <div class="flex justify-between items-start mb-5">
+                                        <h5 class="text-sm font-black text-gray-900 uppercase tracking-widest leading-tight pr-4">{{ $section['title'] }}</h5>
+                                        <div class="shrink-0 bg-gray-900 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg">
+                                            {{ number_format($section['section_average'], 1) }}
+                                        </div>
                                     </div>
 
                                     {{-- Section Criteria --}}
@@ -438,22 +419,37 @@
                                         @foreach($section['criteria'] as $criteria)
                                             @php
                                                 $percent = ($criteria['score'] / 5) * 100;
-                                                if ($criteria['score'] >= 4.5) $barColor = 'bg-green-500';
-                                                elseif ($criteria['score'] >= 3.5) $barColor = 'bg-blue-500';
-                                                elseif ($criteria['score'] >= 2.5) $barColor = 'bg-yellow-400';
-                                                else $barColor = 'bg-red-500';
+                                                // Dynamic colors using explicit base classes to avoid purging
+                                                if ($criteria['score'] >= 4.5) {
+                                                    $barColor = 'bg-green-500';
+                                                    $textColor = 'text-green-600';
+                                                    $shadow = 'rgba(34, 197, 94, 0.4)';
+                                                } elseif ($criteria['score'] >= 3.5) {
+                                                    $barColor = 'bg-blue-500';
+                                                    $textColor = 'text-blue-600';
+                                                    $shadow = 'rgba(59, 130, 246, 0.4)';
+                                                } elseif ($criteria['score'] >= 2.5) {
+                                                    $barColor = 'bg-yellow-400';
+                                                    $textColor = 'text-yellow-600';
+                                                    $shadow = 'rgba(250, 204, 21, 0.4)';
+                                                } else {
+                                                    $barColor = 'bg-red-500';
+                                                    $textColor = 'text-red-600';
+                                                    $shadow = 'rgba(239, 68, 68, 0.4)';
+                                                }
                                             @endphp
                                             <div class="w-full block group/bar">
                                                 <div class="flex justify-between items-end gap-4 mb-1.5 w-full">
-                                                    <div class="text-xs sm:text-sm font-bold text-gray-700 leading-snug group-hover/bar:text-orange-600 transition-colors">
+                                                    <div class="text-[11px] sm:text-xs font-bold text-gray-600 leading-snug group-hover/bar:text-gray-900 transition-colors">
                                                         {{ html_entity_decode($criteria['label']) }}
                                                     </div>
-                                                    <div class="text-sm font-black text-gray-900 shrink-0">
+                                                    <div class="text-[10px] font-black {{ $textColor }} shrink-0">
                                                         {{ number_format($criteria['score'], 1) }}
                                                     </div>
                                                 </div>
-                                                <div class="w-full bg-gray-100 h-2 sm:h-2.5 rounded-full overflow-hidden">
-                                                    <div class="{{ $barColor }} h-full rounded-full transition-all duration-1000 ease-out" style="width: {{ $percent }}%"></div>
+                                                <div class="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden">
+                                                    <div class="{{ $barColor }} h-full rounded-full transition-all duration-1000 ease-out" 
+                                                         style="width: {{ $percent }}%; box-shadow: 0 0 8px {{ $shadow }};"></div>
                                                 </div>
                                             </div>
                                         @endforeach
@@ -617,7 +613,6 @@
         </div>
     </footer>
 
-
 </div>
 @push('scripts')
     {{-- Include Chart.js --}}
@@ -645,7 +640,6 @@
             });
 
             // CREATE A PREMIUM RADIAL GRADIENT FILL
-            // Center is slightly transparent orange, fading out to a richer orange
             const gradientFill = ctx.createRadialGradient(
                 canvas.width / 2, canvas.height / 2, 0,
                 canvas.width / 2, canvas.height / 2, canvas.width / 2
@@ -687,7 +681,9 @@
                     },
                     scales: {
                         r: {
-                            // Circular grid instead of a spiderweb polygon
+                            // FIXED: min and max directly on the 'r' object
+                            min: 0,
+                            max: 5,
                             circular: true,
                             angleLines: {
                                 color: 'rgba(0, 0, 0, 0.05)',
@@ -709,8 +705,6 @@
                                 padding: 15
                             },
                             ticks: {
-                                min: 0,
-                                max: 5,
                                 stepSize: 1,
                                 display: true,
                                 // Hide the background behind the numbers
