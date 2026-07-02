@@ -91,13 +91,13 @@
                 </div>
 
                 <div x-data="{ 
-                        activeSlide: 0, 
-                        totalSlides: {{ count($spotlights) }},
-                        next() { this.activeSlide = this.activeSlide === this.totalSlides - 1 ? 0 : this.activeSlide + 1 },
-                        prev() { this.activeSlide = this.activeSlide === 0 ? this.totalSlides - 1 : this.activeSlide - 1 }
-                     }" 
-                     x-init="setInterval(() => next(), 6000)"
-                     class="relative w-full aspect-[21/9] md:aspect-[4/1] bg-gray-900 rounded-[2rem] overflow-hidden shadow-sm border border-gray-100 group">
+                            activeSlide: 0, 
+                            totalSlides: {{ $spotlights->count() }},
+                            next() { this.activeSlide = this.activeSlide === this.totalSlides - 1 ? 0 : this.activeSlide + 1 },
+                            prev() { this.activeSlide = this.activeSlide === 0 ? this.totalSlides - 1 : this.activeSlide - 1 }
+                        }" 
+                        x-init="if (totalSlides > 1) setInterval(() => next(), 6000)"
+                        class="relative w-full aspect-[21/9] md:aspect-[4/1] bg-gray-900 rounded-[2rem] overflow-hidden shadow-sm border border-gray-100 group">
                     
                     <div class="relative w-full h-full flex transition-transform duration-700 ease-in-out" 
                          :style="'transform: translateX(-' + (activeSlide * 100) + '%)'">
