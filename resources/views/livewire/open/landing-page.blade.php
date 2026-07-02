@@ -1,12 +1,12 @@
 <div class="min-h-screen bg-stone-50 font-sans text-gray-900 selection:bg-red-600 selection:text-white overflow-x-hidden">
-
+    
     {{-- ========================================== --}}
     {{-- 1. ANNOUNCEMENTS TICKER / ALERT BAR        --}}
     {{-- ========================================== --}}
     @if(count($announcements ?? []) > 0)
         <div class="w-full flex flex-col relative z-50">
             @foreach($announcements as $announcement)
-                <div x-data="{ show: true }" x-show="show" x-transition.opacity
+                <div x-data="{ show: true }" x-show="show" x-transition.opacity 
                      class="{{ $announcement->type->color_theme }} px-4 py-3 shadow-md border-b border-black/10">
                     <div class="max-w-[1800px] w-[95%] mx-auto flex items-start sm:items-center justify-between gap-4">
                         <div class="flex items-start sm:items-center gap-3">
@@ -90,23 +90,23 @@
                     </div>
                 </div>
 
-                <div x-data="{
-                        activeSlide: 0,
+                <div x-data="{ 
+                        activeSlide: 0, 
                         totalSlides: {{ count($spotlights) }},
                         next() { this.activeSlide = this.activeSlide === this.totalSlides - 1 ? 0 : this.activeSlide + 1 },
                         prev() { this.activeSlide = this.activeSlide === 0 ? this.totalSlides - 1 : this.activeSlide - 1 }
-                     }"
+                     }" 
                      x-init="setInterval(() => next(), 6000)"
                      class="relative w-full aspect-[21/9] md:aspect-[4/1] bg-gray-900 rounded-[2rem] overflow-hidden shadow-sm border border-gray-100 group">
-
-                    <div class="relative w-full h-full flex transition-transform duration-700 ease-in-out"
+                    
+                    <div class="relative w-full h-full flex transition-transform duration-700 ease-in-out" 
                          :style="'transform: translateX(-' + (activeSlide * 100) + '%)'">
-
+                        
                         @foreach($spotlights as $spotlight)
                             <div class="w-full h-full shrink-0 relative">
                                 <img src="{{ Storage::url($spotlight->image_path) }}" alt="{{ $spotlight->title }}" class="absolute inset-0 w-full h-full object-cover opacity-60 mix-blend-overlay">
                                 <div class="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/40 to-transparent"></div>
-
+                                
                                 <div class="absolute inset-0 flex flex-col justify-end p-8 md:p-16">
                                     <span class="inline-block px-3 py-1 bg-purple-600 text-white text-[10px] font-black uppercase tracking-widest rounded-full w-max mb-4 shadow-md">
                                         {{ $spotlight->category->name }}
@@ -116,7 +116,7 @@
                                     </h3>
                                     @if($spotlight->link && $spotlight->link !== '#')
                                         <a href="{{ $spotlight->link }}" target="_blank" class="inline-flex items-center gap-2 text-[10px] text-white font-black hover:text-purple-400 uppercase tracking-widest transition w-max group/link">
-                                            Find out more
+                                            Find out more 
                                             <svg class="w-4 h-4 group-hover/link:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
                                         </a>
                                     @endif
@@ -134,7 +134,7 @@
 
                     <div class="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2">
                         <template x-for="i in totalSlides" :key="i">
-                            <button @click="activeSlide = i - 1"
+                            <button @click="activeSlide = i - 1" 
                                     :class="{'w-6 bg-purple-600': activeSlide === i - 1, 'w-2 bg-white/50 hover:bg-white': activeSlide !== i - 1}"
                                     class="h-2 rounded-full transition-all duration-300"></button>
                         </template>
