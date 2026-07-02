@@ -13,6 +13,10 @@ return new class extends Migration
     {
         Schema::create('announcement_types', function (Blueprint $table) {
             $table->id();
+            $table->string('name'); // e.g., 'Emergency', 'Urgent', 'DRR', 'General'
+            $table->string('slug')->unique(); // e.g., 'emergency'
+            $table->string('color_theme'); // e.g., 'bg-red-600 text-white'
+            $table->text('icon_svg')->nullable(); // Store the raw SVG path data here
             $table->timestamps();
         });
     }
