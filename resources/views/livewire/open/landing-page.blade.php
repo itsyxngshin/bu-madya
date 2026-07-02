@@ -1,59 +1,151 @@
 <div class="min-h-screen bg-stone-50 font-sans text-gray-900 selection:bg-red-600 selection:text-white overflow-x-hidden">
-{{-- 1. HERO SECTION (Mobile Responsive) --}}
-<header class="relative min-h-[85vh] md:min-h-[85vh] flex items-center bg-gray-900 overflow-hidden shadow-2xl">
 
-    {{-- Image Container (Hidden on Mobile, Spanning Right on Desktop) --}}
-    <div class="hidden md:block absolute top-0 right-0 w-1/2 h-full z-0">
-        <img src="{{ asset('images/1760712981522.JPG') }}"
-             class="w-full h-full object-cover brightness-110"
-             style="mask-image: linear-gradient(to right, transparent 0%, black 30%); -webkit-mask-image: linear-gradient(to right, transparent 0%, black 30%);">
-        <div class="absolute inset-0 bg-gradient-to-r from-gray-900 via-gray-900/60 to-transparent"></div>
-    </div>
+    {{-- ========================================== --}}
+    {{-- 1. ANNOUNCEMENTS TICKER / ALERT BAR        --}}
+    {{-- ========================================== --}}
+    @if(count($announcements ?? []) > 0)
+        <div class="w-full flex flex-col relative z-50">
+            @foreach($announcements as $announcement)
+                <div x-data="{ show: true }" x-show="show" x-transition.opacity
+                     class="{{ $announcement->type->color_theme }} px-4 py-3 shadow-md border-b border-black/10">
+                    <div class="max-w-[1800px] w-[95%] mx-auto flex items-start sm:items-center justify-between gap-4">
+                        <div class="flex items-start sm:items-center gap-3">
+                            <svg class="w-6 h-6 shrink-0 mt-0.5 sm:mt-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                {!! $announcement->type->icon_svg !!}
+                            </svg>
+                            <div class="text-sm">
+                                <span class="font-bold uppercase tracking-wider mr-2">{{ $announcement->title }}:</span>
+                                <span class="opacity-90">{{ $announcement->message }}</span>
+                            </div>
+                        </div>
+                        <button @click="show = false" class="shrink-0 p-1 hover:bg-black/20 rounded transition" aria-label="Dismiss">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                        </button>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+    @endif
 
-    {{-- Mobile Image Overlay (Only visible on small screens) --}}
-    <div class="md:hidden absolute inset-0 z-0 opacity-30">
-        <img src="{{ asset('images/1760712981522.JPG') }}" class="w-full h-full object-cover">
-        <div class="absolute inset-0 bg-gradient-to-b from-gray-900/90 via-gray-900/80 to-gray-900"></div>
-    </div>
+    {{-- 2. HERO SECTION (Mobile Responsive) --}}
+    <header class="relative min-h-[85vh] md:min-h-[85vh] flex items-center bg-gray-900 overflow-hidden shadow-2xl">
 
-    {{-- Text Content Container --}}
-    <div class="relative z-10 container mx-auto px-6 md:px-12">
-        <div class="w-full md:w-5/12 text-left space-y-6 md:space-y-8">
-            {{-- Stylized Badge (Architectural Look) --}}
-            <h1 class="font-heading text-5xl md:text-8xl font-black uppercase tracking-tighter leading-[0.9] text-white">
-                ADVOCACY <br>
-                <span class="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-orange-400 to-red-500">
-                    IN ACTION
-                </span>
-            </h1>
+        {{-- Image Container (Hidden on Mobile, Spanning Right on Desktop) --}}
+        <div class="hidden md:block absolute top-0 right-0 w-1/2 h-full z-0">
+            <img src="{{ asset('images/1760712981522.JPG') }}"
+                 class="w-full h-full object-cover brightness-110"
+                 style="mask-image: linear-gradient(to right, transparent 0%, black 30%); -webkit-mask-image: linear-gradient(to right, transparent 0%, black 30%);">
+            <div class="absolute inset-0 bg-gradient-to-r from-gray-900 via-gray-900/60 to-transparent"></div>
+        </div>
 
-            <p class="text-lg md:text-xl text-gray-400 font-light leading-relaxed max-w-lg">
-                We are Bicol University’s dedicated force for social change. Bridging student voices with community action to foster a sustainable and empowered future.
-            </p>
+        {{-- Mobile Image Overlay (Only visible on small screens) --}}
+        <div class="md:hidden absolute inset-0 z-0 opacity-30">
+            <img src="{{ asset('images/1760712981522.JPG') }}" class="w-full h-full object-cover">
+            <div class="absolute inset-0 bg-gradient-to-b from-gray-900/90 via-gray-900/80 to-gray-900"></div>
+        </div>
 
-            <div class="flex flex-wrap gap-4 pt-2 md:pt-4">
-                <a href="{{ route('membership-form') }}" class="w-full md:w-auto px-8 py-4 bg-red-600 text-white font-black hover:bg-red-700 transition-all shadow-[0_10px_30px_-10px_rgba(220,38,38,0.5)] uppercase tracking-widest text-center text-sm">
-                    JOIN THE MOVEMENT
-                </a>
+        {{-- Text Content Container --}}
+        <div class="relative z-10 container mx-auto px-6 md:px-12">
+            <div class="w-full md:w-5/12 text-left space-y-6 md:space-y-8">
+                {{-- Stylized Badge (Architectural Look) --}}
+                <h1 class="font-heading text-5xl md:text-8xl font-black uppercase tracking-tighter leading-[0.9] text-white">
+                    ADVOCACY <br>
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-orange-400 to-red-500">
+                        IN ACTION
+                    </span>
+                </h1>
+
+                <p class="text-lg md:text-xl text-gray-400 font-light leading-relaxed max-w-lg">
+                    We are Bicol University’s dedicated force for social change. Bridging student voices with community action to foster a sustainable and empowered future.
+                </p>
+
+                <div class="flex flex-wrap gap-4 pt-2 md:pt-4">
+                    <a href="{{ route('membership-form') }}" class="w-full md:w-auto px-8 py-4 bg-red-600 text-white font-black hover:bg-red-700 transition-all shadow-[0_10px_30px_-10px_rgba(220,38,38,0.5)] uppercase tracking-widest text-center text-sm">
+                        JOIN THE MOVEMENT
+                    </a>
+                </div>
             </div>
         </div>
-    </div>
 
-    {{-- Tricolor Stroke at the Bottom --}}
-    <div class="absolute bottom-0 left-0 w-full h-2 flex z-20">
-        <div class="w-1/3 bg-green-600"></div>
-        <div class="w-1/3 bg-yellow-400"></div>
-        <div class="w-1/3 bg-red-600"></div>
-    </div>
-</header>
+        {{-- Tricolor Stroke at the Bottom --}}
+        <div class="absolute bottom-0 left-0 w-full h-2 flex z-20">
+            <div class="w-1/3 bg-green-600"></div>
+            <div class="w-1/3 bg-yellow-400"></div>
+            <div class="w-1/3 bg-red-600"></div>
+        </div>
+    </header>
 
     {{-- MAIN CONTENT --}}
     <main class="max-w-[1800px] w-[95%] mx-auto px-4 relative z-20 pb-24">
 
+        {{-- ========================================== --}}
+        {{-- 3. SPOTLIGHT LANDSCAPE AREA (CAROUSEL)     --}}
+        {{-- ========================================== --}}
+        @if(count($spotlights ?? []) > 0)
+            <section class="mt-12 mb-8 w-full">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="pl-4 border-l-4 border-purple-600">
+                        <h2 class="font-heading text-3xl md:text-4xl font-black text-gray-900 tracking-tight">Spotlight</h2>
+                        <p class="text-gray-500 font-medium mt-1 uppercase tracking-widest text-[10px]">Featured Promotions & Greetings</p>
+                    </div>
+                </div>
+
+                <div x-data="{
+                        activeSlide: 0,
+                        totalSlides: {{ count($spotlights) }},
+                        next() { this.activeSlide = this.activeSlide === this.totalSlides - 1 ? 0 : this.activeSlide + 1 },
+                        prev() { this.activeSlide = this.activeSlide === 0 ? this.totalSlides - 1 : this.activeSlide - 1 }
+                     }"
+                     x-init="setInterval(() => next(), 6000)"
+                     class="relative w-full aspect-[21/9] md:aspect-[4/1] bg-gray-900 rounded-[2rem] overflow-hidden shadow-sm border border-gray-100 group">
+
+                    <div class="relative w-full h-full flex transition-transform duration-700 ease-in-out"
+                         :style="'transform: translateX(-' + (activeSlide * 100) + '%)'">
+
+                        @foreach($spotlights as $spotlight)
+                            <div class="w-full h-full shrink-0 relative">
+                                <img src="{{ Storage::url($spotlight->image_path) }}" alt="{{ $spotlight->title }}" class="absolute inset-0 w-full h-full object-cover opacity-60 mix-blend-overlay">
+                                <div class="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/40 to-transparent"></div>
+
+                                <div class="absolute inset-0 flex flex-col justify-end p-8 md:p-16">
+                                    <span class="inline-block px-3 py-1 bg-purple-600 text-white text-[10px] font-black uppercase tracking-widest rounded-full w-max mb-4 shadow-md">
+                                        {{ $spotlight->category->name }}
+                                    </span>
+                                    <h3 class="font-heading text-3xl md:text-5xl font-black text-white leading-tight mb-4 max-w-4xl drop-shadow-lg">
+                                        {{ $spotlight->title }}
+                                    </h3>
+                                    @if($spotlight->link && $spotlight->link !== '#')
+                                        <a href="{{ $spotlight->link }}" target="_blank" class="inline-flex items-center gap-2 text-[10px] text-white font-black hover:text-purple-400 uppercase tracking-widest transition w-max group/link">
+                                            Find out more
+                                            <svg class="w-4 h-4 group-hover/link:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
+                                        </a>
+                                    @endif
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+
+                    <button @click="prev()" class="absolute left-6 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/20 hover:bg-purple-600 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition backdrop-blur-sm shadow-lg">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" /></svg>
+                    </button>
+                    <button @click="next()" class="absolute right-6 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/20 hover:bg-purple-600 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition backdrop-blur-sm shadow-lg">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
+                    </button>
+
+                    <div class="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2">
+                        <template x-for="i in totalSlides" :key="i">
+                            <button @click="activeSlide = i - 1"
+                                    :class="{'w-6 bg-purple-600': activeSlide === i - 1, 'w-2 bg-white/50 hover:bg-white': activeSlide !== i - 1}"
+                                    class="h-2 rounded-full transition-all duration-300"></button>
+                        </template>
+                    </div>
+                </div>
+            </section>
+        @endif
+
         <div class="grid lg:grid-cols-12 gap-12 items-start pt-12">
 
             {{-- LEFT COLUMN (Main Content) --}}
-            {{-- Wrapper simplified. Spacing is now handled directly on each section. --}}
             <div class="lg:col-span-8">
 
                 {{-- PILLARS SECTION --}}
@@ -128,7 +220,7 @@
                 <section class="mb-8 md:mb-48"
                     x-data="{
                         activeSlide: 0,
-                        slidesCount: {{ $featuredProjects->count() }},
+                        slidesCount: {{ collect($featuredProjects ?? [])->count() ?: 0 }},
                         next() { this.activeSlide = this.activeSlide === this.slidesCount - 1 ? 0 : this.activeSlide + 1 },
                         prev() { this.activeSlide = this.activeSlide === 0 ? this.slidesCount - 1 : this.activeSlide - 1 }
                     }">
@@ -152,7 +244,7 @@
 
                     {{-- Carousel Track --}}
                     <div class="relative overflow-hidden rounded-[2rem] bg-white shadow-sm border border-gray-100 h-[500px] md:h-[400px]">
-                        @forelse($featuredProjects as $index => $project)
+                        @forelse($featuredProjects ?? [] as $index => $project)
                             <div x-show="activeSlide === {{ $index }}"
                                  x-transition:enter="transition ease-out duration-500"
                                  x-transition:enter-start="opacity-0 translate-x-8"
@@ -240,7 +332,7 @@
                 <section class="mb-32 md:mb-48"
                     x-data="{
                         activeEvent: 0,
-                        eventCount: {{ $upcomingEvents->count() }},
+                        eventCount: {{ collect($upcomingEvents ?? [])->count() ?: 0 }},
                         nextEvent() { this.activeEvent = this.activeEvent === this.eventCount - 1 ? 0 : this.activeEvent + 1 },
                         prevEvent() { this.activeEvent = this.activeEvent === 0 ? this.eventCount - 1 : this.activeEvent - 1 }
                     }">
@@ -262,7 +354,7 @@
                     </div>
 
                     <div class="relative overflow-hidden rounded-[2rem] bg-white shadow-sm border border-gray-100 h-[500px] md:h-[400px]">
-                        @forelse($upcomingEvents as $index => $event)
+                        @forelse($upcomingEvents ?? [] as $index => $event)
                             <div x-show="activeEvent === {{ $index }}"
                                  x-transition:enter="transition ease-out duration-500"
                                  x-transition:enter-start="opacity-0 translate-x-8"
@@ -352,7 +444,7 @@
                     </div>
 
                     <div class="grid sm:grid-cols-2 gap-6 md:gap-8">
-                    @forelse($latestNews as $news)
+                    @forelse($latestNews ?? [] as $news)
                         <article class="group bg-white rounded-[2rem] shadow-sm border border-gray-100 overflow-hidden hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col h-full">
 
                             <div class="h-56 overflow-hidden relative bg-gray-100 shrink-0">
@@ -570,7 +662,7 @@
         </div>
     </main>
 
-    {{-- FOOTER (Unchanged but ensuring it's included) --}}
+    {{-- FOOTER (Keep as livewire component if already swapped, otherwise use this static version) --}}
     <footer class="bg-gray-900 text-white pt-20 pb-10 border-t-8 border-red-600 relative z-20">
         <div class="max-w-[1800px] w-[95%] mx-auto px-6 grid md:grid-cols-4 gap-12 mb-16">
 
@@ -587,17 +679,12 @@
 
                 {{-- Social Media Links --}}
                 <div class="flex space-x-4">
-                    {{-- Facebook --}}
                     <a href="https://www.facebook.com/BUMadya" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-blue-600 hover:text-white text-gray-400 transition">
                         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
                     </a>
-
-                    {{-- Instagram --}}
                     <a href="https://www.instagram.com/bu_madya" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-pink-600 hover:text-white text-gray-400 transition">
                         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
                     </a>
-
-                    {{-- X (Twitter) --}}
                     <a href="https://www.x.com/bu_madya" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-black hover:text-white text-gray-400 transition">
                         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
                     </a>
@@ -605,12 +692,12 @@
             </div>
 
             <ul class="space-y-3 text-gray-400 text-sm">
-                    <li><a href="{{ route('about') }}" class="hover:text-white hover:translate-x-1 transition inline-block">About BU MADYA</a></li>
-                    <li><a href="{{ route('open.directory') }}" class="hover:text-white hover:translate-x-1 transition inline-block">Our Officers</a></li>
-                    <li><a href="{{ route('transparency.index') }}" class="hover:text-white hover:translate-x-1 transition inline-block">Transparency Board</a></li>
-                    <li class="pt-2 mt-2 border-t border-gray-800">
-                        <a href="{{ route('privacy') }}" class="text-xs text-gray-500 hover:text-white hover:translate-x-1 transition inline-block">Privacy Policy</a>
-                    </li>
+                <li><a href="{{ route('about') }}" class="hover:text-white hover:translate-x-1 transition inline-block">About BU MADYA</a></li>
+                <li><a href="{{ route('open.directory') }}" class="hover:text-white hover:translate-x-1 transition inline-block">Our Officers</a></li>
+                <li><a href="{{ route('transparency.index') }}" class="hover:text-white hover:translate-x-1 transition inline-block">Transparency Board</a></li>
+                <li class="pt-2 mt-2 border-t border-gray-800">
+                    <a href="{{ route('privacy') }}" class="text-xs text-gray-500 hover:text-white hover:translate-x-1 transition inline-block">Privacy Policy</a>
+                </li>
             </ul>
 
             <div>
