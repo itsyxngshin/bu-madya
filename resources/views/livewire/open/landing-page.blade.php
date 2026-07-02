@@ -78,70 +78,7 @@
     {{-- MAIN CONTENT --}}
     <main class="max-w-[1800px] w-[95%] mx-auto px-4 relative z-20 pb-24">
 
-        {{-- ========================================== --}}
-        {{-- 3. SPOTLIGHT LANDSCAPE AREA (CAROUSEL)     --}}
-        {{-- ========================================== --}}
-        @if(count($spotlights ?? []) > 0)
-            <section class="mt-12 mb-8 w-full">
-                <div class="flex items-center justify-between mb-6">
-                    <div class="pl-4 border-l-4 border-purple-600">
-                        <h2 class="font-heading text-3xl md:text-4xl font-black text-gray-900 tracking-tight">Spotlight</h2>
-                        <p class="text-gray-500 font-medium mt-1 uppercase tracking-widest text-[10px]">Featured Promotions & Greetings</p>
-                    </div>
-                </div>
-
-                <div x-data="{ 
-                            activeSlide: 0, 
-                            totalSlides: {{ $spotlights->count() }},
-                            next() { this.activeSlide = this.activeSlide === this.totalSlides - 1 ? 0 : this.activeSlide + 1 },
-                            prev() { this.activeSlide = this.activeSlide === 0 ? this.totalSlides - 1 : this.activeSlide - 1 }
-                        }" 
-                        x-init="if (totalSlides > 1) setInterval(() => next(), 6000)"
-                        class="relative w-full aspect-[21/9] md:aspect-[4/1] bg-gray-900 rounded-[2rem] overflow-hidden shadow-sm border border-gray-100 group">
-                    
-                    <div class="relative w-full h-full flex transition-transform duration-700 ease-in-out" 
-                         :style="'transform: translateX(-' + (activeSlide * 100) + '%)'">
-                        
-                        @foreach($spotlights as $spotlight)
-                            <div class="w-full h-full shrink-0 relative">
-                                <img src="{{ Storage::url($spotlight->image_path) }}" alt="{{ $spotlight->title }}" class="absolute inset-0 w-full h-full object-cover opacity-60 mix-blend-overlay">
-                                <div class="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/40 to-transparent"></div>
-                                
-                                <div class="absolute inset-0 flex flex-col justify-end p-8 md:p-16">
-                                    <span class="inline-block px-3 py-1 bg-purple-600 text-white text-[10px] font-black uppercase tracking-widest rounded-full w-max mb-4 shadow-md">
-                                        {{ $spotlight->category->name }}
-                                    </span>
-                                    <h3 class="font-heading text-3xl md:text-5xl font-black text-white leading-tight mb-4 max-w-4xl drop-shadow-lg">
-                                        {{ $spotlight->title }}
-                                    </h3>
-                                    @if($spotlight->link && $spotlight->link !== '#')
-                                        <a href="{{ $spotlight->link }}" target="_blank" class="inline-flex items-center gap-2 text-[10px] text-white font-black hover:text-purple-400 uppercase tracking-widest transition w-max group/link">
-                                            Find out more 
-                                            <svg class="w-4 h-4 group-hover/link:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
-                                        </a>
-                                    @endif
-                                </div>
-                            </div>
-                        @endforeach
-                    </div>
-
-                    <button @click="prev()" class="absolute left-6 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/20 hover:bg-purple-600 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition backdrop-blur-sm shadow-lg">
-                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" /></svg>
-                    </button>
-                    <button @click="next()" class="absolute right-6 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/20 hover:bg-purple-600 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition backdrop-blur-sm shadow-lg">
-                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
-                    </button>
-
-                    <div class="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2">
-                        <template x-for="i in totalSlides" :key="i">
-                            <button @click="activeSlide = i - 1" 
-                                    :class="{'w-6 bg-purple-600': activeSlide === i - 1, 'w-2 bg-white/50 hover:bg-white': activeSlide !== i - 1}"
-                                    class="h-2 rounded-full transition-all duration-300"></button>
-                        </template>
-                    </div>
-                </div>
-            </section>
-        @endif
+        
 
         <div class="grid lg:grid-cols-12 gap-12 items-start pt-12">
 
@@ -215,6 +152,71 @@
                         </template>
                     </div>
                 </section>
+
+                {{-- ========================================== --}}
+                {{-- 3. SPOTLIGHT LANDSCAPE AREA (CAROUSEL)     --}}
+                {{-- ========================================== --}}
+                @if(count($spotlights ?? []) > 0)
+                    <section class="mt-12 mb-8 w-full">
+                        <div class="flex items-center justify-between mb-6">
+                            <div class="pl-4 border-l-4 border-purple-600">
+                                <h2 class="font-heading text-3xl md:text-4xl font-black text-gray-900 tracking-tight">Spotlight</h2>
+                                <p class="text-gray-500 font-medium mt-1 uppercase tracking-widest text-[10px]">Featured Promotions & Greetings</p>
+                            </div>
+                        </div>
+
+                        <div x-data="{ 
+                                activeSlide: 0, 
+                                totalSlides: {{ $spotlights->count() }},
+                                next() { this.activeSlide = this.activeSlide === this.totalSlides - 1 ? 0 : this.activeSlide + 1 },
+                                prev() { this.activeSlide = this.activeSlide === 0 ? this.totalSlides - 1 : this.activeSlide - 1 }
+                            }" 
+                            x-init="if (totalSlides > 1) setInterval(() => next(), 6000)"
+                            class="relative w-full h-[250px] md:h-[400px] bg-gray-900 rounded-[2rem] overflow-hidden shadow-sm border border-gray-100 group">
+                            
+                            <div class="relative w-full h-full flex transition-transform duration-700 ease-in-out" 
+                                :style="'transform: translateX(-' + (activeSlide * 100) + '%)'">
+                                
+                                @foreach($spotlights as $spotlight)
+                                    <div class="w-full h-full shrink-0 relative">
+                                        <img src="{{ Storage::url($spotlight->image_path) }}" alt="{{ $spotlight->title }}" class="absolute inset-0 w-full h-full object-cover opacity-60 mix-blend-overlay">
+                                        <div class="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/40 to-transparent"></div>
+                                        
+                                        <div class="absolute inset-0 flex flex-col justify-end p-8 md:p-16">
+                                            <span class="inline-block px-3 py-1 bg-purple-600 text-white text-[10px] font-black uppercase tracking-widest rounded-full w-max mb-4 shadow-md">
+                                                {{ $spotlight->category->name }}
+                                            </span>
+                                            <h3 class="font-heading text-3xl md:text-5xl font-black text-white leading-tight mb-4 max-w-4xl drop-shadow-lg">
+                                                {{ $spotlight->title }}
+                                            </h3>
+                                            @if($spotlight->link && $spotlight->link !== '#')
+                                                <a href="{{ $spotlight->link }}" target="_blank" class="inline-flex items-center gap-2 text-[10px] text-white font-black hover:text-purple-400 uppercase tracking-widest transition w-max group/link">
+                                                    Find out more 
+                                                    <svg class="w-4 h-4 group-hover/link:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
+                                                </a>
+                                            @endif
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+
+                            <button @click="prev()" class="absolute left-6 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/20 hover:bg-purple-600 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition backdrop-blur-sm shadow-lg">
+                                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" /></svg>
+                            </button>
+                            <button @click="next()" class="absolute right-6 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/20 hover:bg-purple-600 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition backdrop-blur-sm shadow-lg">
+                                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
+                            </button>
+
+                            <div class="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2">
+                                <template x-for="i in totalSlides" :key="i">
+                                    <button @click="activeSlide = i - 1" 
+                                            :class="{'w-6 bg-purple-600': activeSlide === i - 1, 'w-2 bg-white/50 hover:bg-white': activeSlide !== i - 1}"
+                                            class="h-2 rounded-full transition-all duration-300"></button>
+                                </template>
+                            </div>
+                        </div>
+                    </section>
+                @endif
 
                 {{-- FEATURED PROJECTS CAROUSEL --}}
                 <section class="mb-8 md:mb-48"
