@@ -16,15 +16,44 @@ use Livewire\Attributes\Layout;
 class LandingPage extends Component
 {
     public $visitorCount = 1;
+    public function mount(){
 
-    public function mount()
-    {
         if (!Session::has('has_visited_site')) {
             SiteStat::where('key', 'visitor_count')->increment('value');
             Session::put('has_visited_site', true);
         }
+
         $this->visitorCount = SiteStat::where('key', 'visitor_count')->value('value');
-    }
+
+        $now = \Carbon\Carbon::now();
+
+        // Fetch valid announcements
+        $this->announcements = \App\Models\Announcement::with('type')
+            ->where('is_active', true)
+            ->where('status', 'approved') // Ensure this is here!
+            ->where(function ($query) use ($now) {
+                $query->whereNull('start_at')->orWhere('start_at', '<=', $now);
+            })
+            ->where(function ($query) use ($now) {
+                $query->whereNull('end_at')->orWhere('end_at', '>=', $now);
+            })
+            ->latest()
+            ->get();
+
+        // Fetch valid spotlights
+        $this->spotlights = \App\Models\Spotlight::with('category')
+            ->where('is_active', true)
+            ->where('status', 'approved') // Ensure this is here!
+            ->where(function ($query) use ($now) {
+                $query->whereNull('start_at')->orWhere('start_at', '<=', $now);
+            })
+            ->where(function ($query) use ($now) {
+                $query->whereNull('end_at')->orWhere('end_at', '>=', $now);
+            })
+            ->orderBy('sort_order', 'asc')
+            ->latest()
+            ->get();
+    } 
 
     public function render()
     {

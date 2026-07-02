@@ -12,7 +12,7 @@ use App\Models\SpotlightCategory;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 
-#[Layout('layouts.madya-admin-deck')] // Update to your admin layout if different
+#[Layout('layouts.madya-admin-deck')]
 class ContentSettings extends Component
 {
     use WithFileUploads;
