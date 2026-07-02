@@ -145,6 +145,45 @@
         @endif
 
         {{-- ========================================== --}}
+        {{-- CONTENT & MEDIA (Announcements, Spotlights) --}}
+        {{-- ========================================== --}}
+        <div class="pt-5 pb-2 px-3 mt-2 border-t border-gray-100">
+            <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Content & Media</p>
+        </div>
+
+        {{-- Admin: Manage Requests and Settings --}}
+        @if($isAdmin)
+            @php $isContentRequestsActive = request()->routeIs('admin.content.requests'); @endphp
+            <a href="{{ route('admin.content.requests') }}" class="{{ $linkClass }} {{ $isContentRequestsActive ? $activeClass : $inactiveClass }}">
+                <svg class="{{ $isContentRequestsActive ? $iconActive : $iconInactive }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                </svg>
+                Content Requests
+            </a>
+
+            @php $isContentSettingsActive = request()->routeIs('admin.content.settings'); @endphp
+            <a href="{{ route('admin.content.settings') }}" class="{{ $linkClass }} {{ $isContentSettingsActive ? $activeClass : $inactiveClass }}">
+                <svg class="{{ $isContentSettingsActive ? $iconActive : $iconInactive }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+                Content Settings
+            </a>
+        @endif
+
+        {{-- Partner/Org: Submit Content to Admin --}}
+        @if($isOrg)
+            @php $isContentSubmitActive = request()->routeIs('partner.content.submit'); @endphp
+            <a href="{{ route('partner.content.submit') }}" class="{{ $linkClass }} {{ $isContentSubmitActive ? $activeClass : $inactiveClass }}">
+                <svg class="{{ $isContentSubmitActive ? $iconActive : $iconInactive }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+                </svg>
+                Submit Content
+            </a>
+        @endif
+
+
+        {{-- ========================================== --}}
         {{-- SERVICES (Evaluations, Welfare, Transparency) --}}
         {{-- ========================================== --}}
         <div class="pt-5 pb-2 px-3 mt-2 border-t border-gray-100">

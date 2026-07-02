@@ -17,11 +17,11 @@ return new class extends Migration
             $table->string('title');
             $table->text('message');
             $table->boolean('is_active')->default(true);
-            
+
             // Add these two scheduling columns
             $table->dateTime('start_at')->nullable();
             $table->dateTime('end_at')->nullable();
-            
+
             $table->timestamps();
         });
     }
