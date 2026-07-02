@@ -1,7 +1,7 @@
 <?php
 
-namespace App\Livewire\Open;
-
+namespace App\Livewire\Open; 
+ 
 use Livewire\Component;
 use App\Models\SiteStat;
 use App\Models\News;
@@ -16,8 +16,13 @@ use Livewire\Attributes\Layout;
 class LandingPage extends Component
 {
     public $visitorCount = 1;
-    public function mount(){
+    
+    // ADD THESE TWO LINES:
+    public $announcements;
+    public $spotlights;
 
+    public function mount()
+    {
         if (!Session::has('has_visited_site')) {
             SiteStat::where('key', 'visitor_count')->increment('value');
             Session::put('has_visited_site', true);
@@ -30,7 +35,7 @@ class LandingPage extends Component
         // Fetch valid announcements
         $this->announcements = \App\Models\Announcement::with('type')
             ->where('is_active', true)
-            ->where('status', 'approved') // Ensure this is here!
+            ->where('status', 'approved')
             ->where(function ($query) use ($now) {
                 $query->whereNull('start_at')->orWhere('start_at', '<=', $now);
             })
@@ -43,7 +48,7 @@ class LandingPage extends Component
         // Fetch valid spotlights
         $this->spotlights = \App\Models\Spotlight::with('category')
             ->where('is_active', true)
-            ->where('status', 'approved') // Ensure this is here!
+            ->where('status', 'approved')
             ->where(function ($query) use ($now) {
                 $query->whereNull('start_at')->orWhere('start_at', '<=', $now);
             })
@@ -138,28 +143,13 @@ class LandingPage extends Component
             ];
         }
 
-        // Fetch ALL active projects 
-        $allProjects = Project::where('status', 'active')->get();
-
-        foreach ($allProjects as $proj) {
-            if ($proj->created_at) {
-                $date = $proj->created_at->format('Y-m-d');
-                if (!isset($calendarData[$date])) $calendarData[$date] = [];
-                $calendarData[$date][] = [
-                    'title' => $proj->title,
-                    'type'  => 'Project',
-                    'url'   => route('projects.show', $proj->slug ?? $proj->id)
-                ];
-            }
-        }
-
         return view('livewire.open.landing-page', [
             'latestNews'       => $latestNews,
             'featuredProjects' => $featuredProjects,
             'upcomingEvents'   => $upcomingEvents,
             'teamMarquee'      => $teamMarquee,
             'activeYearLabel'  => $activeYear?->name ?? 'Current',
-            'calendarData'     => $calendarData // <-- Pass to view
+            'calendarData'     => $calendarData 
         ]); 
     }
 }
