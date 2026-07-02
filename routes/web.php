@@ -72,6 +72,8 @@ use App\Livewire\Admin\CampaignList;
 use App\Livewire\Admin\CampaignBuilder;
 use App\Livewire\Admin\CampaignAnalytics;
 use App\Livewire\Admin\ElectionVoterLogs;
+use App\Livewire\Admin\Content\RequestsBoard; 
+use App\Livewire\Admin\Content\ContentSettings;
 
 
 use App\Models\MembershipApplication;
@@ -84,6 +86,7 @@ use App\Livewire\Partner\AccreditationDashboard as OrgDashboard;
 use App\Livewire\Partner\MeetingManager;
 use App\Livewire\Partner\ActivityManager;
 use App\Livewire\Partner\ActivityBuilder;
+use App\Livewire\Partner\SubmitContent; 
 
 
 
@@ -308,6 +311,8 @@ Route::middleware(['web'])->group(function () {
         Route::get('/community/moderation', CommunityManager::class)->name('community.moderation');
         Route::get('/activities', ActivityManager::class)->name('activities.manage');
         Route::get('/activities/builder/{slug?}', ActivityBuilder::class)->name('activities.builder');
+        Route::get('/content/requests', RequestsBoard::class)->name('content.requests');
+    Route::get('/content/settings', ContentSettings::class)->name('content.settings');
     });
 
     Route::middleware(['auth', 'role:organization'])->prefix('partner')->name('partner.')
@@ -338,6 +343,7 @@ Route::middleware(['web'])->group(function () {
         Route::get('/elections/{election:slug}/edit', \App\Livewire\Admin\ElectionEditor::class)->name('elections.edit');
         Route::get('/activities', ActivityManager::class)->name('activities.manage');
         Route::get('/activities/builder/{slug?}', ActivityBuilder::class)->name('activities.builder');
+        Route::get('/submit-content', SubmitContent::class)->name('content.submit');
 
     });
 
