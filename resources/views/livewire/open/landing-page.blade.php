@@ -4,7 +4,7 @@
     {{-- 1. ANNOUNCEMENTS TICKER / ALERT BAR        --}}
     {{-- ========================================== --}}
     @if(count($announcements ?? []) > 0)
-        <div class="w-full flex flex-col relative z-50">
+        <div class="w-full flex flex-col relative">
             @foreach($announcements as $announcement)
                 <div x-data="{ show: true }" x-show="show" x-transition.opacity 
                      class="{{ $announcement->type->color_theme }} px-4 py-3 shadow-md border-b border-black/10">
