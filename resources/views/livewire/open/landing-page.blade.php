@@ -4,10 +4,9 @@
     {{-- 1. ANNOUNCEMENTS TICKER / ALERT BAR        --}}
     {{-- ========================================== --}}
     @if(count($announcements ?? []) > 0)
-        {{-- ADDED: pt-20 md:pt-24 to push it below the fixed navbar --}}
-        <div class="w-full flex flex-col relative z-50 pt-20 md:pt-24 bg-gray-900">
+        <div class="w-full flex flex-col relative z-50">
             @foreach($announcements as $announcement)
-                <div x-data="{ show: true }" x-show="show" x-transition.opacity 
+                <div x-data="{ show: true }" x-show="show" x-transition.opacity
                      class="{{ $announcement->type->color_theme }} px-4 py-3 shadow-md border-b border-black/10">
                     <div class="max-w-[1800px] w-[95%] mx-auto flex items-start sm:items-center justify-between gap-4">
                         <div class="flex items-start sm:items-center gap-3">
