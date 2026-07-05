@@ -76,7 +76,7 @@ use App\Livewire\Admin\Content\RequestsBoard;
 use App\Livewire\Admin\Content\ContentSettings;
 use App\Livewire\Admin\Content\ContentReferences;
 
-use App\Livewire\Ibalong\Launchpad; 
+use App\Livewire\Ibalong\Launchpad;
 
 use App\Models\MembershipApplication;
 use Illuminate\Support\Facades\Storage;
@@ -145,7 +145,7 @@ Route::domain('community.' . env('APP_DOMAIN'))->name('community.')->group(funct
 Route::domain('ibalong.' . env('APP_DOMAIN'))->group(function () {
     
     // The Launchpad Landing Page
-    Route::get('/', Launchpad::class)->name('ibalong.home');
+    Route::get('/', \App\Livewire\Ibalong\Launchpad::class)->name('ibalong.home');
 
     // Future routes for this event will go here...
     // Route::get('/register', ...)->name('ibalong.register');
