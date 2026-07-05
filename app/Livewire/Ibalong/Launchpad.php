@@ -1,3 +1,5 @@
+<? php
+
 namespace App\Livewire\Ibalong;
 
 use Livewire\Component;
