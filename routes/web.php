@@ -139,6 +139,19 @@ Route::domain('community.' . env('APP_DOMAIN'))->name('community.')->group(funct
     });
 });
 
+// ==========================================
+// IBALONG EVENT SUBDOMAIN
+// ==========================================
+Route::domain('ibalong.' . env('APP_DOMAIN'))->name('ibalong.')->group(function () {
+    
+    // The Launchpad Landing Page
+    Route::get('/', Launchpad::class)->name('home');
+
+    // Future routes for this event will go here...
+    // Route::get('/register', ...)->name('ibalong.register');
+    // Route::get('/judge-dashboard', ...)->name('ibalong.judge')->middleware('auth:event_guard');
+});
+
 
 Route::domain('partners.' . env('APP_DOMAIN'))->group(function () {
 
