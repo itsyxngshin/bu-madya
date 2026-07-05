@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="scroll-smooth bg-[#FAFAFA]">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="scroll-smooth bg-[#FFFBF7]">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -16,7 +16,6 @@
         body { font-family: 'Plus Jakarta Sans', sans-serif; color: #131011; }
         .font-pixel { font-family: 'Press Start 2P', cursive; }
         
-        /* Official Retro Button Styling */
         .btn-retro {
             border: 4px solid #131011;
             box-shadow: 0 4px 0 0 #131011;
@@ -27,72 +26,68 @@
             box-shadow: 0 0px 0 0 transparent;
         }
 
-        /* Authentic Ethnic Image Trims */
+        /* Non-Repeating Stretched Ethnic Trims */
         .trim-element-1 {
             background-image: url('{{ asset('images/ELEMENT 1.png') }}');
-            background-repeat: repeat-x;
+            background-repeat: no-repeat;
             background-position: center;
-            background-size: auto 100%;
-            height: 28px;
+            background-size: 100% 100%;
+            height: 24px;
             width: 100%;
         }
         
         .trim-element-2 {
             background-image: url('{{ asset('images/ELEMENT 2.png') }}');
-            background-repeat: repeat-x;
+            background-repeat: no-repeat;
             background-position: center;
-            background-size: auto 100%;
-            height: 28px;
+            background-size: 100% 100%;
+            height: 24px;
             width: 100%;
         }
 
         @media (min-width: 768px) {
-            .trim-element-1, .trim-element-2 { height: 36px; }
+            .trim-element-1, .trim-element-2 { height: 32px; }
         }
     </style>
 </head>
 <body class="antialiased overflow-x-hidden pt-20 md:pt-24">
 
-    {{-- DYNAMIC FLOATING NAVBAR --}}
-    <nav x-data="{ mobileMenuOpen: false }" class="fixed top-0 w-full z-50 bg-white/95 border-b-4 border-[#131011] shadow-sm backdrop-blur-md">
+    {{-- COLORFUL NAVBAR --}}
+    <nav x-data="{ mobileMenuOpen: false }" class="fixed top-0 w-full z-50 bg-[#FFFBF7]/95 border-b-4 border-[#CF452C] shadow-sm backdrop-blur-md">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex justify-between items-center">
             
             <div class="font-pixel text-[10px] sm:text-xs tracking-tight text-[#CF452C] z-50">
-                <span class="text-[#131011]">BU</span> MADYA
+                <span class="text-[#0095AC]">BU</span> MADYA
             </div>
             
             <div class="flex items-center gap-4 sm:gap-6 z-50">
                 <div class="hidden md:flex gap-6 font-pixel text-[9px] text-[#131011]">
                     <a href="#home" class="hover:text-[#FF8623] transition-colors">HOME</a>
-                    <a href="#about" class="hover:text-[#FF8623] transition-colors">ABOUT</a>
-                    <a href="#pathways" class="hover:text-[#FF8623] transition-colors">PATHWAYS</a>
-                    <a href="#timeline" class="hover:text-[#FF8623] transition-colors">TIMELINE</a>
+                    <a href="#about" class="hover:text-[#0095AC] transition-colors">ABOUT</a>
+                    <a href="#pathways" class="hover:text-[#5C7914] transition-colors">PATHWAYS</a>
+                    <a href="#timeline" class="hover:text-[#CF452C] transition-colors">TIMELINE</a>
                 </div>
 
-                {{-- Mobile Hamburger Button --}}
-                <button @click="mobileMenuOpen = !mobileMenuOpen" class="md:hidden p-2 text-[#131011] focus:outline-none">
+                <button @click="mobileMenuOpen = !mobileMenuOpen" class="md:hidden p-2 text-[#CF452C] focus:outline-none">
                     <svg x-show="!mobileMenuOpen" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
                     <svg x-show="mobileMenuOpen" x-cloak class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
         </div>
 
-        {{-- Mobile Menu --}}
-        <div x-show="mobileMenuOpen" x-cloak class="md:hidden absolute top-full left-0 w-full bg-white border-b-4 border-[#131011] shadow-lg font-pixel text-[10px] text-center">
+        <div x-show="mobileMenuOpen" x-cloak class="md:hidden absolute top-full left-0 w-full bg-[#FFFBF7] border-b-4 border-[#CF452C] shadow-lg font-pixel text-[10px] text-center">
             <div class="flex flex-col py-4">
-                <a href="#home" @click="mobileMenuOpen = false" class="py-3 text-[#131011] hover:text-[#FF8623] hover:bg-gray-50">HOME</a>
-                <a href="#about" @click="mobileMenuOpen = false" class="py-3 text-[#131011] hover:text-[#FF8623] hover:bg-gray-50">ABOUT</a>
-                <a href="#pathways" @click="mobileMenuOpen = false" class="py-3 text-[#131011] hover:text-[#FF8623] hover:bg-gray-50">PATHWAYS</a>
-                <a href="#timeline" @click="mobileMenuOpen = false" class="py-3 text-[#131011] hover:text-[#FF8623] hover:bg-gray-50 border-b border-gray-200">TIMELINE</a>
-                <a href="#register" @click="mobileMenuOpen = false" class="py-4 text-[#CF452C] font-bold bg-[#FF8623]/10">REGISTER NOW</a>
+                <a href="#home" @click="mobileMenuOpen = false" class="py-3 text-[#131011] hover:text-[#FF8623] hover:bg-orange-50">HOME</a>
+                <a href="#about" @click="mobileMenuOpen = false" class="py-3 text-[#131011] hover:text-[#0095AC] hover:bg-teal-50">ABOUT</a>
+                <a href="#pathways" @click="mobileMenuOpen = false" class="py-3 text-[#131011] hover:text-[#5C7914] hover:bg-green-50">PATHWAYS</a>
+                <a href="#timeline" @click="mobileMenuOpen = false" class="py-3 text-[#131011] hover:text-[#CF452C] hover:bg-red-50 border-b border-[#CF452C]/20">TIMELINE</a>
+                <a href="#register" @click="mobileMenuOpen = false" class="py-4 text-white font-bold bg-[#FF8623]">REGISTER NOW</a>
             </div>
         </div>
     </nav>
 
-    {{-- INJECT VIEW COMPONENT --}}
     {{ $slot }}
 
-    {{-- BRAND SHOWCASE / FOOTER --}}
     <footer class="bg-white pt-16">
         <div class="max-w-7xl mx-auto px-4 sm:px-6">
             <div class="text-center mb-8 md:mb-10">
@@ -112,7 +107,7 @@
                 @endphp
 
                 @foreach($partners as $partner)
-                    <div class="bg-[#FAFAFA] border-2 border-[#131011]/10 p-4 sm:p-6 flex flex-col items-center justify-center text-center rounded-xl hover:border-[#FF8623] transition-all">
+                    <div class="bg-[#FFFBF7] border-2 border-[#131011]/10 p-4 sm:p-6 flex flex-col items-center justify-center text-center rounded-xl hover:border-[#FF8623] hover:shadow-md transition-all">
                         <div class="h-12 sm:h-16 w-full flex items-center justify-center mb-2 sm:mb-3">
                             <div class="font-pixel text-[8px] sm:text-[10px] text-[#CF452C] leading-tight">
                                 {{ $partner['name'] }}
@@ -125,12 +120,11 @@
                 @endforeach
             </div>
             
-            <div class="text-center mt-12 pb-8 border-t border-gray-200 pt-6 text-[#131011] text-xs px-4">
+            <div class="text-center mt-12 pb-8 border-t border-[#131011]/10 pt-6 text-[#131011] text-xs px-4">
                 <p>&copy; {{ date('Y') }} BU MADYA & BiCoRSE.</p>
             </div>
         </div>
         
-        {{-- Ethnic Element 2 Trim --}}
         <div class="trim-element-2"></div>
     </footer>
 
