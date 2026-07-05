@@ -24,6 +24,17 @@ export default {
             fontFamily: {
                 sans: ['Figtree', ...defaultTheme.fontFamily.sans],
             },
+
+            colors: {
+                iba: {
+                    black: '#131011',
+                    red: '#CF452C',
+                    orange: '#FF8623',
+                    teal: '#0095AC',
+                    green: '#5C7914',
+                    light: '#FFFBF7'
+                }
+            }, 
         },
     },
 
