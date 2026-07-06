@@ -11,16 +11,29 @@ class RegistrationForm extends Component
 {
     public $step = 1;
 
-    // Form Data - Step 1
+    // Form Data - Step 1 (Cohort Profile)
     public $team_name, $team_about, $affiliation;
-    public $province_id = 1, $citymun_id = 1, $barangay_id = 1; // Fallbacks for PSGC
+    
+    // PSGC Geographic Data
+    public $provCode = '';
+    public $citymunCode = '';
+    public $brgyCode = '';
+    
+    // Cascading Dropdown Options
+    public $provinces = [];
+    public $cities = [];
+    public $barangays = [];
+
+    // Pivot Arrays
+    public $team_skills = [];
     public $team_community_areas = [];
     public $team_experiences = [];
 
     // Form Data - Step 2 (Members)
     public $members = [];
 
-    // Form Data - Step 3 (Verification & Consents)
+    // Form Data - Step 3 (Verification & Logistics)
+    public $team_online_activities = [];
     public $team_member_demographics = '';
     public $onsite_commitment = '';
     public $does_not_automatically_apply_clause = '';
@@ -29,11 +42,10 @@ class RegistrationForm extends Component
     public $data_privacy_consent = false;
 
     // Reference Data (Loaded for the UI)
-    public $ref_skills, $ref_experiences, $ref_community_areas;
+    public $ref_skills, $ref_experiences, $ref_community_areas, $ref_online_activities;
 
     public function mount()
     {
-        // Initialize with 1 Team Leader
         $this->members = [
             $this->getEmptyMemberTemplate('Team Leader')
         ];
@@ -42,7 +54,36 @@ class RegistrationForm extends Component
         $this->ref_skills = DB::table('ibalong_skills')->get();
         $this->ref_experiences = DB::table('ibalong_experiences')->get();
         $this->ref_community_areas = DB::table('ibalong_community_areas')->get();
+        $this->ref_online_activities = DB::table('ibalong_online_activities')->get();
+
+        // Initialize PSGC Location Data (Default to Region V / 05)
+        // Fetches provinces mapped to regCode '05'
+        $this->provinces = DB::table('refprovince')->where('regCode', '05')->orderBy('provDesc')->get();
     }
+
+    // --- CASCADING DROPDOWN HOOKS ---
+
+    public function updatedProvCode($value)
+    {
+        // When Province changes, fetch related Cities/Municipalities
+        $this->cities = DB::table('refcitymun')->where('provCode', $value)->orderBy('citymunDesc')->get();
+        
+        // Reset downstream selections
+        $this->citymunCode = '';
+        $this->brgyCode = '';
+        $this->barangays = [];
+    }
+
+    public function updatedCitymunCode($value)
+    {
+        // When City/Municipality changes, fetch related Barangays
+        $this->barangays = DB::table('refbrgy')->where('citymunCode', $value)->orderBy('brgyDesc')->get();
+        
+        // Reset downstream selection
+        $this->brgyCode = '';
+    }
+
+    // --- END HOOKS ---
 
     private function getEmptyMemberTemplate($role = 'Team Member')
     {
@@ -70,22 +111,6 @@ class RegistrationForm extends Component
 
     public function nextStep()
     {
-        if ($this->step === 1) {
-            $this->validate([
-                'team_name' => 'required|string|max:255',
-                'team_about' => 'required|string',
-                'team_community_areas' => 'required|array|min:1',
-            ]);
-        } elseif ($this->step === 2) {
-            $this->validate([
-                'members' => 'required|array|min:3|max:5',
-                'members.*.full_name' => 'required|string',
-                'members.*.email_address' => 'required|email',
-            ], [
-                'members.min' => 'You must assemble a cohort of at least 3 members.',
-                'members.max' => 'Maximum cohort capacity is 5 members.',
-            ]);
-        }
         $this->step++;
     }
 
@@ -96,16 +121,17 @@ class RegistrationForm extends Component
 
     public function submit()
     {
-        // Final strict verification
         $this->validate([
             'team_member_demographics' => 'required',
             'onsite_commitment' => 'required',
             'data_privacy_consent' => 'accepted',
             'media_consent' => 'accepted',
+            'provCode' => 'required',
+            'citymunCode' => 'required',
+            'brgyCode' => 'required',
         ]);
 
         DB::transaction(function () {
-            // Generate Unique Slug
             $teamSlug = Str::slug($this->team_name) . '-' . strtolower(Str::random(5));
             
             // 1. Create Core Registration
@@ -114,9 +140,9 @@ class RegistrationForm extends Component
                 'slug' => $teamSlug,
                 'team_about' => $this->team_about,
                 'affiliation' => $this->affiliation,
-                'province_id' => $this->province_id,
-                'citymun_id' => $this->citymun_id,
-                'barangay_id' => $this->barangay_id,
+                'provCode' => $this->provCode,
+                'citymunCode' => $this->citymunCode,
+                'brgyCode' => $this->brgyCode,
                 'team_member_demographics' => $this->team_member_demographics,
                 'number_of_team_members' => count($this->members),
                 'onsite_commitment' => $this->onsite_commitment,
@@ -128,8 +154,10 @@ class RegistrationForm extends Component
             ]);
 
             // 2. Sync Team Pivots
+            $registration->skills()->sync($this->team_skills);
             $registration->communityAreas()->sync($this->team_community_areas);
             $registration->experiences()->sync($this->team_experiences);
+            $registration->onlineActivities()->sync($this->team_online_activities);
 
             // 3. Create Members and Sync Member Pivots
             foreach ($this->members as $memberData) {
@@ -154,7 +182,6 @@ class RegistrationForm extends Component
             }
         });
 
-        // Use standard redirect (update to match your actual success route name)
         return redirect('/')->with('success', 'Cohort initialized successfully!');
     }
 

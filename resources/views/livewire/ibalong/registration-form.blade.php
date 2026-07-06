@@ -46,20 +46,56 @@
             </div>
             
             <div class="space-y-8">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="md:col-span-2">
-                        <label class="block font-bold text-iba-black dark:text-iba-light mb-2 uppercase tracking-wider text-sm">Designated Team Name <span class="text-iba-orange">*</span></label>
-                        <input type="text" wire:model="team_name" class="w-full border-4 border-iba-black dark:border-iba-light p-4 font-bold text-lg focus:outline-none focus:border-iba-orange dark:focus:border-iba-orange bg-white dark:bg-[#1A1617] text-iba-black dark:text-iba-light shadow-inner transition-colors">
+                <div class="grid grid-cols-1 gap-6">
+                    <div>
+                        <label class="block font-bold text-iba-black dark:text-iba-light mb-2 text-sm">Team Name: <span class="text-iba-red">*</span></label>
+                        <input type="text" wire:model.defer="team_name" class="w-full border-4 border-iba-black dark:border-iba-light p-4 font-bold text-lg focus:outline-none focus:border-iba-orange dark:focus:border-iba-orange bg-white dark:bg-[#1A1617] text-iba-black dark:text-iba-light shadow-inner transition-colors">
                     </div>
                     
-                    <div class="md:col-span-2">
-                        <label class="block font-bold text-iba-black dark:text-iba-light mb-2 uppercase tracking-wider text-sm">Origin / Affiliation <span class="text-xs text-gray-500 dark:text-gray-400 normal-case">(School, Organization, or Company)</span></label>
-                        <input type="text" wire:model="affiliation" class="w-full border-4 border-iba-black dark:border-iba-light p-4 font-bold focus:outline-none focus:border-iba-orange dark:focus:border-iba-orange bg-white dark:bg-[#1A1617] text-iba-black dark:text-iba-light shadow-inner transition-colors">
+                    <div>
+                        <label class="block font-bold text-iba-black dark:text-iba-light mb-2 text-sm">School / Organization / Company: <span class="text-iba-red">*</span></label>
+                        <input type="text" wire:model.defer="affiliation" class="w-full border-4 border-iba-black dark:border-iba-light p-4 font-bold focus:outline-none focus:border-iba-orange dark:focus:border-iba-orange bg-white dark:bg-[#1A1617] text-iba-black dark:text-iba-light shadow-inner transition-colors">
                     </div>
 
-                    <div class="md:col-span-2">
-                        <label class="block font-bold text-iba-black dark:text-iba-light mb-2 uppercase tracking-wider text-sm">Cohort Manifesto <span class="text-xs text-gray-500 dark:text-gray-400 normal-case">(Brief About)</span> <span class="text-iba-orange">*</span></label>
-                        <textarea wire:model="team_about" rows="3" class="w-full border-4 border-iba-black dark:border-iba-light p-4 font-bold focus:outline-none focus:border-iba-orange dark:focus:border-iba-orange bg-white dark:bg-[#1A1617] text-iba-black dark:text-iba-light shadow-inner transition-colors"></textarea>
+                    {{-- CASCADING GEOGRAPHIC DROPDOWNS --}}
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 border-l-4 border-iba-orange pl-4">
+                        {{-- Province --}}
+                        <div>
+                            <label class="block font-bold text-iba-black dark:text-iba-light mb-2 text-xs uppercase tracking-wider">Province <span class="text-iba-red">*</span></label>
+                            <select wire:model.live="provCode" class="w-full border-4 border-iba-black dark:border-iba-light p-4 font-bold text-sm focus:outline-none focus:border-iba-orange dark:focus:border-iba-orange bg-white dark:bg-[#1A1617] text-iba-black dark:text-iba-light transition-colors">
+                                <option value="">-- SELECT PROVINCE --</option>
+                                @foreach($provinces as $prov)
+                                    <option value="{{ $prov->provCode }}">{{ $prov->provDesc }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        {{-- City / Municipality --}}
+                        <div>
+                            <label class="block font-bold text-iba-black dark:text-iba-light mb-2 text-xs uppercase tracking-wider">City / Municipality <span class="text-iba-red">*</span></label>
+                            <select wire:model.live="citymunCode" class="w-full border-4 border-iba-black dark:border-iba-light p-4 font-bold text-sm focus:outline-none focus:border-iba-orange dark:focus:border-iba-orange bg-white dark:bg-[#1A1617] text-iba-black dark:text-iba-light transition-colors" {{ empty($cities) ? 'disabled' : '' }}>
+                                <option value="">-- SELECT CITY/MUN --</option>
+                                @foreach($cities as $city)
+                                    <option value="{{ $city->citymunCode }}">{{ $city->citymunDesc }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        {{-- Barangay --}}
+                        <div>
+                            <label class="block font-bold text-iba-black dark:text-iba-light mb-2 text-xs uppercase tracking-wider">Barangay <span class="text-iba-red">*</span></label>
+                            <select wire:model.defer="brgyCode" class="w-full border-4 border-iba-black dark:border-iba-light p-4 font-bold text-sm focus:outline-none focus:border-iba-orange dark:focus:border-iba-orange bg-white dark:bg-[#1A1617] text-iba-black dark:text-iba-light transition-colors" {{ empty($barangays) ? 'disabled' : '' }}>
+                                <option value="">-- SELECT BARANGAY --</option>
+                                @foreach($barangays as $brgy)
+                                    <option value="{{ $brgy->brgyCode }}">{{ $brgy->brgyDesc }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block font-bold text-iba-black dark:text-iba-light mb-2 text-sm">Team About / Manifesto: <span class="text-iba-red">*</span></label>
+                        <textarea wire:model.defer="team_about" rows="3" class="w-full border-4 border-iba-black dark:border-iba-light p-4 font-bold focus:outline-none focus:border-iba-orange dark:focus:border-iba-orange bg-white dark:bg-[#1A1617] text-iba-black dark:text-iba-light shadow-inner transition-colors"></textarea>
                     </div>
                 </div>
 
