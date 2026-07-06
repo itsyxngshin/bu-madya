@@ -1,10 +1,10 @@
 <div class="flex h-full flex-col overflow-y-auto">
-    {{-- Branding --}}
-    <div class="flex h-16 shrink-0 items-center px-6 border-b border-gray-200 dark:border-gray-700">
-        <div>
-            <div class="text-xs font-bold text-iba-red tracking-wider uppercase">BU MADYA</div>
-            <div class="font-extrabold text-sm text-gray-900 dark:text-white tracking-wide">COMMAND CENTER</div>
-        </div>
+    {{-- Branding Header --}}
+    <div class="flex flex-col justify-center shrink-0 py-5 px-6 border-b border-gray-200 dark:border-gray-700 bg-gray-900 dark:bg-gray-950">
+        <a href="{{ route('ibalong.dashboard') }}" class="block">
+            <img src="{{ asset('images/HOI Logo Blue.png') }}" alt="Heroes of Innovation Challenge" class="h-10 sm:h-12 w-auto object-contain object-left mb-2 hover:opacity-90 transition-opacity">
+        </a>
+        <div class="text-[10px] font-bold text-gray-400 tracking-widest uppercase">Command Center</div>
     </div>
 
     {{-- Navigation --}}

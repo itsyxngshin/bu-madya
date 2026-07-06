@@ -63,9 +63,10 @@
     <nav x-data="{ mobileMenuOpen: false }" class="fixed top-0 w-full z-50 bg-iba-light dark:bg-iba-black border-b-4 border-iba-black dark:border-iba-light shadow-[0_4px_0_0_#131011] dark:shadow-[0_4px_0_0_#FFFBF7] transition-colors duration-300">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex justify-between items-center">
             
-            <div class="font-pixel text-[10px] sm:text-xs tracking-tight text-iba-red z-50">
-                <span class="text-iba-black dark:text-iba-light">BU</span> MADYA
-            </div>
+            {{-- BRANDING LOGO --}}
+            <a href="{{ route('ibalong.home') }}" class="z-50 flex items-center">
+                <img src="{{ asset('images/HOI Logo Blue.png') }}" alt="Heroes of Innovation Challenge 2026" class="h-10 sm:h-12 w-auto drop-shadow-sm hover:-translate-y-0.5 transition-transform">
+            </a>
             
             <div class="flex items-center gap-4 sm:gap-6 z-50">
                 <div class="hidden md:flex gap-6 font-pixel text-[9px] text-iba-black dark:text-iba-light items-center">

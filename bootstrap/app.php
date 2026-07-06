@@ -17,6 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
          $middleware->alias([
             'role' => RoleMiddleware::class,
+            'ibalong.auth' => \App\Http\Middleware\IbalongAuth::class,
         ]);
         $middleware->web(append: [
             \App\Http\Middleware\EnsureAccountIsActive::class, // <--- Add this line
