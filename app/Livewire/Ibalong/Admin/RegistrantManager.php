@@ -6,6 +6,7 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB; // <-- Add this for the PSGC queries
 use App\Models\IbalongRegistration;
 use App\Models\IbalongUser;
 
@@ -19,32 +20,56 @@ class RegistrantManager extends Component
     // Modal State
     public $showModal = false;
     public $viewingTeam = null;
+    
+    // Extracted Address Data
+    public $fullAddress = '';
+    public $mapQuery = '';
 
     public function updatingSearch()
     {
         $this->resetPage();
     }
 
-    // Load full team details and open modal
     public function viewTeamDetails($id)
     {
-        // Eager load all the pivot relationships so we don't hit N+1 query issues
+        // 1. Eager load ALL relationships, including nested member skills
         $this->viewingTeam = IbalongRegistration::with([
-            'members', 
+            'members.skills', // <-- Nested eager loading
             'skills', 
             'communityAreas', 
             'experiences', 
             'onlineActivities'
         ])->findOrFail($id);
 
+        // 2. Translate PSGC Codes to Human-Readable Text
+        $provCode = $this->viewingTeam->provCode ?? $this->viewingTeam->province_id;
+        $cityCode = $this->viewingTeam->citymunCode ?? $this->viewingTeam->citymun_id;
+        $brgyCode = $this->viewingTeam->brgyCode ?? $this->viewingTeam->barangay_id;
+
+        $prov = DB::table('refprovince')->where('provCode', $provCode)->first();
+        $city = DB::table('refcitymun')->where('citymunCode', $cityCode)->first();
+        $brgy = DB::table('refbrgy')->where('brgyCode', $brgyCode)->first();
+
+        // 3. Construct Address & Map Query
+        $addressParts = array_filter([
+            $brgy ? $brgy->brgyDesc : '',
+            $city ? $city->citymunDesc : '',
+            $prov ? $prov->provDesc : '',
+            'Philippines'
+        ]);
+
+        $this->fullAddress = implode(', ', $addressParts);
+        $this->mapQuery = urlencode($this->fullAddress);
+
         $this->showModal = true;
     }
 
-    // Close the modal
     public function closeModal()
     {
         $this->showModal = false;
         $this->viewingTeam = null;
+        $this->fullAddress = '';
+        $this->mapQuery = '';
     }
 
     public function approveTeam($id)
@@ -75,7 +100,6 @@ class RegistrantManager extends Component
         
         session()->flash('message', "APPROVED! 🚀 Credentials for {$registration->team_name} — Email: {$email} | Password: {$rawPassword}");
         
-        // If they approved from inside the modal, close it.
         $this->closeModal();
     }
 

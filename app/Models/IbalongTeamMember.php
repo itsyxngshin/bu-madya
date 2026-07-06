@@ -41,4 +41,5 @@ class IbalongTeamMember extends Model
         return $this->belongsToMany(IbalongSkill::class, 'ibalong_team_member_skills', 'member_id', 'skill_id')
                     ->withTimestamps();
     }
+    
 }
