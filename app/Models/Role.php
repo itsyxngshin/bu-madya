@@ -5,62 +5,17 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Registration extends Model
+class Role extends Model
 {
     use HasFactory;
 
-    protected $table = 'ibalong_registrations';
-
     protected $fillable = [
-        'user_id',
-        'team_name',
-        'slug',
-        'team_about',
-        'affiliation',
-        'province_id',
-        'citymun_id',
-        'barangay_id',
-        'team_member_demographics',
-        'number_of_team_members',
-        'onsite_commitment',
-        'does_not_automatically_apply_clause',
-        'selection_on_icp',
-        'media_consent',
-        'data_privacy_consent',
-        'status',
-        'account_creation_status',
+        'role_name',
+        'role_description',
     ];
 
-    // Relational: A team has many members
-    public function members()
+    public function users()
     {
-        return $this->hasMany(TeamMember::class, 'team_id');
-    }
-
-    // Relational: Links to the generated user account
-    public function user()
-    {
-        return $this->belongsTo(User::class, 'user_id');
-    }
-
-    // Pivot: Team Community Areas
-    public function communityAreas()
-    {
-        return $this->belongsToMany(CommunityArea::class, 'ibalong_team_community_areas', 'team_id', 'community_area_id')
-                    ->withTimestamps();
-    }
-
-    // Pivot: Team Experiences
-    public function experiences()
-    {
-        return $this->belongsToMany(Experience::class, 'ibalong_team_experiences', 'team_id', 'experience_id')
-                    ->withTimestamps();
-    }
-
-    // Pivot: Team Online Activities
-    public function onlineActivities()
-    {
-        return $this->belongsToMany(OnlineActivity::class, 'ibalong_team_online_participations', 'team_id', 'online_activity_id')
-                    ->withTimestamps();
+        return $this->hasMany(User::class);
     }
 }
