@@ -13,7 +13,7 @@ class IbalongAdminSeeder extends Seeder
     {
         // 1. SUPER ADMIN ACCOUNT (Role ID: 1)
         IbalongUser::updateOrCreate(
-            ['email' => 'dg@bumadya.org'], // The login email
+            ['email' => 'adornado-cabalbag@bu-madya.org'], // The login email
             [
                 'role_id' => 1, 
                 'name' => 'Adornado B. Cabalbag Jr.',
@@ -27,7 +27,7 @@ class IbalongAdminSeeder extends Seeder
 
         // 2. STANDARD ADMIN ACCOUNT (Role ID: 2)
         IbalongUser::updateOrCreate(
-            ['email' => 'admin@bumadya.org'], 
+            ['email' => 'hoi-secretariat@bu-madya.org'], 
             [
                 'role_id' => 2, 
                 'name' => 'HOI Secretariat',

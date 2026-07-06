@@ -154,15 +154,15 @@ Route::domain('ibalong.' . env('APP_DOMAIN'))->name('ibalong.')->group(function 
     // Generic Dashboard Landing
     Route::get('/launchpad/dashboard', function() {
         return view('layouts.dashboard')->with('slot', '<div class="font-pixel text-2xl text-center mt-20">AWAITING DIRECTIVES</div>');
-    })->name('ibalong.dashboard');
+    })->name('dashboard');
     
     // Admin Routes
     Route::get('/launchpad/intake', \App\Livewire\Ibalong\Admin\RegistrantManager::class)
-        ->name('ibalong.admin.registrants');
+        ->name('admin.registrants');
     Route::middleware(['auth:ibalong'])->group(function () {
         Route::get('/dashboard', function() {
             return "Welcome to the Ibalong Dashboard!";
-        })->name('ibalong.dashboard');
+        })->name('dashboard');
         
         // Logout route for Ibalong Guard
         Route::post('/logout', function() {
