@@ -161,6 +161,11 @@ Route::domain('ibalong.' . env('APP_DOMAIN'))->name('ibalong.')->group(function 
         // Admin: Cohort Intake & Management
         Route::get('/launchpad/intake', \App\Livewire\Ibalong\Admin\RegistrantManager::class)
             ->name('admin.registrants');
+
+        Route::get('/launchpad/users', \App\Livewire\Ibalong\Admin\UserManager::class)->name('admin.users');
+    
+        // Every authenticated user can access their profile
+        Route::get('/launchpad/profile', \App\Livewire\Ibalong\ProfileManager::class)->name('profile');
         
         // Secure Logout
         Route::post('/launchpad/logout', function() {
