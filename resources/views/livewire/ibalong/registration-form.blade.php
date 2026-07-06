@@ -16,6 +16,8 @@
             <div class="bg-iba-red text-white p-4 border-4 border-iba-black shadow-[4px_4px_0_0_#131011] inline-block font-bold">
                 ⚠️ At this stage, you are not yet required to submit an idea or solution.
             </div>
+            
+            {{-- Global Validation Errors --}}
             @if ($errors->any())
                 <div class="bg-red-100 border-4 border-iba-red text-iba-red p-4 mt-4 font-bold">
                     System Alert: Please verify the highlighted fields below.
@@ -47,7 +49,7 @@
             <div class="space-y-8">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="md:col-span-2">
-                        <label class="block font-bold text-iba-black mb-2 uppercase tracking-wider text-sm">Designated Team Name</label>
+                        <label class="block font-bold text-iba-black mb-2 uppercase tracking-wider text-sm">Designated Team Name <span class="text-iba-orange">*</span></label>
                         <input type="text" wire:model="team_name" class="w-full border-4 border-iba-black p-4 font-bold text-lg focus:outline-none focus:border-iba-orange bg-white shadow-inner transition-colors">
                     </div>
                     
@@ -57,7 +59,7 @@
                     </div>
 
                     <div class="md:col-span-2">
-                        <label class="block font-bold text-iba-black mb-2 uppercase tracking-wider text-sm">Cohort Manifesto <span class="text-xs text-gray-500 normal-case">(Brief About)</span></label>
+                        <label class="block font-bold text-iba-black mb-2 uppercase tracking-wider text-sm">Cohort Manifesto <span class="text-xs text-gray-500 normal-case">(Brief About)</span> <span class="text-iba-orange">*</span></label>
                         <textarea wire:model="team_about" rows="3" class="w-full border-4 border-iba-black p-4 font-bold focus:outline-none focus:border-iba-orange bg-white shadow-inner transition-colors"></textarea>
                     </div>
                 </div>
@@ -67,8 +69,8 @@
                     <label class="block font-bold text-iba-black mb-4 uppercase tracking-wider text-sm">Target Community Areas of Interest <span class="text-iba-orange">*</span></label>
                     <div class="flex flex-wrap gap-3">
                         @foreach($ref_community_areas as $area)
-                            <label class="cursor-pointer relative">
-                                <input type="checkbox" wire:model.defer="team_community_areas" value="{{ $area->id }}" class="peer sr-only">
+                            <label wire:key="area-{{ $area->id }}" class="cursor-pointer relative inline-block">
+                                <input type="checkbox" wire:model="team_community_areas" value="{{ $area->id }}" class="peer sr-only">
                                 <div class="px-4 py-2 border-4 border-iba-black bg-white text-iba-black font-bold text-xs sm:text-sm uppercase tracking-wide peer-checked:bg-iba-orange peer-checked:text-iba-black peer-checked:translate-y-1 peer-checked:shadow-none shadow-[3px_3px_0_0_#131011] transition-all select-none hover:bg-gray-50">
                                     {{ $area->name }}
                                 </div>
@@ -82,8 +84,8 @@
                     <label class="block font-bold text-iba-black mb-4 uppercase tracking-wider text-sm">Previous Cohort Experiences</label>
                     <div class="flex flex-wrap gap-3">
                         @foreach($ref_experiences as $exp)
-                            <label class="cursor-pointer relative">
-                                <input type="checkbox" wire:model.defer="team_experiences" value="{{ $exp->id }}" class="peer sr-only">
+                            <label wire:key="exp-{{ $exp->id }}" class="cursor-pointer relative inline-block">
+                                <input type="checkbox" wire:model="team_experiences" value="{{ $exp->id }}" class="peer sr-only">
                                 <div class="px-4 py-2 border-4 border-iba-black bg-white text-iba-black font-bold text-xs sm:text-sm uppercase tracking-wide peer-checked:bg-iba-red peer-checked:text-white peer-checked:translate-y-1 peer-checked:shadow-none shadow-[3px_3px_0_0_#131011] transition-all select-none hover:bg-gray-50">
                                     {{ $exp->name }}
                                 </div>
@@ -111,7 +113,7 @@
             
             <div class="space-y-10">
                 @foreach($members as $index => $member)
-                    <div class="border-4 border-iba-black p-6 sm:p-8 relative bg-white shadow-[6px_6px_0_0_#131011]">
+                    <div wire:key="member-block-{{ $index }}" class="border-4 border-iba-black p-6 sm:p-8 relative bg-white shadow-[6px_6px_0_0_#131011]">
                         
                         <div class="flex justify-between items-center mb-6 border-b-2 border-dashed border-gray-300 pb-4">
                             <h4 class="font-pixel text-sm sm:text-base text-iba-black">
@@ -124,24 +126,24 @@
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
                             <div>
-                                <label class="block text-xs font-bold text-iba-black uppercase mb-1">Full Legal Name</label>
-                                <input type="text" wire:model.defer="members.{{ $index }}.full_name" class="w-full border-4 border-iba-black p-3 font-semibold focus:border-iba-teal focus:outline-none bg-iba-light/50">
+                                <label class="block text-xs font-bold text-iba-black uppercase mb-1">Full Legal Name <span class="text-iba-orange">*</span></label>
+                                <input type="text" wire:model="members.{{ $index }}.full_name" class="w-full border-4 border-iba-black p-3 font-semibold focus:border-iba-teal focus:outline-none bg-iba-light/50 transition-colors">
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-iba-black uppercase mb-1">Email Address</label>
-                                <input type="email" wire:model.defer="members.{{ $index }}.email_address" class="w-full border-4 border-iba-black p-3 font-semibold focus:border-iba-teal focus:outline-none bg-iba-light/50">
+                                <label class="block text-xs font-bold text-iba-black uppercase mb-1">Email Address <span class="text-iba-orange">*</span></label>
+                                <input type="email" wire:model="members.{{ $index }}.email_address" class="w-full border-4 border-iba-black p-3 font-semibold focus:border-iba-teal focus:outline-none bg-iba-light/50 transition-colors">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-iba-black uppercase mb-1">Mobile Number</label>
-                                <input type="text" wire:model.defer="members.{{ $index }}.mobile_number" class="w-full border-4 border-iba-black p-3 font-semibold focus:border-iba-teal focus:outline-none bg-iba-light/50">
+                                <input type="text" wire:model="members.{{ $index }}.mobile_number" class="w-full border-4 border-iba-black p-3 font-semibold focus:border-iba-teal focus:outline-none bg-iba-light/50 transition-colors">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-iba-black uppercase mb-1">Date of Birth</label>
-                                <input type="date" wire:model.defer="members.{{ $index }}.birthday" class="w-full border-4 border-iba-black p-3 font-semibold focus:border-iba-teal focus:outline-none bg-iba-light/50">
+                                <input type="date" wire:model="members.{{ $index }}.birthday" class="w-full border-4 border-iba-black p-3 font-semibold focus:border-iba-teal focus:outline-none bg-iba-light/50 transition-colors">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-iba-black uppercase mb-1">Course / Degree</label>
-                                <input type="text" wire:model.defer="members.{{ $index }}.course" class="w-full border-4 border-iba-black p-3 font-semibold focus:border-iba-teal focus:outline-none bg-iba-light/50">
+                                <input type="text" wire:model="members.{{ $index }}.course" class="w-full border-4 border-iba-black p-3 font-semibold focus:border-iba-teal focus:outline-none bg-iba-light/50 transition-colors">
                             </div>
                         </div>
 
@@ -150,8 +152,8 @@
                             <label class="block text-xs font-bold text-iba-black uppercase mb-3 bg-iba-teal text-white py-1 px-3 inline-block border-2 border-iba-black">Select Primary Skills</label>
                             <div class="flex flex-wrap gap-2">
                                 @foreach($ref_skills as $skill)
-                                    <label class="cursor-pointer">
-                                        <input type="checkbox" wire:model.defer="members.{{ $index }}.skills" value="{{ $skill->id }}" class="peer sr-only">
+                                    <label wire:key="skill-{{ $index }}-{{ $skill->id }}" class="cursor-pointer relative inline-block">
+                                        <input type="checkbox" wire:model="members.{{ $index }}.skills" value="{{ $skill->id }}" class="peer sr-only">
                                         <div class="px-3 py-1.5 border-2 border-iba-black bg-white text-gray-600 font-bold text-[10px] sm:text-xs uppercase peer-checked:bg-iba-teal peer-checked:text-white peer-checked:border-iba-black transition-colors select-none hover:bg-gray-100">
                                             {{ $skill->name }}
                                         </div>
@@ -198,8 +200,8 @@
                 {{-- Dropdowns --}}
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <label class="block text-xs font-bold text-iba-black uppercase mb-2">Are all members from Bicol?</label>
-                        <select wire:model.defer="team_member_demographics" class="w-full border-4 border-iba-black p-4 font-bold text-sm focus:border-iba-green focus:outline-none bg-white">
+                        <label class="block text-xs font-bold text-iba-black uppercase mb-2">Are all members from Bicol? <span class="text-iba-orange">*</span></label>
+                        <select wire:model="team_member_demographics" class="w-full border-4 border-iba-black p-4 font-bold text-sm focus:border-iba-green focus:outline-none bg-white transition-colors">
                             <option value="">-- AWAITING INPUT --</option>
                             <option value="YES">Yes, all members are from Bicol</option>
                             <option value="NO">No members are from Bicol</option>
@@ -208,8 +210,8 @@
                     </div>
                     
                     <div>
-                        <label class="block text-xs font-bold text-iba-black uppercase mb-2">Can the team commit to onsite pitching?</label>
-                        <select wire:model.defer="onsite_commitment" class="w-full border-4 border-iba-black p-4 font-bold text-sm focus:border-iba-green focus:outline-none bg-white">
+                        <label class="block text-xs font-bold text-iba-black uppercase mb-2">Can the team commit to onsite pitching? <span class="text-iba-orange">*</span></label>
+                        <select wire:model="onsite_commitment" class="w-full border-4 border-iba-black p-4 font-bold text-sm focus:border-iba-green focus:outline-none bg-white transition-colors">
                             <option value="">-- AWAITING INPUT --</option>
                             <option value="YES">YES, we commit</option>
                             <option value="NO">NO, we cannot</option>
@@ -217,8 +219,8 @@
                     </div>
 
                     <div>
-                        <label class="block text-xs font-bold text-iba-black uppercase mb-2">Acknowledge Non-Automatic Clause</label>
-                        <select wire:model.defer="does_not_automatically_apply_clause" class="w-full border-4 border-iba-black p-4 font-bold text-sm focus:border-iba-green focus:outline-none bg-white">
+                        <label class="block text-xs font-bold text-iba-black uppercase mb-2">Acknowledge Non-Automatic Clause <span class="text-iba-orange">*</span></label>
+                        <select wire:model="does_not_automatically_apply_clause" class="w-full border-4 border-iba-black p-4 font-bold text-sm focus:border-iba-green focus:outline-none bg-white transition-colors">
                             <option value="">-- AWAITING INPUT --</option>
                             <option value="YES">YES, understood</option>
                             <option value="NO">NO</option>
@@ -226,8 +228,8 @@
                     </div>
 
                     <div>
-                        <label class="block text-xs font-bold text-iba-black uppercase mb-2">Selection based on Concept Proposal?</label>
-                        <select wire:model.defer="selection_on_icp" class="w-full border-4 border-iba-black p-4 font-bold text-sm focus:border-iba-green focus:outline-none bg-white">
+                        <label class="block text-xs font-bold text-iba-black uppercase mb-2">Selection based on Concept Proposal? <span class="text-iba-orange">*</span></label>
+                        <select wire:model="selection_on_icp" class="w-full border-4 border-iba-black p-4 font-bold text-sm focus:border-iba-green focus:outline-none bg-white transition-colors">
                             <option value="">-- AWAITING INPUT --</option>
                             <option value="YES">YES, acknowledged</option>
                             <option value="NO">NO</option>
@@ -238,12 +240,12 @@
                 {{-- Consents --}}
                 <div class="pt-6 border-t-2 border-dashed border-gray-300 space-y-4">
                     <label class="flex items-start gap-4 bg-white p-5 border-4 border-iba-black cursor-pointer hover:bg-iba-green/5 transition-colors">
-                        <input type="checkbox" wire:model.defer="data_privacy_consent" class="mt-1 w-6 h-6 border-4 border-iba-black text-iba-green focus:ring-0 rounded-none bg-white checked:bg-iba-green">
+                        <input type="checkbox" wire:model="data_privacy_consent" class="mt-1 w-6 h-6 border-4 border-iba-black text-iba-green focus:ring-0 rounded-none bg-white checked:bg-iba-green">
                         <span class="text-sm font-bold text-iba-black leading-relaxed">I consent to the collection and processing of our team's data in accordance with the Data Privacy Act of 2012 for the purposes of this event.</span>
                     </label>
 
                     <label class="flex items-start gap-4 bg-white p-5 border-4 border-iba-black cursor-pointer hover:bg-iba-green/5 transition-colors">
-                        <input type="checkbox" wire:model.defer="media_consent" class="mt-1 w-6 h-6 border-4 border-iba-black text-iba-green focus:ring-0 rounded-none bg-white checked:bg-iba-green">
+                        <input type="checkbox" wire:model="media_consent" class="mt-1 w-6 h-6 border-4 border-iba-black text-iba-green focus:ring-0 rounded-none bg-white checked:bg-iba-green">
                         <span class="text-sm font-bold text-iba-black leading-relaxed">I grant permission for the organizers to use media (photos/videos) captured during the event for promotional and reporting purposes.</span>
                     </label>
                 </div>
@@ -255,6 +257,8 @@
                     ⬅ Edit Roster
                 </button>
                 <button wire:click="submit" class="btn-retro bg-iba-green text-white font-pixel px-8 py-5 text-xs sm:text-sm uppercase flex items-center justify-center gap-2 w-full sm:w-auto">
+                    <svg wire:loading.remove wire:target="submit" class="w-5 h-5 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                    <svg wire:loading wire:target="submit" class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                     CONFIRM & SUBMIT
                 </button>
             </div>
