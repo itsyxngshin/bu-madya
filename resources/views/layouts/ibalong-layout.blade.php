@@ -111,11 +111,6 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6">
 
             {{-- SECTION 1: EVENT PARTNERS --}}
-            <div class="text-center mb-8 md:mb-10">
-                <span class="font-pixel text-[8px] sm:text-[9px] tracking-widest text-iba-teal block mb-3">COUNCIL OF CO-FOUNDERS</span>
-                <h3 class="text-base sm:text-lg font-bold uppercase text-iba-black dark:text-iba-light tracking-wide">ORGANIZED BY & PARTNERS</h3>
-            </div>
-
             @php
                 // Fetch active partners ordered by your custom priority
                 $partners = \App\Models\IbalongPartner::where('is_active', true)->orderBy('display_order', 'asc')->get();
