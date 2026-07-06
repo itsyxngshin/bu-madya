@@ -40,6 +40,11 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+
+        'ibalong' => [
+            'driver' => 'session',
+            'provider' => 'ibalong_users',
+        ],
     ],
 
     /*
@@ -63,6 +68,12 @@ return [
         'users' => [
             'driver' => 'eloquent',
             'model' => env('AUTH_MODEL', App\Models\User::class),
+        ],
+
+        // CUSTOM PROVIDER FOR IBALONG 
+        'ibalong_users' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\IbalongUser::class, // Points to your prefixed model
         ],
 
         // 'users' => [
@@ -112,4 +123,5 @@ return [
 
     'password_timeout' => env('AUTH_PASSWORD_TIMEOUT', 10800),
 
+    
 ];

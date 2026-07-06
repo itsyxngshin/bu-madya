@@ -146,6 +146,24 @@ Route::domain('ibalong.' . env('APP_DOMAIN'))->name('ibalong.')->group(function 
     
     // The Launchpad Landing Page
     Route::get('/', Launchpad::class)->name('home');
+    // Public Registration
+    Route::get('/register', \App\Livewire\Ibalong\RegistrationForm::class)->name('register');
+
+    // Isolated Authentication
+    Route::get('/login', \App\Livewire\Ibalong\Auth\Login::class)->name('login');
+    Route::middleware(['auth:ibalong'])->group(function () {
+        Route::get('/dashboard', function() {
+            return "Welcome to the Ibalong Dashboard!";
+        })->name('ibalong.dashboard');
+        
+        // Logout route for Ibalong Guard
+        Route::post('/logout', function() {
+            Auth::guard('ibalong')->logout();
+            request()->session()->invalidate();
+            request()->session()->regenerateToken();
+            return redirect()->route('home');
+        })->name('ibalong.logout');
+    });
 
     // Future routes for this event will go here...
     // Route::get('/register', ...)->name('ibalong.register');
