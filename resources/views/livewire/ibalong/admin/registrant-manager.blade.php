@@ -108,33 +108,33 @@
 
     {{-- FULL DETAILS MODAL --}}
     @if($showModal && $viewingTeam)
-        <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-            <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <div class="fixed inset-0 z-[100] overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+            
+            {{-- Background overlay with blur --}}
+            <div class="fixed inset-0 bg-gray-800/75 dark:bg-gray-900/80 backdrop-blur-sm transition-opacity" wire:click="closeModal"></div>
+
+            {{-- Modern Flexbox Centering Wrapper --}}
+            <div class="flex min-h-screen items-center justify-center p-4 text-center sm:p-6">
                 
-                {{-- Background overlay --}}
-                <div class="fixed inset-0 bg-gray-500 bg-opacity-75 dark:bg-gray-900 dark:bg-opacity-80 transition-opacity" wire:click="closeModal"></div>
-
-                <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-
-                {{-- Modal Panel --}}
-                <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-5xl w-full border border-gray-200 dark:border-gray-700">
+                {{-- Modal Panel (Flex Col for sticky header/footer) --}}
+                <div class="relative w-full sm:max-w-5xl max-h-[90vh] flex flex-col bg-white dark:bg-gray-800 rounded-xl text-left shadow-2xl transform transition-all border border-gray-200 dark:border-gray-700 overflow-hidden">
                     
-                    {{-- Modal Header --}}
-                    <div class="bg-gray-50 dark:bg-gray-900/50 px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                    {{-- Modal Header (Fixed at top) --}}
+                    <div class="bg-gray-50 dark:bg-gray-900/90 px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center shrink-0">
                         <div>
-                            <h3 class="text-2xl leading-6 font-bold text-gray-900 dark:text-white" id="modal-title">
+                            <h3 class="text-xl leading-6 font-bold text-gray-900 dark:text-white" id="modal-title">
                                 {{ $viewingTeam->team_name }}
                             </h3>
                             <p class="text-sm font-medium text-gray-500 dark:text-gray-400 mt-1">{{ $viewingTeam->affiliation }}</p>
                         </div>
-                        <button wire:click="closeModal" class="text-gray-400 hover:text-gray-500 focus:outline-none bg-gray-200 dark:bg-gray-700 rounded-full p-2">
+                        <button wire:click="closeModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 focus:outline-none bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-full p-2 transition-colors">
                             <span class="sr-only">Close</span>
                             <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
                         </button>
                     </div>
 
-                    {{-- Modal Body (Scrollable) --}}
-                    <div class="px-6 py-6 max-h-[75vh] overflow-y-auto space-y-10">
+                    {{-- Modal Body (Scrollable Middle) --}}
+                    <div class="px-6 py-6 overflow-y-auto space-y-10 flex-1">
                         
                         {{-- 1. Profile & Location Map --}}
                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -276,8 +276,8 @@
 
                     </div>
 
-                    {{-- Modal Footer / Actions --}}
-                    <div class="bg-gray-50 dark:bg-gray-900/50 px-6 py-4 border-t border-gray-200 dark:border-gray-700 sm:flex sm:flex-row-reverse gap-3">
+                    {{-- Modal Footer / Actions (Fixed at bottom) --}}
+                    <div class="bg-gray-50 dark:bg-gray-900/90 px-6 py-4 border-t border-gray-200 dark:border-gray-700 sm:flex sm:flex-row-reverse gap-3 shrink-0">
                         @if($viewingTeam->status == 'pending')
                             <button wire:click="approveTeam({{ $viewingTeam->id }})" type="button" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-6 py-2.5 bg-iba-teal text-sm font-bold text-white hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-iba-teal sm:w-auto transition-colors">
                                 Verify & Approve Team
