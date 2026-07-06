@@ -170,7 +170,7 @@ Route::domain('ibalong.' . env('APP_DOMAIN'))->name('ibalong.')->group(function 
             request()->session()->invalidate();
             request()->session()->regenerateToken();
             return redirect()->route('home');
-        })->name('ibalong.logout');
+        })->name('logout');
     });
 
     // Future routes for this event will go here...
