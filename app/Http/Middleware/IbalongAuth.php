@@ -27,4 +27,4 @@ class IbalongAuth
 
         return $next($request);
     }
-},
+}
