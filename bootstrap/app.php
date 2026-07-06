@@ -20,6 +20,10 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             \App\Http\Middleware\EnsureAccountIsActive::class, // <--- Add this line
         ]);
+        // Intercept unauthenticated users and route them correctly
+        $middleware->redirectGuestsTo(fn (Request $request) =>
+            $request->is('launchpad*') ? route('ibalong.login') : route('login')
+        );
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
