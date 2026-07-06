@@ -120,7 +120,14 @@ class RegistrationForm extends Component
         $this->validate([
             'team_name' => 'required|string|max:255',
             'affiliation' => 'required|string|max:255',
-            'team_about' => 'required|string',
+            
+            // Custom Word Count Validation for Team About
+            'team_about' => ['required', 'string', function ($attribute, $value, $fail) {
+                if (str_word_count($value) > 250) {
+                    $fail('The team manifesto must not exceed 250 words.');
+                }
+            }],
+            
             'team_member_demographics' => 'required',
             'onsite_commitment' => 'required',
             'data_privacy_consent' => 'accepted',

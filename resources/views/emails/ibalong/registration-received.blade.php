@@ -1,30 +1,142 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="utf-8">
     <style>
-        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
-        .header { background-color: #0095AC; color: white; padding: 20px; text-align: center; border-radius: 5px 5px 0 0; }
-        .content { background-color: #f9f9f9; padding: 20px; border-left: 1px solid #ddd; border-right: 1px solid #ddd; border-bottom: 1px solid #ddd; border-radius: 0 0 5px 5px; }
-        .team-name { font-weight: bold; color: #CF452C; }
-        .footer { margin-top: 20px; font-size: 12px; color: #777; text-align: center; }
+        /* Base Reset */
+        body {
+            font-family: 'Courier New', Courier, monospace; /* Retro fallback */
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: #f3f4f6;
+            color: #131011;
+            margin: 0;
+            padding: 40px 20px;
+        }
+        
+        /* Brutalist Container */
+        .email-wrapper {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border: 4px solid #131011;
+            box-shadow: 10px 10px 0px 0px #0095AC;
+            padding: 0;
+        }
+        
+        /* Dark Header with Logo */
+        .header {
+            background-color: #131011;
+            padding: 30px 20px;
+            text-align: center;
+            border-bottom: 4px solid #131011;
+        }
+        
+        .header img {
+            max-width: 250px;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+        
+        /* Body Content */
+        .content {
+            padding: 40px 30px;
+            font-size: 16px;
+            line-height: 1.6;
+            background-color: #FFFBF7;
+        }
+        
+        h2 {
+            color: #CF452C;
+            text-transform: uppercase;
+            margin-top: 0;
+            border-bottom: 4px solid #CF452C;
+            display: inline-block;
+            padding-bottom: 5px;
+            letter-spacing: 1px;
+            font-size: 24px;
+        }
+        
+        /* Stylized Team Tag */
+        .team-name {
+            background-color: #FF8623;
+            color: #131011;
+            font-weight: bold;
+            padding: 2px 8px;
+            border: 2px solid #131011;
+            text-transform: uppercase;
+        }
+        
+        /* Brutalist Alert Box */
+        .status-box {
+            background-color: #ffffff;
+            border: 4px solid #131011;
+            padding: 20px;
+            margin: 30px 0;
+            box-shadow: 6px 6px 0px 0px #5C7914;
+        }
+        
+        .status-title {
+            font-weight: bold;
+            text-transform: uppercase;
+            color: #5C7914;
+            margin-bottom: 10px;
+            font-size: 14px;
+            letter-spacing: 1px;
+        }
+        
+        /* Footer */
+        .footer {
+            background-color: #e5e7eb;
+            border-top: 4px solid #131011;
+            padding: 20px;
+            font-size: 12px;
+            text-align: center;
+            color: #4b5563;
+        }
+        
+        .important-text {
+            font-weight: bold;
+            color: #0095AC;
+            text-transform: uppercase;
+        }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h2>Application Received</h2>
-    </div>
-    <div class="content">
-        <p>Hi <strong>{{ $teamLeader['full_name'] }}</strong>,</p>
-        <p>Thank you for registering <span class="team-name">{{ $registration->team_name }}</span> for the Heroes of Innovation Challenge 2026!</p>
-        <p>We have successfully received your cohort's application. The BU MADYA Secretariat is currently evaluating your submission.</p>
-        <p><strong>What's Next?</strong><br>
-        Once your team is verified and approved, we will send another email containing your official Community Center login credentials. Please ensure your team members check their inboxes (and spam folders) regularly.</p>
-        <p>Stay tuned for further updates!</p>
-        <br>
-        <p>Best regards,<br><strong>Heroes of Innovation 2026 Secretariat</strong></p>
-    </div>
-    <div class="footer">
-        This is an automated message. Please do not reply directly to this email.
+    <div class="email-wrapper">
+        
+        <!-- Header with the Event Logo -->
+        <div class="header">
+            <img src="{{ url('images/HOI Logo Blue.png') }}" alt="Heroes of Innovation Challenge 2026">
+        </div>
+        
+        <div class="content">
+            <h2>Transmission Received!</h2>
+            
+            <p>Hi <strong>{{ $teamLeader['full_name'] }}</strong>,</p>
+            
+            <p>Thank you for registering <span class="team-name">{{ $registration->team_name }}</span> for the Heroes of Innovation Challenge 2026!</p>
+            
+            <!-- Brutalist Status Box -->
+            <div class="status-box">
+                <div class="status-title">▶ SYSTEM STATUS: AWAITING VERIFICATION</div>
+                <p style="margin: 0;">We have successfully received your cohort's application. The <strong>Heroes of Innovation 2026 Organizing Committee</strong> is currently evaluating your submission.</p>
+            </div>
+
+            <p><span class="important-text">What's Next?</span><br>
+            Once your team is verified and approved, we will send another transmission containing your official <strong>Community Center</strong> login credentials. Please ensure your team members check their inboxes (and spam folders) regularly.</p>
+            
+            <p>Stay tuned for further directives!</p>
+            
+            <br>
+            <p>Best regards,<br><strong>Heroes of Innovation 2026 Organizing Committee</strong></p>
+        </div>
+        
+        <!-- Footer -->
+        <div class="footer">
+            <strong>SYSTEM ALERT:</strong> This is an automated message generated by the Community Center mainframe. Please do not reply directly to this email.
+        </div>
+        
     </div>
 </body>
 </html>

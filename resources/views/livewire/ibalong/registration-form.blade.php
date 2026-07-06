@@ -26,7 +26,7 @@
                     <ul class="space-y-4 text-sm sm:text-base text-gray-700 dark:text-gray-300 font-bold">
                         <li class="flex items-start gap-3">
                             <span class="text-iba-green text-xl leading-none">✓</span>
-                            <span>The BU MADYA Secretariat is now reviewing your submission.</span>
+                            <span>The Heroes of Innovation 2026 Organizing Committee is now reviewing your submission.</span>
                         </li>
                         <li class="flex items-start gap-3">
                             <span class="text-iba-green text-xl leading-none">✓</span>
@@ -34,7 +34,7 @@
                         </li>
                         <li class="flex items-start gap-3 text-gray-500 dark:text-gray-400">
                             <span class="text-gray-400 text-xl leading-none">⧖</span>
-                            <span>If approved, you will receive your Command Center login credentials via email.</span>
+                            <span>If approved, you will receive your Community Center login credentials via email.</span>
                         </li>
                     </ul>
                 </div>
@@ -70,12 +70,7 @@
                 
                 @if ($errors->any())
                     <div class="bg-red-100 dark:bg-iba-red/20 border-4 border-iba-red text-iba-red p-4 mt-4 font-bold">
-                        System Alert: Please verify the highlighted fields below.
-                        <ul class="list-disc pl-5 text-sm mt-2">
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
+                        System Alert: Please verify the highlighted fields below to proceed.
                     </div>
                 @endif
             </div>
@@ -98,41 +93,43 @@
                 
                 <div class="space-y-8">
                     <div class="grid grid-cols-1 gap-6">
+                        
+                        {{-- INLINE ERROR HANDLING & TEXT BOXES --}}
                         <div>
                             <label class="block font-bold text-iba-black dark:text-iba-light mb-2 text-sm uppercase tracking-wider">Designated Team Name <span class="text-iba-red">*</span></label>
-                            <input type="text" wire:model="team_name" class="w-full border-4 border-iba-black dark:border-iba-light p-4 font-bold text-lg focus:outline-none focus:border-iba-orange dark:focus:border-iba-orange bg-white dark:bg-[#1A1617] text-iba-black dark:text-iba-light shadow-inner transition-colors">
+                            <input type="text" wire:model="team_name" class="w-full border-4 {{ $errors->has('team_name') ? 'border-iba-red bg-red-50 dark:bg-red-900/20' : 'border-iba-black dark:border-iba-light bg-white dark:bg-[#1A1617]' }} p-4 font-bold text-lg focus:outline-none focus:border-iba-orange text-iba-black dark:text-iba-light shadow-inner transition-colors">
+                            @error('team_name') <span class="text-iba-red text-xs font-bold block mt-2">⚠ {{ $message }}</span> @enderror
                         </div>
                         
                         <div>
                             <label class="block font-bold text-iba-black dark:text-iba-light mb-2 text-sm uppercase tracking-wider">School / Organization / Company <span class="text-iba-red">*</span></label>
-                            <input type="text" wire:model="affiliation" class="w-full border-4 border-iba-black dark:border-iba-light p-4 font-bold focus:outline-none focus:border-iba-orange dark:focus:border-iba-orange bg-white dark:bg-[#1A1617] text-iba-black dark:text-iba-light shadow-inner transition-colors">
+                            <input type="text" wire:model="affiliation" class="w-full border-4 {{ $errors->has('affiliation') ? 'border-iba-red bg-red-50 dark:bg-red-900/20' : 'border-iba-black dark:border-iba-light bg-white dark:bg-[#1A1617]' }} p-4 font-bold focus:outline-none focus:border-iba-orange text-iba-black dark:text-iba-light shadow-inner transition-colors">
+                            @error('affiliation') <span class="text-iba-red text-xs font-bold block mt-2">⚠ {{ $message }}</span> @enderror
                         </div>
 
                         {{-- CASCADING GEOGRAPHIC DROPDOWNS --}}
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 border-l-4 border-iba-orange pl-4">
                             <div>
                                 <label class="block font-bold text-iba-black dark:text-iba-light mb-2 text-xs uppercase tracking-wider">Province <span class="text-iba-red">*</span></label>
-                                <select wire:model.live="provCode" class="w-full border-4 border-iba-black dark:border-iba-light p-4 font-bold text-sm focus:outline-none focus:border-iba-orange dark:focus:border-iba-orange bg-white dark:bg-[#1A1617] text-iba-black dark:text-iba-light transition-colors">
+                                <select wire:model.live="provCode" class="w-full border-4 {{ $errors->has('provCode') ? 'border-iba-red' : 'border-iba-black dark:border-iba-light' }} p-4 font-bold text-sm focus:outline-none focus:border-iba-orange bg-white dark:bg-[#1A1617] text-iba-black dark:text-iba-light transition-colors">
                                     <option value="">-- SELECT PROVINCE --</option>
                                     @foreach($provinces as $prov)
                                         <option value="{{ $prov->provCode }}">{{ $prov->provDesc }}</option>
                                     @endforeach
                                 </select>
                             </div>
-
                             <div>
                                 <label class="block font-bold text-iba-black dark:text-iba-light mb-2 text-xs uppercase tracking-wider">City / Municipality <span class="text-iba-red">*</span></label>
-                                <select wire:model.live="citymunCode" class="w-full border-4 border-iba-black dark:border-iba-light p-4 font-bold text-sm focus:outline-none focus:border-iba-orange dark:focus:border-iba-orange bg-white dark:bg-[#1A1617] text-iba-black dark:text-iba-light transition-colors" {{ empty($cities) ? 'disabled' : '' }}>
+                                <select wire:model.live="citymunCode" class="w-full border-4 {{ $errors->has('citymunCode') ? 'border-iba-red' : 'border-iba-black dark:border-iba-light' }} p-4 font-bold text-sm focus:outline-none focus:border-iba-orange bg-white dark:bg-[#1A1617] text-iba-black dark:text-iba-light transition-colors" {{ empty($cities) ? 'disabled' : '' }}>
                                     <option value="">-- SELECT CITY/MUN --</option>
                                     @foreach($cities as $city)
                                         <option value="{{ $city->citymunCode }}">{{ $city->citymunDesc }}</option>
                                     @endforeach
                                 </select>
                             </div>
-
                             <div>
                                 <label class="block font-bold text-iba-black dark:text-iba-light mb-2 text-xs uppercase tracking-wider">Barangay <span class="text-iba-red">*</span></label>
-                                <select wire:model="brgyCode" class="w-full border-4 border-iba-black dark:border-iba-light p-4 font-bold text-sm focus:outline-none focus:border-iba-orange dark:focus:border-iba-orange bg-white dark:bg-[#1A1617] text-iba-black dark:text-iba-light transition-colors" {{ empty($barangays) ? 'disabled' : '' }}>
+                                <select wire:model="brgyCode" class="w-full border-4 {{ $errors->has('brgyCode') ? 'border-iba-red' : 'border-iba-black dark:border-iba-light' }} p-4 font-bold text-sm focus:outline-none focus:border-iba-orange bg-white dark:bg-[#1A1617] text-iba-black dark:text-iba-light transition-colors" {{ empty($barangays) ? 'disabled' : '' }}>
                                     <option value="">-- SELECT BARANGAY --</option>
                                     @foreach($barangays as $brgy)
                                         <option value="{{ $brgy->brgyCode }}">{{ $brgy->brgyDesc }}</option>
@@ -141,9 +138,26 @@
                             </div>
                         </div>
 
-                        <div>
-                            <label class="block font-bold text-iba-black dark:text-iba-light mb-2 text-sm uppercase tracking-wider">Cohort Manifesto (Brief About) <span class="text-iba-red">*</span></label>
-                            <textarea wire:model="team_about" rows="3" class="w-full border-4 border-iba-black dark:border-iba-light p-4 font-bold focus:outline-none focus:border-iba-orange dark:focus:border-iba-orange bg-white dark:bg-[#1A1617] text-iba-black dark:text-iba-light shadow-inner transition-colors"></textarea>
+                        {{-- WORD COUNTER & EXPANDED QUESTION --}}
+                        <div x-data="{ 
+                            content: $wire.entangle('team_about'), 
+                            get wordCount() { 
+                                return this.content ? this.content.trim().split(/\s+/).filter(w => w.length > 0).length : 0; 
+                            } 
+                        }">
+                            <label class="block font-bold text-iba-black dark:text-iba-light mb-2 text-sm uppercase tracking-wider">
+                                Cohort Manifesto: What brings your team together? What makes your team interested in innovation, entrepreneurship, or solving community challenges? <span class="text-iba-red">*</span>
+                            </label>
+                            <textarea x-model="content" rows="4" class="w-full border-4 {{ $errors->has('team_about') ? 'border-iba-red bg-red-50 dark:bg-red-900/20' : 'border-iba-black dark:border-iba-light bg-white dark:bg-[#1A1617]' }} p-4 font-bold focus:outline-none focus:border-iba-orange text-iba-black dark:text-iba-light shadow-inner transition-colors placeholder-gray-400"></textarea>
+                            
+                            <div class="flex justify-between items-start mt-2">
+                                <div>
+                                    @error('team_about') <span class="text-iba-red text-xs font-bold block">⚠ {{ $message }}</span> @enderror
+                                </div>
+                                <div class="text-xs font-bold shrink-0" :class="wordCount > 250 ? 'text-iba-red' : 'text-gray-500 dark:text-gray-400'">
+                                    <span x-text="wordCount"></span> / 250 Words
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -314,29 +328,31 @@
                         </div>
                     </div>
 
-                    {{-- Dropdowns --}}
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {{-- Expanded Questions & Dropdowns --}}
+                    <div class="grid grid-cols-1 gap-6">
                         <div>
-                            <label class="block text-xs font-bold text-iba-black dark:text-iba-light uppercase mb-2">Are all members from Bicol? <span class="text-iba-red">*</span></label>
+                            <label class="block text-sm font-bold text-iba-black dark:text-iba-light mb-2">Are all members from Bicol? <span class="text-iba-red">*</span></label>
                             <select wire:model="team_member_demographics" class="w-full border-4 border-iba-black dark:border-iba-light p-4 font-bold text-sm focus:border-iba-green dark:focus:border-iba-green focus:outline-none bg-white dark:bg-[#1A1617] text-iba-black dark:text-iba-light transition-colors">
                                 <option value="">-- AWAITING INPUT --</option>
                                 <option value="YES">Yes, all members are from Bicol</option>
                                 <option value="NO">No members are from Bicol</option>
                                 <option value="NOT ALL BUT MAJORITY FROM BICOL">Not all, but majority are</option>
                             </select>
+                            @error('team_member_demographics') <span class="text-iba-red text-xs font-bold block mt-2">⚠ Required</span> @enderror
                         </div>
                         
                         <div>
-                            <label class="block text-xs font-bold text-iba-black dark:text-iba-light uppercase mb-2">Can the team commit to onsite pitching? <span class="text-iba-red">*</span></label>
+                            <label class="block text-sm font-bold text-iba-black dark:text-iba-light mb-2">If selected, our team commits to participate in the onsite Heroes of Innovation Challenge: <span class="text-iba-red">*</span></label>
                             <select wire:model="onsite_commitment" class="w-full border-4 border-iba-black dark:border-iba-light p-4 font-bold text-sm focus:border-iba-green dark:focus:border-iba-green focus:outline-none bg-white dark:bg-[#1A1617] text-iba-black dark:text-iba-light transition-colors">
                                 <option value="">-- AWAITING INPUT --</option>
                                 <option value="YES">YES, we commit</option>
                                 <option value="NO">NO, we cannot</option>
                             </select>
+                            @error('onsite_commitment') <span class="text-iba-red text-xs font-bold block mt-2">⚠ Required</span> @enderror
                         </div>
 
                         <div>
-                            <label class="block text-xs font-bold text-iba-black dark:text-iba-light uppercase mb-2">Acknowledge Non-Automatic Clause <span class="text-iba-red">*</span></label>
+                            <label class="block text-sm font-bold text-iba-black dark:text-iba-light mb-2">Our team understands that registration does not automatically qualify us for the onsite Challenge: <span class="text-iba-red">*</span></label>
                             <select wire:model="does_not_automatically_apply_clause" class="w-full border-4 border-iba-black dark:border-iba-light p-4 font-bold text-sm focus:border-iba-green dark:focus:border-iba-green focus:outline-none bg-white dark:bg-[#1A1617] text-iba-black dark:text-iba-light transition-colors">
                                 <option value="">-- AWAITING INPUT --</option>
                                 <option value="YES">YES, understood</option>
@@ -345,7 +361,7 @@
                         </div>
 
                         <div>
-                            <label class="block text-xs font-bold text-iba-black dark:text-iba-light uppercase mb-2">Selection based on Concept Proposal? <span class="text-iba-red">*</span></label>
+                            <label class="block text-sm font-bold text-iba-black dark:text-iba-light mb-2">Our team understands that selected teams will be chosen based on the Innovation Concept Proposal to be submitted after the Opportunity Discovery Phase: <span class="text-iba-red">*</span></label>
                             <select wire:model="selection_on_icp" class="w-full border-4 border-iba-black dark:border-iba-light p-4 font-bold text-sm focus:border-iba-green dark:focus:border-iba-green focus:outline-none bg-white dark:bg-[#1A1617] text-iba-black dark:text-iba-light transition-colors">
                                 <option value="">-- AWAITING INPUT --</option>
                                 <option value="YES">YES, acknowledged</option>
@@ -354,16 +370,22 @@
                         </div>
                     </div>
 
-                    {{-- Consents --}}
+                    {{-- Expanded Consents --}}
                     <div class="pt-6 border-t-2 border-dashed border-gray-300 dark:border-gray-700 space-y-4">
-                        <label class="flex items-start gap-4 bg-white dark:bg-[#1A1617] p-5 border-4 border-iba-black dark:border-iba-light cursor-pointer hover:bg-iba-green/5 dark:hover:bg-iba-green/10 transition-colors">
-                            <input type="checkbox" wire:model="data_privacy_consent" class="mt-1 w-6 h-6 border-4 border-iba-black text-iba-green focus:ring-0 rounded-none bg-white checked:bg-iba-green">
-                            <span class="text-sm font-bold text-iba-black dark:text-iba-light leading-relaxed">I consent to the collection and processing of our team's data in accordance with the Data Privacy Act of 2012 for the purposes of this event.</span>
-                        </label>
+                        
+                        <div class="bg-white dark:bg-[#1A1617] p-5 border-4 {{ $errors->has('data_privacy_consent') ? 'border-iba-red' : 'border-iba-black dark:border-iba-light' }}">
+                            <span class="text-sm font-bold text-iba-black dark:text-iba-light leading-relaxed block mb-2">Data Privacy Consent <span class="text-iba-red">*</span></span>
+                            <span class="text-sm text-gray-700 dark:text-gray-300 leading-relaxed block mb-2">Your privacy matters to us. The personal information collected in this form will only be used for the HEROES OF INNOVATION CHALLENGE: Ibalong Festival 2026 Edition.</span>
+                            <span class="text-sm text-gray-700 dark:text-gray-300 leading-relaxed block mb-4">In compliance with the Data Privacy Act of 2012, we ensure your data is kept confidential and safe. By submitting this form, you consent to the collection and use of your information for this specific purpose.</span>
+                            <label class="flex items-center gap-4 cursor-pointer hover:bg-iba-green/5 dark:hover:bg-iba-green/10 transition-colors p-2 -ml-2">
+                                <input type="checkbox" wire:model="data_privacy_consent" class="w-6 h-6 border-4 border-iba-black text-iba-green focus:ring-0 rounded-none bg-white checked:bg-iba-green">
+                                <span class="text-sm font-bold text-iba-black dark:text-iba-light">I acknowledge and consent to the Data Privacy Act.</span>
+                            </label>
+                        </div>
 
-                        <label class="flex items-start gap-4 bg-white dark:bg-[#1A1617] p-5 border-4 border-iba-black dark:border-iba-light cursor-pointer hover:bg-iba-green/5 dark:hover:bg-iba-green/10 transition-colors">
+                        <label class="flex items-start gap-4 bg-white dark:bg-[#1A1617] p-5 border-4 {{ $errors->has('media_consent') ? 'border-iba-red' : 'border-iba-black dark:border-iba-light' }} cursor-pointer hover:bg-iba-green/5 dark:hover:bg-iba-green/10 transition-colors">
                             <input type="checkbox" wire:model="media_consent" class="mt-1 w-6 h-6 border-4 border-iba-black text-iba-green focus:ring-0 rounded-none bg-white checked:bg-iba-green">
-                            <span class="text-sm font-bold text-iba-black dark:text-iba-light leading-relaxed">I grant permission for the organizers to use media (photos/videos) captured during the event for promotional and reporting purposes.</span>
+                            <span class="text-sm font-bold text-iba-black dark:text-iba-light leading-relaxed">Media Consent: I grant permission for the organizers to use media (photos/videos) captured during the event for promotional and reporting purposes. <span class="text-iba-red">*</span></span>
                         </label>
                     </div>
 
