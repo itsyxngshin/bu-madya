@@ -2,7 +2,7 @@
     {{-- Branding Header --}}
     <div class="flex flex-col justify-center shrink-0 py-5 px-6 border-b border-gray-200 dark:border-gray-700 bg-gray-900 dark:bg-gray-950">
         <a href="{{ route('ibalong.dashboard') }}" class="block">
-            <img src="{{ asset('images/heroes-logo.png') }}" alt="Heroes of Innovation Challenge" class="h-10 sm:h-12 w-auto object-contain object-left mb-2 hover:opacity-90 transition-opacity">
+            <img src="{{ asset('images/HOI Logo Blue.png') }}" alt="Heroes of Innovation Challenge" class="h-10 sm:h-12 w-auto object-contain object-left mb-2 hover:opacity-90 transition-opacity">
         </a>
         <div class="text-[10px] font-bold text-gray-400 tracking-widest uppercase">Community Center</div>
     </div>
