@@ -152,24 +152,28 @@ Route::domain('ibalong.' . env('APP_DOMAIN'))->name('ibalong.')->group(function 
     // Isolated Authentication
     Route::get('/launchpad/login', \App\Livewire\Ibalong\Auth\Login::class)->name('login');
     
-    // Admin Routes
-    Route::get('/launchpad/intake', \App\Livewire\Ibalong\Admin\RegistrantManager::class)
-        ->name('admin.registrants');
-    Route::middleware(['auth:ibalong'])->group(function () {
-       Route::get('/launchpad/dashboard', function() {
-        return view('layouts.dashboard')->with(
-            'slot', 
-            '<div class="font-pixel text-2xl text-center mt-20 text-iba-black dark:text-iba-light animate-pulse">AWAITING DIRECTIVES...</div>'
-        );
-    })->name('dashboard');
+    Route::middleware(['ibalong.auth'])->group(function () {
         
-        // Logout route for Ibalong Guard
-        Route::post('/logout', function() {
+        // Default Dashboard Overview
+        Route::get('/launchpad/dashboard', function() {
+            return view('layouts.dashboard')->with(
+                'slot', 
+                '<div class="font-pixel text-2xl text-center mt-20 text-iba-black dark:text-iba-light animate-pulse">AWAITING DIRECTIVES...</div>'
+            );
+        })->name('ibalong.dashboard');
+        
+        // Admin: Cohort Intake & Management
+        Route::get('/launchpad/intake', \App\Livewire\Ibalong\Admin\RegistrantManager::class)
+            ->name('ibalong.admin.registrants');
+        
+        // Secure Logout
+        Route::post('/launchpad/logout', function() {
             Auth::guard('ibalong')->logout();
             request()->session()->invalidate();
             request()->session()->regenerateToken();
-            return redirect()->route('home');
-        })->name('logout');
+            
+            return redirect()->route('ibalong.home');
+        })->name('ibalong.logout');
     });
 
     // Future routes for this event will go here...
