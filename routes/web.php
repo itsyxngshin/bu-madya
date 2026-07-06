@@ -155,12 +155,8 @@ Route::domain('ibalong.' . env('APP_DOMAIN'))->name('ibalong.')->group(function 
     Route::middleware(['ibalong.auth'])->group(function () {
         
         // Default Dashboard Overview
-        Route::get('/launchpad/dashboard', function() {
-            return view('layouts.dashboard')->with(
-                'slot', 
-                '<div class="font-pixel text-2xl text-center mt-20 text-iba-black dark:text-iba-light animate-pulse">AWAITING DIRECTIVES...</div>'
-            );
-        })->name('dashboard');
+        Route::get('/launchpad/dashboard', \App\Livewire\Ibalong\Admin\DashboardOverview::class)
+            ->name('dashboard');
         
         // Admin: Cohort Intake & Management
         Route::get('/launchpad/intake', \App\Livewire\Ibalong\Admin\RegistrantManager::class)

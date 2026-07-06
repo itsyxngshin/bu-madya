@@ -4,7 +4,10 @@ namespace App\Livewire\Ibalong\Admin;
 
 use Livewire\Component;
 use Livewire\WithPagination;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Hash;
 use App\Models\IbalongRegistration;
+use App\Models\IbalongUser;
 
 class RegistrantManager extends Component
 {
@@ -20,12 +23,41 @@ class RegistrantManager extends Component
 
     public function approveTeam($id)
     {
-        // For now, we update the status. The password minting/linking logic 
-        // will go here once we decide on the exact authentication flow.
-        $registration = IbalongRegistration::findOrFail($id);
-        $registration->update(['status' => 'approved']);
+        // 1. Fetch the registration and its members
+        $registration = IbalongRegistration::with('members')->findOrFail($id);
+
+        // Prevent double-processing
+        if ($registration->status === 'approved') {
+            return;
+        }
+
+        // 2. Extract Team Leader's email (Fallback to a generated one if missing)
+        $teamLeader = $registration->members->where('team_role', 'Team Leader')->first();
+        $email = $teamLeader ? $teamLeader->email_address : 'team'.$id.'@bumadya.org';
+
+        // 3. Generate a secure, 8-character uppercase password
+        $rawPassword = strtoupper(Str::random(8));
+
+        // 4. Create the Ibalong User Account (Role ID 3 = Team)
+        $user = IbalongUser::create([
+            'role_id' => 3, 
+            'name' => $registration->team_name,
+            'slug' => Str::slug($registration->team_name) . '-' . strtolower(Str::random(5)),
+            'email' => $email,
+            'password' => Hash::make($rawPassword),
+            'is_active' => true,
+            'email_verified_at' => now(), // Auto-verify for hackathon speed
+        ]);
+
+        // 5. Link account and update status
+        $registration->update([
+            'status' => 'approved',
+            'user_id' => $user->id,
+            'account_creation_status' => 'Created'
+        ]);
         
-        session()->flash('message', "Cohort '{$registration->team_name}' has been approved.");
+        // 6. Flash the success message WITH the credentials so the Admin can copy them
+        session()->flash('message', "APPROVED! 🚀 Credentials for {$registration->team_name} — Email: {$email} | Password: {$rawPassword}");
     }
 
     public function rejectTeam($id)
