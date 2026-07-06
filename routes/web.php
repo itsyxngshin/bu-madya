@@ -143,7 +143,7 @@ Route::domain('community.' . env('APP_DOMAIN'))->name('community.')->group(funct
 // IBALONG EVENT SUBDOMAIN
 // ==========================================
 Route::domain('ibalong.' . env('APP_DOMAIN'))->name('ibalong.')->group(function () {
-    
+
     // The Launchpad Landing Page
     Route::get('/', Launchpad::class)->name('home');
     // Public Registration
@@ -151,28 +151,28 @@ Route::domain('ibalong.' . env('APP_DOMAIN'))->name('ibalong.')->group(function 
 
     // Isolated Authentication
     Route::get('/launchpad/login', \App\Livewire\Ibalong\Auth\Login::class)->name('login');
-    
+
     Route::middleware(['ibalong.auth'])->group(function () {
-        
+
         // Default Dashboard Overview
         Route::get('/launchpad/dashboard', \App\Livewire\Ibalong\Admin\DashboardOverview::class)
             ->name('dashboard');
-        
+
         // Admin: Cohort Intake & Management
         Route::get('/launchpad/intake', \App\Livewire\Ibalong\Admin\RegistrantManager::class)
             ->name('admin.registrants');
 
         Route::get('/launchpad/users', \App\Livewire\Ibalong\Admin\UserManager::class)->name('admin.users');
-    
+
         // Every authenticated user can access their profile
         Route::get('/launchpad/profile', \App\Livewire\Ibalong\ProfileManager::class)->name('profile');
-        
+        Route::get('/launchpad/partners', \App\Livewire\Ibalong\Admin\PartnerManager::class)->name('admin.partners');
         // Secure Logout
         Route::post('/launchpad/logout', function() {
             Auth::guard('ibalong')->logout();
             request()->session()->invalidate();
             request()->session()->regenerateToken();
-            
+
             return redirect()->route('home');
         })->name('logout');
     });

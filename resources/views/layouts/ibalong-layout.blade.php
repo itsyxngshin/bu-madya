@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" 
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}"
       class="scroll-smooth"
       x-data="{ darkMode: localStorage.getItem('ibalong_theme') === 'dark' || (!('ibalong_theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches) }"
       x-init="$watch('darkMode', val => localStorage.setItem('ibalong_theme', val ? 'dark' : 'light'))"
@@ -8,18 +8,18 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Heroes of Innovation Challenge 2026 | Ibalong Launchpad</title>
-    
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Press+Start+2P&display=swap" rel="stylesheet">
-    
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
 
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
         .font-pixel { font-family: 'Press Start 2P', cursive; }
-        
+
         /* Premium Retro Neo-Brutalist Button - Light & Dark */
         .btn-retro {
             border: 4px solid #131011;
@@ -30,10 +30,10 @@
             border-color: #FFFBF7;
             box-shadow: 6px 6px 0 0 #FFFBF7;
         }
-        
+
         .btn-retro:hover { transform: translate(-2px, -2px); box-shadow: 8px 8px 0 0 #131011; }
         .dark .btn-retro:hover { box-shadow: 8px 8px 0 0 #FFFBF7; }
-        
+
         .btn-retro:active { transform: translate(6px, 6px); box-shadow: 0px 0px 0 0 transparent; }
         .dark .btn-retro:active { box-shadow: 0px 0px 0 0 transparent; }
 
@@ -62,18 +62,18 @@
 
     <nav x-data="{ mobileMenuOpen: false }" class="fixed top-0 w-full z-50 bg-iba-light dark:bg-iba-black border-b-4 border-iba-black dark:border-iba-light shadow-[0_4px_0_0_#131011] dark:shadow-[0_4px_0_0_#FFFBF7] transition-colors duration-300">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex justify-between items-center">
-            
+
             {{-- BRANDING LOGO --}}
             <a href="{{ route('ibalong.home') }}" class="z-50 flex items-center">
                 <img src="{{ asset('images/HOI Logo Blue.png') }}" alt="Heroes of Innovation Challenge 2026" class="h-10 sm:h-12 w-auto drop-shadow-sm hover:-translate-y-0.5 transition-transform">
             </a>
-            
+
             <div class="flex items-center gap-4 sm:gap-6 z-50">
                 <div class="hidden md:flex gap-6 font-pixel text-[9px] text-iba-black dark:text-iba-light items-center">
                     <a href="{{ route('ibalong.home') }}#home" class="hover:text-iba-orange transition-colors">HOME</a>
                     <a href="{{ route('ibalong.home') }}#about" class="hover:text-iba-teal transition-colors">ABOUT</a>
                     <a href="{{ route('ibalong.home') }}#pathways" class="hover:text-iba-green transition-colors">PATHWAYS</a>
-                    
+
                     @auth('ibalong')
                         <a href="{{ route('ibalong.dashboard') }}" class="text-iba-teal font-bold border-b-2 border-iba-teal pb-1">DASHBOARD</a>
                     @else
@@ -109,36 +109,46 @@
 
     <footer class="bg-iba-light dark:bg-iba-black pt-16 transition-colors duration-300 border-t-8 border-iba-red relative z-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6">
-            
+
             {{-- SECTION 1: EVENT PARTNERS --}}
             <div class="text-center mb-8 md:mb-10">
                 <span class="font-pixel text-[8px] sm:text-[9px] tracking-widest text-iba-teal block mb-3">COUNCIL OF CO-FOUNDERS</span>
                 <h3 class="text-base sm:text-lg font-bold uppercase text-iba-black dark:text-iba-light tracking-wide">ORGANIZED BY & PARTNERS</h3>
             </div>
 
-            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-6 max-w-5xl mx-auto mb-16">
-                @php
-                    $partners = [
-                        ['name' => 'LGU LEGAZPI', 'label' => 'City Government Official Seal'],
-                        ['name' => 'IBALONG FESTIVAL', 'label' => 'Executive Festival Committee'],
-                        ['name' => 'DEVCON LEGAZPI', 'label' => 'Technology Ecosystem Partner'],
-                        ['name' => 'BiCoRSE', 'label' => 'Lead Consortium Host'],
-                        ['name' => 'DOST V', 'label' => 'Innovation Support Partner'],
-                    ];
-                @endphp
+            @php
+                // Fetch active partners ordered by your custom priority
+                $partners = \App\Models\IbalongPartner::where('is_active', true)->orderBy('display_order', 'asc')->get();
+            @endphp
 
-                @foreach($partners as $partner)
-                    <div class="bg-white dark:bg-[#1A1617] border-4 border-iba-black dark:border-iba-light p-4 sm:p-6 flex flex-col items-center justify-center text-center shadow-[4px_4px_0_0_#CF452C] hover:shadow-[6px_6px_0_0_#FF8623] hover:-translate-y-1 transition-all">
-                        <div class="h-12 sm:h-16 w-full flex items-center justify-center mb-2 sm:mb-3">
-                            <div class="font-pixel text-[8px] sm:text-[10px] text-iba-black dark:text-iba-light leading-tight">
-                                {{ $partner['name'] }}
-                            </div>
-                        </div>
-                        <div class="text-[8px] sm:text-[9px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider leading-tight">
-                            {{ $partner['label'] }}
-                        </div>
+            <div class="py-16 bg-iba-light dark:bg-iba-black transition-colors duration-300">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6">
+
+                    <div class="text-center mb-12">
+                        <h2 class="font-pixel text-xl sm:text-2xl text-iba-black dark:text-iba-light uppercase tracking-wide">ORGANIZED BY & PARTNERS</h2>
                     </div>
-                @endforeach
+
+                    {{-- Neo-Brutalist Flex/Grid Container --}}
+                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 justify-center">
+                        @foreach($partners as $partner)
+                            <div class="bg-white dark:bg-[#1A1617] border-4 border-iba-black dark:border-iba-light p-6 shadow-[6px_6px_0_0_#CF452C] hover:translate-y-1 hover:shadow-none transition-all flex flex-col items-center justify-center text-center group h-full">
+
+                                {{-- Dynamic Logo with Emphasis Sizing --}}
+                                <div class="mb-4 flex-1 flex items-center justify-center w-full">
+                                    <img src="{{ Storage::url($partner->logo_path) }}"
+                                        alt="{{ $partner->name }}"
+                                        class="{{ $partner->emphasis === 'medium' ? 'h-20 sm:h-24' : 'h-12 sm:h-16' }} w-auto object-contain grayscale group-hover:grayscale-0 transition-all duration-300">
+                                </div>
+
+                                {{-- Role Text --}}
+                                <p class="text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-widest mt-auto w-full pt-4 border-t-2 border-dashed border-gray-300 dark:border-gray-700">
+                                    {{ $partner->role }}
+                                </p>
+                            </div>
+                        @endforeach
+                    </div>
+
+                </div>
             </div>
 
             {{-- HEAVY DIVIDER --}}
@@ -146,7 +156,7 @@
 
             {{-- SECTION 2: BU MADYA ORIGINAL FOOTER CONTENT --}}
             <div class="grid md:grid-cols-4 gap-12 mb-12">
-                
+
                 {{-- Col 1 & 2: Branding & Socials --}}
                 <div class="col-span-1 md:col-span-2">
                     <div class="flex items-center gap-4 mb-6">
@@ -155,11 +165,11 @@
                         </div>
                         <span class="font-pixel text-lg sm:text-xl tracking-tight text-iba-black dark:text-iba-light">BU MADYA</span>
                     </div>
-                    
+
                     <p class="text-gray-700 dark:text-gray-300 font-medium leading-relaxed max-w-sm mb-8 text-sm">
                         The Bicol University - Movement for the Advancement of Youth-led Advocacy is a duly-accredited University Based Organization in Bicol University committed to service and reaching communities through advocacy.
                     </p>
-                    
+
                     {{-- Social Media Links (Neo-Brutalist) --}}
                     <div class="flex space-x-4">
                         {{-- Facebook --}}
@@ -178,7 +188,7 @@
                         </a>
                     </div>
                 </div>
-                
+
                 {{-- Col 3: Navigation Links --}}
                 <div class="flex flex-col justify-center">
                     <ul class="space-y-4 text-iba-black dark:text-iba-light font-bold text-sm">
@@ -203,7 +213,7 @@
                 </div>
 
             </div>
-            
+
             {{-- Copyright Text --}}
             <div class="pt-8 text-center text-iba-black dark:text-iba-light font-bold text-xs uppercase tracking-widest pb-8">
                 &copy; {{ date('Y') }} BU MADYA. All Rights Reserved.
