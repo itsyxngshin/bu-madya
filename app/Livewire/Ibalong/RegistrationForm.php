@@ -5,11 +5,14 @@ namespace App\Livewire\Ibalong;
 use Livewire\Component;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
-use App\Models\IbalongRegistration; 
+use Illuminate\Support\Facades\Mail;
+use App\Models\IbalongRegistration;
+use App\Mail\IbalongRegistrationReceived;
 
 class RegistrationForm extends Component
 {
     public $step = 1;
+    public $registrationSuccessful = false;
 
     // Form Data - Step 1 (Cohort Profile)
     public $team_name, $team_about, $affiliation;
@@ -57,7 +60,6 @@ class RegistrationForm extends Component
         $this->ref_online_activities = DB::table('ibalong_online_activities')->get();
 
         // Initialize PSGC Location Data (Default to Region V / 05)
-        // Fetches provinces mapped to regCode '05'
         $this->provinces = DB::table('refprovince')->where('regCode', '05')->orderBy('provDesc')->get();
     }
 
@@ -65,10 +67,7 @@ class RegistrationForm extends Component
 
     public function updatedProvCode($value)
     {
-        // When Province changes, fetch related Cities/Municipalities
         $this->cities = DB::table('refcitymun')->where('provCode', $value)->orderBy('citymunDesc')->get();
-        
-        // Reset downstream selections
         $this->citymunCode = '';
         $this->brgyCode = '';
         $this->barangays = [];
@@ -76,10 +75,7 @@ class RegistrationForm extends Component
 
     public function updatedCitymunCode($value)
     {
-        // When City/Municipality changes, fetch related Barangays
         $this->barangays = DB::table('refbrgy')->where('citymunCode', $value)->orderBy('brgyDesc')->get();
-        
-        // Reset downstream selection
         $this->brgyCode = '';
     }
 
@@ -122,6 +118,9 @@ class RegistrationForm extends Component
     public function submit()
     {
         $this->validate([
+            'team_name' => 'required|string|max:255',
+            'affiliation' => 'required|string|max:255',
+            'team_about' => 'required|string',
             'team_member_demographics' => 'required',
             'onsite_commitment' => 'required',
             'data_privacy_consent' => 'accepted',
@@ -131,18 +130,20 @@ class RegistrationForm extends Component
             'brgyCode' => 'required',
         ]);
 
-        DB::transaction(function () {
+        $registration = DB::transaction(function () {
             $teamSlug = Str::slug($this->team_name) . '-' . strtolower(Str::random(5));
             
-            // 1. Create Core Registration
-            $registration = IbalongRegistration::create([
+            // 1. Create Core Registration (Mapping PSGC variables to standard DB columns)
+            $reg = IbalongRegistration::create([
                 'team_name' => $this->team_name,
                 'slug' => $teamSlug,
                 'team_about' => $this->team_about,
                 'affiliation' => $this->affiliation,
+                
                 'province_id' => $this->provCode,
                 'citymun_id' => $this->citymunCode,
                 'barangay_id' => $this->brgyCode,
+                
                 'team_member_demographics' => $this->team_member_demographics,
                 'number_of_team_members' => count($this->members),
                 'onsite_commitment' => $this->onsite_commitment,
@@ -154,16 +155,16 @@ class RegistrationForm extends Component
             ]);
 
             // 2. Sync Team Pivots
-            $registration->skills()->sync($this->team_skills);
-            $registration->communityAreas()->sync($this->team_community_areas);
-            $registration->experiences()->sync($this->team_experiences);
-            $registration->onlineActivities()->sync($this->team_online_activities);
+            $reg->skills()->sync($this->team_skills);
+            $reg->communityAreas()->sync($this->team_community_areas);
+            $reg->experiences()->sync($this->team_experiences);
+            $reg->onlineActivities()->sync($this->team_online_activities);
 
             // 3. Create Members and Sync Member Pivots
             foreach ($this->members as $memberData) {
                 $memberSlug = Str::slug($memberData['full_name']) . '-' . strtolower(Str::random(5));
                 
-                $member = $registration->members()->create([
+                $member = $reg->members()->create([
                     'full_name' => $memberData['full_name'],
                     'slug' => $memberSlug,
                     'email_address' => $memberData['email_address'],
@@ -180,9 +181,23 @@ class RegistrationForm extends Component
                     $member->skills()->sync($memberData['skills']);
                 }
             }
+
+            return $reg;
         });
 
-        return redirect('/')->with('success', 'Cohort initialized successfully!');
+        // Fetch Team Leader for Email
+        $teamLeader = collect($this->members)->where('team_role', 'Team Leader')->first() ?? $this->members[0];
+
+        // Send Email Confirmation
+        try {
+            Mail::to($teamLeader['email_address'])->send(new IbalongRegistrationReceived($registration, $teamLeader));
+        } catch (\Exception $e) {
+            // Silently fail mail sending to not interrupt the user experience, or log it
+            \Log::error('Registration Mail Failed: ' . $e->getMessage());
+        }
+
+        // Trigger Success UI
+        $this->registrationSuccessful = true;
     }
 
     public function render()
