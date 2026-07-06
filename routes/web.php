@@ -160,11 +160,11 @@ Route::domain('ibalong.' . env('APP_DOMAIN'))->name('ibalong.')->group(function 
                 'slot', 
                 '<div class="font-pixel text-2xl text-center mt-20 text-iba-black dark:text-iba-light animate-pulse">AWAITING DIRECTIVES...</div>'
             );
-        })->name('ibalong.dashboard');
+        })->name('dashboard');
         
         // Admin: Cohort Intake & Management
         Route::get('/launchpad/intake', \App\Livewire\Ibalong\Admin\RegistrantManager::class)
-            ->name('ibalong.admin.registrants');
+            ->name('admin.registrants');
         
         // Secure Logout
         Route::post('/launchpad/logout', function() {
@@ -172,8 +172,8 @@ Route::domain('ibalong.' . env('APP_DOMAIN'))->name('ibalong.')->group(function 
             request()->session()->invalidate();
             request()->session()->regenerateToken();
             
-            return redirect()->route('ibalong.home');
-        })->name('ibalong.logout');
+            return redirect()->route('home');
+        })->name('logout');
     });
 
     // Future routes for this event will go here...
