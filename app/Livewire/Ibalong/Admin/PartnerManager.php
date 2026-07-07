@@ -12,7 +12,7 @@ class PartnerManager extends Component
     use WithFileUploads;
 
     public $name, $role, $logo, $emphasis = 'medium', $display_order = 0;
-    
+
     // For the edit modal
     public $editModalOpen = false;
     public $edit_id, $edit_name, $edit_role, $edit_emphasis, $edit_display_order;

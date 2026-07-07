@@ -1,4 +1,4 @@
-<div class="max-w-7xl mx-auto space-y-8">
+<div class="max-w-7xl mx-auto space-y-8 relative">
 
     <div>
         <h1 class="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Partner & Enabler Roster</h1>
@@ -56,7 +56,6 @@
                          class="relative flex flex-col items-center justify-center w-full p-8 border-2 border-dashed rounded-xl cursor-pointer transition-all duration-200 ease-in-out"
                          :class="isDropping ? 'border-iba-teal bg-teal-50 dark:bg-teal-900/20 scale-[1.01]' : 'border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700'">
 
-                        {{-- Hidden File Input tied to Livewire --}}
                         <input type="file" x-ref="fileInput" wire:model.live="logo" accept="image/png, image/webp, image/jpeg" class="absolute inset-0 z-50 w-full h-full opacity-0 cursor-pointer">
 
                         @if ($logo)
@@ -92,7 +91,6 @@
                     @error('logo') <span class="text-red-500 text-xs font-bold mt-2 block">⚠ {{ $message }}</span> @enderror
                 </div>
 
-                {{-- Action Button --}}
                 <div class="lg:col-span-6 flex justify-end pt-2 border-t border-gray-100 dark:border-gray-700">
                     <button type="submit" class="inline-flex justify-center items-center px-6 py-2.5 border border-transparent text-sm font-bold rounded-md shadow-sm text-white bg-iba-teal hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-iba-teal transition-colors" wire:loading.attr="disabled">
                         <span wire:loading.remove wire:target="logo">Publish Partner to Roster</span>
@@ -105,7 +103,6 @@
 
     {{-- Partners Table --}}
     <div class="bg-white dark:bg-gray-800 shadow-sm border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
-        {{-- ... Keep the exact same Partners Table code here ... --}}
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                 <thead class="bg-gray-50 dark:bg-gray-900/50">
@@ -122,7 +119,7 @@
                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                             <td class="px-6 py-4">
                                 <div class="flex items-center gap-4">
-                                    <div class="w-16 h-12 bg-gray-100 dark:bg-gray-900 rounded flex items-center justify-center p-1 border border-gray-200 dark:border-gray-700">
+                                    <div class="w-16 h-12 bg-gray-900 dark:bg-gray-950 rounded flex items-center justify-center p-1 border border-gray-300 dark:border-gray-700 shadow-inner">
                                         <img src="{{ Storage::url($partner->logo_path) }}" alt="{{ $partner->name }}" class="max-h-full max-w-full object-contain">
                                     </div>
                                     <div class="text-sm font-bold text-gray-900 dark:text-white">{{ $partner->name }}</div>
@@ -144,11 +141,15 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                 <div class="flex justify-end items-center gap-3">
+                                    <button wire:click="openEditModal({{ $partner->id }})" class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300" title="Edit Partner">
+                                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                    </button>
+                                    <span class="text-gray-300 dark:text-gray-600">|</span>
                                     <button wire:click="toggleStatus({{ $partner->id }})" class="{{ $partner->is_active ? 'text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200' : 'text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300' }}">
                                         {{ $partner->is_active ? 'Hide' : 'Show' }}
                                     </button>
                                     <span class="text-gray-300 dark:text-gray-600">|</span>
-                                    <button wire:click="deletePartner({{ $partner->id }})" wire:confirm="Are you sure you want to remove this partner?" class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">
+                                    <button wire:click="deletePartner({{ $partner->id }})" wire:confirm="Are you sure you want to completely remove this partner?" class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">
                                         Delete
                                     </button>
                                 </div>
@@ -165,4 +166,82 @@
             </table>
         </div>
     </div>
+
+    {{-- MODAL: EDIT PARTNER --}}
+    @if($editModalOpen)
+        <div class="fixed inset-0 z-[100] overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+            <div class="fixed inset-0 bg-gray-800/75 dark:bg-gray-900/80 backdrop-blur-sm transition-opacity" wire:click="closeModals"></div>
+            <div class="flex min-h-screen items-center justify-center p-4 text-center sm:p-6">
+                <div class="relative w-full sm:max-w-2xl flex flex-col bg-white dark:bg-gray-800 rounded-xl text-left shadow-2xl transform transition-all border border-gray-200 dark:border-gray-700 overflow-hidden">
+
+                    <div class="bg-gray-50 dark:bg-gray-900/90 px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                        <h3 class="text-lg font-bold text-gray-900 dark:text-white">Edit Partner Details</h3>
+                        <button wire:click="closeModals" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"><svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
+                    </div>
+
+                    <form wire:submit.prevent="updatePartner">
+                        <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                            {{-- Info Fields --}}
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">Organization Name</label>
+                                <input type="text" wire:model="edit_name" class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white sm:text-sm focus:border-iba-teal focus:ring-iba-teal">
+                                @error('edit_name') <span class="text-red-500 text-xs font-bold block mt-1">⚠ {{ $message }}</span> @enderror
+                            </div>
+
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">Assigned Role</label>
+                                <input type="text" wire:model="edit_role" class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white sm:text-sm focus:border-iba-teal focus:ring-iba-teal">
+                                @error('edit_role') <span class="text-red-500 text-xs font-bold block mt-1">⚠ {{ $message }}</span> @enderror
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">Logo Emphasis</label>
+                                <select wire:model="edit_emphasis" class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white sm:text-sm focus:border-iba-teal focus:ring-iba-teal">
+                                    <option value="medium">Medium</option>
+                                    <option value="small">Small</option>
+                                </select>
+                                @error('edit_emphasis') <span class="text-red-500 text-xs font-bold block mt-1">⚠ {{ $message }}</span> @enderror
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">Sort Order</label>
+                                <input type="number" wire:model="edit_display_order" class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white sm:text-sm focus:border-iba-teal focus:ring-iba-teal">
+                            </div>
+
+                            {{-- Optional Image Replacement --}}
+                            <div class="md:col-span-2 mt-2 pt-4 border-t border-gray-100 dark:border-gray-700">
+                                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Partner Logo</label>
+                                <div class="flex items-center gap-6">
+
+                                    {{-- Preview --}}
+                                    <div class="w-24 h-16 bg-gray-900 rounded-lg flex items-center justify-center p-2 border border-gray-700 shadow-inner shrink-0">
+                                        @if ($new_logo)
+                                            <img src="{{ $new_logo->temporaryUrl() }}" class="max-h-full max-w-full object-contain">
+                                        @else
+                                            <img src="{{ Storage::url($existing_logo_path) }}" class="max-h-full max-w-full object-contain">
+                                        @endif
+                                    </div>
+
+                                    {{-- Upload Input --}}
+                                    <div class="flex-1">
+                                        <input type="file" wire:model.live="new_logo" accept="image/png, image/webp, image/jpeg" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-bold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 dark:file:bg-gray-700 dark:file:text-gray-300 cursor-pointer">
+                                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Leave empty to keep the existing logo.</p>
+                                        @error('new_logo') <span class="text-red-500 text-xs font-bold block mt-1">⚠ {{ $message }}</span> @enderror
+
+                                        <div wire:loading wire:target="new_logo" class="text-xs font-bold text-iba-teal mt-1 animate-pulse">Processing preview...</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-gray-50 dark:bg-gray-900/90 px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-3">
+                            <button type="button" wire:click="closeModals" class="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">Cancel</button>
+                            <button type="submit" class="px-6 py-2 bg-iba-teal text-white rounded-md text-sm font-bold hover:bg-teal-700 transition-colors" wire:loading.attr="disabled">Save Changes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    @endif
 </div>
