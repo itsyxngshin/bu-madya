@@ -153,6 +153,7 @@ Route::domain('ibalong.' . env('APP_DOMAIN'))->name('ibalong.')->group(function 
     Route::get('/launchpad/login', \App\Livewire\Ibalong\Auth\Login::class)->name('login');
     // Place this outside of your auth middleware!
     Route::get('/roster', \App\Livewire\Ibalong\MeetTheTeam::class)->name('roster');
+    Route::get('/about', \App\Livewire\Ibalong\AboutHackathon::class)->name('about');
     Route::middleware(['ibalong.auth'])->group(function () {
 
         // Default Dashboard Overview
