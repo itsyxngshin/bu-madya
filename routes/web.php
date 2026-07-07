@@ -167,6 +167,7 @@ Route::domain('ibalong.' . env('APP_DOMAIN'))->name('ibalong.')->group(function 
         // Every authenticated user can access their profile
         Route::get('/launchpad/profile', \App\Livewire\Ibalong\ProfileManager::class)->name('profile');
         Route::get('/launchpad/partners', \App\Livewire\Ibalong\Admin\PartnerManager::class)->name('admin.partners');
+        Route::get('/launchpad/committees', \App\Livewire\Ibalong\Admin\CommitteeManager::class)->name('ibalong.admin.committees');
         // Secure Logout
         Route::post('/launchpad/logout', function() {
             Auth::guard('ibalong')->logout();
