@@ -36,55 +36,52 @@
                         <div class="flex-1 h-1 sm:h-2 bg-iba-black dark:bg-iba-light w-full"></div>
                     </div>
 
-                    {{-- Members Grid (2 per row on mobile, up to 4 on desktop) --}}
-                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6 lg:gap-8">
+                    {{-- Members Grid (Strictly 2-per-row on Mobile) --}}
+                    <div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-8">
                         @foreach($committee->members as $member)
 
                             {{-- Determine Card Accent Colors Based on Role --}}
                             @php
                                 $isHead = $member->role === 'Head';
                                 $accentColor = $isHead ? 'iba-red' : 'iba-teal';
-                                $shadowColor = $isHead ? '#CF452C' : '#0095AC';
+                                $shadowClass = $isHead ? 'shadow-[4px_4px_0_0_#CF452C] sm:shadow-[8px_8px_0_0_#CF452C]' : 'shadow-[4px_4px_0_0_#0095AC] sm:shadow-[8px_8px_0_0_#0095AC]';
                             @endphp
 
-                            <div class="group relative flex flex-col bg-white dark:bg-[#1A1617] border-2 sm:border-4 border-iba-black dark:border-iba-light transition-transform duration-200 hover:-translate-y-1 sm:hover:-translate-y-2"
-                                 style="box-shadow: 4px 4px 0px 0px {{ $shadowColor }};">
+                            <div class="group relative flex flex-col bg-white dark:bg-[#1A1617] border-2 sm:border-4 border-iba-black dark:border-iba-light transition-transform duration-200 hover:-translate-y-1 sm:hover:-translate-y-2 {{ $shadowClass }}">
 
-                                {{-- Card Content Wrapper --}}
-                                <div class="p-4 sm:p-6 flex flex-col flex-1 items-center text-center">
+                                {{-- Avatar / Photo Block (Restored to edge-to-edge square) --}}
+                                <div class="w-full aspect-square border-b-2 sm:border-b-4 border-iba-black dark:border-iba-light bg-gray-100 dark:bg-gray-800 relative overflow-hidden shrink-0">
+                                    @if($member->photo_path)
+                                        <img src="{{ Storage::url($member->photo_path) }}" alt="{{ $member->name }}" class="w-full h-full object-cover filter grayscale group-hover:grayscale-0 transition-all duration-500">
+                                    @else
+                                        <div class="w-full h-full flex items-center justify-center bg-gray-200 dark:bg-gray-800 text-gray-400 dark:text-gray-600 font-pixel text-4xl sm:text-6xl">
+                                            {{ substr($member->name, 0, 1) }}
+                                        </div>
+                                    @endif
 
-                                    {{-- Centered, Smaller Avatar Block --}}
-                                    <div class="w-20 h-20 sm:w-32 sm:h-32 mb-3 sm:mb-4 border-2 sm:border-4 border-iba-black dark:border-iba-light bg-gray-100 dark:bg-gray-800 relative overflow-hidden shrink-0 transition-transform duration-300 group-hover:scale-105">
-                                        @if($member->photo_path)
-                                            <img src="{{ Storage::url($member->photo_path) }}" alt="{{ $member->name }}" class="w-full h-full object-cover filter grayscale group-hover:grayscale-0 transition-all duration-500">
-                                        @else
-                                            <div class="w-full h-full flex items-center justify-center bg-gray-200 dark:bg-gray-800 text-gray-400 dark:text-gray-600 font-pixel text-3xl sm:text-5xl">
-                                                {{ substr($member->name, 0, 1) }}
-                                            </div>
-                                        @endif
+                                    {{-- Absolute Corner Role Badge --}}
+                                    <div class="absolute top-0 right-0 bg-{{ $accentColor }} text-white font-bold text-[9px] sm:text-xs px-2 py-1 sm:px-3 sm:py-1.5 border-b-2 sm:border-b-4 border-l-2 sm:border-l-4 border-iba-black dark:border-iba-light uppercase tracking-wider shadow-sm z-10">
+                                        @if($isHead) ★ @endif <span class="hidden sm:inline">{{ $member->role }}</span><span class="sm:hidden">{{ substr($member->role, 0, 1) }}</span>
                                     </div>
+                                </div>
 
-                                    {{-- Role Badge --}}
-                                    <div class="bg-{{ $accentColor }} text-white font-bold text-[9px] sm:text-xs px-2 py-0.5 sm:px-3 sm:py-1 border-2 border-iba-black dark:border-iba-light uppercase tracking-wider mb-2 sm:mb-3 shadow-sm inline-block">
-                                        @if($isHead) ★ @endif {{ $member->role }}
-                                    </div>
-
-                                    {{-- Text Info Block --}}
-                                    <h3 class="font-bold text-xs sm:text-lg text-iba-black dark:text-iba-light uppercase leading-tight mb-1 line-clamp-2">
+                                {{-- Text Info Block (Restored to Left-Aligned) --}}
+                                <div class="p-3 sm:p-5 flex flex-col flex-1">
+                                    <h3 class="font-bold text-sm sm:text-xl text-iba-black dark:text-iba-light uppercase leading-tight mb-0.5 sm:mb-1 truncate" title="{{ $member->name }}">
                                         {{ $member->name }}
                                     </h3>
 
                                     @if($member->designation)
-                                        <p class="text-[9px] sm:text-xs font-bold text-{{ $accentColor }} uppercase tracking-wider mb-3 line-clamp-2">
+                                        <p class="text-[9px] sm:text-sm font-bold text-{{ $accentColor }} uppercase tracking-wider mb-2 sm:mb-3 line-clamp-2" title="{{ $member->designation }}">
                                             {{ $member->designation }}
                                         </p>
                                     @endif
 
                                     @if($member->affiliation)
-                                        <div class="mt-auto pt-3 sm:pt-4 border-t-2 border-dashed border-gray-300 dark:border-gray-700 w-full">
-                                            <p class="text-[8px] sm:text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest flex items-center justify-center gap-1 truncate w-full" title="{{ $member->affiliation }}">
+                                        <div class="mt-auto pt-2 sm:pt-4 border-t-2 border-dashed border-gray-300 dark:border-gray-700">
+                                            <p class="text-[8px] sm:text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest flex items-center gap-1 sm:gap-2 w-full">
                                                 <svg class="w-3 h-3 sm:w-4 sm:h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
-                                                <span class="truncate">{{ $member->affiliation }}</span>
+                                                <span class="truncate" title="{{ $member->affiliation }}">{{ $member->affiliation }}</span>
                                             </p>
                                         </div>
                                     @endif
