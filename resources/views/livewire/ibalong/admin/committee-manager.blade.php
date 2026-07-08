@@ -1,5 +1,5 @@
 <div class="max-w-7xl mx-auto space-y-8 relative">
-
+    
     <div>
         <h1 class="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Working Committee Roster</h1>
         <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Manage the internal teams, heads, and members powering the Heroes of Innovation.</p>
@@ -18,7 +18,7 @@
         </div>
         <div class="p-6">
             <form wire:submit.prevent="addMember" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-5 items-start">
-
+                
                 {{-- Left Column: Info --}}
                 <div class="lg:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="md:col-span-2">
@@ -86,7 +86,6 @@
                             <div class="text-center pointer-events-none" wire:loading.remove wire:target="photo">
                                 <svg class="mx-auto h-10 w-10 text-gray-400 dark:text-gray-500 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" /></svg>
                                 <p class="text-xs font-semibold text-gray-700 dark:text-gray-300">Drag & Drop or <span class="text-iba-teal underline">Click to upload</span></p>
-                                <p class="text-[10px] text-gray-500 mt-1">Square aspect ratio recommended</p>
                             </div>
                             <div class="text-center hidden pointer-events-none" wire:loading.class.remove="hidden" wire:target="photo">
                                 <svg class="mx-auto h-8 w-8 text-iba-teal animate-spin mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
@@ -94,13 +93,11 @@
                             </div>
                         @endif
                     </div>
-                    @error('photo') <span class="text-red-500 text-xs font-bold mt-1 block">⚠ {{ $message }}</span> @enderror
                 </div>
 
                 <div class="lg:col-span-5 flex justify-end pt-2 border-t border-gray-100 dark:border-gray-700">
                     <button type="submit" class="px-6 py-2 border border-transparent text-sm font-bold rounded-md shadow-sm text-white bg-iba-teal hover:bg-teal-700 transition-colors" wire:loading.attr="disabled">
-                        <span wire:loading.remove wire:target="photo">Publish to Roster</span>
-                        <span wire:loading wire:target="photo">Awaiting Upload...</span>
+                        Publish to Roster
                     </button>
                 </div>
             </form>
@@ -108,11 +105,18 @@
     </div>
 
     {{-- Committees Display Loop --}}
-    @forelse($membersGrouped as $committeeName => $members)
-        <div class="bg-white dark:bg-gray-800 shadow-sm border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
-            <div class="bg-gray-50 dark:bg-gray-900/50 px-6 py-4 border-b border-gray-200 dark:border-gray-700 border-l-4 border-l-iba-teal">
-                <h3 class="text-base font-bold text-gray-900 dark:text-white uppercase tracking-wider">{{ $committeeName }}</h3>
+    @forelse($committees as $committee)
+        <div class="bg-white dark:bg-gray-800 shadow-sm border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden mb-8">
+            
+            {{-- Header with Edit Committee Button --}}
+            <div class="bg-gray-50 dark:bg-gray-900/50 px-6 py-4 border-b border-gray-200 dark:border-gray-700 border-l-4 border-l-iba-teal flex justify-between items-center">
+                <h3 class="text-base font-bold text-gray-900 dark:text-white uppercase tracking-wider">{{ $committee->name }}</h3>
+                <button wire:click="openEditCommitteeModal({{ $committee->id }})" class="text-xs font-bold text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 flex items-center gap-1 transition-colors">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                    Edit Committee
+                </button>
             </div>
+
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                     <thead class="bg-white dark:bg-gray-800">
@@ -124,14 +128,13 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-800">
-                        @foreach($members as $member)
+                        @forelse($committee->members as $member)
                             <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="flex items-center gap-4">
-                                        {{-- Avatar Display --}}
                                         <div class="w-10 h-10 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-700 flex shrink-0 items-center justify-center border border-gray-300 dark:border-gray-600">
                                             @if($member->photo_path)
-                                                <img src="{{ Storage::url($member->photo_path) }}" class="w-full h-full object-cover" alt="{{ $member->name }}">
+                                                <img src="{{ Storage::url($member->photo_path) }}" class="w-full h-full object-cover">
                                             @else
                                                 <span class="text-gray-500 dark:text-gray-400 font-bold text-sm">{{ substr($member->name, 0, 1) }}</span>
                                             @endif
@@ -155,55 +158,58 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                     <div class="flex justify-end items-center gap-3">
-                                        <button wire:click="openEditModal({{ $member->id }})" class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300" title="Edit">
+                                        <button wire:click="openEditModal({{ $member->id }})" class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300">
                                             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                                         </button>
                                         <span class="text-gray-300 dark:text-gray-600">|</span>
-                                        <button wire:click="toggleStatus({{ $member->id }})" class="{{ $member->is_active ? 'text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200' : 'text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300' }}">
+                                        <button wire:click="toggleStatus({{ $member->id }})" class="{{ $member->is_active ? 'text-gray-500' : 'text-green-600' }}">
                                             {{ $member->is_active ? 'Hide' : 'Show' }}
                                         </button>
                                         <span class="text-gray-300 dark:text-gray-600">|</span>
-                                        <button wire:click="deleteMember({{ $member->id }})" wire:confirm="Remove this member from the roster completely?" class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">
-                                            Delete
-                                        </button>
+                                        <button wire:click="deleteMember({{ $member->id }})" wire:confirm="Remove this member?" class="text-red-600">Delete</button>
                                     </div>
                                 </td>
                             </tr>
-                        @endforeach
+                        @empty
+                            <tr>
+                                <td colspan="4" class="px-6 py-8 text-center text-sm text-gray-500">No members assigned to this committee yet.</td>
+                            </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>
         </div>
     @empty
         <div class="bg-white dark:bg-gray-800 shadow-sm border border-gray-200 dark:border-gray-700 rounded-xl p-10 text-center">
-            <p class="text-sm text-gray-500 dark:text-gray-400">No committee members have been registered yet.</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">No committees created yet.</p>
         </div>
     @endforelse
 
+
     {{-- MODAL: ADD NEW COMMITTEE --}}
     @if($createCommitteeModalOpen)
-        <div class="fixed inset-0 z-[110] overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-            <div class="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/80 backdrop-blur-sm transition-opacity" wire:click="closeModals"></div>
+        <div class="fixed inset-0 z-[110] overflow-y-auto">
+            <div class="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/80 backdrop-blur-sm" wire:click="closeModals"></div>
             <div class="flex min-h-screen items-center justify-center p-4 text-center sm:p-6">
-                <div class="relative w-full sm:max-w-md flex flex-col bg-white dark:bg-gray-800 rounded-xl text-left shadow-2xl overflow-hidden border border-gray-200 dark:border-gray-700">
+                <div class="relative w-full sm:max-w-md flex flex-col bg-white dark:bg-gray-800 rounded-xl text-left shadow-2xl border-2 border-gray-200 dark:border-gray-700 overflow-hidden">
                     <div class="bg-gray-50 dark:bg-gray-900/90 px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                        <h3 class="text-lg font-bold text-gray-900 dark:text-white">Create New Committee</h3>
+                        <h3 class="text-lg font-bold text-gray-900 dark:text-white uppercase">Create New Committee</h3>
                     </div>
                     <form wire:submit.prevent="saveNewCommittee">
                         <div class="p-6 space-y-4">
                             <div>
-                                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">Committee Name</label>
-                                <input type="text" wire:model="new_committee_name" class="w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white sm:text-sm focus:border-iba-teal focus:ring-iba-teal">
+                                <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Committee Name</label>
+                                <input type="text" wire:model="new_committee_name" class="w-full rounded-md border-gray-300 dark:bg-gray-700 dark:text-white">
                                 @error('new_committee_name') <span class="text-red-500 text-xs font-bold block mt-1">⚠ {{ $message }}</span> @enderror
                             </div>
                             <div>
-                                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">Sort Order</label>
-                                <input type="number" wire:model="new_committee_order" class="w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white sm:text-sm focus:border-iba-teal focus:ring-iba-teal">
+                                <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Sort Order</label>
+                                <input type="number" wire:model="new_committee_order" class="w-full rounded-md border-gray-300 dark:bg-gray-700 dark:text-white">
                             </div>
                         </div>
-                        <div class="bg-gray-50 dark:bg-gray-900/90 px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-3">
-                            <button type="button" wire:click="$set('createCommitteeModalOpen', false)" class="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">Cancel</button>
-                            <button type="submit" class="px-6 py-2 bg-iba-teal text-white rounded-md text-sm font-bold hover:bg-teal-700">Save</button>
+                        <div class="bg-gray-50 dark:bg-gray-900/90 px-6 py-4 border-t flex justify-end gap-3">
+                            <button type="button" wire:click="closeModals" class="px-4 py-2 bg-white dark:bg-gray-800 border rounded-md text-sm font-bold text-gray-700 dark:text-gray-300">Cancel</button>
+                            <button type="submit" class="px-6 py-2 bg-iba-teal text-white rounded-md text-sm font-bold">Save</button>
                         </div>
                     </form>
                 </div>
@@ -211,43 +217,108 @@
         </div>
     @endif
 
-    {{-- MODAL: EDIT MEMBER --}}
+    {{-- MODAL: EDIT COMMITTEE --}}
+    @if($editCommitteeModalOpen)
+        <div class="fixed inset-0 z-[110] overflow-y-auto">
+            <div class="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/80 backdrop-blur-sm" wire:click="closeModals"></div>
+            <div class="flex min-h-screen items-center justify-center p-4 text-center sm:p-6">
+                <div class="relative w-full sm:max-w-md flex flex-col bg-white dark:bg-gray-800 rounded-xl text-left shadow-2xl border-2 border-gray-200 dark:border-gray-700 overflow-hidden">
+                    <div class="bg-gray-50 dark:bg-gray-900/90 px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                        <h3 class="text-lg font-bold text-gray-900 dark:text-white uppercase">Edit Committee</h3>
+                    </div>
+                    <form wire:submit.prevent="updateCommittee">
+                        <div class="p-6 space-y-4">
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Committee Name</label>
+                                <input type="text" wire:model="edit_committee_name" class="w-full rounded-md border-gray-300 dark:bg-gray-700 dark:text-white">
+                                @error('edit_committee_name') <span class="text-red-500 text-xs font-bold block mt-1">⚠ {{ $message }}</span> @enderror
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Sort Order</label>
+                                <input type="number" wire:model="edit_committee_order" class="w-full rounded-md border-gray-300 dark:bg-gray-700 dark:text-white">
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 dark:bg-gray-900/90 px-6 py-4 border-t flex justify-end gap-3">
+                            <button type="button" wire:click="closeModals" class="px-4 py-2 bg-white dark:bg-gray-800 border rounded-md text-sm font-bold text-gray-700 dark:text-gray-300">Cancel</button>
+                            <button type="submit" class="px-6 py-2 bg-iba-teal text-white rounded-md text-sm font-bold">Update</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    {{-- MODAL: EDIT COMMITTEE MEMBER --}}
     @if($editModalOpen)
         <div class="fixed inset-0 z-[100] overflow-y-auto">
             <div class="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/80 backdrop-blur-sm" wire:click="closeModals"></div>
             <div class="flex min-h-screen items-center justify-center p-4">
-                <div class="relative w-full sm:max-w-3xl bg-white dark:bg-gray-800 rounded-xl shadow-2xl border-2 border-iba-black dark:border-iba-light overflow-hidden">
-                    <div class="bg-gray-50 dark:bg-gray-900 px-6 py-4 border-b-2 border-gray-200 dark:border-gray-700 font-bold uppercase">Edit Member</div>
+                <div class="relative w-full sm:max-w-3xl bg-white dark:bg-gray-800 rounded-xl shadow-2xl border-2 border-gray-200 dark:border-gray-700 overflow-hidden">
+                    <div class="bg-gray-50 dark:bg-gray-900/90 px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                        <h3 class="text-lg font-bold text-gray-900 dark:text-white uppercase">Edit Member Profile</h3>
+                    </div>
                     <form wire:submit.prevent="updateMember">
                         <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div class="md:col-span-2">
-                                <label class="text-xs font-bold uppercase">Committee</label>
-                                <select wire:model="edit_committee_id" class="w-full mt-1 rounded border-gray-300 dark:bg-gray-700">
-                                    @foreach($committees as $c) <option value="{{ $c->id }}">{{ $c->name }}</option> @endforeach
+                            <div>
+                                <label class="text-xs font-bold uppercase text-gray-500">Committee</label>
+                                <select wire:model="edit_committee_id" class="w-full rounded-md border-gray-300 dark:bg-gray-700 dark:text-white">
+                                    @foreach($committees as $committee)
+                                        <option value="{{ $committee->id }}">{{ $committee->name }}</option>
+                                    @endforeach
                                 </select>
                             </div>
                             <div>
-                                <label class="text-xs font-bold uppercase">Name</label>
-                                <input type="text" wire:model="edit_name" class="w-full rounded border-gray-300 dark:bg-gray-700">
+                                <label class="text-xs font-bold uppercase text-gray-500">Full Name</label>
+                                <input type="text" wire:model="edit_name" class="w-full rounded-md border-gray-300 dark:bg-gray-700 dark:text-white">
                             </div>
                             <div>
-                                <label class="text-xs font-bold uppercase">Role</label>
-                                <select wire:model="edit_role" class="w-full rounded border-gray-300 dark:bg-gray-700">
-                                    <option value="Head">Head</option><option value="Member">Member</option>
+                                <label class="text-xs font-bold uppercase text-gray-500">Affiliation</label>
+                                <input type="text" wire:model="edit_affiliation" class="w-full rounded-md border-gray-300 dark:bg-gray-700 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="text-xs font-bold uppercase text-gray-500">Designation</label>
+                                <input type="text" wire:model="edit_designation" class="w-full rounded-md border-gray-300 dark:bg-gray-700 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="text-xs font-bold uppercase text-gray-500">Role</label>
+                                <select wire:model="edit_role" class="w-full rounded-md border-gray-300 dark:bg-gray-700 dark:text-white">
+                                    <option value="Head">Head</option>
+                                    <option value="Member">Member</option>
                                 </select>
+                            </div>
+                            <div>
+                                <label class="text-xs font-bold uppercase text-gray-500">Sort Order</label>
+                                <input type="number" wire:model="edit_display_order" class="w-full rounded-md border-gray-300 dark:bg-gray-700 dark:text-white">
                             </div>
 
-                            {{-- Volunteer Fields --}}
                             @if($edit_motivation)
-                            <div class="md:col-span-2 bg-blue-50 dark:bg-blue-900/20 p-3 rounded">
-                                <p class="text-xs font-bold text-blue-700 dark:text-blue-300 uppercase mb-1">Volunteer Data</p>
-                                <p class="text-sm"><strong>Email:</strong> {{ $edit_email }}</p>
-                                <p class="text-sm"><strong>Motivation:</strong> {{ $edit_motivation }}</p>
-                            </div>
+                                <div class="md:col-span-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 p-4 rounded-md my-2">
+                                    <h4 class="text-[10px] font-bold text-blue-800 dark:text-blue-300 uppercase tracking-widest mb-2">Volunteer Application Info</h4>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-2">
+                                        <p class="text-sm text-gray-700 dark:text-gray-300"><strong>Email:</strong> {{ $edit_email }}</p>
+                                        <p class="text-sm text-gray-700 dark:text-gray-300"><strong>Mobile:</strong> {{ $edit_mobile_number }}</p>
+                                    </div>
+                                    <p class="text-sm text-gray-700 dark:text-gray-300"><strong>Motivation:</strong> "{{ $edit_motivation }}"</p>
+                                </div>
                             @endif
+
+                            <div class="md:col-span-2 pt-4 border-t border-gray-200 dark:border-gray-700">
+                                <label class="text-xs font-bold uppercase text-gray-500 mb-2 block">Replace Avatar</label>
+                                <div class="flex items-center gap-4">
+                                    <div class="w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-700 border border-gray-300 overflow-hidden shrink-0">
+                                        @if ($new_photo)
+                                            <img src="{{ $new_photo->temporaryUrl() }}" class="w-full h-full object-cover">
+                                        @elseif ($existing_photo_path)
+                                            <img src="{{ Storage::url($existing_photo_path) }}" class="w-full h-full object-cover">
+                                        @endif
+                                    </div>
+                                    <input type="file" wire:model.live="new_photo" accept="image/png, image/webp, image/jpeg" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-bold file:bg-gray-100 dark:file:bg-gray-700 cursor-pointer">
+                                </div>
+                            </div>
                         </div>
-                        <div class="p-6 border-t flex justify-end">
-                            <button type="submit" class="bg-iba-teal text-white font-bold px-6 py-2 rounded">Save</button>
+                        <div class="bg-gray-50 dark:bg-gray-900/90 px-6 py-4 border-t flex justify-end gap-3">
+                            <button type="button" wire:click="closeModals" class="px-4 py-2 bg-white dark:bg-gray-800 border rounded-md text-sm font-bold text-gray-700 dark:text-gray-300">Cancel</button>
+                            <button type="submit" class="px-6 py-2 bg-iba-teal text-white rounded-md text-sm font-bold">Save Updates</button>
                         </div>
                     </form>
                 </div>

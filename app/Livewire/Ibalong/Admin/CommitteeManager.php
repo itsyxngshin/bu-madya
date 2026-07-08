@@ -14,8 +14,8 @@ class CommitteeManager extends Component
 
     // Member Creation Form
     public $committee_id, $name, $email, $mobile_number, $affiliation, $designation, $motivation, $role = 'Member', $display_order = 0, $photo;
-
-    // Edit Modal State
+    
+    // Member Edit Modal State
     public $editModalOpen = false;
     public $edit_id, $edit_committee_id, $edit_name, $edit_email, $edit_mobile_number, $edit_affiliation, $edit_designation, $edit_motivation, $edit_role, $edit_display_order;
     public $new_photo, $existing_photo_path;
@@ -23,6 +23,12 @@ class CommitteeManager extends Component
     // Quick Add Committee Modal
     public $createCommitteeModalOpen = false;
     public $new_committee_name, $new_committee_order = 0;
+
+    // Edit Committee Modal State
+    public $editCommitteeModalOpen = false;
+    public $target_committee_id, $edit_committee_name, $edit_committee_order;
+
+    // --- COMMITTEE LOGIC ---
 
     public function saveNewCommittee()
     {
@@ -40,7 +46,37 @@ class CommitteeManager extends Component
         $this->committee_id = $committee->id;
         $this->createCommitteeModalOpen = false;
         $this->reset(['new_committee_name', 'new_committee_order']);
+        session()->flash('success', 'Committee created successfully.');
     }
+
+    public function openEditCommitteeModal($id)
+    {
+        $committee = IbalongCommittee::findOrFail($id);
+        $this->target_committee_id = $committee->id;
+        $this->edit_committee_name = $committee->name;
+        $this->edit_committee_order = $committee->display_order;
+        
+        $this->editCommitteeModalOpen = true;
+    }
+
+    public function updateCommittee()
+    {
+        $this->validate([
+            'edit_committee_name' => 'required|string|max:255|unique:ibalong_committees,name,' . $this->target_committee_id,
+            'edit_committee_order' => 'required|integer',
+        ]);
+
+        $committee = IbalongCommittee::findOrFail($this->target_committee_id);
+        $committee->update([
+            'name' => $this->edit_committee_name,
+            'display_order' => $this->edit_committee_order,
+        ]);
+
+        $this->closeModals();
+        session()->flash('success', 'Committee updated successfully.');
+    }
+
+    // --- MEMBER LOGIC ---
 
     public function addMember()
     {
@@ -75,7 +111,7 @@ class CommitteeManager extends Component
     public function openEditModal($id)
     {
         $member = IbalongCommitteeMember::findOrFail($id);
-
+        
         $this->edit_id = $member->id;
         $this->edit_committee_id = $member->committee_id;
         $this->edit_name = $member->name;
@@ -87,7 +123,7 @@ class CommitteeManager extends Component
         $this->edit_role = $member->role;
         $this->edit_display_order = $member->display_order;
         $this->existing_photo_path = $member->photo_path;
-
+        
         $this->editModalOpen = true;
     }
 
@@ -122,7 +158,7 @@ class CommitteeManager extends Component
         ]);
 
         $this->closeModals();
-        session()->flash('success', 'Member updated.');
+        session()->flash('success', 'Member updated successfully.');
     }
 
     public function toggleStatus($id)
@@ -138,23 +174,31 @@ class CommitteeManager extends Component
             Storage::disk('public')->delete($member->photo_path);
         }
         $member->delete();
+        session()->flash('success', 'Member removed.');
     }
 
     public function closeModals()
     {
         $this->editModalOpen = false;
         $this->createCommitteeModalOpen = false;
-        $this->reset(['edit_id', 'new_photo', 'existing_photo_path']);
+        $this->editCommitteeModalOpen = false;
+        
+        $this->reset([
+            'edit_id', 'new_photo', 'existing_photo_path', 
+            'new_committee_name', 'new_committee_order',
+            'target_committee_id', 'edit_committee_name', 'edit_committee_order'
+        ]);
     }
 
     public function render()
     {
+        // Fetch Committees with their members pre-loaded and sorted
+        $committees = IbalongCommittee::with(['members' => function($query) {
+            $query->orderBy('role', 'asc')->orderBy('display_order', 'asc');
+        }])->orderBy('display_order', 'asc')->get();
+
         return view('livewire.ibalong.admin.committee-manager', [
-            'committees' => IbalongCommittee::orderBy('display_order', 'asc')->get(),
-            'membersGrouped' => IbalongCommitteeMember::with('committee')
-                ->orderBy('display_order', 'asc')
-                ->get()
-                ->groupBy('committee.name')
+            'committees' => $committees,
         ])->layout('layouts.dashboard');
     }
 }
