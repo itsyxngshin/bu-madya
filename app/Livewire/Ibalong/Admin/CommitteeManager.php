@@ -7,6 +7,8 @@ use Livewire\WithFileUploads;
 use App\Models\IbalongCommittee;
 use App\Models\IbalongCommitteeMember;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\VolunteerApproved;
 
 class CommitteeManager extends Component
 {
