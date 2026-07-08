@@ -79,6 +79,27 @@ class CommitteeManager extends Component
 
     // --- MEMBER LOGIC ---
 
+    public function approveAndNotify($id)
+    {
+        $member = IbalongCommitteeMember::findOrFail($id);
+
+        if (!$member->email) {
+            session()->flash('error', 'Cannot send email: This member has no email address on record.');
+            return;
+        }
+
+        // 1. Set them to visible on the public roster
+        $member->update(['is_active' => true]);
+
+        // 2. Dispatch the email
+        try {
+            Mail::to($member->email)->send(new VolunteerApproved($member));
+            session()->flash('success', 'Volunteer approved and confirmation email sent to ' . $member->email);
+        } catch (\Exception $e) {
+            session()->flash('error', 'Volunteer approved, but the email failed to send. Check your mail configuration.');
+        }
+    }
+
     public function addMember()
     {
         $this->validate([
