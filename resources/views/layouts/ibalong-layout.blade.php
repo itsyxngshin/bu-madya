@@ -193,12 +193,14 @@
                 </div>
 
                 {{-- Col 4: Live Stats --}}
-                <div class="flex flex-col justify-center">
-                    <h4 class="font-pixel text-[9px] sm:text-[10px] mb-3 sm:mb-4 text-iba-green tracking-widest uppercase">Live System Stats</h4>
-                    <div class="bg-iba-black dark:bg-[#1A1617] p-4 sm:p-6 border-2 sm:border-4 border-iba-black dark:border-iba-light shadow-[4px_4px_0_0_#0095AC] sm:shadow-[6px_6px_0_0_#0095AC] dark:shadow-[4px_4px_0_0_#0095AC]">
-                        <span class="block font-bold text-[9px] sm:text-[10px] uppercase tracking-widest text-iba-light/50 mb-1 sm:mb-2">Total Terminals Accessed</span>
-                        <div class="text-2xl sm:text-4xl font-pixel text-iba-orange tracking-widest">
-                            {{ str_pad($visitorCount ?? 0, 7, '0', STR_PAD_LEFT) }}
+                <div class="flex flex-col justify-center min-w-0">
+                    <h4 class="font-pixel text-[9px] sm:text-[10px] mb-3 sm:mb-4 text-iba-green tracking-widest uppercase truncate">Live System Stats</h4>
+                    <div class="bg-iba-black dark:bg-[#1A1617] p-4 sm:p-5 border-2 sm:border-4 border-iba-black dark:border-iba-light shadow-[4px_4px_0_0_#0095AC] sm:shadow-[6px_6px_0_0_#0095AC] overflow-hidden w-full">
+                        <span class="block font-bold text-[9px] sm:text-[10px] uppercase tracking-widest text-iba-light/50 mb-1 sm:mb-2 truncate">Total Terminals Accessed</span>
+                        
+                        {{-- Fixed font sizing, added break-all, and directly called Cache --}}
+                        <div class="text-xl sm:text-2xl lg:text-3xl font-pixel text-iba-orange tracking-widest break-all">
+                            {{ str_pad(\Illuminate\Support\Facades\Cache::get('global_visitor_count', 0), 7, '0', STR_PAD_LEFT) }}
                         </div>
                     </div>
                 </div>

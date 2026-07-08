@@ -10,15 +10,18 @@ class TrackVisitor
 {
     public function handle(Request $request, Closure $next)
     {
-        // Use the user's IP and date to prevent spamming the counter on page refreshes.
-        // It counts 1 unique visit per IP address per day.
         $ip = $request->ip();
         $date = now()->toDateString();
         $cacheKey = "visited_{$ip}_{$date}";
 
         if (!Cache::has($cacheKey)) {
+            // Log the unique visitor for today
             Cache::put($cacheKey, true, now()->endOfDay());
-            // Increment the global total visitor count forever
+            
+            // Ensure the global counter exists, then increment
+            if (!Cache::has('global_visitor_count')) {
+                Cache::put('global_visitor_count', 0);
+            }
             Cache::increment('global_visitor_count');
         }
 

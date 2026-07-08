@@ -21,9 +21,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // This makes $visitorCount available to ALL views (or you can specify 'partials.footer')
-        View::composer('*', function ($view) {
-            $view->with('visitorCount', Cache::get('global_visitor_count', 0));
-        });
+       
     }
 }
