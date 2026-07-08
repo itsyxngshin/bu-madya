@@ -134,6 +134,10 @@ class CommitteeManager extends Component
         $this->validate([
             'edit_committee_id' => 'required|exists:ibalong_committees,id',
             'edit_name' => 'required|string|max:255',
+            'edit_email' => 'nullable|email|max:255',
+            'edit_mobile_number' => 'nullable|string|max:20',
+            'edit_motivation' => 'nullable|string|max:1000',
+            'edit_devcon_consent' => 'boolean',
             'edit_role' => 'required|in:Head,Member',
             'new_photo' => 'nullable|image|max:2048',
         ]);
@@ -155,6 +159,7 @@ class CommitteeManager extends Component
             'affiliation' => $this->edit_affiliation,
             'designation' => $this->edit_designation,
             'motivation' => $this->edit_motivation,
+            'devcon_consent' => $this->edit_devcon_consent,
             'role' => $this->edit_role,
             'display_order' => $this->edit_display_order,
         ]);

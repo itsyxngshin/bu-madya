@@ -291,26 +291,33 @@
                                 <input type="number" wire:model="edit_display_order" class="w-full rounded-md border-gray-300 dark:bg-gray-700 dark:text-white">
                             </div>
 
-                            @if($edit_motivation)
-                                <div class="md:col-span-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 p-4 rounded-md my-2">
-                                    <div class="flex justify-between items-start mb-2">
-                                        <h4 class="text-[10px] font-bold text-blue-800 dark:text-blue-300 uppercase tracking-widest">Volunteer Application Info</h4>
-                                        
-                                        {{-- Simple Consent Badge --}}
-                                        @if($edit_devcon_consent)
-                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 border border-green-200 dark:border-green-800">
-                                                ✓ Privacy terms accepted
-                                            </span>
-                                        @endif
-
+                            {{-- Contact & Volunteer Data (Editable) --}}
+                            <div class="md:col-span-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 p-4 rounded-md my-2">
+                                <h4 class="text-[10px] font-bold text-blue-800 dark:text-blue-300 uppercase tracking-widest mb-3">Contact & Volunteer Details</h4>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                    <div>
+                                        <label class="block text-xs font-bold uppercase text-blue-800 dark:text-blue-300 mb-1">Email Address</label>
+                                        <input type="email" wire:model="edit_email" class="w-full rounded-md border-blue-300 dark:border-blue-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white sm:text-sm focus:border-iba-teal focus:ring-iba-teal">
                                     </div>
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-2">
-                                        <p class="text-sm text-gray-700 dark:text-gray-300"><strong>Email:</strong> {{ $edit_email }}</p>
-                                        <p class="text-sm text-gray-700 dark:text-gray-300"><strong>Mobile:</strong> {{ $edit_mobile_number }}</p>
+                                    <div>
+                                        <label class="block text-xs font-bold uppercase text-blue-800 dark:text-blue-300 mb-1">Mobile Number</label>
+                                        <input type="text" wire:model="edit_mobile_number" class="w-full rounded-md border-blue-300 dark:border-blue-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white sm:text-sm focus:border-iba-teal focus:ring-iba-teal">
                                     </div>
-                                    <p class="text-sm text-gray-700 dark:text-gray-300"><strong>Motivation:</strong> "{{ $edit_motivation }}"</p>
                                 </div>
-                            @endif
+
+                                <div class="mb-4">
+                                    <label class="block text-xs font-bold uppercase text-blue-800 dark:text-blue-300 mb-1">Motivation / Notes</label>
+                                    <textarea wire:model="edit_motivation" rows="3" class="w-full rounded-md border-blue-300 dark:border-blue-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white sm:text-sm focus:border-iba-teal focus:ring-iba-teal"></textarea>
+                                </div>
+
+                                <div>
+                                    <label class="flex items-center gap-3 cursor-pointer">
+                                        <input type="checkbox" wire:model="edit_devcon_consent" class="w-5 h-5 text-iba-teal border-gray-300 rounded focus:ring-iba-teal cursor-pointer">
+                                        <span class="text-xs font-bold uppercase text-blue-800 dark:text-blue-300">Privacy & Media Consent Accepted</span>
+                                    </label>
+                                </div>
+                            </div>
 
                             <div class="md:col-span-2 pt-4 border-t border-gray-200 dark:border-gray-700">
                                 <label class="text-xs font-bold uppercase text-gray-500 mb-2 block">Replace Avatar</label>
