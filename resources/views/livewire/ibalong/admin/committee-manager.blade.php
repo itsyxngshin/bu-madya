@@ -211,74 +211,43 @@
         </div>
     @endif
 
-    {{-- MODAL: EDIT COMMITTEE MEMBER --}}
+    {{-- MODAL: EDIT MEMBER --}}
     @if($editModalOpen)
-        <div class="fixed inset-0 z-[100] overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-            <div class="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/80 backdrop-blur-sm transition-opacity" wire:click="closeModals"></div>
-            <div class="flex min-h-screen items-center justify-center p-4 text-center sm:p-6">
-                <div class="relative w-full sm:max-w-2xl flex flex-col bg-white dark:bg-gray-800 rounded-xl text-left shadow-2xl overflow-hidden border border-gray-200 dark:border-gray-700">
-                    <div class="bg-gray-50 dark:bg-gray-900/90 px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
-                        <h3 class="text-lg font-bold text-gray-900 dark:text-white">Edit Member Profile</h3>
-                        <button wire:click="closeModals" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"><svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
-                    </div>
+        <div class="fixed inset-0 z-[100] overflow-y-auto">
+            <div class="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/80 backdrop-blur-sm" wire:click="closeModals"></div>
+            <div class="flex min-h-screen items-center justify-center p-4">
+                <div class="relative w-full sm:max-w-3xl bg-white dark:bg-gray-800 rounded-xl shadow-2xl border-2 border-iba-black dark:border-iba-light overflow-hidden">
+                    <div class="bg-gray-50 dark:bg-gray-900 px-6 py-4 border-b-2 border-gray-200 dark:border-gray-700 font-bold uppercase">Edit Member</div>
                     <form wire:submit.prevent="updateMember">
                         <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">Committee</label>
-                                <select wire:model="edit_committee_id" class="w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white sm:text-sm focus:border-iba-teal focus:ring-iba-teal">
-                                    @foreach($committees as $committee)
-                                        <option value="{{ $committee->id }}">{{ $committee->name }}</option>
-                                    @endforeach
+                            <div class="md:col-span-2">
+                                <label class="text-xs font-bold uppercase">Committee</label>
+                                <select wire:model="edit_committee_id" class="w-full mt-1 rounded border-gray-300 dark:bg-gray-700">
+                                    @foreach($committees as $c) <option value="{{ $c->id }}">{{ $c->name }}</option> @endforeach
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">Full Name</label>
-                                <input type="text" wire:model="edit_name" class="w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white sm:text-sm focus:border-iba-teal focus:ring-iba-teal">
+                                <label class="text-xs font-bold uppercase">Name</label>
+                                <input type="text" wire:model="edit_name" class="w-full rounded border-gray-300 dark:bg-gray-700">
                             </div>
                             <div>
-                                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">Affiliation</label>
-                                <input type="text" wire:model="edit_affiliation" class="w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white sm:text-sm focus:border-iba-teal focus:ring-iba-teal">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">Designation</label>
-                                <input type="text" wire:model="edit_designation" class="w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white sm:text-sm focus:border-iba-teal focus:ring-iba-teal">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">Role</label>
-                                <select wire:model="edit_role" class="w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white sm:text-sm focus:border-iba-teal focus:ring-iba-teal">
-                                    <option value="Head">Head</option>
-                                    <option value="Member">Member</option>
+                                <label class="text-xs font-bold uppercase">Role</label>
+                                <select wire:model="edit_role" class="w-full rounded border-gray-300 dark:bg-gray-700">
+                                    <option value="Head">Head</option><option value="Member">Member</option>
                                 </select>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">Sort Order</label>
-                                <input type="number" wire:model="edit_display_order" class="w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white sm:text-sm focus:border-iba-teal focus:ring-iba-teal">
                             </div>
 
-                            {{-- Avatar Image Replacement --}}
-                            <div class="md:col-span-2 pt-4 border-t border-gray-100 dark:border-gray-700">
-                                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Member Avatar</label>
-                                <div class="flex items-center gap-6">
-                                    <div class="w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-700 flex shrink-0 items-center justify-center border border-gray-300 dark:border-gray-600 overflow-hidden">
-                                        @if ($new_photo)
-                                            <img src="{{ $new_photo->temporaryUrl() }}" class="w-full h-full object-cover">
-                                        @elseif ($existing_photo_path)
-                                            <img src="{{ Storage::url($existing_photo_path) }}" class="w-full h-full object-cover">
-                                        @else
-                                            <span class="text-gray-500 font-bold text-xl">{{ substr($edit_name, 0, 1) }}</span>
-                                        @endif
-                                    </div>
-                                    <div class="flex-1">
-                                        <input type="file" wire:model.live="new_photo" accept="image/png, image/webp, image/jpeg" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-bold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 dark:file:bg-gray-700 dark:file:text-gray-300 cursor-pointer">
-                                        @error('new_photo') <span class="text-red-500 text-xs font-bold block mt-1">⚠ {{ $message }}</span> @enderror
-                                        <div wire:loading wire:target="new_photo" class="text-xs font-bold text-iba-teal mt-1 animate-pulse">Processing image...</div>
-                                    </div>
-                                </div>
+                            {{-- Volunteer Fields --}}
+                            @if($edit_motivation)
+                            <div class="md:col-span-2 bg-blue-50 dark:bg-blue-900/20 p-3 rounded">
+                                <p class="text-xs font-bold text-blue-700 dark:text-blue-300 uppercase mb-1">Volunteer Data</p>
+                                <p class="text-sm"><strong>Email:</strong> {{ $edit_email }}</p>
+                                <p class="text-sm"><strong>Motivation:</strong> {{ $edit_motivation }}</p>
                             </div>
+                            @endif
                         </div>
-                        <div class="bg-gray-50 dark:bg-gray-900/90 px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-3">
-                            <button type="button" wire:click="closeModals" class="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">Cancel</button>
-                            <button type="submit" class="px-6 py-2 bg-iba-teal text-white rounded-md text-sm font-bold hover:bg-teal-700 transition-colors" wire:loading.attr="disabled">Save Updates</button>
+                        <div class="p-6 border-t flex justify-end">
+                            <button type="submit" class="bg-iba-teal text-white font-bold px-6 py-2 rounded">Save</button>
                         </div>
                     </form>
                 </div>

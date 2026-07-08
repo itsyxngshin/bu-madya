@@ -12,15 +12,15 @@ class CommitteeManager extends Component
 {
     use WithFileUploads;
 
-    // Member Form State
-    public $committee_id, $name, $affiliation, $designation, $role = 'Member', $display_order = 0, $photo;
+    // Member Creation Form
+    public $committee_id, $name, $email, $mobile_number, $affiliation, $designation, $motivation, $role = 'Member', $display_order = 0, $photo;
 
-    // Member Edit Modal State
+    // Edit Modal State
     public $editModalOpen = false;
-    public $edit_id, $edit_committee_id, $edit_name, $edit_affiliation, $edit_designation, $edit_role, $edit_display_order;
+    public $edit_id, $edit_committee_id, $edit_name, $edit_email, $edit_mobile_number, $edit_affiliation, $edit_designation, $edit_motivation, $edit_role, $edit_display_order;
     public $new_photo, $existing_photo_path;
 
-    // Quick Add Committee Modal State
+    // Quick Add Committee Modal
     public $createCommitteeModalOpen = false;
     public $new_committee_name, $new_committee_order = 0;
 
@@ -37,10 +37,9 @@ class CommitteeManager extends Component
             'is_active' => true,
         ]);
 
-        $this->committee_id = $committee->id; // Auto-select the newly created committee
+        $this->committee_id = $committee->id;
         $this->createCommitteeModalOpen = false;
         $this->reset(['new_committee_name', 'new_committee_order']);
-        session()->flash('success', 'Committee created successfully.');
     }
 
     public function addMember()
@@ -48,11 +47,9 @@ class CommitteeManager extends Component
         $this->validate([
             'committee_id' => 'required|exists:ibalong_committees,id',
             'name' => 'required|string|max:255',
-            'affiliation' => 'nullable|string|max:255',
-            'designation' => 'nullable|string|max:255',
+            'email' => 'nullable|email',
             'role' => 'required|in:Head,Member',
-            'display_order' => 'required|integer',
-            'photo' => 'nullable|image|max:2048', // Optional photo up to 2MB
+            'photo' => 'nullable|image|max:2048',
         ]);
 
         $path = $this->photo ? $this->photo->store('committees', 'public') : null;
@@ -60,15 +57,18 @@ class CommitteeManager extends Component
         IbalongCommitteeMember::create([
             'committee_id' => $this->committee_id,
             'name' => $this->name,
+            'email' => $this->email,
+            'mobile_number' => $this->mobile_number,
             'affiliation' => $this->affiliation,
             'designation' => $this->designation,
+            'motivation' => $this->motivation,
             'role' => $this->role,
             'photo_path' => $path,
             'display_order' => $this->display_order,
             'is_active' => true,
         ]);
 
-        $this->reset(['name', 'affiliation', 'designation', 'role', 'display_order', 'photo']);
+        $this->reset(['name', 'email', 'mobile_number', 'affiliation', 'designation', 'motivation', 'role', 'display_order', 'photo']);
         session()->flash('success', 'Committee member added successfully.');
     }
 
@@ -79,12 +79,14 @@ class CommitteeManager extends Component
         $this->edit_id = $member->id;
         $this->edit_committee_id = $member->committee_id;
         $this->edit_name = $member->name;
+        $this->edit_email = $member->email;
+        $this->edit_mobile_number = $member->mobile_number;
         $this->edit_affiliation = $member->affiliation;
         $this->edit_designation = $member->designation;
+        $this->edit_motivation = $member->motivation;
         $this->edit_role = $member->role;
         $this->edit_display_order = $member->display_order;
         $this->existing_photo_path = $member->photo_path;
-        $this->new_photo = null;
 
         $this->editModalOpen = true;
     }
@@ -94,10 +96,7 @@ class CommitteeManager extends Component
         $this->validate([
             'edit_committee_id' => 'required|exists:ibalong_committees,id',
             'edit_name' => 'required|string|max:255',
-            'edit_affiliation' => 'nullable|string|max:255',
-            'edit_designation' => 'nullable|string|max:255',
             'edit_role' => 'required|in:Head,Member',
-            'edit_display_order' => 'required|integer',
             'new_photo' => 'nullable|image|max:2048',
         ]);
 
@@ -113,21 +112,17 @@ class CommitteeManager extends Component
         $member->update([
             'committee_id' => $this->edit_committee_id,
             'name' => $this->edit_name,
+            'email' => $this->edit_email,
+            'mobile_number' => $this->edit_mobile_number,
             'affiliation' => $this->edit_affiliation,
             'designation' => $this->edit_designation,
+            'motivation' => $this->edit_motivation,
             'role' => $this->edit_role,
             'display_order' => $this->edit_display_order,
         ]);
 
         $this->closeModals();
-        session()->flash('success', 'Committee member updated successfully.');
-    }
-
-    public function closeModals()
-    {
-        $this->editModalOpen = false;
-        $this->createCommitteeModalOpen = false;
-        $this->reset(['edit_id', 'edit_committee_id', 'edit_name', 'edit_affiliation', 'edit_designation', 'edit_role', 'edit_display_order', 'new_photo', 'existing_photo_path', 'new_committee_name', 'new_committee_order']);
+        session()->flash('success', 'Member updated.');
     }
 
     public function toggleStatus($id)
@@ -139,28 +134,27 @@ class CommitteeManager extends Component
     public function deleteMember($id)
     {
         $member = IbalongCommitteeMember::findOrFail($id);
-
         if ($member->photo_path && Storage::disk('public')->exists($member->photo_path)) {
             Storage::disk('public')->delete($member->photo_path);
         }
-
         $member->delete();
-        session()->flash('success', 'Member removed from the roster.');
+    }
+
+    public function closeModals()
+    {
+        $this->editModalOpen = false;
+        $this->createCommitteeModalOpen = false;
+        $this->reset(['edit_id', 'new_photo', 'existing_photo_path']);
     }
 
     public function render()
     {
-        $committees = IbalongCommittee::orderBy('display_order', 'asc')->get();
-
-        $membersGrouped = IbalongCommitteeMember::with('committee')
-            ->orderBy('role') // Heads first
-            ->orderBy('display_order', 'asc')
-            ->get()
-            ->groupBy('committee.name');
-
         return view('livewire.ibalong.admin.committee-manager', [
-            'committees' => $committees,
-            'membersGrouped' => $membersGrouped,
+            'committees' => IbalongCommittee::orderBy('display_order', 'asc')->get(),
+            'membersGrouped' => IbalongCommitteeMember::with('committee')
+                ->orderBy('display_order', 'asc')
+                ->get()
+                ->groupBy('committee.name')
         ])->layout('layouts.dashboard');
     }
 }
