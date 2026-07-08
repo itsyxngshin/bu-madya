@@ -30,7 +30,7 @@ class VolunteerApproved extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'emails.volunteer-approved',
+            view: 'emails.ibalong.volunteer-approved',
         );
     }
 
