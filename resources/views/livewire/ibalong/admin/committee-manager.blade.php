@@ -143,6 +143,11 @@
                                             <div class="text-sm font-bold text-gray-900 dark:text-white">{{ $member->name }}</div>
                                             <div class="text-[10px] font-bold uppercase tracking-wider mt-0.5 {{ $member->role == 'Head' ? 'text-iba-orange' : 'text-gray-500 dark:text-gray-400' }}">
                                                 {{ $member->role == 'Head' ? '★ Committee Head' : 'Committee Member' }}
+                                                
+                                                {{-- Notify if it is a pending volunteer application --}}
+                                                @if(!$member->is_active && $member->motivation)
+                                                    <span class="ml-2 text-[9px] bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300 px-1.5 py-0.5 rounded">NEW VOLUNTEER</span>
+                                                @endif
                                             </div>
                                         </div>
                                     </div>
@@ -162,7 +167,7 @@
                                             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                                         </button>
                                         <span class="text-gray-300 dark:text-gray-600">|</span>
-                                        <button wire:click="toggleStatus({{ $member->id }})" class="{{ $member->is_active ? 'text-gray-500' : 'text-green-600' }}">
+                                        <button wire:click="toggleStatus({{ $member->id }})" class="{{ $member->is_active ? 'text-gray-500' : 'text-green-600 font-bold' }}">
                                             {{ $member->is_active ? 'Hide' : 'Show' }}
                                         </button>
                                         <span class="text-gray-300 dark:text-gray-600">|</span>
@@ -184,7 +189,6 @@
             <p class="text-sm text-gray-500 dark:text-gray-400">No committees created yet.</p>
         </div>
     @endforelse
-
 
     {{-- MODAL: ADD NEW COMMITTEE --}}
     @if($createCommitteeModalOpen)
@@ -313,7 +317,8 @@
 
                                 <div>
                                     <label class="flex items-center gap-3 cursor-pointer">
-                                        <input type="checkbox" wire:model="edit_devcon_consent" class="w-5 h-5 text-iba-teal border-gray-300 rounded focus:ring-iba-teal cursor-pointer">
+                                        {{-- Explicitly using wire:model.boolean ensures exact true/false binding --}}
+                                        <input type="checkbox" wire:model.boolean="edit_devcon_consent" class="w-5 h-5 text-iba-teal border-gray-300 rounded focus:ring-iba-teal cursor-pointer">
                                         <span class="text-xs font-bold uppercase text-blue-800 dark:text-blue-300">Privacy & Media Consent Accepted</span>
                                     </label>
                                 </div>

@@ -18,8 +18,8 @@ class CommitteeManager extends Component
     // Member Edit Modal State
     public $editModalOpen = false;
     public $edit_id, $edit_committee_id, $edit_name, $edit_email, $edit_mobile_number, $edit_affiliation, $edit_designation, $edit_motivation, $edit_role, $edit_display_order;
+    public $edit_devcon_consent = false; // Strictly default to false
     public $new_photo, $existing_photo_path;
-    public $edit_devcon_consent;
 
     // Quick Add Committee Modal
     public $createCommitteeModalOpen = false;
@@ -56,7 +56,6 @@ class CommitteeManager extends Component
         $this->target_committee_id = $committee->id;
         $this->edit_committee_name = $committee->name;
         $this->edit_committee_order = $committee->display_order;
-        $this->edit_devcon_consent = $member->devcon_consent;
         
         $this->editCommitteeModalOpen = true;
     }
@@ -122,6 +121,7 @@ class CommitteeManager extends Component
         $this->edit_affiliation = $member->affiliation;
         $this->edit_designation = $member->designation;
         $this->edit_motivation = $member->motivation;
+        $this->edit_devcon_consent = (bool) $member->devcon_consent; // Force boolean cast
         $this->edit_role = $member->role;
         $this->edit_display_order = $member->display_order;
         $this->existing_photo_path = $member->photo_path;
@@ -137,7 +137,7 @@ class CommitteeManager extends Component
             'edit_email' => 'nullable|email|max:255',
             'edit_mobile_number' => 'nullable|string|max:20',
             'edit_motivation' => 'nullable|string|max:1000',
-            'edit_devcon_consent' => 'boolean',
+            'edit_devcon_consent' => 'boolean', // Validate as boolean
             'edit_role' => 'required|in:Head,Member',
             'new_photo' => 'nullable|image|max:2048',
         ]);
@@ -192,6 +192,7 @@ class CommitteeManager extends Component
         
         $this->reset([
             'edit_id', 'new_photo', 'existing_photo_path', 
+            'edit_email', 'edit_mobile_number', 'edit_motivation', 'edit_devcon_consent',
             'new_committee_name', 'new_committee_order',
             'target_committee_id', 'edit_committee_name', 'edit_committee_order'
         ]);
@@ -199,7 +200,6 @@ class CommitteeManager extends Component
 
     public function render()
     {
-        // Fetch Committees with their members pre-loaded and sorted
         $committees = IbalongCommittee::with(['members' => function($query) {
             $query->orderBy('role', 'asc')->orderBy('display_order', 'asc');
         }])->orderBy('display_order', 'asc')->get();
