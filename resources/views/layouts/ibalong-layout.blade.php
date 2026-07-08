@@ -69,15 +69,29 @@
             </a>
 
             <div class="flex items-center gap-4 sm:gap-6 z-50">
+                
+                {{-- DESKTOP NAVIGATION --}}
                 <div class="hidden md:flex gap-6 font-pixel text-[9px] text-iba-black dark:text-iba-light items-center">
-                    <a href="{{ route('ibalong.home') }}#home" class="hover:text-iba-orange transition-colors">HOME</a>
-                    <a href="{{ route('ibalong.home') }}#about" class="hover:text-iba-teal transition-colors">ABOUT</a>
-                    <a href="{{ route('ibalong.home') }}#pathways" class="hover:text-iba-green transition-colors">PATHWAYS</a>
+                    <a href="{{ route('ibalong.home') }}" class="hover:text-iba-orange transition-colors">HOME</a>
+                    <a href="{{ route('ibalong.about') }}" class="hover:text-iba-teal transition-colors">ABOUT</a>
+                    <a href="{{ route('ibalong.roster') }}" class="hover:text-iba-green transition-colors">ROSTER</a>
+                    <a href="{{ route('ibalong.volunteer') }}" class="hover:text-iba-red transition-colors">VOLUNTEER</a>
 
                     @auth('ibalong')
-                        <a href="{{ route('ibalong.dashboard') }}" class="text-iba-teal font-bold border-b-2 border-iba-teal pb-1">DASHBOARD</a>
+                        <div class="flex items-center gap-3 pl-4 border-l-2 border-dashed border-iba-black/20 dark:border-iba-light/20">
+                            <a href="{{ route('ibalong.dashboard') }}" class="text-iba-teal hover:text-teal-600 transition-colors">DASHBOARD</a>
+                            
+                            {{-- Desktop Avatar --}}
+                            <a href="{{ route('ibalong.dashboard') }}" class="w-8 h-8 border-2 border-iba-black dark:border-iba-light overflow-hidden bg-white shadow-[2px_2px_0_0_#131011] dark:shadow-[2px_2px_0_0_#FFFBF7] hover:translate-y-0.5 hover:shadow-none transition-all">
+                                @if(Laravel\Jetstream\Jetstream::managesProfilePhotos() && auth('ibalong')->user()->profile_photo_path)
+                                    <img src="{{ auth('ibalong')->user()->profile_photo_url }}" alt="{{ auth('ibalong')->user()->name }}" class="w-full h-full object-cover">
+                                @else
+                                    <img src="https://ui-avatars.com/api/?name={{ urlencode(auth('ibalong')->user()->name) }}&background=0095AC&color=fff&bold=true&size=100" alt="Avatar" class="w-full h-full object-cover">
+                                @endif
+                            </a>
+                        </div>
                     @else
-                        <a href="{{ route('ibalong.login') }}" class="hover:text-iba-red transition-colors flex items-center gap-1">
+                        <a href="{{ route('ibalong.login') }}" class="hover:text-iba-red transition-colors flex items-center gap-1 pl-4 border-l-2 border-dashed border-iba-black/20 dark:border-iba-light/20">
                             <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/></svg> LOGIN
                         </a>
                     @endauth
@@ -96,11 +110,32 @@
             </div>
         </div>
 
-        <div x-show="mobileMenuOpen" x-cloak class="md:hidden absolute top-full left-0 w-full bg-iba-light dark:bg-iba-black border-b-4 border-iba-black dark:border-iba-light shadow-lg font-pixel text-[10px] text-center">
-            <div class="flex flex-col py-4">
-                <a href="#home" @click="mobileMenuOpen = false" class="py-4 text-iba-black dark:text-iba-light hover:bg-iba-orange hover:text-white border-b-2 border-dashed border-iba-black/20 dark:border-iba-light/20">HOME</a>
-                <a href="#about" @click="mobileMenuOpen = false" class="py-4 text-iba-black dark:text-iba-light hover:bg-iba-teal hover:text-white border-b-2 border-dashed border-iba-black/20 dark:border-iba-light/20">ABOUT</a>
-                <a href="#pathways" @click="mobileMenuOpen = false" class="py-4 text-iba-black dark:text-iba-light hover:bg-iba-green hover:text-white">PATHWAYS</a>
+        {{-- MOBILE NAVIGATION --}}
+        <div x-show="mobileMenuOpen" x-cloak class="md:hidden absolute top-full left-0 w-full bg-iba-light dark:bg-iba-black border-b-4 border-iba-black dark:border-iba-light shadow-[0_10px_0_0_rgba(0,0,0,0.2)] font-pixel text-[10px] text-center">
+            <div class="flex flex-col py-2">
+                <a href="{{ route('ibalong.home') }}" @click="mobileMenuOpen = false" class="py-4 text-iba-black dark:text-iba-light hover:bg-iba-orange hover:text-white border-b-2 border-dashed border-iba-black/20 dark:border-iba-light/20">HOME</a>
+                <a href="{{ route('ibalong.about') }}" @click="mobileMenuOpen = false" class="py-4 text-iba-black dark:text-iba-light hover:bg-iba-teal hover:text-white border-b-2 border-dashed border-iba-black/20 dark:border-iba-light/20">ABOUT</a>
+                <a href="{{ route('ibalong.roster') }}" @click="mobileMenuOpen = false" class="py-4 text-iba-black dark:text-iba-light hover:bg-iba-green hover:text-white border-b-2 border-dashed border-iba-black/20 dark:border-iba-light/20">THE ROSTER</a>
+                <a href="{{ route('ibalong.volunteer') }}" @click="mobileMenuOpen = false" class="py-4 text-iba-black dark:text-iba-light hover:bg-iba-red hover:text-white border-b-2 border-dashed border-iba-black/20 dark:border-iba-light/20">VOLUNTEER</a>
+                
+                @auth('ibalong')
+                    <div class="py-6 flex flex-col items-center justify-center gap-4 bg-white/50 dark:bg-black/20">
+                        {{-- Mobile Avatar & Name --}}
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 border-2 border-iba-black dark:border-iba-light overflow-hidden shadow-[2px_2px_0_0_#131011] dark:shadow-[2px_2px_0_0_#FFFBF7] bg-white">
+                                @if(Laravel\Jetstream\Jetstream::managesProfilePhotos() && auth('ibalong')->user()->profile_photo_path)
+                                    <img src="{{ auth('ibalong')->user()->profile_photo_url }}" alt="{{ auth('ibalong')->user()->name }}" class="w-full h-full object-cover">
+                                @else
+                                    <img src="https://ui-avatars.com/api/?name={{ urlencode(auth('ibalong')->user()->name) }}&background=0095AC&color=fff&bold=true&size=100" alt="Avatar" class="w-full h-full object-cover">
+                                @endif
+                            </div>
+                            <span class="text-iba-black dark:text-iba-light uppercase tracking-widest">{{ auth('ibalong')->user()->name }}</span>
+                        </div>
+                        <a href="{{ route('ibalong.dashboard') }}" @click="mobileMenuOpen = false" class="text-iba-teal hover:underline mt-2">GO TO DASHBOARD ➔</a>
+                    </div>
+                @else
+                    <a href="{{ route('ibalong.login') }}" @click="mobileMenuOpen = false" class="py-5 text-iba-black dark:text-iba-light hover:bg-gray-200 dark:hover:bg-gray-800">LOGIN</a>
+                @endauth
             </div>
         </div>
     </nav>
