@@ -11,7 +11,7 @@ class IbalongCommitteeMember extends Model
 
     protected $fillable = [
         'committee_id', 'name', 'email', 'mobile_number', 'affiliation',
-        'designation', 'motivation', 'role', 'photo_path', 'display_order', 'is_active'
+        'designation', 'motivation', 'role', 'photo_path', 'display_order', 'is_active', 'devcon_consent'
     ];
 
     public function committee()

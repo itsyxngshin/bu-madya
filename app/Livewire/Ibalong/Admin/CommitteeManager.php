@@ -19,6 +19,7 @@ class CommitteeManager extends Component
     public $editModalOpen = false;
     public $edit_id, $edit_committee_id, $edit_name, $edit_email, $edit_mobile_number, $edit_affiliation, $edit_designation, $edit_motivation, $edit_role, $edit_display_order;
     public $new_photo, $existing_photo_path;
+    public $edit_devcon_consent;
 
     // Quick Add Committee Modal
     public $createCommitteeModalOpen = false;
@@ -55,6 +56,7 @@ class CommitteeManager extends Component
         $this->target_committee_id = $committee->id;
         $this->edit_committee_name = $committee->name;
         $this->edit_committee_order = $committee->display_order;
+        $this->edit_devcon_consent = $member->devcon_consent;
         
         $this->editCommitteeModalOpen = true;
     }

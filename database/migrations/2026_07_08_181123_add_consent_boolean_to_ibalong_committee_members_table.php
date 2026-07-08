@@ -9,16 +9,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('ibalong_committee_members', function (Blueprint $table) {
-            $table->string('email')->nullable()->after('name');
-            $table->string('mobile_number')->nullable()->after('email');
-            $table->text('motivation')->nullable()->after('designation');
+            // Records the True/False state of the tick box
+            $table->boolean('devcon_consent')->default(false)->after('motivation');
         });
     }
 
     public function down(): void
     {
         Schema::table('ibalong_committee_members', function (Blueprint $table) {
-            $table->dropColumn(['email', 'mobile_number', 'motivation']);
+            $table->dropColumn('devcon_consent');
         });
     }
 };

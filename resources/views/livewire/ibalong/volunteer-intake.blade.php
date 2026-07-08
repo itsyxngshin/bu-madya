@@ -1,6 +1,6 @@
 <div class="bg-iba-light dark:bg-iba-black min-h-screen py-10 sm:py-16 px-4 sm:px-6 transition-colors duration-300">
     <div class="max-w-4xl mx-auto space-y-12">
-
+        
         @if($isSubmitted)
             {{-- SUCCESS SCREEN --}}
             <div class="bg-white dark:bg-[#1A1617] border-4 border-iba-black dark:border-iba-light p-8 sm:p-16 shadow-[10px_10px_0_0_#5C7914] text-center animate-fade-in-up">
@@ -29,7 +29,7 @@
             {{-- FORM --}}
             <div class="bg-white dark:bg-[#1A1617] border-4 border-iba-black dark:border-iba-light p-6 sm:p-10 shadow-[8px_8px_0_0_#0095AC]">
                 <form wire:submit.prevent="submit" class="space-y-6 sm:space-y-8">
-
+                    
                     <div>
                         <label class="block text-sm font-bold text-iba-black dark:text-iba-light uppercase tracking-wider mb-2">Select a Working Committee <span class="text-iba-red">*</span></label>
                         <select wire:model="committee_id" class="w-full border-4 {{ $errors->has('committee_id') ? 'border-iba-red' : 'border-iba-black dark:border-iba-light' }} p-4 font-bold text-sm focus:outline-none focus:border-iba-teal bg-gray-50 dark:bg-gray-900 text-iba-black dark:text-iba-light transition-colors cursor-pointer">
@@ -95,6 +95,28 @@
                             @endif
                         </div>
                         @error('photo') <span class="text-iba-red text-xs font-bold block mt-2">⚠ {{ $message }}</span> @enderror
+                    </div>
+
+                    {{-- DEVCON PRIVACY & MEDIA CONSENT --}}
+                    <div class="pt-4 pb-2">
+                        <label class="flex items-start gap-4 cursor-pointer group">
+                            <div class="relative flex items-center justify-center shrink-0">
+                                <input type="checkbox" wire:model="devcon_consent" class="peer appearance-none w-6 h-6 border-4 border-iba-black dark:border-iba-light bg-white dark:bg-[#1A1617] checked:bg-iba-teal cursor-pointer transition-colors shadow-[2px_2px_0_0_#131011] dark:shadow-[2px_2px_0_0_#FFFBF7]">
+                                <svg class="absolute w-4 h-4 text-white opacity-0 peer-checked:opacity-100 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="4"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                            </div>
+                            <span class="text-xs sm:text-sm font-bold text-gray-800 dark:text-gray-200 leading-relaxed mt-0.5 transition-colors">
+                                <span class="text-iba-black dark:text-white uppercase tracking-wider border-b-2 border-iba-teal mr-1">Privacy & Media Consent:</span> 
+                                By submitting this form, I consent to the collection, processing, and storage of my personal data by DEVCON and the organizers for event management in accordance with the Data Privacy Act of 2012 (RA 10173). I also grant permission for the organizers to use photographs and video recordings taken during the event for promotional, documentation, and archival purposes. 
+                                <a href="https://devcon.ph/standard-privacy-and-safespace-consent/" target="_blank" rel="noopener noreferrer" class="text-iba-teal hover:text-teal-600 dark:hover:text-teal-400 underline ml-1 transition-colors" @click.stop>
+                                    Read the DEVCON Standard Privacy and Safe Space Consent here.
+                                </a>
+                            </span>
+                        </label>
+                        @error('devcon_consent') 
+                            <div class="bg-iba-red text-white font-bold text-xs p-3 mt-3 border-2 border-iba-black uppercase tracking-wider">
+                                ⚠ You must agree to the privacy and media consent clause to proceed.
+                            </div>
+                        @enderror
                     </div>
 
                     <div class="pt-6 border-t-4 border-iba-black dark:border-iba-light flex justify-end">

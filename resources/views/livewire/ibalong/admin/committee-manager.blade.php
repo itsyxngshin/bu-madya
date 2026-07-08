@@ -293,7 +293,17 @@
 
                             @if($edit_motivation)
                                 <div class="md:col-span-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 p-4 rounded-md my-2">
-                                    <h4 class="text-[10px] font-bold text-blue-800 dark:text-blue-300 uppercase tracking-widest mb-2">Volunteer Application Info</h4>
+                                    <div class="flex justify-between items-start mb-2">
+                                        <h4 class="text-[10px] font-bold text-blue-800 dark:text-blue-300 uppercase tracking-widest">Volunteer Application Info</h4>
+                                        
+                                        {{-- Simple Consent Badge --}}
+                                        @if($edit_devcon_consent)
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 border border-green-200 dark:border-green-800">
+                                                ✓ Privacy terms accepted
+                                            </span>
+                                        @endif
+
+                                    </div>
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-2">
                                         <p class="text-sm text-gray-700 dark:text-gray-300"><strong>Email:</strong> {{ $edit_email }}</p>
                                         <p class="text-sm text-gray-700 dark:text-gray-300"><strong>Mobile:</strong> {{ $edit_mobile_number }}</p>

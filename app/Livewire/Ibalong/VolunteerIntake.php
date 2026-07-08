@@ -12,6 +12,7 @@ class VolunteerIntake extends Component
     use WithFileUploads;
 
     public $committee_id, $name, $email, $mobile_number, $affiliation, $motivation, $photo;
+    public $devcon_consent = false; // New property for the consent checkbox
     public $isSubmitted = false;
 
     protected $rules = [
@@ -21,7 +22,8 @@ class VolunteerIntake extends Component
         'mobile_number' => 'required|string|max:20',
         'affiliation' => 'nullable|string|max:255',
         'motivation' => 'required|string|max:1000',
-        'photo' => 'nullable|image|max:2048', // 2MB Max
+        'photo' => 'nullable|image|max:2048', 
+        'devcon_consent' => 'accepted', // Enforces that the checkbox must be ticked
     ];
 
     public function submit()
@@ -36,12 +38,13 @@ class VolunteerIntake extends Component
             'email' => $this->email,
             'mobile_number' => $this->mobile_number,
             'affiliation' => $this->affiliation,
-            'designation' => 'Volunteer', // Default designation
+            'designation' => 'Volunteer', 
             'motivation' => $this->motivation,
-            'role' => 'Member', // Default role
+            'devcon_consent' => $this->devcon_consent, // Records True if ticked
+            'role' => 'Member', 
             'photo_path' => $path,
-            'display_order' => 99, // Put new volunteers at the bottom of the list
-            'is_active' => false, // HIDDEN BY DEFAULT for admin approval
+            'display_order' => 99, 
+            'is_active' => false, 
         ]);
 
         $this->isSubmitted = true;
