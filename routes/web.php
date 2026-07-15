@@ -23,6 +23,7 @@ use App\Livewire\Open\FrameBuilder;
 use App\Livewire\Open\EventDiscovery;
 use App\Livewire\Open\PrivacyPolicy;
 use App\Livewire\Open\CandidateProfile;
+use App\Livewire\Open\CandidateApplicationForm;
 use App\Livewire\MeetingViewer;
 
 use App\Livewire\Auth\RegisterOrganization;
@@ -77,6 +78,8 @@ use App\Livewire\Admin\Content\ContentSettings;
 use App\Livewire\Admin\Content\ContentReferences;
 
 use App\Livewire\Ibalong\Launchpad;
+use App\Livewire\Ibalong\Admin\EventManager;
+use App\Livewire\Ibalong\EventRegistration;
 
 use App\Models\MembershipApplication;
 use Illuminate\Support\Facades\Storage;
@@ -148,6 +151,7 @@ Route::domain('ibalong.' . env('APP_DOMAIN'))->name('ibalong.')->group(function 
     Route::get('/', Launchpad::class)->name('home');
     // Public Registration
     Route::get('/launchpad/register', \App\Livewire\Ibalong\RegistrationForm::class)->name('register');
+    Route::get('/events/{slug}/register', EventRegistration::class)->name('events.register');
 
     // Isolated Authentication
     Route::get('/launchpad/login', \App\Livewire\Ibalong\Auth\Login::class)->name('login');
@@ -171,6 +175,7 @@ Route::domain('ibalong.' . env('APP_DOMAIN'))->name('ibalong.')->group(function 
         Route::get('/launchpad/profile', \App\Livewire\Ibalong\ProfileManager::class)->name('profile');
         Route::get('/launchpad/partners', \App\Livewire\Ibalong\Admin\PartnerManager::class)->name('admin.partners');
         Route::get('/launchpad/committees', \App\Livewire\Ibalong\Admin\CommitteeManager::class)->name('admin.committees');
+        Route::get('/events', EventManager::class)->name('admin.events');
         // Secure Logout
         Route::post('/launchpad/logout', function() {
             Auth::guard('ibalong')->logout();
@@ -304,6 +309,7 @@ Route::middleware(['web'])->group(function () {
         Route::get('/campaigns/{slug}/edit', CampaignBuilder::class)->name('campaigns.edit');
         Route::get('/campaigns/{slug}/results', CampaignAnalytics::class)->name('campaigns.results');
         Route::get('/community/moderation', CommunityManager::class)->name('community.moderation');
+        Route::get('/elections/{election:slug}/apply', CandidateApplicationForm::class)->name('elections.apply');
 
     });
 
@@ -312,7 +318,6 @@ Route::middleware(['web'])->group(function () {
         Route::get('/roundtable', RoundtableIndex::class)->name('roundtable.index');
         Route::get('/roundtable/{id}', RoundtableShow::class)->name('roundtable.show');
         Route::get('/evaluations', EvaluationList::class)->name('evaluations.index');
-        Route::get('/elections/{election:slug}/apply', \App\Livewire\Open\CandidateApplicationForm::class)->name('elections.apply');
         Route::get('/meetings', MeetingManager::class)->name('partner.meetings');
         Route::get('/m/{slug}', MeetingViewer::class)->name('meeting.live');
 

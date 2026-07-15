@@ -2,7 +2,7 @@
     {{-- Branding Header --}}
     <div class="flex flex-col justify-center shrink-0 py-5 px-6 border-b border-gray-200 dark:border-gray-700 bg-gray-900 dark:bg-gray-950">
         <a href="{{ route('ibalong.dashboard') }}" class="block">
-            <im,g src="{{ asset('images/HOI Logo Blue.png') }}" alt="Heroes of Innovation Challenge" class="h-10 sm:h-12 w-auto object-contain object-left mb-2 hover:opacity-90 transition-opacity">
+            <img src="{{ asset('images/HOI Logo Blue.png') }}" alt="Heroes of Innovation Challenge" class="h-10 sm:h-12 w-auto object-contain object-left mb-2 hover:opacity-90 transition-opacity">
         </a>
         <div class="text-[10px] font-bold text-gray-400 tracking-widest uppercase">Community Center</div>
     </div>
@@ -40,6 +40,12 @@
             <a href="{{ route('ibalong.admin.committees') }}" class="group flex items-center px-3 py-2.5 text-sm font-semibold rounded-md transition-colors {{ request()->routeIs('ibalong.admin.committees') ? 'bg-gray-100 text-iba-teal dark:bg-gray-700/50 dark:text-iba-teal' : 'text-gray-700 hover:bg-gray-50 hover:text-iba-teal dark:text-gray-300 dark:hover:bg-gray-700/50 dark:hover:text-white' }}">
                 <svg class="mr-3 flex-shrink-0 h-5 w-5 {{ request()->routeIs('ibalong.admin.committees') ? 'text-iba-teal' : 'text-gray-400 group-hover:text-iba-teal' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
                 Working Committees
+            </a>
+
+            {{-- NEW: Event Management --}}
+            <a href="{{ route('ibalong.admin.events') }}" class="group flex items-center px-3 py-2.5 text-sm font-semibold rounded-md transition-colors {{ request()->routeIs('ibalong.admin.events') ? 'bg-gray-100 text-iba-teal dark:bg-gray-700/50 dark:text-iba-teal' : 'text-gray-700 hover:bg-gray-50 hover:text-iba-teal dark:text-gray-300 dark:hover:bg-gray-700/50 dark:hover:text-white' }}">
+                <svg class="mr-3 flex-shrink-0 h-5 w-5 {{ request()->routeIs('ibalong.admin.events') ? 'text-iba-teal' : 'text-gray-400 group-hover:text-iba-teal' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                Event Control Center
             </a>
         @endif
     </nav>
