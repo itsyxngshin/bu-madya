@@ -1,12 +1,12 @@
 <div class="min-h-screen bg-stone-50 font-sans text-gray-900 selection:bg-red-600 selection:text-white overflow-x-hidden">
-    
+
     {{-- ========================================== --}}
     {{-- 1. ANNOUNCEMENTS TICKER / ALERT BAR        --}}
     {{-- ========================================== --}}
     @if(count($announcements ?? []) > 0)
         <div class="w-full flex flex-col relative">
             @foreach($announcements as $announcement)
-                <div x-data="{ show: true }" x-show="show" x-transition.opacity 
+                <div x-data="{ show: true }" x-show="show" x-transition.opacity
                      class="{{ $announcement->type->color_theme }} px-4 py-3 shadow-md border-b border-black/10">
                     <div class="max-w-[1800px] w-[95%] mx-auto flex items-start sm:items-center justify-between gap-4">
                         <div class="flex items-start sm:items-center gap-3">
@@ -48,7 +48,7 @@
         <div class="relative z-10 container mx-auto px-6 md:px-12">
             <div class="w-full md:w-5/12 text-left space-y-6 md:space-y-8">
                 {{-- Stylized Badge (Architectural Look) --}}
-                <h1 class="font-heading text-5xl md:text-8xl font-black uppercase tracking-tighter leading-[0.9] text-white">
+                <h1 class="font-heading text-4xl md:text-6xl font-black uppercase tracking-tighter leading-[0.9] text-white">
                     ADVOCACY <br>
                     <span class="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-orange-400 to-red-500">
                         IN ACTION
@@ -78,7 +78,7 @@
     {{-- MAIN CONTENT --}}
     <main class="max-w-[1800px] w-[95%] mx-auto px-4 relative z-20 pb-24">
 
-        
+
 
         <div class="grid lg:grid-cols-12 gap-12 items-start pt-12">
 
@@ -165,23 +165,23 @@
                             </div>
                         </div>
 
-                        <div x-data="{ 
-                                activeSlide: 0, 
+                        <div x-data="{
+                                activeSlide: 0,
                                 totalSlides: {{ $spotlights->count() }},
                                 next() { this.activeSlide = this.activeSlide === this.totalSlides - 1 ? 0 : this.activeSlide + 1 },
                                 prev() { this.activeSlide = this.activeSlide === 0 ? this.totalSlides - 1 : this.activeSlide - 1 }
-                            }" 
+                            }"
                             x-init="if (totalSlides > 1) setInterval(() => next(), 6000)"
                             class="relative w-full h-[250px] md:h-[400px] bg-gray-900 rounded-[2rem] overflow-hidden shadow-sm border border-gray-100 group">
-                            
-                            <div class="relative w-full h-full flex transition-transform duration-700 ease-in-out" 
+
+                            <div class="relative w-full h-full flex transition-transform duration-700 ease-in-out"
                                 :style="'transform: translateX(-' + (activeSlide * 100) + '%)'">
-                                
+
                                 @foreach($spotlights as $spotlight)
                                     <div class="w-full h-full shrink-0 relative">
                                         <img src="{{ Storage::url($spotlight->image_path) }}" alt="{{ $spotlight->title }}" class="absolute inset-0 w-full h-full object-cover opacity-60 mix-blend-overlay">
                                         <div class="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/40 to-transparent"></div>
-                                        
+
                                         <div class="absolute inset-0 flex flex-col justify-end p-8 md:p-16">
                                             <span class="inline-block px-3 py-1 bg-purple-600 text-white text-[10px] font-black uppercase tracking-widest rounded-full w-max mb-4 shadow-md">
                                                 {{ $spotlight->category->name }}
@@ -191,7 +191,7 @@
                                             </h3>
                                             @if($spotlight->link && $spotlight->link !== '#')
                                                 <a href="{{ $spotlight->link }}" target="_blank" class="inline-flex items-center gap-2 text-[10px] text-white font-black hover:text-purple-400 uppercase tracking-widest transition w-max group/link">
-                                                    Find out more 
+                                                    Find out more
                                                     <svg class="w-4 h-4 group-hover/link:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
                                                 </a>
                                             @endif
@@ -209,7 +209,7 @@
 
                             <div class="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2">
                                 <template x-for="i in totalSlides" :key="i">
-                                    <button @click="activeSlide = i - 1" 
+                                    <button @click="activeSlide = i - 1"
                                             :class="{'w-6 bg-purple-600': activeSlide === i - 1, 'w-2 bg-white/50 hover:bg-white': activeSlide !== i - 1}"
                                             class="h-2 rounded-full transition-all duration-300"></button>
                                 </template>
@@ -717,3 +717,4 @@
         </div>
     </footer>
 </div>
+
