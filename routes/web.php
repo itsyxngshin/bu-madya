@@ -188,7 +188,7 @@ Route::domain('ibalong.' . env('APP_DOMAIN'))->name('ibalong.')->group(function 
             request()->session()->invalidate();
             request()->session()->regenerateToken();
 
-            return redirect()->route('home');
+            return redirect()->route('ibalong.home');
         })->name('logout');
     });
 

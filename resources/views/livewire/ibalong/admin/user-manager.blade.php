@@ -120,6 +120,8 @@
         {{ $users->links() }}
     </div>
 
+    <div class="h-16 sm:h-24 w-full flex-shrink-0"></div>
+
     {{-- MODAL: EDIT USER --}}
     @if($editModalOpen)
         <div class="fixed inset-0 z-[100] overflow-y-auto">

@@ -148,6 +148,8 @@
         </table>
     </div>
 
+    
+
     {{-- MODAL: EDIT PARTNER --}}
     @if($editModalOpen)
         <div class="fixed inset-0 z-[100] overflow-y-auto">

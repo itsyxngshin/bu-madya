@@ -74,6 +74,8 @@
         {{ $teams->links() }}
     </div>
 
+    <div class="h-16 sm:h-24 w-full flex-shrink-0"></div>
+
     {{-- MODAL: FULL TEAM PROFILE (Reused from Intake) --}}
     @if($showModal && $viewingTeam)
         <div class="fixed inset-0 z-50 overflow-y-auto">
