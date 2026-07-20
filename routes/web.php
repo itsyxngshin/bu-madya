@@ -180,7 +180,7 @@ Route::domain('ibalong.' . env('APP_DOMAIN'))->name('ibalong.')->group(function 
         Route::get('/launchpad/profile', \App\Livewire\Ibalong\ProfileManager::class)->name('profile');
         Route::get('/launchpad/partners', \App\Livewire\Ibalong\Admin\PartnerManager::class)->name('admin.partners');
         Route::get('/launchpad/committees', \App\Livewire\Ibalong\Admin\CommitteeManager::class)->name('admin.committees');
-        Route::get('/team-accounts', TeamAccountManager::class)->name('ibalong.admin.team-accounts');
+        Route::get('/team-accounts', TeamAccountManager::class)->name('admin.team-accounts');
         Route::get('/events', EventManager::class)->name('admin.events');
         // Secure Logout
         Route::post('/launchpad/logout', function() {
