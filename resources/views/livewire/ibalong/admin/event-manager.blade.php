@@ -35,14 +35,14 @@
                             <div class="text-sm font-bold text-iba-black dark:text-white uppercase">{{ $event->title }}</div>
                             <div class="text-xs text-gray-500 mt-1 flex items-center gap-2">
                                 <span class="px-2 py-0.5 border border-gray-300 dark:border-gray-600 rounded bg-gray-50 dark:bg-gray-800 font-bold uppercase text-[9px] tracking-widest">{{ $event->type }}</span>
-                                <span>/{{ $event->slug }}</span>
+                                <span class="font-bold">/{{ $event->slug }}</span>
                             </div>
                         </td>
                         <td class="px-6 py-4">
-                            <div class="text-sm text-gray-800 dark:text-gray-200 font-medium">
+                            <div class="text-sm text-gray-800 dark:text-gray-200 font-bold uppercase">
                                 {{ $event->start_datetime->format('M d, Y') }} • {{ $event->start_datetime->format('h:i A') }}
                             </div>
-                            <div class="text-xs text-gray-500 mt-1 truncate max-w-[200px]" title="{{ $event->venue_or_link }}">
+                            <div class="text-xs text-gray-500 font-bold uppercase mt-1 truncate max-w-[200px]" title="{{ $event->venue_or_link }}">
                                 📍 {{ $event->venue_or_link ?: 'TBA' }}
                             </div>
                         </td>
@@ -56,10 +56,17 @@
                                 <button wire:click="viewRegistrants({{ $event->id }})" class="text-blue-600 hover:text-blue-800 dark:text-blue-400 font-bold uppercase text-xs tracking-wider flex items-center gap-1">
                                     Attendees ({{ $event->registrations_count }})
                                 </button>
-                                <span class="text-gray-300">|</span>
+                                <a href="{{ route('ibalong.events.scanner', $event->slug) }}" target="_blank" class="text-iba-orange hover:text-orange-700 font-bold uppercase text-xs tracking-wider flex items-center gap-1">
+                                    📷 Scanner
+                                </a>
+                                <span class="text-gray-300 dark:text-gray-600">|</span>
                                 <button wire:click="edit({{ $event->id }})" class="text-iba-teal hover:text-teal-700 dark:hover:text-teal-400 font-bold uppercase text-xs tracking-wider">Edit</button>
-                                <span class="text-gray-300">|</span>
-                                <button wire:click="delete({{ $event->id }})" wire:confirm="Are you sure you want to delete this event?" class="text-iba-red hover:text-red-700 dark:hover:text-red-400 font-bold uppercase text-xs tracking-wider">Drop</button>
+                                
+                                {{-- FACILITATOR RBAC: Hide Delete Event Button --}}
+                                @if(auth('ibalong')->user()->role_id != 5)
+                                    <span class="text-gray-300 dark:text-gray-600">|</span>
+                                    <button wire:click="delete({{ $event->id }})" wire:confirm="Are you sure you want to delete this event?" class="text-iba-red hover:text-red-700 dark:hover:text-red-400 font-bold uppercase text-xs tracking-wider">Drop</button>
+                                @endif
                             </div>
                         </td>
                     </tr>
@@ -77,12 +84,12 @@
     {{-- REGISTRANTS ROSTER MODAL --}}
     @if($isRegistrantsModalOpen && $selectedEvent)
         <div class="fixed inset-0 z-40 overflow-y-auto">
-            <div class="fixed inset-0 bg-iba-black/60 backdrop-blur-sm transition-opacity" wire:click="closeRegistrantsModal"></div>
+            <div class="fixed inset-0 bg-iba-black/80 backdrop-blur-sm transition-opacity" wire:click="closeRegistrantsModal"></div>
 
             <div class="flex min-h-screen items-center justify-center p-4">
-                <div class="relative w-full max-w-5xl bg-white dark:bg-[#1A1617] border-2 border-iba-black dark:border-iba-light shadow-[6px_6px_0_0_#131011] dark:shadow-[6px_6px_0_0_#FFFBF7]">
+                <div class="relative w-full max-w-5xl bg-white dark:bg-[#1A1617] border-4 border-iba-black dark:border-iba-light shadow-[8px_8px_0_0_#131011] dark:shadow-[8px_8px_0_0_#FFFBF7]">
 
-                    <div class="px-6 py-4 border-b-2 border-iba-black dark:border-iba-light bg-gray-50 dark:bg-gray-800 flex justify-between items-center">
+                    <div class="px-6 py-4 border-b-4 border-iba-black dark:border-iba-light bg-gray-50 dark:bg-gray-800 flex justify-between items-center">
                         <div>
                             <h3 class="text-lg font-black text-iba-black dark:text-white uppercase tracking-wider">Passenger Manifest</h3>
                             <p class="text-xs font-bold text-iba-teal uppercase mt-1">{{ $selectedEvent->title }}</p>
@@ -93,7 +100,7 @@
                     </div>
 
                     <div class="p-0 overflow-y-auto max-h-[60vh]">
-                        <table class="min-w-full divide-y-2 divide-iba-black/10 dark:divide-iba-light/10">
+                        <table class="min-w-full divide-y-2 divide-iba-black/20 dark:divide-iba-light/20">
                             <thead class="bg-gray-100 dark:bg-gray-800 sticky top-0 z-10">
                                 <tr>
                                     <th class="px-4 py-3 text-left text-xs font-black text-iba-black dark:text-iba-light uppercase tracking-wider">Attendee</th>
@@ -102,27 +109,27 @@
                                     <th class="px-4 py-3 text-right text-xs font-black text-iba-black dark:text-iba-light uppercase tracking-wider">Action</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-[#1A1617]">
+                            <tbody class="divide-y-2 divide-gray-200 dark:divide-gray-700 bg-white dark:bg-[#1A1617]">
                                 @forelse($registrants as $reg)
                                     <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50">
                                         <td class="px-4 py-3">
                                             <div class="text-sm font-bold text-iba-black dark:text-white uppercase">{{ $reg->name }}</div>
-                                            <div class="text-xs text-gray-500 mt-1">{{ $reg->email }}</div>
-                                            <span class="inline-block mt-1 px-2 py-0.5 border border-gray-300 dark:border-gray-600 rounded bg-gray-50 dark:bg-gray-800 font-bold uppercase text-[9px] tracking-widest">{{ $reg->role }}</span>
+                                            <div class="text-xs text-gray-500 font-bold mt-1">{{ $reg->email }}</div>
+                                            <span class="inline-block mt-1 px-2 py-0.5 border border-iba-black dark:border-gray-600 bg-gray-50 dark:bg-gray-800 font-bold uppercase text-[9px] tracking-widest">{{ $reg->role }}</span>
                                         </td>
                                         <td class="px-4 py-3">
                                             @if($reg->team)
                                                 <div class="text-sm font-bold text-iba-orange uppercase">⭐ {{ $reg->team->team_name }}</div>
-                                                <div class="text-xs text-gray-500 mt-1 uppercase">Official Master Team</div>
+                                                <div class="text-xs text-gray-500 font-bold mt-1 uppercase">Official Master Team</div>
                                             @else
                                                 <div class="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase">{{ $reg->affiliation ?: 'N/A' }}</div>
                                             @endif
                                         </td>
                                         <td class="px-4 py-3 text-center">
-                                            <span class="font-pixel text-[10px] text-gray-600 dark:text-gray-400">{{ $reg->ticket_code }}</span>
+                                            <span class="font-pixel text-[10px] text-iba-teal">{{ $reg->ticket_code }}</span>
                                         </td>
                                         <td class="px-4 py-3 text-right">
-                                            <button wire:click="showQr('{{ $reg->ticket_code }}', '{{ addslashes($reg->name) }}')" class="bg-iba-black text-white dark:bg-iba-light dark:text-iba-black px-3 py-1.5 text-[10px] font-bold uppercase border-2 border-transparent hover:border-iba-teal transition-colors">
+                                            <button wire:click="showQr('{{ $reg->ticket_code }}', '{{ addslashes($reg->name) }}')" class="bg-iba-black text-white dark:bg-iba-light dark:text-iba-black px-4 py-2 text-[10px] font-bold uppercase border-2 border-transparent hover:translate-y-0.5 transition-all">
                                                 View QR
                                             </button>
                                         </td>
@@ -164,17 +171,16 @@
         </div>
     @endif
 
-    {{-- CREATE/EDIT EVENT MODAL (Keep your existing one here) --}}
+    {{-- CREATE/EDIT EVENT MODAL --}}
     @if($isModalOpen)
-        {{-- ... Existing event creation modal code ... --}}
         <div class="fixed inset-0 z-50 overflow-y-auto">
-            <div class="fixed inset-0 bg-iba-black/60 backdrop-blur-sm transition-opacity" wire:click="closeModal"></div>
+            <div class="fixed inset-0 bg-iba-black/80 backdrop-blur-sm transition-opacity" wire:click="closeModal"></div>
 
-            <div class="flex min-h-screen items-center justify-center p-4">
-                <div class="relative w-full max-w-2xl bg-white dark:bg-[#1A1617] border-2 border-iba-black dark:border-iba-light shadow-[6px_6px_0_0_#131011] dark:shadow-[6px_6px_0_0_#FFFBF7]">
+            <div class="flex min-h-screen items-center justify-center p-4 text-left">
+                <div class="relative w-full max-w-2xl bg-white dark:bg-[#1A1617] border-4 border-iba-black dark:border-iba-light shadow-[8px_8px_0_0_#131011] dark:shadow-[8px_8px_0_0_#FFFBF7]">
 
                     {{-- Modal Header --}}
-                    <div class="px-6 py-4 border-b-2 border-iba-black dark:border-iba-light bg-gray-50 dark:bg-gray-800 flex justify-between items-center">
+                    <div class="px-6 py-4 border-b-4 border-iba-black dark:border-iba-light bg-gray-50 dark:bg-gray-800 flex justify-between items-center">
                         <h3 class="text-lg font-black text-iba-black dark:text-white uppercase tracking-wider">
                             {{ $isEditMode ? 'Update Event Settings' : 'Initialize New Event' }}
                         </h3>
@@ -189,20 +195,20 @@
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                                 <div class="md:col-span-2">
-                                    <label class="block text-xs font-bold text-iba-black dark:text-iba-light uppercase tracking-wider mb-1">Event Title <span class="text-iba-red">*</span></label>
-                                    <input type="text" wire:model.live.debounce.500ms="title" class="w-full border-2 border-iba-black dark:border-iba-light p-2 text-sm bg-white dark:bg-gray-900 focus:outline-none focus:border-iba-teal text-iba-black dark:text-white">
-                                    @error('title') <span class="text-iba-red text-xs font-bold block mt-1">{{ $message }}</span> @enderror
+                                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Event Title <span class="text-iba-red">*</span></label>
+                                    <input type="text" wire:model.live.debounce.500ms="title" class="w-full border-2 border-iba-black dark:border-iba-light p-2 text-sm focus:outline-none focus:border-iba-teal bg-white dark:bg-gray-900 text-iba-black dark:text-white font-bold uppercase">
+                                    @error('title') <span class="text-iba-red text-xs font-bold block mt-1">⚠ {{ $message }}</span> @enderror
                                 </div>
 
                                 <div>
-                                    <label class="block text-xs font-bold text-iba-black dark:text-iba-light uppercase tracking-wider mb-1">URL Slug <span class="text-iba-red">*</span></label>
-                                    <input type="text" wire:model="slug" class="w-full border-2 border-iba-black dark:border-iba-light p-2 text-sm bg-gray-100 dark:bg-gray-800 focus:outline-none text-iba-black dark:text-white">
-                                    @error('slug') <span class="text-iba-red text-xs font-bold block mt-1">{{ $message }}</span> @enderror
+                                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">URL Slug <span class="text-iba-red">*</span></label>
+                                    <input type="text" wire:model="slug" class="w-full border-2 border-iba-black dark:border-iba-light p-2 text-sm focus:outline-none focus:border-iba-teal bg-gray-100 dark:bg-gray-800 text-iba-black dark:text-white font-bold">
+                                    @error('slug') <span class="text-iba-red text-xs font-bold block mt-1">⚠ {{ $message }}</span> @enderror
                                 </div>
 
                                 <div>
-                                    <label class="block text-xs font-bold text-iba-black dark:text-iba-light uppercase tracking-wider mb-1">Event Type <span class="text-iba-red">*</span></label>
-                                    <select wire:model="type" class="w-full border-2 border-iba-black dark:border-iba-light p-2 text-sm bg-white dark:bg-gray-900 focus:outline-none focus:border-iba-teal text-iba-black dark:text-white">
+                                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Event Type <span class="text-iba-red">*</span></label>
+                                    <select wire:model="type" class="w-full border-2 border-iba-black dark:border-iba-light p-2 text-sm focus:outline-none focus:border-iba-teal bg-white dark:bg-gray-900 text-iba-black dark:text-white font-bold uppercase">
                                         <option value="Physical">Physical (In-Person)</option>
                                         <option value="Online">Online (Virtual)</option>
                                         <option value="Hybrid">Hybrid</option>
@@ -210,40 +216,50 @@
                                 </div>
 
                                 <div class="md:col-span-2">
-                                    <label class="block text-xs font-bold text-iba-black dark:text-iba-light uppercase tracking-wider mb-1">Venue or Meeting Link</label>
-                                    <input type="text" wire:model="venue_or_link" placeholder="e.g. Bicol University MPB or Zoom URL" class="w-full border-2 border-iba-black dark:border-iba-light p-2 text-sm bg-white dark:bg-gray-900 focus:outline-none focus:border-iba-teal text-iba-black dark:text-white">
+                                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Venue or Meeting Link</label>
+                                    <input type="text" wire:model="venue_or_link" placeholder="e.g. Bicol University MPB or Zoom URL" class="w-full border-2 border-iba-black dark:border-iba-light p-2 text-sm focus:outline-none focus:border-iba-teal bg-white dark:bg-gray-900 text-iba-black dark:text-white font-bold">
                                 </div>
 
                                 <div>
-                                    <label class="block text-xs font-bold text-iba-black dark:text-iba-light uppercase tracking-wider mb-1">Start Time <span class="text-iba-red">*</span></label>
-                                    <input type="datetime-local" wire:model="start_datetime" class="w-full border-2 border-iba-black dark:border-iba-light p-2 text-sm bg-white dark:bg-gray-900 focus:outline-none focus:border-iba-teal text-iba-black dark:text-white cursor-pointer">
-                                    @error('start_datetime') <span class="text-iba-red text-xs font-bold block mt-1">{{ $message }}</span> @enderror
+                                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Start Time <span class="text-iba-red">*</span></label>
+                                    <input type="datetime-local" wire:model="start_datetime" class="w-full border-2 border-iba-black dark:border-iba-light p-2 text-sm focus:outline-none focus:border-iba-teal bg-white dark:bg-gray-900 text-iba-black dark:text-white font-bold cursor-pointer">
+                                    @error('start_datetime') <span class="text-iba-red text-xs font-bold block mt-1">⚠ {{ $message }}</span> @enderror
                                 </div>
 
                                 <div>
-                                    <label class="block text-xs font-bold text-iba-black dark:text-iba-light uppercase tracking-wider mb-1">End Time <span class="text-iba-red">*</span></label>
-                                    <input type="datetime-local" wire:model="end_datetime" class="w-full border-2 border-iba-black dark:border-iba-light p-2 text-sm bg-white dark:bg-gray-900 focus:outline-none focus:border-iba-teal text-iba-black dark:text-white cursor-pointer">
-                                    @error('end_datetime') <span class="text-iba-red text-xs font-bold block mt-1">{{ $message }}</span> @enderror
+                                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">End Time <span class="text-iba-red">*</span></label>
+                                    <input type="datetime-local" wire:model="end_datetime" class="w-full border-2 border-iba-black dark:border-iba-light p-2 text-sm focus:outline-none focus:border-iba-teal bg-white dark:bg-gray-900 text-iba-black dark:text-white font-bold cursor-pointer">
+                                    @error('end_datetime') <span class="text-iba-red text-xs font-bold block mt-1">⚠ {{ $message }}</span> @enderror
                                 </div>
 
                                 <div class="md:col-span-2">
-                                    <label class="block text-xs font-bold text-iba-black dark:text-iba-light uppercase tracking-wider mb-1">Max Capacity (Leave blank for unlimited)</label>
-                                    <input type="number" wire:model="max_capacity" min="1" placeholder="e.g. 500" class="w-full border-2 border-iba-black dark:border-iba-light p-2 text-sm bg-white dark:bg-gray-900 focus:outline-none focus:border-iba-teal text-iba-black dark:text-white">
+                                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Max Capacity (Leave blank for unlimited)</label>
+                                    <input type="number" wire:model="max_capacity" min="1" placeholder="e.g. 500" class="w-full border-2 border-iba-black dark:border-iba-light p-2 text-sm focus:outline-none focus:border-iba-teal bg-white dark:bg-gray-900 text-iba-black dark:text-white font-bold">
+                                </div>
+
+                                <div class="md:col-span-2 mt-2">
+                                    <label class="flex items-center gap-3 cursor-pointer p-4 border-2 border-dashed border-iba-black dark:border-gray-600 bg-gray-50 dark:bg-gray-800">
+                                        <input type="checkbox" wire:model="allow_self_checkin" class="w-5 h-5 border-2 border-iba-black text-iba-teal focus:ring-iba-teal cursor-pointer">
+                                        <span class="text-sm font-black text-iba-black dark:text-white uppercase tracking-wider">
+                                            Allow Self Check-In Kiosk
+                                            <p class="text-[10px] font-bold text-gray-500 mt-1">If checked, anyone with the scanner link can scan tickets. If unchecked, only logged-in Admins/Facilitators can scan.</p>
+                                        </span>
+                                    </label>
                                 </div>
 
                                 <div class="md:col-span-2">
-                                    <label class="block text-xs font-bold text-iba-black dark:text-iba-light uppercase tracking-wider mb-1">Internal Notes / Description</label>
-                                    <textarea wire:model="description" rows="3" class="w-full border-2 border-iba-black dark:border-iba-light p-2 text-sm bg-white dark:bg-gray-900 focus:outline-none focus:border-iba-teal text-iba-black dark:text-white"></textarea>
+                                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Internal Notes / Description</label>
+                                    <textarea wire:model="description" rows="3" class="w-full border-2 border-iba-black dark:border-iba-light p-2 text-sm focus:outline-none focus:border-iba-teal bg-white dark:bg-gray-900 text-iba-black dark:text-white font-bold"></textarea>
                                 </div>
                             </div>
                         </div>
 
                         {{-- Modal Footer --}}
-                        <div class="px-6 py-4 border-t-2 border-iba-black dark:border-iba-light bg-gray-50 dark:bg-gray-800 flex justify-end gap-4">
+                        <div class="px-6 py-4 border-t-4 border-iba-black dark:border-iba-light bg-gray-50 dark:bg-gray-800 flex justify-end gap-4">
                             <button type="button" wire:click="closeModal" class="px-6 py-2 text-sm font-bold uppercase text-gray-600 hover:text-iba-black dark:text-gray-400 dark:hover:text-white transition-colors">
                                 Cancel
                             </button>
-                            <button type="submit" class="bg-iba-black dark:bg-iba-light text-white dark:text-iba-black font-bold px-8 py-2 text-sm uppercase border-2 border-transparent shadow-[3px_3px_0_0_#FF8623] hover:translate-y-0.5 hover:shadow-none transition-all active:translate-y-1">
+                            <button type="submit" class="bg-iba-teal text-white font-bold px-8 py-2.5 text-sm uppercase border-2 border-iba-black shadow-[3px_3px_0_0_#131011] hover:translate-y-0.5 hover:shadow-none transition-all active:translate-y-1">
                                 Save Event Data
                             </button>
                         </div>
