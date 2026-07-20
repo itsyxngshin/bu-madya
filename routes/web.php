@@ -154,7 +154,7 @@ Route::domain('ibalong.' . env('APP_DOMAIN'))->name('ibalong.')->group(function 
     // The Launchpad Landing Page
     Route::get('/', Launchpad::class)->name('home');
     // Public Registration
-    Route::get('/events/{slug}/scanner', IbalongScanner::class)->name('ibalong.events.scanner');
+    Route::get('/events/{slug}/scanner', IbalongScanner::class)->name('events.scanner');
     Route::get('/launchpad/register', IbalongRegistration::class)->name('register');
     Route::get('/events/{slug}/register', EventRegistration::class)->name('events.register');
 
