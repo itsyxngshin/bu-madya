@@ -16,33 +16,37 @@
             Overview
         </a>
 
-        {{-- Admin Controls --}}
-        @if(in_array($role, [1, 2]))
+        {{-- Admin & Facilitator Controls (Role 1: Super Admin, Role 2: Admin, Role 5: Facilitator) --}}
+        @if(in_array($role, [1, 2, 5]))
             <div class="pt-6 pb-2">
                 <p class="px-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Administration</p>
             </div>
 
+            {{-- Accessible to Admins & Facilitators --}}
             <a href="{{ route('ibalong.admin.registrants') }}" class="group flex items-center px-3 py-2.5 text-sm font-semibold rounded-md transition-colors {{ request()->routeIs('ibalong.admin.registrants') ? 'bg-gray-100 text-iba-teal dark:bg-gray-700/50 dark:text-iba-teal' : 'text-gray-700 hover:bg-gray-50 hover:text-iba-teal dark:text-gray-300 dark:hover:bg-gray-700/50 dark:hover:text-white' }}">
                 <svg class="mr-3 flex-shrink-0 h-5 w-5 {{ request()->routeIs('ibalong.admin.registrants') ? 'text-iba-teal' : 'text-gray-400 group-hover:text-iba-teal' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
                 Team Intake
             </a>
 
-            <a href="{{ route('ibalong.admin.users') }}" class="group flex items-center px-3 py-2.5 text-sm font-semibold rounded-md transition-colors {{ request()->routeIs('ibalong.admin.users') ? 'bg-gray-100 text-iba-teal dark:bg-gray-700/50 dark:text-iba-teal' : 'text-gray-700 hover:bg-gray-50 hover:text-iba-teal dark:text-gray-300 dark:hover:bg-gray-700/50 dark:hover:text-white' }}">
-                <svg class="mr-3 flex-shrink-0 h-5 w-5 {{ request()->routeIs('ibalong.admin.users') ? 'text-iba-teal' : 'text-gray-400 group-hover:text-iba-teal' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
-                Personnel Management
-            </a>
+            {{-- Strictly Admin Only Controls --}}
+            @if(in_array($role, [1, 2]))
+                <a href="{{ route('ibalong.admin.users') }}" class="group flex items-center px-3 py-2.5 text-sm font-semibold rounded-md transition-colors {{ request()->routeIs('ibalong.admin.users') ? 'bg-gray-100 text-iba-teal dark:bg-gray-700/50 dark:text-iba-teal' : 'text-gray-700 hover:bg-gray-50 hover:text-iba-teal dark:text-gray-300 dark:hover:bg-gray-700/50 dark:hover:text-white' }}">
+                    <svg class="mr-3 flex-shrink-0 h-5 w-5 {{ request()->routeIs('ibalong.admin.users') ? 'text-iba-teal' : 'text-gray-400 group-hover:text-iba-teal' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                    Personnel Management
+                </a>
 
-            <a href="{{ route('ibalong.admin.partners') }}" class="group flex items-center px-3 py-2.5 text-sm font-semibold rounded-md transition-colors {{ request()->routeIs('ibalong.admin.partners') ? 'bg-gray-100 text-iba-teal dark:bg-gray-700/50 dark:text-iba-teal' : 'text-gray-700 hover:bg-gray-50 hover:text-iba-teal dark:text-gray-300 dark:hover:bg-gray-700/50 dark:hover:text-white' }}">
-                <svg class="mr-3 flex-shrink-0 h-5 w-5 {{ request()->routeIs('ibalong.admin.partners') ? 'text-iba-teal' : 'text-gray-400 group-hover:text-iba-teal' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
-                Partner Roster
-            </a>
+                <a href="{{ route('ibalong.admin.partners') }}" class="group flex items-center px-3 py-2.5 text-sm font-semibold rounded-md transition-colors {{ request()->routeIs('ibalong.admin.partners') ? 'bg-gray-100 text-iba-teal dark:bg-gray-700/50 dark:text-iba-teal' : 'text-gray-700 hover:bg-gray-50 hover:text-iba-teal dark:text-gray-300 dark:hover:bg-gray-700/50 dark:hover:text-white' }}">
+                    <svg class="mr-3 flex-shrink-0 h-5 w-5 {{ request()->routeIs('ibalong.admin.partners') ? 'text-iba-teal' : 'text-gray-400 group-hover:text-iba-teal' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                    Partner Roster
+                </a>
 
-            <a href="{{ route('ibalong.admin.committees') }}" class="group flex items-center px-3 py-2.5 text-sm font-semibold rounded-md transition-colors {{ request()->routeIs('ibalong.admin.committees') ? 'bg-gray-100 text-iba-teal dark:bg-gray-700/50 dark:text-iba-teal' : 'text-gray-700 hover:bg-gray-50 hover:text-iba-teal dark:text-gray-300 dark:hover:bg-gray-700/50 dark:hover:text-white' }}">
-                <svg class="mr-3 flex-shrink-0 h-5 w-5 {{ request()->routeIs('ibalong.admin.committees') ? 'text-iba-teal' : 'text-gray-400 group-hover:text-iba-teal' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-                Working Committees
-            </a>
+                <a href="{{ route('ibalong.admin.committees') }}" class="group flex items-center px-3 py-2.5 text-sm font-semibold rounded-md transition-colors {{ request()->routeIs('ibalong.admin.committees') ? 'bg-gray-100 text-iba-teal dark:bg-gray-700/50 dark:text-iba-teal' : 'text-gray-700 hover:bg-gray-50 hover:text-iba-teal dark:text-gray-300 dark:hover:bg-gray-700/50 dark:hover:text-white' }}">
+                    <svg class="mr-3 flex-shrink-0 h-5 w-5 {{ request()->routeIs('ibalong.admin.committees') ? 'text-iba-teal' : 'text-gray-400 group-hover:text-iba-teal' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                    Working Committees
+                </a>
+            @endif
 
-            {{-- NEW: Event Management --}}
+            {{-- Accessible to Admins & Facilitators --}}
             <a href="{{ route('ibalong.admin.events') }}" class="group flex items-center px-3 py-2.5 text-sm font-semibold rounded-md transition-colors {{ request()->routeIs('ibalong.admin.events') ? 'bg-gray-100 text-iba-teal dark:bg-gray-700/50 dark:text-iba-teal' : 'text-gray-700 hover:bg-gray-50 hover:text-iba-teal dark:text-gray-300 dark:hover:bg-gray-700/50 dark:hover:text-white' }}">
                 <svg class="mr-3 flex-shrink-0 h-5 w-5 {{ request()->routeIs('ibalong.admin.events') ? 'text-iba-teal' : 'text-gray-400 group-hover:text-iba-teal' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                 Event Control Center
