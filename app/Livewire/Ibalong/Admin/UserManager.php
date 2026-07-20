@@ -22,6 +22,7 @@ class UserManager extends Component
     // Password Reset State
     public $passwordModalOpen = false;
     public $reset_user_id;
+    public $resettingUserId = null;
     public $admin_password; // To verify admin's identity
     public $new_password = '';
     public $generated_password; // To show the newly minted password
