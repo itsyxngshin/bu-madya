@@ -23,6 +23,7 @@ class UserManager extends Component
     public $passwordModalOpen = false;
     public $reset_user_id;
     public $admin_password; // To verify admin's identity
+    public $new_password = '';
     public $generated_password; // To show the newly minted password
 
     public function createUser()
@@ -92,34 +93,36 @@ class UserManager extends Component
 
     public function confirmPasswordReset($id)
     {
-        $this->reset_user_id = $id;
+        $this->resettingUserId = $id;
         $this->admin_password = '';
-        $this->generated_password = null;
+        $this->new_password = ''; // Reset on open
+        $this->generated_password = '';
         $this->passwordModalOpen = true;
     }
 
     public function executePasswordReset()
     {
         $this->validate([
-            'admin_password' => 'required',
+            'admin_password' => 'required|string',
+            'new_password' => 'nullable|string|min:8', // NEW: Validate custom password if provided
         ]);
 
-        // Verify the logged-in admin's password before changing another user's data
+        // Verify the admin's password before allowing the reset
         if (!Hash::check($this->admin_password, auth('ibalong')->user()->password)) {
-            $this->addError('admin_password', 'Incorrect admin authorization password. Access Denied.');
+            $this->addError('admin_password', 'ACCESS DENIED: Incorrect administrator password.');
             return;
         }
 
-        $user = IbalongUser::findOrFail($this->reset_user_id);
-        $newPassword = strtoupper(Str::random(8));
+        $user = IbalongUser::findOrFail($this->resettingUserId);
+        
+        // Use custom password, or auto-generate one if left blank
+        $passwordToSet = $this->new_password ?: Str::random(10);
 
         $user->update([
-            'password' => Hash::make($newPassword)
+            'password' => Hash::make($passwordToSet)
         ]);
 
-        // Display the new password in the modal
-        $this->generated_password = $newPassword;
-        session()->flash('success', "Password for {$user->name} has been securely reset.");
+        $this->generated_password = $passwordToSet;
     }
 
     public function toggleStatus($userId)
