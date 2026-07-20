@@ -185,17 +185,23 @@
                     <div class="p-6">
                         @if(!$generated_password)
                             <form wire:submit.prevent="executePasswordReset" class="space-y-4">
-                                <p class="text-sm font-bold text-gray-600 dark:text-gray-400 mb-4 leading-relaxed uppercase">To securely reset this user's password, please enter your own Administrator password to authorize the action.</p>
+                                <p class="text-sm font-bold text-gray-600 dark:text-gray-400 mb-4 leading-relaxed uppercase">To securely reset this user's password, verify your admin clearance.</p>
 
                                 <div>
-                                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Your Admin Password</label>
+                                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">New Custom Password</label>
+                                    <input type="text" wire:model="new_password" placeholder="Leave blank to auto-generate" class="w-full border-2 border-iba-black dark:border-iba-light p-2 text-sm focus:outline-none focus:border-iba-orange bg-white dark:bg-gray-900 text-iba-black dark:text-white font-bold">
+                                    @error('new_password') <span class="text-iba-red text-xs font-bold block mt-1 uppercase">⚠ {{ $message }}</span> @enderror
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Your Admin Password <span class="text-iba-red">*</span></label>
                                     <input type="password" wire:model="admin_password" class="w-full border-2 border-iba-black dark:border-iba-light p-2 text-sm focus:outline-none focus:border-iba-orange bg-white dark:bg-gray-900 text-iba-black dark:text-white font-bold">
                                     @error('admin_password') <span class="text-iba-red text-xs font-bold block mt-1 uppercase">⚠ {{ $message }}</span> @enderror
                                 </div>
 
                                 <div class="pt-4 flex gap-3">
                                     <button type="button" wire:click="closeModals" class="w-full px-4 py-2 border-2 border-iba-black dark:border-iba-light bg-gray-100 dark:bg-gray-800 text-sm font-bold uppercase text-gray-700 dark:text-gray-300 hover:bg-gray-200">Cancel</button>
-                                    <button type="submit" class="w-full bg-iba-orange text-iba-black font-bold px-4 py-2 text-sm uppercase border-2 border-iba-black shadow-[3px_3px_0_0_#131011] hover:translate-y-0.5 hover:shadow-none transition-all active:translate-y-1">Authorize Reset</button>
+                                    <button type="submit" class="w-full bg-iba-orange text-iba-black font-bold px-4 py-2 text-sm uppercase border-2 border-iba-black shadow-[3px_3px_0_0_#131011] hover:translate-y-0.5 hover:shadow-none transition-all active:translate-y-1">Force Reset</button>
                                 </div>
                             </form>
                         @else
