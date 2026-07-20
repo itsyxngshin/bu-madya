@@ -80,6 +80,8 @@ use App\Livewire\Admin\Content\ContentReferences;
 use App\Livewire\Ibalong\Launchpad;
 use App\Livewire\Ibalong\Admin\EventManager;
 use App\Livewire\Ibalong\EventRegistration;
+use App\Livewire\Ibalong\EventScanner as IbalongScanner; 
+use App\Livewire\Ibalong\RegistrationForm as IbalongRegistration; 
 
 use App\Models\MembershipApplication;
 use Illuminate\Support\Facades\Storage;
@@ -150,7 +152,8 @@ Route::domain('ibalong.' . env('APP_DOMAIN'))->name('ibalong.')->group(function 
     // The Launchpad Landing Page
     Route::get('/', Launchpad::class)->name('home');
     // Public Registration
-    Route::get('/launchpad/register', \App\Livewire\Ibalong\RegistrationForm::class)->name('register');
+    Route::get('/events/{slug}/scanner', IbalongScanner::class)->name('ibalong.events.scanner');
+    Route::get('/launchpad/register', IbalongRegistration::class)->name('register');
     Route::get('/events/{slug}/register', EventRegistration::class)->name('events.register');
 
     // Isolated Authentication

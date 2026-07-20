@@ -9,7 +9,7 @@ class IbalongEvent extends Model
     protected $fillable = [
         'title', 'slug', 'description', 'type',
         'venue_or_link', 'start_datetime', 'end_datetime',
-        'max_capacity', 'is_active'
+        'max_capacity', 'is_active', 'allow_self_checkin'
     ];
 
     protected $casts = [

@@ -31,6 +31,7 @@ class EventManager extends Component
     public $activeQrUri = '';
     public $activeRegistrantName = '';
     public $activeTicketCode = '';
+    public $allow_self_checkin = false;
 
     protected $rules = [
         'title' => 'required|string|max:255',
@@ -41,6 +42,7 @@ class EventManager extends Component
         'start_datetime' => 'required|date',
         'end_datetime' => 'required|date|after_or_equal:start_datetime',
         'max_capacity' => 'nullable|integer|min:1',
+        'allow_self_checkin' => 'boolean',
     ];
 
     public function updatedTitle($value)
@@ -68,6 +70,7 @@ class EventManager extends Component
         $this->edit_id = $event->id;
         $this->title = $event->title;
         $this->slug = $event->slug;
+        $this->allow_self_checkin = $event->allow_self_checkin;
         $this->description = $event->description;
         $this->type = $event->type;
         $this->venue_or_link = $event->venue_or_link;
@@ -98,6 +101,7 @@ class EventManager extends Component
                 'start_datetime' => $this->start_datetime,
                 'end_datetime' => $this->end_datetime,
                 'max_capacity' => $this->max_capacity,
+                'allow_self_checkin' => $this->allow_self_checkin,
             ]
         );
 
@@ -165,8 +169,9 @@ class EventManager extends Component
     {
         $this->reset([
             'edit_id', 'title', 'slug', 'description', 'type',
-            'venue_or_link', 'start_datetime', 'end_datetime', 'max_capacity'
+            'venue_or_link', 'start_datetime', 'end_datetime', 'max_capacity',
         ]);
+        $this->allow_self_checkin = false;
         $this->type = 'Physical';
     }
 
