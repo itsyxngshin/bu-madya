@@ -54,10 +54,10 @@
 
         // Dynamic Color Mapper for Badges
         getBadgeColor(category) {
-            if (category === 'Event' || category === 'Deadline') return 'bg-red-50 text-red-600';
-            if (category === 'Active Project' || category === 'Meeting') return 'bg-yellow-50 text-yellow-600';
-            if (category === 'Completed Project') return 'bg-green-50 text-green-600';
-            return 'bg-blue-50 text-blue-600';
+            if (category === 'Event' || category === 'Deadline') return 'bg-red-50 text-red-600 border-red-100';
+            if (category === 'Active Project' || category === 'Meeting') return 'bg-yellow-50 text-yellow-700 border-yellow-100';
+            if (category === 'Completed Project') return 'bg-green-50 text-green-700 border-green-100';
+            return 'bg-blue-50 text-blue-600 border-blue-100';
         }
      }">
 
@@ -92,55 +92,101 @@
         </header>
 
         {{-- MAIN GRID --}}
-        <div class="max-w-7xl mx-auto px-6 pb-24 grid lg:grid-cols-12 gap-8 md:gap-12">
+        <div class="max-w-7xl mx-auto px-6 pb-24 grid lg:grid-cols-12 gap-8 md:gap-12 items-start">
 
             {{-- LEFT COLUMN: Activity Sidebar --}}
-            <aside class="lg:col-span-5 flex flex-col h-full">
+            <aside class="lg:col-span-5 flex flex-col h-full lg:sticky lg:top-24">
 
                 {{-- Glassmorphism Container --}}
-                <div class="bg-white/80 backdrop-blur-md rounded-[2.5rem] shadow-xl shadow-gray-200/50 border border-white/60 overflow-hidden flex flex-col h-full min-h-[500px] lg:sticky lg:top-24">
+                <div class="bg-white/90 backdrop-blur-xl rounded-[2.5rem] shadow-2xl shadow-gray-200/50 border border-white overflow-hidden flex flex-col min-h-[600px] relative">
 
-                    {{-- Dynamic Date Header --}}
-                    <div class="bg-white border-b border-gray-100 p-8 shrink-0">
-                        <p class="text-[10px] font-bold uppercase tracking-widest text-red-500 mb-1" x-text="displayDate === todayDate ? 'TODAY\'S AGENDA' : 'SELECTED DATE'"></p>
-                        <h2 class="font-heading text-3xl font-black text-gray-900 leading-tight" x-text="getDisplayDateFormatted()"></h2>
+                    {{-- Dynamic Date Header (Elevated Styling) --}}
+                    <div class="bg-gradient-to-br from-red-600 to-red-800 text-white p-8 md:p-10 shrink-0 relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -mr-10 -mt-10"></div>
+                        <div class="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-yellow-400 via-orange-400 to-red-500"></div>
+
+                        <p class="text-[10px] font-black uppercase tracking-widest text-red-200 mb-2 relative z-10" x-text="displayDate === todayDate ? 'PRESENT DAY' : 'SCHEDULED EVENTS'"></p>
+                        <h2 class="font-heading text-4xl md:text-5xl font-black leading-tight drop-shadow-md relative z-10" x-text="getDisplayDateFormatted()"></h2>
                     </div>
 
                     {{-- Dynamic Activity Feed --}}
-                    <div class="p-6 md:p-8 flex-1 overflow-y-auto space-y-4 bg-stone-50/50">
+                    <div class="p-6 md:p-8 flex-1 overflow-y-auto space-y-5 bg-stone-50/50">
 
                         {{-- Empty State --}}
-                        <div x-show="displayActivities.length === 0" class="flex flex-col items-center justify-center h-full text-center py-10 opacity-60">
+                        <div x-show="displayActivities.length === 0" class="flex flex-col items-center justify-center py-10 opacity-70">
                             <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm border border-gray-100">
                                 <svg class="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                             </div>
-                            <p class="text-sm font-bold uppercase tracking-wider text-gray-500">No activities scheduled.</p>
+                            <p class="text-sm font-bold uppercase tracking-wider text-gray-500">No scheduled events.</p>
                         </div>
 
-                        {{-- Activity Cards --}}
+                        {{-- Dynamic Activity Cards (Mapped from DB) --}}
                         <template x-for="activity in displayActivities" :key="activity.id">
-                            <div class="bg-white rounded-2xl p-5 shadow-sm hover:shadow-md border border-gray-100 transition-all duration-300 group text-left">
+                            <div class="bg-white rounded-[1.5rem] p-6 shadow-sm hover:shadow-xl border border-gray-100 hover:border-red-100 transition-all duration-300 group text-left relative overflow-hidden">
+                                <div class="absolute top-0 right-0 w-24 h-24 bg-red-50 rounded-bl-full -mr-12 -mt-12 transition-transform group-hover:scale-110"></div>
 
-                                <div class="flex justify-between items-start mb-3">
-                                    <span class="px-2.5 py-1 text-[9px] font-black uppercase tracking-widest rounded-md"
+                                <div class="flex justify-between items-start mb-4 relative z-10">
+                                    <span class="px-3 py-1 text-[9px] font-black uppercase tracking-widest rounded-lg border"
                                           :class="getBadgeColor(activity.category)"
                                           x-text="activity.category"></span>
                                 </div>
 
-                                <h3 class="font-bold text-gray-900 text-lg leading-tight mb-2 group-hover:text-red-600 transition-colors" x-text="activity.title"></h3>
+                                <h3 class="font-bold text-gray-900 text-xl leading-tight mb-3 group-hover:text-red-600 transition-colors relative z-10" x-text="activity.title"></h3>
 
-                                <div x-show="activity.organizer" class="flex items-center gap-2 mb-3">
-                                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                                <div x-show="activity.organizer" class="flex items-center gap-2 mb-4 relative z-10">
+                                    <div class="w-6 h-6 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center shrink-0">
+                                        <svg class="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                                    </div>
                                     <span class="text-xs font-bold text-gray-500 uppercase tracking-wide" x-text="activity.organizer"></span>
                                 </div>
 
-                                <p x-show="activity.description" class="text-sm text-gray-600 font-medium mb-4 line-clamp-3" x-text="activity.description"></p>
+                                <p x-show="activity.description" class="text-sm text-gray-600 font-medium mb-5 line-clamp-3 relative z-10" x-text="activity.description"></p>
 
-                                <a x-show="activity.link" :href="activity.link" target="_blank" class="inline-flex items-center text-[10px] font-black text-gray-900 hover:text-red-600 uppercase tracking-widest transition-colors mt-2 group/link">
+                                <a x-show="activity.link" :href="activity.link" target="_blank" class="inline-flex items-center text-[10px] font-black text-gray-900 hover:text-red-600 uppercase tracking-widest transition-colors mt-2 group/link relative z-10">
                                     Access Portal <svg class="w-4 h-4 ml-1 group-hover/link:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
                                 </a>
                             </div>
                         </template>
+
+                        {{-- HARDCODED EXAMPLE (Custom Activity Box) --}}
+                        <div class="relative pt-4">
+                            <div class="flex items-center gap-3 mb-5 opacity-70">
+                                <div class="h-px bg-gray-300 flex-1"></div>
+                                <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest bg-gray-100 px-2 py-0.5 rounded-full">Custom Activity Preview</span>
+                                <div class="h-px bg-gray-300 flex-1"></div>
+                            </div>
+
+                            <div class="bg-white rounded-[1.5rem] p-6 shadow-sm hover:shadow-xl border border-gray-100 hover:border-blue-100 transition-all duration-300 group text-left relative overflow-hidden">
+                                {{-- Decorative corner shape --}}
+                                <div class="absolute top-0 right-0 w-24 h-24 bg-blue-50 rounded-bl-full -mr-12 -mt-12 transition-transform group-hover:scale-110"></div>
+
+                                <div class="flex justify-between items-start mb-4 relative z-10">
+                                    <span class="px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-lg bg-blue-50 text-blue-600 border border-blue-100">
+                                        Executive Meeting
+                                    </span>
+                                </div>
+
+                                <h3 class="font-bold text-gray-900 text-xl leading-tight mb-3 group-hover:text-blue-600 transition-colors relative z-10">
+                                    Project DIGiTS Implementation Sync
+                                </h3>
+
+                                <div class="flex items-center gap-2 mb-4 relative z-10">
+                                    <div class="w-6 h-6 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center shrink-0">
+                                        <svg class="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                                    </div>
+                                    <span class="text-xs font-bold text-gray-500 uppercase tracking-wide">BU MADYA Secretariat</span>
+                                </div>
+
+                                <p class="text-sm text-gray-600 font-medium mb-5 line-clamp-3 relative z-10">
+                                    Pre-deployment logistics preparation and finalizing partnerships with DEVCON and BICOURSE for the upcoming digital literacy outreach program.
+                                </p>
+
+                                <a href="#" class="inline-flex items-center text-[10px] font-black text-gray-900 hover:text-blue-600 uppercase tracking-widest transition-colors group/link relative z-10">
+                                    View Link <svg class="w-4 h-4 ml-1 group-hover/link:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+                                </a>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             </aside>
@@ -154,7 +200,7 @@
                     {{-- Calendar Header Controls --}}
                     <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8 pb-6 border-b border-gray-100">
                         <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 rounded-xl bg-red-50 text-red-600 flex items-center justify-center shrink-0 border border-red-100">
+                            <div class="w-12 h-12 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center shrink-0 border border-red-100 shadow-sm">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                             </div>
                             <div>
@@ -164,12 +210,12 @@
                         </div>
 
                         {{-- Navigation Arrows --}}
-                        <div class="flex items-center gap-1 bg-gray-50 rounded-xl border border-gray-200 p-1">
-                            <button @click="prevMonth()" class="p-2 md:p-3 text-gray-400 hover:text-red-600 hover:bg-white rounded-lg transition-all focus:outline-none shadow-sm border border-transparent hover:border-gray-100 active:scale-95">
+                        <div class="flex items-center gap-1 bg-gray-50 rounded-xl border border-gray-200 p-1 shadow-inner">
+                            <button @click="prevMonth()" class="p-2 md:p-3 text-gray-500 hover:text-red-600 hover:bg-white rounded-lg transition-all focus:outline-none hover:shadow-sm active:scale-95">
                                 <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7"></path></svg>
                             </button>
                             <div class="w-[1px] h-6 bg-gray-200"></div>
-                            <button @click="nextMonth()" class="p-2 md:p-3 text-gray-400 hover:text-red-600 hover:bg-white rounded-lg transition-all focus:outline-none shadow-sm border border-transparent hover:border-gray-100 active:scale-95">
+                            <button @click="nextMonth()" class="p-2 md:p-3 text-gray-500 hover:text-red-600 hover:bg-white rounded-lg transition-all focus:outline-none hover:shadow-sm active:scale-95">
                                 <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"></path></svg>
                             </button>
                         </div>
