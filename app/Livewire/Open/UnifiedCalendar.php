@@ -49,60 +49,60 @@ class UnifiedCalendar extends Component
         }
 
         // ---------------------------------------------------------
-        // 2. PLOT CORE EVENTS[cite: 12]
+        // 2. PLOT CORE EVENTS
         // ---------------------------------------------------------
-        $allEvents = Event::where('is_active', true)->get();[cite: 12]
+        $allEvents = Event::where('is_active', true)->get();
 
-        foreach ($allEvents as $ev) {[cite: 12]
-            if ($ev->start_date) {[cite: 12]
-                $date = Carbon::parse($ev->start_date)->format('Y-m-d');[cite: 12]
+        foreach ($allEvents as $ev) {
+            if ($ev->start_date) {
+                $date = Carbon::parse($ev->start_date)->format('Y-m-d');
 
-                if (!isset($calendarData[$date])) {[cite: 12]
-                    $calendarData[$date] = [];[cite: 12]
+                if (!isset($calendarData[$date])) {
+                    $calendarData[$date] = [];
                 }
 
                 $calendarData[$date][] = [
                     'id' => 'evt_' . $ev->id,
-                    'title' => $ev->title,[cite: 12]
-                    'category' => 'Event',[cite: 12]
+                    'title' => $ev->title,
+                    'category' => 'Event',
                     'organizer' => 'BU MADYA', // Default internal organizer
-                    'link' => route('events.show', $ev->slug ?? $ev->id),[cite: 12]
+                    'link' => route('events.show', $ev->slug ?? $ev->id),
                     'description' => Str::limit(strip_tags($ev->description), 150),
                 ];
             }
         }
 
         // ---------------------------------------------------------
-        // 3. PLOT PROJECTS[cite: 12]
+        // 3. PLOT PROJECTS
         // ---------------------------------------------------------
-        $allProjects = Project::whereIn('status', ['active', 'completed'])->get();[cite: 12]
-        $today = now()->format('Y-m-d');[cite: 12]
+        $allProjects = Project::whereIn('status', ['active', 'completed'])->get();
+        $today = now()->format('Y-m-d');
 
-        foreach ($allProjects as $proj) {[cite: 12]
+        foreach ($allProjects as $proj) {
 
-            // UX TRICK: Pin 'active' projects to today.[cite: 12]
-            // Map 'completed' projects to their actual creation/launch date.[cite: 12]
-            $date = $proj->status === 'active' ? $today : Carbon::parse($proj->created_at)->format('Y-m-d');[cite: 12]
+            // UX TRICK: Pin 'active' projects to today.
+            // Map 'completed' projects to their actual creation/launch date.
+            $date = $proj->status === 'active' ? $today : Carbon::parse($proj->created_at)->format('Y-m-d');
 
-            if (!isset($calendarData[$date])) {[cite: 12]
-                $calendarData[$date] = [];[cite: 12]
+            if (!isset($calendarData[$date])) {
+                $calendarData[$date] = [];
             }
 
-            // Differentiate the label based on status[cite: 12]
-            $typeLabel = $proj->status === 'active' ? 'Active Project' : 'Completed Project';[cite: 12]
+            // Differentiate the label based on status
+            $typeLabel = $proj->status === 'active' ? 'Active Project' : 'Completed Project';
 
             $calendarData[$date][] = [
                 'id' => 'proj_' . $proj->id,
-                'title' => $proj->title,[cite: 12]
-                'category' => $typeLabel,[cite: 12]
+                'title' => $proj->title,
+                'category' => $typeLabel,
                 'organizer' => 'BU MADYA',
-                'link' => route('projects.show', $proj->slug ?? $proj->id),[cite: 12]
+                'link' => route('projects.show', $proj->slug ?? $proj->id),
                 'description' => Str::limit(strip_tags($proj->description), 150),
             ];
         }
 
         return view('livewire.public.unified-calendar', [
             'calendarData' => $calendarData
-        ])->layout('layouts.madya-template'); // Adjusted to match your public template
+        ])->layout('layouts.madya-template');
     }
 }
