@@ -62,6 +62,7 @@ use App\Livewire\Admin\EditEvent;
 use App\Livewire\Admin\Transparency\DocumentForm;
 use App\Livewire\Admin\Transparency\DocumentIndex;
 use App\Livewire\Open\TransparencyIndex;
+use App\Livewire\Open\UnifiedCalendar;
 use App\Livewire\Open\CampaignView;
 use App\Livewire\Admin\EvaluationResults;
 use App\Livewire\Admin\EvaluationList as AdminEvaluationIndex;
@@ -81,8 +82,8 @@ use App\Livewire\Admin\Content\ContentReferences;
 use App\Livewire\Ibalong\Launchpad;
 use App\Livewire\Ibalong\Admin\EventManager;
 use App\Livewire\Ibalong\EventRegistration;
-use App\Livewire\Ibalong\EventScanner as IbalongScanner; 
-use App\Livewire\Ibalong\RegistrationForm as IbalongRegistration; 
+use App\Livewire\Ibalong\EventScanner as IbalongScanner;
+use App\Livewire\Ibalong\RegistrationForm as IbalongRegistration;
 use App\Livewire\Ibalong\Admin\TeamAccountManager;
 
 use App\Models\MembershipApplication;
@@ -287,6 +288,7 @@ Route::middleware([
 Route::middleware(['web'])->group(function () {
 
     Route::get('/events/{event:slug}/scan', EventScanner::class)->name('admin.events.scan');
+    Route::get('/calendar', UnifiedCalendar::class)->name('unified-calendar');
 
     // Middleware accessible to both members and directors
     Route::middleware(['auth', 'role:director'])->prefix('director')->name('director.')

@@ -147,7 +147,6 @@
             </tbody>
         </table>
     </div>
-
     
 
     {{-- MODAL: EDIT PARTNER --}}
