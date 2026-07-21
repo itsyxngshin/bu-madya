@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Public;
+namespace App\Livewire\Open;
 
 use Livewire\Component;
 use App\Models\MadyaCalendarActivity;
@@ -101,7 +101,7 @@ class UnifiedCalendar extends Component
             ];
         }
 
-        return view('livewire.public.unified-calendar', [
+        return view('livewire.open.unified-calendar', [
             'calendarData' => $calendarData
         ])->layout('layouts.madya-template');
     }
