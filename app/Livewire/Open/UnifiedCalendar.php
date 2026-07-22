@@ -15,7 +15,7 @@ class UnifiedCalendar extends Component
 {
     public $visitorCount = 0;
 
-    // --- Admin Modal State ---
+    // --- Admin Modal State -----
     public $isModalOpen = false;
     public $title, $start_date, $end_date, $category = 'Activity', $organizer, $external_link, $description;
 
