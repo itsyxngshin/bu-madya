@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::table('madya_calendar_activities', function (Blueprint $table) {
             $table->renameColumn('activity_date', 'start_date');
-            $table->date('end_date')->after('activity_date')->nullable();
+            $table->date('end_date')->after('start_date')->nullable();
         });
     }
 
