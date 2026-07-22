@@ -288,7 +288,7 @@ Route::middleware([
 Route::middleware(['web'])->group(function () {
 
     Route::get('/events/{event:slug}/scan', EventScanner::class)->name('admin.events.scan');
-    Route::get('/calendar', UnifiedCalendar::class)->name('unified-calendar');
+    Route::get('/unified-calendar', UnifiedCalendar::class)->name('unified-calendar');
 
     // Middleware accessible to both members and directors
     Route::middleware(['auth', 'role:director'])->prefix('director')->name('director.')
