@@ -1,4 +1,4 @@
-<div class="min-h-screen bg-stone-50 font-sans text-gray-900 relative overflow-x-hidden pb-20"
+<div class="min-h-screen bg-stone-50 font-sans text-gray-900 relative overflow-x-hidden"
      x-data="{
         currentMonth: new Date().getMonth(),
         currentYear: new Date().getFullYear(),
@@ -73,7 +73,7 @@
     <div class="relative z-10">
 
         {{-- PAGE HEADER --}}
-        <header class="pt-24 md:pt-32 pb-8 md:pb-12 px-5 md:px-6 max-w-7xl mx-auto text-center md:text-left">
+        <header class="pt-12 md:pt-16 pb-8 md:pb-12 px-5 md:px-6 max-w-7xl mx-auto text-center md:text-left">
             <div class="mb-4 relative z-20">
                 <a href="{{ url('/') }}" class="inline-flex items-center gap-2 text-[10px] md:text-xs font-bold text-gray-400 hover:text-red-600 uppercase tracking-widest transition">
                     &larr; Back to Home
