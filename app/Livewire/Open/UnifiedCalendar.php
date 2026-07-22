@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Open\Public;
+namespace App\Livewire\Open;
 
 use Livewire\Component;
 use App\Models\MadyaCalendarActivity;
