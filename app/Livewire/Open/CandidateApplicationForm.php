@@ -39,13 +39,15 @@ class CandidateApplicationForm extends Component
         $this->election = $election;
         $this->display_name = auth()->check() ? auth()->user()->name : null;
 
-        // 1. Check if they already applied
-        $existingCandidate = Candidate::where('election_id', $this->election->id)
-                                      ->where('user_id', auth()->id())
-                                      ->first();
+        // 1. Check if they already applied (only applies to authenticated users)
+        if (auth()->check()) {
+            $existingCandidate = Candidate::where('election_id', $this->election->id)
+                                          ->where('user_id', auth()->id())
+                                          ->first();
 
-        if ($existingCandidate) {
-            $this->hasApplied = true;
+            if ($existingCandidate) {
+                $this->hasApplied = true;
+            }
         }
 
         // 2. Determine the precise state of the application window
