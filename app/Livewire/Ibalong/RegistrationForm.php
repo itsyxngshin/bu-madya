@@ -7,35 +7,32 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use App\Models\IbalongRegistration;
+use App\Models\IbalongSetting; // <-- Add this import
 use App\Mail\IbalongRegistrationReceived;
 
 class RegistrationForm extends Component
 {
+    public $isRegistrationOpen;
+
     public $step = 1;
     public $registrationSuccessful = false;
 
-    // Form Data - Step 1 (Cohort Profile)
+    // Form Data
     public $team_name, $team_about, $affiliation;
-    
-    // PSGC Geographic Data
     public $provCode = '';
     public $citymunCode = '';
     public $brgyCode = '';
-    
-    // Cascading Dropdown Options
+
     public $provinces = [];
     public $cities = [];
     public $barangays = [];
 
-    // Pivot Arrays
     public $team_skills = [];
     public $team_community_areas = [];
     public $team_experiences = [];
 
-    // Form Data - Step 2 (Members)
     public $members = [];
 
-    // Form Data - Step 3 (Verification & Logistics)
     public $team_online_activities = [];
     public $team_member_demographics = '';
     public $onsite_commitment = '';
@@ -44,11 +41,19 @@ class RegistrationForm extends Component
     public $media_consent = false;
     public $data_privacy_consent = false;
 
-    // Reference Data (Loaded for the UI)
     public $ref_skills, $ref_experiences, $ref_community_areas, $ref_online_activities;
 
     public function mount()
     {
+        // 1. Fetch live status from the database
+        $setting = IbalongSetting::firstOrCreate(['id' => 1]);
+        $this->isRegistrationOpen = $setting->is_registration_open;
+
+        // 2. If locked, stop processing and render the lockdown screen immediately
+        if (!$this->isRegistrationOpen) {
+            return;
+        }
+
         $this->members = [
             $this->getEmptyMemberTemplate('Team Leader')
         ];
@@ -64,7 +69,6 @@ class RegistrationForm extends Component
     }
 
     // --- CASCADING DROPDOWN HOOKS ---
-
     public function updatedProvCode($value)
     {
         $this->cities = DB::table('refcitymun')->where('provCode', $value)->orderBy('citymunDesc')->get();
@@ -79,13 +83,11 @@ class RegistrationForm extends Component
         $this->brgyCode = '';
     }
 
-    // --- END HOOKS ---
-
     private function getEmptyMemberTemplate($role = 'Team Member')
     {
         return [
-            'full_name' => '', 'email_address' => '', 'mobile_number' => '', 
-            'birthday' => '', 'course' => '', 'role' => '', 'position' => '', 
+            'full_name' => '', 'email_address' => '', 'mobile_number' => '',
+            'birthday' => '', 'course' => '', 'role' => '', 'position' => '',
             'affiliation' => '', 'team_role' => $role, 'skills' => []
         ];
     }
@@ -117,17 +119,19 @@ class RegistrationForm extends Component
 
     public function submit()
     {
+        // Double-check security on submission in case they bypassed the UI
+        if (!$this->isRegistrationOpen) {
+            return;
+        }
+
         $this->validate([
             'team_name' => 'required|string|max:255',
             'affiliation' => 'required|string|max:255',
-            
-            // Custom Word Count Validation for Team About
-            'team_about' => ['required', 'string', function ($attribute, $value, $fail) {
-                if (str_word_count($value) > 250) {
-                    $fail('The team manifesto must not exceed 250 words.');
+            'team_about' => ['bail', 'required', 'string', function ($attribute, $value, $fail) {
+                if (str_word_count((string) $value) > 250) {
+                    $fail('The cohort manifesto must not exceed 250 words.');
                 }
             }],
-            
             'team_member_demographics' => 'required',
             'onsite_commitment' => 'required',
             'data_privacy_consent' => 'accepted',
@@ -139,18 +143,15 @@ class RegistrationForm extends Component
 
         $registration = DB::transaction(function () {
             $teamSlug = Str::slug($this->team_name) . '-' . strtolower(Str::random(5));
-            
-            // 1. Create Core Registration (Mapping PSGC variables to standard DB columns)
+
             $reg = IbalongRegistration::create([
                 'team_name' => $this->team_name,
                 'slug' => $teamSlug,
                 'team_about' => $this->team_about,
                 'affiliation' => $this->affiliation,
-                
                 'province_id' => $this->provCode,
                 'citymun_id' => $this->citymunCode,
                 'barangay_id' => $this->brgyCode,
-                
                 'team_member_demographics' => $this->team_member_demographics,
                 'number_of_team_members' => count($this->members),
                 'onsite_commitment' => $this->onsite_commitment,
@@ -161,16 +162,14 @@ class RegistrationForm extends Component
                 'status' => 'pending'
             ]);
 
-            // 2. Sync Team Pivots
             $reg->skills()->sync($this->team_skills);
             $reg->communityAreas()->sync($this->team_community_areas);
             $reg->experiences()->sync($this->team_experiences);
             $reg->onlineActivities()->sync($this->team_online_activities);
 
-            // 3. Create Members and Sync Member Pivots
             foreach ($this->members as $memberData) {
                 $memberSlug = Str::slug($memberData['full_name']) . '-' . strtolower(Str::random(5));
-                
+
                 $member = $reg->members()->create([
                     'full_name' => $memberData['full_name'],
                     'slug' => $memberSlug,
@@ -192,18 +191,14 @@ class RegistrationForm extends Component
             return $reg;
         });
 
-        // Fetch Team Leader for Email
         $teamLeader = collect($this->members)->where('team_role', 'Team Leader')->first() ?? $this->members[0];
 
-        // Send Email Confirmation
         try {
             Mail::to($teamLeader['email_address'])->send(new IbalongRegistrationReceived($registration, $teamLeader));
         } catch (\Exception $e) {
-            // Silently fail mail sending to not interrupt the user experience, or log it
             \Log::error('Registration Mail Failed: ' . $e->getMessage());
         }
 
-        // Trigger Success UI
         $this->registrationSuccessful = true;
     }
 

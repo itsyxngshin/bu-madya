@@ -1,9 +1,45 @@
 <div class="max-w-5xl mx-auto py-12 px-4 sm:px-6 transition-colors duration-300">
-    
-    @if($registrationSuccessful)
+
+    @if(!$isRegistrationOpen)
+        {{-- SYSTEM LOCKDOWN SCREEN --}}
+        <div class="bg-iba-light dark:bg-[#1A1617] border-4 border-iba-black dark:border-iba-light p-8 sm:p-16 shadow-[15px_15px_0_0_#D93B3B] animate-fade-in-up text-center relative overflow-hidden">
+
+            {{-- Background Warning Pattern --}}
+            <div class="absolute inset-0 opacity-5 dark:opacity-10 pointer-events-none" style="background-image: repeating-linear-gradient(45deg, #131011 25%, transparent 25%, transparent 75%, #131011 75%, #131011), repeating-linear-gradient(45deg, #131011 25%, transparent 25%, transparent 75%, #131011 75%, #131011); background-position: 0 0, 10px 10px; background-size: 20px 20px;"></div>
+
+            <div class="relative z-10">
+                <div class="mx-auto w-24 h-24 bg-iba-red border-4 border-iba-black dark:border-iba-light flex items-center justify-center shadow-[4px_4px_0_0_#131011] dark:shadow-[4px_4px_0_0_#FFFBF7] mb-8">
+                    <svg class="h-12 w-12 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                </div>
+
+                <h2 class="font-pixel text-2xl sm:text-4xl text-iba-black dark:text-iba-light uppercase mb-6 border-b-8 border-iba-red inline-block pb-2">INTAKE CLOSED</h2>
+
+                <p class="text-base sm:text-lg text-gray-700 dark:text-gray-300 font-bold max-w-2xl mx-auto mb-10 leading-relaxed uppercase tracking-wider">
+                    The registration portal for the <span class="text-iba-red font-black">Heroes of Innovation Challenge 2026</span> has been officially locked. We are no longer accepting new cohort applications at this time.
+                </p>
+
+                <div class="bg-white dark:bg-iba-black border-4 border-iba-black dark:border-iba-light p-6 md:p-8 inline-block text-center shadow-[8px_8px_0_0_#131011] dark:shadow-[8px_8px_0_0_#FFFBF7] mb-12 max-w-xl w-full">
+                    <h4 class="font-pixel text-iba-teal uppercase tracking-wider text-sm md:text-base mb-2">Notice to Applicants</h4>
+                    <p class="text-sm sm:text-base text-gray-700 dark:text-gray-300 font-bold">
+                        For teams that have successfully submitted their manifestos, please monitor your Team Leader's email inbox for the verdict of the Organizing Committee.
+                    </p>
+                </div>
+
+                <div>
+                    <a href="{{ route('ibalong.home') }}" class="btn-retro bg-iba-black dark:bg-iba-light text-white dark:text-iba-black font-pixel px-8 py-5 text-xs sm:text-sm uppercase inline-flex items-center gap-2 transition-transform shadow-[6px_6px_0_0_#0095AC] hover:translate-y-1 hover:shadow-none border-4 border-transparent dark:hover:border-white hover:border-iba-black">
+                        ⬅ Return to Launchpad
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    @elseif($registrationSuccessful)
+        {{-- ... EXACT EXISTING SUCCESS SCREEN HTML ... --}}
         {{-- SUCCESS SCREEN --}}
         <div class="bg-iba-light dark:bg-iba-black border-4 border-iba-black dark:border-iba-light p-8 sm:p-16 shadow-[15px_15px_0_0_#5C7914] animate-fade-in-up text-center relative overflow-hidden">
-            
+
             <div class="absolute top-0 right-0 opacity-5 dark:opacity-10 pointer-events-none text-iba-green">
                 <svg class="w-64 h-64 -mt-10 -mr-10" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L2 22h20L12 2z"/></svg>
             </div>
@@ -14,13 +50,13 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
                     </svg>
                 </div>
-                
+
                 <h2 class="font-pixel text-2xl sm:text-4xl text-iba-black dark:text-iba-light uppercase mb-6 border-b-8 border-iba-green inline-block pb-2">APPLICATION RECEIVED!</h2>
-                
+
                 <p class="text-base sm:text-lg text-gray-700 dark:text-gray-300 font-bold max-w-2xl mx-auto mb-10 leading-relaxed">
                     Your cohort's application for the <span class="text-iba-teal font-black">Heroes of Innovation Challenge 2026</span> has been successfully logged into our mainframe.
                 </p>
-                
+
                 <div class="bg-white dark:bg-[#1A1617] border-4 border-iba-black dark:border-iba-light p-6 md:p-8 inline-block text-left shadow-[8px_8px_0_0_#0095AC] mb-12 max-w-xl w-full">
                     <h4 class="font-pixel text-iba-red uppercase tracking-wider text-sm md:text-base mb-4 border-b-2 border-dashed border-gray-300 dark:border-gray-700 pb-2">Transmission Status</h4>
                     <ul class="space-y-4 text-sm sm:text-base text-gray-700 dark:text-gray-300 font-bold">
@@ -38,7 +74,7 @@
                         </li>
                     </ul>
                 </div>
-                
+
                 <div>
                     <a href="{{ route('ibalong.home') }}" class="btn-retro bg-iba-orange text-iba-black font-pixel px-8 py-5 text-xs sm:text-sm uppercase inline-flex items-center gap-2 hover:bg-orange-500 transition-colors shadow-[6px_6px_0_0_#131011] dark:shadow-[6px_6px_0_0_#FFFBF7] hover:translate-y-1 hover:shadow-none">
                         ⬅ Return to Launchpad
@@ -48,18 +84,18 @@
         </div>
 
     @else
-        {{-- FORM WRAPPER --}}
-        
+        {{-- ... EXACT EXISTING FORM WRAPPER, HEADER BLOCK, AND STEPS HTML ... --}}
+
         {{-- HEADER BLOCK --}}
         <div class="bg-white dark:bg-[#1A1617] border-4 border-iba-black dark:border-iba-light p-6 sm:p-10 shadow-[10px_10px_0_0_#0095AC] mb-12 relative overflow-hidden">
             <div class="absolute top-0 right-0 opacity-5 dark:opacity-10 pointer-events-none text-iba-black dark:text-iba-light">
                 <svg class="w-64 h-64 -mt-10 -mr-10" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L2 22h20L12 2z"/></svg>
             </div>
-            
+
             <h1 class="font-pixel text-xl sm:text-3xl text-iba-black dark:text-iba-light uppercase tracking-wide border-b-8 border-iba-orange pb-6 mb-6 leading-relaxed relative z-10">
                 HEROES OF INNOVATION CHALLENGE<br><span class="text-iba-red">Ibalong Festival 2026 Edition</span>
             </h1>
-            
+
             <div class="space-y-4 text-iba-black dark:text-gray-300 font-semibold leading-relaxed text-sm sm:text-base relative z-10">
                 <p>Welcome, future Heroes of Innovation.</p>
                 <p>The Challenge begins with listening. Registered teams will first learn about the Ibalong Heroes, meet the Community Heroes through the <span class="text-iba-teal">Voices of Bicol</span> session, join the <span class="text-iba-teal">Human-Centered Design</span> workshop, and only then develop an Innovation Concept Proposal.</p>
@@ -67,7 +103,7 @@
                     ⚠️ At this stage, you are not yet required to submit an idea or solution.
                 </div>
                 <p class="font-bold text-iba-green pt-2">Please register as a team of 3 to 5 members.</p>
-                
+
                 @if ($errors->any())
                     <div class="bg-red-100 dark:bg-iba-red/20 border-4 border-iba-red text-iba-red p-4 mt-4 font-bold">
                         System Alert: Please verify the highlighted fields below to proceed.
@@ -90,17 +126,17 @@
                     <h3 class="font-pixel text-xl sm:text-2xl text-iba-black dark:text-iba-light">STEP 1: <span class="text-iba-orange">COHORT PROFILE</span></h3>
                     <span class="font-pixel text-iba-orange text-2xl">01</span>
                 </div>
-                
+
                 <div class="space-y-8">
                     <div class="grid grid-cols-1 gap-6">
-                        
+
                         {{-- INLINE ERROR HANDLING & TEXT BOXES --}}
                         <div>
                             <label class="block font-bold text-iba-black dark:text-iba-light mb-2 text-sm uppercase tracking-wider">Designated Team Name <span class="text-iba-red">*</span></label>
                             <input type="text" wire:model="team_name" class="w-full border-4 {{ $errors->has('team_name') ? 'border-iba-red bg-red-50 dark:bg-red-900/20' : 'border-iba-black dark:border-iba-light bg-white dark:bg-[#1A1617]' }} p-4 font-bold text-lg focus:outline-none focus:border-iba-orange text-iba-black dark:text-iba-light shadow-inner transition-colors">
                             @error('team_name') <span class="text-iba-red text-xs font-bold block mt-2">⚠ {{ $message }}</span> @enderror
                         </div>
-                        
+
                         <div>
                             <label class="block font-bold text-iba-black dark:text-iba-light mb-2 text-sm uppercase tracking-wider">School / Organization / Company <span class="text-iba-red">*</span></label>
                             <input type="text" wire:model="affiliation" class="w-full border-4 {{ $errors->has('affiliation') ? 'border-iba-red bg-red-50 dark:bg-red-900/20' : 'border-iba-black dark:border-iba-light bg-white dark:bg-[#1A1617]' }} p-4 font-bold focus:outline-none focus:border-iba-orange text-iba-black dark:text-iba-light shadow-inner transition-colors">
@@ -139,17 +175,17 @@
                         </div>
 
                         {{-- WORD COUNTER & EXPANDED QUESTION --}}
-                        <div x-data="{ 
-                            content: $wire.entangle('team_about'), 
-                            get wordCount() { 
-                                return this.content ? this.content.trim().split(/\s+/).filter(w => w.length > 0).length : 0; 
-                            } 
+                        <div x-data="{
+                            content: $wire.entangle('team_about'),
+                            get wordCount() {
+                                return this.content ? this.content.trim().split(/\s+/).filter(w => w.length > 0).length : 0;
+                            }
                         }">
                             <label class="block font-bold text-iba-black dark:text-iba-light mb-2 text-sm uppercase tracking-wider">
                                 Cohort Manifesto: What brings your team together? What makes your team interested in innovation, entrepreneurship, or solving community challenges? <span class="text-iba-red">*</span>
                             </label>
                             <textarea x-model="content" rows="4" class="w-full border-4 {{ $errors->has('team_about') ? 'border-iba-red bg-red-50 dark:bg-red-900/20' : 'border-iba-black dark:border-iba-light bg-white dark:bg-[#1A1617]' }} p-4 font-bold focus:outline-none focus:border-iba-orange text-iba-black dark:text-iba-light shadow-inner transition-colors placeholder-gray-400"></textarea>
-                            
+
                             <div class="flex justify-between items-start mt-2">
                                 <div>
                                     @error('team_about') <span class="text-iba-red text-xs font-bold block">⚠ {{ $message }}</span> @enderror
@@ -208,7 +244,7 @@
                 </div>
 
                 <div class="mt-12 flex justify-end">
-                    <button wire:click="nextStep" class="btn-retro bg-iba-orange text-iba-black font-pixel px-8 py-4 text-xs sm:text-sm uppercase flex items-center gap-2">
+                    <button wire:click="nextStep" class="btn-retro bg-iba-orange text-iba-black font-pixel px-8 py-4 text-xs sm:text-sm uppercase flex items-center gap-2 shadow-[6px_6px_0_0_#131011] dark:shadow-[6px_6px_0_0_#FFFBF7] border-4 border-iba-black dark:border-iba-light hover:translate-y-1 hover:shadow-none transition-all">
                         Proceed to Roster ➔
                     </button>
                 </div>
@@ -222,11 +258,11 @@
                     <h3 class="font-pixel text-xl sm:text-2xl text-iba-black dark:text-iba-light">STEP 2: <span class="text-iba-teal">ASSEMBLE ROSTER</span></h3>
                     <span class="font-pixel text-iba-teal text-2xl">02</span>
                 </div>
-                
+
                 <div class="space-y-10">
                     @foreach($members as $index => $member)
                         <div wire:key="member-block-{{ $index }}" class="border-4 border-iba-black dark:border-iba-light p-6 sm:p-8 relative bg-white dark:bg-[#1A1617] shadow-[6px_6px_0_0_#131011] dark:shadow-[6px_6px_0_0_#FFFBF7]">
-                            
+
                             <div class="flex justify-between items-center mb-6 border-b-2 border-dashed border-gray-300 dark:border-gray-700 pb-4">
                                 <h4 class="font-pixel text-sm sm:text-base text-iba-black dark:text-iba-light">
                                     <span class="{{ $index == 0 ? 'text-iba-red' : 'text-iba-teal' }} mr-2">▶</span>{{ $member['team_role'] }}
@@ -291,7 +327,7 @@
                     <button wire:click="previousStep" class="font-bold text-gray-500 dark:text-gray-400 hover:text-iba-black dark:hover:text-iba-light uppercase tracking-widest text-sm">
                         ⬅ Go Back
                     </button>
-                    <button wire:click="nextStep" class="btn-retro bg-iba-teal text-white font-pixel px-8 py-4 text-xs sm:text-sm uppercase flex items-center gap-2 w-full sm:w-auto justify-center">
+                    <button wire:click="nextStep" class="btn-retro bg-iba-teal text-white font-pixel px-8 py-4 text-xs sm:text-sm uppercase flex items-center justify-center gap-2 border-4 border-iba-black shadow-[6px_6px_0_0_#131011] dark:shadow-[6px_6px_0_0_#FFFBF7] hover:translate-y-1 hover:shadow-none transition-all w-full sm:w-auto">
                         Final Verification ➔
                     </button>
                 </div>
@@ -305,16 +341,16 @@
                     <h3 class="font-pixel text-xl sm:text-2xl text-iba-black dark:text-iba-light">STEP 3: <span class="text-iba-green">VERIFICATION</span></h3>
                     <span class="font-pixel text-iba-green text-2xl">03</span>
                 </div>
-                
+
                 <div class="space-y-8">
-                    
+
                     {{-- AVAILABILITY AND COMMITMENT (Online Activities) --}}
                     <div class="bg-white dark:bg-[#1A1617] border-4 border-iba-black dark:border-iba-light p-6">
                         <h4 class="font-bold text-iba-black dark:text-iba-light uppercase tracking-wider text-base mb-2">AVAILABILITY AND COMMITMENT</h4>
                         <p class="text-sm text-gray-600 dark:text-gray-400 mb-6">Read and answer correctly.</p>
-                        
+
                         <label class="block font-bold text-iba-black dark:text-iba-light mb-4 text-sm">Our team is available to attend the required online activities: <span class="text-iba-red">*</span></label>
-                        
+
                         <div class="flex flex-wrap gap-3">
                             @foreach($ref_online_activities as $activity)
                                 <label wire:key="activity-{{ $activity->id }}" class="cursor-pointer relative inline-block w-full sm:w-auto">
@@ -340,7 +376,7 @@
                             </select>
                             @error('team_member_demographics') <span class="text-iba-red text-xs font-bold block mt-2">⚠ Required</span> @enderror
                         </div>
-                        
+
                         <div>
                             <label class="block text-sm font-bold text-iba-black dark:text-iba-light mb-2">If selected, our team commits to participate in the onsite Heroes of Innovation Challenge: <span class="text-iba-red">*</span></label>
                             <select wire:model="onsite_commitment" class="w-full border-4 border-iba-black dark:border-iba-light p-4 font-bold text-sm focus:border-iba-green dark:focus:border-iba-green focus:outline-none bg-white dark:bg-[#1A1617] text-iba-black dark:text-iba-light transition-colors">
@@ -372,7 +408,7 @@
 
                     {{-- Expanded Consents --}}
                     <div class="pt-6 border-t-2 border-dashed border-gray-300 dark:border-gray-700 space-y-4">
-                        
+
                         <div class="bg-white dark:bg-[#1A1617] p-5 border-4 {{ $errors->has('data_privacy_consent') ? 'border-iba-red' : 'border-iba-black dark:border-iba-light' }}">
                             <span class="text-sm font-bold text-iba-black dark:text-iba-light leading-relaxed block mb-2">Data Privacy Consent <span class="text-iba-red">*</span></span>
                             <span class="text-sm text-gray-700 dark:text-gray-300 leading-relaxed block mb-2">Your privacy matters to us. The personal information collected in this form will only be used for the HEROES OF INNOVATION CHALLENGE: Ibalong Festival 2026 Edition.</span>
@@ -395,7 +431,7 @@
                     <button wire:click="previousStep" class="font-bold text-gray-500 dark:text-gray-400 hover:text-iba-black dark:hover:text-iba-light uppercase tracking-widest text-sm">
                         ⬅ Edit Roster
                     </button>
-                    <button wire:click="submit" class="btn-retro bg-iba-green text-white font-pixel px-8 py-5 text-xs sm:text-sm uppercase flex items-center justify-center gap-2 w-full sm:w-auto">
+                    <button wire:click="submit" class="btn-retro bg-iba-green text-white font-pixel px-8 py-5 text-xs sm:text-sm uppercase flex items-center justify-center gap-2 border-4 border-iba-black shadow-[6px_6px_0_0_#131011] dark:shadow-[6px_6px_0_0_#FFFBF7] hover:translate-y-1 hover:shadow-none transition-all w-full sm:w-auto">
                         <svg wire:loading.remove wire:target="submit" class="w-5 h-5 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
                         <svg wire:loading wire:target="submit" class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                         CONFIRM & SUBMIT
@@ -410,4 +446,3 @@
         .animate-fade-in-up { animation: fadeInUp 0.3s ease-out forwards; }
     </style>
 </div>
-
