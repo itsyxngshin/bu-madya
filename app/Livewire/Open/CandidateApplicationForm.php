@@ -37,12 +37,7 @@ class CandidateApplicationForm extends Component
     public function mount(Election $election)
     {
         $this->election = $election;
-
-        if (!auth()->check()) {
-            abort(403, 'You must be logged in to apply.');
-        }
-
-        $this->display_name = auth()->user()->name;
+        $this->display_name = auth()->check() ? auth()->user()->name : null;
 
         // 1. Check if they already applied
         $existingCandidate = Candidate::where('election_id', $this->election->id)
