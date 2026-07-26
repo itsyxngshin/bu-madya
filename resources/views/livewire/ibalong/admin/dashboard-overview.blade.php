@@ -91,28 +91,28 @@
             <div class="bg-iba-orange px-6 py-3 border-b-4 border-iba-black">
                 <h1 class="text-sm font-black text-iba-black uppercase tracking-widest">Cohort Command Center</h1>
             </div>
-            
+
             <div class="p-6 md:p-8 flex flex-col md:flex-row gap-8 items-center md:items-start">
-                
+
                 {{-- Team Logo Upload Section --}}
                 <div class="relative group shrink-0">
-                    <div class="w-32 h-32 md:w-40 md:h-40 border-4 {{ !$team->logo_path ? 'border-dashed border-iba-red' : 'border-iba-black' }} shadow-[4px_4px_0_0_#131011] overflow-hidden bg-[#1A1617] flex items-center justify-center relative">
+                    <div class="w-32 h-32 md:w-40 md:h-40 border-4 {{ !$team->logo_path ? 'border-dashed border-iba-red' : 'border-iba-black dark:border-iba-light' }} shadow-[4px_4px_0_0_#131011] dark:shadow-[4px_4px_0_0_#FFFBF7] overflow-hidden bg-white dark:bg-[#1A1617] flex items-center justify-center relative aspect-square">
                         @if($team && $team->logo_path)
-                            <img src="{{ Storage::url($team->logo_path) }}" class="w-full h-full object-cover">
+                            {{-- Changed object-cover to object-contain and added p-2 for breathing room --}}
+                            <img src="{{ Storage::url($team->logo_path) }}" class="w-full h-full object-contain p-2">
                         @else
                             <div class="flex flex-col items-center justify-center">
-                                <span class="text-4xl mb-2">🚀</span>
-                                <span class="text-[9px] font-black text-gray-400 uppercase">Team Logo</span>
+                                <span class="text-[9px] font-black text-gray-500 uppercase text-center leading-tight">Missing<br>Logo</span>
                             </div>
                             {{-- Notification Dot --}}
                             <div class="absolute top-2 right-2 w-3 h-3 bg-iba-red rounded-full animate-ping"></div>
                             <div class="absolute top-2 right-2 w-3 h-3 bg-iba-red rounded-full"></div>
                         @endif
-                        
+
                         {{-- Upload Overlay --}}
                         <label class="absolute inset-0 bg-black/80 hidden group-hover:flex flex-col items-center justify-center cursor-pointer transition-all">
                             <span class="text-[10px] font-black text-white uppercase tracking-widest text-center px-2">Update<br>Logo</span>
-                            <span class="text-[8px] font-bold text-gray-400 mt-1 uppercase">Max 10MB</span>
+                            <span class="text-[8px] font-bold text-gray-300 mt-1 uppercase">Max 2MB</span>
                             <input type="file" wire:model.live="teamLogo" accept="image/*" class="hidden">
                         </label>
                     </div>
@@ -125,7 +125,7 @@
                     <p class="text-sm font-bold text-gray-600 dark:text-gray-400 max-w-2xl">
                         Welcome to the Ibalong Festival Hackathon 2026. This is your staging area. Connect with the community, review challenge files, and prepare your pitch.
                     </p>
-                    
+
                     <div class="flex flex-wrap justify-center md:justify-start gap-4 pt-2">
                         <a href="{{ route('ibalong.resources') }}" class="inline-flex items-center gap-2 bg-iba-teal text-white font-black px-6 py-3 text-xs uppercase border-4 border-iba-black shadow-[4px_4px_0_0_#131011] hover:translate-y-0.5 hover:shadow-none transition-all">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" /></svg>
@@ -145,7 +145,7 @@
                 <h3 class="text-sm font-black text-iba-black dark:text-white uppercase tracking-wider mb-4 border-b-4 border-iba-black dark:border-iba-light pb-2">Cohort Manifesto</h3>
                 <p class="text-sm font-bold text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">{{ $team->team_about ?? 'No manifesto provided.' }}</p>
             </div>
-            
+
             <div class="bg-gray-50 dark:bg-gray-800 border-4 border-iba-black dark:border-iba-light p-6 shadow-[6px_6px_0_0_#131011] dark:shadow-[6px_6px_0_0_#FFFBF7]">
                 <h3 class="text-sm font-black text-iba-black dark:text-white uppercase tracking-wider mb-4 border-b-4 border-iba-black dark:border-iba-light pb-2">Team Capabilities</h3>
                 @if($team && $team->skills->count() > 0)
@@ -163,7 +163,7 @@
         {{-- Event Participation & Tracking Monitor --}}
         <div>
             <h3 class="text-lg font-black text-iba-black dark:text-white uppercase tracking-wider mb-6 border-l-4 border-iba-teal pl-3">Event Participation Monitor</h3>
-            
+
             <div class="bg-white dark:bg-gray-900 border-4 border-iba-black dark:border-iba-light shadow-[6px_6px_0_0_#0095AC] p-6">
                 @if(count($teamEvents) > 0)
                     <div class="space-y-4">
@@ -172,7 +172,7 @@
                                 <div class="flex-1">
                                     <h4 class="text-sm font-black text-iba-black dark:text-white uppercase">{{ $eventReg->event->title ?? 'Unknown Event' }}</h4>
                                     <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-1">
-                                        {{ $eventReg->event->type ?? 'General' }} 
+                                        {{ $eventReg->event->type ?? 'General' }}
                                         @if($eventReg->event && $eventReg->event->start_datetime)
                                             • {{ $eventReg->event->start_datetime->format('M d, Y h:i A') }}
                                         @endif
@@ -212,12 +212,12 @@
         {{-- Team Roster --}}
         <div>
             <h3 class="text-lg font-black text-iba-black dark:text-white uppercase tracking-wider mb-6 border-l-4 border-iba-orange pl-3">Team Roster</h3>
-            
+
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 @if($team && $team->members)
                     @foreach($team->members as $member)
                         <div class="bg-white dark:bg-[#1A1617] border-4 border-iba-black flex items-start p-4 shadow-[4px_4px_0_0_#131011] relative group overflow-hidden {{ !$member->photo_path ? 'border-dashed border-iba-red' : '' }}">
-                            
+
                             {{-- Cleaner Member Avatar Placeholder --}}
                             <div class="w-16 h-16 shrink-0 border-2 {{ !$member->photo_path ? 'border-iba-red' : 'border-iba-black' }} overflow-hidden bg-[#1A1617] flex items-center justify-center relative mt-1">
                                 @if($member->photo_path)
@@ -239,7 +239,7 @@
                             <div class="ml-4 flex-1">
                                 <h4 class="font-black text-sm text-iba-black dark:text-white uppercase truncate" title="{{ $member->full_name }}">{{ $member->full_name }}</h4>
                                 <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-0.5">{{ $member->team_role }}</p>
-                                
+
                                 @if($member->skills && $member->skills->count() > 0)
                                     <div class="flex flex-wrap gap-1 mt-2">
                                         @foreach($member->skills as $skill)
@@ -247,7 +247,7 @@
                                         @endforeach
                                     </div>
                                 @endif
-                                
+
                                 @error('memberPhotos.'.$member->id) <span class="text-[9px] font-black text-iba-red block mt-1 truncate">{{ $message }}</span> @enderror
                             </div>
 
