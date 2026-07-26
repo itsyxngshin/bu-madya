@@ -81,7 +81,7 @@
             <div class="bg-iba-orange/10 border-l-4 border-iba-orange p-4 flex items-center shadow-sm">
                 <svg class="w-6 h-6 text-iba-orange mr-3 shrink-0 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                 <p class="text-xs font-black text-iba-black dark:text-white uppercase tracking-wider">
-                    Action Required: Please complete your team profile by uploading your <span class="text-iba-orange">team logo</span> and <span class="text-iba-orange">member photos</span>. Max 2MB per file.
+                    Action Required: Please complete your team profile by uploading your <span class="text-iba-orange">team logo</span> and <span class="text-iba-orange">member photos</span>. Max 10MB per file.
                 </p>
             </div>
         @endif
@@ -112,7 +112,7 @@
                         {{-- Upload Overlay --}}
                         <label class="absolute inset-0 bg-black/80 hidden group-hover:flex flex-col items-center justify-center cursor-pointer transition-all">
                             <span class="text-[10px] font-black text-white uppercase tracking-widest text-center px-2">Update<br>Logo</span>
-                            <span class="text-[8px] font-bold text-gray-400 mt-1 uppercase">Max 2MB</span>
+                            <span class="text-[8px] font-bold text-gray-400 mt-1 uppercase">Max 10MB</span>
                             <input type="file" wire:model.live="teamLogo" accept="image/*" class="hidden">
                         </label>
                     </div>
@@ -231,7 +231,7 @@
 
                                 <label class="absolute inset-0 bg-black/80 hidden group-hover:flex flex-col items-center justify-center cursor-pointer transition-all">
                                     <svg class="w-4 h-4 text-white mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                                    <span class="text-[7px] font-bold text-gray-400 uppercase">Max 2MB</span>
+                                    <span class="text-[7px] font-bold text-gray-400 uppercase">Max 10MB</span>
                                     <input type="file" wire:model.live="memberPhotos.{{ $member->id }}" accept="image/*" class="hidden">
                                 </label>
                             </div>

@@ -79,7 +79,7 @@ class DashboardOverview extends Component
     // --- Image Upload Handlers ---
     public function updatedTeamLogo()
     {
-        $this->validate(['teamLogo' => 'image|max:2048']); 
+        $this->validate(['teamLogo' => 'image|max:10240']); 
         
         if ($this->team->logo_path) {
             Storage::disk('public')->delete($this->team->logo_path);
@@ -96,7 +96,7 @@ class DashboardOverview extends Component
 
     public function updatedMemberPhotos($value, $memberId)
     {
-        $this->validate(['memberPhotos.'.$memberId => 'image|max:2048']);
+        $this->validate(['memberPhotos.'.$memberId => 'image|max:15360']);
         
         $member = IbalongTeamMember::find($memberId);
         
