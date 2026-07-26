@@ -7,7 +7,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Heroes of Innovation Challenge 2026 | Ibalong Launchpad</title>
+    <title>HOI Challenge 2026 | Ibalong Launchpad</title>
+    <link rel="icon" href="{{ asset('images/HOI Main Blue.png') }}">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -69,7 +70,7 @@
             </a>
 
             <div class="flex items-center gap-4 sm:gap-6 z-50">
-                
+
                 {{-- DESKTOP NAVIGATION --}}
                 <div class="hidden md:flex gap-6 font-pixel text-[9px] text-iba-black dark:text-iba-light items-center">
                     <a href="{{ route('ibalong.home') }}" class="hover:text-iba-orange transition-colors">HOME</a>
@@ -80,7 +81,7 @@
                     @auth('ibalong')
                         <div class="flex items-center gap-3 pl-4 border-l-2 border-dashed border-iba-black/20 dark:border-iba-light/20">
                             <a href="{{ route('ibalong.dashboard') }}" class="text-iba-teal hover:text-teal-600 transition-colors">DASHBOARD</a>
-                            
+
                             {{-- Desktop Avatar --}}
                             <a href="{{ route('ibalong.dashboard') }}" class="w-8 h-8 border-2 border-iba-black dark:border-iba-light overflow-hidden bg-white shadow-[2px_2px_0_0_#131011] dark:shadow-[2px_2px_0_0_#FFFBF7] hover:translate-y-0.5 hover:shadow-none transition-all">
                                 @if(Laravel\Jetstream\Jetstream::managesProfilePhotos() && auth('ibalong')->user()->profile_photo_path)
@@ -117,7 +118,7 @@
                 <a href="{{ route('ibalong.about') }}" @click="mobileMenuOpen = false" class="py-4 text-iba-black dark:text-iba-light hover:bg-iba-teal hover:text-white border-b-2 border-dashed border-iba-black/20 dark:border-iba-light/20">ABOUT</a>
                 <a href="{{ route('ibalong.roster') }}" @click="mobileMenuOpen = false" class="py-4 text-iba-black dark:text-iba-light hover:bg-iba-green hover:text-white border-b-2 border-dashed border-iba-black/20 dark:border-iba-light/20">THE ROSTER</a>
                 <a href="{{ route('ibalong.volunteer') }}" @click="mobileMenuOpen = false" class="py-4 text-iba-black dark:text-iba-light hover:bg-iba-red hover:text-white border-b-2 border-dashed border-iba-black/20 dark:border-iba-light/20">VOLUNTEER</a>
-                
+
                 @auth('ibalong')
                     <div class="py-6 flex flex-col items-center justify-center gap-4 bg-white/50 dark:bg-black/20">
                         {{-- Mobile Avatar & Name --}}

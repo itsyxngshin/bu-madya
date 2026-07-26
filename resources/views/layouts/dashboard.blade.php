@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" 
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}"
       class="scroll-smooth h-full"
-      x-data="{ 
-          darkMode: localStorage.getItem('ibalong_theme') === 'dark' || (!('ibalong_theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches), 
+      x-data="{
+          darkMode: localStorage.getItem('ibalong_theme') === 'dark' || (!('ibalong_theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches),
           mobileSidebarOpen: false,
           desktopSidebarOpen: localStorage.getItem('ibalong_sidebar') !== 'closed'
       }"
@@ -14,7 +14,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Command Center | Ibalong Launchpad</title>
+    <title>Community Center | Ibalong Launchpad</title>
+    <link rel="icon" href="{{ asset('images/HOI Main Blue.png') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -54,10 +55,10 @@
     {{-- Notice w-full is removed here to fix the empty right-side space bug --}}
     <div class="flex flex-col flex-1 h-screen transition-all duration-300 ease-in-out overflow-x-hidden"
          :class="desktopSidebarOpen ? 'md:pl-64' : 'md:pl-0'">
-        
+
         {{-- TOP HEADER --}}
         <header class="sticky top-0 z-20 flex h-16 flex-shrink-0 items-center gap-x-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8 transition-colors duration-200">
-            
+
             {{-- Mobile Hamburger --}}
             <button type="button" class="-m-2.5 p-2.5 text-gray-700 dark:text-gray-300 md:hidden" @click="mobileSidebarOpen = true">
                 <span class="sr-only">Open sidebar</span>
@@ -75,7 +76,7 @@
             </div>
 
             <div class="flex flex-1 justify-end items-center gap-x-4 lg:gap-x-6">
-                
+
                 {{-- NEW: Notification Bell Component --}}
                 <livewire:ibalong.components.notification-bell />
 
