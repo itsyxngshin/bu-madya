@@ -93,12 +93,29 @@
                     </div>
 
                     <div class="px-6 py-6 overflow-y-auto space-y-8 flex-1">
-                        <div class="grid grid-cols-1 gap-6">
+
+                        {{-- Brand & Manifesto Grid --}}
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            {{-- Team Logo Panel --}}
                             <div class="flex flex-col h-full">
-                                <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Cohort Manifesto</h4>
-                                <div class="bg-gray-50 dark:bg-gray-900 border-2 border-iba-black dark:border-gray-700 p-4 font-bold text-sm text-iba-black dark:text-gray-300 leading-relaxed flex-1">
-                                    "{{ $viewingTeam->team_about }}"
+                                <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Team Identity</h4>
+                                <div class="bg-gray-50 dark:bg-gray-900 border-2 border-iba-black dark:border-gray-700 p-4 flex flex-col items-center justify-center flex-1">
+                                    @if($viewingTeam->logo_path)
+                                        <div class="w-24 h-24 bg-white border-2 border-iba-black shadow-[2px_2px_0_0_#131011] mb-3 p-1">
+                                            <img src="{{ Storage::url($viewingTeam->logo_path) }}" class="w-full h-full object-contain">
+                                        </div>
+                                        <a href="{{ Storage::url($viewingTeam->logo_path) }}" download="{{ \Illuminate\Support\Str::slug($viewingTeam->team_name) }}-logo" class="bg-iba-teal text-white text-[9px] font-black uppercase px-3 py-1.5 border-2 border-iba-black shadow-[2px_2px_0_0_#131011] hover:translate-y-0.5 hover:shadow-none transition-all text-center w-full">Download Logo</a>
+                                    @else
+                                        <span class="text-3xl mb-1">🚀</span>
+                                        <span class="text-[9px] font-black text-gray-500 uppercase tracking-widest text-center">No Logo<br>Uploaded</span>
+                                    @endif
                                 </div>
+                            </div>
+
+                            {{-- Manifesto Panel --}}
+                            <div class="md:col-span-2 flex flex-col h-full">
+                                <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Cohort Manifesto</h4>
+                                <div class="bg-gray-50 dark:bg-gray-900 border-2 border-iba-black dark:border-gray-700 p-4 font-bold text-sm text-iba-black dark:text-gray-300 leading-relaxed flex-1 whitespace-pre-wrap">"{{ $viewingTeam->team_about }}"</div>
                             </div>
                         </div>
 
@@ -107,15 +124,33 @@
                             <h4 class="text-sm font-black text-iba-black dark:text-white uppercase tracking-wider mb-4 border-l-4 border-iba-teal pl-3">Team Roster ({{ $viewingTeam->number_of_team_members }})</h4>
                             <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                                 @foreach($viewingTeam->members as $member)
-                                    <div class="border-2 border-iba-black dark:border-iba-light p-5 bg-white dark:bg-gray-800 shadow-[4px_4px_0_0_#131011] dark:shadow-[4px_4px_0_0_#FFFBF7] flex flex-col">
-                                        <div class="flex justify-between items-start mb-3">
-                                            <h5 class="font-bold text-sm text-iba-black dark:text-white uppercase">{{ $member->full_name }}</h5>
-                                            <span class="px-2 py-1 border-2 border-iba-black text-[9px] font-bold uppercase tracking-wider {{ $member->team_role == 'Team Leader' ? 'bg-iba-red text-white' : 'bg-gray-100 text-iba-black' }}">{{ $member->team_role }}</span>
+                                    <div class="border-2 border-iba-black dark:border-iba-light p-4 bg-white dark:bg-gray-800 shadow-[4px_4px_0_0_#131011] dark:shadow-[4px_4px_0_0_#FFFBF7] flex items-start gap-4">
+
+                                        {{-- Member Photo & Download --}}
+                                        <div class="flex flex-col items-center gap-2 shrink-0 mt-1">
+                                            <div class="w-14 h-14 border-2 {{ $member->photo_path ? 'border-iba-black' : 'border-dashed border-iba-red' }} overflow-hidden bg-gray-100 dark:bg-[#1A1617] flex items-center justify-center">
+                                                @if($member->photo_path)
+                                                    <img src="{{ Storage::url($member->photo_path) }}" class="w-full h-full object-cover">
+                                                @else
+                                                    <span class="font-black text-xl text-gray-400 uppercase">{{ substr($member->full_name, 0, 1) }}</span>
+                                                @endif
+                                            </div>
+                                            @if($member->photo_path)
+                                                <a href="{{ Storage::url($member->photo_path) }}" download="{{ \Illuminate\Support\Str::slug($member->full_name) }}-photo" class="text-[8px] font-black uppercase tracking-widest text-iba-teal hover:underline text-center">Download</a>
+                                            @endif
                                         </div>
-                                        <div class="text-xs font-semibold text-gray-600 dark:text-gray-400 space-y-1 flex-1">
-                                            <p>{{ $member->email_address }}</p>
-                                            <p>{{ $member->mobile_number ?? 'N/A' }}</p>
+
+                                        {{-- Member Details --}}
+                                        <div class="flex-1 min-w-0">
+                                            <h5 class="font-bold text-sm text-iba-black dark:text-white uppercase truncate mb-1" title="{{ $member->full_name }}">{{ $member->full_name }}</h5>
+                                            <span class="inline-block px-2 py-0.5 border border-iba-black text-[8px] font-bold uppercase tracking-wider mb-2 {{ $member->team_role == 'Team Leader' ? 'bg-iba-red text-white' : 'bg-gray-100 text-iba-black' }}">{{ $member->team_role }}</span>
+
+                                            <div class="text-[10px] font-semibold text-gray-600 dark:text-gray-400 space-y-0.5 truncate">
+                                                <p class="truncate" title="{{ $member->email_address }}">{{ $member->email_address }}</p>
+                                                <p>{{ $member->mobile_number ?? 'N/A' }}</p>
+                                            </div>
                                         </div>
+
                                     </div>
                                 @endforeach
                             </div>
