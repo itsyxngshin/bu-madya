@@ -168,8 +168,8 @@ Route::domain('ibalong.' . env('APP_DOMAIN'))->name('ibalong.')->group(function 
     Route::get('/roster', \App\Livewire\Ibalong\MeetTheTeam::class)->name('roster');
     Route::get('/about', \App\Livewire\Ibalong\AboutHackathon::class)->name('about');
     Route::get('/volunteer', \App\Livewire\Ibalong\VolunteerIntake::class)->name('volunteer');
-    Route::get('/admin/notifications', \App\Livewire\Ibalong\Admin\NotificationCenter::class)->name('ibalong.admin.notifications');
-    Route::get('/resources', \App\Livewire\Ibalong\ResourceRoom::class)->name('ibalong.resources');
+    Route::get('/launchpad/notifications', \App\Livewire\Ibalong\Admin\NotificationCenter::class)->name('admin.notifications');
+    Route::get('/resources', \App\Livewire\Ibalong\ResourceRoom::class)->name('resources');
 
     Route::middleware(['ibalong.auth'])->group(function () {
 

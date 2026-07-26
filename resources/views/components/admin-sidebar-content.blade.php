@@ -21,6 +21,11 @@
             <svg class="mr-3 flex-shrink-0 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" /></svg>
             Community Logs
         </a>
+        {{-- Resource Room --}}
+        <a href="{{ route('ibalong.resources') }}" class="group flex items-center px-4 py-3 text-xs font-black uppercase tracking-wider border-2 transition-all {{ request()->routeIs('ibalong.resources') ? 'bg-iba-orange text-iba-black border-iba-black shadow-[4px_4px_0_0_#131011]' : 'border-transparent text-gray-600 dark:text-gray-400 hover:border-iba-black dark:hover:border-white hover:text-iba-black dark:hover:text-white' }}">
+            <svg class="mr-3 shrink-0 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" /></svg>
+            Resource Room
+        </a>
 
         {{-- Admin & Facilitator Controls (Role 1: Super Admin, Role 2: Admin, Role 5: Facilitator) --}}
         @if(in_array($role, [1, 2, 5]))
@@ -54,6 +59,11 @@
                 <a href="{{ route('ibalong.admin.committees') }}" class="group flex items-center px-4 py-3 text-xs font-bold uppercase tracking-wider border-2 transition-all {{ request()->routeIs('ibalong.admin.committees') ? 'bg-iba-teal text-white border-iba-black dark:border-iba-light shadow-[4px_4px_0_0_#131011] dark:shadow-[4px_4px_0_0_#FFFBF7]' : 'border-transparent text-gray-700 dark:text-gray-300 hover:border-iba-black dark:hover:border-iba-light hover:bg-gray-100 dark:hover:bg-gray-800 hover:-translate-y-0.5' }}">
                     <svg class="mr-3 flex-shrink-0 h-5 w-5 {{ request()->routeIs('ibalong.admin.committees') ? 'text-white' : 'text-gray-400 group-hover:text-iba-teal' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
                     Committees
+                </a>
+
+                <a href="{{ route('ibalong.admin.notifications') }}" class="group flex items-center px-4 py-3 text-xs font-black uppercase tracking-wider border-2 transition-all {{ request()->routeIs('ibalong.admin.notifications') ? 'bg-iba-red text-white border-iba-black shadow-[4px_4px_0_0_#131011]' : 'border-transparent text-gray-600 dark:text-gray-400 hover:border-iba-black dark:hover:border-white hover:text-iba-black dark:hover:text-white' }}">
+                    <svg class="mr-3 shrink-0 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" /></svg>
+                    Alerts System
                 </a>
             @endif
 
