@@ -142,7 +142,7 @@
 
                                         {{-- Member Details --}}
                                         <div class="flex-1 min-w-0">
-                                            <h5 class="font-bold text-sm text-iba-black dark:text-white uppercase truncate mb-1" title="{{ $member->full_name }}">{{ $member->full_name }}</h5>
+                                            <h5 class="font-bold text-sm text-iba-black dark:text-white uppercase leading-tight break-words mb-1" title="{{ $member->full_name }}">{{ $member->full_name }}</h5>
                                             <span class="inline-block px-2 py-0.5 border border-iba-black text-[8px] font-bold uppercase tracking-wider mb-2 {{ $member->team_role == 'Team Leader' ? 'bg-iba-red text-white' : 'bg-gray-100 text-iba-black' }}">{{ $member->team_role }}</span>
 
                                             <div class="text-[10px] font-semibold text-gray-600 dark:text-gray-400 space-y-0.5 truncate">
