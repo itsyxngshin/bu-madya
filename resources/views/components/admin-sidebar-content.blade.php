@@ -1,5 +1,5 @@
 <div class="flex h-full flex-col overflow-y-auto bg-white dark:bg-[#1A1617] border-r-4 border-iba-black dark:border-iba-light transition-colors duration-300">
-    
+
     {{-- Branding Header --}}
     <div class="flex flex-col justify-center shrink-0 py-6 px-6 border-b-4 border-iba-black dark:border-iba-light bg-gray-50 dark:bg-gray-900">
         <a href="{{ route('ibalong.dashboard') }}" class="block transform hover:-translate-y-1 transition-transform">
@@ -15,6 +15,11 @@
         <a href="{{ route('ibalong.dashboard') }}" class="group flex items-center px-4 py-3 text-xs font-bold uppercase tracking-wider border-2 transition-all {{ request()->routeIs('ibalong.dashboard') ? 'bg-iba-teal text-white border-iba-black dark:border-iba-light shadow-[4px_4px_0_0_#131011] dark:shadow-[4px_4px_0_0_#FFFBF7]' : 'border-transparent text-gray-700 dark:text-gray-300 hover:border-iba-black dark:hover:border-iba-light hover:bg-gray-100 dark:hover:bg-gray-800 hover:-translate-y-0.5' }}">
             <svg class="mr-3 flex-shrink-0 h-5 w-5 {{ request()->routeIs('ibalong.dashboard') ? 'text-white' : 'text-gray-400 group-hover:text-iba-teal' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
             Overview
+        </a>
+
+        <a href="{{ route('ibalong.community-logs') }}" class="group flex items-center px-4 py-3 text-xs font-bold uppercase tracking-wider border-2 transition-all {{ request()->routeIs('ibalong.community-logs') ? 'bg-iba-teal text-white border-iba-black shadow-[4px_4px_0_0_#131011]' : 'border-transparent text-gray-700 hover:border-iba-black hover:bg-gray-100' }}">
+            <svg class="mr-3 flex-shrink-0 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" /></svg>
+            Community Logs
         </a>
 
         {{-- Admin & Facilitator Controls (Role 1: Super Admin, Role 2: Admin, Role 5: Facilitator) --}}

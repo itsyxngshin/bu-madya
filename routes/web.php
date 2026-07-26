@@ -79,12 +79,14 @@ use App\Livewire\Admin\Content\RequestsBoard;
 use App\Livewire\Admin\Content\ContentSettings;
 use App\Livewire\Admin\Content\ContentReferences;
 
+// Exclusively for Ibalong Hackathon routes
 use App\Livewire\Ibalong\Launchpad;
 use App\Livewire\Ibalong\Admin\EventManager;
 use App\Livewire\Ibalong\EventRegistration;
 use App\Livewire\Ibalong\EventScanner as IbalongScanner;
 use App\Livewire\Ibalong\RegistrationForm as IbalongRegistration;
 use App\Livewire\Ibalong\Admin\TeamAccountManager;
+use App\Livewire\Ibalong\CommunityLogs; 
 
 use App\Models\MembershipApplication;
 use Illuminate\Support\Facades\Storage;
@@ -176,6 +178,7 @@ Route::domain('ibalong.' . env('APP_DOMAIN'))->name('ibalong.')->group(function 
             ->name('admin.registrants');
 
         Route::get('/launchpad/users', \App\Livewire\Ibalong\Admin\UserManager::class)->name('admin.users');
+        Route::get('/community', CommunityLogs::class)->name('community-logs');
 
         // Every authenticated user can access their profile
         Route::get('/launchpad/profile', \App\Livewire\Ibalong\ProfileManager::class)->name('profile');
