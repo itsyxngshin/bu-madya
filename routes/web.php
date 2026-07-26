@@ -162,8 +162,8 @@ Route::domain('ibalong.' . env('APP_DOMAIN'))->name('ibalong.')->group(function 
     // TIER 1: PUBLIC ROUTES (No Login Required)
     // ==========================================
     Route::get('/', \App\Livewire\Ibalong\Launchpad::class)->name('home');
-    Route::get('/launchpad/register', \App\Livewire\Ibalong\IbalongRegistration::class)->name('register');
-    Route::get('/events/{slug}/register', \App\Livewire\Ibalong\EventRegistration::class)->name('events.register');
+    Route::get('/launchpad/register', IbalongRegistration::class)->name('register');
+    Route::get('/events/{slug}/register', EventRegistration::class)->name('events.register');
     Route::get('/events/{slug}/scanner', \App\Livewire\Ibalong\IbalongScanner::class)->name('events.scanner');
     Route::get('/launchpad/login', \App\Livewire\Ibalong\Auth\Login::class)->name('login');
     Route::get('/roster', \App\Livewire\Ibalong\MeetTheTeam::class)->name('roster');
