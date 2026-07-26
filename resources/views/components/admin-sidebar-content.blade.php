@@ -31,7 +31,7 @@
         </a>
 
         {{-- Admin & Facilitator Controls (Role 1: Super Admin, Role 2: Admin, Role 5: Facilitator) --}}
-        @if(in_array($role, [1, 2, 5]))
+        @if(in_array($role, [1, 2, 4]))
             <div class="pt-4 pb-2">
                 <p class="px-2 text-[10px] font-black text-gray-500 uppercase tracking-widest border-b-2 border-dashed border-gray-300 dark:border-gray-700 pb-2">Administration</p>
             </div>

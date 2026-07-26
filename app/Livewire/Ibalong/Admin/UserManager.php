@@ -151,8 +151,8 @@ class UserManager extends Component
             1 => 'Super Admin',
             2 => 'System Admin',
             3 => 'Cohort Team',
-            4 => 'Judge',
-            5 => 'Facilitator / Mentor',
+            4 => 'Facilitator / Mentor',
+            5 => 'Judge',
             default => 'Unknown',
         };
     }
