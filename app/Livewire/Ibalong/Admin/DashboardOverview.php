@@ -7,7 +7,8 @@ use Livewire\WithFileUploads;
 use Illuminate\Support\Facades\Storage;
 use App\Models\IbalongRegistration;
 use App\Models\IbalongSetting;
-use App\Models\IbalongTeamMember; // Adjust this if your model is named differently
+use App\Models\IbalongTeamMember;
+use App\Models\IbalongEventRegistration;
 
 class DashboardOverview extends Component
 {
@@ -21,12 +22,12 @@ class DashboardOverview extends Component
     public $team;
     public $teamLogo;
     public $memberPhotos = [];
+    public $teamEvents = []; // Holds the event participation data
 
     public function mount()
     {
         $user = auth('ibalong')->user();
         
-        // Roles 1 (Super Admin) and 2 (Admin)[cite: 3]
         $this->isAdmin = in_array($user->role_id, [1, 2]);
 
         if ($this->isAdmin) {
@@ -43,8 +44,17 @@ class DashboardOverview extends Component
                 'rejected' => IbalongRegistration::where('status', 'rejected')->count(),
             ];
         } else {
-            // Load the specific team and their members
-            $this->team = IbalongRegistration::where('user_id', $user->id)->with('members')->first();
+            // Eager load the team, their skills, members, and member skills
+            $this->team = IbalongRegistration::where('user_id', $user->id)
+                            ->with(['skills', 'members.skills'])
+                            ->first();
+
+            // Load the Event Registrations for this team, including the event details and check-ins
+            if ($this->team) {
+                $this->teamEvents = IbalongEventRegistration::with(['event', 'attendances'])
+                                        ->where('team_id', $this->team->id)
+                                        ->get();
+            }
         }
     }
 
@@ -69,7 +79,7 @@ class DashboardOverview extends Component
     // --- Image Upload Handlers ---
     public function updatedTeamLogo()
     {
-        $this->validate(['teamLogo' => 'image|max:2048']); // 2MB Max
+        $this->validate(['teamLogo' => 'image|max:6144']); // 2MB Max
         
         if ($this->team->logo_path) {
             Storage::disk('public')->delete($this->team->logo_path);
@@ -84,12 +94,11 @@ class DashboardOverview extends Component
 
     public function updatedMemberPhotos($value, $memberId)
     {
-        $this->validate(['memberPhotos.'.$memberId => 'image|max:8192']);
+        $this->validate(['memberPhotos.'.$memberId => 'image|max:15360']);
         
         $member = IbalongTeamMember::find($memberId);
         
-        // Security check to ensure they only update their own members
-        if ($member && $member->registration_id === $this->team->id) {
+        if ($member && $member->team_id === $this->team->id) {
             if ($member->photo_path) {
                 Storage::disk('public')->delete($member->photo_path);
             }
@@ -97,8 +106,7 @@ class DashboardOverview extends Component
             $path = $this->memberPhotos[$memberId]->store('member_photos', 'public');
             $member->update(['photo_path' => $path]);
             
-            // Refresh team members relationship
-            $this->team->load('members');
+            $this->team->load('members.skills');
             session()->flash('success', 'Member photo updated!');
         }
     }

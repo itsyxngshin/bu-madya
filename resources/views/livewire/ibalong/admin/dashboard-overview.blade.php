@@ -1,4 +1,4 @@
-<div class="max-w-7xl mx-auto space-y-6 pb-24">
+<div class="max-w-7xl mx-auto space-y-8 pb-24">
 
     @if (session()->has('success'))
         <div class="bg-iba-green/10 border-l-4 border-iba-green p-4 flex items-center justify-between">
@@ -72,6 +72,20 @@
     {{-- TEAM VIEW --}}
     {{-- ========================================== --}}
     @else
+        {{-- Profile Completion Check --}}
+        @php
+            $hasMissingPhotos = !$team->logo_path || ($team->members && $team->members->contains(function($m) { return empty($m->photo_path); }));
+        @endphp
+
+        @if($hasMissingPhotos)
+            <div class="bg-iba-orange/10 border-l-4 border-iba-orange p-4 flex items-center shadow-sm">
+                <svg class="w-6 h-6 text-iba-orange mr-3 shrink-0 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                <p class="text-xs font-black text-iba-black dark:text-white uppercase tracking-wider">
+                    Action Required: Please complete your team profile by uploading your <span class="text-iba-orange">team logo</span> and <span class="text-iba-orange">member photos</span>. Max 2MB per file.
+                </p>
+            </div>
+        @endif
+
         {{-- Welcome & Overview --}}
         <div class="bg-white dark:bg-[#1A1617] border-4 border-iba-black dark:border-iba-light shadow-[8px_8px_0_0_#FF8623] overflow-hidden">
             <div class="bg-iba-orange px-6 py-3 border-b-4 border-iba-black">
@@ -86,15 +100,20 @@
                         @if($team && $team->logo_path)
                             <img src="{{ Storage::url($team->logo_path) }}" class="w-full h-full object-cover">
                         @else
-                            <span class="text-4xl">🚀</span>
+                            <div class="flex flex-col items-center justify-center space-y-1">
+                                <span class="text-4xl">🚀</span>
+                                <span class="text-[9px] font-black text-iba-red uppercase text-center leading-tight">Missing<br>Logo</span>
+                            </div>
                         @endif
                         
                         {{-- Upload Overlay --}}
-                        <label class="absolute inset-0 bg-black/50 hidden group-hover:flex items-center justify-center cursor-pointer transition-all">
+                        <label class="absolute inset-0 bg-black/70 hidden group-hover:flex flex-col items-center justify-center cursor-pointer transition-all">
                             <span class="text-[10px] font-black text-white uppercase tracking-widest text-center px-2">Update<br>Logo</span>
+                            <span class="text-[8px] font-bold text-gray-300 mt-1 uppercase">Max 2MB</span>
                             <input type="file" wire:model.live="teamLogo" accept="image/*" class="hidden">
                         </label>
                     </div>
+                    @error('teamLogo') <span class="absolute -bottom-6 left-0 right-0 text-center text-[10px] font-black text-iba-red block mt-1">{{ $message }}</span> @enderror
                     <div wire:loading wire:target="teamLogo" class="absolute -bottom-6 left-0 right-0 text-center text-[10px] font-bold text-iba-orange animate-pulse">Uploading...</div>
                 </div>
 
@@ -117,6 +136,78 @@
             </div>
         </div>
 
+        {{-- Team Manifesto & Capabilities --}}
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {{-- Cohort Manifesto --}}
+            <div class="lg:col-span-2 bg-white dark:bg-[#1A1617] border-4 border-iba-black dark:border-iba-light p-6 shadow-[6px_6px_0_0_#131011] dark:shadow-[6px_6px_0_0_#FFFBF7]">
+                <h3 class="text-sm font-black text-iba-black dark:text-white uppercase tracking-wider mb-4 border-b-4 border-iba-black dark:border-iba-light pb-2">Cohort Manifesto</h3>
+                <p class="text-sm font-bold text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">{{ $team->team_about ?? 'No manifesto provided.' }}</p>
+            </div>
+            
+            {{-- Team Skills / Tech Stack --}}
+            <div class="bg-gray-50 dark:bg-gray-800 border-4 border-iba-black dark:border-iba-light p-6 shadow-[6px_6px_0_0_#131011] dark:shadow-[6px_6px_0_0_#FFFBF7]">
+                <h3 class="text-sm font-black text-iba-black dark:text-white uppercase tracking-wider mb-4 border-b-4 border-iba-black dark:border-iba-light pb-2">Team Capabilities</h3>
+                @if($team && $team->skills->count() > 0)
+                    <div class="flex flex-wrap gap-2">
+                        @foreach($team->skills as $skill)
+                            <span class="bg-iba-black text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 border border-iba-black shadow-sm">{{ $skill->name }}</span>
+                        @endforeach
+                    </div>
+                @else
+                    <p class="text-sm font-bold text-gray-500 italic">No team skills registered.</p>
+                @endif
+            </div>
+        </div>
+
+        {{-- Event Participation & Tracking Monitor --}}
+        <div>
+            <h3 class="text-lg font-black text-iba-black dark:text-white uppercase tracking-wider mb-6 border-l-4 border-iba-teal pl-3">Event Participation Monitor</h3>
+            
+            <div class="bg-white dark:bg-gray-900 border-4 border-iba-black dark:border-iba-light shadow-[6px_6px_0_0_#0095AC] p-6">
+                @if(count($teamEvents) > 0)
+                    <div class="space-y-4">
+                        @foreach($teamEvents as $eventReg)
+                            <div class="flex flex-col md:flex-row md:items-center justify-between border-2 border-dashed border-gray-300 dark:border-gray-700 p-4 gap-4 bg-gray-50 dark:bg-gray-800">
+                                <div class="flex-1">
+                                    <h4 class="text-sm font-black text-iba-black dark:text-white uppercase">{{ $eventReg->event->title ?? 'Unknown Event' }}</h4>
+                                    <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-1">
+                                        {{ $eventReg->event->type ?? 'General' }} 
+                                        @if($eventReg->event && $eventReg->event->start_datetime)
+                                            • {{ $eventReg->event->start_datetime->format('M d, Y h:i A') }}
+                                        @endif
+                                    </p>
+                                </div>
+
+                                <div class="flex items-center gap-6 md:shrink-0">
+                                    <div class="text-center">
+                                        <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest">Ticket Code</p>
+                                        <p class="text-xs font-black font-pixel text-iba-black dark:text-white bg-gray-200 dark:bg-gray-700 px-2 py-1 mt-1 border border-iba-black">{{ $eventReg->ticket_code }}</p>
+                                    </div>
+
+                                    <div class="text-center min-w-[90px]">
+                                        <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest">Status</p>
+                                        @if($eventReg->attendances->count() > 0)
+                                            <p class="text-xs font-black text-iba-green uppercase mt-1 flex items-center justify-center gap-1">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg> Verified
+                                            </p>
+                                        @else
+                                            <p class="text-xs font-black text-iba-orange uppercase mt-1 flex items-center justify-center gap-1">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> Pending
+                                            </p>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @else
+                    <div class="p-8 text-center border-4 border-dashed border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
+                        <p class="text-xs font-black uppercase tracking-widest text-gray-500">Your team has not registered for any upcoming events yet.</p>
+                    </div>
+                @endif
+            </div>
+        </div>
+
         {{-- Team Roster --}}
         <div>
             <h3 class="text-lg font-black text-iba-black dark:text-white uppercase tracking-wider mb-6 border-l-4 border-iba-orange pl-3">Team Roster</h3>
@@ -124,25 +215,40 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 @if($team && $team->members)
                     @foreach($team->members as $member)
-                        <div class="bg-white dark:bg-[#1A1617] border-4 border-iba-black flex items-center p-4 shadow-[4px_4px_0_0_#131011] relative group overflow-hidden">
+                        <div class="bg-white dark:bg-[#1A1617] border-4 border-iba-black flex items-start p-4 shadow-[4px_4px_0_0_#131011] relative group overflow-hidden {{ !$member->photo_path ? 'border-dashed border-iba-red' : '' }}">
                             
                             {{-- Member Avatar & Upload --}}
-                            <div class="w-16 h-16 shrink-0 border-2 border-iba-black overflow-hidden bg-gray-100 flex items-center justify-center relative">
+                            <div class="w-16 h-16 shrink-0 border-2 border-iba-black overflow-hidden bg-gray-100 flex items-center justify-center relative mt-1">
                                 @if($member->photo_path)
                                     <img src="{{ Storage::url($member->photo_path) }}" class="w-full h-full object-cover">
                                 @else
-                                    <span class="font-black text-lg text-gray-400">{{ substr($member->full_name, 0, 1) }}</span>
+                                    <div class="flex flex-col items-center justify-center w-full h-full bg-red-50 text-iba-red">
+                                        <span class="font-black text-lg">{{ substr($member->full_name, 0, 1) }}</span>
+                                        <span class="text-[6px] font-black uppercase text-center mt-0.5 leading-tight">Need<br>Photo</span>
+                                    </div>
                                 @endif
 
-                                <label class="absolute inset-0 bg-black/50 hidden group-hover:flex items-center justify-center cursor-pointer transition-all">
-                                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                                <label class="absolute inset-0 bg-black/70 hidden group-hover:flex flex-col items-center justify-center cursor-pointer transition-all">
+                                    <svg class="w-4 h-4 text-white mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                                    <span class="text-[7px] font-bold text-gray-300 uppercase">Max 2MB</span>
                                     <input type="file" wire:model.live="memberPhotos.{{ $member->id }}" accept="image/*" class="hidden">
                                 </label>
                             </div>
 
-                            <div class="ml-4 truncate">
-                                <h4 class="font-black text-sm text-iba-black dark:text-white uppercase truncate">{{ $member->full_name }}</h4>
+                            <div class="ml-4 flex-1">
+                                <h4 class="font-black text-sm text-iba-black dark:text-white uppercase truncate" title="{{ $member->full_name }}">{{ $member->full_name }}</h4>
                                 <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-0.5">{{ $member->team_role }}</p>
+                                
+                                {{-- Display Individual Member Skills --}}
+                                @if($member->skills && $member->skills->count() > 0)
+                                    <div class="flex flex-wrap gap-1 mt-2">
+                                        @foreach($member->skills as $skill)
+                                            <span class="bg-iba-teal/10 text-iba-teal border border-iba-teal/30 text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 truncate max-w-full" title="{{ $skill->name }}">{{ $skill->name }}</span>
+                                        @endforeach
+                                    </div>
+                                @endif
+                                
+                                @error('memberPhotos.'.$member->id) <span class="text-[9px] font-black text-iba-red block mt-1 truncate">{{ $message }}</span> @enderror
                             </div>
 
                             <div wire:loading wire:target="memberPhotos.{{ $member->id }}" class="absolute bottom-0 left-0 right-0 h-1 bg-iba-orange animate-pulse"></div>
