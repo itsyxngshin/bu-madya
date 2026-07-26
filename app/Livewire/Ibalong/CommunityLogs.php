@@ -263,17 +263,6 @@ class CommunityLogs extends Component
                 ]);
                 continue; // Move to next mention if team was found
             }
-
-            // 2. Check if a specific Organizer/Facilitator was mentioned
-            $user = User::whereRaw("REPLACE(name, ' ', '') LIKE ?", ['%'.$mention.'%'])->first();
-            if ($user && $user->id !== auth('ibalong')->id()) {
-                IbalongNotification::create([
-                    'user_id' => $user->id,
-                    'type' => 'mention',
-                    'message' => $author . ' mentioned you.',
-                    'link' => route('ibalong.community-logs.show', $postId),
-                ]);
-            }
         }
     }
 
