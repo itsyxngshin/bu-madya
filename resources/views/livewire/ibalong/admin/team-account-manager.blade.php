@@ -47,7 +47,7 @@
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                             <div class="flex justify-end items-center gap-3">
                                 <button wire:click="viewTeamDetails({{ $team->id }})" class="text-blue-600 hover:text-blue-900 font-bold uppercase text-xs tracking-wider">Profile</button>
-                                
+
                                 @if($team->user)
                                     <span class="text-gray-300 dark:text-gray-600">|</span>
                                     <button wire:click="confirmPasswordReset({{ $team->user->id }})" class="text-iba-orange hover:text-orange-700 font-bold uppercase text-xs tracking-wider">Reset Pass</button>
@@ -76,14 +76,14 @@
 
     <div class="h-16 sm:h-24 w-full flex-shrink-0"></div>
 
-    {{-- MODAL: FULL TEAM PROFILE (Reused from Intake) --}}
+    {{-- MODAL: FULL TEAM PROFILE --}}
     @if($showModal && $viewingTeam)
         <div class="fixed inset-0 z-50 overflow-y-auto">
             <div class="fixed inset-0 bg-iba-black/80 backdrop-blur-sm transition-opacity" wire:click="closeModal"></div>
 
             <div class="flex min-h-screen items-center justify-center p-4">
                 <div class="relative w-full max-w-5xl bg-white dark:bg-[#1A1617] border-4 border-iba-black dark:border-iba-light shadow-[8px_8px_0_0_#FF8623] flex flex-col text-left max-h-[90vh]">
-                    
+
                     <div class="px-6 py-4 border-b-4 border-iba-black dark:border-iba-light bg-gray-50 dark:bg-gray-800 flex justify-between items-center shrink-0">
                         <div>
                             <h3 class="text-xl font-black text-iba-black dark:text-white uppercase tracking-wider">{{ $viewingTeam->team_name }}</h3>
@@ -136,7 +136,7 @@
             <div class="fixed inset-0 bg-iba-black/80 backdrop-blur-sm transition-opacity" wire:click="closeModal"></div>
             <div class="flex min-h-screen items-center justify-center p-4 text-center sm:p-6">
                 <div class="relative w-full sm:max-w-md flex flex-col bg-white dark:bg-[#1A1617] border-4 border-iba-black dark:border-iba-light shadow-[8px_8px_0_0_#FF8623] text-left transition-all overflow-hidden">
-                    
+
                     <div class="bg-gray-50 dark:bg-gray-800 px-6 py-4 border-b-4 border-iba-black dark:border-iba-light flex justify-between items-center">
                         <h3 class="text-lg font-black text-iba-black dark:text-white uppercase tracking-wider">Force Account Reset</h3>
                         <button wire:click="closeModal" class="text-gray-400 hover:text-iba-red"><svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
@@ -161,16 +161,19 @@
 
                                 <div class="pt-4 flex gap-3">
                                     <button type="button" wire:click="closeModal" class="w-full px-4 py-2 border-2 border-iba-black dark:border-iba-light bg-gray-100 dark:bg-gray-800 text-sm font-bold uppercase text-gray-700 dark:text-gray-300 hover:bg-gray-200">Cancel</button>
-                                    <button type="submit" class="w-full bg-iba-orange text-iba-black font-bold px-4 py-2 text-sm uppercase border-2 border-iba-black shadow-[3px_3px_0_0_#131011] hover:translate-y-0.5 hover:shadow-none transition-all active:translate-y-1">Force Reset</button>
+                                    <button type="submit" class="w-full bg-iba-orange text-iba-black font-bold px-4 py-2 text-sm uppercase border-2 border-iba-black shadow-[3px_3px_0_0_#131011] hover:translate-y-0.5 hover:shadow-none transition-all active:translate-y-1">Force Reset & Email</button>
                                 </div>
                             </form>
                         @else
+                            {{-- Success Screen --}}
                             <div class="text-center">
-                                <h3 class="text-lg font-black text-iba-black dark:text-white uppercase mb-2">Password Regenerated</h3>
-                                <p class="text-xs font-bold uppercase text-gray-500 dark:text-gray-400 mb-4">Please securely provide this new portal password to the team.</p>
+                                <h3 class="text-lg font-black text-iba-black dark:text-white uppercase mb-2 text-iba-green">Keys Regenerated!</h3>
+                                <p class="text-xs font-bold uppercase text-gray-500 dark:text-gray-400 mb-4">The new credentials have been successfully emailed to the team.</p>
+
                                 <div class="bg-gray-100 dark:bg-gray-900 border-2 border-iba-black dark:border-iba-light p-4 text-center mb-6 shadow-inner">
                                     <span class="font-pixel text-xl font-bold text-iba-teal tracking-widest">{{ $generated_password }}</span>
                                 </div>
+
                                 <button wire:click="closeModal" class="w-full bg-iba-black dark:bg-iba-light text-white dark:text-iba-black font-bold px-6 py-2.5 text-sm uppercase border-2 border-transparent shadow-[3px_3px_0_0_#FF8623] hover:translate-y-0.5 hover:shadow-none transition-all active:translate-y-1">Close Window</button>
                             </div>
                         @endif
