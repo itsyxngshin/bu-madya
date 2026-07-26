@@ -116,9 +116,9 @@
                             </div>
                         </div>
                     @else
-                        {{-- Clamped Text Display --}}
+                        {{-- Clamped Text Display (REMOVED nl2br to fix double spacing) --}}
                         <div class="text-sm font-bold text-gray-800 dark:text-gray-200 leading-relaxed whitespace-pre-wrap transition-all duration-300"
-                             :class="expanded ? '' : 'line-clamp-4'">{!! preg_replace('/@([A-Za-z0-9_]+)/', '<span class="text-iba-teal bg-iba-teal/10 px-1 py-0.5 border border-iba-teal border-dashed">$0</span>', nl2br(e($post->content))) !!}</div>
+                             :class="expanded ? '' : 'line-clamp-4'">{!! preg_replace('/@([A-Za-z0-9_]+)/', '<span class="text-iba-teal bg-iba-teal/10 px-1 py-0.5 border border-iba-teal border-dashed">$0</span>', e($post->content)) !!}</div>
                         
                         @if(strlen($post->content) > 300)
                             <button @click="expanded = !expanded" class="text-iba-teal text-[10px] font-black uppercase tracking-widest mt-2 hover:underline focus:outline-none" x-text="expanded ? 'SEE LESS ↑' : 'SEE MORE ↓'"></button>
@@ -167,7 +167,7 @@
                                         <span class="text-[10px] font-black uppercase tracking-widest text-iba-black dark:text-white">{{ $comment->author_display }}</span>
                                         <span class="text-[9px] font-bold text-gray-400">{{ $comment->created_at->diffForHumans() }}</span>
                                     </div>
-                                    <p class="text-xs font-bold text-gray-700 dark:text-gray-300 leading-relaxed mb-2">{!! preg_replace('/@([A-Za-z0-9_]+)/', '<span class="text-iba-teal">$0</span>', e($comment->content)) !!}</p>
+                                    <p class="text-xs font-bold text-gray-700 dark:text-gray-300 leading-relaxed mb-2 whitespace-pre-wrap">{!! preg_replace('/@([A-Za-z0-9_]+)/', '<span class="text-iba-teal">$0</span>', e($comment->content)) !!}</p>
                                     <button wire:click="setReply({{ $comment->id }})" class="text-[9px] font-black uppercase text-gray-400 hover:text-iba-orange transition-colors">Reply ↳</button>
                                 </div>
                             </div>
@@ -184,7 +184,7 @@
                                                 <div class="flex justify-between items-end mb-1">
                                                     <span class="text-[9px] font-black uppercase tracking-widest text-iba-black">{{ $reply->author_display }}</span>
                                                 </div>
-                                                <p class="text-[11px] font-bold text-gray-600 dark:text-gray-400">{!! preg_replace('/@([A-Za-z0-9_]+)/', '<span class="text-iba-teal">$0</span>', e($reply->content)) !!}</p>
+                                                <p class="text-[11px] font-bold text-gray-600 dark:text-gray-400 whitespace-pre-wrap">{!! preg_replace('/@([A-Za-z0-9_]+)/', '<span class="text-iba-teal">$0</span>', e($reply->content)) !!}</p>
                                             </div>
                                         </div>
                                     @endforeach
