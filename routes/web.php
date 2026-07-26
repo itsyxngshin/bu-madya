@@ -2,6 +2,9 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Middleware\IbalongRoleMiddleware;
+
+
 use App\Livewire\Open\LandingPage;
 use App\Livewire\About;
 use App\Livewire\EventsCalendar;
@@ -155,55 +158,74 @@ Route::domain('community.' . env('APP_DOMAIN'))->name('community.')->group(funct
 // ==========================================
 Route::domain('ibalong.' . env('APP_DOMAIN'))->name('ibalong.')->group(function () {
 
-    // The Launchpad Landing Page
-    Route::get('/', Launchpad::class)->name('home');
-    // Public Registration
-    Route::get('/events/{slug}/scanner', IbalongScanner::class)->name('events.scanner');
-    Route::get('/launchpad/register', IbalongRegistration::class)->name('register');
-    Route::get('/events/{slug}/register', EventRegistration::class)->name('events.register');
-
-    // Isolated Authentication
+    // ==========================================
+    // TIER 1: PUBLIC ROUTES (No Login Required)
+    // ==========================================
+    Route::get('/', \App\Livewire\Ibalong\Launchpad::class)->name('home');
+    Route::get('/launchpad/register', \App\Livewire\Ibalong\IbalongRegistration::class)->name('register');
+    Route::get('/events/{slug}/register', \App\Livewire\Ibalong\EventRegistration::class)->name('events.register');
+    Route::get('/events/{slug}/scanner', \App\Livewire\Ibalong\IbalongScanner::class)->name('events.scanner');
     Route::get('/launchpad/login', \App\Livewire\Ibalong\Auth\Login::class)->name('login');
-    // Place this outside of your auth middleware!
     Route::get('/roster', \App\Livewire\Ibalong\MeetTheTeam::class)->name('roster');
     Route::get('/about', \App\Livewire\Ibalong\AboutHackathon::class)->name('about');
     Route::get('/volunteer', \App\Livewire\Ibalong\VolunteerIntake::class)->name('volunteer');
-    Route::get('/launchpad/notifications', \App\Livewire\Ibalong\Admin\NotificationCenter::class)->name('admin.notifications');
-    Route::get('/resources', \App\Livewire\Ibalong\ResourceRoom::class)->name('resources');
 
+    // ==========================================
+    // TIER 2: AUTHENTICATED (All Logged-in Roles: 1, 2, 3, 4, 5)
+    // ==========================================
     Route::middleware(['ibalong.auth'])->group(function () {
-
-        // Default Dashboard Overview
-        Route::get('/launchpad/dashboard', \App\Livewire\Ibalong\Admin\DashboardOverview::class)
-            ->name('dashboard');
-
-        // Admin: Cohort Intake & Management
-        Route::get('/launchpad/intake', \App\Livewire\Ibalong\Admin\RegistrantManager::class)
-            ->name('admin.registrants');
-
-        Route::get('/launchpad/users', \App\Livewire\Ibalong\Admin\UserManager::class)->name('admin.users');
-        Route::get('/community', CommunityLogs::class)->name('community-logs');
-        Route::get('/community/log/{id}', CommunityLogSingle::class)->name('community-logs.show');
-
-        // Every authenticated user can access their profile
+        
+        // Universal Access
+        Route::get('/launchpad/dashboard', \App\Livewire\Ibalong\Admin\DashboardOverview::class)->name('dashboard');
         Route::get('/launchpad/profile', \App\Livewire\Ibalong\ProfileManager::class)->name('profile');
-        Route::get('/launchpad/partners', \App\Livewire\Ibalong\Admin\PartnerManager::class)->name('admin.partners');
-        Route::get('/launchpad/committees', \App\Livewire\Ibalong\Admin\CommitteeManager::class)->name('admin.committees');
-        Route::get('/team-accounts', TeamAccountManager::class)->name('admin.team-accounts');
-        Route::get('/events', EventManager::class)->name('admin.events');
+        Route::get('/community', \App\Livewire\Ibalong\CommunityLogs::class)->name('community-logs');
+        Route::get('/community/log/{id}', \App\Livewire\Ibalong\CommunityLogSingle::class)->name('community-logs.show');
+        Route::get('/resources', \App\Livewire\Ibalong\ResourceRoom::class)->name('resources');
+
         // Secure Logout
         Route::post('/launchpad/logout', function() {
             Auth::guard('ibalong')->logout();
             request()->session()->invalidate();
             request()->session()->regenerateToken();
-
             return redirect()->route('ibalong.home');
         })->name('logout');
-    });
 
-    // Future routes for this event will go here...
-    // Route::get('/register', ...)->name('ibalong.register');
-    // Route::get('/judge-dashboard', ...)->name('ibalong.judge')->middleware('auth:event_guard');
+
+        // ==========================================
+        // TIER 3: COMMAND CENTER (Super Admin & Admin Only -> Roles 1, 2)
+        // ==========================================
+        Route::middleware([IbalongRoleMiddleware::class.':1,2'])->group(function () {
+            
+            Route::get('/launchpad/users', \App\Livewire\Ibalong\Admin\UserManager::class)->name('admin.users');
+            Route::get('/launchpad/partners', \App\Livewire\Ibalong\Admin\PartnerManager::class)->name('admin.partners');
+            Route::get('/launchpad/committees', \App\Livewire\Ibalong\Admin\CommitteeManager::class)->name('admin.committees');
+            Route::get('/team-accounts', \App\Livewire\Ibalong\Admin\TeamAccountManager::class)->name('admin.team-accounts');
+            Route::get('/events', \App\Livewire\Ibalong\Admin\EventManager::class)->name('admin.events');
+            Route::get('/launchpad/notifications', \App\Livewire\Ibalong\Admin\NotificationCenter::class)->name('admin.notifications');
+            
+        });
+
+        // ==========================================
+        // TIER 4: FACILITATOR & ADMIN OPERATIONS (Roles 1, 2, 4)
+        // ==========================================
+        Route::middleware([IbalongRoleMiddleware::class.':1,2,4'])->group(function () {
+            
+            // Facilitators usually need access to manage registrants/intake
+            Route::get('/launchpad/intake', \App\Livewire\Ibalong\Admin\RegistrantManager::class)->name('admin.registrants');
+            
+            // Future route example: Route::get('/mentorship-queue', ...)->name('facilitator.mentors');
+        });
+
+        // ==========================================
+        // TIER 5: JUDGE OPERATIONS (Roles 1, 2, 5)
+        // ==========================================
+        Route::middleware([IbalongRoleMiddleware::class.':1,2,5'])->group(function () {
+            
+            // Future routes for judges will go here
+            // Route::get('/scoring-dashboard', ...)->name('judge.scoring');
+            
+        });
+    });
 });
 
 

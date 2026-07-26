@@ -14,11 +14,9 @@
                     const extension = fileName.split('.').pop().toLowerCase();
                     
                     if (extension === 'pdf' || extension === 'txt' || extension.match(/(jpg|jpeg|png|gif|webp)$/i)) {
-                        // Browsers can handle PDFs, Text, and Images natively
                         this.isNativeViewer = true;
                         this.viewerUrl = fileUrl;
                     } else if (['doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx'].includes(extension)) {
-                        // Route Office files through Microsoft Office Online Viewer
                         this.isNativeViewer = false;
                         this.viewerUrl = 'https://view.officeapps.live.com/op/embed.aspx?src=' + encodeURIComponent(fileUrl);
                     } else {
@@ -171,13 +169,14 @@
                         </form>
                     </div>
 
-                {{-- NORMAL VIEW --}}
+                {{-- NORMAL VIEW (ADMIN) --}}
                 @else
                     <div @click="expanded = !expanded" class="p-5 cursor-pointer flex justify-between items-center hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors">
                         <div>
                             <h2 class="text-lg font-black text-iba-black dark:text-white uppercase">{{ $group->title }}</h2>
                             @if($group->description)
-                                <p class="text-xs font-bold text-gray-600 dark:text-gray-400 mt-1">{{ $group->description }}</p>
+                                {{-- ADDED whitespace-pre-wrap HERE --}}
+                                <p class="text-xs font-bold text-gray-600 dark:text-gray-400 mt-1 whitespace-pre-wrap">{{ $group->description }}</p>
                             @endif
                         </div>
                         <div class="shrink-0 ml-4 bg-iba-black text-white w-8 h-8 flex items-center justify-center font-black">
