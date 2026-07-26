@@ -12,7 +12,7 @@ use App\Models\IbalongPostLike;
 use App\Models\IbalongPostComment;
 use App\Models\IbalongRegistration;
 use App\Models\IbalongNotification;
-use App\Models\User;
+use App\Models\IbalongUser; // <-- CHANGED: Using IbalongUser instead of User
 
 class CommunityLogs extends Component
 {
@@ -21,10 +21,11 @@ class CommunityLogs extends Component
     // --- Create Post State ---
     public $content = '';
     public $photos = [];
+    public $isAnnouncement = false; // <-- NEW: Toggle state for announcements
     
     // --- Identity, Comment & Mention State ---
     public $availableIdentities = [];
-    public $mentionables = []; // Holds the list of taggable users/teams
+    public $mentionables = []; 
     public $postingAs = ''; 
     public $commentIdentities = []; 
     public $newComments = []; 
@@ -57,13 +58,14 @@ class CommunityLogs extends Component
             $this->postingAs = $identity;
         }
 
-        // 2. Load Mentionable Entities (Teams & Organizers)
+        // 2. Load Mentionable Entities
         $teams = IbalongRegistration::select('team_name')->get();
         $teamMentions = $teams->map(function($t) {
             return ['tag' => str_replace(' ', '', $t->team_name), 'display' => $t->team_name];
         })->toArray();
 
-        $admins = User::whereIn('role_id', [1, 2])->select('name')->get();
+        // CHANGED: Querying IbalongUser instead of User
+        $admins = IbalongUser::whereIn('role_id', [1, 2])->select('name')->get();
         $adminMentions = $admins->map(function($a) {
             return ['tag' => str_replace(' ', '', $a->name), 'display' => $a->name . ' (Organizer)'];
         })->toArray();
@@ -90,13 +92,15 @@ class CommunityLogs extends Component
         ]);
 
         $user = auth('ibalong')->user();
-        $isAnnouncement = in_array($user->role_id, [1, 2]);
+        
+        // Ensure only Admins can actually set it as an announcement
+        $isOfficial = $this->isAnnouncement && in_array($user->role_id, [1, 2]);
 
         $post = IbalongPost::create([
             'user_id' => $user->id,
             'author_display' => $this->postingAs,
             'content' => $this->content,
-            'is_announcement' => $isAnnouncement,
+            'is_announcement' => $isOfficial,
         ]);
 
         if (!empty($this->photos)) {
@@ -109,13 +113,15 @@ class CommunityLogs extends Component
             }
         }
 
-        if ($isAnnouncement) {
+        // TRIGGER NOTIFICATIONS ONLY IF IT IS AN OFFICIAL ANNOUNCEMENT
+        if ($isOfficial) {
             $this->notifyAllUsers('announcement', 'New Official Announcement: ' . mb_strimwidth($this->content, 0, 40, '...'), route('ibalong.community-logs.show', $post->id));
         }
 
         $this->parseMentionsAndNotify($this->content, $post->id, $this->postingAs);
 
-        $this->reset(['content', 'photos']);
+        // Reset the form
+        $this->reset(['content', 'photos', 'isAnnouncement']);
         session()->flash('success', 'Log published to the community feed.');
     }
 
@@ -233,7 +239,8 @@ class CommunityLogs extends Component
     // --- NOTIFICATION HELPERS ---
     private function notifyAllUsers($type, $message, $link)
     {
-        $userIds = User::pluck('id'); 
+        // CHANGED: Pluck from IbalongUser to ensure it goes to the right table
+        $userIds = IbalongUser::pluck('id'); 
         $notifications = [];
         foreach ($userIds as $id) {
             if ($id !== auth('ibalong')->id()) {
@@ -252,7 +259,6 @@ class CommunityLogs extends Component
         $mentions = array_unique($matches[1]);
 
         foreach ($mentions as $mention) {
-            // 1. Check if a team was mentioned
             $team = IbalongRegistration::whereRaw("REPLACE(team_name, ' ', '') LIKE ?", ['%'.$mention.'%'])->first();
             if ($team && $team->user_id && $team->user_id !== auth('ibalong')->id()) {
                 IbalongNotification::create([
@@ -261,7 +267,18 @@ class CommunityLogs extends Component
                     'message' => $author . ' mentioned your team.',
                     'link' => route('ibalong.community-logs.show', $postId),
                 ]);
-                continue; // Move to next mention if team was found
+                continue; 
+            }
+
+            // CHANGED: Checking IbalongUser instead of User
+            $user = IbalongUser::whereRaw("REPLACE(name, ' ', '') LIKE ?", ['%'.$mention.'%'])->first();
+            if ($user && $user->id !== auth('ibalong')->id()) {
+                IbalongNotification::create([
+                    'user_id' => $user->id,
+                    'type' => 'mention',
+                    'message' => $author . ' mentioned you.',
+                    'link' => route('ibalong.community-logs.show', $postId),
+                ]);
             }
         }
     }
@@ -271,7 +288,6 @@ class CommunityLogs extends Component
         $query = IbalongPost::with(['user', 'images', 'likes', 'comments.user', 'comments.replies.user'])
             ->withCount(['likes', 'comments']);
 
-        // Algorithm Logic
         if ($this->filterType === 'trending') {
             $query->orderByRaw('(likes_count + comments_count) DESC')->latest();
         } else {

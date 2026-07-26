@@ -33,7 +33,6 @@
                     el.value = before + '@' + tag + ' ' + after;
                     this.showDropdown = false;
                     
-                    // Trigger Livewire update manually since we modified the value via JS
                     el.dispatchEvent(new Event('input'));
                     
                     this.$nextTick(() => {
@@ -77,11 +76,9 @@
                 </select>
             </div>
 
-            {{-- TEXTAREA WITH AUTOCOMPLETE LOGIC --}}
             <div x-data="mentionHandler" class="relative w-full">
                 <textarea x-ref="mentionInput" wire:model="content" @input="checkMention" rows="3" placeholder="What's happening? Type @ to tag a team or organizer..." class="w-full border-4 border-iba-black dark:border-iba-light p-4 text-sm focus:outline-none focus:border-iba-teal bg-gray-50 dark:bg-gray-900 text-iba-black dark:text-white font-bold resize-none"></textarea>
                 
-                {{-- Dropdown UI --}}
                 <div x-show="showDropdown" @click.away="showDropdown = false" class="absolute z-50 w-full max-h-48 overflow-y-auto bg-white dark:bg-gray-800 border-4 border-iba-black dark:border-iba-light shadow-[4px_4px_0_0_#131011] mt-1" x-cloak>
                     <template x-for="mention in filteredMentions" :key="mention.tag">
                         <button type="button" @click.prevent="insertMention(mention.tag)" class="w-full text-left px-4 py-2 text-xs font-bold border-b-2 border-dashed border-gray-200 dark:border-gray-700 hover:bg-iba-teal hover:text-white transition-colors group flex justify-between items-center">
@@ -93,6 +90,14 @@
             </div>
             @error('content') <span class="text-iba-red text-xs font-bold block mt-1">⚠ {{ $message }}</span> @enderror
             
+            {{-- NEW: Announcement Toggle (Only visible to Admins/Role 1 & 2) --}}
+            @if(in_array(auth('ibalong')->user()->role_id, [1, 2]))
+                <div class="mt-3 flex items-center gap-2 bg-iba-red/10 border-2 border-dashed border-iba-red p-2 inline-flex">
+                    <input type="checkbox" id="isAnnouncement" wire:model="isAnnouncement" class="w-4 h-4 text-iba-red border-2 border-iba-black focus:ring-0 rounded-none bg-white checked:bg-iba-red cursor-pointer">
+                    <label for="isAnnouncement" class="text-[10px] font-black uppercase tracking-widest text-iba-red cursor-pointer">Post as Official Announcement (Notifies all users)</label>
+                </div>
+            @endif
+
             @if($photos)
                 <div class="flex flex-wrap gap-3 mt-4">
                     @foreach($photos as $photo)
@@ -245,7 +250,6 @@
 
                             @if($replyingTo === $comment->id)
                                 <form wire:submit.prevent="addComment({{ $post->id }}, {{ $comment->id }})" class="pl-11 mt-1 flex flex-col sm:flex-row gap-2">
-                                    {{-- Reply Input with Mention Handler --}}
                                     <div x-data="mentionHandler" class="relative w-full flex-1">
                                         <input type="text" x-ref="mentionInput" wire:model="newComments.reply_{{ $comment->id }}" @input="checkMention" placeholder="Replying to {{ $comment->author_display }}... (Type @ to tag)" class="w-full border-2 border-iba-black dark:border-gray-500 p-2 text-xs focus:outline-none focus:border-iba-orange bg-white dark:bg-gray-800 text-iba-black dark:text-white">
                                         <div x-show="showDropdown" @click.away="showDropdown = false" class="absolute bottom-full mb-1 z-50 w-full max-h-48 overflow-y-auto bg-white dark:bg-gray-800 border-4 border-iba-black dark:border-iba-light shadow-[4px_4px_0_0_#131011]" x-cloak>
@@ -279,7 +283,6 @@
                                 </select>
                             </div>
                             
-                            {{-- Main Comment Input with Mention Handler --}}
                             <div x-data="mentionHandler" class="relative w-full flex-1">
                                 <input type="text" x-ref="mentionInput" wire:model="newComments.{{ $post->id }}" @input="checkMention" placeholder="Write a comment... (Type @ to tag)" class="w-full border-4 border-iba-black dark:border-iba-light p-2 text-xs focus:outline-none focus:border-iba-orange bg-white dark:bg-[#1A1617] text-iba-black dark:text-white font-bold">
                                 <div x-show="showDropdown" @click.away="showDropdown = false" class="absolute bottom-full mb-1 z-50 w-full max-h-48 overflow-y-auto bg-white dark:bg-gray-800 border-4 border-iba-black dark:border-iba-light shadow-[4px_4px_0_0_#131011]" x-cloak>
