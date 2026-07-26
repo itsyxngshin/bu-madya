@@ -22,15 +22,16 @@ class CommunityLogs extends Component
     public $content = '';
     public $photos = [];
     
-    // --- Identity & Comment State ---
+    // --- Identity, Comment & Mention State ---
     public $availableIdentities = [];
+    public $mentionables = []; // Holds the list of taggable users/teams
     public $postingAs = ''; 
     public $commentIdentities = []; 
     public $newComments = []; 
     public $replyingTo = null;
 
     // --- Algorithm State ---
-    public $filterType = 'latest'; // 'latest' or 'trending'
+    public $filterType = 'latest'; 
 
     // --- Edit & Delete State ---
     public $editingPostId = null;
@@ -42,8 +43,8 @@ class CommunityLogs extends Component
         $user = auth('ibalong')->user();
         $this->availableIdentities = [];
 
+        // 1. Establish Posting Identities
         $team = IbalongRegistration::where('user_id', $user->id)->with('members')->first();
-
         if ($team) {
             $this->availableIdentities[$team->team_name] = $team->team_name . ' (Entire Team)';
             foreach ($team->members as $member) {
@@ -55,11 +56,23 @@ class CommunityLogs extends Component
             $this->availableIdentities[$identity] = $identity . ' (System Account)';
             $this->postingAs = $identity;
         }
+
+        // 2. Load Mentionable Entities (Teams & Organizers)
+        $teams = IbalongRegistration::select('team_name')->get();
+        $teamMentions = $teams->map(function($t) {
+            return ['tag' => str_replace(' ', '', $t->team_name), 'display' => $t->team_name];
+        })->toArray();
+
+        $admins = User::whereIn('role_id', [1, 2])->select('name')->get();
+        $adminMentions = $admins->map(function($a) {
+            return ['tag' => str_replace(' ', '', $a->name), 'display' => $a->name . ' (Organizer)'];
+        })->toArray();
+
+        $this->mentionables = array_merge($teamMentions, $adminMentions);
     }
 
     public function updatingFilterType()
     {
-        // Reset pagination when switching between Latest and Trending
         $this->resetPage();
     }
 
@@ -239,13 +252,25 @@ class CommunityLogs extends Component
         $mentions = array_unique($matches[1]);
 
         foreach ($mentions as $mention) {
+            // 1. Check if a team was mentioned
             $team = IbalongRegistration::whereRaw("REPLACE(team_name, ' ', '') LIKE ?", ['%'.$mention.'%'])->first();
-            
             if ($team && $team->user_id && $team->user_id !== auth('ibalong')->id()) {
                 IbalongNotification::create([
                     'user_id' => $team->user_id,
                     'type' => 'mention',
                     'message' => $author . ' mentioned your team.',
+                    'link' => route('ibalong.community-logs.show', $postId),
+                ]);
+                continue; // Move to next mention if team was found
+            }
+
+            // 2. Check if a specific Organizer/Facilitator was mentioned
+            $user = User::whereRaw("REPLACE(name, ' ', '') LIKE ?", ['%'.$mention.'%'])->first();
+            if ($user && $user->id !== auth('ibalong')->id()) {
+                IbalongNotification::create([
+                    'user_id' => $user->id,
+                    'type' => 'mention',
+                    'message' => $author . ' mentioned you.',
                     'link' => route('ibalong.community-logs.show', $postId),
                 ]);
             }

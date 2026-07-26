@@ -1,5 +1,51 @@
 <div class="max-w-4xl mx-auto space-y-8 pb-24">
     
+    {{-- Reusable Alpine Logic for Mentions --}}
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('mentionHandler', () => ({
+                showDropdown: false,
+                searchQuery: '',
+                filteredMentions: [],
+                mentionStartPoint: 0,
+                mentionList: @js($mentionables),
+                
+                checkMention(e) {
+                    const el = e.target;
+                    const cursorPos = el.selectionStart;
+                    const textBeforeCursor = el.value.substring(0, cursorPos);
+                    const match = textBeforeCursor.match(/(?:\s|^)@([A-Za-z0-9_]*)$/);
+                    
+                    if (match) {
+                        this.searchQuery = match[1].toLowerCase();
+                        this.filteredMentions = this.mentionList.filter(m => m.tag.toLowerCase().includes(this.searchQuery) || m.display.toLowerCase().includes(this.searchQuery));
+                        this.showDropdown = this.filteredMentions.length > 0;
+                        this.mentionStartPoint = match.index + (textBeforeCursor.charAt(match.index) === '@' ? 0 : 1);
+                    } else {
+                        this.showDropdown = false;
+                    }
+                },
+                insertMention(tag) {
+                    const el = this.$refs.mentionInput;
+                    const before = el.value.substring(0, this.mentionStartPoint);
+                    const after = el.value.substring(el.selectionStart);
+                    
+                    el.value = before + '@' + tag + ' ' + after;
+                    this.showDropdown = false;
+                    
+                    // Trigger Livewire update manually since we modified the value via JS
+                    el.dispatchEvent(new Event('input'));
+                    
+                    this.$nextTick(() => {
+                        el.focus();
+                        const newPos = before.length + tag.length + 2;
+                        el.setSelectionRange(newPos, newPos);
+                    });
+                }
+            }));
+        });
+    </script>
+
     {{-- Header & Sorting Toggle --}}
     <div class="bg-white dark:bg-[#1A1617] p-6 border-4 border-iba-black dark:border-iba-light shadow-[8px_8px_0_0_#131011] dark:shadow-[8px_8px_0_0_#FFFBF7] flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
@@ -7,7 +53,6 @@
             <p class="text-sm font-bold text-gray-500 dark:text-gray-400 mt-1">Share updates, ask questions, and document your hackathon journey.</p>
         </div>
 
-        {{-- ALGORITHM FILTER TOGGLE --}}
         <div class="flex items-center bg-gray-100 dark:bg-gray-800 border-4 border-iba-black dark:border-iba-light p-1 shadow-[4px_4px_0_0_#131011] shrink-0">
             <button wire:click="$set('filterType', 'latest')" class="px-4 py-2 text-[10px] font-black uppercase tracking-widest transition-all {{ $filterType === 'latest' ? 'bg-iba-teal text-white border-2 border-iba-black shadow-sm' : 'text-gray-500 hover:text-iba-black dark:hover:text-white border-2 border-transparent' }}">Latest</button>
             <button wire:click="$set('filterType', 'trending')" class="px-4 py-2 text-[10px] font-black uppercase tracking-widest transition-all {{ $filterType === 'trending' ? 'bg-iba-orange text-iba-black border-2 border-iba-black shadow-sm' : 'text-gray-500 hover:text-iba-black dark:hover:text-white border-2 border-transparent' }}">Trending</button>
@@ -32,7 +77,20 @@
                 </select>
             </div>
 
-            <textarea wire:model="content" rows="3" placeholder="What's happening? Type @TeamName to tag someone..." class="w-full border-4 border-iba-black dark:border-iba-light p-4 text-sm focus:outline-none focus:border-iba-teal bg-gray-50 dark:bg-gray-900 text-iba-black dark:text-white font-bold resize-none"></textarea>
+            {{-- TEXTAREA WITH AUTOCOMPLETE LOGIC --}}
+            <div x-data="mentionHandler" class="relative w-full">
+                <textarea x-ref="mentionInput" wire:model="content" @input="checkMention" rows="3" placeholder="What's happening? Type @ to tag a team or organizer..." class="w-full border-4 border-iba-black dark:border-iba-light p-4 text-sm focus:outline-none focus:border-iba-teal bg-gray-50 dark:bg-gray-900 text-iba-black dark:text-white font-bold resize-none"></textarea>
+                
+                {{-- Dropdown UI --}}
+                <div x-show="showDropdown" @click.away="showDropdown = false" class="absolute z-50 w-full max-h-48 overflow-y-auto bg-white dark:bg-gray-800 border-4 border-iba-black dark:border-iba-light shadow-[4px_4px_0_0_#131011] mt-1" x-cloak>
+                    <template x-for="mention in filteredMentions" :key="mention.tag">
+                        <button type="button" @click.prevent="insertMention(mention.tag)" class="w-full text-left px-4 py-2 text-xs font-bold border-b-2 border-dashed border-gray-200 dark:border-gray-700 hover:bg-iba-teal hover:text-white transition-colors group flex justify-between items-center">
+                            <span x-text="mention.display" class="text-iba-black dark:text-white group-hover:text-white"></span>
+                            <span class="text-[10px] text-gray-500 group-hover:text-gray-200" x-text="'@' + mention.tag"></span>
+                        </button>
+                    </template>
+                </div>
+            </div>
             @error('content') <span class="text-iba-red text-xs font-bold block mt-1">⚠ {{ $message }}</span> @enderror
             
             @if($photos)
@@ -84,7 +142,6 @@
                         </div>
                     </div>
 
-                    {{-- Edit/Delete Dropdown --}}
                     @if($post->user_id === auth('ibalong')->id() || in_array(auth('ibalong')->user()->role_id, [1, 2]))
                         <div x-data="{ open: false }" class="relative shrink-0">
                             <button @click="open = !open" @click.away="open = false" class="p-2 text-gray-400 hover:text-iba-black dark:hover:text-white transition-colors focus:outline-none">
@@ -102,10 +159,8 @@
                     @endif
                 </div>
 
-                {{-- Post Content --}}
                 <div class="p-5" x-data="{ expanded: false }">
                     @if($editingPostId === $post->id)
-                        {{-- Editing UI --}}
                         <div class="space-y-3">
                             <textarea wire:model="editContent" rows="4" class="w-full border-4 border-iba-black dark:border-iba-light p-4 text-sm focus:outline-none focus:border-iba-orange bg-gray-50 dark:bg-gray-900 text-iba-black dark:text-white font-bold resize-none"></textarea>
                             @error('editContent') <span class="text-iba-red text-xs font-bold block">⚠ {{ $message }}</span> @enderror
@@ -116,7 +171,6 @@
                             </div>
                         </div>
                     @else
-                        {{-- Clamped Text Display (REMOVED nl2br to fix double spacing) --}}
                         <div class="text-sm font-bold text-gray-800 dark:text-gray-200 leading-relaxed whitespace-pre-wrap transition-all duration-300"
                              :class="expanded ? '' : 'line-clamp-4'">{!! preg_replace('/@([A-Za-z0-9_]+)/', '<span class="text-iba-teal bg-iba-teal/10 px-1 py-0.5 border border-iba-teal border-dashed">$0</span>', e($post->content)) !!}</div>
                         
@@ -124,7 +178,6 @@
                             <button @click="expanded = !expanded" class="text-iba-teal text-[10px] font-black uppercase tracking-widest mt-2 hover:underline focus:outline-none" x-text="expanded ? 'SEE LESS ↑' : 'SEE MORE ↓'"></button>
                         @endif
                         
-                        {{-- Image Grid --}}
                         @if($post->images->count() > 0)
                             <div class="mt-4 grid gap-2 {{ $post->images->count() == 1 ? 'grid-cols-1' : ($post->images->count() == 2 ? 'grid-cols-2' : 'grid-cols-2 sm:grid-cols-3') }}">
                                 @foreach($post->images as $image)
@@ -137,7 +190,6 @@
                     @endif
                 </div>
 
-                {{-- Action Bar --}}
                 <div class="bg-gray-50 dark:bg-gray-900 border-t-2 border-iba-black dark:border-iba-light p-3 flex justify-between items-center gap-6">
                     <div class="flex gap-6">
                         <button wire:click="toggleLike({{ $post->id }})" class="flex items-center gap-1.5 text-xs font-black uppercase tracking-widest transition-colors {{ $post->likes->contains('user_id', auth('ibalong')->id()) ? 'text-iba-red' : 'text-gray-500 hover:text-iba-black dark:hover:text-white' }}">
@@ -148,13 +200,11 @@
                         </a>
                     </div>
                     
-                    {{-- Link to Individual Thread --}}
                     <a href="{{ route('ibalong.community-logs.show', $post->id) }}" class="text-[9px] font-black uppercase tracking-widest text-gray-400 hover:text-iba-orange flex items-center gap-1">
                         Open Thread <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
                     </a>
                 </div>
 
-                {{-- Comments Section (Partial Display) --}}
                 <div class="bg-gray-100 dark:bg-gray-800 border-t-2 border-iba-black dark:border-iba-light p-5 space-y-4">
                     @foreach($post->comments->take(2) as $comment)
                         <div class="flex flex-col gap-2">
@@ -172,7 +222,6 @@
                                 </div>
                             </div>
 
-                            {{-- Nested Replies --}}
                             @if($comment->replies->count() > 0)
                                 <div class="pl-11 space-y-2 mt-1">
                                     @foreach($comment->replies->take(1) as $reply)
@@ -194,10 +243,19 @@
                                 </div>
                             @endif
 
-                            {{-- Reply Input Box --}}
                             @if($replyingTo === $comment->id)
                                 <form wire:submit.prevent="addComment({{ $post->id }}, {{ $comment->id }})" class="pl-11 mt-1 flex flex-col sm:flex-row gap-2">
-                                    <input type="text" wire:model="newComments.reply_{{ $comment->id }}" placeholder="Replying to {{ $comment->author_display }}..." class="flex-1 border-2 border-iba-black dark:border-gray-500 p-2 text-xs focus:outline-none focus:border-iba-orange bg-white dark:bg-gray-800 text-iba-black dark:text-white">
+                                    {{-- Reply Input with Mention Handler --}}
+                                    <div x-data="mentionHandler" class="relative w-full flex-1">
+                                        <input type="text" x-ref="mentionInput" wire:model="newComments.reply_{{ $comment->id }}" @input="checkMention" placeholder="Replying to {{ $comment->author_display }}... (Type @ to tag)" class="w-full border-2 border-iba-black dark:border-gray-500 p-2 text-xs focus:outline-none focus:border-iba-orange bg-white dark:bg-gray-800 text-iba-black dark:text-white">
+                                        <div x-show="showDropdown" @click.away="showDropdown = false" class="absolute bottom-full mb-1 z-50 w-full max-h-48 overflow-y-auto bg-white dark:bg-gray-800 border-4 border-iba-black dark:border-iba-light shadow-[4px_4px_0_0_#131011]" x-cloak>
+                                            <template x-for="mention in filteredMentions" :key="mention.tag">
+                                                <button type="button" @click.prevent="insertMention(mention.tag)" class="w-full text-left px-4 py-2 text-xs font-bold border-b-2 border-dashed border-gray-200 dark:border-gray-700 hover:bg-iba-teal hover:text-white transition-colors">
+                                                    <span x-text="mention.display"></span>
+                                                </button>
+                                            </template>
+                                        </div>
+                                    </div>
                                     <button type="submit" class="bg-iba-orange text-iba-black font-black px-3 py-1.5 text-[10px] uppercase border-2 border-iba-black shadow-[2px_2px_0_0_#131011] hover:translate-y-0.5 hover:shadow-none transition-all w-full sm:w-auto text-center">Post</button>
                                 </form>
                             @endif
@@ -220,7 +278,19 @@
                                     @endforeach
                                 </select>
                             </div>
-                            <input type="text" wire:model="newComments.{{ $post->id }}" placeholder="Write a comment..." class="flex-1 border-4 border-iba-black dark:border-iba-light p-2 text-xs focus:outline-none focus:border-iba-orange bg-white dark:bg-[#1A1617] text-iba-black dark:text-white font-bold">
+                            
+                            {{-- Main Comment Input with Mention Handler --}}
+                            <div x-data="mentionHandler" class="relative w-full flex-1">
+                                <input type="text" x-ref="mentionInput" wire:model="newComments.{{ $post->id }}" @input="checkMention" placeholder="Write a comment... (Type @ to tag)" class="w-full border-4 border-iba-black dark:border-iba-light p-2 text-xs focus:outline-none focus:border-iba-orange bg-white dark:bg-[#1A1617] text-iba-black dark:text-white font-bold">
+                                <div x-show="showDropdown" @click.away="showDropdown = false" class="absolute bottom-full mb-1 z-50 w-full max-h-48 overflow-y-auto bg-white dark:bg-gray-800 border-4 border-iba-black dark:border-iba-light shadow-[4px_4px_0_0_#131011]" x-cloak>
+                                    <template x-for="mention in filteredMentions" :key="mention.tag">
+                                        <button type="button" @click.prevent="insertMention(mention.tag)" class="w-full text-left px-4 py-2 text-xs font-bold border-b-2 border-dashed border-gray-200 dark:border-gray-700 hover:bg-iba-teal hover:text-white transition-colors">
+                                            <span x-text="mention.display"></span>
+                                        </button>
+                                    </template>
+                                </div>
+                            </div>
+
                             <button type="submit" class="bg-iba-orange text-iba-black font-black px-4 py-2 text-xs uppercase border-4 border-iba-black shadow-[3px_3px_0_0_#131011] hover:translate-y-0.5 hover:shadow-none transition-all w-full sm:w-auto">Reply</button>
                         </div>
                     </form>
