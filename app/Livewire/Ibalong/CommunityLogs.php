@@ -4,11 +4,14 @@ namespace App\Livewire\Ibalong;
 
 use Livewire\Component;
 use Livewire\WithFileUploads;
+use Illuminate\Support\Facades\Storage;
 use App\Models\IbalongPost;
 use App\Models\IbalongPostImage;
 use App\Models\IbalongPostLike;
 use App\Models\IbalongPostComment;
-use App\Models\IbalongRegistration; // Needed to fetch the roster
+use App\Models\IbalongRegistration;
+use App\Models\IbalongNotification;
+use App\Models\User;
 
 class CommunityLogs extends Component
 {
@@ -16,38 +19,45 @@ class CommunityLogs extends Component
 
     public $content = '';
     public $photos = [];
-
-    // Identity State
+    
     public $availableIdentities = [];
-    public $postingAs = ''; // Identity for creating a new post
-    public $commentIdentities = []; // Stores the selected identity for each comment box
-    public $newComments = [];
+    public $postingAs = ''; 
+    public $commentIdentities = []; 
+    public $newComments = []; 
+
+    // Reply State
+    public $replyingTo = null;
+
+    // --- NEW: Edit & Delete State ---
+    public $editingPostId = null;
+    public $editContent = '';
+    public $postToDelete = null;
 
     public function mount()
     {
         $user = auth('ibalong')->user();
         $this->availableIdentities = [];
 
-        // Check if the logged-in user is tied to a Cohort Registration
         $team = IbalongRegistration::where('user_id', $user->id)->with('members')->first();
 
         if ($team) {
-            // Add the collective Team identity
             $this->availableIdentities[$team->team_name] = $team->team_name . ' (Entire Team)';
-
-            // Add individual roster members
             foreach ($team->members as $member) {
                 $this->availableIdentities[$member->full_name] = $member->full_name . ' (' . $member->team_role . ')';
             }
-
-            // Set default posting identity to the Team Name
             $this->postingAs = $team->team_name;
         } else {
-            // For Admins and Facilitators, default to their user name and designation
             $identity = $user->name . ($user->designation ? ' - ' . $user->designation : '');
             $this->availableIdentities[$identity] = $identity . ' (System Account)';
             $this->postingAs = $identity;
         }
+    }
+
+    // ... (Keep your existing setReply, createPost, addComment, toggleLike, markNotificationsRead, notifyAllUsers, and parseMentionsAndNotify methods exactly as they are) ...
+
+    public function setReply($commentId)
+    {
+        $this->replyingTo = $this->replyingTo === $commentId ? null : $commentId;
     }
 
     public function createPost()
@@ -63,7 +73,7 @@ class CommunityLogs extends Component
 
         $post = IbalongPost::create([
             'user_id' => $user->id,
-            'author_display' => $this->postingAs, // Save the selected identity
+            'author_display' => $this->postingAs,
             'content' => $this->content,
             'is_announcement' => $isAnnouncement,
         ]);
@@ -78,8 +88,49 @@ class CommunityLogs extends Component
             }
         }
 
+        if ($isAnnouncement) {
+            $this->notifyAllUsers('announcement', 'New Official Announcement: ' . mb_strimwidth($this->content, 0, 40, '...'), route('ibalong.community-logs'));
+        }
+
+        $this->parseMentionsAndNotify($this->content, $post->id, $this->postingAs);
+
         $this->reset(['content', 'photos']);
         session()->flash('success', 'Log published to the community feed.');
+    }
+
+    public function addComment($postId, $parentId = null)
+    {
+        $contentKey = $parentId ? 'reply_'.$parentId : $postId;
+
+        if (empty(trim($this->newComments[$contentKey] ?? ''))) {
+            return;
+        }
+
+        $identity = $this->commentIdentities[$postId] ?? $this->postingAs;
+        $content = $this->newComments[$contentKey];
+
+        $comment = IbalongPostComment::create([
+            'post_id' => $postId,
+            'user_id' => auth('ibalong')->id(),
+            'author_display' => $identity,
+            'parent_id' => $parentId,
+            'content' => $content,
+        ]);
+
+        $post = IbalongPost::find($postId);
+        if ($post->user_id !== auth('ibalong')->id()) {
+            IbalongNotification::create([
+                'user_id' => $post->user_id,
+                'type' => 'reply',
+                'message' => $identity . ' commented on your log.',
+                'link' => route('ibalong.community-logs'),
+            ]);
+        }
+
+        $this->parseMentionsAndNotify($content, $postId, $identity);
+
+        $this->newComments[$contentKey] = ''; 
+        $this->replyingTo = null;
     }
 
     public function toggleLike($postId)
@@ -94,28 +145,113 @@ class CommunityLogs extends Component
         }
     }
 
-    public function addComment($postId)
+    private function notifyAllUsers($type, $message, $link)
     {
-        if (empty(trim($this->newComments[$postId] ?? ''))) {
+        $userIds = User::pluck('id'); 
+        $notifications = [];
+        foreach ($userIds as $id) {
+            if ($id !== auth('ibalong')->id()) {
+                $notifications[] = [
+                    'user_id' => $id, 'type' => $type, 'message' => $message, 
+                    'link' => $link, 'created_at' => now(), 'updated_at' => now()
+                ];
+            }
+        }
+        IbalongNotification::insert($notifications);
+    }
+
+    private function parseMentionsAndNotify($text, $postId, $author)
+    {
+        preg_match_all('/@([A-Za-z0-9_]+)/', $text, $matches);
+        $mentions = array_unique($matches[1]);
+
+        foreach ($mentions as $mention) {
+            $team = IbalongRegistration::whereRaw("REPLACE(team_name, ' ', '') LIKE ?", ['%'.$mention.'%'])->first();
+            
+            if ($team && $team->user_id) {
+                if ($team->user_id !== auth('ibalong')->id()) {
+                    IbalongNotification::create([
+                        'user_id' => $team->user_id,
+                        'type' => 'mention',
+                        'message' => $author . ' mentioned your team.',
+                        'link' => route('ibalong.community-logs'),
+                    ]);
+                }
+            }
+        }
+    }
+
+    // --- NEW: Edit Methods ---
+    public function editPost($postId)
+    {
+        $post = IbalongPost::findOrFail($postId);
+        
+        // Security check: Only owner or admin can edit
+        if ($post->user_id !== auth('ibalong')->id() && !in_array(auth('ibalong')->user()->role_id, [1, 2])) {
             return;
         }
 
-        // Get the selected identity for this specific comment box, fallback to the main posting identity
-        $identity = $this->commentIdentities[$postId] ?? $this->postingAs;
+        $this->editingPostId = $postId;
+        $this->editContent = $post->content;
+    }
 
-        IbalongPostComment::create([
-            'post_id' => $postId,
-            'user_id' => auth('ibalong')->id(),
-            'author_display' => $identity, // Save the selected identity
-            'content' => $this->newComments[$postId],
-        ]);
+    public function cancelEdit()
+    {
+        $this->editingPostId = null;
+        $this->editContent = '';
+    }
 
-        $this->newComments[$postId] = '';
+    public function updatePost()
+    {
+        $this->validate(['editContent' => 'required|string|max:2000']);
+        
+        $post = IbalongPost::findOrFail($this->editingPostId);
+        
+        if ($post->user_id !== auth('ibalong')->id() && !in_array(auth('ibalong')->user()->role_id, [1, 2])) {
+            return;
+        }
+
+        $post->update(['content' => $this->editContent]);
+        
+        $this->cancelEdit();
+        session()->flash('success', 'Log updated successfully.');
+    }
+
+    // --- NEW: Delete Methods ---
+    public function confirmDelete($postId)
+    {
+        $this->postToDelete = $postId;
+    }
+
+    public function cancelDelete()
+    {
+        $this->postToDelete = null;
+    }
+
+    public function deletePost()
+    {
+        if (!$this->postToDelete) return;
+
+        $post = IbalongPost::findOrFail($this->postToDelete);
+        
+        // Security check: Only owner or admin can delete
+        if ($post->user_id !== auth('ibalong')->id() && !in_array(auth('ibalong')->user()->role_id, [1, 2])) {
+            return;
+        }
+
+        // Delete associated images from storage to save space
+        foreach($post->images as $image) {
+            Storage::disk('public')->delete($image->image_path);
+        }
+
+        $post->delete();
+        $this->postToDelete = null;
+        session()->flash('success', 'Log successfully deleted.');
     }
 
     public function render()
     {
-        $posts = IbalongPost::with(['user', 'images', 'likes', 'comments.user'])
+        $posts = IbalongPost::with(['user', 'images', 'likes', 'comments.user', 'comments.replies.user'])
             ->latest()
             ->get();
 

@@ -26,6 +26,8 @@ class IbalongPost extends Model
 
     public function comments()
     {
-        return $this->hasMany(IbalongPostComment::class, 'post_id')->latest();
+        // Only fetch parent comments. Replies will be eager-loaded.
+        return $this->hasMany(IbalongPostComment::class, 'post_id')->whereNull('parent_id')->latest();
     }
+
 }
