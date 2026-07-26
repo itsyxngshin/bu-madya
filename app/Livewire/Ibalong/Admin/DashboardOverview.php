@@ -84,7 +84,7 @@ class DashboardOverview extends Component
 
     public function updatedMemberPhotos($value, $memberId)
     {
-        $this->validate(['memberPhotos.'.$memberId => 'image|max:2048']);
+        $this->validate(['memberPhotos.'.$memberId => 'image|max:8192']);
         
         $member = IbalongTeamMember::find($memberId);
         

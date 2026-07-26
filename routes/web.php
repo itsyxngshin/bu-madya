@@ -161,7 +161,7 @@ Route::domain('ibalong.' . env('APP_DOMAIN'))->name('ibalong.')->group(function 
     // ==========================================
     // TIER 1: PUBLIC ROUTES (No Login Required)
     // ==========================================
-    Route::get('/', \App\Livewire\Ibalong\Launchpad::class)->name('home');
+    Route::get('/', Launchpad::class)->name('home');
     Route::get('/launchpad/register', IbalongRegistration::class)->name('register');
     Route::get('/events/{slug}/register', EventRegistration::class)->name('events.register');
     Route::get('/events/{slug}/scanner', IbalongScanner::class)->name('events.scanner');
@@ -178,8 +178,8 @@ Route::domain('ibalong.' . env('APP_DOMAIN'))->name('ibalong.')->group(function 
         // Universal Access
         Route::get('/launchpad/dashboard', \App\Livewire\Ibalong\Admin\DashboardOverview::class)->name('dashboard');
         Route::get('/launchpad/profile', \App\Livewire\Ibalong\ProfileManager::class)->name('profile');
-        Route::get('/community', \App\Livewire\Ibalong\CommunityLogs::class)->name('community-logs');
-        Route::get('/community/log/{id}', \App\Livewire\Ibalong\CommunityLogSingle::class)->name('community-logs.show');
+        Route::get('/community', CommunityLogs::class)->name('community-logs');
+        Route::get('/community/log/{id}', CommunityLogSingle::class)->name('community-logs.show');
         Route::get('/resources', \App\Livewire\Ibalong\ResourceRoom::class)->name('resources');
 
         // Secure Logout
@@ -199,8 +199,8 @@ Route::domain('ibalong.' . env('APP_DOMAIN'))->name('ibalong.')->group(function 
             Route::get('/launchpad/users', \App\Livewire\Ibalong\Admin\UserManager::class)->name('admin.users');
             Route::get('/launchpad/partners', \App\Livewire\Ibalong\Admin\PartnerManager::class)->name('admin.partners');
             Route::get('/launchpad/committees', \App\Livewire\Ibalong\Admin\CommitteeManager::class)->name('admin.committees');
-            Route::get('/team-accounts', \App\Livewire\Ibalong\Admin\TeamAccountManager::class)->name('admin.team-accounts');
-            Route::get('/events', \App\Livewire\Ibalong\Admin\EventManager::class)->name('admin.events');
+            Route::get('/team-accounts', TeamAccountManager::class)->name('admin.team-accounts');
+            Route::get('/events', EventManager::class)->name('admin.events');
             Route::get('/launchpad/notifications', \App\Livewire\Ibalong\Admin\NotificationCenter::class)->name('admin.notifications');
             
         });
