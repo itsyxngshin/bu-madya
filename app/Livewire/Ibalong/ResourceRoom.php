@@ -12,9 +12,19 @@ class ResourceRoom extends Component
 {
     use WithFileUploads;
 
-    public $title, $description, $availableAt, $isVisible = true;
-    public $uploads = []; // Holds the files during creation
     public $isAdmin = false;
+
+    // --- Create State ---
+    public $title, $description, $availableAt, $isVisible = true;
+    public $uploads = []; 
+
+    // --- Edit State ---
+    public $editingGroupId = null;
+    public $editTitle = '';
+    public $editDescription = '';
+    public $editAvailableAt = null;
+    public $editIsVisible = true;
+    public $newUploads = []; // For adding files to an existing group
 
     public function mount()
     {
@@ -39,23 +49,83 @@ class ResourceRoom extends Component
             'is_visible' => $this->isVisible,
         ]);
 
-        foreach ($this->uploads as $file) {
-            $path = $file->store('resources', 'public');
-            // Format size for display (e.g., 2.5 MB)
-            $size = round($file->getSize() / 1048576, 2) . ' MB'; 
-            
-            IbalongResourceFile::create([
-                'group_id' => $group->id,
-                'file_name' => $file->getClientOriginalName(),
-                'file_path' => $path,
-                'file_size' => $size,
-            ]);
+        if (!empty($this->uploads)) {
+            foreach ($this->uploads as $file) {
+                $path = $file->store('resources', 'public');
+                $size = round($file->getSize() / 1048576, 2) . ' MB'; 
+                
+                IbalongResourceFile::create([
+                    'group_id' => $group->id,
+                    'file_name' => $file->getClientOriginalName(),
+                    'file_path' => $path,
+                    'file_size' => $size,
+                ]);
+            }
         }
 
         $this->reset(['title', 'description', 'availableAt', 'isVisible', 'uploads']);
         session()->flash('success', 'Resource Pack Deployed.');
     }
 
+    // --- EDIT & UPDATE METHODS ---
+    public function editGroup($id)
+    {
+        if (!$this->isAdmin) return;
+        
+        $group = IbalongResourceGroup::findOrFail($id);
+        $this->editingGroupId = $group->id;
+        $this->editTitle = $group->title;
+        $this->editDescription = $group->description;
+        // Format for HTML datetime-local input
+        $this->editAvailableAt = $group->available_at ? $group->available_at->format('Y-m-d\TH:i') : null; 
+        $this->editIsVisible = $group->is_visible;
+        $this->newUploads = [];
+    }
+
+    public function cancelEdit()
+    {
+        $this->reset(['editingGroupId', 'editTitle', 'editDescription', 'editAvailableAt', 'editIsVisible', 'newUploads']);
+    }
+
+    public function updateGroup()
+    {
+        if (!$this->isAdmin) abort(403);
+
+        $this->validate([
+            'editTitle' => 'required|string|max:255',
+            'editDescription' => 'nullable|string',
+            'editAvailableAt' => 'nullable|date',
+            'newUploads.*' => 'file|max:20480',
+        ]);
+
+        $group = IbalongResourceGroup::findOrFail($this->editingGroupId);
+        $group->update([
+            'title' => $this->editTitle,
+            'description' => $this->editDescription,
+            'available_at' => $this->editAvailableAt,
+            'is_visible' => $this->editIsVisible,
+        ]);
+
+        // Process newly added files during edit
+        if (!empty($this->newUploads)) {
+            foreach ($this->newUploads as $file) {
+                $path = $file->store('resources', 'public');
+                $size = round($file->getSize() / 1048576, 2) . ' MB'; 
+                
+                IbalongResourceFile::create([
+                    'group_id' => $group->id,
+                    'file_name' => $file->getClientOriginalName(),
+                    'file_path' => $path,
+                    'file_size' => $size,
+                ]);
+            }
+        }
+
+        $this->cancelEdit();
+        session()->flash('success', 'Resource Pack Updated Successfully.');
+    }
+
+    // --- DELETE METHODS ---
     public function toggleVisibility($groupId)
     {
         if (!$this->isAdmin) return;
@@ -72,13 +142,23 @@ class ResourceRoom extends Component
             Storage::disk('public')->delete($file->file_path);
         }
         $group->delete();
+        session()->flash('success', 'Resource Pack Deleted.');
+    }
+
+    public function deleteFile($fileId)
+    {
+        if (!$this->isAdmin) return;
+        $file = IbalongResourceFile::findOrFail($fileId);
+        
+        Storage::disk('public')->delete($file->file_path);
+        $file->delete();
+        session()->flash('success', 'File removed from pack.');
     }
 
     public function render()
     {
         $query = IbalongResourceGroup::with('files')->latest();
 
-        // If not admin, only show visible AND (no schedule OR schedule <= now)
         if (!$this->isAdmin) {
             $query->where('is_visible', true)
                   ->where(function($q) {

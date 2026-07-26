@@ -23,30 +23,31 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-[10px] font-black uppercase text-gray-500 mb-1">Title</label>
-                            <input type="text" wire:model="title" required class="w-full border-4 border-iba-black p-2 text-xs font-bold bg-white focus:outline-none">
+                            <input type="text" wire:model="title" required class="w-full border-4 border-iba-black p-2 text-xs font-bold bg-white focus:outline-none focus:border-iba-orange">
                         </div>
                         <div>
-                            <label class="block text-[10px] font-black uppercase text-gray-500 mb-1">Schedule Drop (Leave empty to drop now)</label>
-                            <input type="datetime-local" wire:model="availableAt" class="w-full border-4 border-iba-black p-2 text-xs font-bold bg-white focus:outline-none">
+                            <label class="block text-[10px] font-black uppercase text-gray-500 mb-1">Schedule Drop (Optional)</label>
+                            <input type="datetime-local" wire:model="availableAt" class="w-full border-4 border-iba-black p-2 text-xs font-bold bg-white focus:outline-none focus:border-iba-orange">
                         </div>
                     </div>
                     
                     <div>
                         <label class="block text-[10px] font-black uppercase text-gray-500 mb-1">Description / Instructions</label>
-                        <textarea wire:model="description" rows="2" class="w-full border-4 border-iba-black p-2 text-xs font-bold bg-white focus:outline-none resize-none"></textarea>
+                        <textarea wire:model="description" rows="2" class="w-full border-4 border-iba-black p-2 text-xs font-bold bg-white focus:outline-none focus:border-iba-orange resize-none"></textarea>
                     </div>
 
-                    <div class="flex items-center gap-4">
-                        <div class="flex-1">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                        <div class="flex-1 w-full">
                             <input type="file" wire:model="uploads" multiple class="w-full border-4 border-iba-black bg-white text-xs font-bold p-1 cursor-pointer file:mr-4 file:py-2 file:px-4 file:border-0 file:bg-iba-black file:text-white file:font-black file:uppercase">
+                            <div wire:loading wire:target="uploads" class="text-[10px] font-bold text-iba-orange mt-1 animate-pulse uppercase">Uploading...</div>
                         </div>
-                        <div class="flex items-center gap-2">
-                            <input type="checkbox" wire:model="isVisible" id="visible" class="w-5 h-5 border-2 border-iba-black">
-                            <label for="visible" class="text-[10px] font-black uppercase text-iba-black">Visible to Cohort</label>
+                        <div class="flex items-center gap-2 shrink-0">
+                            <input type="checkbox" wire:model="isVisible" id="visible" class="w-5 h-5 border-2 border-iba-black cursor-pointer">
+                            <label for="visible" class="text-[10px] font-black uppercase text-iba-black cursor-pointer">Visible to Cohort</label>
                         </div>
                     </div>
                     
-                    <button type="submit" class="w-full bg-iba-orange text-iba-black font-black px-6 py-3 text-xs uppercase border-4 border-iba-black shadow-[4px_4px_0_0_#131011] hover:translate-y-0.5 hover:shadow-none transition-all">Upload Pack</button>
+                    <button type="submit" class="w-full bg-iba-orange text-iba-black font-black px-6 py-3 text-xs uppercase border-4 border-iba-black shadow-[4px_4px_0_0_#131011] hover:translate-y-0.5 hover:shadow-none transition-all" wire:loading.attr="disabled">Upload Pack</button>
                 </form>
             </div>
         </div>
@@ -55,11 +56,11 @@
     {{-- RESOURCE BARS --}}
     <div class="space-y-6">
         @forelse($resourceGroups as $group)
-            <div x-data="{ expanded: false }" class="bg-white dark:bg-[#1A1617] border-4 border-iba-black dark:border-iba-light shadow-[6px_6px_0_0_#131011] dark:shadow-[6px_6px_0_0_#FFFBF7]">
+            <div wire:key="group-{{ $group->id }}" x-data="{ expanded: false }" class="bg-white dark:bg-[#1A1617] border-4 border-iba-black dark:border-iba-light shadow-[6px_6px_0_0_#131011] dark:shadow-[6px_6px_0_0_#FFFBF7]">
                 
-                {{-- Admin Controls overlay --}}
+                {{-- ADMIN OVERLAY --}}
                 @if($isAdmin)
-                    <div class="bg-gray-200 dark:bg-gray-800 border-b-4 border-iba-black px-4 py-2 flex justify-between items-center">
+                    <div class="bg-gray-200 dark:bg-gray-800 border-b-4 border-iba-black px-4 py-2 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
                         <span class="text-[9px] font-black uppercase tracking-widest {{ $group->is_visible ? 'text-iba-green' : 'text-iba-red' }}">
                             {{ $group->is_visible ? '👁 Visible' : '🚫 Hidden' }}
                             @if($group->available_at && $group->available_at > now())
@@ -68,39 +69,95 @@
                         </span>
                         <div class="flex gap-4">
                             <button wire:click="toggleVisibility({{ $group->id }})" class="text-[9px] font-black uppercase text-gray-500 hover:text-iba-black">Toggle Vis</button>
-                            <button wire:click="deleteGroup({{ $group->id }})" class="text-[9px] font-black uppercase text-iba-red hover:text-red-700">Delete</button>
+                            <button wire:click="editGroup({{ $group->id }})" class="text-[9px] font-black uppercase text-iba-teal hover:text-teal-700">Edit</button>
+                            <button wire:click="deleteGroup({{ $group->id }})" class="text-[9px] font-black uppercase text-iba-red hover:text-red-700" onclick="confirm('Are you sure you want to delete this entire pack?') || event.stopImmediatePropagation()">Delete</button>
                         </div>
                     </div>
                 @endif
 
-                {{-- Header Bar (Click to expand) --}}
-                <div @click="expanded = !expanded" class="p-5 cursor-pointer flex justify-between items-center hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors">
-                    <div>
-                        <h2 class="text-lg font-black text-iba-black dark:text-white uppercase">{{ $group->title }}</h2>
-                        @if($group->description)
-                            <p class="text-xs font-bold text-gray-600 dark:text-gray-400 mt-1">{{ $group->description }}</p>
-                        @endif
-                    </div>
-                    <div class="shrink-0 ml-4 bg-iba-black text-white w-8 h-8 flex items-center justify-center font-black">
-                        <span x-text="expanded ? '−' : '+'"></span>
-                    </div>
-                </div>
-
-                {{-- File List --}}
-                <div x-show="expanded" x-collapse class="border-t-4 border-iba-black dark:border-iba-light bg-gray-50 dark:bg-gray-900 p-5 space-y-3">
-                    @forelse($group->files as $file)
-                        <div class="flex items-center justify-between border-2 border-dashed border-gray-300 dark:border-gray-700 p-3 bg-white dark:bg-gray-800">
-                            <div class="flex items-center gap-3 overflow-hidden">
-                                <svg class="w-6 h-6 text-iba-teal shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
-                                <span class="text-xs font-bold text-gray-800 dark:text-gray-200 truncate">{{ $file->file_name }}</span>
-                                <span class="text-[10px] font-black text-gray-400 ml-2 shrink-0">{{ $file->file_size }}</span>
+                {{-- EDIT MODE --}}
+                @if($editingGroupId === $group->id)
+                    <div class="p-6">
+                        <form wire:submit.prevent="updateGroup" class="space-y-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-[10px] font-black uppercase text-gray-500 mb-1">Title</label>
+                                    <input type="text" wire:model="editTitle" required class="w-full border-4 border-iba-black p-2 text-xs font-bold bg-white focus:outline-none focus:border-iba-orange">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-black uppercase text-gray-500 mb-1">Schedule Drop</label>
+                                    <input type="datetime-local" wire:model="editAvailableAt" class="w-full border-4 border-iba-black p-2 text-xs font-bold bg-white focus:outline-none focus:border-iba-orange">
+                                </div>
                             </div>
-                            <a href="{{ Storage::url($file->file_path) }}" download class="shrink-0 bg-iba-teal text-white text-[10px] font-black uppercase px-4 py-2 border-2 border-iba-black shadow-[2px_2px_0_0_#131011] hover:translate-y-0.5 hover:shadow-none transition-all">Download</a>
+                            
+                            <div>
+                                <label class="block text-[10px] font-black uppercase text-gray-500 mb-1">Description</label>
+                                <textarea wire:model="editDescription" rows="2" class="w-full border-4 border-iba-black p-2 text-xs font-bold bg-white focus:outline-none focus:border-iba-orange resize-none"></textarea>
+                            </div>
+
+                            <div class="flex items-center gap-2">
+                                <input type="checkbox" wire:model="editIsVisible" id="editVisible" class="w-4 h-4 border-2 border-iba-black cursor-pointer">
+                                <label for="editVisible" class="text-[10px] font-black uppercase text-iba-black cursor-pointer">Visible to Cohort</label>
+                            </div>
+
+                            {{-- Manage Existing Files --}}
+                            @if($group->files->count() > 0)
+                                <div class="bg-gray-50 p-4 border-4 border-iba-black mt-4">
+                                    <label class="block text-[10px] font-black uppercase text-gray-500 mb-2 border-b-2 border-dashed border-gray-300 pb-2">Existing Files</label>
+                                    <div class="space-y-2">
+                                        @foreach($group->files as $file)
+                                            <div class="flex justify-between items-center bg-white border-2 border-iba-black p-2">
+                                                <span class="text-xs font-bold truncate">{{ $file->file_name }}</span>
+                                                <button type="button" wire:click="deleteFile({{ $file->id }})" class="text-[10px] font-black uppercase text-iba-red hover:underline ml-4 shrink-0">Remove</button>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @endif
+
+                            {{-- Add New Files --}}
+                            <div class="mt-4">
+                                <label class="block text-[10px] font-black uppercase text-gray-500 mb-1">Add More Files</label>
+                                <input type="file" wire:model="newUploads" multiple class="w-full border-4 border-iba-black bg-white text-xs font-bold p-1 cursor-pointer file:mr-4 file:py-2 file:px-4 file:border-0 file:bg-iba-black file:text-white file:font-black file:uppercase">
+                                <div wire:loading wire:target="newUploads" class="text-[10px] font-bold text-iba-orange mt-1 animate-pulse uppercase">Uploading...</div>
+                            </div>
+
+                            <div class="flex gap-4 justify-end pt-4 border-t-2 border-dashed border-gray-300 mt-4">
+                                <button type="button" wire:click="cancelEdit" class="text-xs font-black uppercase tracking-widest text-gray-500 hover:text-iba-black transition-colors px-4 py-2">Cancel</button>
+                                <button type="submit" class="bg-iba-teal text-white font-black px-6 py-2.5 text-xs uppercase border-4 border-iba-black shadow-[4px_4px_0_0_#131011] hover:translate-y-0.5 hover:shadow-none transition-all">Save Changes</button>
+                            </div>
+                        </form>
+                    </div>
+
+                {{-- NORMAL VIEW --}}
+                @else
+                    <div @click="expanded = !expanded" class="p-5 cursor-pointer flex justify-between items-center hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors">
+                        <div>
+                            <h2 class="text-lg font-black text-iba-black dark:text-white uppercase">{{ $group->title }}</h2>
+                            @if($group->description)
+                                <p class="text-xs font-bold text-gray-600 dark:text-gray-400 mt-1">{{ $group->description }}</p>
+                            @endif
                         </div>
-                    @empty
-                        <p class="text-xs font-bold text-gray-500 uppercase">No files in this pack.</p>
-                    @endforelse
-                </div>
+                        <div class="shrink-0 ml-4 bg-iba-black text-white w-8 h-8 flex items-center justify-center font-black">
+                            <span x-text="expanded ? '−' : '+'"></span>
+                        </div>
+                    </div>
+
+                    <div x-show="expanded" x-collapse class="border-t-4 border-iba-black dark:border-iba-light bg-gray-50 dark:bg-gray-900 p-5 space-y-3">
+                        @forelse($group->files as $file)
+                            <div class="flex items-center justify-between border-2 border-dashed border-gray-300 dark:border-gray-700 p-3 bg-white dark:bg-gray-800">
+                                <div class="flex items-center gap-3 overflow-hidden">
+                                    <svg class="w-6 h-6 text-iba-teal shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                                    <span class="text-xs font-bold text-gray-800 dark:text-gray-200 truncate">{{ $file->file_name }}</span>
+                                    <span class="text-[10px] font-black text-gray-400 ml-2 shrink-0">{{ $file->file_size }}</span>
+                                </div>
+                                <a href="{{ Storage::url($file->file_path) }}" download class="shrink-0 bg-iba-teal text-white text-[10px] font-black uppercase px-4 py-2 border-2 border-iba-black shadow-[2px_2px_0_0_#131011] hover:translate-y-0.5 hover:shadow-none transition-all">Download</a>
+                            </div>
+                        @empty
+                            <p class="text-xs font-bold text-gray-500 uppercase">No files in this pack.</p>
+                        @endforelse
+                    </div>
+                @endif
 
             </div>
         @empty
