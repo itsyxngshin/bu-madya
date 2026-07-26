@@ -1,9 +1,17 @@
 <div class="max-w-4xl mx-auto space-y-8 pb-24">
     
-    {{-- Header --}}
-    <div class="bg-white dark:bg-[#1A1617] p-6 border-4 border-iba-black dark:border-iba-light shadow-[8px_8px_0_0_#131011] dark:shadow-[8px_8px_0_0_#FFFBF7]">
-        <h1 class="text-2xl font-black text-iba-black dark:text-iba-light uppercase tracking-wider">Community Logs</h1>
-        <p class="text-sm font-bold text-gray-500 dark:text-gray-400 mt-1">Share updates, ask questions, and document your hackathon journey.</p>
+    {{-- Header & Sorting Toggle --}}
+    <div class="bg-white dark:bg-[#1A1617] p-6 border-4 border-iba-black dark:border-iba-light shadow-[8px_8px_0_0_#131011] dark:shadow-[8px_8px_0_0_#FFFBF7] flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+            <h1 class="text-2xl font-black text-iba-black dark:text-iba-light uppercase tracking-wider">Community Logs</h1>
+            <p class="text-sm font-bold text-gray-500 dark:text-gray-400 mt-1">Share updates, ask questions, and document your hackathon journey.</p>
+        </div>
+
+        {{-- ALGORITHM FILTER TOGGLE --}}
+        <div class="flex items-center bg-gray-100 dark:bg-gray-800 border-4 border-iba-black dark:border-iba-light p-1 shadow-[4px_4px_0_0_#131011] shrink-0">
+            <button wire:click="$set('filterType', 'latest')" class="px-4 py-2 text-[10px] font-black uppercase tracking-widest transition-all {{ $filterType === 'latest' ? 'bg-iba-teal text-white border-2 border-iba-black shadow-sm' : 'text-gray-500 hover:text-iba-black dark:hover:text-white border-2 border-transparent' }}">Latest</button>
+            <button wire:click="$set('filterType', 'trending')" class="px-4 py-2 text-[10px] font-black uppercase tracking-widest transition-all {{ $filterType === 'trending' ? 'bg-iba-orange text-iba-black border-2 border-iba-black shadow-sm' : 'text-gray-500 hover:text-iba-black dark:hover:text-white border-2 border-transparent' }}">Trending</button>
+        </div>
     </div>
 
     @if (session()->has('success'))
@@ -25,6 +33,7 @@
             </div>
 
             <textarea wire:model="content" rows="3" placeholder="What's happening? Type @TeamName to tag someone..." class="w-full border-4 border-iba-black dark:border-iba-light p-4 text-sm focus:outline-none focus:border-iba-teal bg-gray-50 dark:bg-gray-900 text-iba-black dark:text-white font-bold resize-none"></textarea>
+            @error('content') <span class="text-iba-red text-xs font-bold block mt-1">⚠ {{ $message }}</span> @enderror
             
             @if($photos)
                 <div class="flex flex-wrap gap-3 mt-4">
@@ -42,8 +51,9 @@
                     <label for="photo-upload" class="cursor-pointer inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest text-iba-teal hover:text-teal-700 transition-colors">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg> Attach Photos
                     </label>
+                    <div wire:loading wire:target="photos" class="text-[10px] font-bold text-iba-orange ml-2 animate-pulse uppercase">Uploading...</div>
                 </div>
-                <button type="submit" class="bg-iba-black dark:bg-iba-light text-white dark:text-iba-black font-black px-6 py-2.5 text-xs uppercase border-4 border-transparent shadow-[4px_4px_0_0_#0095AC] hover:translate-y-0.5 hover:shadow-none transition-all w-full sm:w-auto text-center">
+                <button type="submit" class="bg-iba-black dark:bg-iba-light text-white dark:text-iba-black font-black px-6 py-2.5 text-xs uppercase border-4 border-transparent shadow-[4px_4px_0_0_#0095AC] hover:translate-y-0.5 hover:shadow-none transition-all active:translate-y-1 w-full sm:w-auto text-center" wire:loading.attr="disabled">
                     Publish Log
                 </button>
             </div>
@@ -74,9 +84,9 @@
                         </div>
                     </div>
 
-                    {{-- POST OPTIONS DROPDOWN (Edit/Delete) --}}
+                    {{-- Edit/Delete Dropdown --}}
                     @if($post->user_id === auth('ibalong')->id() || in_array(auth('ibalong')->user()->role_id, [1, 2]))
-                        <div x-data="{ open: false }" class="relative">
+                        <div x-data="{ open: false }" class="relative shrink-0">
                             <button @click="open = !open" @click.away="open = false" class="p-2 text-gray-400 hover:text-iba-black dark:hover:text-white transition-colors focus:outline-none">
                                 <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 14a2 2 0 100-4 2 2 0 000 4zm-7 0a2 2 0 100-4 2 2 0 000 4zm14 0a2 2 0 100-4 2 2 0 000 4z"/></svg>
                             </button>
@@ -92,23 +102,29 @@
                     @endif
                 </div>
 
-                {{-- Post Content & Edit State --}}
-                <div class="p-5">
+                {{-- Post Content --}}
+                <div class="p-5" x-data="{ expanded: false }">
                     @if($editingPostId === $post->id)
-                        {{-- EDITING UI --}}
+                        {{-- Editing UI --}}
                         <div class="space-y-3">
                             <textarea wire:model="editContent" rows="4" class="w-full border-4 border-iba-black dark:border-iba-light p-4 text-sm focus:outline-none focus:border-iba-orange bg-gray-50 dark:bg-gray-900 text-iba-black dark:text-white font-bold resize-none"></textarea>
                             @error('editContent') <span class="text-iba-red text-xs font-bold block">⚠ {{ $message }}</span> @enderror
                             
-                            <div class="flex gap-3 justify-end">
+                            <div class="flex flex-col sm:flex-row gap-3 justify-end">
                                 <button wire:click="cancelEdit" class="text-xs font-black uppercase tracking-widest text-gray-500 hover:text-iba-black dark:hover:text-white px-4 py-2 transition-colors">Cancel</button>
                                 <button wire:click="updatePost" class="bg-iba-orange text-iba-black font-black px-6 py-2 text-xs uppercase border-4 border-iba-black shadow-[3px_3px_0_0_#131011] hover:translate-y-0.5 hover:shadow-none transition-all">Save Changes</button>
                             </div>
                         </div>
                     @else
-                        {{-- NORMAL DISPLAY --}}
-                        <p class="text-sm font-bold text-gray-800 dark:text-gray-200 leading-relaxed whitespace-pre-wrap">{!! preg_replace('/@([A-Za-z0-9_]+)/', '<span class="text-iba-teal bg-iba-teal/10 px-1 py-0.5 border border-iba-teal border-dashed">$0</span>', e($post->content)) !!}</p>
+                        {{-- Clamped Text Display --}}
+                        <div class="text-sm font-bold text-gray-800 dark:text-gray-200 leading-relaxed whitespace-pre-wrap transition-all duration-300"
+                             :class="expanded ? '' : 'line-clamp-4'">{!! preg_replace('/@([A-Za-z0-9_]+)/', '<span class="text-iba-teal bg-iba-teal/10 px-1 py-0.5 border border-iba-teal border-dashed">$0</span>', nl2br(e($post->content))) !!}</div>
                         
+                        @if(strlen($post->content) > 300)
+                            <button @click="expanded = !expanded" class="text-iba-teal text-[10px] font-black uppercase tracking-widest mt-2 hover:underline focus:outline-none" x-text="expanded ? 'SEE LESS ↑' : 'SEE MORE ↓'"></button>
+                        @endif
+                        
+                        {{-- Image Grid --}}
                         @if($post->images->count() > 0)
                             <div class="mt-4 grid gap-2 {{ $post->images->count() == 1 ? 'grid-cols-1' : ($post->images->count() == 2 ? 'grid-cols-2' : 'grid-cols-2 sm:grid-cols-3') }}">
                                 @foreach($post->images as $image)
@@ -122,19 +138,25 @@
                 </div>
 
                 {{-- Action Bar --}}
-                <div class="bg-gray-50 dark:bg-gray-900 border-t-2 border-iba-black dark:border-iba-light p-3 flex gap-6">
-                    @php $hasLiked = $post->likes->contains('user_id', auth('ibalong')->id()); @endphp
-                    <button wire:click="toggleLike({{ $post->id }})" class="flex items-center gap-1.5 text-xs font-black uppercase tracking-widest transition-colors {{ $hasLiked ? 'text-iba-red' : 'text-gray-500 hover:text-iba-black dark:hover:text-white' }}">
-                        <svg class="w-5 h-5 {{ $hasLiked ? 'fill-current' : 'fill-none stroke-currentColor' }}" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg> {{ $post->likes->count() }}
-                    </button>
-                    <div class="flex items-center gap-1.5 text-xs font-black uppercase tracking-widest text-gray-500">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg> {{ $post->comments->count() }}
+                <div class="bg-gray-50 dark:bg-gray-900 border-t-2 border-iba-black dark:border-iba-light p-3 flex justify-between items-center gap-6">
+                    <div class="flex gap-6">
+                        <button wire:click="toggleLike({{ $post->id }})" class="flex items-center gap-1.5 text-xs font-black uppercase tracking-widest transition-colors {{ $post->likes->contains('user_id', auth('ibalong')->id()) ? 'text-iba-red' : 'text-gray-500 hover:text-iba-black dark:hover:text-white' }}">
+                            <svg class="w-5 h-5 {{ $post->likes->contains('user_id', auth('ibalong')->id()) ? 'fill-current' : 'fill-none stroke-currentColor' }}" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg> {{ $post->likes_count }}
+                        </button>
+                        <a href="{{ route('ibalong.community-logs.show', $post->id) }}" class="flex items-center gap-1.5 text-xs font-black uppercase tracking-widest text-gray-500 hover:text-iba-teal transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg> {{ $post->comments_count }}
+                        </a>
                     </div>
+                    
+                    {{-- Link to Individual Thread --}}
+                    <a href="{{ route('ibalong.community-logs.show', $post->id) }}" class="text-[9px] font-black uppercase tracking-widest text-gray-400 hover:text-iba-orange flex items-center gap-1">
+                        Open Thread <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                    </a>
                 </div>
 
-                {{-- Comments Section --}}
+                {{-- Comments Section (Partial Display) --}}
                 <div class="bg-gray-100 dark:bg-gray-800 border-t-2 border-iba-black dark:border-iba-light p-5 space-y-4">
-                    @foreach($post->comments as $comment)
+                    @foreach($post->comments->take(2) as $comment)
                         <div class="flex flex-col gap-2">
                             <div class="flex gap-3">
                                 <div class="w-8 h-8 bg-gray-900 text-white flex items-center justify-center font-black text-xs border border-iba-black shrink-0">
@@ -150,9 +172,10 @@
                                 </div>
                             </div>
 
+                            {{-- Nested Replies --}}
                             @if($comment->replies->count() > 0)
                                 <div class="pl-11 space-y-2 mt-1">
-                                    @foreach($comment->replies as $reply)
+                                    @foreach($comment->replies->take(1) as $reply)
                                         <div class="flex gap-3 border-l-2 border-iba-orange pl-3">
                                             <div class="w-6 h-6 bg-gray-700 text-white flex items-center justify-center font-black text-[9px] border border-iba-black shrink-0">
                                                 {{ substr($reply->author_display ?? 'U', 0, 1) }}
@@ -165,22 +188,32 @@
                                             </div>
                                         </div>
                                     @endforeach
+                                    @if($comment->replies->count() > 1)
+                                        <a href="{{ route('ibalong.community-logs.show', $post->id) }}" class="text-[9px] font-black uppercase tracking-widest text-iba-teal pl-3 hover:underline block mt-2">View {{ $comment->replies->count() - 1 }} more replies...</a>
+                                    @endif
                                 </div>
                             @endif
 
+                            {{-- Reply Input Box --}}
                             @if($replyingTo === $comment->id)
-                                <form wire:submit.prevent="addComment({{ $post->id }}, {{ $comment->id }})" class="pl-11 mt-1 flex gap-2">
+                                <form wire:submit.prevent="addComment({{ $post->id }}, {{ $comment->id }})" class="pl-11 mt-1 flex flex-col sm:flex-row gap-2">
                                     <input type="text" wire:model="newComments.reply_{{ $comment->id }}" placeholder="Replying to {{ $comment->author_display }}..." class="flex-1 border-2 border-iba-black dark:border-gray-500 p-2 text-xs focus:outline-none focus:border-iba-orange bg-white dark:bg-gray-800 text-iba-black dark:text-white">
-                                    <button type="submit" class="bg-iba-orange text-iba-black font-black px-3 py-1.5 text-[10px] uppercase border-2 border-iba-black shadow-[2px_2px_0_0_#131011] hover:translate-y-0.5 hover:shadow-none transition-all">Post</button>
+                                    <button type="submit" class="bg-iba-orange text-iba-black font-black px-3 py-1.5 text-[10px] uppercase border-2 border-iba-black shadow-[2px_2px_0_0_#131011] hover:translate-y-0.5 hover:shadow-none transition-all w-full sm:w-auto text-center">Post</button>
                                 </form>
                             @endif
                         </div>
                     @endforeach
 
+                    @if($post->comments->count() > 2)
+                        <a href="{{ route('ibalong.community-logs.show', $post->id) }}" class="block text-center mt-4 text-[10px] font-black uppercase tracking-widest text-gray-500 hover:text-iba-teal transition-colors">
+                            View all {{ $post->comments->count() }} comments
+                        </a>
+                    @endif
+
                     <form wire:submit.prevent="addComment({{ $post->id }})" class="mt-4 pt-4 border-t-2 border-dashed border-gray-300 dark:border-gray-700">
                         <div class="flex flex-col sm:flex-row gap-3">
                             <div class="shrink-0">
-                                <select wire:model="commentIdentities.{{ $post->id }}" class="w-full sm:w-32 border-4 border-iba-black dark:border-iba-light bg-gray-50 dark:bg-gray-800 text-iba-black dark:text-white text-[10px] font-black uppercase tracking-widest p-2 focus:outline-none focus:border-iba-teal">
+                                <select wire:model="commentIdentities.{{ $post->id }}" class="w-full sm:w-32 border-4 border-iba-black dark:border-iba-light bg-gray-50 dark:bg-gray-800 text-iba-black dark:text-white text-[10px] font-black uppercase tracking-widest p-2 focus:outline-none focus:border-iba-teal h-full">
                                     <option value="" disabled>Reply As...</option>
                                     @foreach($availableIdentities as $value => $label)
                                         <option value="{{ $value }}">{{ $value }}</option>
@@ -192,13 +225,17 @@
                         </div>
                     </form>
                 </div>
-
             </div>
         @empty
             <div class="bg-white dark:bg-[#1A1617] border-4 border-iba-black border-dashed p-12 text-center shadow-sm">
-                <p class="text-sm font-black text-gray-500 uppercase tracking-widest">The community log is currently empty.</p>
+                <p class="text-sm font-black text-gray-500 uppercase tracking-widest">No logs match your filter criteria.</p>
             </div>
         @endforelse
+
+        {{-- PAGINATION --}}
+        <div class="mt-8">
+            {{ $posts->links() }}
+        </div>
     </div>
 
     {{-- DELETE CONFIRMATION MODAL --}}
@@ -208,15 +245,13 @@
             
             <div class="relative w-full max-w-md bg-white dark:bg-[#1A1617] border-4 border-iba-black dark:border-iba-light shadow-[10px_10px_0_0_#D93B3B] p-8 text-center animate-fade-in-up z-10">
                 <div class="mx-auto w-16 h-16 bg-iba-red border-4 border-iba-black flex items-center justify-center shadow-[4px_4px_0_0_#131011] mb-6">
-                    <svg class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
+                    <svg class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                 </div>
                 
                 <h3 class="text-2xl font-black font-pixel text-iba-black dark:text-white uppercase mb-2">Delete Log?</h3>
                 <p class="text-sm font-bold text-gray-600 dark:text-gray-400 mb-8">This action is permanent and cannot be undone. All associated images, likes, and comments will be wiped.</p>
                 
-                <div class="flex justify-center gap-4">
+                <div class="flex flex-col sm:flex-row justify-center gap-4">
                     <button wire:click="cancelDelete" class="px-6 py-3 text-xs font-black uppercase tracking-widest text-gray-600 dark:text-gray-400 hover:text-iba-black dark:hover:text-white transition-colors">Cancel</button>
                     <button wire:click="deletePost" class="bg-iba-red text-white font-black px-6 py-3 text-xs uppercase border-4 border-iba-black shadow-[4px_4px_0_0_#131011] hover:translate-y-0.5 hover:shadow-none transition-all">Yes, Delete It</button>
                 </div>

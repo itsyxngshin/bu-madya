@@ -4,6 +4,7 @@ namespace App\Livewire\Ibalong;
 
 use Livewire\Component;
 use Livewire\WithFileUploads;
+use Livewire\WithPagination;
 use Illuminate\Support\Facades\Storage;
 use App\Models\IbalongPost;
 use App\Models\IbalongPostImage;
@@ -15,20 +16,23 @@ use App\Models\User;
 
 class CommunityLogs extends Component
 {
-    use WithFileUploads;
+    use WithFileUploads, WithPagination;
 
+    // --- Create Post State ---
     public $content = '';
     public $photos = [];
     
+    // --- Identity & Comment State ---
     public $availableIdentities = [];
     public $postingAs = ''; 
     public $commentIdentities = []; 
     public $newComments = []; 
-
-    // Reply State
     public $replyingTo = null;
 
-    // --- NEW: Edit & Delete State ---
+    // --- Algorithm State ---
+    public $filterType = 'latest'; // 'latest' or 'trending'
+
+    // --- Edit & Delete State ---
     public $editingPostId = null;
     public $editContent = '';
     public $postToDelete = null;
@@ -53,7 +57,11 @@ class CommunityLogs extends Component
         }
     }
 
-    // ... (Keep your existing setReply, createPost, addComment, toggleLike, markNotificationsRead, notifyAllUsers, and parseMentionsAndNotify methods exactly as they are) ...
+    public function updatingFilterType()
+    {
+        // Reset pagination when switching between Latest and Trending
+        $this->resetPage();
+    }
 
     public function setReply($commentId)
     {
@@ -63,7 +71,7 @@ class CommunityLogs extends Component
     public function createPost()
     {
         $this->validate([
-            'content' => 'required|string|max:2000',
+            'content' => 'required|string|max:5000',
             'photos.*' => 'image|max:5120',
             'postingAs' => 'required|string'
         ]);
@@ -89,7 +97,7 @@ class CommunityLogs extends Component
         }
 
         if ($isAnnouncement) {
-            $this->notifyAllUsers('announcement', 'New Official Announcement: ' . mb_strimwidth($this->content, 0, 40, '...'), route('ibalong.community-logs'));
+            $this->notifyAllUsers('announcement', 'New Official Announcement: ' . mb_strimwidth($this->content, 0, 40, '...'), route('ibalong.community-logs.show', $post->id));
         }
 
         $this->parseMentionsAndNotify($this->content, $post->id, $this->postingAs);
@@ -123,7 +131,7 @@ class CommunityLogs extends Component
                 'user_id' => $post->user_id,
                 'type' => 'reply',
                 'message' => $identity . ' commented on your log.',
-                'link' => route('ibalong.community-logs'),
+                'link' => route('ibalong.community-logs.show', $postId),
             ]);
         }
 
@@ -145,6 +153,71 @@ class CommunityLogs extends Component
         }
     }
 
+    // --- EDIT & DELETE METHODS ---
+    public function editPost($postId)
+    {
+        $post = IbalongPost::findOrFail($postId);
+        
+        if ($post->user_id !== auth('ibalong')->id() && !in_array(auth('ibalong')->user()->role_id, [1, 2])) {
+            return;
+        }
+
+        $this->editingPostId = $postId;
+        $this->editContent = $post->content;
+    }
+
+    public function cancelEdit()
+    {
+        $this->editingPostId = null;
+        $this->editContent = '';
+    }
+
+    public function updatePost()
+    {
+        $this->validate(['editContent' => 'required|string|max:5000']);
+        
+        $post = IbalongPost::findOrFail($this->editingPostId);
+        
+        if ($post->user_id !== auth('ibalong')->id() && !in_array(auth('ibalong')->user()->role_id, [1, 2])) {
+            return;
+        }
+
+        $post->update(['content' => $this->editContent]);
+        
+        $this->cancelEdit();
+        session()->flash('success', 'Log updated successfully.');
+    }
+
+    public function confirmDelete($postId)
+    {
+        $this->postToDelete = $postId;
+    }
+
+    public function cancelDelete()
+    {
+        $this->postToDelete = null;
+    }
+
+    public function deletePost()
+    {
+        if (!$this->postToDelete) return;
+
+        $post = IbalongPost::findOrFail($this->postToDelete);
+        
+        if ($post->user_id !== auth('ibalong')->id() && !in_array(auth('ibalong')->user()->role_id, [1, 2])) {
+            return;
+        }
+
+        foreach($post->images as $image) {
+            Storage::disk('public')->delete($image->image_path);
+        }
+
+        $post->delete();
+        $this->postToDelete = null;
+        session()->flash('success', 'Log successfully deleted.');
+    }
+
+    // --- NOTIFICATION HELPERS ---
     private function notifyAllUsers($type, $message, $link)
     {
         $userIds = User::pluck('id'); 
@@ -168,92 +241,30 @@ class CommunityLogs extends Component
         foreach ($mentions as $mention) {
             $team = IbalongRegistration::whereRaw("REPLACE(team_name, ' ', '') LIKE ?", ['%'.$mention.'%'])->first();
             
-            if ($team && $team->user_id) {
-                if ($team->user_id !== auth('ibalong')->id()) {
-                    IbalongNotification::create([
-                        'user_id' => $team->user_id,
-                        'type' => 'mention',
-                        'message' => $author . ' mentioned your team.',
-                        'link' => route('ibalong.community-logs'),
-                    ]);
-                }
+            if ($team && $team->user_id && $team->user_id !== auth('ibalong')->id()) {
+                IbalongNotification::create([
+                    'user_id' => $team->user_id,
+                    'type' => 'mention',
+                    'message' => $author . ' mentioned your team.',
+                    'link' => route('ibalong.community-logs.show', $postId),
+                ]);
             }
         }
     }
 
-    // --- NEW: Edit Methods ---
-    public function editPost($postId)
-    {
-        $post = IbalongPost::findOrFail($postId);
-        
-        // Security check: Only owner or admin can edit
-        if ($post->user_id !== auth('ibalong')->id() && !in_array(auth('ibalong')->user()->role_id, [1, 2])) {
-            return;
-        }
-
-        $this->editingPostId = $postId;
-        $this->editContent = $post->content;
-    }
-
-    public function cancelEdit()
-    {
-        $this->editingPostId = null;
-        $this->editContent = '';
-    }
-
-    public function updatePost()
-    {
-        $this->validate(['editContent' => 'required|string|max:2000']);
-        
-        $post = IbalongPost::findOrFail($this->editingPostId);
-        
-        if ($post->user_id !== auth('ibalong')->id() && !in_array(auth('ibalong')->user()->role_id, [1, 2])) {
-            return;
-        }
-
-        $post->update(['content' => $this->editContent]);
-        
-        $this->cancelEdit();
-        session()->flash('success', 'Log updated successfully.');
-    }
-
-    // --- NEW: Delete Methods ---
-    public function confirmDelete($postId)
-    {
-        $this->postToDelete = $postId;
-    }
-
-    public function cancelDelete()
-    {
-        $this->postToDelete = null;
-    }
-
-    public function deletePost()
-    {
-        if (!$this->postToDelete) return;
-
-        $post = IbalongPost::findOrFail($this->postToDelete);
-        
-        // Security check: Only owner or admin can delete
-        if ($post->user_id !== auth('ibalong')->id() && !in_array(auth('ibalong')->user()->role_id, [1, 2])) {
-            return;
-        }
-
-        // Delete associated images from storage to save space
-        foreach($post->images as $image) {
-            Storage::disk('public')->delete($image->image_path);
-        }
-
-        $post->delete();
-        $this->postToDelete = null;
-        session()->flash('success', 'Log successfully deleted.');
-    }
-
     public function render()
     {
-        $posts = IbalongPost::with(['user', 'images', 'likes', 'comments.user', 'comments.replies.user'])
-            ->latest()
-            ->get();
+        $query = IbalongPost::with(['user', 'images', 'likes', 'comments.user', 'comments.replies.user'])
+            ->withCount(['likes', 'comments']);
+
+        // Algorithm Logic
+        if ($this->filterType === 'trending') {
+            $query->orderByRaw('(likes_count + comments_count) DESC')->latest();
+        } else {
+            $query->latest();
+        }
+
+        $posts = $query->paginate(15);
 
         return view('livewire.ibalong.community-logs', compact('posts'))
             ->layout('layouts.dashboard');
