@@ -17,7 +17,7 @@ class IbalongTeamMember extends Model
         'full_name',
         'slug',
         'email_address',
-        'photo_path', 
+        'photo_path',
         'mobile_number',
         'birthday',
         'course',
@@ -42,5 +42,5 @@ class IbalongTeamMember extends Model
         return $this->belongsToMany(IbalongSkill::class, 'ibalong_team_member_skills', 'member_id', 'skill_id')
                     ->withTimestamps();
     }
-    
+
 }
