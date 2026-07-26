@@ -1,5 +1,5 @@
 <div class="max-w-4xl mx-auto space-y-8 pb-24">
-    
+
     {{-- Reusable Alpine Logic for Mentions --}}
     <script>
         document.addEventListener('alpine:init', () => {
@@ -9,13 +9,13 @@
                 filteredMentions: [],
                 mentionStartPoint: 0,
                 mentionList: @js($mentionables),
-                
+
                 checkMention(e) {
                     const el = e.target;
                     const cursorPos = el.selectionStart;
                     const textBeforeCursor = el.value.substring(0, cursorPos);
                     const match = textBeforeCursor.match(/(?:\s|^)@([A-Za-z0-9_]*)$/);
-                    
+
                     if (match) {
                         this.searchQuery = match[1].toLowerCase();
                         this.filteredMentions = this.mentionList.filter(m => m.tag.toLowerCase().includes(this.searchQuery) || m.display.toLowerCase().includes(this.searchQuery));
@@ -29,12 +29,12 @@
                     const el = this.$refs.mentionInput;
                     const before = el.value.substring(0, this.mentionStartPoint);
                     const after = el.value.substring(el.selectionStart);
-                    
+
                     el.value = before + '@' + tag + ' ' + after;
                     this.showDropdown = false;
-                    
+
                     el.dispatchEvent(new Event('input'));
-                    
+
                     this.$nextTick(() => {
                         el.focus();
                         const newPos = before.length + tag.length + 2;
@@ -78,7 +78,7 @@
 
             <div x-data="mentionHandler" class="relative w-full">
                 <textarea x-ref="mentionInput" wire:model="content" @input="checkMention" rows="3" placeholder="What's happening? Type @ to tag a team or organizer..." class="w-full border-4 border-iba-black dark:border-iba-light p-4 text-sm focus:outline-none focus:border-iba-teal bg-gray-50 dark:bg-gray-900 text-iba-black dark:text-white font-bold resize-none"></textarea>
-                
+
                 <div x-show="showDropdown" @click.away="showDropdown = false" class="absolute z-50 w-full max-h-48 overflow-y-auto bg-white dark:bg-gray-800 border-4 border-iba-black dark:border-iba-light shadow-[4px_4px_0_0_#131011] mt-1" x-cloak>
                     <template x-for="mention in filteredMentions" :key="mention.tag">
                         <button type="button" @click.prevent="insertMention(mention.tag)" class="w-full text-left px-4 py-2 text-xs font-bold border-b-2 border-dashed border-gray-200 dark:border-gray-700 hover:bg-iba-teal hover:text-white transition-colors group flex justify-between items-center">
@@ -89,7 +89,7 @@
                 </div>
             </div>
             @error('content') <span class="text-iba-red text-xs font-bold block mt-1">⚠ {{ $message }}</span> @enderror
-            
+
             @if(in_array(auth('ibalong')->user()->role_id, [1, 2]))
                 <div class="mt-3 flex items-center gap-2 bg-iba-red/10 border-2 border-dashed border-iba-red p-2 inline-flex">
                     <input type="checkbox" id="isAnnouncement" wire:model="isAnnouncement" class="w-4 h-4 text-iba-red border-2 border-iba-black focus:ring-0 rounded-none bg-white checked:bg-iba-red cursor-pointer">
@@ -126,7 +126,7 @@
     <div class="space-y-8">
         @forelse($posts as $post)
             <div class="bg-white dark:bg-[#1A1617] border-4 border-iba-black dark:border-iba-light shadow-[8px_8px_0_0_#131011] dark:shadow-[8px_8px_0_0_#FFFBF7] flex flex-col relative">
-                
+
                 @if($post->is_announcement)
                     <div class="absolute -top-4 -left-4 bg-iba-red text-white font-black text-[10px] uppercase tracking-widest px-4 py-1.5 border-2 border-iba-black shadow-[2px_2px_0_0_#131011] transform -rotate-2 z-10">
                         Official Announcement
@@ -171,7 +171,7 @@
                         <div class="space-y-3">
                             <textarea wire:model="editContent" rows="4" class="w-full border-4 border-iba-black dark:border-iba-light p-4 text-sm focus:outline-none focus:border-iba-orange bg-gray-50 dark:bg-gray-900 text-iba-black dark:text-white font-bold resize-none"></textarea>
                             @error('editContent') <span class="text-iba-red text-xs font-bold block">⚠ {{ $message }}</span> @enderror
-                            
+
                             <div class="flex flex-col sm:flex-row gap-3 justify-end">
                                 <button wire:click="cancelEdit" class="text-xs font-black uppercase tracking-widest text-gray-500 hover:text-iba-black dark:hover:text-white px-4 py-2 transition-colors">Cancel</button>
                                 <button wire:click="updatePost" class="bg-iba-orange text-iba-black font-black px-6 py-2 text-xs uppercase border-4 border-iba-black shadow-[3px_3px_0_0_#131011] hover:translate-y-0.5 hover:shadow-none transition-all">Save Changes</button>
@@ -180,11 +180,11 @@
                     @else
                         <div class="text-sm font-bold text-gray-800 dark:text-gray-200 leading-relaxed whitespace-pre-wrap transition-all duration-300"
                              :class="expanded ? '' : 'line-clamp-4'">{!! preg_replace('/@([A-Za-z0-9_]+)/', '<span class="text-iba-teal bg-iba-teal/10 px-1 py-0.5 border border-iba-teal border-dashed">$0</span>', e($post->content)) !!}</div>
-                        
+
                         @if(strlen($post->content) > 300)
                             <button @click="expanded = !expanded" class="text-iba-teal text-[10px] font-black uppercase tracking-widest mt-2 hover:underline focus:outline-none" x-text="expanded ? 'SEE LESS ↑' : 'SEE MORE ↓'"></button>
                         @endif
-                        
+
                         @if($post->images->count() > 0)
                             <div class="mt-4 grid gap-2 {{ $post->images->count() == 1 ? 'grid-cols-1' : ($post->images->count() == 2 ? 'grid-cols-2' : 'grid-cols-2 sm:grid-cols-3') }}">
                                 @foreach($post->images as $image)
@@ -200,15 +200,26 @@
                 <div class="bg-gray-50 dark:bg-gray-900 border-t-2 border-iba-black dark:border-iba-light p-3 flex justify-between items-center gap-6">
                     <div class="flex gap-6">
                         <button wire:click="toggleLike({{ $post->id }})" class="flex items-center gap-1.5 text-xs font-black uppercase tracking-widest transition-colors {{ $post->likes->contains('user_id', auth('ibalong')->id()) ? 'text-iba-red' : 'text-gray-500 hover:text-iba-black dark:hover:text-white' }}">
-                            <svg class="w-5 h-5 {{ $post->likes->contains('user_id', auth('ibalong')->id()) ? 'fill-current' : 'fill-none stroke-currentColor' }}" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg> {{ $post->likes_count }}
+                            {{-- Fixed: Added stroke="currentColor" as an HTML attribute and simplified the class ternary --}}
+                            <svg class="w-5 h-5 {{ $post->likes->contains('user_id', auth('ibalong')->id()) ? 'fill-current' : 'fill-none' }}" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                            </svg>
+                            {{ $post->likes_count }}
                         </button>
+
                         <a href="{{ route('ibalong.community-logs.show', $post->id) }}" class="flex items-center gap-1.5 text-xs font-black uppercase tracking-widest text-gray-500 hover:text-iba-teal transition-colors">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg> {{ $post->comments_count }}
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                            </svg>
+                            {{ $post->comments_count }}
                         </a>
                     </div>
-                    
+
                     <a href="{{ route('ibalong.community-logs.show', $post->id) }}" class="text-[9px] font-black uppercase tracking-widest text-gray-400 hover:text-iba-orange flex items-center gap-1">
-                        Open Thread <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                        Open Thread
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                        </svg>
                     </a>
                 </div>
 
@@ -346,7 +357,7 @@
                                     @endforeach
                                 </select>
                             </div>
-                            
+
                             <div x-data="mentionHandler" class="relative w-full flex-1">
                                 <input type="text" x-ref="mentionInput" wire:model="newComments.{{ $post->id }}" @input="checkMention" placeholder="Write a comment... (Type @ to tag)" class="w-full border-4 border-iba-black dark:border-iba-light p-2 text-xs focus:outline-none focus:border-iba-orange bg-white dark:bg-[#1A1617] text-iba-black dark:text-white font-bold">
                                 <div x-show="showDropdown" @click.away="showDropdown = false" class="absolute bottom-full mb-1 z-50 w-full max-h-48 overflow-y-auto bg-white dark:bg-gray-800 border-4 border-iba-black dark:border-iba-light shadow-[4px_4px_0_0_#131011]" x-cloak>
@@ -379,15 +390,15 @@
     @if($postToDelete)
         <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
             <div class="fixed inset-0 bg-gray-900/70 backdrop-blur-sm" wire:click="cancelDelete"></div>
-            
+
             <div class="relative w-full max-w-md bg-white dark:bg-[#1A1617] border-4 border-iba-black dark:border-iba-light shadow-[10px_10px_0_0_#D93B3B] p-8 text-center animate-fade-in-up z-10">
                 <div class="mx-auto w-16 h-16 bg-iba-red border-4 border-iba-black flex items-center justify-center shadow-[4px_4px_0_0_#131011] mb-6">
                     <svg class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                 </div>
-                
+
                 <h3 class="text-2xl font-black font-pixel text-iba-black dark:text-white uppercase mb-2">Delete Log?</h3>
                 <p class="text-sm font-bold text-gray-600 dark:text-gray-400 mb-8">This action is permanent and cannot be undone. All associated images, likes, and comments will be wiped.</p>
-                
+
                 <div class="flex flex-col sm:flex-row justify-center gap-4">
                     <button wire:click="cancelDelete" class="px-6 py-3 text-xs font-black uppercase tracking-widest text-gray-600 dark:text-gray-400 hover:text-iba-black dark:hover:text-white transition-colors">Cancel</button>
                     <button wire:click="deletePost" class="bg-iba-red text-white font-black px-6 py-3 text-xs uppercase border-4 border-iba-black shadow-[4px_4px_0_0_#131011] hover:translate-y-0.5 hover:shadow-none transition-all">Yes, Delete It</button>
@@ -400,11 +411,11 @@
     @if($commentToDelete)
         <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
             <div class="fixed inset-0 bg-gray-900/70 backdrop-blur-sm" wire:click="cancelDeleteComment"></div>
-            
+
             <div class="relative w-full max-w-sm bg-white dark:bg-[#1A1617] border-4 border-iba-black dark:border-iba-light shadow-[10px_10px_0_0_#D93B3B] p-6 text-center animate-fade-in-up z-10">
                 <h3 class="text-xl font-black font-pixel text-iba-black dark:text-white uppercase mb-2">Delete Comment?</h3>
                 <p class="text-xs font-bold text-gray-600 dark:text-gray-400 mb-6">Are you sure? This cannot be undone.</p>
-                
+
                 <div class="flex flex-col sm:flex-row justify-center gap-3">
                     <button wire:click="cancelDeleteComment" class="px-4 py-2 text-xs font-black uppercase tracking-widest text-gray-600 dark:text-gray-400 hover:text-iba-black dark:hover:text-white transition-colors">Cancel</button>
                     <button wire:click="deleteComment" class="bg-iba-red text-white font-black px-4 py-2 text-xs uppercase border-4 border-iba-black shadow-[4px_4px_0_0_#131011] hover:translate-y-0.5 hover:shadow-none transition-all">Delete</button>
