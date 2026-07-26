@@ -180,7 +180,7 @@ Route::domain('ibalong.' . env('APP_DOMAIN'))->name('ibalong.')->group(function 
 
         Route::get('/launchpad/users', \App\Livewire\Ibalong\Admin\UserManager::class)->name('admin.users');
         Route::get('/community', CommunityLogs::class)->name('community-logs');
-        Route::get('/community/log/{id}', CommunityLogSingle::class)->name('community-logs-single');
+        Route::get('/community/log/{id}', CommunityLogSingle::class)->name('community-logs.show');
 
         // Every authenticated user can access their profile
         Route::get('/launchpad/profile', \App\Livewire\Ibalong\ProfileManager::class)->name('profile');
