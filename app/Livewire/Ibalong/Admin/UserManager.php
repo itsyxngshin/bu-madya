@@ -115,7 +115,7 @@ class UserManager extends Component
         }
 
         $user = IbalongUser::findOrFail($this->resettingUserId);
-        
+
         // Use custom password, or auto-generate one if left blank
         $passwordToSet = $this->new_password ?: Str::random(10);
 
