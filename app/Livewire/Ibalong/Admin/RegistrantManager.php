@@ -6,9 +6,11 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\DB; // <-- Add this for the PSGC queries
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail; // <-- Add Mail Facade
 use App\Models\IbalongRegistration;
 use App\Models\IbalongUser;
+use App\Mail\TeamCredentialsMail; // <-- Add your new Mailable
 
 class RegistrantManager extends Component
 {
@@ -16,11 +18,11 @@ class RegistrantManager extends Component
 
     public $search = '';
     public $statusFilter = 'pending';
-    
+
     // Modal State
     public $showModal = false;
     public $viewingTeam = null;
-    
+
     // Extracted Address Data
     public $fullAddress = '';
     public $mapQuery = '';
@@ -32,16 +34,14 @@ class RegistrantManager extends Component
 
     public function viewTeamDetails($id)
     {
-        // 1. Eager load ALL relationships, including nested member skills
         $this->viewingTeam = IbalongRegistration::with([
-            'members.skills', // <-- Nested eager loading
-            'skills', 
-            'communityAreas', 
-            'experiences', 
+            'members.skills',
+            'skills',
+            'communityAreas',
+            'experiences',
             'onlineActivities'
         ])->findOrFail($id);
 
-        // 2. Translate PSGC Codes to Human-Readable Text
         $provCode = $this->viewingTeam->provCode ?? $this->viewingTeam->province_id;
         $cityCode = $this->viewingTeam->citymunCode ?? $this->viewingTeam->citymun_id;
         $brgyCode = $this->viewingTeam->brgyCode ?? $this->viewingTeam->barangay_id;
@@ -50,7 +50,6 @@ class RegistrantManager extends Component
         $city = DB::table('refcitymun')->where('citymunCode', $cityCode)->first();
         $brgy = DB::table('refbrgy')->where('brgyCode', $brgyCode)->first();
 
-        // 3. Construct Address & Map Query
         $addressParts = array_filter([
             $brgy ? $brgy->brgyDesc : '',
             $city ? $city->citymunDesc : '',
@@ -80,10 +79,11 @@ class RegistrantManager extends Component
 
         $teamLeader = $registration->members->where('team_role', 'Team Leader')->first();
         $email = $teamLeader ? $teamLeader->email_address : 'team'.$id.'@bumadya.org';
+        $leaderName = $teamLeader ? $teamLeader->full_name : 'Team Leader';
         $rawPassword = strtoupper(Str::random(8));
 
         $user = IbalongUser::create([
-            'role_id' => 3, 
+            'role_id' => 3,
             'name' => $registration->team_name,
             'slug' => Str::slug($registration->team_name) . '-' . strtolower(Str::random(5)),
             'email' => $email,
@@ -97,9 +97,17 @@ class RegistrantManager extends Component
             'user_id' => $user->id,
             'account_creation_status' => 'Created'
         ]);
-        
-        session()->flash('message', "APPROVED! 🚀 Credentials for {$registration->team_name} — Email: {$email} | Password: {$rawPassword}");
-        
+
+        // --- DISPATCH THE EMAIL ---
+        Mail::to($email)->send(new TeamCredentialsMail(
+            $registration->team_name,
+            $leaderName,
+            $email,
+            $rawPassword
+        ));
+
+        session()->flash('message', "APPROVED! 🚀 Credentials successfully emailed to {$email}");
+
         $this->closeModal();
     }
 
@@ -107,7 +115,7 @@ class RegistrantManager extends Component
     {
         $registration = IbalongRegistration::findOrFail($id);
         $registration->update(['status' => 'rejected']);
-        
+
         session()->flash('message', "Cohort '{$registration->team_name}' was rejected.");
         $this->closeModal();
     }
