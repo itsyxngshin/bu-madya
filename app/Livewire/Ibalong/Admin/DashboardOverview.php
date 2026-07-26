@@ -25,7 +25,9 @@ class DashboardOverview extends Component
     public function mount()
     {
         $user = auth('ibalong')->user();
-        $this->isAdmin = in_array($user->role_id, [1, 2]);
+
+        // Anyone who is NOT a participating team (Role 3) sees the Admin view
+        $this->isAdmin = ($user->role_id !== 3);
 
         if ($this->isAdmin) {
             $setting = IbalongSetting::firstOrCreate(
@@ -47,7 +49,8 @@ class DashboardOverview extends Component
 
     private function loadTeamData()
     {
-        $this->team = clone IbalongRegistration::where('user_id', auth('ibalong')->id())
+        // Safely fetch the team without the clone keyword
+        $this->team = IbalongRegistration::where('user_id', auth('ibalong')->id())
                         ->with(['skills', 'members.skills'])
                         ->first();
 
@@ -60,7 +63,9 @@ class DashboardOverview extends Component
 
     public function toggleRegistration()
     {
-        if (!$this->isAdmin) {
+        // Only Super Admins (1) and Admins (2) should be allowed to lock the portal
+        $user = auth('ibalong')->user();
+        if (!in_array($user->role_id, [1, 2])) {
             session()->flash('error', 'UNAUTHORIZED: You do not have clearance to lock the portal.');
             return;
         }
@@ -78,7 +83,6 @@ class DashboardOverview extends Component
     {
         if (!$this->team) return;
 
-        // Strip the metadata prefix (data:image/jpeg;base64,)
         $imageParts = explode(";base64,", $base64Image);
         $imageBase64 = base64_decode($imageParts[1]);
         $fileName = 'team_logos/' . uniqid() . '.jpg';
