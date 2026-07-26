@@ -302,15 +302,16 @@
 
                                 {{-- ALIPINE: Hook up to the openCropper function instead of Livewire --}}
                                 <label class="absolute inset-0 bg-black/80 hidden group-hover:flex flex-col items-center justify-center cursor-pointer transition-all">
-                                    <svg class="w-4 h-4 text-white mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                                    <svg class="w-4 h-4 text-white mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                                     <span class="text-[7px] font-bold text-gray-400 uppercase">Click to Crop</span>
                                     <input type="file" @change="openCropper($event, 'member', {{ $member->id }})" accept="image/*" class="hidden">
                                 </label>
                             </div>
 
                             <div class="ml-4 flex-1">
-                                <h4 class="font-black text-sm text-iba-black dark:text-white uppercase truncate" title="{{ $member->full_name }}">{{ $member->full_name }}</h4>
-                                <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-0.5">{{ $member->team_role }}</p>
+                                {{-- Removed 'truncate', added 'leading-tight' and 'break-words' to allow multi-line names --}}
+                                <h4 class="font-black text-sm text-iba-black dark:text-white uppercase leading-tight break-words" title="{{ $member->full_name }}">{{ $member->full_name }}</h4>
+                                <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-1">{{ $member->team_role }}</p>
 
                                 @if($member->skills && $member->skills->count() > 0)
                                     <div class="flex flex-wrap gap-1 mt-2">
@@ -319,7 +320,11 @@
                                         @endforeach
                                     </div>
                                 @endif
+
+                                @error('memberPhotos.'.$member->id) <span class="text-[9px] font-black text-iba-red block mt-1 truncate">{{ $message }}</span> @enderror
                             </div>
+
+                            <div wire:loading wire:target="memberPhotos.{{ $member->id }}" class="absolute bottom-0 left-0 right-0 h-1 bg-iba-orange animate-pulse"></div>
                         </div>
                     @endforeach
                 @endif
