@@ -6,9 +6,13 @@
             <h1 class="text-xl font-black text-iba-black dark:text-iba-light uppercase tracking-wider">Event Control Center</h1>
             <p class="text-sm font-bold text-gray-500 dark:text-gray-400 mt-1">Create, manage, and monitor ticketing for all upcoming sessions.</p>
         </div>
-        <button wire:click="openModal" class="bg-iba-teal text-white font-bold px-6 py-2.5 text-sm uppercase border-2 border-iba-black dark:border-iba-light shadow-[3px_3px_0_0_#131011] dark:shadow-[3px_3px_0_0_#FFFBF7] hover:translate-y-0.5 hover:shadow-none transition-all active:translate-y-1">
-            + Deploy New Event
-        </button>
+        
+        {{-- RBAC: Only Admins can deploy new events. Facilitators can only edit existing ones. --}}
+        @if(in_array(auth('ibalong')->user()->role_id, [1, 2]))
+            <button wire:click="openModal" class="bg-iba-teal text-white font-bold px-6 py-2.5 text-sm uppercase border-2 border-iba-black dark:border-iba-light shadow-[3px_3px_0_0_#131011] dark:shadow-[3px_3px_0_0_#FFFBF7] hover:translate-y-0.5 hover:shadow-none transition-all active:translate-y-1">
+                + Deploy New Event
+            </button>
+        @endif
     </div>
 
     @if (session()->has('success'))
@@ -63,7 +67,7 @@
                                 <button wire:click="edit({{ $event->id }})" class="text-iba-teal hover:text-teal-700 dark:hover:text-teal-400 font-bold uppercase text-xs tracking-wider">Edit</button>
                                 
                                 {{-- FACILITATOR RBAC: Hide Delete Event Button --}}
-                                @if(auth('ibalong')->user()->role_id != 5)
+                                @if(auth('ibalong')->user()->role_id != 4)
                                     <span class="text-gray-300 dark:text-gray-600">|</span>
                                     <button wire:click="delete({{ $event->id }})" wire:confirm="Are you sure you want to delete this event?" class="text-iba-red hover:text-red-700 dark:hover:text-red-400 font-bold uppercase text-xs tracking-wider">Drop</button>
                                 @endif

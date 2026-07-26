@@ -48,7 +48,8 @@
                             <div class="flex justify-end items-center gap-3">
                                 <button wire:click="viewTeamDetails({{ $team->id }})" class="text-blue-600 hover:text-blue-900 font-bold uppercase text-xs tracking-wider">Profile</button>
 
-                                @if($team->user)
+                                {{-- RBAC: Only Admins and Super Admins can manage account access --}}
+                                @if($team->user && in_array(auth('ibalong')->user()->role_id, [1, 2]))
                                     <span class="text-gray-300 dark:text-gray-600">|</span>
                                     <button wire:click="confirmPasswordReset({{ $team->user->id }})" class="text-iba-orange hover:text-orange-700 font-bold uppercase text-xs tracking-wider">Reset Pass</button>
                                     <span class="text-gray-300 dark:text-gray-600">|</span>
@@ -166,7 +167,7 @@
     @endif
 
     {{-- MODAL: RESET PASSWORD --}}
-    @if($passwordModalOpen)
+    @if($passwordModalOpen && in_array(auth('ibalong')->user()->role_id, [1, 2]))
         <div class="fixed inset-0 z-[100] overflow-y-auto">
             <div class="fixed inset-0 bg-iba-black/80 backdrop-blur-sm transition-opacity" wire:click="closeModal"></div>
             <div class="flex min-h-screen items-center justify-center p-4 text-center sm:p-6">
