@@ -90,7 +90,6 @@
             </div>
             @error('content') <span class="text-iba-red text-xs font-bold block mt-1">⚠ {{ $message }}</span> @enderror
             
-            {{-- NEW: Announcement Toggle (Only visible to Admins/Role 1 & 2) --}}
             @if(in_array(auth('ibalong')->user()->role_id, [1, 2]))
                 <div class="mt-3 flex items-center gap-2 bg-iba-red/10 border-2 border-dashed border-iba-red p-2 inline-flex">
                     <input type="checkbox" id="isAnnouncement" wire:model="isAnnouncement" class="w-4 h-4 text-iba-red border-2 border-iba-black focus:ring-0 rounded-none bg-white checked:bg-iba-red cursor-pointer">
@@ -143,6 +142,9 @@
                             <h4 class="font-black text-sm text-iba-black dark:text-white uppercase leading-tight">{{ $post->author_display ?? $post->user->name }}</h4>
                             <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
                                 @if($post->is_announcement) Organizing Committee @else Hackathon Cohort @endif • {{ $post->created_at->diffForHumans() }}
+                                @if($post->created_at != $post->updated_at)
+                                    <span class="ml-1">(Edited)</span>
+                                @endif
                             </p>
                         </div>
                     </div>
@@ -210,6 +212,7 @@
                     </a>
                 </div>
 
+                {{-- Comments Section (Partial Display) --}}
                 <div class="bg-gray-100 dark:bg-gray-800 border-t-2 border-iba-black dark:border-iba-light p-5 space-y-4">
                     @foreach($post->comments->take(2) as $comment)
                         <div class="flex flex-col gap-2">
@@ -218,12 +221,43 @@
                                     {{ substr($comment->author_display ?? 'U', 0, 1) }}
                                 </div>
                                 <div class="bg-white dark:bg-gray-900 border-2 border-iba-black dark:border-gray-600 p-3 flex-1 shadow-[2px_2px_0_0_#131011]">
-                                    <div class="flex justify-between items-end mb-1">
-                                        <span class="text-[10px] font-black uppercase tracking-widest text-iba-black dark:text-white">{{ $comment->author_display }}</span>
-                                        <span class="text-[9px] font-bold text-gray-400">{{ $comment->created_at->diffForHumans() }}</span>
+                                    <div class="flex justify-between items-start mb-1">
+                                        <div>
+                                            <span class="text-[10px] font-black uppercase tracking-widest text-iba-black dark:text-white">{{ $comment->author_display }}</span>
+                                            <span class="text-[9px] font-bold text-gray-400 block sm:inline sm:ml-2">{{ $comment->created_at->diffForHumans() }}</span>
+                                            @if($comment->created_at != $comment->updated_at)
+                                                <span class="text-[8px] font-bold text-gray-400 italic sm:ml-1">(Edited)</span>
+                                            @endif
+                                        </div>
+
+                                        {{-- Comment Edit/Delete Dropdown --}}
+                                        @if($comment->user_id === auth('ibalong')->id() || in_array(auth('ibalong')->user()->role_id, [1, 2]))
+                                            <div x-data="{ open: false }" class="relative shrink-0">
+                                                <button @click="open = !open" @click.away="open = false" class="text-gray-400 hover:text-iba-black dark:hover:text-white transition-colors focus:outline-none">
+                                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 14a2 2 0 100-4 2 2 0 000 4zm-7 0a2 2 0 100-4 2 2 0 000 4zm14 0a2 2 0 100-4 2 2 0 000 4z"/></svg>
+                                                </button>
+                                                <div x-show="open" style="display: none;" class="absolute right-0 mt-1 w-28 bg-white dark:bg-gray-800 border-2 border-iba-black dark:border-iba-light shadow-[2px_2px_0_0_#131011] z-20 flex flex-col">
+                                                    <button wire:click="editComment({{ $comment->id }})" @click="open = false" class="text-left px-3 py-1.5 text-[10px] font-black uppercase text-iba-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 border-b-2 border-iba-black dark:border-gray-600 transition-colors">Edit</button>
+                                                    <button wire:click="confirmDeleteComment({{ $comment->id }})" @click="open = false" class="text-left px-3 py-1.5 text-[10px] font-black uppercase text-iba-red hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors">Delete</button>
+                                                </div>
+                                            </div>
+                                        @endif
                                     </div>
-                                    <p class="text-xs font-bold text-gray-700 dark:text-gray-300 leading-relaxed mb-2 whitespace-pre-wrap">{!! preg_replace('/@([A-Za-z0-9_]+)/', '<span class="text-iba-teal">$0</span>', e($comment->content)) !!}</p>
-                                    <button wire:click="setReply({{ $comment->id }})" class="text-[9px] font-black uppercase text-gray-400 hover:text-iba-orange transition-colors">Reply ↳</button>
+
+                                    {{-- Comment Content or Edit Input --}}
+                                    @if($editingCommentId === $comment->id)
+                                        <div class="mt-2 mb-2">
+                                            <textarea wire:model="editCommentContent" rows="2" class="w-full border-2 border-iba-black dark:border-gray-500 p-2 text-xs focus:outline-none focus:border-iba-orange bg-white dark:bg-gray-800 text-iba-black dark:text-white resize-none"></textarea>
+                                            @error('editCommentContent') <span class="text-iba-red text-[10px] font-bold block">⚠ {{ $message }}</span> @enderror
+                                            <div class="flex gap-2 mt-1 justify-end">
+                                                <button wire:click="cancelEditComment" class="text-[9px] font-black uppercase text-gray-500 hover:text-iba-black dark:hover:text-white transition-colors">Cancel</button>
+                                                <button wire:click="updateComment" class="bg-iba-orange text-iba-black font-black px-3 py-1 text-[9px] uppercase border-2 border-iba-black shadow-[2px_2px_0_0_#131011] hover:translate-y-0.5 hover:shadow-none transition-all">Save</button>
+                                            </div>
+                                        </div>
+                                    @else
+                                        <p class="text-xs font-bold text-gray-700 dark:text-gray-300 leading-relaxed mb-2 whitespace-pre-wrap">{!! preg_replace('/@([A-Za-z0-9_]+)/', '<span class="text-iba-teal">$0</span>', e($comment->content)) !!}</p>
+                                        <button wire:click="setReply({{ $comment->id }})" class="text-[9px] font-black uppercase text-gray-400 hover:text-iba-orange transition-colors">Reply ↳</button>
+                                    @endif
                                 </div>
                             </div>
 
@@ -235,10 +269,40 @@
                                                 {{ substr($reply->author_display ?? 'U', 0, 1) }}
                                             </div>
                                             <div class="bg-white dark:bg-gray-900 border border-iba-black p-2 flex-1 shadow-[1px_1px_0_0_#FF8623]">
-                                                <div class="flex justify-between items-end mb-1">
-                                                    <span class="text-[9px] font-black uppercase tracking-widest text-iba-black">{{ $reply->author_display }}</span>
+                                                <div class="flex justify-between items-start mb-1">
+                                                    <div>
+                                                        <span class="text-[9px] font-black uppercase tracking-widest text-iba-black dark:text-white">{{ $reply->author_display }}</span>
+                                                        @if($reply->created_at != $reply->updated_at)
+                                                            <span class="text-[8px] font-bold text-gray-400 italic ml-1">(Edited)</span>
+                                                        @endif
+                                                    </div>
+
+                                                    {{-- Reply Edit/Delete Dropdown --}}
+                                                    @if($reply->user_id === auth('ibalong')->id() || in_array(auth('ibalong')->user()->role_id, [1, 2]))
+                                                        <div x-data="{ open: false }" class="relative shrink-0">
+                                                            <button @click="open = !open" @click.away="open = false" class="text-gray-400 hover:text-iba-black dark:hover:text-white transition-colors focus:outline-none">
+                                                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M12 14a2 2 0 100-4 2 2 0 000 4zm-7 0a2 2 0 100-4 2 2 0 000 4zm14 0a2 2 0 100-4 2 2 0 000 4z"/></svg>
+                                                            </button>
+                                                            <div x-show="open" style="display: none;" class="absolute right-0 mt-1 w-28 bg-white dark:bg-gray-800 border-2 border-iba-black dark:border-iba-light shadow-[2px_2px_0_0_#131011] z-20 flex flex-col">
+                                                                <button wire:click="editComment({{ $reply->id }})" @click="open = false" class="text-left px-3 py-1 text-[9px] font-black uppercase text-iba-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 border-b-2 border-iba-black dark:border-gray-600 transition-colors">Edit</button>
+                                                                <button wire:click="confirmDeleteComment({{ $reply->id }})" @click="open = false" class="text-left px-3 py-1 text-[9px] font-black uppercase text-iba-red hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors">Delete</button>
+                                                            </div>
+                                                        </div>
+                                                    @endif
                                                 </div>
-                                                <p class="text-[11px] font-bold text-gray-600 dark:text-gray-400 whitespace-pre-wrap">{!! preg_replace('/@([A-Za-z0-9_]+)/', '<span class="text-iba-teal">$0</span>', e($reply->content)) !!}</p>
+
+                                                {{-- Reply Content or Edit Input --}}
+                                                @if($editingCommentId === $reply->id)
+                                                    <div class="mt-1 mb-1">
+                                                        <textarea wire:model="editCommentContent" rows="2" class="w-full border border-iba-black dark:border-gray-500 p-1.5 text-[11px] focus:outline-none focus:border-iba-orange bg-white dark:bg-gray-800 text-iba-black dark:text-white resize-none"></textarea>
+                                                        <div class="flex gap-2 mt-1 justify-end">
+                                                            <button wire:click="cancelEditComment" class="text-[8px] font-black uppercase text-gray-500 hover:text-iba-black dark:hover:text-white transition-colors">Cancel</button>
+                                                            <button wire:click="updateComment" class="bg-iba-orange text-iba-black font-black px-2 py-0.5 text-[8px] uppercase border border-iba-black shadow-[1px_1px_0_0_#131011] hover:translate-y-0.5 hover:shadow-none transition-all">Save</button>
+                                                        </div>
+                                                    </div>
+                                                @else
+                                                    <p class="text-[11px] font-bold text-gray-600 dark:text-gray-400 whitespace-pre-wrap">{!! preg_replace('/@([A-Za-z0-9_]+)/', '<span class="text-iba-teal">$0</span>', e($reply->content)) !!}</p>
+                                                @endif
                                             </div>
                                         </div>
                                     @endforeach
@@ -311,7 +375,7 @@
         </div>
     </div>
 
-    {{-- DELETE CONFIRMATION MODAL --}}
+    {{-- POST DELETE CONFIRMATION MODAL --}}
     @if($postToDelete)
         <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
             <div class="fixed inset-0 bg-gray-900/70 backdrop-blur-sm" wire:click="cancelDelete"></div>
@@ -327,6 +391,23 @@
                 <div class="flex flex-col sm:flex-row justify-center gap-4">
                     <button wire:click="cancelDelete" class="px-6 py-3 text-xs font-black uppercase tracking-widest text-gray-600 dark:text-gray-400 hover:text-iba-black dark:hover:text-white transition-colors">Cancel</button>
                     <button wire:click="deletePost" class="bg-iba-red text-white font-black px-6 py-3 text-xs uppercase border-4 border-iba-black shadow-[4px_4px_0_0_#131011] hover:translate-y-0.5 hover:shadow-none transition-all">Yes, Delete It</button>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    {{-- COMMENT DELETE CONFIRMATION MODAL --}}
+    @if($commentToDelete)
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div class="fixed inset-0 bg-gray-900/70 backdrop-blur-sm" wire:click="cancelDeleteComment"></div>
+            
+            <div class="relative w-full max-w-sm bg-white dark:bg-[#1A1617] border-4 border-iba-black dark:border-iba-light shadow-[10px_10px_0_0_#D93B3B] p-6 text-center animate-fade-in-up z-10">
+                <h3 class="text-xl font-black font-pixel text-iba-black dark:text-white uppercase mb-2">Delete Comment?</h3>
+                <p class="text-xs font-bold text-gray-600 dark:text-gray-400 mb-6">Are you sure? This cannot be undone.</p>
+                
+                <div class="flex flex-col sm:flex-row justify-center gap-3">
+                    <button wire:click="cancelDeleteComment" class="px-4 py-2 text-xs font-black uppercase tracking-widest text-gray-600 dark:text-gray-400 hover:text-iba-black dark:hover:text-white transition-colors">Cancel</button>
+                    <button wire:click="deleteComment" class="bg-iba-red text-white font-black px-4 py-2 text-xs uppercase border-4 border-iba-black shadow-[4px_4px_0_0_#131011] hover:translate-y-0.5 hover:shadow-none transition-all">Delete</button>
                 </div>
             </div>
         </div>

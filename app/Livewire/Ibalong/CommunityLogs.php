@@ -12,7 +12,7 @@ use App\Models\IbalongPostLike;
 use App\Models\IbalongPostComment;
 use App\Models\IbalongRegistration;
 use App\Models\IbalongNotification;
-use App\Models\IbalongUser; // <-- CHANGED: Using IbalongUser instead of User
+use App\Models\IbalongUser;
 
 class CommunityLogs extends Component
 {
@@ -21,7 +21,7 @@ class CommunityLogs extends Component
     // --- Create Post State ---
     public $content = '';
     public $photos = [];
-    public $isAnnouncement = false; // <-- NEW: Toggle state for announcements
+    public $isAnnouncement = false;
     
     // --- Identity, Comment & Mention State ---
     public $availableIdentities = [];
@@ -34,17 +34,21 @@ class CommunityLogs extends Component
     // --- Algorithm State ---
     public $filterType = 'latest'; 
 
-    // --- Edit & Delete State ---
+    // --- Post Edit & Delete State ---
     public $editingPostId = null;
     public $editContent = '';
     public $postToDelete = null;
+
+    // --- Comment Edit & Delete State ---
+    public $editingCommentId = null;
+    public $editCommentContent = '';
+    public $commentToDelete = null;
 
     public function mount()
     {
         $user = auth('ibalong')->user();
         $this->availableIdentities = [];
 
-        // 1. Establish Posting Identities
         $team = IbalongRegistration::where('user_id', $user->id)->with('members')->first();
         if ($team) {
             $this->availableIdentities[$team->team_name] = $team->team_name . ' (Entire Team)';
@@ -58,13 +62,11 @@ class CommunityLogs extends Component
             $this->postingAs = $identity;
         }
 
-        // 2. Load Mentionable Entities
         $teams = IbalongRegistration::select('team_name')->get();
         $teamMentions = $teams->map(function($t) {
             return ['tag' => str_replace(' ', '', $t->team_name), 'display' => $t->team_name];
         })->toArray();
 
-        // CHANGED: Querying IbalongUser instead of User
         $admins = IbalongUser::whereIn('role_id', [1, 2])->select('name')->get();
         $adminMentions = $admins->map(function($a) {
             return ['tag' => str_replace(' ', '', $a->name), 'display' => $a->name . ' (Organizer)'];
@@ -92,8 +94,6 @@ class CommunityLogs extends Component
         ]);
 
         $user = auth('ibalong')->user();
-        
-        // Ensure only Admins can actually set it as an announcement
         $isOfficial = $this->isAnnouncement && in_array($user->role_id, [1, 2]);
 
         $post = IbalongPost::create([
@@ -113,14 +113,12 @@ class CommunityLogs extends Component
             }
         }
 
-        // TRIGGER NOTIFICATIONS ONLY IF IT IS AN OFFICIAL ANNOUNCEMENT
         if ($isOfficial) {
             $this->notifyAllUsers('announcement', 'New Official Announcement: ' . mb_strimwidth($this->content, 0, 40, '...'), route('ibalong.community-logs.show', $post->id));
         }
 
         $this->parseMentionsAndNotify($this->content, $post->id, $this->postingAs);
 
-        // Reset the form
         $this->reset(['content', 'photos', 'isAnnouncement']);
         session()->flash('success', 'Log published to the community feed.');
     }
@@ -172,15 +170,13 @@ class CommunityLogs extends Component
         }
     }
 
-    // --- EDIT & DELETE METHODS ---
+    // --- POST EDIT & DELETE METHODS ---
     public function editPost($postId)
     {
         $post = IbalongPost::findOrFail($postId);
-        
         if ($post->user_id !== auth('ibalong')->id() && !in_array(auth('ibalong')->user()->role_id, [1, 2])) {
             return;
         }
-
         $this->editingPostId = $postId;
         $this->editContent = $post->content;
     }
@@ -194,7 +190,6 @@ class CommunityLogs extends Component
     public function updatePost()
     {
         $this->validate(['editContent' => 'required|string|max:5000']);
-        
         $post = IbalongPost::findOrFail($this->editingPostId);
         
         if ($post->user_id !== auth('ibalong')->id() && !in_array(auth('ibalong')->user()->role_id, [1, 2])) {
@@ -202,7 +197,6 @@ class CommunityLogs extends Component
         }
 
         $post->update(['content' => $this->editContent]);
-        
         $this->cancelEdit();
         session()->flash('success', 'Log updated successfully.');
     }
@@ -222,7 +216,6 @@ class CommunityLogs extends Component
         if (!$this->postToDelete) return;
 
         $post = IbalongPost::findOrFail($this->postToDelete);
-        
         if ($post->user_id !== auth('ibalong')->id() && !in_array(auth('ibalong')->user()->role_id, [1, 2])) {
             return;
         }
@@ -236,10 +229,62 @@ class CommunityLogs extends Component
         session()->flash('success', 'Log successfully deleted.');
     }
 
+    // --- COMMENT EDIT & DELETE METHODS ---
+    public function editComment($commentId)
+    {
+        $comment = IbalongPostComment::findOrFail($commentId);
+        if ($comment->user_id !== auth('ibalong')->id() && !in_array(auth('ibalong')->user()->role_id, [1, 2])) {
+            return;
+        }
+        $this->editingCommentId = $commentId;
+        $this->editCommentContent = $comment->content;
+    }
+
+    public function cancelEditComment()
+    {
+        $this->editingCommentId = null;
+        $this->editCommentContent = '';
+    }
+
+    public function updateComment()
+    {
+        $this->validate(['editCommentContent' => 'required|string|max:2000']);
+        $comment = IbalongPostComment::findOrFail($this->editingCommentId);
+        
+        if ($comment->user_id !== auth('ibalong')->id() && !in_array(auth('ibalong')->user()->role_id, [1, 2])) {
+            return;
+        }
+
+        $comment->update(['content' => $this->editCommentContent]);
+        $this->cancelEditComment();
+    }
+
+    public function confirmDeleteComment($commentId)
+    {
+        $this->commentToDelete = $commentId;
+    }
+
+    public function cancelDeleteComment()
+    {
+        $this->commentToDelete = null;
+    }
+
+    public function deleteComment()
+    {
+        if (!$this->commentToDelete) return;
+
+        $comment = IbalongPostComment::findOrFail($this->commentToDelete);
+        if ($comment->user_id !== auth('ibalong')->id() && !in_array(auth('ibalong')->user()->role_id, [1, 2])) {
+            return;
+        }
+
+        $comment->delete();
+        $this->commentToDelete = null;
+    }
+
     // --- NOTIFICATION HELPERS ---
     private function notifyAllUsers($type, $message, $link)
     {
-        // CHANGED: Pluck from IbalongUser to ensure it goes to the right table
         $userIds = IbalongUser::pluck('id'); 
         $notifications = [];
         foreach ($userIds as $id) {
@@ -270,7 +315,6 @@ class CommunityLogs extends Component
                 continue; 
             }
 
-            // CHANGED: Checking IbalongUser instead of User
             $user = IbalongUser::whereRaw("REPLACE(name, ' ', '') LIKE ?", ['%'.$mention.'%'])->first();
             if ($user && $user->id !== auth('ibalong')->id()) {
                 IbalongNotification::create([
