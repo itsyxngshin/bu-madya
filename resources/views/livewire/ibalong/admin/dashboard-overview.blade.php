@@ -1,4 +1,83 @@
-<div class="max-w-7xl mx-auto space-y-8 pb-24">
+<div x-data="imageCropper()" class="max-w-7xl mx-auto space-y-8 pb-24">
+
+    {{-- CROPPER.JS ASSETS --}}
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+
+    {{-- ALPINE CROPPER LOGIC --}}
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('imageCropper', () => ({
+                isCropModalOpen: false,
+                imageUrl: '',
+                cropper: null,
+                targetType: '',
+                targetId: null,
+                isUploading: false,
+
+                openCropper(event, type, id = null) {
+                    const file = event.target.files[0];
+                    if (!file) return;
+
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        this.imageUrl = e.target.result;
+                        this.targetType = type;
+                        this.targetId = id;
+                        this.isCropModalOpen = true;
+
+                        this.$nextTick(() => {
+                            if (this.cropper) {
+                                this.cropper.destroy();
+                            }
+                            this.cropper = new Cropper(this.$refs.cropperImage, {
+                                aspectRatio: 1, // Enforce a perfect square
+                                viewMode: 1,
+                                autoCropArea: 1,
+                                background: false,
+                            });
+                        });
+                    };
+                    reader.readAsDataURL(file);
+                    event.target.value = ''; // Reset file input
+                },
+
+                cropAndSave() {
+                    if (!this.cropper) return;
+                    this.isUploading = true;
+
+                    // Force the canvas to generate a highly compressed, standard-sized JPEG
+                    const canvas = this.cropper.getCroppedCanvas({
+                        width: 500,
+                        height: 500,
+                        fillColor: '#fff',
+                    });
+
+                    const base64Image = canvas.toDataURL('image/jpeg', 0.85);
+
+                    if (this.targetType === 'logo') {
+                        this.$wire.saveCroppedLogo(base64Image).then(() => {
+                            this.closeCropper();
+                        });
+                    } else if (this.targetType === 'member') {
+                        this.$wire.saveCroppedMemberPhoto(base64Image, this.targetId).then(() => {
+                            this.closeCropper();
+                        });
+                    }
+                },
+
+                closeCropper() {
+                    this.isCropModalOpen = false;
+                    this.isUploading = false;
+                    if (this.cropper) {
+                        this.cropper.destroy();
+                        this.cropper = null;
+                    }
+                    this.imageUrl = '';
+                }
+            }));
+        });
+    </script>
 
     @if (session()->has('success'))
         <div class="bg-iba-green/10 border-l-4 border-iba-green p-4 flex items-center justify-between animate-pulse">
@@ -72,7 +151,6 @@
     {{-- TEAM VIEW --}}
     {{-- ========================================== --}}
     @else
-        {{-- Profile Completion Check --}}
         @php
             $hasMissingPhotos = !$team->logo_path || ($team->members && $team->members->contains(function($m) { return empty($m->photo_path); }));
         @endphp
@@ -81,12 +159,11 @@
             <div class="bg-iba-orange/10 border-l-4 border-iba-orange p-4 flex items-center shadow-sm">
                 <svg class="w-6 h-6 text-iba-orange mr-3 shrink-0 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                 <p class="text-xs font-black text-iba-black dark:text-white uppercase tracking-wider">
-                    Action Required: Please complete your team profile by uploading your <span class="text-iba-orange">team logo</span> and <span class="text-iba-orange">member photos</span>. Max 10MB per file.
+                    Action Required: Please complete your team profile by uploading your <span class="text-iba-orange">team logo</span> and <span class="text-iba-orange">member photos</span>.
                 </p>
             </div>
         @endif
 
-        {{-- Welcome & Overview --}}
         <div class="bg-white dark:bg-[#1A1617] border-4 border-iba-black dark:border-iba-light shadow-[8px_8px_0_0_#FF8623] overflow-hidden">
             <div class="bg-iba-orange px-6 py-3 border-b-4 border-iba-black">
                 <h1 class="text-sm font-black text-iba-black uppercase tracking-widest">Cohort Command Center</h1>
@@ -98,26 +175,22 @@
                 <div class="relative group shrink-0">
                     <div class="w-32 h-32 md:w-40 md:h-40 border-4 {{ !$team->logo_path ? 'border-dashed border-iba-red' : 'border-iba-black dark:border-iba-light' }} shadow-[4px_4px_0_0_#131011] dark:shadow-[4px_4px_0_0_#FFFBF7] overflow-hidden bg-white dark:bg-[#1A1617] flex items-center justify-center relative aspect-square">
                         @if($team && $team->logo_path)
-                            {{-- Changed object-cover to object-contain and added p-2 for breathing room --}}
                             <img src="{{ Storage::url($team->logo_path) }}" class="w-full h-full object-contain p-2">
                         @else
                             <div class="flex flex-col items-center justify-center">
                                 <span class="text-[9px] font-black text-gray-500 uppercase text-center leading-tight">Missing<br>Logo</span>
                             </div>
-                            {{-- Notification Dot --}}
                             <div class="absolute top-2 right-2 w-3 h-3 bg-iba-red rounded-full animate-ping"></div>
                             <div class="absolute top-2 right-2 w-3 h-3 bg-iba-red rounded-full"></div>
                         @endif
 
-                        {{-- Upload Overlay --}}
+                        {{-- ALIPINE: Hook up to the openCropper function instead of Livewire --}}
                         <label class="absolute inset-0 bg-black/80 hidden group-hover:flex flex-col items-center justify-center cursor-pointer transition-all">
                             <span class="text-[10px] font-black text-white uppercase tracking-widest text-center px-2">Update<br>Logo</span>
-                            <span class="text-[8px] font-bold text-gray-300 mt-1 uppercase">Max 2MB</span>
-                            <input type="file" wire:model.live="teamLogo" accept="image/*" class="hidden">
+                            <span class="text-[8px] font-bold text-gray-300 mt-1 uppercase">Click to Crop</span>
+                            <input type="file" @change="openCropper($event, 'logo')" accept="image/*" class="hidden">
                         </label>
                     </div>
-                    @error('teamLogo') <span class="absolute -bottom-6 left-0 right-0 text-center text-[10px] font-black text-iba-red block mt-1">{{ $message }}</span> @enderror
-                    <div wire:loading wire:target="teamLogo" class="absolute -bottom-6 left-0 right-0 text-center text-[10px] font-bold text-iba-orange animate-pulse">Uploading...</div>
                 </div>
 
                 <div class="flex-1 text-center md:text-left space-y-4">
@@ -160,7 +233,7 @@
             </div>
         </div>
 
-        {{-- Event Participation & Tracking Monitor --}}
+        {{-- Event Participation --}}
         <div>
             <h3 class="text-lg font-black text-iba-black dark:text-white uppercase tracking-wider mb-6 border-l-4 border-iba-teal pl-3">Event Participation Monitor</h3>
 
@@ -218,21 +291,20 @@
                     @foreach($team->members as $member)
                         <div class="bg-white dark:bg-[#1A1617] border-4 border-iba-black flex items-start p-4 shadow-[4px_4px_0_0_#131011] relative group overflow-hidden {{ !$member->photo_path ? 'border-dashed border-iba-red' : '' }}">
 
-                            {{-- Cleaner Member Avatar Placeholder --}}
                             <div class="w-16 h-16 shrink-0 border-2 {{ !$member->photo_path ? 'border-iba-red' : 'border-iba-black' }} overflow-hidden bg-[#1A1617] flex items-center justify-center relative mt-1">
                                 @if($member->photo_path)
                                     <img src="{{ Storage::url($member->photo_path) }}" class="w-full h-full object-cover">
                                 @else
                                     <span class="font-black text-2xl text-gray-400 uppercase">{{ substr($member->full_name, 0, 1) }}</span>
-                                    {{-- Notification Dot --}}
                                     <div class="absolute top-1 right-1 w-2 h-2 bg-iba-red rounded-full animate-ping"></div>
                                     <div class="absolute top-1 right-1 w-2 h-2 bg-iba-red rounded-full"></div>
                                 @endif
 
+                                {{-- ALIPINE: Hook up to the openCropper function instead of Livewire --}}
                                 <label class="absolute inset-0 bg-black/80 hidden group-hover:flex flex-col items-center justify-center cursor-pointer transition-all">
                                     <svg class="w-4 h-4 text-white mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                                    <span class="text-[7px] font-bold text-gray-400 uppercase">Max 10MB</span>
-                                    <input type="file" wire:model.live="memberPhotos.{{ $member->id }}" accept="image/*" class="hidden">
+                                    <span class="text-[7px] font-bold text-gray-400 uppercase">Click to Crop</span>
+                                    <input type="file" @change="openCropper($event, 'member', {{ $member->id }})" accept="image/*" class="hidden">
                                 </label>
                             </div>
 
@@ -247,14 +319,48 @@
                                         @endforeach
                                     </div>
                                 @endif
-
-                                @error('memberPhotos.'.$member->id) <span class="text-[9px] font-black text-iba-red block mt-1 truncate">{{ $message }}</span> @enderror
                             </div>
-
-                            <div wire:loading wire:target="memberPhotos.{{ $member->id }}" class="absolute bottom-0 left-0 right-0 h-1 bg-iba-orange animate-pulse"></div>
                         </div>
                     @endforeach
                 @endif
+            </div>
+        </div>
+
+        {{-- NEO-BRUTALIST CROPPER MODAL --}}
+        <div x-show="isCropModalOpen" x-cloak class="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <div class="fixed inset-0 bg-gray-900/80 backdrop-blur-sm" @click="!isUploading && closeCropper()"></div>
+
+            <div class="relative w-full max-w-2xl bg-white dark:bg-[#1A1617] border-4 border-iba-black shadow-[8px_8px_0_0_#FF8623] flex flex-col z-10 animate-fade-in-up">
+
+                {{-- Modal Header --}}
+                <div class="flex justify-between items-center p-4 border-b-4 border-iba-black bg-iba-teal text-white shrink-0">
+                    <h3 class="font-black uppercase tracking-widest text-sm">Crop Image (Perfect Square)</h3>
+                    <button @click="closeCropper()" :disabled="isUploading" class="shrink-0 w-8 h-8 flex items-center justify-center border-2 border-iba-black bg-iba-red hover:bg-red-600 transition-colors disabled:opacity-50">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+
+                {{-- Image Canvas Area --}}
+                <div class="p-4 bg-gray-100 dark:bg-gray-900 border-b-4 border-iba-black relative">
+                    <div class="max-h-[50vh] overflow-hidden flex items-center justify-center bg-[#1A1617]">
+                        <img x-ref="cropperImage" :src="imageUrl" class="max-w-full block">
+                    </div>
+
+                    {{-- Uploading Overlay --}}
+                    <div x-show="isUploading" class="absolute inset-0 bg-white/70 dark:bg-black/70 flex flex-col items-center justify-center z-50 backdrop-blur-sm">
+                        <svg class="w-10 h-10 text-iba-orange animate-spin mb-3" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                        <span class="text-xs font-black uppercase tracking-widest animate-pulse text-iba-black dark:text-white">Processing & Uploading...</span>
+                    </div>
+                </div>
+
+                {{-- Action Buttons --}}
+                <div class="p-4 flex flex-col sm:flex-row justify-end gap-4 bg-white dark:bg-[#1A1617]">
+                    <button @click="closeCropper()" :disabled="isUploading" type="button" class="px-6 py-2.5 text-xs font-black uppercase tracking-widest text-gray-500 hover:text-iba-black dark:hover:text-white transition-colors disabled:opacity-50">Cancel</button>
+
+                    <button @click="cropAndSave()" :disabled="isUploading" type="button" class="bg-iba-orange text-iba-black font-black px-8 py-2.5 text-xs uppercase border-4 border-iba-black shadow-[4px_4px_0_0_#131011] hover:translate-y-0.5 hover:shadow-none transition-all disabled:opacity-50">
+                        Crop & Upload
+                    </button>
+                </div>
             </div>
         </div>
     @endif

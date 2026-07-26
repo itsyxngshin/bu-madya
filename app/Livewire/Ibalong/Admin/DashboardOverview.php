@@ -20,8 +20,6 @@ class DashboardOverview extends Component
 
     // --- Team View State ---
     public $team;
-    public $teamLogo;
-    public $memberPhotos = [];
     public $teamEvents = [];
 
     public function mount()
@@ -47,7 +45,6 @@ class DashboardOverview extends Component
         }
     }
 
-    // Helper to fetch fresh data after an update
     private function loadTeamData()
     {
         $this->team = clone IbalongRegistration::where('user_id', auth('ibalong')->id())
@@ -71,47 +68,50 @@ class DashboardOverview extends Component
         $setting = IbalongSetting::find(1);
         $setting->update(['is_registration_open' => !$setting->is_registration_open]);
         $this->isRegistrationOpen = $setting->is_registration_open;
-        
+
         $statusMessage = $this->isRegistrationOpen ? 'Registration portal is now OPEN.' : 'Registration portal is now LOCKED.';
         session()->flash('success', $statusMessage);
     }
 
-    // --- Image Upload Handlers ---
-    public function updatedTeamLogo()
+    // --- Base64 Cropped Image Handlers ---
+    public function saveCroppedLogo($base64Image)
     {
-        $this->validate(['teamLogo' => 'image|max:10240']); 
-        
+        if (!$this->team) return;
+
+        // Strip the metadata prefix (data:image/jpeg;base64,)
+        $imageParts = explode(";base64,", $base64Image);
+        $imageBase64 = base64_decode($imageParts[1]);
+        $fileName = 'team_logos/' . uniqid() . '.jpg';
+
         if ($this->team->logo_path) {
             Storage::disk('public')->delete($this->team->logo_path);
         }
-        
-        $path = $this->teamLogo->store('team_logos', 'public');
-        $this->team->update(['logo_path' => $path]);
-        
-        $this->teamLogo = null; // Clear the temp upload state
-        $this->loadTeamData();  // Force refresh
-        
-        session()->flash('success', 'Team logo updated successfully!');
+
+        Storage::disk('public')->put($fileName, $imageBase64);
+        $this->team->update(['logo_path' => $fileName]);
+
+        $this->loadTeamData();
+        session()->flash('success', 'Team logo perfectly cropped and updated!');
     }
 
-    public function updatedMemberPhotos($value, $memberId)
+    public function saveCroppedMemberPhoto($base64Image, $memberId)
     {
-        $this->validate(['memberPhotos.'.$memberId => 'image|max:15360']);
-        
         $member = IbalongTeamMember::find($memberId);
-        
+
         if ($member && $member->team_id === $this->team->id) {
+            $imageParts = explode(";base64,", $base64Image);
+            $imageBase64 = base64_decode($imageParts[1]);
+            $fileName = 'member_photos/' . uniqid() . '.jpg';
+
             if ($member->photo_path) {
                 Storage::disk('public')->delete($member->photo_path);
             }
-            
-            $path = $this->memberPhotos[$memberId]->store('member_photos', 'public');
-            $member->update(['photo_path' => $path]);
-            
-            unset($this->memberPhotos[$memberId]); // Clear temp upload state
-            $this->loadTeamData(); // Force refresh
-            
-            session()->flash('success', 'Member photo updated!');
+
+            Storage::disk('public')->put($fileName, $imageBase64);
+            $member->update(['photo_path' => $fileName]);
+
+            $this->loadTeamData();
+            session()->flash('success', 'Member photo cropped and updated!');
         }
     }
 
