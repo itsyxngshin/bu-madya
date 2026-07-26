@@ -88,6 +88,7 @@ class RegistrantManager extends Component
             'slug' => Str::slug($registration->team_name) . '-' . strtolower(Str::random(5)),
             'email' => $email,
             'password' => Hash::make($rawPassword),
+            'designation' => "Participating Team",
             'is_active' => true,
             'email_verified_at' => now(),
         ]);
