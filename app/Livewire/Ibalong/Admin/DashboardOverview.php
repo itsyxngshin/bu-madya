@@ -22,12 +22,11 @@ class DashboardOverview extends Component
     public $team;
     public $teamLogo;
     public $memberPhotos = [];
-    public $teamEvents = []; // Holds the event participation data
+    public $teamEvents = [];
 
     public function mount()
     {
         $user = auth('ibalong')->user();
-        
         $this->isAdmin = in_array($user->role_id, [1, 2]);
 
         if ($this->isAdmin) {
@@ -44,17 +43,21 @@ class DashboardOverview extends Component
                 'rejected' => IbalongRegistration::where('status', 'rejected')->count(),
             ];
         } else {
-            // Eager load the team, their skills, members, and member skills
-            $this->team = IbalongRegistration::where('user_id', $user->id)
-                            ->with(['skills', 'members.skills'])
-                            ->first();
+            $this->loadTeamData();
+        }
+    }
 
-            // Load the Event Registrations for this team, including the event details and check-ins
-            if ($this->team) {
-                $this->teamEvents = IbalongEventRegistration::with(['event', 'attendances'])
-                                        ->where('team_id', $this->team->id)
-                                        ->get();
-            }
+    // Helper to fetch fresh data after an update
+    private function loadTeamData()
+    {
+        $this->team = clone IbalongRegistration::where('user_id', auth('ibalong')->id())
+                        ->with(['skills', 'members.skills'])
+                        ->first();
+
+        if ($this->team) {
+            $this->teamEvents = IbalongEventRegistration::with(['event', 'attendances'])
+                                    ->where('team_id', $this->team->id)
+                                    ->get();
         }
     }
 
@@ -66,12 +69,9 @@ class DashboardOverview extends Component
         }
 
         $setting = IbalongSetting::find(1);
-        $setting->update([
-            'is_registration_open' => !$setting->is_registration_open
-        ]);
-
+        $setting->update(['is_registration_open' => !$setting->is_registration_open]);
         $this->isRegistrationOpen = $setting->is_registration_open;
-
+        
         $statusMessage = $this->isRegistrationOpen ? 'Registration portal is now OPEN.' : 'Registration portal is now LOCKED.';
         session()->flash('success', $statusMessage);
     }
@@ -79,7 +79,7 @@ class DashboardOverview extends Component
     // --- Image Upload Handlers ---
     public function updatedTeamLogo()
     {
-        $this->validate(['teamLogo' => 'image|max:6144']); // 2MB Max
+        $this->validate(['teamLogo' => 'image|max:2048']); 
         
         if ($this->team->logo_path) {
             Storage::disk('public')->delete($this->team->logo_path);
@@ -87,14 +87,16 @@ class DashboardOverview extends Component
         
         $path = $this->teamLogo->store('team_logos', 'public');
         $this->team->update(['logo_path' => $path]);
-        $this->teamLogo = null;
+        
+        $this->teamLogo = null; // Clear the temp upload state
+        $this->loadTeamData();  // Force refresh
         
         session()->flash('success', 'Team logo updated successfully!');
     }
 
     public function updatedMemberPhotos($value, $memberId)
     {
-        $this->validate(['memberPhotos.'.$memberId => 'image|max:15360']);
+        $this->validate(['memberPhotos.'.$memberId => 'image|max:2048']);
         
         $member = IbalongTeamMember::find($memberId);
         
@@ -106,7 +108,9 @@ class DashboardOverview extends Component
             $path = $this->memberPhotos[$memberId]->store('member_photos', 'public');
             $member->update(['photo_path' => $path]);
             
-            $this->team->load('members.skills');
+            unset($this->memberPhotos[$memberId]); // Clear temp upload state
+            $this->loadTeamData(); // Force refresh
+            
             session()->flash('success', 'Member photo updated!');
         }
     }
