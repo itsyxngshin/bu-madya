@@ -28,6 +28,7 @@ class IbalongRegistration extends Model
         'media_consent',
         'data_privacy_consent',
         'status',
+        'logo_path',
         'account_creation_status',
     ];
 

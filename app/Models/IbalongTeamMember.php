@@ -17,6 +17,7 @@ class IbalongTeamMember extends Model
         'full_name',
         'slug',
         'email_address',
+        'photo_path', 
         'mobile_number',
         'birthday',
         'course',
