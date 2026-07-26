@@ -1,4 +1,37 @@
-<div class="max-w-5xl mx-auto space-y-8 pb-24">
+<div x-data="documentViewer()" class="max-w-5xl mx-auto space-y-8 pb-24">
+    
+    {{-- ALPINE SCRIPT FOR DOCUMENT VIEWER --}}
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('documentViewer', () => ({
+                viewerOpen: false,
+                viewerUrl: '',
+                viewerTitle: '',
+                isNativeViewer: false,
+                
+                openViewer(fileUrl, fileName) {
+                    this.viewerTitle = fileName;
+                    const extension = fileName.split('.').pop().toLowerCase();
+                    
+                    if (extension === 'pdf' || extension === 'txt' || extension.match(/(jpg|jpeg|png|gif|webp)$/i)) {
+                        // Browsers can handle PDFs, Text, and Images natively
+                        this.isNativeViewer = true;
+                        this.viewerUrl = fileUrl;
+                    } else if (['doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx'].includes(extension)) {
+                        // Route Office files through Microsoft Office Online Viewer
+                        this.isNativeViewer = false;
+                        this.viewerUrl = 'https://view.officeapps.live.com/op/embed.aspx?src=' + encodeURIComponent(fileUrl);
+                    } else {
+                        alert('Inline preview is not available for this file type. Please download it instead.');
+                        return;
+                    }
+                    
+                    this.viewerOpen = true;
+                }
+            }));
+        });
+    </script>
+
     <div class="bg-white dark:bg-[#1A1617] p-6 border-4 border-iba-black dark:border-iba-light shadow-[8px_8px_0_0_#FF8623]">
         <h1 class="text-2xl font-black text-iba-black dark:text-iba-light uppercase tracking-wider">Resource Vault</h1>
         <p class="text-sm font-bold text-gray-500 mt-1">Access essential hackathon files, datasets, and templates here.</p>
@@ -108,7 +141,16 @@
                                         @foreach($group->files as $file)
                                             <div class="flex justify-between items-center bg-white border-2 border-iba-black p-2">
                                                 <span class="text-xs font-bold truncate">{{ $file->file_name }}</span>
-                                                <button type="button" wire:click="deleteFile({{ $file->id }})" class="text-[10px] font-black uppercase text-iba-red hover:underline ml-4 shrink-0">Remove</button>
+                                                <div class="flex items-center gap-3">
+                                                    @php
+                                                        $ext = strtolower(pathinfo($file->file_name, PATHINFO_EXTENSION));
+                                                        $isViewable = in_array($ext, ['pdf', 'doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx', 'txt', 'jpg', 'png', 'jpeg']);
+                                                    @endphp
+                                                    @if($isViewable)
+                                                        <button type="button" @click="openViewer('{{ url(Storage::url($file->file_path)) }}', '{{ addslashes($file->file_name) }}')" class="text-[10px] font-black uppercase text-iba-teal hover:underline shrink-0">Preview</button>
+                                                    @endif
+                                                    <button type="button" wire:click="deleteFile({{ $file->id }})" class="text-[10px] font-black uppercase text-iba-red hover:underline shrink-0">Remove</button>
+                                                </div>
                                             </div>
                                         @endforeach
                                     </div>
@@ -145,25 +187,66 @@
 
                     <div x-show="expanded" x-collapse class="border-t-4 border-iba-black dark:border-iba-light bg-gray-50 dark:bg-gray-900 p-5 space-y-3">
                         @forelse($group->files as $file)
-                            <div class="flex items-center justify-between border-2 border-dashed border-gray-300 dark:border-gray-700 p-3 bg-white dark:bg-gray-800">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-2 border-dashed border-gray-300 dark:border-gray-700 p-3 bg-white dark:bg-gray-800">
                                 <div class="flex items-center gap-3 overflow-hidden">
                                     <svg class="w-6 h-6 text-iba-teal shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
                                     <span class="text-xs font-bold text-gray-800 dark:text-gray-200 truncate">{{ $file->file_name }}</span>
                                     <span class="text-[10px] font-black text-gray-400 ml-2 shrink-0">{{ $file->file_size }}</span>
                                 </div>
-                                <a href="{{ Storage::url($file->file_path) }}" download class="shrink-0 bg-iba-teal text-white text-[10px] font-black uppercase px-4 py-2 border-2 border-iba-black shadow-[2px_2px_0_0_#131011] hover:translate-y-0.5 hover:shadow-none transition-all">Download</a>
+                                <div class="flex gap-2 shrink-0">
+                                    @php
+                                        $ext = strtolower(pathinfo($file->file_name, PATHINFO_EXTENSION));
+                                        $isViewable = in_array($ext, ['pdf', 'doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx', 'txt', 'jpg', 'png', 'jpeg']);
+                                    @endphp
+                                    
+                                    @if($isViewable)
+                                        <button type="button" @click="openViewer('{{ url(Storage::url($file->file_path)) }}', '{{ addslashes($file->file_name) }}')" class="bg-iba-orange text-iba-black text-[10px] font-black uppercase px-4 py-2 border-2 border-iba-black shadow-[2px_2px_0_0_#131011] hover:translate-y-0.5 hover:shadow-none transition-all">View</button>
+                                    @endif
+                                    
+                                    <a href="{{ Storage::url($file->file_path) }}" download class="bg-iba-teal text-white text-[10px] font-black uppercase px-4 py-2 border-2 border-iba-black shadow-[2px_2px_0_0_#131011] hover:translate-y-0.5 hover:shadow-none transition-all text-center">Download</a>
+                                </div>
                             </div>
                         @empty
                             <p class="text-xs font-bold text-gray-500 uppercase">No files in this pack.</p>
                         @endforelse
                     </div>
                 @endif
-
             </div>
         @empty
             <div class="bg-white dark:bg-[#1A1617] border-4 border-iba-black border-dashed p-12 text-center shadow-sm">
                 <p class="text-sm font-black text-gray-500 uppercase tracking-widest">No resources are currently available.</p>
             </div>
         @endforelse
+    </div>
+
+    {{-- DOCUMENT VIEWER MODAL --}}
+    <div x-show="viewerOpen" x-cloak class="fixed inset-0 z-[100] flex items-center justify-center p-2 sm:p-6">
+        <div class="fixed inset-0 bg-gray-900/80 backdrop-blur-sm" @click="viewerOpen = false"></div>
+        
+        <div class="relative w-full max-w-6xl h-full max-h-[90vh] bg-white dark:bg-[#1A1617] border-4 border-iba-black shadow-[12px_12px_0_0_#0095AC] flex flex-col z-10 animate-fade-in-up">
+            
+            {{-- Viewer Header --}}
+            <div class="flex justify-between items-center p-3 sm:p-4 border-b-4 border-iba-black bg-iba-teal text-white shrink-0">
+                <div class="flex items-center gap-3 overflow-hidden">
+                    <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                    <h3 class="font-black uppercase tracking-widest text-xs sm:text-sm truncate" x-text="viewerTitle"></h3>
+                </div>
+                <button @click="viewerOpen = false" class="shrink-0 w-8 h-8 flex items-center justify-center border-2 border-iba-black bg-iba-red hover:bg-red-600 transition-colors ml-4">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+
+            {{-- Viewer Iframe Body --}}
+            <div class="flex-1 bg-gray-200 dark:bg-gray-900 relative">
+                {{-- Loader (Visible while iframe loads) --}}
+                <div x-show="!isNativeViewer" class="absolute inset-0 flex flex-col items-center justify-center gap-3 p-6 text-center">
+                    <svg class="w-8 h-8 text-iba-orange animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    <span class="text-[10px] font-black uppercase tracking-widest text-gray-500 animate-pulse">Connecting to Office Viewer...</span>
+                    <span class="text-[9px] font-bold text-gray-400">(If this fails to load, the file must be hosted on a live server, or you can just download it).</span>
+                </div>
+                
+                <iframe :src="viewerUrl" class="absolute inset-0 w-full h-full border-none z-10 bg-white" allowfullscreen></iframe>
+            </div>
+        </div>
     </div>
 </div>
