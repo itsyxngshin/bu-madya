@@ -18,15 +18,26 @@
 
             <div class="text-center mb-6">
                 <h2 class="text-xl font-black text-iba-black dark:text-white uppercase">Scan Boarding Pass</h2>
-                <p class="text-xs font-bold text-gray-500 uppercase mt-1">Center the QR code in the frame or upload an image file.</p>
+                <p class="text-xs font-bold text-gray-500 uppercase mt-1">Select camera to scan or upload a QR image file.</p>
             </div>
 
             {{-- The Div where the JS Library injects the camera/upload UI --}}
-            <div id="qr-reader" class="w-full mx-auto overflow-hidden border-4 border-dashed border-gray-300 dark:border-gray-700 p-2" wire:ignore></div>
+            <div id="qr-reader" class="w-full mx-auto overflow-hidden border-4 border-dashed border-gray-300 dark:border-gray-700 p-4 bg-gray-50 dark:bg-gray-900" wire:ignore></div>
+
+            {{-- Manual Entry Fallback --}}
+            <div class="mt-6 flex flex-col sm:flex-row gap-4 border-t-4 border-dashed border-gray-300 dark:border-gray-700 pt-6">
+                <input type="text" wire:model="manualTicketCode" wire:keydown.enter="submitManualCode" placeholder="Enter Ticket Code (e.g., HOI-XXXXX)" class="flex-1 border-4 border-iba-black dark:border-iba-light p-3 text-sm bg-white dark:bg-gray-900 focus:outline-none focus:border-iba-teal text-iba-black dark:text-white font-bold uppercase tracking-widest text-center sm:text-left">
+
+                <button wire:click="submitManualCode" class="bg-iba-orange text-iba-black font-black px-8 py-3 text-sm uppercase border-4 border-iba-black dark:border-iba-light shadow-[4px_4px_0_0_#131011] dark:shadow-[4px_4px_0_0_#FFFBF7] hover:translate-y-0.5 hover:shadow-none transition-all flex items-center justify-center gap-2">
+                    <span wire:loading.remove wire:target="submitManualCode">Verify Code</span>
+                    <span wire:loading wire:target="submitManualCode">Processing...</span>
+                </button>
+            </div>
+            @error('manualTicketCode') <span class="text-iba-red text-xs font-bold block mt-2 uppercase text-center sm:text-left">⚠ {{ $message }}</span> @enderror
 
             {{-- Dynamic Alert Messages --}}
             @if($lastScanStatus)
-                <div class="mt-8 p-6 border-4 border-iba-black dark:border-iba-light text-center {{ $lastScanStatus === 'success' ? 'bg-iba-green text-white shadow-[6px_6px_0_0_#131011] dark:shadow-[6px_6px_0_0_#FFFBF7]' : 'bg-iba-red text-white shadow-[6px_6px_0_0_#131011] dark:shadow-[6px_6px_0_0_#FFFBF7]' }}">
+                <div class="mt-8 p-6 border-4 border-iba-black dark:border-iba-light text-center {{ $lastScanStatus === 'success' ? 'bg-iba-green text-white shadow-[6px_6px_0_0_#131011] dark:shadow-[6px_6px_0_0_#FFFBF7]' : 'bg-iba-red text-white shadow-[6px_6px_0_0_#131011] dark:shadow-[6px_6px_0_0_#FFFBF7]' }} animate-fade-in-up">
                     <h3 class="font-pixel text-lg sm:text-xl uppercase tracking-widest mb-2">{{ $lastScanMessage }}</h3>
 
                     @if($scannedRegistrant)
@@ -34,6 +45,7 @@
                             <p class="font-bold text-sm uppercase border-b-2 border-white/30 pb-1 mb-1">Passholder Details</p>
                             <p class="text-lg font-black uppercase">{{ $scannedRegistrant->name }}</p>
                             <p class="text-xs font-bold uppercase tracking-wider">{{ $scannedRegistrant->role }}</p>
+                            <p class="text-[10px] font-bold uppercase tracking-wider text-white/70 mt-2">Code: {{ $scannedRegistrant->ticket_code }}</p>
                         </div>
                     @endif
                 </div>
@@ -47,55 +59,91 @@
 
     <script>
         document.addEventListener('livewire:initialized', () => {
-            // Wait for DOM to be ready
             setTimeout(() => {
-                const html5QrCode = new Html5Qrcode("qr-reader");
-
-                // Audio beep for successful scan
                 const beep = new Audio('https://www.soundjay.com/buttons/sounds/button-09.mp3');
 
+                const html5QrcodeScanner = new Html5QrcodeScanner(
+                    "qr-reader",
+                    { fps: 10, qrbox: { width: 250, height: 250 } },
+                    false
+                );
+
                 const qrCodeSuccessCallback = (decodedText, decodedResult) => {
-                    // Pause scanning to prevent spamming the server
-                    html5QrCode.pause();
+                    html5QrcodeScanner.pause(true);
                     beep.play().catch(e => console.log('Audio disabled by browser'));
 
-                    // Send to Livewire component
                     @this.processScan(decodedText).then(() => {
-                        // Resume scanning after 2 seconds automatically
                         setTimeout(() => {
-                            html5QrCode.resume();
-                        }, 2000);
+                            html5QrcodeScanner.resume();
+                        }, 2500);
                     });
                 };
 
-                const config = { fps: 10, qrbox: { width: 250, height: 250 } };
-
-                // Start the camera (prefer rear camera for mobiles)
-                html5QrCode.start({ facingMode: "environment" }, config, qrCodeSuccessCallback)
-                .catch((err) => {
-                    // Fallback to basic file upload UI if camera is denied/missing
-                    console.log("Camera access failed, falling back to basic scanner.", err);
-                    const fileScanner = new Html5QrcodeScanner("qr-reader", { fps: 10, qrbox: 250 });
-                    fileScanner.render(qrCodeSuccessCallback);
-                });
+                html5QrcodeScanner.render(qrCodeSuccessCallback);
             }, 500);
         });
     </script>
 
     <style>
         /* Neo-Brutalist overrides for the injected QR library UI */
+        #qr-reader {
+            border: none !important;
+        }
+
         #qr-reader img { margin: 0 auto; }
-        #qr-reader__dashboard_section_csr button {
+
+        #qr-reader button {
             background-color: #0095AC !important;
             color: white !important;
             border: 2px solid #131011 !important;
-            font-weight: bold !important;
+            font-weight: 900 !important;
             text-transform: uppercase !important;
-            padding: 8px 16px !important;
+            padding: 10px 20px !important;
             cursor: pointer !important;
-            box-shadow: 2px 2px 0 0 #131011 !important;
+            box-shadow: 3px 3px 0 0 #131011 !important;
             border-radius: 0 !important;
+            margin: 10px 5px !important;
+            transition: all 0.2s;
         }
-        #qr-reader__dashboard_section_csr span a { display: none !important; /* Hide "Scan an Image File" text */ }
+
+        #qr-reader button:hover {
+            transform: translateY(2px);
+            box-shadow: none !important;
+        }
+
+        #qr-reader__dashboard_section_swaplink {
+            color: #FF8623 !important;
+            font-weight: 900 !important;
+            text-transform: uppercase !important;
+            text-decoration: none !important;
+            letter-spacing: 1px !important;
+            display: inline-block !important;
+            margin: 15px 0 !important;
+            border-bottom: 2px dashed #FF8623 !important;
+            transition: color 0.2s;
+        }
+
+        #qr-reader__dashboard_section_swaplink:hover {
+            color: #CF452C !important;
+            border-color: #CF452C !important;
+        }
+
+        #qr-reader__dashboard_section_fsr input[type="file"] {
+            background: #ffffff !important;
+            border: 2px solid #131011 !important;
+            padding: 8px !important;
+            font-weight: bold !important;
+            margin-top: 10px !important;
+            width: 100%;
+            max-width: 300px;
+            color: #131011 !important;
+            cursor: pointer;
+        }
+
+        #qr-reader__dashboard_section_csr span {
+            font-family: ui-sans-serif, system-ui, -apple-system, sans-serif !important;
+            font-weight: bold !important;
+            color: #4b5563 !important;
+        }
     </style>
 </div>

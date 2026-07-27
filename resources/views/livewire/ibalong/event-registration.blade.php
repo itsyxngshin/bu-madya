@@ -28,7 +28,7 @@
                         <div class="grid grid-cols-2 gap-4 pt-4 border-t-2 border-dashed border-gray-300 dark:border-gray-700">
                             <div>
                                 <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest">ATTENDEE</span>
-                                <span class="block text-lg font-bold text-iba-black dark:text-white uppercase truncate">{{ $name }}</span>
+                                <span class="block text-lg font-bold text-iba-black dark:text-white uppercase leading-tight break-words">{{ $name }}</span>
                             </div>
                             <div>
                                 <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest">ROLE</span>

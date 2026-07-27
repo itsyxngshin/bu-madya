@@ -14,6 +14,9 @@ class EventScanner extends Component
     public $lastScanMessage = '';
     public $scannedRegistrant = null;
 
+    // --- Added for Manual Fallback ---
+    public $manualTicketCode = '';
+
     public function mount($slug)
     {
         $this->event = IbalongEvent::where('slug', $slug)
@@ -22,11 +25,24 @@ class EventScanner extends Component
 
         // 1. Check Security Permissions
         $user = auth('ibalong')->user();
-        $isAdminOrFacilitator = $user && in_array($user->role_id, [1, 2]); // Check your exact admin roles
+        $isAdminOrFacilitator = $user && in_array($user->role_id, [1, 2, 4, 5]); // Adjusted to allow all admin/facilitator roles
 
         if (!$this->event->allow_self_checkin && !$isAdminOrFacilitator) {
             abort(403, 'ACCESS DENIED: This terminal is restricted to authorized Facilitators only.');
         }
+    }
+
+    public function submitManualCode()
+    {
+        $this->validate([
+            'manualTicketCode' => 'required|string'
+        ]);
+
+        // Trim any accidental spaces and process
+        $this->processScan(trim($this->manualTicketCode));
+
+        // Clear the input field for the next person
+        $this->manualTicketCode = '';
     }
 
     public function processScan($ticketCode)
