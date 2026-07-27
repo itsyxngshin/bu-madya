@@ -69,13 +69,27 @@
                 );
 
                 const qrCodeSuccessCallback = (decodedText, decodedResult) => {
-                    html5QrcodeScanner.pause(true);
+                    // 1. Try to pause, safely catch error if it's a static file upload
+                    try {
+                        html5QrcodeScanner.pause(true);
+                    } catch (error) {
+                        console.log("Static image scan detected, skipping video pause.");
+                    }
+
                     beep.play().catch(e => console.log('Audio disabled by browser'));
 
+                    // 2. Process the scan
                     @this.processScan(decodedText).then(() => {
+
+                        // 3. Try to resume after 2.5 seconds
                         setTimeout(() => {
-                            html5QrcodeScanner.resume();
+                            try {
+                                html5QrcodeScanner.resume();
+                            } catch (error) {
+                                // Silently catch resume errors for file uploads
+                            }
                         }, 2500);
+
                     });
                 };
 
