@@ -1,5 +1,5 @@
 <div class="max-w-4xl mx-auto space-y-8 pb-24">
-    
+
     {{-- Reusable Alpine Logic for Mentions --}}
     <script>
         document.addEventListener('alpine:init', () => {
@@ -9,13 +9,13 @@
                 filteredMentions: [],
                 mentionStartPoint: 0,
                 mentionList: @js($mentionables),
-                
+
                 checkMention(e) {
                     const el = e.target;
                     const cursorPos = el.selectionStart;
                     const textBeforeCursor = el.value.substring(0, cursorPos);
                     const match = textBeforeCursor.match(/(?:\s|^)@([A-Za-z0-9_]*)$/);
-                    
+
                     if (match) {
                         this.searchQuery = match[1].toLowerCase();
                         this.filteredMentions = this.mentionList.filter(m => m.tag.toLowerCase().includes(this.searchQuery) || m.display.toLowerCase().includes(this.searchQuery));
@@ -29,12 +29,12 @@
                     const el = this.$refs.mentionInput;
                     const before = el.value.substring(0, this.mentionStartPoint);
                     const after = el.value.substring(el.selectionStart);
-                    
+
                     el.value = before + '@' + tag + ' ' + after;
                     this.showDropdown = false;
-                    
+
                     el.dispatchEvent(new Event('input'));
-                    
+
                     this.$nextTick(() => {
                         el.focus();
                         const newPos = before.length + tag.length + 2;
@@ -59,21 +59,27 @@
 
     {{-- SINGLE POST FOCUS --}}
     <div class="bg-white dark:bg-[#1A1617] border-4 border-iba-black dark:border-iba-light shadow-[12px_12px_0_0_#0095AC] flex flex-col relative">
-        
+
         @if($post->is_announcement)
             <div class="absolute -top-4 -left-4 bg-iba-red text-white font-black text-[10px] uppercase tracking-widest px-4 py-1.5 border-2 border-iba-black shadow-[2px_2px_0_0_#131011] transform -rotate-2 z-10">
                 Official Announcement
             </div>
         @endif
 
-        <div class="p-5 flex items-center justify-between border-b-2 border-dashed border-gray-200 dark:border-gray-800">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-iba-teal text-white flex items-center justify-center font-black text-lg border-2 border-iba-black shadow-[2px_2px_0_0_#131011] shrink-0">
+        <div class="p-5 flex items-start justify-between border-b-2 border-dashed border-gray-200 dark:border-gray-800">
+            <div class="flex items-start gap-3">
+                <div class="w-10 h-10 bg-iba-teal text-white flex items-center justify-center font-black text-lg border-2 border-iba-black shadow-[2px_2px_0_0_#131011] shrink-0 mt-1">
                     {{ substr($post->author_display ?? $post->user->name ?? 'U', 0, 1) }}
                 </div>
                 <div>
-                    <h4 class="font-black text-sm text-iba-black dark:text-white uppercase leading-tight">{{ $post->author_display ?? $post->user->name }}</h4>
-                    <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+                    @php $mainParts = explode(' - ', $post->author_display ?? $post->user->name ?? 'User', 2); @endphp
+                    <h4 class="font-black text-sm text-iba-black dark:text-white uppercase leading-tight">{{ $mainParts[0] }}</h4>
+
+                    @if(isset($mainParts[1]))
+                        <p class="text-xs font-bold text-gray-700 dark:text-gray-300 italic uppercase mt-0.5">{{ $mainParts[1] }}</p>
+                    @endif
+
+                    <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-1">
                         @if($post->is_announcement) Organizing Committee @else Hackathon Cohort @endif • {{ $post->created_at->diffForHumans() }}
                         @if($post->created_at != $post->updated_at)
                             <span class="ml-1">(Edited)</span>
@@ -105,7 +111,7 @@
                 <div class="space-y-3">
                     <textarea wire:model="editContent" rows="6" class="w-full border-4 border-iba-black dark:border-iba-light p-4 text-sm focus:outline-none focus:border-iba-orange bg-gray-50 dark:bg-gray-900 text-iba-black dark:text-white font-bold resize-none"></textarea>
                     @error('editContent') <span class="text-iba-red text-xs font-bold block">⚠ {{ $message }}</span> @enderror
-                    
+
                     <div class="flex flex-col sm:flex-row gap-3 justify-end">
                         <button wire:click="cancelEdit" class="text-xs font-black uppercase tracking-widest text-gray-500 hover:text-iba-black dark:hover:text-white px-4 py-2 transition-colors">Cancel</button>
                         <button wire:click="updatePost" class="bg-iba-orange text-iba-black font-black px-6 py-2 text-xs uppercase border-4 border-iba-black shadow-[3px_3px_0_0_#131011] hover:translate-y-0.5 hover:shadow-none transition-all">Save Changes</button>
@@ -113,7 +119,7 @@
                 </div>
             @else
                 <div class="text-sm md:text-base font-bold text-gray-800 dark:text-gray-200 leading-relaxed whitespace-pre-wrap">{!! preg_replace('/@([A-Za-z0-9_]+)/', '<span class="text-iba-teal bg-iba-teal/10 px-1 py-0.5 border border-iba-teal border-dashed">$0</span>', e($post->content)) !!}</div>
-                
+
                 @if($post->images->count() > 0)
                     <div class="mt-8 grid gap-3 {{ $post->images->count() == 1 ? 'grid-cols-1' : ($post->images->count() == 2 ? 'grid-cols-2' : 'grid-cols-2 sm:grid-cols-3') }}">
                         @foreach($post->images as $image)
@@ -129,11 +135,11 @@
         <div class="bg-gray-50 dark:bg-gray-900 border-t-2 border-iba-black dark:border-iba-light p-4 flex gap-6">
             @php $hasLiked = $post->likes->contains('user_id', auth('ibalong')->id()); @endphp
             <button wire:click="toggleLike" class="flex items-center gap-2 text-sm font-black uppercase tracking-widest transition-colors {{ $hasLiked ? 'text-iba-red' : 'text-gray-500 hover:text-iba-black dark:hover:text-white' }}">
-                <svg class="w-6 h-6 {{ $hasLiked ? 'fill-current' : 'fill-none stroke-currentColor' }}" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg> 
+                <svg class="w-6 h-6 {{ $hasLiked ? 'fill-current' : 'fill-none stroke-currentColor' }}" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
                 {{ $post->likes->count() }} Likes
             </button>
             <div class="flex items-center gap-2 text-sm font-black uppercase tracking-widest text-gray-500">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg> 
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
                 {{ $post->comments->count() }} Comments
             </div>
         </div>
@@ -150,10 +156,16 @@
                         <div class="bg-white dark:bg-gray-900 border-2 border-iba-black dark:border-gray-600 p-4 flex-1 shadow-[3px_3px_0_0_#131011]">
                             <div class="flex justify-between items-start mb-2 border-b border-gray-100 dark:border-gray-800 pb-2">
                                 <div>
-                                    <span class="text-xs font-black uppercase tracking-widest text-iba-black dark:text-white">{{ $comment->author_display }}</span>
-                                    <span class="text-[10px] font-bold text-gray-400 uppercase block sm:inline sm:ml-2">{{ $comment->created_at->diffForHumans() }}</span>
-                                    @if($comment->created_at != $comment->updated_at)
-                                        <span class="text-[9px] font-bold text-gray-400 italic sm:ml-1">(Edited)</span>
+                                    @php $commentParts = explode(' - ', $comment->author_display ?? 'User', 2); @endphp
+                                    <div class="flex items-baseline flex-wrap gap-x-2">
+                                        <span class="text-xs font-black uppercase tracking-widest text-iba-black dark:text-white">{{ $commentParts[0] }}</span>
+                                        <span class="text-[10px] font-bold text-gray-400 uppercase">{{ $comment->created_at->diffForHumans() }}</span>
+                                        @if($comment->created_at != $comment->updated_at)
+                                            <span class="text-[9px] font-bold text-gray-400 italic">(Edited)</span>
+                                        @endif
+                                    </div>
+                                    @if(isset($commentParts[1]))
+                                        <p class="text-[10px] font-bold text-gray-600 dark:text-gray-400 italic uppercase mt-0.5">{{ $commentParts[1] }}</p>
                                     @endif
                                 </div>
 
@@ -199,10 +211,16 @@
                                     <div class="bg-white dark:bg-gray-900 border-2 border-iba-black p-3 flex-1 shadow-[2px_2px_0_0_#FF8623]">
                                         <div class="flex justify-between items-start mb-1">
                                             <div>
-                                                <span class="text-[10px] font-black uppercase tracking-widest text-iba-black dark:text-white">{{ $reply->author_display }}</span>
-                                                <span class="text-[9px] font-bold text-gray-400 uppercase block sm:inline sm:ml-2">{{ $reply->created_at->diffForHumans() }}</span>
-                                                @if($reply->created_at != $reply->updated_at)
-                                                    <span class="text-[8px] font-bold text-gray-400 italic sm:ml-1">(Edited)</span>
+                                                @php $replyParts = explode(' - ', $reply->author_display ?? 'User', 2); @endphp
+                                                <div class="flex items-baseline flex-wrap gap-x-2">
+                                                    <span class="text-[10px] font-black uppercase tracking-widest text-iba-black dark:text-white">{{ $replyParts[0] }}</span>
+                                                    <span class="text-[9px] font-bold text-gray-400 uppercase">{{ $reply->created_at->diffForHumans() }}</span>
+                                                    @if($reply->created_at != $reply->updated_at)
+                                                        <span class="text-[8px] font-bold text-gray-400 italic">(Edited)</span>
+                                                    @endif
+                                                </div>
+                                                @if(isset($replyParts[1]))
+                                                    <p class="text-[9px] font-bold text-gray-600 dark:text-gray-400 italic uppercase mt-0.5">{{ $replyParts[1] }}</p>
                                                 @endif
                                             </div>
 
@@ -238,6 +256,7 @@
                     @endif
 
                     @if($replyingTo === $comment->id)
+                        @php $commentParts = explode(' - ', $comment->author_display ?? 'User', 2); @endphp
                         <form wire:submit.prevent="addComment({{ $comment->id }})" class="pl-14 mt-2 flex flex-col sm:flex-row gap-2">
                             <div class="shrink-0">
                                 <select wire:model="commentIdentities.{{ $comment->id }}" class="w-full sm:w-32 border-4 border-iba-black dark:border-gray-500 bg-gray-50 dark:bg-gray-800 text-iba-black dark:text-white text-[10px] font-black uppercase tracking-widest p-3 focus:outline-none focus:border-iba-orange h-full">
@@ -246,9 +265,9 @@
                                     @endforeach
                                 </select>
                             </div>
-                            
+
                             <div x-data="mentionHandler" class="relative w-full flex-1">
-                                <input type="text" x-ref="mentionInput" wire:model="newComments.reply_{{ $comment->id }}" @input="checkMention" placeholder="Replying to {{ $comment->author_display }}... (Type @ to tag)" class="w-full border-4 border-iba-black dark:border-gray-500 p-3 text-xs focus:outline-none focus:border-iba-orange bg-white dark:bg-gray-800 text-iba-black dark:text-white font-bold">
+                                <input type="text" x-ref="mentionInput" wire:model="newComments.reply_{{ $comment->id }}" @input="checkMention" placeholder="Replying to {{ $commentParts[0] }}... (Type @ to tag)" class="w-full border-4 border-iba-black dark:border-gray-500 p-3 text-xs focus:outline-none focus:border-iba-orange bg-white dark:bg-gray-800 text-iba-black dark:text-white font-bold">
                                 <div x-show="showDropdown" @click.away="showDropdown = false" class="absolute bottom-full mb-1 z-50 w-full max-h-48 overflow-y-auto bg-white dark:bg-gray-800 border-4 border-iba-black dark:border-iba-light shadow-[4px_4px_0_0_#131011]" x-cloak>
                                     <template x-for="mention in filteredMentions" :key="mention.tag">
                                         <button type="button" @click.prevent="insertMention(mention.tag)" class="w-full text-left px-4 py-2 text-xs font-bold border-b-2 border-dashed border-gray-200 dark:border-gray-700 hover:bg-iba-teal hover:text-white transition-colors">
@@ -277,7 +296,7 @@
                             @endforeach
                         </select>
                     </div>
-                    
+
                     <div x-data="mentionHandler" class="relative w-full flex-1">
                         <input type="text" x-ref="mentionInput" wire:model="newComments.main" @input="checkMention" placeholder="Write a comment... (Type @ to tag)" class="w-full border-4 border-iba-black dark:border-iba-light p-3 text-sm focus:outline-none focus:border-iba-orange bg-white dark:bg-[#1A1617] text-iba-black dark:text-white font-bold">
                         <div x-show="showDropdown" @click.away="showDropdown = false" class="absolute bottom-full mb-1 z-50 w-full max-h-48 overflow-y-auto bg-white dark:bg-gray-800 border-4 border-iba-black dark:border-iba-light shadow-[4px_4px_0_0_#131011]" x-cloak>
