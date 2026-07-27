@@ -1,4 +1,7 @@
-<div class="max-w-4xl mx-auto space-y-8 pb-24">
+<div x-data="{ lightboxOpen: false, lightboxImage: '' }" 
+     @open-lightbox.window="lightboxImage = $event.detail.image; lightboxOpen = true"
+     @keydown.escape.window="lightboxOpen = false"
+     class="max-w-4xl mx-auto space-y-8 pb-24 relative">
 
     {{-- Reusable Alpine Logic for Mentions --}}
     <script>
@@ -191,11 +194,25 @@
                             <button @click="expanded = !expanded" class="text-iba-teal text-[10px] font-black uppercase tracking-widest mt-2 hover:underline focus:outline-none" x-text="expanded ? 'SEE LESS ↑' : 'SEE MORE ↓'"></button>
                         @endif
 
+                        {{-- DYNAMIC GRID SYSTEM --}}
                         @if($post->images->count() > 0)
-                            <div class="mt-4 grid gap-2 {{ $post->images->count() == 1 ? 'grid-cols-1' : ($post->images->count() == 2 ? 'grid-cols-2' : 'grid-cols-2 sm:grid-cols-3') }}">
-                                @foreach($post->images as $image)
-                                    <div class="border-2 border-iba-black shadow-[2px_2px_0_0_#131011] overflow-hidden aspect-square relative group">
-                                        <img src="{{ Storage::url($image->image_path) }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                            @php $imgCount = $post->images->count(); @endphp
+                            <div class="mt-4 grid gap-2 {{ $imgCount == 1 ? 'grid-cols-1' : ($imgCount == 2 || $imgCount == 4 ? 'grid-cols-2' : ($imgCount == 3 ? 'grid-cols-2' : 'grid-cols-2 sm:grid-cols-3')) }}">
+                                @foreach($post->images as $index => $image)
+                                    @php
+                                        $wrapperClass = '';
+                                        $imgClass = 'w-full h-full object-cover';
+                                        
+                                        if ($imgCount == 1) {
+                                            $imgClass = 'w-full max-h-[500px] object-contain';
+                                        } elseif ($imgCount == 3 && $index == 0) {
+                                            $wrapperClass = 'col-span-2 aspect-video';
+                                        } else {
+                                            $wrapperClass = 'aspect-square';
+                                        }
+                                    @endphp
+                                    <div @click="$dispatch('open-lightbox', { image: '{{ Storage::url($image->image_path) }}' })" class="{{ $wrapperClass }} border-2 border-iba-black shadow-[2px_2px_0_0_#131011] overflow-hidden relative cursor-zoom-in group bg-iba-black flex items-center justify-center">
+                                        <img src="{{ Storage::url($image->image_path) }}" class="{{ $imgClass }} transition-transform duration-500 group-hover:scale-105">
                                     </div>
                                 @endforeach
                             </div>
@@ -442,4 +459,12 @@
             </div>
         </div>
     @endif
+
+    {{-- GLOBAL PHOTO VIEWER (LIGHTBOX) --}}
+    <div x-show="lightboxOpen" style="display: none;" class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-8 bg-iba-black/90 backdrop-blur-sm" x-cloak>
+        <button @click="lightboxOpen = false" class="absolute top-4 right-4 sm:top-8 sm:right-8 bg-iba-red text-white p-2 border-2 border-iba-black shadow-[4px_4px_0_0_#131011] hover:translate-y-0.5 hover:shadow-[2px_2px_0_0_#131011] transition-all z-10">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+        <img :src="lightboxImage" class="max-w-full max-h-full border-4 border-iba-black shadow-[8px_8px_0_0_#0095AC] object-contain cursor-zoom-out" @click="lightboxOpen = false">
+    </div>
 </div>

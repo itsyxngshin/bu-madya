@@ -1,5 +1,8 @@
-<div class="max-w-4xl mx-auto space-y-8 pb-24">
-
+<div x-data="{ lightboxOpen: false, lightboxImage: '' }" 
+     @open-lightbox.window="lightboxImage = $event.detail.image; lightboxOpen = true"
+     @keydown.escape.window="lightboxOpen = false"
+     class="max-w-4xl mx-auto space-y-8 pb-24 relative">
+    
     {{-- Reusable Alpine Logic for Mentions --}}
     <script>
         document.addEventListener('alpine:init', () => {
@@ -9,13 +12,13 @@
                 filteredMentions: [],
                 mentionStartPoint: 0,
                 mentionList: @js($mentionables),
-
+                
                 checkMention(e) {
                     const el = e.target;
                     const cursorPos = el.selectionStart;
                     const textBeforeCursor = el.value.substring(0, cursorPos);
                     const match = textBeforeCursor.match(/(?:\s|^)@([A-Za-z0-9_]*)$/);
-
+                    
                     if (match) {
                         this.searchQuery = match[1].toLowerCase();
                         this.filteredMentions = this.mentionList.filter(m => m.tag.toLowerCase().includes(this.searchQuery) || m.display.toLowerCase().includes(this.searchQuery));
@@ -29,12 +32,12 @@
                     const el = this.$refs.mentionInput;
                     const before = el.value.substring(0, this.mentionStartPoint);
                     const after = el.value.substring(el.selectionStart);
-
+                    
                     el.value = before + '@' + tag + ' ' + after;
                     this.showDropdown = false;
-
+                    
                     el.dispatchEvent(new Event('input'));
-
+                    
                     this.$nextTick(() => {
                         el.focus();
                         const newPos = before.length + tag.length + 2;
@@ -59,7 +62,7 @@
 
     {{-- SINGLE POST FOCUS --}}
     <div class="bg-white dark:bg-[#1A1617] border-4 border-iba-black dark:border-iba-light shadow-[12px_12px_0_0_#0095AC] flex flex-col relative">
-
+        
         @if($post->is_announcement)
             <div class="absolute -top-4 -left-4 bg-iba-red text-white font-black text-[10px] uppercase tracking-widest px-4 py-1.5 border-2 border-iba-black shadow-[2px_2px_0_0_#131011] transform -rotate-2 z-10">
                 Official Announcement
@@ -74,11 +77,11 @@
                 <div>
                     @php $mainParts = explode(' - ', $post->author_display ?? $post->user->name ?? 'User', 2); @endphp
                     <h4 class="font-black text-sm text-iba-black dark:text-white uppercase leading-tight">{{ $mainParts[0] }}</h4>
-
+                    
                     @if(isset($mainParts[1]))
                         <p class="text-xs font-bold text-gray-700 dark:text-gray-300 italic uppercase mt-0.5">{{ $mainParts[1] }}</p>
                     @endif
-
+                    
                     <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-1">
                         @if($post->is_announcement) Organizing Committee @else Hackathon Cohort @endif • {{ $post->created_at->diffForHumans() }}
                         @if($post->created_at != $post->updated_at)
@@ -111,7 +114,7 @@
                 <div class="space-y-3">
                     <textarea wire:model="editContent" rows="6" class="w-full border-4 border-iba-black dark:border-iba-light p-4 text-sm focus:outline-none focus:border-iba-orange bg-gray-50 dark:bg-gray-900 text-iba-black dark:text-white font-bold resize-none"></textarea>
                     @error('editContent') <span class="text-iba-red text-xs font-bold block">⚠ {{ $message }}</span> @enderror
-
+                    
                     <div class="flex flex-col sm:flex-row gap-3 justify-end">
                         <button wire:click="cancelEdit" class="text-xs font-black uppercase tracking-widest text-gray-500 hover:text-iba-black dark:hover:text-white px-4 py-2 transition-colors">Cancel</button>
                         <button wire:click="updatePost" class="bg-iba-orange text-iba-black font-black px-6 py-2 text-xs uppercase border-4 border-iba-black shadow-[3px_3px_0_0_#131011] hover:translate-y-0.5 hover:shadow-none transition-all">Save Changes</button>
@@ -119,12 +122,26 @@
                 </div>
             @else
                 <div class="text-sm md:text-base font-bold text-gray-800 dark:text-gray-200 leading-relaxed whitespace-pre-wrap">{!! preg_replace('/@([A-Za-z0-9_]+)/', '<span class="text-iba-teal bg-iba-teal/10 px-1 py-0.5 border border-iba-teal border-dashed">$0</span>', e($post->content)) !!}</div>
-
+                
+                {{-- DYNAMIC GRID SYSTEM --}}
                 @if($post->images->count() > 0)
-                    <div class="mt-8 grid gap-3 {{ $post->images->count() == 1 ? 'grid-cols-1' : ($post->images->count() == 2 ? 'grid-cols-2' : 'grid-cols-2 sm:grid-cols-3') }}">
-                        @foreach($post->images as $image)
-                            <div class="border-2 border-iba-black shadow-[4px_4px_0_0_#131011] overflow-hidden relative cursor-pointer group">
-                                <img src="{{ Storage::url($image->image_path) }}" class="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-105">
+                    @php $imgCount = $post->images->count(); @endphp
+                    <div class="mt-8 grid gap-3 {{ $imgCount == 1 ? 'grid-cols-1' : ($imgCount == 2 || $imgCount == 4 ? 'grid-cols-2' : ($imgCount == 3 ? 'grid-cols-2' : 'grid-cols-2 sm:grid-cols-3')) }}">
+                        @foreach($post->images as $index => $image)
+                            @php
+                                $wrapperClass = '';
+                                $imgClass = 'w-full h-full object-cover';
+                                
+                                if ($imgCount == 1) {
+                                    $imgClass = 'w-full max-h-[600px] object-contain';
+                                } elseif ($imgCount == 3 && $index == 0) {
+                                    $wrapperClass = 'col-span-2 aspect-video';
+                                } else {
+                                    $wrapperClass = 'aspect-square';
+                                }
+                            @endphp
+                            <div @click="$dispatch('open-lightbox', { image: '{{ Storage::url($image->image_path) }}' })" class="{{ $wrapperClass }} border-2 border-iba-black shadow-[4px_4px_0_0_#131011] overflow-hidden relative cursor-zoom-in group bg-iba-black flex items-center justify-center">
+                                <img src="{{ Storage::url($image->image_path) }}" class="{{ $imgClass }} transition-transform duration-500 group-hover:scale-105">
                             </div>
                         @endforeach
                     </div>
@@ -135,11 +152,11 @@
         <div class="bg-gray-50 dark:bg-gray-900 border-t-2 border-iba-black dark:border-iba-light p-4 flex gap-6">
             @php $hasLiked = $post->likes->contains('user_id', auth('ibalong')->id()); @endphp
             <button wire:click="toggleLike" class="flex items-center gap-2 text-sm font-black uppercase tracking-widest transition-colors {{ $hasLiked ? 'text-iba-red' : 'text-gray-500 hover:text-iba-black dark:hover:text-white' }}">
-                <svg class="w-6 h-6 {{ $hasLiked ? 'fill-current' : 'fill-none stroke-currentColor' }}" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+                <svg class="w-6 h-6 {{ $hasLiked ? 'fill-current' : 'fill-none stroke-currentColor' }}" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg> 
                 {{ $post->likes->count() }} Likes
             </button>
             <div class="flex items-center gap-2 text-sm font-black uppercase tracking-widest text-gray-500">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg> 
                 {{ $post->comments->count() }} Comments
             </div>
         </div>
@@ -265,7 +282,7 @@
                                     @endforeach
                                 </select>
                             </div>
-
+                            
                             <div x-data="mentionHandler" class="relative w-full flex-1">
                                 <input type="text" x-ref="mentionInput" wire:model="newComments.reply_{{ $comment->id }}" @input="checkMention" placeholder="Replying to {{ $commentParts[0] }}... (Type @ to tag)" class="w-full border-4 border-iba-black dark:border-gray-500 p-3 text-xs focus:outline-none focus:border-iba-orange bg-white dark:bg-gray-800 text-iba-black dark:text-white font-bold">
                                 <div x-show="showDropdown" @click.away="showDropdown = false" class="absolute bottom-full mb-1 z-50 w-full max-h-48 overflow-y-auto bg-white dark:bg-gray-800 border-4 border-iba-black dark:border-iba-light shadow-[4px_4px_0_0_#131011]" x-cloak>
@@ -296,7 +313,7 @@
                             @endforeach
                         </select>
                     </div>
-
+                    
                     <div x-data="mentionHandler" class="relative w-full flex-1">
                         <input type="text" x-ref="mentionInput" wire:model="newComments.main" @input="checkMention" placeholder="Write a comment... (Type @ to tag)" class="w-full border-4 border-iba-black dark:border-iba-light p-3 text-sm focus:outline-none focus:border-iba-orange bg-white dark:bg-[#1A1617] text-iba-black dark:text-white font-bold">
                         <div x-show="showDropdown" @click.away="showDropdown = false" class="absolute bottom-full mb-1 z-50 w-full max-h-48 overflow-y-auto bg-white dark:bg-gray-800 border-4 border-iba-black dark:border-iba-light shadow-[4px_4px_0_0_#131011]" x-cloak>
@@ -346,4 +363,12 @@
             </div>
         </div>
     @endif
+
+    {{-- GLOBAL PHOTO VIEWER (LIGHTBOX) --}}
+    <div x-show="lightboxOpen" style="display: none;" class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-8 bg-iba-black/90 backdrop-blur-sm" x-cloak>
+        <button @click="lightboxOpen = false" class="absolute top-4 right-4 sm:top-8 sm:right-8 bg-iba-red text-white p-2 border-2 border-iba-black shadow-[4px_4px_0_0_#131011] hover:translate-y-0.5 hover:shadow-[2px_2px_0_0_#131011] transition-all z-10">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+        <img :src="lightboxImage" class="max-w-full max-h-full border-4 border-iba-black shadow-[8px_8px_0_0_#0095AC] object-contain cursor-zoom-out" @click="lightboxOpen = false">
+    </div>
 </div>
