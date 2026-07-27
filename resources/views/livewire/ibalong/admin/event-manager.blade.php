@@ -109,7 +109,7 @@
                                 <tr>
                                     <th class="px-4 py-3 text-left text-xs font-black text-iba-black dark:text-iba-light uppercase tracking-wider">Attendee</th>
                                     <th class="px-4 py-3 text-left text-xs font-black text-iba-black dark:text-iba-light uppercase tracking-wider">Affiliation / Team</th>
-                                    <th class="px-4 py-3 text-center text-xs font-black text-iba-black dark:text-iba-light uppercase tracking-wider">Ticket Code</th>
+                                    <th class="px-4 py-3 text-center text-xs font-black text-iba-black dark:text-iba-light uppercase tracking-wider">Ticket & Status</th>
                                     <th class="px-4 py-3 text-right text-xs font-black text-iba-black dark:text-iba-light uppercase tracking-wider">Action</th>
                                 </tr>
                             </thead>
@@ -131,6 +131,23 @@
                                         </td>
                                         <td class="px-4 py-3 text-center">
                                             <span class="font-pixel text-[10px] text-iba-teal">{{ $reg->ticket_code }}</span>
+                                            
+                                            {{-- Attendance Status Badge --}}
+                                            <div class="mt-2">
+                                                @if($reg->attendances && $reg->attendances->count() > 0)
+                                                    @php $attendance = $reg->attendances->first(); @endphp
+                                                    <span class="px-2 py-1 border border-iba-green bg-green-50 dark:bg-green-900/30 text-iba-green text-[9px] font-bold uppercase flex items-center justify-center gap-1 w-max mx-auto">
+                                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                                                        Scanned In
+                                                    </span>
+                                                    <span class="text-[8px] text-gray-500 font-bold uppercase block mt-1">Via: {{ $attendance->scanned_by }}</span>
+                                                @else
+                                                    <span class="px-2 py-1 border border-iba-orange bg-orange-50 dark:bg-orange-900/30 text-iba-orange text-[9px] font-bold uppercase flex items-center justify-center gap-1 w-max mx-auto">
+                                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                                        Pending
+                                                    </span>
+                                                @endif
+                                            </div>
                                         </td>
                                         <td class="px-4 py-3 text-right">
                                             <button wire:click="showQr('{{ $reg->ticket_code }}', '{{ addslashes($reg->name) }}')" class="bg-iba-black text-white dark:bg-iba-light dark:text-iba-black px-4 py-2 text-[10px] font-bold uppercase border-2 border-transparent hover:translate-y-0.5 transition-all">

@@ -128,8 +128,8 @@ class EventManager extends Component
     {
         $this->selectedEvent = IbalongEvent::findOrFail($eventId);
 
-        // Eager load the 'team' relationship to map to ibalong_registrations
-        $this->registrants = IbalongEventRegistration::with('team')
+        // Eager load both 'team' and 'attendances' relationships
+        $this->registrants = IbalongEventRegistration::with(['team', 'attendances'])
             ->where('event_id', $eventId)
             ->orderBy('created_at', 'desc')
             ->get();
@@ -141,7 +141,6 @@ class EventManager extends Component
     {
         $this->activeTicketCode = $ticketCode;
         $this->activeRegistrantName = $name;
-        // Instantly generate the QR Code URI for the requested ticket
         $this->activeQrUri = (new QRCode)->render($ticketCode);
         $this->isQrModalOpen = true;
     }
@@ -181,3 +180,4 @@ class EventManager extends Component
         return view('livewire.ibalong.admin.event-manager')->layout('layouts.dashboard');
     }
 }
+
