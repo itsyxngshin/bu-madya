@@ -39,7 +39,7 @@ class ResourceRoom extends Component
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'availableAt' => 'nullable|date',
-            'uploads.*' => 'file|max:20480', // 20MB Max per file
+            'uploads.*' => 'file|max:40960', // 40MB Max per file
         ]);
 
         $group = IbalongResourceGroup::create([
