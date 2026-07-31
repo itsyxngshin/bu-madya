@@ -211,7 +211,8 @@ Route::domain('ibalong.' . env('APP_DOMAIN'))->name('ibalong.')->group(function 
 
             // (You might also want an index page here like /quests to list all quests)
             Route::get('/quests', QuestRoster::class)->name('admin.quests.index');
-            Route::get('/quests/forge', QuestBuilder::class)->name('admin.quests.forge');
+            Route::get('/quests/forge/{quest_id?}', QuestBuilder::class)->name('admin.quests.forge');
+            // Route::get('/quests/{quest_id}/submissions', \App\Livewire\Ibalong\Admin\QuestSubmissionsList::class)->name('admin.quests.submissions');
             
             // Phase 4: Judge Scoring Deck (requires the specific submission ID)
             Route::get('/quests/weighing/{submission_id}', ScoringDeck::class)->name('admin.quests.weighing');
