@@ -47,7 +47,7 @@
                         <a href="#" class="bg-iba-teal text-white text-center text-xs font-black uppercase tracking-widest w-full py-3 border-2 border-iba-black hover:translate-y-0.5 hover:shadow-[2px_2px_0_0_#131011] transition-all">Evaluate Submissions</a>
                     @else
                         {{-- Team Buttons --}}
-                        <a href="{{ route('team.quests.terminal', $quest->id) }}" class="bg-iba-black text-white text-center text-xs font-black uppercase tracking-widest w-full py-3 border-2 border-iba-black hover:translate-y-0.5 hover:shadow-[2px_2px_0_0_#FF8623] transition-all">
+                        <a href="{{ route('ibalong.team.quests.terminal', $quest->id) }}" class="bg-iba-black text-white text-center text-xs font-black uppercase tracking-widest w-full py-3 border-2 border-iba-black hover:translate-y-0.5 hover:shadow-[2px_2px_0_0_#FF8623] transition-all">
                             {{ $mySubmission && $mySubmission->status !== 'draft' ? 'View Transmitted Data' : 'Enter Terminal' }}
                         </a>
                     @endif
