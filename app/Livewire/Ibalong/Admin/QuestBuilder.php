@@ -101,7 +101,7 @@ class QuestBuilder extends Component
         });
 
         session()->flash('success', 'Quest successfully forged and added to the logs!');
-        return redirect()->route('admin.quests.index'); // Adjust to your route name
+        return redirect()->route('ibalong.admin.quests.index'); // Adjust to your route name
     }
 
     public function render()
