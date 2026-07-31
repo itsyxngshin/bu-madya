@@ -35,7 +35,8 @@
                     <div>
                         <label for="email" class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Email Address</label>
                         <div class="relative">
-                            <input id="email" type="email" name="email" :value="old('email', $request->email)" required autofocus autocomplete="username" 
+                            <!-- Changed :value to value="{{ ... }}" -->
+                            <input id="email" type="email" name="email" value="{{ old('email', $request->email) }}" required autofocus autocomplete="username" 
                                 class="appearance-none block w-full px-4 py-3 border border-gray-200 rounded-xl bg-gray-50 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:bg-white focus:border-transparent transition-all sm:text-sm text-gray-500"
                                 readonly>
                             {{-- Lock Icon to indicate email is fixed --}}
