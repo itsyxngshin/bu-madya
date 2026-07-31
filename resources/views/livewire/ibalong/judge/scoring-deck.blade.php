@@ -5,7 +5,7 @@
             <h1 class="text-2xl font-black uppercase tracking-widest">The Weighing of the Gift</h1>
             <p class="text-xs font-bold text-iba-teal mt-1 uppercase">{{ $submission->team->team_name ?? 'Unknown Cohort' }} • {{ $submission->quest->title }}</p>
         </div>
-        <a href="{{ route('admin.quests.index') }}" class="text-xs font-black uppercase text-gray-400 hover:text-white border-2 border-transparent hover:border-gray-400 px-3 py-1 transition-all">&larr; Return</a>
+        <a href="{{ route('ibalong.admin.quests.index') }}" class="text-xs font-black uppercase text-gray-400 hover:text-white border-2 border-transparent hover:border-gray-400 px-3 py-1 transition-all">&larr; Return</a>
     </div>
 
     @if (session()->has('success'))
