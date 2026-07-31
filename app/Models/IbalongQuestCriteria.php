@@ -8,6 +8,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class IbalongQuestCriteria extends Model
 {
+    // Override Laravel's default pluralization
+    protected $table = 'ibalong_quest_criteria';
+
     protected $fillable = [
         'quest_id', 'name', 'max_score', 'description', 'rubric_levels'
     ];
