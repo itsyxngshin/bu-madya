@@ -8,7 +8,7 @@
             </p>
         </div>
         @if(in_array(auth('ibalong')->user()->role_id, [1, 2]))
-            <a href="{{ route('admin.quests.forge') }}" class="bg-iba-black text-white text-xs font-black uppercase px-6 py-3 border-2 border-transparent hover:-translate-y-1 hover:shadow-[4px_4px_0_0_#0095AC] transition-all">+ Forge New Quest</a>
+            <a href="{{ route('ibalong.admin.quests.forge') }}" class="bg-iba-black text-white text-xs font-black uppercase px-6 py-3 border-2 border-transparent hover:-translate-y-1 hover:shadow-[4px_4px_0_0_#0095AC] transition-all">+ Forge New Quest</a>
         @endif
     </div>
 
