@@ -18,6 +18,14 @@
             Overview
         </a>
 
+        {{-- TEAM ONLY: My Quest Logs (Role 3) --}}
+        @if($role == 3)
+            <a href="{{ route('ibalong.team.quests.index') }}" class="group flex items-center px-4 py-3 text-xs font-bold uppercase tracking-wider border-2 transition-all {{ request()->routeIs('ibalong.team.quests.index') ? 'bg-iba-orange text-iba-black border-iba-black dark:border-iba-light shadow-[4px_4px_0_0_#131011] dark:shadow-[4px_4px_0_0_#FFFBF7]' : 'border-transparent text-gray-600 dark:text-gray-400 hover:border-iba-black dark:hover:border-iba-light hover:bg-gray-100 dark:hover:bg-gray-800 hover:-translate-y-0.5' }}">
+                <svg class="mr-3 flex-shrink-0 h-5 w-5 transition-colors {{ request()->routeIs('ibalong.team.quests.index') ? 'text-iba-black' : 'text-gray-400 group-hover:text-iba-orange' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg>
+                My Quest Logs
+            </a>
+        @endif
+
         {{-- Community Logs --}}
         <a href="{{ route('ibalong.community-logs') }}" class="group flex items-center px-4 py-3 text-xs font-bold uppercase tracking-wider border-2 transition-all {{ request()->routeIs('ibalong.community-logs*') ? 'bg-iba-teal text-white border-iba-black dark:border-iba-light shadow-[4px_4px_0_0_#131011] dark:shadow-[4px_4px_0_0_#FFFBF7]' : 'border-transparent text-gray-600 dark:text-gray-400 hover:border-iba-black dark:hover:border-iba-light hover:bg-gray-100 dark:hover:bg-gray-800 hover:-translate-y-0.5' }}">
             <svg class="mr-3 flex-shrink-0 h-5 w-5 transition-colors {{ request()->routeIs('ibalong.community-logs*') ? 'text-white' : 'text-gray-400 group-hover:text-iba-teal' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" /></svg>
@@ -30,25 +38,38 @@
             Resource Room
         </a>
 
-        {{-- Admin & Facilitator Controls (Role 1: Super Admin, Role 2: Admin, Role 5: Facilitator) --}}
-        @if(in_array($role, [1, 2, 4]))
+        {{-- Admin, Facilitator & Judge Controls (Roles 1, 2, 4, 5) --}}
+        @if(in_array($role, [1, 2, 4, 5]))
             <div class="pt-4 pb-2">
                 <p class="px-2 text-[10px] font-black text-gray-500 uppercase tracking-widest border-b-2 border-dashed border-gray-300 dark:border-gray-700 pb-2">Administration</p>
             </div>
+
+            {{-- Master Quest Roster (Accessible to Admins, Facilitators & Judges) --}}
+            <a href="{{ route('ibalong.admin.quests.index') }}" class="group flex items-center px-4 py-3 text-xs font-bold uppercase tracking-wider border-2 transition-all {{ request()->routeIs('ibalong.admin.quests.index') ? 'bg-iba-orange text-iba-black border-iba-black dark:border-iba-light shadow-[4px_4px_0_0_#131011] dark:shadow-[4px_4px_0_0_#FFFBF7]' : 'border-transparent text-gray-600 dark:text-gray-400 hover:border-iba-black dark:hover:border-iba-light hover:bg-gray-100 dark:hover:bg-gray-800 hover:-translate-y-0.5' }}">
+                <svg class="mr-3 flex-shrink-0 h-5 w-5 transition-colors {{ request()->routeIs('ibalong.admin.quests.index') ? 'text-iba-black' : 'text-gray-400 group-hover:text-iba-orange' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                Quest Roster
+            </a>
 
             <a href="{{ route('ibalong.admin.team-accounts') }}" class="group flex items-center px-4 py-3 text-xs font-bold uppercase tracking-wider border-2 transition-all {{ request()->routeIs('ibalong.admin.team-accounts') ? 'bg-iba-teal text-white border-iba-black dark:border-iba-light shadow-[4px_4px_0_0_#131011] dark:shadow-[4px_4px_0_0_#FFFBF7]' : 'border-transparent text-gray-600 dark:text-gray-400 hover:border-iba-black dark:hover:border-iba-light hover:bg-gray-100 dark:hover:bg-gray-800 hover:-translate-y-0.5' }}">
                 <svg class="mr-3 flex-shrink-0 h-5 w-5 transition-colors {{ request()->routeIs('ibalong.admin.team-accounts') ? 'text-white' : 'text-gray-400 group-hover:text-iba-teal' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
                 Team Accounts
             </a>
 
-            {{-- Accessible to Admins & Facilitators --}}
+            {{-- Team Intake (Accessible to Admins & Facilitators) --}}
             <a href="{{ route('ibalong.admin.registrants') }}" class="group flex items-center px-4 py-3 text-xs font-bold uppercase tracking-wider border-2 transition-all {{ request()->routeIs('ibalong.admin.registrants') ? 'bg-iba-teal text-white border-iba-black dark:border-iba-light shadow-[4px_4px_0_0_#131011] dark:shadow-[4px_4px_0_0_#FFFBF7]' : 'border-transparent text-gray-600 dark:text-gray-400 hover:border-iba-black dark:hover:border-iba-light hover:bg-gray-100 dark:hover:bg-gray-800 hover:-translate-y-0.5' }}">
                 <svg class="mr-3 flex-shrink-0 h-5 w-5 transition-colors {{ request()->routeIs('ibalong.admin.registrants') ? 'text-white' : 'text-gray-400 group-hover:text-iba-teal' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
                 Team Intake
             </a>
 
-            {{-- Strictly Admin Only Controls --}}
+            {{-- Event Control (Accessible to Admins & Facilitators) --}}
+            <a href="{{ route('ibalong.admin.events') }}" class="group flex items-center px-4 py-3 text-xs font-bold uppercase tracking-wider border-2 transition-all {{ request()->routeIs('ibalong.admin.events') ? 'bg-iba-teal text-white border-iba-black dark:border-iba-light shadow-[4px_4px_0_0_#131011] dark:shadow-[4px_4px_0_0_#FFFBF7]' : 'border-transparent text-gray-600 dark:text-gray-400 hover:border-iba-black dark:hover:border-iba-light hover:bg-gray-100 dark:hover:bg-gray-800 hover:-translate-y-0.5' }}">
+                <svg class="mr-3 flex-shrink-0 h-5 w-5 transition-colors {{ request()->routeIs('ibalong.admin.events') ? 'text-white' : 'text-gray-400 group-hover:text-iba-teal' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                Event Control
+            </a>
+
+            {{-- Strictly Admin Only Controls (Role 1 & 2) --}}
             @if(in_array($role, [1, 2]))
+                <div class="border-t-2 border-dashed border-gray-300 dark:border-gray-700 my-2"></div>
                 <a href="{{ route('ibalong.admin.users') }}" class="group flex items-center px-4 py-3 text-xs font-bold uppercase tracking-wider border-2 transition-all {{ request()->routeIs('ibalong.admin.users') ? 'bg-iba-teal text-white border-iba-black dark:border-iba-light shadow-[4px_4px_0_0_#131011] dark:shadow-[4px_4px_0_0_#FFFBF7]' : 'border-transparent text-gray-600 dark:text-gray-400 hover:border-iba-black dark:hover:border-iba-light hover:bg-gray-100 dark:hover:bg-gray-800 hover:-translate-y-0.5' }}">
                     <svg class="mr-3 flex-shrink-0 h-5 w-5 transition-colors {{ request()->routeIs('ibalong.admin.users') ? 'text-white' : 'text-gray-400 group-hover:text-iba-teal' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
                     Personnel
@@ -69,12 +90,6 @@
                     Alerts System
                 </a>
             @endif
-
-            {{-- Accessible to Admins & Facilitators --}}
-            <a href="{{ route('ibalong.admin.events') }}" class="group flex items-center px-4 py-3 text-xs font-bold uppercase tracking-wider border-2 transition-all {{ request()->routeIs('ibalong.admin.events') ? 'bg-iba-teal text-white border-iba-black dark:border-iba-light shadow-[4px_4px_0_0_#131011] dark:shadow-[4px_4px_0_0_#FFFBF7]' : 'border-transparent text-gray-600 dark:text-gray-400 hover:border-iba-black dark:hover:border-iba-light hover:bg-gray-100 dark:hover:bg-gray-800 hover:-translate-y-0.5' }}">
-                <svg class="mr-3 flex-shrink-0 h-5 w-5 transition-colors {{ request()->routeIs('ibalong.admin.events') ? 'text-white' : 'text-gray-400 group-hover:text-iba-teal' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                Event Control
-            </a>
         @endif
     </nav>
 

@@ -91,6 +91,10 @@ use App\Livewire\Ibalong\RegistrationForm as IbalongRegistration;
 use App\Livewire\Ibalong\Admin\TeamAccountManager;
 use App\Livewire\Ibalong\CommunityLogs;
 use App\Livewire\Ibalong\CommunityLogSingle;
+use App\Livewire\Ibalong\Admin\QuestBuilder;
+use App\Livewire\Ibalong\Team\QuestTerminal;
+use App\Livewire\Ibalong\Judge\ScoringDeck;
+use App\Livewire\Ibalong\QuestRoster;
 
 use App\Models\MembershipApplication;
 use Illuminate\Support\Facades\Storage;
@@ -200,6 +204,24 @@ Route::domain('ibalong.' . env('APP_DOMAIN'))->name('ibalong.')->group(function 
             Route::get('/launchpad/partners', \App\Livewire\Ibalong\Admin\PartnerManager::class)->name('admin.partners');
             Route::get('/launchpad/committees', \App\Livewire\Ibalong\Admin\CommitteeManager::class)->name('admin.committees');
             Route::get('/launchpad/notifications', \App\Livewire\Ibalong\Admin\NotificationCenter::class)->name('admin.notifications');
+
+        });
+
+        Route::middleware([IbalongRoleMiddleware::class.':1,2,4,5'])->group(function () {
+
+            // (You might also want an index page here like /quests to list all quests)
+            Route::get('/quests', QuestRoster::class)->name('admin.quests.index');
+            Route::get('/quests/forge', QuestBuilder::class)->name('admin.quests.forge');
+            
+            // Phase 4: Judge Scoring Deck (requires the specific submission ID)
+            Route::get('/quests/weighing/{submission_id}', ScoringDeck::class)->name('admin.quests.weighing');
+
+        });
+
+        Route::middleware([IbalongRoleMiddleware::class.':3'])->group(function () {
+
+            Route::get('/terminal/quests', QuestRoster::class)->name('team.quests.index'); // Team Roster
+            Route::get('/terminal/quest/{quest_id}', QuestTerminal::class)->name('team.quests.terminal');
 
         });
 
