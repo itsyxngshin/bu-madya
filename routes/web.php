@@ -95,6 +95,7 @@ use App\Livewire\Ibalong\Admin\QuestBuilder;
 use App\Livewire\Ibalong\Team\QuestTerminal;
 use App\Livewire\Ibalong\Judge\ScoringDeck;
 use App\Livewire\Ibalong\QuestRoster;
+use App\Livewire\Ibalong\Admin\QuestResultsBoard;
 
 use App\Models\MembershipApplication;
 use Illuminate\Support\Facades\Storage;
@@ -204,7 +205,7 @@ Route::domain('ibalong.' . env('APP_DOMAIN'))->name('ibalong.')->group(function 
             Route::get('/launchpad/partners', \App\Livewire\Ibalong\Admin\PartnerManager::class)->name('admin.partners');
             Route::get('/launchpad/committees', \App\Livewire\Ibalong\Admin\CommitteeManager::class)->name('admin.committees');
             Route::get('/launchpad/notifications', \App\Livewire\Ibalong\Admin\NotificationCenter::class)->name('admin.notifications');
-
+            Route::get('/quests/{quest_id}/results', QuestResultsBoard::class)->name('admin.quests.results');
         });
 
         Route::middleware([IbalongRoleMiddleware::class.':1,2,4,5'])->group(function () {

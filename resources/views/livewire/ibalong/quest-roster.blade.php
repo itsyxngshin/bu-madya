@@ -51,7 +51,15 @@
                     @if($isAdminView)
                         {{-- Admin/Judge Controls --}}
                         <div class="flex flex-col gap-2">
-                            <a href="{{ route('ibalong.admin.quests.submissions', $quest->id) }}" class="bg-iba-teal text-white text-center text-xs font-black uppercase tracking-widest w-full py-3 border-2 border-iba-black hover:translate-y-0.5 hover:shadow-[2px_2px_0_0_#131011] transition-all">Evaluate Submissions</a>
+                            <div class="flex gap-2">
+                                <a href="{{ route('ibalong.admin.quests.submissions', $quest->id) }}" class="flex-1 bg-iba-teal text-white text-center text-xs font-black uppercase tracking-widest py-3 border-2 border-iba-black hover:translate-y-0.5 hover:shadow-[2px_2px_0_0_#131011] transition-all">Submissions</a>
+                                
+                                {{-- Tabulation Board Button (Only for Admins/Directors) --}}
+                                @if(in_array(auth('ibalong')->user()->role_id, [1, 2, 4]))
+                                    <a href="{{ route('ibalong.admin.quests.results', $quest->id) }}" class="flex-1 bg-iba-black text-iba-orange text-center text-xs font-black uppercase tracking-widest py-3 border-2 border-iba-black hover:translate-y-0.5 hover:shadow-[2px_2px_0_0_#FF8623] transition-all">Tabulation</a>
+                                @endif
+                            </div>
+                            
                             <div class="flex gap-2">
                                 <a href="{{ route('ibalong.admin.quests.forge', $quest->id) }}" class="flex-1 bg-gray-100 text-iba-black text-center text-[10px] font-black uppercase tracking-widest py-2 border-2 border-iba-black hover:bg-gray-200 transition-colors">Edit Quest</a>
                                 <button wire:click="deleteQuest({{ $quest->id }})" wire:confirm="WARNING: This will permanently delete the Quest, all Tasks, Criteria, AND all Team Submissions/Scores attached to it. Proceed?" class="flex-1 bg-iba-red text-white text-center text-[10px] font-black uppercase tracking-widest py-2 border-2 border-iba-black hover:bg-red-800 transition-colors">Drop</button>
