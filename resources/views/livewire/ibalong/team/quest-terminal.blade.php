@@ -69,12 +69,12 @@
                     <div class="border-2 border-dashed border-gray-400 p-6 text-center bg-gray-50 hover:bg-gray-100 transition-colors relative">
                         @if(isset($existingFiles[$task->id]))
                             <div class="mb-4 p-3 bg-iba-teal/10 border-2 border-iba-teal inline-block">
-                                <p class="text-xs font-black text-iba-teal uppercase">✓ File Attached to Draft</p>
+                                <p class="text-xs font-black text-iba-teal uppercase">✓ File Attached</p>
                                 <a href="{{ Storage::url($existingFiles[$task->id]) }}" target="_blank" class="text-[10px] font-bold text-gray-600 hover:text-iba-black underline">View Current File</a>
                             </div>
                         @endif
 
-                        @if($submission->status !== 'submitted')
+                        @if(!$isLocked)
                             <input type="file" wire:model="files.{{ $task->id }}" id="file_{{ $task->id }}" class="hidden">
                             <label for="file_{{ $task->id }}" class="cursor-pointer flex flex-col items-center">
                                 <svg class="w-8 h-8 text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
@@ -82,17 +82,20 @@
                                     {{ isset($existingFiles[$task->id]) ? 'Upload New File to Replace' : 'Click to attach file' }}
                                 </span>
                                 <span class="text-[10px] font-bold text-gray-500 mt-2 uppercase">Max Size: {{ $task->max_file_size_mb }}MB</span>
+                                <span class="text-[9px] font-bold text-gray-400 mt-1 uppercase tracking-widest">(Special characters in filenames will be auto-formatted)</span>
                             </label>
-                            
+
                             @if(isset($files[$task->id]))
                                 <p class="text-[10px] font-black text-iba-green mt-3 uppercase">File ready for save: {{ $files[$task->id]->getClientOriginalName() }}</p>
                             @endif
 
                             <div wire:loading wire:target="files.{{ $task->id }}" class="text-[10px] font-black text-iba-orange mt-2 uppercase animate-pulse">Processing File...</div>
+                        @else
+                            <p class="text-xs font-black text-iba-teal uppercase tracking-widest mt-2">File locked for evaluation.</p>
                         @endif
                     </div>
                 @endif
-                
+
                 @error("answers.{$task->id}") <span class="text-[10px] font-black text-iba-red uppercase">⚠ {{ $message }}</span> @enderror
                 @error("files.{$task->id}") <span class="text-[10px] font-black text-iba-red uppercase">⚠ {{ $message }}</span> @enderror
             </div>

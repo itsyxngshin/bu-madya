@@ -9,7 +9,7 @@
             </div>
             <p class="text-sm font-bold text-gray-400 uppercase tracking-widest">{{ $quest->title }}</p>
         </div>
-        
+
         <a href="{{ route('ibalong.admin.quests.index') }}" class="bg-transparent text-white text-xs font-black uppercase px-6 py-3 border-2 border-white hover:bg-white hover:text-iba-black transition-colors">
             &larr; Return to Roster
         </a>
@@ -28,7 +28,7 @@
             </thead>
             <tbody class="divide-y-2 divide-gray-200 bg-white">
                 @forelse($leaderboard as $index => $row)
-                    @php 
+                    @php
                         $rank = $index + 1;
                         $rankColor = match($rank) {
                             1 => 'bg-iba-orange text-iba-black border-iba-black',
@@ -38,7 +38,7 @@
                         };
                     @endphp
                     <tr class="hover:bg-gray-50 transition-colors">
-                        
+
                         {{-- Rank --}}
                         <td class="px-6 py-4 text-center">
                             <div class="inline-flex items-center justify-center w-10 h-10 border-2 font-black text-lg shadow-[2px_2px_0_0_#131011] {{ $rankColor }}">

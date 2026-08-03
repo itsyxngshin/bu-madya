@@ -8,7 +8,7 @@ use App\Models\IbalongQuest;
 class QuestRoster extends Component
 {
     public $isAdminView = false;
-    
+
     public function mount()
     {
         $role = auth('ibalong')->user()->role_id;
@@ -26,7 +26,7 @@ class QuestRoster extends Component
     public function deleteQuest($id)
     {
         if (!$this->isAdminView) return;
-        
+
         // This will cascade delete tasks, criteria, submissions, and scores!
         IbalongQuest::findOrFail($id)->delete();
         session()->flash('success', 'Quest and all associated logs have been wiped.');

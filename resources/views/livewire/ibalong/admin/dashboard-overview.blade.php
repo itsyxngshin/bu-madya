@@ -118,7 +118,7 @@
                 <dd class="text-4xl font-pixel text-iba-red">{{ $stats['rejected'] }}</dd>
             </div>
         </div>
-
+        @if(in_array(auth('ibalong')->user()->role_id, [1, 2]))
         <div class="bg-white dark:bg-[#1A1617] border-4 border-iba-black dark:border-iba-light p-6 sm:p-8 shadow-[8px_8px_0_0_#131011] dark:shadow-[8px_8px_0_0_#FFFBF7]">
             <h2 class="text-sm font-black text-iba-black dark:text-white uppercase tracking-wider mb-6">Quick Directives & Controls</h2>
 
@@ -146,6 +146,7 @@
                 </div>
             </div>
         </div>
+        @endif
 
     {{-- ========================================== --}}
     {{-- TEAM VIEW --}}

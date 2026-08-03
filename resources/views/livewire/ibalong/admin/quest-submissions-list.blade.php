@@ -9,7 +9,7 @@
             </div>
             <p class="text-sm font-bold text-iba-teal uppercase tracking-widest">{{ $quest->title }}</p>
         </div>
-        
+
         <a href="{{ route('ibalong.admin.quests.index') }}" class="bg-gray-100 text-iba-black text-xs font-black uppercase px-6 py-3 border-2 border-iba-black shadow-[3px_3px_0_0_#131011] hover:translate-y-0.5 hover:shadow-none transition-all">
             &larr; Return to Roster
         </a>
@@ -28,13 +28,13 @@
                 </tr>
             </thead>
             <tbody class="divide-y-2 divide-gray-200 bg-white">
-                @php 
-                    $maxPossibleScore = $quest->criteria->sum('max_score'); 
+                @php
+                    $maxPossibleScore = $quest->criteria->sum('max_score');
                 @endphp
 
                 @forelse($submissions as $sub)
                     <tr class="hover:bg-gray-50 transition-colors">
-                        
+
                         {{-- Team Name --}}
                         <td class="px-6 py-4">
                             <div class="text-sm font-black text-iba-black uppercase">{{ $sub->team->team_name ?? 'Unknown Cohort' }}</div>
@@ -89,15 +89,24 @@
 
                         {{-- Action Button --}}
                         <td class="px-6 py-4 text-right">
-                            @if($sub->status === 'draft')
-                                <button disabled class="bg-gray-200 text-gray-400 text-[10px] font-black uppercase px-4 py-2 border-2 border-gray-300 cursor-not-allowed">
-                                    Unavailable
-                                </button>
-                            @else
-                                <a href="{{ route('ibalong.admin.quests.weighing', $sub->id) }}" class="inline-block bg-iba-orange text-iba-black text-[10px] font-black uppercase px-4 py-2 border-2 border-iba-black shadow-[2px_2px_0_0_#131011] hover:translate-y-0.5 hover:shadow-none transition-all">
-                                    Weigh Gift
-                                </a>
-                            @endif
+                            <div class="flex flex-col items-end gap-1.5">
+                                @if($sub->status === 'draft')
+                                    <button disabled class="bg-gray-200 text-gray-400 text-[10px] font-black uppercase px-4 py-2 border-2 border-gray-300 cursor-not-allowed w-full max-w-[130px]">
+                                        Unavailable
+                                    </button>
+                                @else
+                                    <a href="{{ route('ibalong.admin.quests.weighing', $sub->id) }}" class="inline-block bg-iba-orange text-iba-black text-[10px] font-black uppercase px-4 py-2 border-2 border-iba-black shadow-[2px_2px_0_0_#131011] hover:translate-y-0.5 hover:shadow-none transition-all w-full max-w-[130px] text-center">
+                                        Weigh Gift
+                                    </a>
+                                @endif
+
+                                {{-- Admin Override Button --}}
+                                @if(in_array(auth('ibalong')->user()->role_id, [1, 2]))
+                                    <a href="{{ route('ibalong.admin.quests.override', $sub->id) }}" class="inline-block bg-iba-red text-white text-[10px] font-black uppercase px-4 py-1.5 border-2 border-iba-black hover:bg-red-800 transition-colors w-full max-w-[130px] text-center">
+                                        Override
+                                    </a>
+                                @endif
+                            </div>
                         </td>
                     </tr>
                 @empty

@@ -15,7 +15,7 @@ class QuestResultsBoard extends Component
     public function mount($quest_id)
     {
         $role = auth('ibalong')->user()->role_id ?? 0;
-        
+
         // RBAC: Only Admins & Directors can view the master tabulation
         if (!in_array($role, [1, 2, 4])) {
             abort(403, 'ACCESS DENIED: Only the Admin Command may view tabulated results.');
@@ -34,7 +34,7 @@ class QuestResultsBoard extends Component
 
         foreach ($submissions as $sub) {
             $judgeTotals = [];
-            
+
             // Group the scores by the judge who cast them
             $scoresByJudge = $sub->scores->groupBy('judge_id');
 
@@ -60,7 +60,7 @@ class QuestResultsBoard extends Component
 
         // Sort the array descending to create the Leaderboard ranking
         usort($results, fn($a, $b) => $b['average_score'] <=> $a['average_score']);
-        
+
         $this->leaderboard = $results;
     }
 

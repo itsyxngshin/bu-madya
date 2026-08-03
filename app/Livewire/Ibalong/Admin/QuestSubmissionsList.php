@@ -21,7 +21,7 @@ class QuestSubmissionsList extends Component
 
         // Load the quest and its max possible score (sum of all criteria)
         $this->quest = IbalongQuest::with('criteria')->findOrFail($quest_id);
-        
+
         // Eager load submissions with their respective team and score data
         $this->submissions = IbalongQuestSubmission::with(['team', 'scores.judge'])
             ->where('quest_id', $quest_id)

@@ -1,6 +1,11 @@
 <div class="max-w-7xl mx-auto pb-24">
-    
-    <div class="bg-iba-black text-white p-6 border-4 border-iba-black shadow-[8px_8px_0_0_#FF8623] mb-8 flex justify-between items-center">
+
+    <div class="bg-iba-black text-white p-6 border-4 border-iba-black shadow-[8px_8px_0_0_#FF8623] mb-8 flex justify-between items-center relative">
+        {{-- Status Badge --}}
+        @if($hasScored)
+            <div class="absolute top-4 right-4 bg-iba-red text-white font-black text-[10px] uppercase tracking-widest px-3 py-1 border-2 border-white">EVALUATION LOCKED</div>
+        @endif
+
         <div>
             <h1 class="text-2xl font-black uppercase tracking-widest">The Weighing of the Gift</h1>
             <p class="text-xs font-bold text-iba-teal mt-1 uppercase">{{ $submission->team->team_name ?? 'Unknown Cohort' }} • {{ $submission->quest->title }}</p>
@@ -14,20 +19,26 @@
         </div>
     @endif
 
+    @if (session()->has('error'))
+        <div class="bg-iba-red/10 border-l-4 border-iba-red p-4 mb-8 shadow-[4px_4px_0_0_#131011]">
+            <p class="text-sm font-bold text-iba-red uppercase tracking-wider">{{ session('error') }}</p>
+        </div>
+    @endif
+
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        
+
         {{-- LEFT COLUMN: Team's Deliverables --}}
         <div class="space-y-6">
             <h2 class="text-lg font-black uppercase border-b-4 border-iba-black pb-2">Cohort Submission</h2>
-            
+
             @foreach($submission->quest->tasks as $task)
-                @php 
-                    $answer = $submission->answers->where('task_id', $task->id)->first(); 
+                @php
+                    $answer = $submission->answers->where('task_id', $task->id)->first();
                 @endphp
-                
+
                 <div class="bg-white border-4 border-iba-black shadow-[4px_4px_0_0_#131011] p-5">
                     <h3 class="text-xs font-black text-iba-teal uppercase tracking-widest mb-3">{{ $task->question }}</h3>
-                    
+
                     @if(!$answer)
                         <p class="text-sm font-bold text-gray-400 italic">No response provided.</p>
                     @elseif($task->type === 'file')
@@ -52,7 +63,17 @@
         {{-- RIGHT COLUMN: The Rubric & Scoring --}}
         <div class="space-y-6">
             <h2 class="text-lg font-black uppercase border-b-4 border-iba-orange pb-2">Scoring Matrix</h2>
-            
+
+            {{-- Lock Warning Banner --}}
+            @if($hasScored)
+                <div class="bg-blue-50 border-l-4 border-blue-500 p-4 shadow-[4px_4px_0_0_#131011]">
+                    <p class="text-xs font-black text-blue-700 uppercase tracking-widest flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                        Your evaluation has been successfully recorded and is now locked.
+                    </p>
+                </div>
+            @endif
+
             <form wire:submit.prevent="lockScores" class="space-y-6">
                 @foreach($submission->quest->criteria as $crit)
                     <div class="bg-gray-50 border-4 border-iba-black shadow-[4px_4px_0_0_#131011] p-5">
@@ -60,7 +81,7 @@
                             <h3 class="text-sm font-black uppercase">{{ $crit->name }}</h3>
                             <span class="bg-iba-teal text-white text-[10px] font-black uppercase px-2 py-1">Max: {{ $crit->max_score }} Pts</span>
                         </div>
-                        
+
                         <p class="text-xs font-bold text-gray-600 mb-4">{{ $crit->description }}</p>
 
                         {{-- Tiers Visualizer --}}
@@ -89,20 +110,31 @@
                         <div class="flex flex-col sm:flex-row gap-4 bg-white p-4 border-2 border-iba-black">
                             <div class="w-full sm:w-1/3">
                                 <label class="block text-[10px] font-black text-gray-500 uppercase mb-1">Assigned Marks</label>
-                                <input type="number" step="0.5" wire:model="scores.{{ $crit->id }}" max="{{ $crit->max_score }}" min="0" class="w-full border-2 border-iba-black p-3 text-lg font-black text-center focus:outline-none focus:border-iba-orange text-iba-orange">
+                                <input type="number" step="0.5" wire:model="scores.{{ $crit->id }}" max="{{ $crit->max_score }}" min="0" class="w-full border-2 border-iba-black p-3 text-lg font-black text-center focus:outline-none focus:border-iba-orange text-iba-orange {{ $hasScored ? 'bg-gray-100 cursor-not-allowed text-gray-500' : '' }}" {{ $hasScored ? 'disabled' : '' }}>
                                 @error("scores.{$crit->id}") <span class="text-[10px] font-black text-iba-red uppercase">⚠ Required</span> @enderror
                             </div>
                             <div class="w-full sm:w-2/3">
                                 <label class="block text-[10px] font-black text-gray-500 uppercase mb-1">Council Notes / Feedback (Optional)</label>
-                                <textarea wire:model="feedback.{{ $crit->id }}" rows="2" class="w-full border-2 border-iba-black p-2 text-xs font-bold focus:outline-none focus:border-iba-orange resize-none"></textarea>
+                                <textarea
+                                    x-data="{ resize() { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px' } }"
+                                    x-init="resize()"
+                                    @input="resize()"
+                                    wire:model="feedback.{{ $crit->id }}"
+                                    rows="2"
+                                    class="w-full border-2 border-iba-black p-2 text-xs font-bold focus:outline-none focus:border-iba-orange overflow-hidden {{ $hasScored ? 'bg-gray-100 cursor-not-allowed text-gray-500' : '' }}"
+                                    {{ $hasScored ? 'disabled' : '' }}
+                                ></textarea>
                             </div>
                         </div>
                     </div>
                 @endforeach
 
-                <div class="pt-4 sticky bottom-4 z-10">
-                    <button type="submit" class="w-full bg-iba-black text-iba-orange text-lg font-black uppercase tracking-widest py-4 border-4 border-iba-black shadow-[6px_6px_0_0_#FF8623] hover:translate-y-1 hover:shadow-none transition-all">Lock Council Scores</button>
-                </div>
+                {{-- Action Button (Only visible if not scored yet) --}}
+                @if(!$hasScored)
+                    <div class="pt-4 sticky bottom-4 z-10">
+                        <button type="submit" class="w-full bg-iba-black text-iba-orange text-lg font-black uppercase tracking-widest py-4 border-4 border-iba-black shadow-[6px_6px_0_0_#FF8623] hover:translate-y-1 hover:shadow-none transition-all">Lock Council Scores</button>
+                    </div>
+                @endif
             </form>
         </div>
     </div>

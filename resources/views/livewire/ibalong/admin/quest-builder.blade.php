@@ -1,5 +1,5 @@
 <div class="max-w-5xl mx-auto space-y-8 pb-24">
-    
+
     <div class="bg-iba-black text-white p-6 border-4 border-iba-black shadow-[8px_8px_0_0_#FF8623]">
         <h1 class="text-2xl font-black uppercase tracking-widest">Forge a New Quest</h1>
         <p class="text-xs font-bold text-gray-400 mt-1 uppercase">Define challenges and scoring rubrics for the startup cohorts.</p>
@@ -42,7 +42,7 @@
                 @foreach($tasks as $index => $task)
                     <div class="p-4 border-2 border-dashed border-gray-300 relative bg-gray-50">
                         <button type="button" wire:click="removeTask({{ $index }})" class="absolute -top-3 -right-3 bg-iba-red text-white w-6 h-6 flex items-center justify-center font-bold border-2 border-iba-black hover:scale-110 transition-transform">X</button>
-                        
+
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div class="md:col-span-2">
                                 <label class="block text-[10px] font-black text-gray-500 uppercase mb-1">Task / Question Prompt</label>
@@ -96,7 +96,7 @@
                 @foreach($criteria as $cIndex => $crit)
                     <div class="p-5 border-4 border-iba-black relative bg-gray-100">
                         <button type="button" wire:click="removeCriteria({{ $cIndex }})" class="absolute -top-3 -right-3 bg-iba-red text-white w-6 h-6 flex items-center justify-center font-bold border-2 border-iba-black hover:scale-110 transition-transform">X</button>
-                        
+
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
                             <div class="md:col-span-3">
                                 <label class="block text-[10px] font-black text-gray-500 uppercase mb-1">Criteria Name</label>

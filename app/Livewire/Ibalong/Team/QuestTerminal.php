@@ -14,9 +14,10 @@ class QuestTerminal extends Component
 
     public $quest;
     public $submission;
-    public $answers = []; 
-    public $files = [];   
+    public $answers = [];
+    public $files = [];
     public $existingFiles = []; // To track files already saved in drafts
+    public $isLocked = false;
 
     public function mount($quest_id)
     {
@@ -50,16 +51,17 @@ class QuestTerminal extends Component
     {
         $rules = [];
         foreach ($this->quest->tasks as $task) {
-            // Drafts ignore 'required' flags
             $baseRule = ($task->is_required && !$isDraft) ? 'required' : 'nullable';
-            
+
             if ($task->type === 'file') {
                 $maxKB = ($task->max_file_size_mb ?? 5) * 1024;
-                // If a file is required, but they already uploaded one previously, skip required check for the file input
                 if ($baseRule === 'required' && isset($this->existingFiles[$task->id])) {
-                    $baseRule = 'nullable'; 
+                    $baseRule = 'nullable';
                 }
+
+                // Reverted back to the standard, clean validation
                 $rules["files.{$task->id}"] = "$baseRule|file|max:$maxKB";
+
             } elseif ($task->type === 'checklist') {
                 $rules["answers.{$task->id}"] = "$baseRule|array";
             } else {
@@ -76,14 +78,32 @@ class QuestTerminal extends Component
             $filePath = $this->existingFiles[$task->id] ?? null;
 
             if ($task->type === 'file' && isset($this->files[$task->id])) {
-                // Delete old file if replacing
+                // Delete the old file if they are replacing it
                 if ($filePath) Storage::disk('public')->delete($filePath);
-                $filePath = $this->files[$task->id]->store("quests/files/{$this->submission->id}", 'public');
-                $this->existingFiles[$task->id] = $filePath; // Update local state
-                unset($this->files[$task->id]); // Clear temp file
+
+                $file = $this->files[$task->id];
+                $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+                $extension = $file->getClientOriginalExtension();
+
+                // SANITIZER: Replace anything that isn't a letter, number, or underscore with an underscore
+                $sanitizedName = preg_replace('/[^a-zA-Z0-9_]/', '_', $originalName);
+
+                // Fallback just in case the original filename was entirely emojis or symbols
+                if (empty(trim($sanitizedName, '_'))) {
+                    $sanitizedName = 'cohort_upload';
+                }
+
+                // Append a unique short ID so files with the same name never overwrite each other
+                $finalName = $sanitizedName . '_' . uniqid() . '.' . $extension;
+
+                // Use storeAs() to save the file with our newly cleaned filename
+                $filePath = $file->storeAs("quests/files/{$this->submission->id}", $finalName, 'public');
+
+                $this->existingFiles[$task->id] = $filePath;
+                unset($this->files[$task->id]);
             } elseif ($task->type !== 'file') {
-                $val = is_array($this->answers[$task->id] ?? null) 
-                       ? json_encode($this->answers[$task->id]) 
+                $val = is_array($this->answers[$task->id] ?? null)
+                       ? json_encode($this->answers[$task->id])
                        : ($this->answers[$task->id] ?? null);
             }
 

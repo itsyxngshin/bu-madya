@@ -12,22 +12,28 @@ class ScoringDeck extends Component
     public $scores = [];
     public $feedback = [];
 
+    // NEW: Property to track if the judge has already submitted
+    public $hasScored = false;
+
     public function mount($submission_id)
     {
-        // Load the submission with ALL nested data required for judging
         $this->submission = IbalongQuestSubmission::with([
-            'team', 
-            'quest.criteria', 
-            'quest.tasks', 
+            'team',
+            'quest.criteria',
+            'quest.tasks',
             'answers'
         ])->findOrFail($submission_id);
 
         $judge_id = auth('ibalong')->id();
 
-        // Pre-fill existing scores if the judge is returning to an evaluation
         $existingScores = IbalongQuestScore::where('submission_id', $this->submission->id)
                             ->where('judge_id', $judge_id)
                             ->get();
+
+        // If records exist, lock the terminal
+        if ($existingScores->count() > 0) {
+            $this->hasScored = true;
+        }
 
         foreach ($existingScores as $score) {
             $this->scores[$score->criteria_id] = $score->score;
@@ -37,6 +43,12 @@ class ScoringDeck extends Component
 
     public function lockScores()
     {
+        // Prevent double submission if they try to bypass the UI
+        if ($this->hasScored) {
+            session()->flash('error', 'SYSTEM LOCK: Your evaluation is already recorded and cannot be altered.');
+            return;
+        }
+
         $rules = [];
         foreach ($this->submission->quest->criteria as $crit) {
             $rules["scores.{$crit->id}"] = "required|numeric|min:0|max:{$crit->max_score}";
@@ -61,8 +73,10 @@ class ScoringDeck extends Component
             );
         }
 
-        // Mark as reviewed (You could also base this on whether all judges have scored)
         $this->submission->update(['status' => 'reviewed']);
+
+        // Lock the terminal for this judge after successful save
+        $this->hasScored = true;
 
         session()->flash('success', 'The Weighing is complete. Scores securely locked.');
     }
