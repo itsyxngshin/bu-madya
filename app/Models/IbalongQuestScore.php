@@ -23,7 +23,7 @@ class IbalongQuestScore extends Model
     public function judge(): BelongsTo
     {
         // Links to whoever is logged in and evaluating (User model)
-        return $this->belongsTo(User::class, 'judge_id');
+        return $this->belongsTo(IbalongUser::class, 'judge_id');
     }
 
     public function criteria(): BelongsTo
