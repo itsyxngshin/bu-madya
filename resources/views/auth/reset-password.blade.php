@@ -1,6 +1,6 @@
 <x-guest-layout>
     <div class="min-h-screen bg-stone-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden">
-        
+
         {{-- Background Blobs --}}
         <div class="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
             <div class="absolute top-[-10%] left-[-5%] w-96 h-96 bg-red-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
@@ -20,7 +20,7 @@
         {{-- Main Card --}}
         <div class="sm:mx-auto sm:w-full sm:max-w-md">
             <div class="bg-white py-8 px-4 shadow-xl rounded-[2rem] sm:px-10 border border-gray-100 relative overflow-hidden">
-                
+
                 {{-- Decorative Top Line --}}
                 <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-red-500 via-orange-400 to-yellow-400"></div>
 
@@ -35,7 +35,7 @@
                     <div>
                         <label for="email" class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Email Address</label>
                         <div class="relative">
-                            <input id="email" type="email" name="email" value="{{ old('email', $request->email) }}" required autofocus autocomplete="username" 
+                            <input id="email" type="email" name="email" value="{{ old('email', $request->email) }}" required autofocus autocomplete="username"
                                 class="appearance-none block w-full px-4 py-3 border border-gray-200 rounded-xl bg-gray-50 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:bg-white focus:border-transparent transition-all sm:text-sm text-gray-500"
                                 readonly>
                             {{-- Lock Icon to indicate email is fixed --}}
@@ -49,7 +49,7 @@
                     <div>
                         <label for="password" class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">New Password</label>
                         <div class="relative">
-                            <input id="password" type="password" name="password" required autocomplete="new-password" 
+                            <input id="password" type="password" name="password" required autocomplete="new-password"
                                 class="appearance-none block w-full px-4 py-3 border border-gray-200 rounded-xl bg-gray-50 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:bg-white focus:border-transparent transition-all sm:text-sm"
                                 placeholder="••••••••">
                         </div>
@@ -59,7 +59,7 @@
                     <div>
                         <label for="password_confirmation" class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Confirm New Password</label>
                         <div class="relative">
-                            <input id="password_confirmation" type="password" name="password_confirmation" required autocomplete="new-password" 
+                            <input id="password_confirmation" type="password" name="password_confirmation" required autocomplete="new-password"
                                 class="appearance-none block w-full px-4 py-3 border border-gray-200 rounded-xl bg-gray-50 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:bg-white focus:border-transparent transition-all sm:text-sm"
                                 placeholder="••••••••">
                         </div>
@@ -67,7 +67,7 @@
 
                     {{-- Submit Button --}}
                     <div class="pt-2">
-                        <button type="submit" 
+                        <button type="submit"
                             class="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-lg text-sm font-bold text-white bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transform transition hover:-translate-y-0.5 uppercase tracking-widest">
                             {{ __('Reset Password') }}
                         </button>
