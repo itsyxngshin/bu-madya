@@ -6,7 +6,7 @@
             <svg class="w-20 h-20 text-iba-teal mx-auto mb-4 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
             <h1 class="text-3xl font-black text-iba-black uppercase tracking-widest relative z-10 mb-2">Transmission Received</h1>
             <p class="text-sm font-bold text-gray-600 uppercase relative z-10 mb-8">Your data has been successfully routed to the Command Center.</p>
-            <a href="{{ route('evaluations.index') }}" class="inline-block bg-iba-black text-white text-sm font-black uppercase tracking-widest px-8 py-4 border-4 border-transparent shadow-[4px_4px_0_0_#FF8623] hover:translate-y-1 hover:shadow-none transition-all relative z-10">Return to Directory</a>
+            <a href="{{ route('ibalong.evaluations.index') }}" class="inline-block bg-iba-black text-white text-sm font-black uppercase tracking-widest px-8 py-4 border-4 border-transparent shadow-[4px_4px_0_0_#FF8623] hover:translate-y-1 hover:shadow-none transition-all relative z-10">Return to Directory</a>
         </div>
     @else
 
