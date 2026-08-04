@@ -100,6 +100,7 @@ use App\Livewire\Ibalong\EvaluationList as IbalongEvaluationList;
 use App\Livewire\Ibalong\EvaluationForm as IbalongEvaluationForm;
 use App\Livewire\Ibalong\Admin\EvaluationBuilder as IbalongEvaluationBuilder;
 use App\Livewire\Ibalong\Admin\EvaluationResults as IbalongEvaluationResults;
+use App\Livewire\Ibalong\Admin\QuestOverrideTerminal;
 
 use App\Models\MembershipApplication;
 use Illuminate\Support\Facades\Storage;
@@ -190,8 +191,8 @@ Route::domain('ibalong.' . env('APP_DOMAIN'))->name('ibalong.')->group(function 
         Route::get('/community', CommunityLogs::class)->name('community-logs');
         Route::get('/community/log/{id}', CommunityLogSingle::class)->name('community-logs.show');
         Route::get('/resources', \App\Livewire\Ibalong\ResourceRoom::class)->name('resources');
-        Route::get('/surveys', EvaluationList::class)->name('evaluations.index');
-        Route::get('/surveys/{slug}/terminal', EvaluationForm::class)->name('evaluations.terminal');
+        Route::get('/surveys', IbalongEvaluationList::class)->name('evaluations.index');
+        Route::get('/surveys/{slug}/terminal', IbalongEvaluationForm::class)->name('evaluations.terminal');
 
         // Secure Logout
         Route::post('/launchpad/logout', function() {
@@ -216,6 +217,7 @@ Route::domain('ibalong.' . env('APP_DOMAIN'))->name('ibalong.')->group(function 
             Route::get('/admin/evaluations/forge', IbalongEvaluationBuilder::class)->name('admin.evaluations.forge');
             Route::get('/admin/evaluations/{evaluation:slug}/edit', IbalongEvaluationBuilder::class)->name('admin.evaluations.edit');
             Route::get('/admin/evaluations/{slug}/results', EvaluationResults::class)->name('admin.evaluations.results');
+            Route::get('/quests/override/{submission_id}', QuestOverrideTerminal::class)->name('admin.quests.override');
         });
 
         Route::middleware([IbalongRoleMiddleware::class.':1,2,4,5'])->group(function () {
