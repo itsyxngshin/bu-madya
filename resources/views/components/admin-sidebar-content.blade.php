@@ -25,7 +25,7 @@
                 My Quest Logs
             </a>
 
-            <a href="{{ route('evaluations.index') }}" class="group flex items-center px-4 py-3 text-xs font-bold uppercase tracking-wider border-2 transition-all {{ request()->routeIs('evaluations.*') ? 'bg-iba-teal text-white border-iba-black shadow-[4px_4px_0_0_#131011]' : 'border-transparent text-gray-600 hover:border-iba-black hover:bg-gray-100 hover:-translate-y-0.5' }}">
+            <a href="{{ route('ibalong.evaluations.index') }}" class="group flex items-center px-4 py-3 text-xs font-bold uppercase tracking-wider border-2 transition-all {{ request()->routeIs('evaluations.*') ? 'bg-iba-teal text-white border-iba-black shadow-[4px_4px_0_0_#131011]' : 'border-transparent text-gray-600 hover:border-iba-black hover:bg-gray-100 hover:-translate-y-0.5' }}">
                 <svg class="mr-3 flex-shrink-0 h-5 w-5 transition-colors {{ request()->routeIs('evaluations.*') ? 'text-white' : 'text-gray-400 group-hover:text-iba-teal' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
                 Surveys & Feedback
             </a>
