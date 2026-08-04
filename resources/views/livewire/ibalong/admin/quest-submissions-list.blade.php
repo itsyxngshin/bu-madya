@@ -10,10 +10,16 @@
             <p class="text-sm font-bold text-iba-teal uppercase tracking-widest">{{ $quest->title }}</p>
         </div>
 
-        <a href="{{ route('ibalong.admin.quests.index') }}" class="bg-gray-100 text-iba-black text-xs font-black uppercase px-6 py-3 border-2 border-iba-black shadow-[3px_3px_0_0_#131011] hover:translate-y-0.5 hover:shadow-none transition-all">
+        <a href="{{ route('admin.quests.index') }}" class="bg-gray-100 text-iba-black text-xs font-black uppercase px-6 py-3 border-2 border-iba-black shadow-[3px_3px_0_0_#131011] hover:translate-y-0.5 hover:shadow-none transition-all">
             &larr; Return to Roster
         </a>
     </div>
+
+    @if (session()->has('success'))
+        <div class="bg-iba-teal/10 border-l-4 border-iba-teal p-4 shadow-[4px_4px_0_0_#131011]">
+            <p class="text-xs font-black text-iba-teal uppercase tracking-widest">{{ session('success') }}</p>
+        </div>
+    @endif
 
     {{-- Submissions Data Table --}}
     <div class="bg-white border-4 border-iba-black shadow-[8px_8px_0_0_#131011] overflow-x-auto">
@@ -21,15 +27,17 @@
             <thead class="bg-iba-black text-white">
                 <tr>
                     <th class="px-6 py-4 text-left text-xs font-black uppercase tracking-widest">Cohort / Team</th>
+                    <th class="px-6 py-4 text-left text-xs font-black uppercase tracking-widest">Division Track</th>
                     <th class="px-6 py-4 text-center text-xs font-black uppercase tracking-widest">Status</th>
                     <th class="px-6 py-4 text-center text-xs font-black uppercase tracking-widest">Timestamp</th>
-                    <th class="px-6 py-4 text-center text-xs font-black uppercase tracking-widest">Council Grading</th>
+                    <th class="px-6 py-4 text-center text-xs font-black uppercase tracking-widest">Grading</th>
                     <th class="px-6 py-4 text-right text-xs font-black uppercase tracking-widest">Action</th>
                 </tr>
             </thead>
             <tbody class="divide-y-2 divide-gray-200 bg-white">
                 @php
                     $maxPossibleScore = $quest->criteria->sum('max_score');
+                    $userRole = auth('ibalong')->user()->role_id ?? 0;
                 @endphp
 
                 @forelse($submissions as $sub)
@@ -39,6 +47,33 @@
                         <td class="px-6 py-4">
                             <div class="text-sm font-black text-iba-black uppercase">{{ $sub->team->team_name ?? 'Unknown Cohort' }}</div>
                             <div class="text-[10px] text-gray-500 font-bold uppercase mt-1">ID: {{ $sub->team->ticket_code ?? 'N/A' }}</div>
+                        </td>
+
+                        {{-- Category / Division Assigner --}}
+                        <td class="px-6 py-4">
+                            @if(in_array($userRole, [1, 2, 4]) && $sub->team)
+                                @php $currentCategory = $sub->team->category ?? 'General Classification'; @endphp
+                                <div class="relative">
+                                    <select wire:change="updateCategory({{ $sub->team->id }}, $event.target.value)"
+                                            class="text-[10px] font-black uppercase tracking-widest border-2 border-iba-black bg-gray-50 text-iba-black focus:border-iba-orange focus:ring-0 py-2 px-3 w-full max-w-[160px] cursor-pointer hover:bg-gray-100 transition-colors">
+                                        <option value="General Classification" {{ $currentCategory === 'General Classification' ? 'selected' : '' }}>General</option>
+                                        <option value="High School" {{ $currentCategory === 'High School' ? 'selected' : '' }}>High School</option>
+                                        <option value="College" {{ $currentCategory === 'College' ? 'selected' : '' }}>College</option>
+                                        <option value="Software Track" {{ $currentCategory === 'Software Track' ? 'selected' : '' }}>Software Track</option>
+                                        <option value="Hardware Track" {{ $currentCategory === 'Hardware Track' ? 'selected' : '' }}>Hardware Track</option>
+                                    </select>
+                                    <div wire:loading wire:target="updateCategory({{ $sub->team->id }})" class="absolute -top-2 -right-2">
+                                        <span class="flex h-3 w-3">
+                                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-iba-orange opacity-75"></span>
+                                            <span class="relative inline-flex rounded-full h-3 w-3 bg-iba-orange"></span>
+                                        </span>
+                                    </div>
+                                </div>
+                            @else
+                                <span class="text-[10px] font-black uppercase text-gray-600 bg-gray-200 border-2 border-gray-300 px-3 py-1">
+                                    {{ $sub->team->category ?? 'General' }}
+                                </span>
+                            @endif
                         </td>
 
                         {{-- Submission Status --}}
@@ -67,20 +102,19 @@
                             @endif
                         </td>
 
-                        {{-- Grading Progress / Total Score --}}
+                        {{-- Grading Progress --}}
                         <td class="px-6 py-4 text-center">
                             @if($sub->status === 'draft')
                                 <span class="text-xs font-bold text-gray-400">-</span>
                             @else
                                 @php
-                                    // Calculate total score given by the current logged-in judge
                                     $myScore = $sub->scores->where('judge_id', auth('ibalong')->id())->sum('score');
                                     $hasGraded = $sub->scores->where('judge_id', auth('ibalong')->id())->count() > 0;
                                 @endphp
 
                                 @if($hasGraded)
                                     <div class="text-sm font-black text-iba-teal">{{ $myScore }} <span class="text-[10px] text-gray-500">/ {{ $maxPossibleScore }}</span></div>
-                                    <div class="text-[9px] font-bold text-gray-500 uppercase mt-1">Your Eval Complete</div>
+                                    <div class="text-[9px] font-bold text-gray-500 uppercase mt-1">Eval Complete</div>
                                 @else
                                     <span class="text-[10px] font-black text-iba-red uppercase border-b-2 border-iba-red">Awaiting Eval</span>
                                 @endif
@@ -95,13 +129,13 @@
                                         Unavailable
                                     </button>
                                 @else
-                                    <a href="{{ route('ibalong.admin.quests.weighing', $sub->id) }}" class="inline-block bg-iba-orange text-iba-black text-[10px] font-black uppercase px-4 py-2 border-2 border-iba-black shadow-[2px_2px_0_0_#131011] hover:translate-y-0.5 hover:shadow-none transition-all w-full max-w-[130px] text-center">
+                                    <a href="{{ route('admin.quests.weighing', $sub->id) }}" class="inline-block bg-iba-orange text-iba-black text-[10px] font-black uppercase px-4 py-2 border-2 border-iba-black shadow-[2px_2px_0_0_#131011] hover:translate-y-0.5 hover:shadow-none transition-all w-full max-w-[130px] text-center">
                                         Weigh Gift
                                     </a>
                                 @endif
 
-                                @if(in_array(auth('ibalong')->user()->role_id, [1, 2]))
-                                    <a href="{{ route('ibalong.admin.quests.override', $sub->id) }}" class="inline-block bg-iba-red text-white text-[10px] font-black uppercase px-4 py-1.5 border-2 border-iba-black hover:bg-red-800 transition-colors w-full max-w-[130px] text-center">
+                                @if(in_array($userRole, [1, 2]))
+                                    <a href="{{ route('admin.quests.override', $sub->id) }}" class="inline-block bg-iba-red text-white text-[10px] font-black uppercase px-4 py-1.5 border-2 border-iba-black hover:bg-red-800 transition-colors w-full max-w-[130px] text-center">
                                         Override
                                     </a>
                                 @endif
@@ -110,7 +144,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="5" class="px-6 py-12 text-center border-t-4 border-dashed border-gray-300 bg-gray-50">
+                        <td colspan="6" class="px-6 py-12 text-center border-t-4 border-dashed border-gray-300 bg-gray-50">
                             <p class="text-sm font-black text-gray-500 uppercase tracking-widest">No cohorts have initiated this quest yet.</p>
                         </td>
                     </tr>

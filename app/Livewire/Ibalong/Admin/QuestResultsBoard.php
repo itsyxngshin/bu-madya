@@ -9,7 +9,7 @@ use App\Models\IbalongQuestSubmission;
 class QuestResultsBoard extends Component
 {
     public $quest;
-    public $leaderboard = [];
+    public $categorizedLeaderboard = [];
     public $maxPossibleScore = 0;
 
     public function mount($quest_id)
@@ -47,10 +47,14 @@ class QuestResultsBoard extends Component
             $totalJudges = count($judgeTotals);
             $average = $totalJudges > 0 ? array_sum($judgeTotals) / $totalJudges : 0;
 
+            // Extract the division track
+            $category = $sub->team->category ?? 'General Classification';
+
             $results[] = [
                 'submission_id' => $sub->id,
                 'team_name' => $sub->team->team_name ?? 'Unknown Cohort',
                 'ticket_code' => $sub->team->ticket_code ?? 'N/A',
+                'category' => $category,
                 'judge_totals' => $judgeTotals,
                 'total_judges' => $totalJudges,
                 'average_score' => round($average, 2),
@@ -58,10 +62,16 @@ class QuestResultsBoard extends Component
             ];
         }
 
-        // Sort the array descending to create the Leaderboard ranking
-        usort($results, fn($a, $b) => $b['average_score'] <=> $a['average_score']);
+        // Convert to a Laravel Collection to effortlessly group and sort
+        $collection = collect($results);
 
-        $this->leaderboard = $results;
+        // Group the cohorts by their assigned track
+        $grouped = $collection->groupBy('category');
+
+        // Sort each division's array descending by their average score
+        $this->categorizedLeaderboard = $grouped->map(function ($group) {
+            return $group->sortByDesc('average_score')->values()->toArray();
+        })->toArray();
     }
 
     public function render()

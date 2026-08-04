@@ -17,6 +17,7 @@ class IbalongRegistration extends Model
         'slug',
         'team_about',
         'affiliation',
+        'category',
         'province_id',
         'citymun_id',
         'barangay_id',
