@@ -10,7 +10,7 @@
             <p class="text-sm font-bold text-iba-teal uppercase tracking-widest">{{ $quest->title }}</p>
         </div>
 
-        <a href="{{ route('admin.quests.index') }}" class="bg-gray-100 text-iba-black text-xs font-black uppercase px-6 py-3 border-2 border-iba-black shadow-[3px_3px_0_0_#131011] hover:translate-y-0.5 hover:shadow-none transition-all">
+        <a href="{{ route('ibalong.admin.quests.index') }}" class="bg-gray-100 text-iba-black text-xs font-black uppercase px-6 py-3 border-2 border-iba-black shadow-[3px_3px_0_0_#131011] hover:translate-y-0.5 hover:shadow-none transition-all">
             &larr; Return to Roster
         </a>
     </div>
