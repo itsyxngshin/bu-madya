@@ -153,6 +153,46 @@ class EvaluationBuilder extends Component
         usort($this->questions, fn($a, $b) => $a['order'] <=> $b['order']);
     }
 
+    // --- UI HELPER METHODS ---
+
+    public function setActiveQuestion($index)
+    {
+        $this->activeQuestionIndex = $index;
+    }
+
+    public function addOption($questionIndex)
+    {
+        // Adds a new choice to Radio, Checkbox, or Dropdown nodes
+        $this->questions[$questionIndex]['options'][] = ['text' => 'New Option', 'jump' => null];
+    }
+
+    public function removeOption($qIndex, $optIndex)
+    {
+        unset($this->questions[$qIndex]['options'][$optIndex]);
+        // Re-index the array so Livewire doesn't throw a string conflict
+        $this->questions[$qIndex]['options'] = array_values($this->questions[$qIndex]['options']);
+    }
+
+    // --- SECTION PURGE PROTOCOLS ---
+
+    public function confirmDeleteSection($index)
+    {
+        $this->sectionToDeleteIndex = $index;
+    }
+
+    public function cancelDeleteSection()
+    {
+        $this->sectionToDeleteIndex = null;
+    }
+
+    public function executeDeleteSection()
+    {
+        if ($this->sectionToDeleteIndex !== null) {
+            $this->removeQuestion($this->sectionToDeleteIndex);
+            $this->sectionToDeleteIndex = null;
+        }
+    }
+
     public function save()
     {
         $this->validate();
