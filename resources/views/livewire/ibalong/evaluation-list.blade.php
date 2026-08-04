@@ -52,7 +52,7 @@
                         <div class="flex flex-col gap-2">
                             <a href="{{ route('ibalong.admin.evaluations.edit', $eval->slug) }}" class="block bg-gray-100 text-iba-black text-center text-xs font-black uppercase tracking-widest w-full py-3 border-2 border-iba-black hover:bg-gray-200 transition-colors">Edit Blueprint</a>
                             <div class="flex gap-2">
-                                <a href="#" class="flex-1 bg-iba-teal text-white text-center text-[10px] font-black uppercase tracking-widest py-2 border-2 border-iba-black hover:bg-teal-700 transition-colors">View Data</a>
+                                <a href="{{ route('ibalong.admin.evaluations.list' }}" class="flex-1 bg-iba-teal text-white text-center text-[10px] font-black uppercase tracking-widest py-2 border-2 border-iba-black hover:bg-teal-700 transition-colors">View Data</a>
                                 <button wire:click="deleteEvaluation({{ $eval->id }})" wire:confirm="WARNING: This permanently deletes the form and ALL recorded answers. Proceed?" class="flex-1 bg-iba-red text-white text-center text-[10px] font-black uppercase tracking-widest py-2 border-2 border-iba-black hover:bg-red-800 transition-colors">Drop</button>
                             </div>
                         </div>
