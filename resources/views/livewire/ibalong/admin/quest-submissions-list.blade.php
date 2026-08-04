@@ -49,20 +49,18 @@
                             <div class="text-[10px] text-gray-500 font-bold uppercase mt-1">ID: {{ $sub->team->ticket_code ?? 'N/A' }}</div>
                         </td>
 
-                        {{-- Category / Division Assigner --}}
+                        {{-- Category / Division Assigner (Manual Text Input) --}}
                         <td class="px-6 py-4">
                             @if(in_array($userRole, [1, 2, 4]) && $sub->team)
-                                @php $currentCategory = $sub->team->category ?? 'General Classification'; @endphp
                                 <div class="relative">
-                                    <select wire:change="updateCategory({{ $sub->team->id }}, $event.target.value)"
-                                            class="text-[10px] font-black uppercase tracking-widest border-2 border-iba-black bg-gray-50 text-iba-black focus:border-iba-orange focus:ring-0 py-2 px-3 w-full max-w-[160px] cursor-pointer hover:bg-gray-100 transition-colors">
-                                        <option value="General Classification" {{ $currentCategory === 'General Classification' ? 'selected' : '' }}>General</option>
-                                        <option value="High School" {{ $currentCategory === 'High School' ? 'selected' : '' }}>High School</option>
-                                        <option value="College" {{ $currentCategory === 'College' ? 'selected' : '' }}>College</option>
-                                        <option value="Software Track" {{ $currentCategory === 'Software Track' ? 'selected' : '' }}>Software Track</option>
-                                        <option value="Hardware Track" {{ $currentCategory === 'Hardware Track' ? 'selected' : '' }}>Hardware Track</option>
-                                    </select>
-                                    <div wire:loading wire:target="updateCategory({{ $sub->team->id }})" class="absolute -top-2 -right-2">
+                                    <input type="text" 
+                                           wire:change="updateCategory({{ $sub->team->id }}, $event.target.value)" 
+                                           value="{{ $sub->team->category ?? 'General Classification' }}"
+                                           placeholder="Type division..."
+                                           class="text-[10px] font-black uppercase tracking-widest border-2 border-iba-black bg-gray-50 text-iba-black focus:border-iba-orange focus:ring-0 py-2 px-3 w-full max-w-[160px] placeholder:text-gray-400">
+                                    <p class="text-[8px] font-bold text-gray-400 uppercase mt-1">Press Enter to save</p>
+                                    
+                                    <div wire:loading wire:target="updateCategory({{ $sub->team->id }})" class="absolute top-2 -right-3">
                                         <span class="flex h-3 w-3">
                                             <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-iba-orange opacity-75"></span>
                                             <span class="relative inline-flex rounded-full h-3 w-3 bg-iba-orange"></span>
@@ -71,7 +69,7 @@
                                 </div>
                             @else
                                 <span class="text-[10px] font-black uppercase text-gray-600 bg-gray-200 border-2 border-gray-300 px-3 py-1">
-                                    {{ $sub->team->category ?? 'General' }}
+                                    {{ $sub->team->category ?? 'General Classification' }}
                                 </span>
                             @endif
                         </td>
