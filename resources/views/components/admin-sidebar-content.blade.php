@@ -75,6 +75,17 @@
                 Event Control
             </a>
 
+            <a href="{{ route('ibalong.admin.dial-up') }}"
+            class="flex items-center gap-3 px-4 py-3 border-2 {{ request()->routeIs('ibalong.admin.dial-up') ? 'bg-iba-orange border-iba-black text-iba-black shadow-[4px_4px_0_0_#131011] translate-x-1' : 'border-transparent text-gray-600 hover:border-iba-black hover:bg-gray-50 hover:text-iba-black transition-all' }}">
+
+                {{-- Retro Terminal Icon --}}
+                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                </svg>
+
+                <span class="text-xs font-black uppercase tracking-widest">Dial-Up Terminal</span>
+            </a>
+
             {{-- Strictly Admin Only Controls (Role 1 & 2) --}}
             @if(in_array($role, [1, 2]))
                 <div class="border-t-2 border-dashed border-gray-300 dark:border-gray-700 my-2"></div>

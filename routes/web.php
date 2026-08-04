@@ -248,6 +248,7 @@ Route::domain('ibalong.' . env('APP_DOMAIN'))->name('ibalong.')->group(function 
             Route::get('/launchpad/intake', \App\Livewire\Ibalong\Admin\RegistrantManager::class)->name('admin.registrants');
             Route::get('/team-accounts', TeamAccountManager::class)->name('admin.team-accounts');
             Route::get('/events', EventManager::class)->name('admin.events');
+            Route::get('/dial-up', \App\Livewire\Ibalong\Admin\DialUpTerminal::class)->name('admin.dial-up');
 
             // Future route example: Route::get('/mentorship-queue', ...)->name('facilitator.mentors');
         });
