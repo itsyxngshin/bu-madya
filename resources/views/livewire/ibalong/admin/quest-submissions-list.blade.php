@@ -129,13 +129,13 @@
                                         Unavailable
                                     </button>
                                 @else
-                                    <a href="{{ route('admin.quests.weighing', $sub->id) }}" class="inline-block bg-iba-orange text-iba-black text-[10px] font-black uppercase px-4 py-2 border-2 border-iba-black shadow-[2px_2px_0_0_#131011] hover:translate-y-0.5 hover:shadow-none transition-all w-full max-w-[130px] text-center">
+                                    <a href="{{ route('ibalong.admin.quests.weighing', $sub->id) }}" class="inline-block bg-iba-orange text-iba-black text-[10px] font-black uppercase px-4 py-2 border-2 border-iba-black shadow-[2px_2px_0_0_#131011] hover:translate-y-0.5 hover:shadow-none transition-all w-full max-w-[130px] text-center">
                                         Weigh Gift
                                     </a>
                                 @endif
 
                                 @if(in_array($userRole, [1, 2]))
-                                    <a href="{{ route('admin.quests.override', $sub->id) }}" class="inline-block bg-iba-red text-white text-[10px] font-black uppercase px-4 py-1.5 border-2 border-iba-black hover:bg-red-800 transition-colors w-full max-w-[130px] text-center">
+                                    <a href="{{ route('ibalong.admin.quests.override', $sub->id) }}" class="inline-block bg-iba-red text-white text-[10px] font-black uppercase px-4 py-1.5 border-2 border-iba-black hover:bg-red-800 transition-colors w-full max-w-[130px] text-center">
                                         Override
                                     </a>
                                 @endif
