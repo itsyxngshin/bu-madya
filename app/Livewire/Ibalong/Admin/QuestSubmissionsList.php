@@ -5,98 +5,58 @@ namespace App\Livewire\Ibalong\Admin;
 use Livewire\Component;
 use App\Models\IbalongQuest;
 use App\Models\IbalongQuestSubmission;
+use App\Models\IbalongRegistration;
 
-class QuestResultsBoard extends Component
+class QuestSubmissionsList extends Component
 {
-    public $quest_id;
     public $quest;
-    public $categorizedLeaderboard = [];
-    public $maxPossibleScore = 0;
-    
-    // Filter State
-    public $selectedJudge = 'all';
-    public $availableJudges = [];
+    public $submissions;
 
     public function mount($quest_id)
     {
+        // Ensure only authorized roles can access this list
         $role = auth('ibalong')->user()->role_id ?? 0;
-
-        if (!in_array($role, [1, 2, 4])) {
-            abort(403, 'ACCESS DENIED: Only the Admin Command may view tabulated results.');
+        if (!in_array($role, [1, 2, 4, 5])) {
+            abort(403, 'ACCESS DENIED: Only the Council may view submission manifests.');
         }
 
-        $this->quest_id = $quest_id;
-        $this->calculateLeaderboard();
+        // Load the quest and its max possible score (sum of all criteria)
+        $this->quest = IbalongQuest::with('criteria')->findOrFail($quest_id);
+
+        $this->loadSubmissions();
     }
 
-    // Livewire lifecycle hook: Runs automatically when $selectedJudge changes
-    public function updatedSelectedJudge()
+    public function loadSubmissions()
     {
-        $this->calculateLeaderboard();
-    }
-
-    public function calculateLeaderboard()
-    {
-        $this->quest = IbalongQuest::with('criteria')->findOrFail($this->quest_id);
-        $this->maxPossibleScore = $this->quest->criteria->sum('max_score');
-
-        $submissions = IbalongQuestSubmission::with(['team', 'scores.judge'])
-            ->where('quest_id', $this->quest_id)
-            ->whereIn('status', ['reviewing', 'reviewed', 'submitted'])
+        // Eager load submissions with their respective team and score data
+        $this->submissions = IbalongQuestSubmission::with(['team', 'scores.judge'])
+            ->where('quest_id', $this->quest->id)
+            ->orderByRaw("FIELD(status, 'submitted', 'reviewing', 'reviewed', 'draft')")
+            ->orderBy('submitted_at', 'asc')
             ->get();
+    }
 
-        $results = [];
-        $judgesList = [];
-
-        foreach ($submissions as $sub) {
-            $judgeTotals = [];
-            $scoresByJudge = $sub->scores->groupBy('judge_id');
-
-            foreach ($scoresByJudge as $judgeId => $scores) {
-                $judgeName = $scores->first()->judge->name ?? 'Unknown Judge';
-                $judgeTotals[$judgeName] = $scores->sum('score');
-                $judgesList[$judgeName] = $judgeName; // Collect unique judge names
-            }
-
-            $totalJudges = count($judgeTotals);
-            $average = $totalJudges > 0 ? array_sum($judgeTotals) / $totalJudges : 0;
-            $category = $sub->team->category ?? 'General Classification';
-
-            // Determine the sorting metric based on the active filter
-            $sortScore = 0;
-            if ($this->selectedJudge === 'all') {
-                $sortScore = round($average, 2);
-            } else {
-                $sortScore = $judgeTotals[$this->selectedJudge] ?? 0;
-            }
-
-            $results[] = [
-                'submission_id' => $sub->id,
-                'team_name' => $sub->team->team_name ?? 'Unknown Cohort',
-                'ticket_code' => $sub->team->ticket_code ?? 'N/A',
-                'category' => $category,
-                'judge_totals' => $judgeTotals,
-                'total_judges' => $totalJudges,
-                'average_score' => round($average, 2),
-                'sort_score' => $sortScore, 
-                'status' => $sub->status,
-            ];
+    public function updateCategory($team_id, $new_category)
+    {
+        // Strict RBAC: Only Admins (1, 2) and Directors (4) can reassign categories. Judges (5) cannot.
+        $role = auth('ibalong')->user()->role_id ?? 0;
+        if (!in_array($role, [1, 2, 4])) {
+            abort(403, 'ACCESS DENIED: You lack clearance to modify cohort divisions.');
         }
 
-        // Store unique judges for the dropdown
-        $this->availableJudges = array_values($judgesList);
+        $team = IbalongRegistration::findOrFail($team_id);
+        $team->update([
+            'category' => $new_category
+        ]);
 
-        $collection = collect($results);
-        $grouped = $collection->groupBy('category');
+        // Refresh the submissions data to reflect changes immediately
+        $this->loadSubmissions();
 
-        // Sort dynamically based on the target metric (sort_score)
-        $this->categorizedLeaderboard = $grouped->map(function ($group) {
-            return $group->sortByDesc('sort_score')->values()->toArray();
-        })->toArray();
+        session()->flash('success', "Cohort '{$team->team_name}' reassigned to {$new_category}.");
     }
 
     public function render()
     {
-        return view('livewire.ibalong.admin.quest-results-board')->layout('layouts.dashboard');
+        return view('livewire.ibalong.admin.quest-submissions-list')->layout('layouts.dashboard');
     }
 }
