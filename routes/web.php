@@ -96,6 +96,10 @@ use App\Livewire\Ibalong\Team\QuestTerminal;
 use App\Livewire\Ibalong\Judge\ScoringDeck;
 use App\Livewire\Ibalong\QuestRoster;
 use App\Livewire\Ibalong\Admin\QuestResultsBoard;
+use App\Livewire\Ibalong\EvaluationList as IbalongEvaluationList;
+use App\Livewire\Ibalong\EvaluationForm as IbalongEvaluationForm;
+use App\Livewire\Ibalong\Admin\EvaluationBuilder as IbalongEvaluationBuilder;
+use App\Livewire\Ibalong\Admin\EvaluationResults as IbalongEvaluationResults;
 
 use App\Models\MembershipApplication;
 use Illuminate\Support\Facades\Storage;
@@ -186,6 +190,8 @@ Route::domain('ibalong.' . env('APP_DOMAIN'))->name('ibalong.')->group(function 
         Route::get('/community', CommunityLogs::class)->name('community-logs');
         Route::get('/community/log/{id}', CommunityLogSingle::class)->name('community-logs.show');
         Route::get('/resources', \App\Livewire\Ibalong\ResourceRoom::class)->name('resources');
+        Route::get('/surveys', EvaluationList::class)->name('evaluations.index');
+        Route::get('/surveys/{slug}/terminal', EvaluationForm::class)->name('evaluations.terminal');
 
         // Secure Logout
         Route::post('/launchpad/logout', function() {
@@ -206,6 +212,10 @@ Route::domain('ibalong.' . env('APP_DOMAIN'))->name('ibalong.')->group(function 
             Route::get('/launchpad/committees', \App\Livewire\Ibalong\Admin\CommitteeManager::class)->name('admin.committees');
             Route::get('/launchpad/notifications', \App\Livewire\Ibalong\Admin\NotificationCenter::class)->name('admin.notifications');
             Route::get('/quests/{quest_id}/results', QuestResultsBoard::class)->name('admin.quests.results');
+            Route::get('/admin/evaluations', IbalongEvaluationList::class)->name('admin.evaluations.index');
+            Route::get('/admin/evaluations/forge', IbalongEvaluationBuilder::class)->name('admin.evaluations.forge');
+            Route::get('/admin/evaluations/{evaluation:slug}/edit', IbalongEvaluationBuilder::class)->name('admin.evaluations.edit');
+            Route::get('/admin/evaluations/{slug}/results', EvaluationResults::class)->name('admin.evaluations.results');
         });
 
         Route::middleware([IbalongRoleMiddleware::class.':1,2,4,5'])->group(function () {
@@ -214,7 +224,7 @@ Route::domain('ibalong.' . env('APP_DOMAIN'))->name('ibalong.')->group(function 
             Route::get('/quests', QuestRoster::class)->name('admin.quests.index');
             Route::get('/quests/forge/{quest_id?}', QuestBuilder::class)->name('admin.quests.forge');
             Route::get('/quests/{quest_id}/submissions', \App\Livewire\Ibalong\Admin\QuestSubmissionsList::class)->name('admin.quests.submissions');
-            
+
             // Phase 4: Judge Scoring Deck (requires the specific submission ID)
             Route::get('/quests/weighing/{submission_id}', ScoringDeck::class)->name('admin.quests.weighing');
 
