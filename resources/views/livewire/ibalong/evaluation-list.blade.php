@@ -9,7 +9,7 @@
             </p>
         </div>
         @if($isAdminView)
-            <a href="{{ route('admin.evaluations.forge') }}" class="bg-iba-black text-white text-xs font-black uppercase px-6 py-3 border-2 border-transparent hover:-translate-y-1 hover:shadow-[4px_4px_0_0_#0095AC] transition-all">+ Forge Blueprint</a>
+            <a href="{{ route('ibalong.admin.evaluations.forge') }}" class="bg-iba-black text-white text-xs font-black uppercase px-6 py-3 border-2 border-transparent hover:-translate-y-1 hover:shadow-[4px_4px_0_0_#0095AC] transition-all">+ Forge Blueprint</a>
         @endif
     </div>
 
