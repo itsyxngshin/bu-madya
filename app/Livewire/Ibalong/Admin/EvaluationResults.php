@@ -12,25 +12,23 @@ class EvaluationResults extends Component
     public $tallies = [];
     public $textResponses = [];
 
-    public function mount(Evaluation $evaluation)
+    public function mount($slug)
     {
-        // 1. Assign the property FIRST before doing anything else
-        $this->evaluation = $evaluation;
-        
-        $user = auth()->user();
-
-        // 2. Now it is safe to read $this->evaluation
-        $isCollaborator = $this->evaluation->exists ? $this->evaluation->collaborators()->where('user_id', $user->id)->exists() : false;
-
-        // Block if not Admin, not Creator, AND not Collaborator
-        if ($this->evaluation->exists &&
-            $user->role?->role_name !== 'administrator' &&
-            $this->evaluation->created_by !== $user->id &&
-            !$isCollaborator) {
-            abort(403, 'You do not have permission to access this evaluation.');
+        // Enforce RBAC
+        $role = auth('ibalong')->user()->role_id ?? 0;
+        if (!in_array($role, [1, 2, 4])) {
+            abort(403, 'ACCESS DENIED: Command Center clearance required to view telemetry data.');
         }
 
-        $this->calculateStats();
+        // Query the correct Ibalong model using the slug from the URL
+        $this->evaluation = IbalongEvaluation::with([
+            'questions' => fn($q) => $q->orderBy('order', 'asc'),
+            'responses.answers',
+            'responses.user',
+            'responses.team'
+        ])->where('slug', $slug)->firstOrFail();
+
+        $this->processData();
     }
 
     private function processData()
