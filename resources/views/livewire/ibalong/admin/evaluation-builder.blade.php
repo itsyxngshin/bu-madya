@@ -12,7 +12,7 @@
         </div>
 
         <div class="flex flex-wrap items-center gap-3">
-            <a href="{{ route('admin.evaluations.index') }}" class="bg-gray-100 text-iba-black text-xs font-black uppercase px-6 py-3 border-2 border-iba-black hover:bg-gray-200 transition-colors">Cancel</a>
+            <a href="{{ route('ibalong.admin.evaluations.index') }}" class="bg-gray-100 text-iba-black text-xs font-black uppercase px-6 py-3 border-2 border-iba-black hover:bg-gray-200 transition-colors">Cancel</a>
             <button wire:click="save" class="bg-iba-black text-white text-xs font-black uppercase tracking-widest px-8 py-3 border-4 border-transparent shadow-[4px_4px_0_0_#0095AC] hover:translate-y-1 hover:shadow-none transition-all">
                 Save Blueprint
             </button>
