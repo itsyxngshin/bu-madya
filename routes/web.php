@@ -216,7 +216,7 @@ Route::domain('ibalong.' . env('APP_DOMAIN'))->name('ibalong.')->group(function 
             Route::get('/admin/evaluations', IbalongEvaluationList::class)->name('admin.evaluations.index');
             Route::get('/admin/evaluations/forge', IbalongEvaluationBuilder::class)->name('admin.evaluations.forge');
             Route::get('/admin/evaluations/{evaluation:slug}/edit', IbalongEvaluationBuilder::class)->name('admin.evaluations.edit');
-            Route::get('/admin/evaluations/{slug}/results', EvaluationResults::class)->name('admin.evaluations.results');
+            Route::get('/admin/evaluations/{slug}/results', IbalongEvaluationResults::class)->name('admin.evaluations.results');
             Route::get('/quests/override/{submission_id}', QuestOverrideTerminal::class)->name('admin.quests.override');
         });
 
