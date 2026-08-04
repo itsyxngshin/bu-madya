@@ -2,9 +2,7 @@
      x-data="{ sectionToDelete: @entangle('sectionToDeleteIndex') }"
      x-effect="document.body.classList.toggle('overflow-hidden', sectionToDelete !== null)">
 
-    {{-- ========================================== --}}
     {{-- HEADER / ACTIONS --}}
-    {{-- ========================================== --}}
     <div class="bg-white border-4 border-iba-black shadow-[8px_8px_0_0_#FF8623] p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
             <h1 class="text-2xl font-black uppercase tracking-widest text-iba-black">
@@ -14,7 +12,7 @@
         </div>
 
         <div class="flex flex-wrap items-center gap-3">
-            <a href="#" class="bg-gray-100 text-iba-black text-xs font-black uppercase px-6 py-3 border-2 border-iba-black hover:bg-gray-200 transition-colors">Cancel</a>
+            <a href="{{ route('admin.evaluations.index') }}" class="bg-gray-100 text-iba-black text-xs font-black uppercase px-6 py-3 border-2 border-iba-black hover:bg-gray-200 transition-colors">Cancel</a>
             <button wire:click="save" class="bg-iba-black text-white text-xs font-black uppercase tracking-widest px-8 py-3 border-4 border-transparent shadow-[4px_4px_0_0_#0095AC] hover:translate-y-1 hover:shadow-none transition-all">
                 Save Blueprint
             </button>
@@ -28,12 +26,8 @@
     @endif
 
     <div class="grid grid-cols-1 xl:grid-cols-12 gap-8">
-        {{-- ========================================== --}}
         {{-- LEFT: CONFIGURATION --}}
-        {{-- ========================================== --}}
         <div class="xl:col-span-4 space-y-6">
-
-            {{-- Main Settings --}}
             <div class="bg-white border-4 border-iba-black shadow-[6px_6px_0_0_#131011] p-6">
                 <h2 class="text-lg font-black uppercase border-b-4 border-iba-black pb-2 mb-4">General Settings</h2>
 
@@ -78,20 +72,9 @@
                               placeholder="Enter operational directives..."></textarea>
                 </div>
 
-                <div class="flex items-center justify-between p-4 bg-gray-100 border-2 border-iba-black">
-                    <span class="text-xs font-black uppercase text-iba-black">Live Deployment</span>
-                    <label class="relative inline-flex items-center cursor-pointer">
-                        <input type="checkbox" wire:model="is_active" class="sr-only peer">
-                        <div class="w-11 h-6 bg-gray-300 border-2 border-iba-black peer-focus:outline-none peer-checked:bg-iba-green after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-2 after:border-iba-black after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-[18px]"></div>
-                    </label>
-                </div>
-            </div>
-
-            {{-- Certificate Builder --}}
-            <div x-data="{ expanded: false }" class="bg-white border-4 border-iba-black shadow-[6px_6px_0_0_#131011]">
                 <div class="mb-5">
                     <label class="block text-[10px] font-black text-gray-500 uppercase mb-2">Access Control Protocol</label>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 gap-2">
                         <label class="flex flex-col p-4 border-4 cursor-pointer transition-colors {{ $access_level === 'public' ? 'bg-iba-teal/10 border-iba-teal' : 'bg-gray-50 border-gray-300 hover:border-iba-black' }}">
                             <div class="flex items-center gap-3 mb-1">
                                 <input type="radio" wire:model="access_level" value="public" class="w-5 h-5 text-iba-teal border-2 border-iba-black focus:ring-0">
@@ -110,6 +93,17 @@
                     </div>
                 </div>
 
+                <div class="flex items-center justify-between p-4 bg-gray-100 border-2 border-iba-black">
+                    <span class="text-xs font-black uppercase text-iba-black">Live Deployment</span>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" wire:model="is_active" class="sr-only peer">
+                        <div class="w-11 h-6 bg-gray-300 border-2 border-iba-black peer-focus:outline-none peer-checked:bg-iba-green after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-2 after:border-iba-black after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-[18px]"></div>
+                    </label>
+                </div>
+            </div>
+
+            {{-- Certificate Builder Module --}}
+            <div x-data="{ expanded: false }" class="bg-white border-4 border-iba-black shadow-[6px_6px_0_0_#131011]">
                 <button @click="expanded = !expanded" type="button" class="w-full flex items-center justify-between p-6 bg-iba-black text-white hover:bg-gray-900 transition-colors">
                     <div class="flex flex-col items-start text-left">
                         <h3 class="text-base font-black uppercase tracking-widest">E-Certificate Factory</h3>
@@ -120,18 +114,15 @@
 
                 <div x-show="expanded" x-collapse x-cloak>
                     <div class="p-6 border-t-4 border-iba-black space-y-6 bg-gray-50">
-                        {{-- Cert Tools from Source 7 go here (adapted to Brutalism) --}}
-                        <div class="p-4 border-2 border-dashed border-gray-400 text-center text-xs font-bold text-gray-500 uppercase tracking-widest">
-                            <p>Certificate alignment module available in extended view.</p>
+                        <div class="p-4 border-2 border-dashed border-gray-400 text-center text-xs font-bold text-gray-500 uppercase tracking-widest bg-gray-100">
+                            <p>Certificate integration engine standing by for template processing.</p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        {{-- ========================================== --}}
         {{-- RIGHT: BUILDER (The Canvas) --}}
-        {{-- ========================================== --}}
         <div class="xl:col-span-8 relative">
 
             {{-- Floating Tool Menu --}}
@@ -151,7 +142,8 @@
                             <button wire:click="addQuestion('checkbox'); open = false" class="w-full text-center px-4 py-3 bg-white border-2 border-iba-black text-xs font-black uppercase hover:bg-iba-orange transition-colors shadow-[2px_2px_0_0_#131011]">Checkboxes</button>
                             <button wire:click="addQuestion('likert'); open = false" class="w-full text-center px-4 py-3 bg-white border-2 border-iba-black text-xs font-black uppercase hover:bg-iba-orange transition-colors shadow-[2px_2px_0_0_#131011]">Rating Scale</button>
 
-                            <button wire:click="addQuestion('section'); open = false" class="col-span-2 w-full text-center px-4 py-3 bg-gray-100 border-2 border-dashed border-iba-black text-xs font-black uppercase hover:bg-gray-200 transition-colors mt-2">Inject Section Header</button>
+                            <button wire:click="addQuestion('section'); open = false" class="w-full text-center px-4 py-3 bg-gray-100 border-2 border-dashed border-iba-black text-xs font-black uppercase hover:bg-gray-200 transition-colors mt-2">Inject Section Header</button>
+                            <button wire:click="addQuestion('page_break'); open = false" class="w-full text-center px-4 py-3 bg-red-50 border-2 border-dashed border-iba-red text-iba-red text-xs font-black uppercase hover:bg-red-100 transition-colors mt-2">Inject Page Break</button>
                         </div>
                     </div>
                 </div>
@@ -180,12 +172,15 @@
                     @php
                         $qKey = $question['temp_id'];
                         $isSectionHeader = $question['type'] === 'section';
+                        $isPageBreak = $question['type'] === 'page_break';
                         $isActive = ($activeQuestionIndex === $index);
 
                         // Brutalist Styling logic
                         $classes = 'group/card relative transition-all duration-200 p-6 ';
                         if ($isSectionHeader) {
                             $classes .= 'bg-iba-teal text-white border-4 border-iba-black mt-8 mb-0 shadow-[6px_6px_0_0_#131011] ';
+                        } elseif ($isPageBreak) {
+                            $classes .= 'bg-red-50 border-4 border-iba-red mt-4 mb-0 shadow-[6px_6px_0_0_#D93B3B] ';
                         } else {
                             $classes .= 'bg-white border-4 border-iba-black border-t-0 mb-0 shadow-[6px_6px_0_0_#131011] ';
                         }
@@ -200,82 +195,126 @@
                             <svg class="w-4 h-4 text-iba-black" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"></path></svg>
                         </div>
 
-                        <div class="pl-8" x-data="{
-                                activeField: 'qText',
-                                resize(el) { this.$nextTick(() => { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; }); }
-                            }">
+                        {{-- PAGE BREAK UI --}}
+                        @if($isPageBreak)
+                            <div class="pl-8 flex items-center justify-between">
+                                <div class="flex-1 flex flex-col sm:flex-row sm:items-center gap-4">
+                                    <span class="text-[10px] font-black uppercase tracking-widest text-white bg-iba-red border-2 border-iba-black px-3 py-1">Page Break</span>
 
-                            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-4 gap-4">
-                                <div class="flex flex-col gap-2 flex-1 w-full">
-                                    @if(!$isSectionHeader)
-                                        <span class="text-[9px] font-black uppercase tracking-widest bg-gray-100 border-2 border-iba-black px-2 py-1 w-max">{{ $question['type'] }}</span>
+                                    @if($isActive)
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-[10px] font-black uppercase text-gray-500">Jump To:</span>
+                                            <select wire:model="questions.{{ $index }}.options.0.jump" class="text-xs font-bold border-2 border-iba-red focus:ring-0 focus:border-iba-black py-1 px-2">
+                                                <option value="">Next Page (Default)</option>
+                                                <option value="submit">Submit Form</option>
+                                                @foreach($this->sections as $section)
+                                                    <option value="{{ $section['id'] }}">Section: {{ Str::limit($section['title'], 20) }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
                                     @endif
+                                    <div class="flex-1 border-t-4 border-dashed border-iba-red hidden sm:block"></div>
                                 </div>
-
-                                <div class="flex items-center gap-2 ml-auto shrink-0">
-                                    @if(!$isSectionHeader)
-                                        <label class="flex items-center gap-2 cursor-pointer bg-gray-100 px-3 py-1 border-2 border-iba-black">
-                                            <input type="checkbox" wire:model="questions.{{ $index }}.is_required" class="text-iba-orange border-2 border-iba-black focus:ring-0 w-4 h-4">
-                                            <span class="text-[10px] font-black uppercase tracking-widest text-iba-black">Required</span>
-                                        </label>
-                                    @endif
-
-                                    @if($isSectionHeader)
-                                        <button wire:click.stop="confirmDeleteSection({{ $index }})" class="bg-iba-red text-white p-2 border-2 border-iba-black hover:bg-red-800 transition-colors" title="Delete Section">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                                        </button>
-                                    @else
-                                        <button wire:click.stop="removeQuestion({{ $index }})" class="bg-gray-100 text-iba-red p-2 border-2 border-iba-black hover:bg-gray-200 transition-colors" title="Delete Question">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                                        </button>
-                                    @endif
-                                </div>
+                                <button wire:click.stop="removeQuestion({{ $index }})" class="text-iba-red p-2 hover:bg-red-100 border-2 border-transparent hover:border-iba-red transition-colors ml-4" title="Remove Break">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                </button>
                             </div>
 
-                            {{-- Question Text --}}
-                            <textarea x-ref="qText" @focus="activeField = 'qText'" wire:model="questions.{{ $index }}.question_text"
-                                      x-init="$nextTick(() => resize($el))" @input="resize($el)" rows="1"
-                                      class="w-full text-base font-black uppercase border-0 border-b-4 border-transparent hover:border-black/20 focus:border-iba-orange focus:ring-0 bg-transparent transition-colors p-0 mb-3 overflow-hidden resize-none {{ $isSectionHeader ? 'text-white placeholder-white/50' : 'text-iba-black placeholder-gray-300' }}"
-                                      placeholder="Enter Question Target..."></textarea>
+                        {{-- STANDARD QUESTION UI --}}
+                        @else
+                            <div class="pl-8" x-data="{
+                                    activeField: 'qText',
+                                    resize(el) { this.$nextTick(() => { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; }); }
+                                }">
 
-                            {{-- Description --}}
-                            @if($isActive || $question['description'])
-                                <textarea wire:model="questions.{{ $index }}.description" rows="1" x-init="resize($el)" @input="resize($el)"
-                                          class="w-full text-sm font-bold border-0 border-b-2 border-transparent focus:border-iba-orange focus:ring-0 bg-transparent transition-colors p-0 mb-4 overflow-hidden resize-none {{ $isSectionHeader ? 'text-teal-100 placeholder-teal-200/50' : 'text-gray-500 placeholder-gray-300' }}"
-                                          placeholder="Add helper directives..."></textarea>
-                            @endif
+                                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-4 gap-4">
+                                    <div class="flex flex-col gap-2 flex-1 w-full">
+                                        @if(!$isSectionHeader)
+                                            <span class="text-[9px] font-black uppercase tracking-widest bg-gray-100 border-2 border-iba-black px-2 py-1 w-max">{{ $question['type'] }}</span>
+                                        @endif
+                                    </div>
 
-                            {{-- Options --}}
-                            @if(in_array($question['type'], ['radio', 'checkbox', 'dropdown']))
-                                <div class="pl-4 border-l-4 border-gray-200 space-y-3 mt-4">
-                                    @foreach($question['options'] as $optIndex => $opt)
-                                        <div class="flex items-center gap-3" wire:key="opt-{{ $index }}-{{ $qKey }}-{{ $optIndex }}">
-                                            <div class="w-4 h-4 border-4 border-gray-400 {{ $question['type'] === 'checkbox' ? 'rounded-none' : 'rounded-full' }} shrink-0"></div>
-                                            <input type="text" wire:model="questions.{{ $index }}.options.{{ $optIndex }}{{ is_array($opt) ? '.text' : '' }}" class="w-full text-sm font-bold border-0 border-b-2 border-dashed border-gray-300 bg-transparent focus:border-iba-orange focus:ring-0 p-1 placeholder-gray-400" placeholder="Parameter output">
-                                            <button wire:click.stop="removeOption({{ $index }}, {{ $optIndex }})" class="text-iba-red hover:text-red-800 p-1 font-black shrink-0 uppercase text-[10px]">Remove</button>
-                                        </div>
-                                    @endforeach
-                                    <button wire:click.stop="addOption({{ $index }})" class="text-[10px] font-black uppercase text-iba-teal hover:text-teal-800 mt-2 bg-teal-50 px-3 py-1 border-2 border-iba-teal">
-                                        + Inject Option
-                                    </button>
+                                    <div class="flex items-center gap-2 ml-auto shrink-0">
+                                        @if(!$isSectionHeader)
+                                            <label class="flex items-center gap-2 cursor-pointer bg-gray-100 px-3 py-1 border-2 border-iba-black">
+                                                <input type="checkbox" wire:model="questions.{{ $index }}.is_required" class="text-iba-orange border-2 border-iba-black focus:ring-0 w-4 h-4">
+                                                <span class="text-[10px] font-black uppercase tracking-widest text-iba-black">Required</span>
+                                            </label>
+                                        @endif
+
+                                        {{-- Advanced Action Buttons --}}
+                                        @if($isSectionHeader)
+                                            <button wire:click.stop="duplicateSection({{ $index }})" class="bg-gray-100 text-iba-black text-[9px] font-black uppercase p-2 border-2 border-iba-black hover:bg-gray-200 transition-colors" title="Clone Entire Section">Clone</button>
+                                            <button wire:click.stop="confirmDeleteSection({{ $index }})" class="bg-iba-red text-white p-2 border-2 border-iba-black hover:bg-red-800 transition-colors" title="Delete Section">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                            </button>
+                                        @else
+                                            <button wire:click.stop="duplicateQuestion({{ $index }})" class="bg-gray-100 text-iba-black p-2 border-2 border-iba-black hover:bg-gray-200 transition-colors" title="Clone Node">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                                            </button>
+                                            <button wire:click.stop="removeQuestion({{ $index }})" class="bg-gray-100 text-iba-red p-2 border-2 border-iba-black hover:bg-gray-200 transition-colors" title="Delete Node">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                            </button>
+                                        @endif
+                                    </div>
                                 </div>
-                            @elseif($question['type'] === 'likert')
-                                <div class="bg-gray-100 p-4 border-2 border-iba-black mt-4 flex gap-2 overflow-x-auto">
-                                    @foreach($question['options'] as $optIndex => $option)
-                                        <input type="text" wire:key="likert-{{ $index }}-{{ $qKey }}-{{ $optIndex }}" wire:model="questions.{{ $index }}.options.{{ $optIndex }}" class="w-24 text-[10px] font-black uppercase text-center border-2 border-iba-black focus:border-iba-orange focus:ring-0 bg-white p-2">
-                                    @endforeach
-                                </div>
-                            @endif
-                        </div>
+
+                                {{-- Question Text & Description --}}
+                                <textarea x-ref="qText" @focus="activeField = 'qText'" wire:model="questions.{{ $index }}.question_text"
+                                          x-init="$nextTick(() => resize($el))" @input="resize($el)" rows="1"
+                                          class="w-full text-base font-black uppercase border-0 border-b-4 border-transparent hover:border-black/20 focus:border-iba-orange focus:ring-0 bg-transparent transition-colors p-0 mb-3 overflow-hidden resize-none {{ $isSectionHeader ? 'text-white placeholder-white/50' : 'text-iba-black placeholder-gray-300' }}"
+                                          placeholder="Enter Target..."></textarea>
+
+                                @if($isActive || $question['description'])
+                                    <textarea wire:model="questions.{{ $index }}.description" rows="1" x-init="resize($el)" @input="resize($el)"
+                                              class="w-full text-sm font-bold border-0 border-b-2 border-transparent focus:border-iba-orange focus:ring-0 bg-transparent transition-colors p-0 mb-4 overflow-hidden resize-none {{ $isSectionHeader ? 'text-teal-100 placeholder-teal-200/50' : 'text-gray-500 placeholder-gray-300' }}"
+                                              placeholder="Add helper directives..."></textarea>
+                                @endif
+
+                                {{-- Options & Jump Logic --}}
+                                @if(in_array($question['type'], ['radio', 'checkbox', 'dropdown']))
+                                    <div class="pl-4 border-l-4 border-gray-200 space-y-3 mt-4">
+                                        @foreach($question['options'] as $optIndex => $opt)
+                                            <div class="flex flex-col gap-2" wire:key="opt-{{ $index }}-{{ $qKey }}-{{ $optIndex }}">
+                                                <div class="flex items-center gap-3">
+                                                    <div class="w-4 h-4 border-4 border-gray-400 {{ $question['type'] === 'checkbox' ? 'rounded-none' : 'rounded-full' }} shrink-0"></div>
+                                                    <input type="text" wire:model="questions.{{ $index }}.options.{{ $optIndex }}{{ is_array($opt) ? '.text' : '' }}" class="w-full text-sm font-bold border-0 border-b-2 border-dashed border-gray-300 bg-transparent focus:border-iba-orange focus:ring-0 p-1 placeholder-gray-400" placeholder="Parameter output">
+                                                    <button wire:click.stop="removeOption({{ $index }}, {{ $optIndex }})" class="text-iba-red hover:text-red-800 p-1 font-black shrink-0 uppercase text-[10px]">Remove</button>
+                                                </div>
+
+                                                {{-- Single Choice (Radio) Conditional Jump Logic --}}
+                                                @if($question['type'] === 'radio' && is_array($opt) && $isActive)
+                                                    <div class="flex items-center gap-2 pl-7">
+                                                        <span class="text-[9px] font-black uppercase text-gray-400">Jump:</span>
+                                                        <select wire:model="questions.{{ $index }}.options.{{ $optIndex }}.jump" class="w-48 text-[10px] font-bold border-2 border-gray-300 focus:border-iba-black focus:ring-0 py-1 px-2 bg-gray-50">
+                                                            <option value="">Continue Next</option>
+                                                            <option value="submit">Submit Form</option>
+                                                            @foreach($this->sections as $section)
+                                                                <option value="{{ $section['id'] }}">To: {{ Str::limit($section['title'], 15) }}</option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
+                                                @endif
+                                            </div>
+                                        @endforeach
+                                        <button wire:click.stop="addOption({{ $index }})" class="text-[10px] font-black uppercase text-iba-teal hover:text-teal-800 mt-2 bg-teal-50 px-3 py-1 border-2 border-iba-teal">+ Inject Option</button>
+                                    </div>
+                                @elseif($question['type'] === 'likert')
+                                    <div class="bg-gray-100 p-4 border-2 border-iba-black mt-4 flex gap-2 overflow-x-auto">
+                                        @foreach($question['options'] as $optIndex => $option)
+                                            <input type="text" wire:key="likert-{{ $index }}-{{ $qKey }}-{{ $optIndex }}" wire:model="questions.{{ $index }}.options.{{ $optIndex }}" class="w-24 text-[10px] font-black uppercase text-center border-2 border-iba-black focus:border-iba-orange focus:ring-0 bg-white p-2">
+                                        @endforeach
+                                    </div>
+                                @endif
+                            </div>
+                        @endif
                     </div>
                 @endforeach
             </div>
         </div>
     </div>
 
-    {{-- ========================================== --}}
     {{-- DELETE SECTION CONFIRMATION MODAL --}}
-    {{-- ========================================== --}}
     @if($sectionToDeleteIndex !== null)
         <div class="fixed inset-0 z-[100] flex items-center justify-center p-4">
             <div class="fixed inset-0 bg-iba-black/90 backdrop-blur-sm" wire:click="cancelDeleteSection"></div>
@@ -293,4 +332,3 @@
         </div>
     @endif
 </div>
-
