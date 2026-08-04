@@ -101,7 +101,7 @@
                                 @endif
 
                                 @if(in_array(auth('ibalong')->user()->role_id, [1, 2]))
-                                    <a href="{{ route('ibalong.admin.quests.override', $sub->id) }}" class="inline-block bg-iba-red text-white text-[10px] font-black uppercase px-4 py-1.5 border-2 border-iba-black hover:bg-red-800 transition-colors w-full max-w-[130px] text-center">
+                                    <a href="{{ route('admin.quests.override', $sub->id) }}" class="inline-block bg-iba-red text-white text-[10px] font-black uppercase px-4 py-1.5 border-2 border-iba-black hover:bg-red-800 transition-colors w-full max-w-[130px] text-center">
                                         Override
                                     </a>
                                 @endif
