@@ -1,12 +1,21 @@
-<div class="max-w-7xl mx-auto space-y-6">
-
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white dark:bg-[#1A1617] p-6 border-2 border-iba-black dark:border-iba-light shadow-[4px_4px_0_0_#131011] dark:shadow-[4px_4px_0_0_#FFFBF7]">
+<div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white dark:bg-[#1A1617] p-6 border-2 border-iba-black dark:border-iba-light shadow-[4px_4px_0_0_#131011] dark:shadow-[4px_4px_0_0_#FFFBF7]">
         <div>
             <h1 class="text-xl font-black text-iba-black dark:text-iba-light uppercase tracking-wider">Team Accounts</h1>
             <p class="text-sm font-bold text-gray-500 dark:text-gray-400 mt-1">Manage portal access and view profiles for approved cohort teams.</p>
         </div>
-        <div class="w-full md:w-auto">
+        
+        <div class="w-full md:w-auto flex flex-col sm:flex-row gap-3">
             <input wire:model.live.debounce.300ms="search" type="text" placeholder="Search team or email..." class="w-full sm:w-64 border-2 border-iba-black dark:border-iba-light p-2 text-sm bg-white dark:bg-gray-900 focus:outline-none focus:border-iba-teal text-iba-black dark:text-white font-bold uppercase">
+            
+            {{-- Data Extraction Button (Visible only to Admins) --}}
+            @if(in_array(auth('ibalong')->user()->role_id, [1, 2]))
+                <button wire:click="exportTeamRoster" wire:loading.attr="disabled" class="bg-iba-teal text-white font-black px-4 py-2 text-xs uppercase tracking-widest border-2 border-iba-black shadow-[3px_3px_0_0_#131011] hover:translate-y-0.5 hover:shadow-none transition-all flex items-center justify-center gap-2 w-full sm:w-auto cursor-pointer">
+                    <svg wire:loading.remove wire:target="exportTeamRoster" class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    <svg wire:loading wire:target="exportTeamRoster" class="w-4 h-4 animate-spin flex-shrink-0" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    <span wire:loading.remove wire:target="exportTeamRoster">Extract Roster</span>
+                    <span wire:loading wire:target="exportTeamRoster">Extracting...</span>
+                </button>
+            @endif
         </div>
     </div>
 

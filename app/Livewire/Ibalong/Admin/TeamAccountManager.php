@@ -59,6 +59,41 @@ class TeamAccountManager extends Component
         session()->flash('success', "Account successfully $status.");
     }
 
+    public function exportTeamRoster()
+    {
+        // 1. Enforce RBAC - Only Admins/Super Admins can extract data
+        if (!in_array(auth('ibalong')->user()->role_id, [1, 2])) {
+            abort(403, 'ACCESS DENIED: Data extraction requires Admin clearance.');
+        }
+
+        // 2. Fetch all approved teams and their members
+        $teams = IbalongRegistration::with('members')->where('status', 'approved')->get();
+
+        // 3. Set the CSV Headers
+        $csvData = "Cohort / Team Name,Affiliation,Member Full Name,Role,Email Address,Mobile Number\n";
+
+        // 4. Loop through and map the data
+        foreach ($teams as $team) {
+            foreach ($team->members as $member) {
+                // We wrap variables in quotes to prevent commas inside names/affiliations from breaking the columns
+                $csvData .= sprintf(
+                    '"%s","%s","%s","%s","%s","%s"' . "\n",
+                    addslashes($team->team_name),
+                    addslashes($team->affiliation ?? 'N/A'),
+                    addslashes($member->full_name),
+                    addslashes($member->team_role),
+                    addslashes($member->email_address),
+                    addslashes($member->mobile_number ?? 'N/A')
+                );
+            }
+        }
+
+        // 5. Trigger the download sequence
+        return response()->streamDownload(function () use ($csvData) {
+            echo $csvData;
+        }, 'HOI_2026_Cohort_Roster_' . now()->format('Ymd_His') . '.csv');
+    }
+
     public function confirmPasswordReset($userId)
     {
         $this->targetUserId = $userId;
