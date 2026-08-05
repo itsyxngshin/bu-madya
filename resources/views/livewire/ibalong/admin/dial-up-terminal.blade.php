@@ -23,29 +23,43 @@
         {{-- Target Selection --}}
         <div class="space-y-3">
             <label class="text-sm font-black uppercase text-iba-black block">Signal Destination <span class="text-iba-red">*</span></label>
-            <div class="flex gap-4">
+            <div class="flex flex-col sm:flex-row gap-4">
                 <label class="flex items-center gap-2 cursor-pointer group">
                     <input type="radio" wire:model.live="target" value="all" class="w-5 h-5 text-iba-orange border-2 border-iba-black focus:ring-0">
                     <span class="text-xs font-bold uppercase group-hover:text-iba-orange transition-colors">Global Broadcast (All Cohorts)</span>
                 </label>
                 <label class="flex items-center gap-2 cursor-pointer group">
                     <input type="radio" wire:model.live="target" value="specific" class="w-5 h-5 text-iba-teal border-2 border-iba-black focus:ring-0">
-                    <span class="text-xs font-bold uppercase group-hover:text-iba-teal transition-colors">Targeted Transmit (Single Cohort)</span>
+                    <span class="text-xs font-bold uppercase group-hover:text-iba-teal transition-colors">Targeted Transmit (Selected Cohorts)</span>
                 </label>
             </div>
         </div>
 
-        {{-- Specific Team Dropdown (Conditional) --}}
+        {{-- Multi-Select Checkbox Roster (Conditional) --}}
         @if($target === 'specific')
             <div class="space-y-2 animate-fade-in-up">
-                <label class="text-xs font-black uppercase text-gray-500 block">Select Target Cohort</label>
-                <select wire:model="selectedTeamId" class="w-full border-2 border-iba-black p-3 font-bold uppercase tracking-widest focus:outline-none focus:border-iba-teal bg-gray-50 cursor-pointer">
-                    <option value="">-- AWAITING SELECTION --</option>
-                    @foreach($teams as $team)
-                        <option value="{{ $team->id }}">{{ $team->team_name }} ({{ $team->user->email ?? 'No Email' }})</option>
-                    @endforeach
-                </select>
-                @error('selectedTeamId') <span class="text-[10px] font-black text-iba-red uppercase">⚠ {{ $message }}</span> @enderror
+                <div class="flex justify-between items-end">
+                    <label class="text-xs font-black uppercase text-gray-500 block">Select Target Cohorts</label>
+                    <span class="text-[10px] font-bold text-gray-400 uppercase">{{ count($selectedTeamIds) }} Selected</span>
+                </div>
+
+                {{-- Scrollable Roster Box --}}
+                <div class="border-2 border-iba-black bg-gray-50 max-h-60 overflow-y-auto divide-y-2 divide-gray-200 shadow-inner">
+                    @forelse($teams as $team)
+                        <label class="flex items-center gap-4 p-3 cursor-pointer hover:bg-orange-50 transition-colors {{ in_array($team->id, $selectedTeamIds) ? 'bg-orange-50/50' : '' }}">
+                            <input type="checkbox" wire:model.live="selectedTeamIds" value="{{ $team->id }}" class="w-5 h-5 text-iba-orange border-2 border-iba-black focus:ring-0">
+                            <div class="flex flex-col">
+                                <span class="text-xs font-black uppercase text-iba-black">{{ $team->team_name }}</span>
+                                <span class="text-[9px] font-bold uppercase text-gray-500">{{ $team->user->email ?? 'No Email Attached' }}</span>
+                            </div>
+                        </label>
+                    @empty
+                        <div class="p-4 text-center">
+                            <span class="text-xs font-bold text-gray-400 uppercase">No active cohorts available.</span>
+                        </div>
+                    @endforelse
+                </div>
+                @error('selectedTeamIds') <span class="text-[10px] font-black text-iba-red uppercase">⚠ {{ $message }}</span> @enderror
             </div>
         @endif
 
@@ -56,11 +70,74 @@
             @error('subject') <span class="text-[10px] font-black text-iba-red uppercase">⚠ {{ $message }}</span> @enderror
         </div>
 
-        {{-- Message Body --}}
+        {{-- Message Body (Rich Text Editor) --}}
         <div class="space-y-2">
             <label class="text-sm font-black uppercase text-iba-black block">Message Payload <span class="text-iba-red">*</span></label>
-            <textarea wire:model="messageBody" rows="8" placeholder="Type your directive here..." class="w-full border-2 border-iba-black p-4 font-bold focus:outline-none focus:border-iba-orange bg-gray-50 resize-y whitespace-pre-wrap"></textarea>
-            @error('messageBody') <span class="text-[10px] font-black text-iba-red uppercase">⚠ {{ $message }}</span> @enderror
+
+            {{-- Quill.js Assets --}}
+            <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
+            <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
+
+            {{-- Brutalist Editor Styling --}}
+            <style>
+                .quill-wrapper .ql-toolbar.ql-snow {
+                    border: 2px solid #131011;
+                    background-color: #f9fafb;
+                    font-family: 'Courier New', Courier, monospace;
+                    border-bottom: 2px dashed #131011;
+                }
+                .quill-wrapper .ql-container.ql-snow {
+                    border: 2px solid #131011;
+                    border-top: none;
+                    background-color: #f9fafb;
+                    font-family: inherit;
+                    font-size: 14px;
+                    font-weight: 700;
+                    min-height: 200px;
+                }
+                /* Focus state border color change */
+                .quill-wrapper:focus-within .ql-toolbar.ql-snow,
+                .quill-wrapper:focus-within .ql-container.ql-snow {
+                    border-color: #FF8623;
+                }
+                .quill-wrapper:focus-within .ql-toolbar.ql-snow {
+                    border-bottom: 2px dashed #FF8623;
+                }
+            </style>
+
+            {{-- Alpine.js + Livewire Editor Bridge --}}
+            <div class="quill-wrapper" wire:ignore
+                 x-data="{
+                     initQuill() {
+                         let quill = new Quill(this.$refs.quillEditor, {
+                             theme: 'snow',
+                             placeholder: 'Type your formatted directive here...',
+                             modules: {
+                                 toolbar: [
+                                     ['bold', 'italic', 'underline'],
+                                     [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                                     ['link', 'clean']
+                                 ]
+                             }
+                         });
+
+                         // Bind Quill to Livewire
+                         quill.on('text-change', () => {
+                             $wire.set('messageBody', quill.root.innerHTML);
+                         });
+
+                         // Reset editor when transmission is sent successfully
+                         window.addEventListener('messageBody-reset', () => {
+                             quill.setContents([]);
+                         });
+                     }
+                 }"
+                 x-init="initQuill()">
+
+                <div x-ref="quillEditor"></div>
+            </div>
+
+            @error('messageBody') <span class="text-[10px] font-black text-iba-red uppercase block mt-1">⚠ {{ $message }}</span> @enderror
         </div>
 
         {{-- Action Button --}}

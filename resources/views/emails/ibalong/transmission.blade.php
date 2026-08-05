@@ -90,8 +90,17 @@
             border: 2px dashed #131011;
             padding: 15px;
             margin-top: 15px;
-            white-space: pre-wrap; /* Preserves line breaks from the textarea */
         }
+
+        /* NEW: Rich Text Formatting Rules for Emails */
+        .message-block p { margin: 0 0 10px 0; }
+        .message-block p:last-child { margin: 0; }
+        .message-block strong { font-weight: bold; color: #131011; }
+        .message-block em { font-style: italic; }
+        .message-block u { text-decoration: underline; }
+        .message-block ul { margin: 10px 0; padding-left: 20px; list-style-type: disc; }
+        .message-block ol { margin: 10px 0; padding-left: 20px; list-style-type: decimal; }
+        .message-block a { color: #0095AC; text-decoration: underline; font-weight: bold; }
 
         /* Footer */
         .footer {
@@ -129,7 +138,7 @@
             <div class="status-box">
                 <div class="status-title">▶ SUBJECT: {{ $subject }}</div>
 
-                <div class="message-block">{{ $messageBody }}</div>
+                <div class="message-block">{{!! $messageBody !!}}</div>
             </div>
 
             <p><span class="important-text">Directive Action Required:</span><br>

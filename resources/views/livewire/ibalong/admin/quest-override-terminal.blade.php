@@ -94,7 +94,7 @@
             @endforeach
 
             <div class="pt-6 flex justify-end gap-4">
-                <a href="{{ route('admin.quests.submissions', $quest->id) }}" class="bg-gray-100 text-iba-black text-sm font-black uppercase tracking-widest px-8 py-4 border-4 border-iba-black hover:bg-gray-200 transition-colors">
+                <a href="{{ route('ibalong.admin.quests.submissions', $quest->id) }}" class="bg-gray-100 text-iba-black text-sm font-black uppercase tracking-widest px-8 py-4 border-4 border-iba-black hover:bg-gray-200 transition-colors">
                     Cancel Override
                 </a>
                 <button type="submit" class="bg-iba-red text-white text-sm font-black uppercase tracking-widest px-8 py-4 border-4 border-iba-black shadow-[4px_4px_0_0_#131011] hover:translate-y-1 hover:shadow-none transition-all">

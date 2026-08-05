@@ -10,7 +10,10 @@ use Illuminate\Support\Facades\Mail;
 class DialUpTerminal extends Component
 {
     public $target = 'all'; // 'all' or 'specific'
-    public $selectedTeamId = '';
+
+    // Changed to an array to hold multiple selections
+    public $selectedTeamIds = [];
+
     public $subject = '';
     public $messageBody = '';
     public $teams = [];
@@ -23,7 +26,7 @@ class DialUpTerminal extends Component
             abort(403, 'ACCESS DENIED: Dial-Up terminal requires Command Center clearance.');
         }
 
-        // Load all active cohorts to populate the dropdown
+        // Load all active cohorts to populate the roster
         $this->teams = IbalongRegistration::with('user')
             ->whereNotNull('user_id')
             ->orderBy('team_name', 'asc')
@@ -34,7 +37,7 @@ class DialUpTerminal extends Component
     {
         $this->validate([
             'target' => 'required|in:all,specific',
-            'selectedTeamId' => 'required_if:target,specific',
+            'selectedTeamIds' => 'required_if:target,specific|array',
             'subject' => 'required|string|max:150',
             'messageBody' => 'required|string',
         ]);
@@ -49,15 +52,24 @@ class DialUpTerminal extends Component
                 }
             }
         } else {
-            $team = IbalongRegistration::with('user')->findOrFail($this->selectedTeamId);
-            if ($team->user && $team->user->email) {
-                Mail::to($team->user->email)->send(new IbalongTransmission($this->subject, $this->messageBody, $team->team_name));
-                $dispatchedCount++;
+            // Fetch all cohorts that were checked off in the list
+            $selectedTeams = IbalongRegistration::with('user')
+                ->whereIn('id', $this->selectedTeamIds)
+                ->get();
+
+            foreach ($selectedTeams as $team) {
+                if ($team->user && $team->user->email) {
+                    Mail::to($team->user->email)->send(new IbalongTransmission($this->subject, $this->messageBody, $team->team_name));
+                    $dispatchedCount++;
+                }
             }
         }
 
         // Reset the form
-        $this->reset(['subject', 'messageBody', 'selectedTeamId']);
+        $this->reset(['subject', 'messageBody', 'selectedTeamIds']);
+
+        // Tell the Quill rich text editor to clear its canvas
+        $this->dispatch('messageBody-reset');
 
         session()->flash('success', "TRANSMISSION SUCCESSFUL: Signal routed to {$dispatchedCount} cohort leader(s).");
     }
