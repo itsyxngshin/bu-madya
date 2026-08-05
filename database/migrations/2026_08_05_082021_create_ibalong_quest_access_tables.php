@@ -8,9 +8,8 @@ return new class extends Migration
 {
     public function up(): void
     {
-        // 1. Add the lock flag to the main quests table
         Schema::table('ibalong_quests', function (Blueprint $table) {
-            $table->boolean('is_restricted')->default(false)->after('status');
+            $table->boolean('is_restricted')->default(false)->after('is_published');
         });
 
         // 2. Forge the pivot table for cohort clearances
