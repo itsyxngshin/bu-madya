@@ -17,8 +17,6 @@
                 </button>
             @endif
         </div>
-    </div>
-
     @if (session()->has('success'))
         <div class="bg-iba-green/10 border-l-4 border-iba-green p-4 flex items-center justify-between">
             <p class="text-sm font-bold text-iba-green uppercase tracking-wider">{{ session('success') }}</p>
