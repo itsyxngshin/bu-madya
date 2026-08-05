@@ -34,9 +34,20 @@ class QuestRoster extends Component
 
     public function render()
     {
+        // Fetch the team ID if the user is a team member
+        $team_id = auth('ibalong')->user()->registration->id ?? null;
+
         $quests = IbalongQuest::with('submissions')
-            ->when(!$this->isAdminView, function($q) {
-                $q->where('is_published', true);
+            ->when(!$this->isAdminView, function($q) use ($team_id) {
+                // 1. Must be published
+                $q->where('is_published', true)
+                  // 2. Security Check: Must be public OR team must have clearance
+                  ->where(function ($subQ) use ($team_id) {
+                      $subQ->where('is_restricted', false)
+                           ->orWhereHas('allowedTeams', function ($accessQ) use ($team_id) {
+                               $accessQ->where('team_id', $team_id);
+                           });
+                  });
             })
             ->orderBy('deadline', 'asc')
             ->get();

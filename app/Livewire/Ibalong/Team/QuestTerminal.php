@@ -26,6 +26,15 @@ class QuestTerminal extends Component
 
         if (!$team_id) abort(403, 'UNAUTHORIZED: Terminal access restricted to registered cohorts.');
 
+        // --- NEW ENCRYPTED PROTOCOL CHECK ---
+        if ($this->quest->is_restricted) {
+            $hasClearance = $this->quest->allowedTeams()->where('team_id', $team_id)->exists();
+            if (!$hasClearance) {
+                abort(403, 'RESTRICTED PROTOCOL: Your cohort lacks the necessary clearance to access this terminal.');
+            }
+        }
+        // ------------------------------------
+
         $this->submission = IbalongQuestSubmission::firstOrCreate(
             ['quest_id' => $this->quest->id, 'team_id' => $team_id],
             ['status' => 'draft']

@@ -31,4 +31,10 @@ class IbalongQuest extends Model
     {
         return $this->hasMany(IbalongQuestSubmission::class, 'quest_id');
     }
+
+    public function allowedTeams()
+    {
+        return $this->belongsToMany(IbalongRegistration::class, 'ibalong_quest_team_access', 'quest_id', 'team_id')
+                    ->withTimestamps();
+    }
 }

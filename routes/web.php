@@ -249,6 +249,7 @@ Route::domain('ibalong.' . env('APP_DOMAIN'))->name('ibalong.')->group(function 
             Route::get('/team-accounts', TeamAccountManager::class)->name('admin.team-accounts');
             Route::get('/events', EventManager::class)->name('admin.events');
             Route::get('/dial-up', \App\Livewire\Ibalong\Admin\DialUpTerminal::class)->name('admin.dial-up');
+            Route::get('/quests/{quest_id}/clearance', \App\Livewire\Ibalong\Admin\QuestAccessTerminal::class)->name('admin.quests.clearance');
 
             // Future route example: Route::get('/mentorship-queue', ...)->name('facilitator.mentors');
         });

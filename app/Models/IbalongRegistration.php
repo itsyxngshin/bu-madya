@@ -80,4 +80,10 @@ class IbalongRegistration extends Model
         return $this->belongsToMany(IbalongOnlineActivity::class, 'ibalong_team_online_participations', 'team_id', 'online_activity_id')
                     ->withTimestamps();
     }
+
+    public function unlockedQuests()
+    {
+        return $this->belongsToMany(IbalongQuest::class, 'ibalong_quest_team_access', 'team_id', 'quest_id')
+                    ->withTimestamps();
+    }
 }

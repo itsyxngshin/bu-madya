@@ -129,9 +129,7 @@
             <div class="status-box">
                 <div class="status-title">▶ SUBJECT: {{ $subject }}</div>
 
-                <div class="message-block">
-                    {!! nl2br(e($messageBody)) !!}
-                </div>
+                <div class="message-block">{{ $messageBody }}</div>
             </div>
 
             <p><span class="important-text">Directive Action Required:</span><br>

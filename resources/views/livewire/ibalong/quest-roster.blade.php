@@ -61,6 +61,17 @@
 
                                 @if(in_array(auth('ibalong')->user()->role_id, [1, 2, 4]))
                                     <a href="{{ route('ibalong.admin.quests.results', $quest->id) }}" class="flex-1 bg-iba-black dark:bg-gray-200 text-iba-orange dark:text-iba-black text-center text-xs font-black uppercase tracking-widest py-3 border-2 border-iba-black dark:border-gray-200 hover:translate-y-0.5 hover:shadow-[2px_2px_0_0_#FF8623] transition-all">Tabulation</a>
+                                    {{-- NEW: Clearance Terminal Route --}}
+                                    <a href="{{ route('ibalong.admin.quests.clearance', $quest->id) }}" class="flex-1 bg-white dark:bg-[#1A1617] text-iba-red text-center text-xs font-black uppercase tracking-widest py-3 border-2 border-iba-black dark:border-gray-200 hover:translate-y-0.5 hover:shadow-[2px_2px_0_0_#D93B3B] transition-all">
+                                        @if($quest->is_restricted)
+                                            <span class="flex items-center justify-center gap-1">
+                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                                                Locked
+                                            </span>
+                                        @else
+                                            Clearance
+                                        @endif
+                                    </a>
                                 @endif
                             </div>
 
