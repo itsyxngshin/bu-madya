@@ -8,7 +8,7 @@ use App\Models\IbalongHackathon;
 use App\Models\IbalongActivity;
 use App\Models\IbalongActivityTrack;
 use App\Models\IbalongActivitySlot;
-use App\Models\IbalongUser; // Imported the User model
+use App\Models\IbalongUser;
 
 class SchedulerManager extends Component
 {
@@ -19,15 +19,21 @@ class SchedulerManager extends Component
     public $activityType = 'mentorship';
     public $activityDescription = '';
 
-    // Slot Generator State
+    // Slot Generator State (Create)
     public $selectedActivityId = null;
     public $trackName = '';
-    public $mentorId = ''; // Holds the assigned mentor
+    public $mentorId = '';
     public $location = '';
     public $slotDate = '';
     public $startTime = '';
     public $endTime = '';
     public $durationMinutes = 30;
+
+    // Hub Editing State
+    public $editingTrackId = null;
+    public $editTrackName = '';
+    public $editMentorId = '';
+    public $editLocation = '';
 
     public function mount()
     {
@@ -70,10 +76,10 @@ class SchedulerManager extends Component
         session()->flash('success', 'Hub and all associated time blocks have been purged.');
     }
 
+    // --- HUB CREATION ---
     public function openTrackGenerator($activityId)
     {
         $this->selectedActivityId = $activityId;
-        // Added mentorId to the reset array so it clears when opening a new modal
         $this->reset(['trackName', 'mentorId', 'location', 'slotDate', 'startTime', 'endTime', 'durationMinutes']);
     }
 
@@ -81,22 +87,20 @@ class SchedulerManager extends Component
     {
         $this->validate([
             'trackName' => 'required|string',
-            'mentorId' => 'nullable', // Allow null if they want an unassigned hub
+            'mentorId' => 'nullable',
             'slotDate' => 'required|date',
             'startTime' => 'required',
             'endTime' => 'required|after:startTime',
             'durationMinutes' => 'required|integer|min:10',
         ]);
 
-        // 1. Forge the Hub/Track with the assigned mentor
         $track = IbalongActivityTrack::create([
             'activity_id' => $this->selectedActivityId,
             'name' => $this->trackName,
             'location' => $this->location,
-            'mentor_id' => $this->mentorId ?: null, // Converts empty strings to true null
+            'mentor_id' => $this->mentorId ?: null,
         ]);
 
-        // 2. The Slot Generation Engine
         $start = Carbon::parse($this->slotDate . ' ' . $this->startTime);
         $end = Carbon::parse($this->slotDate . ' ' . $this->endTime);
         $duration = (int) $this->durationMinutes;
@@ -120,16 +124,42 @@ class SchedulerManager extends Component
         session()->flash('success', 'Hub forged and time blocks successfully generated.');
     }
 
+    // --- HUB EDITING ---
+    public function openEditTrack($trackId)
+    {
+        $track = IbalongActivityTrack::findOrFail($trackId);
+        $this->editingTrackId = $track->id;
+        $this->editTrackName = $track->name;
+        $this->editLocation = $track->location;
+        $this->editMentorId = $track->mentor_id;
+    }
+
+    public function updateTrack()
+    {
+        $this->validate([
+            'editTrackName' => 'required|string',
+            'editMentorId' => 'nullable',
+            'editLocation' => 'nullable|string',
+        ]);
+
+        IbalongActivityTrack::findOrFail($this->editingTrackId)->update([
+            'name' => $this->editTrackName,
+            'location' => $this->editLocation,
+            'mentor_id' => $this->editMentorId ?: null,
+        ]);
+
+        $this->editingTrackId = null;
+        session()->flash('success', 'Hub parameters have been updated.');
+    }
+
     public function render()
     {
-        // Added 'tracks.mentor' to eager load the assigned personnel
         $activities = IbalongActivity::with(['tracks.mentor', 'tracks.slots.appointments'])
             ->where('hackathon_id', $this->activeHackathon->id)
             ->latest()
             ->get();
 
-        // Fetch all Command Center staff, Facilitators, and Judges (Roles 1, 2, 4, 5)
-        $mentors = IbalongUser::whereIn('role_id', [2, 4, 5])
+        $mentors = IbalongUser::whereIn('role_id', [1, 2, 4, 5])
             ->orderBy('name', 'asc')
             ->get();
 
