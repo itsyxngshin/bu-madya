@@ -4,15 +4,28 @@ namespace App\Livewire\Open;
 
 use Livewire\Component;
 use App\Models\EventFrame;
+use App\Models\SiteStat;
+use Illuminate\Support\Facades\Session;
 use Livewire\Attributes\Layout;
 
 #[Layout('layouts.madya-template')]
 class FrameBuilder extends Component
 {
     public EventFrame $frame;
+    public $visitorCount = 1;
 
     public function mount($slug)
     {
+
+        if (!Session::has('has_visited_site')) {
+            SiteStat::where('key', 'visitor_count')->increment('value');
+            Session::put('has_visited_site', true);
+        }
+
+        $this->visitorCount = SiteStat::where('key', 'visitor_count')->value('value');
+
+        $now = \Carbon\Carbon::now();
+
         $this->frame = EventFrame::where('slug', $slug)->firstOrFail();
 
         // Security Check

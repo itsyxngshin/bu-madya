@@ -236,6 +236,7 @@ Route::domain('ibalong.' . env('APP_DOMAIN'))->name('ibalong.')->group(function 
 
             Route::get('/terminal/quests', QuestRoster::class)->name('team.quests.index'); // Team Roster
             Route::get('/terminal/quest/{quest_id}', QuestTerminal::class)->name('team.quests.terminal');
+            Route::get('/appointments', \App\Livewire\Ibalong\Team\AppointmentTerminal::class)->name('team.appointments');
 
         });
 
@@ -250,7 +251,8 @@ Route::domain('ibalong.' . env('APP_DOMAIN'))->name('ibalong.')->group(function 
             Route::get('/events', EventManager::class)->name('admin.events');
             Route::get('/dial-up', \App\Livewire\Ibalong\Admin\DialUpTerminal::class)->name('admin.dial-up');
             Route::get('/quests/{quest_id}/clearance', \App\Livewire\Ibalong\Admin\QuestAccessTerminal::class)->name('admin.quests.clearance');
-
+            Route::get('/scheduler', \App\Livewire\Ibalong\Admin\SchedulerManager::class)->name('admin.scheduler');
+            Route::get('/mentor-hub', \App\Livewire\Ibalong\Mentor\MentorHub::class)->name('mentor.hub');
             // Future route example: Route::get('/mentorship-queue', ...)->name('facilitator.mentors');
         });
 

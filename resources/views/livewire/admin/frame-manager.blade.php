@@ -80,7 +80,7 @@
                     </div>
 
                     <div class="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between gap-2">
-                        {{-- Approve / Revoke Toggle --}}
+    
                         <button wire:click="toggleApproval({{ $frame->id }})" 
                                 class="flex-1 text-xs font-bold uppercase tracking-widest px-3 py-2 rounded-lg transition
                                 {{ $frame->is_approved ? 'bg-orange-50 text-orange-700 hover:bg-orange-100' : 'bg-gray-900 text-white hover:bg-gray-800' }}">
@@ -90,11 +90,116 @@
                         <a href="{{ route('open.frames.show', $frame->slug) }}" target="_blank" class="p-2 text-gray-400 hover:text-blue-600 bg-gray-50 hover:bg-blue-50 rounded-lg transition" title="Preview Public Page">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
                         </a>
-
+                    
+                        {{-- NEW: Edit Button --}}
+                        <button wire:click="editFrame({{ $frame->id }})" class="p-2 text-gray-400 hover:text-orange-600 bg-gray-50 hover:bg-orange-50 rounded-lg transition" title="Edit Metadata">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                        </button>
+                    
                         <button wire:click="deleteFrame({{ $frame->id }})" wire:confirm="Delete this campaign and all variations permanently?" class="p-2 text-gray-400 hover:text-red-600 bg-gray-50 hover:bg-red-50 rounded-lg transition" title="Delete">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                         </button>
                     </div>
+                    
+                    {{-- Add this Edit Modal right before the closing </div> of the main view --}}
+                    @if($editMode)
+                    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/40 backdrop-blur-sm" x-data @keydown.escape.window="$wire.cancelEdit()">
+                        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-xl overflow-hidden animate-fade-in-up max-h-[90vh] flex flex-col">
+                            
+                            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50 shrink-0">
+                                <h3 class="font-black text-gray-900">Edit Campaign</h3>
+                                <button wire:click="cancelEdit" class="text-gray-400 hover:text-red-500 transition-colors">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                </button>
+                            </div>
+                    
+                            <div class="p-6 overflow-y-auto space-y-6">
+                                
+                                {{-- Metadata Section --}}
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1.5">Campaign Title</label>
+                                        <input wire:model="editTitle" type="text" class="w-full rounded-xl border-gray-200 text-sm focus:ring-orange-500 focus:border-orange-500 font-medium text-gray-700 shadow-sm">
+                                        @error('editTitle') <span class="text-xs text-red-500 font-bold mt-1 block">{{ $message }}</span> @enderror
+                                    </div>
+                                    
+                                    <div>
+                                        <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1.5">Description</label>
+                                        <textarea wire:model="editDescription" rows="2" class="w-full rounded-xl border-gray-200 text-sm focus:ring-orange-500 focus:border-orange-500 font-medium text-gray-700 shadow-sm"></textarea>
+                                        @error('editDescription') <span class="text-xs text-red-500 font-bold mt-1 block">{{ $message }}</span> @enderror
+                                    </div>
+                                    
+                                    <div>
+                                        <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1.5">Official Caption</label>
+                                        <textarea wire:model="editCaption" rows="3" class="w-full rounded-xl border-gray-200 text-sm focus:ring-orange-500 focus:border-orange-500 font-medium text-gray-700 shadow-sm"></textarea>
+                                        @error('editCaption') <span class="text-xs text-red-500 font-bold mt-1 block">{{ $message }}</span> @enderror
+                                    </div>
+                                </div>
+                    
+                                {{-- Variations Section --}}
+                                <div class="border-t border-gray-100 pt-5">
+                                    <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-3">Frame Variations Sequence</label>
+                                    
+                                    @error('editImages') 
+                                        <div class="bg-red-50 text-red-600 px-3 py-2 rounded-lg text-xs font-bold mb-4 border border-red-100">
+                                            {{ $message }}
+                                        </div>
+                                    @enderror
+                    
+                                    <div class="space-y-2 mb-4">
+                                        @foreach($editImages as $index => $path)
+                                            <div class="flex items-center gap-4 bg-gray-50 p-2.5 rounded-xl border border-gray-100 transition-all hover:border-gray-200 hover:shadow-sm">
+                                                <div class="w-14 h-14 bg-[url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAMUlEQVQ4T2NkYNgBxVD8nwEPsOEHMBqNhsFhAAfLwcAAYf///z8DHgZQDw1DDEAGDAAASgIdX/3i4QAAAABJRU5ErkJggg==')] bg-repeat rounded-lg overflow-hidden shrink-0 border border-gray-200">
+                                                    <img src="{{ asset('storage/' . $path) }}" class="w-full h-full object-contain p-1">
+                                                </div>
+                    
+                                                <div class="flex-1 flex items-center justify-between">
+                                                    <span class="text-xs font-bold text-gray-400">Layer {{ $index + 1 }}</span>
+                    
+                                                    <div class="flex items-center gap-1">
+                                                        <button wire:click.prevent="moveImageUp({{ $index }})" @if($index === 0) disabled @endif class="p-1.5 rounded-md text-gray-400 hover:bg-white hover:text-gray-900 hover:shadow-sm disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:shadow-none transition-all">
+                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7"></path></svg>
+                                                        </button>
+                                                        <button wire:click.prevent="moveImageDown({{ $index }})" @if($index === count($editImages) - 1) disabled @endif class="p-1.5 rounded-md text-gray-400 hover:bg-white hover:text-gray-900 hover:shadow-sm disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:shadow-none transition-all">
+                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
+                                                        </button>
+                                                        <div class="w-px h-5 bg-gray-200 mx-1.5"></div>
+                                                        <button wire:click.prevent="removeImage({{ $index }})" class="p-1.5 rounded-md text-gray-400 hover:bg-red-50 hover:text-red-500 transition-all">
+                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                    
+                                    {{-- Upload New Trigger --}}
+                                    <div class="flex items-center justify-between mt-2">
+                                        <label class="cursor-pointer inline-flex items-center gap-2 px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-[10px] font-black uppercase tracking-widest rounded-xl transition-colors border border-gray-200 shadow-sm">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                                            Add Variations
+                                            <input type="file" wire:model="newUploads" multiple accept="image/png" class="hidden">
+                                        </label>
+                    
+                                        <div wire:loading wire:target="newUploads" class="text-[10px] font-black uppercase tracking-widest text-orange-500 flex items-center gap-2">
+                                            <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                            </svg>
+                                            Uploading...
+                                        </div>
+                                    </div>
+                    
+                                </div>
+                            </div>
+                    
+                            <div class="px-6 py-4 border-t border-gray-100 bg-gray-50/50 flex justify-end gap-3 shrink-0">
+                                <button wire:click="cancelEdit" class="px-5 py-2.5 text-xs font-black uppercase tracking-widest text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors shadow-sm">Cancel</button>
+                                <button wire:click="updateFrame" class="px-5 py-2.5 text-xs font-black uppercase tracking-widest text-white bg-orange-500 rounded-xl hover:bg-orange-600 transition-colors shadow-lg shadow-orange-500/20">Save Changes</button>
+                            </div>
+                        </div>
+                    </div>
+                    @endif
                 </div>
 
             </div>
