@@ -8,6 +8,7 @@ use App\Models\IbalongHackathon;
 use App\Models\IbalongActivity;
 use App\Models\IbalongActivityTrack;
 use App\Models\IbalongActivitySlot;
+use App\Models\IbalongUser; // Imported the User model
 
 class SchedulerManager extends Component
 {
@@ -21,20 +22,18 @@ class SchedulerManager extends Component
     // Slot Generator State
     public $selectedActivityId = null;
     public $trackName = '';
-    public $mentorId = null;
+    public $mentorId = ''; // Holds the assigned mentor
     public $location = '';
     public $slotDate = '';
     public $startTime = '';
     public $endTime = '';
-    public $durationMinutes = 30; // Default to 30 min blocks
+    public $durationMinutes = 30;
 
     public function mount()
     {
-        // Enforce Command Center Clearance
         $role = auth('ibalong')->user()->role_id ?? 0;
         if (!in_array($role, [1, 2, 4])) { abort(403); }
 
-        // Future-proofing check: Ensure a default hackathon exists
         $this->activeHackathon = IbalongHackathon::firstOrCreate(
             ['status' => 'active'],
             ['name' => 'Heroes of Innovation 2026']
@@ -67,7 +66,6 @@ class SchedulerManager extends Component
 
     public function deleteTrack($trackId)
     {
-        // This will cascade delete all slots and appointments attached to it
         IbalongActivityTrack::findOrFail($trackId)->delete();
         session()->flash('success', 'Hub and all associated time blocks have been purged.');
     }
@@ -75,24 +73,27 @@ class SchedulerManager extends Component
     public function openTrackGenerator($activityId)
     {
         $this->selectedActivityId = $activityId;
-        $this->reset(['trackName', 'location', 'slotDate', 'startTime', 'endTime', 'durationMinutes']);
+        // Added mentorId to the reset array so it clears when opening a new modal
+        $this->reset(['trackName', 'mentorId', 'location', 'slotDate', 'startTime', 'endTime', 'durationMinutes']);
     }
 
     public function generateTrackAndSlots()
     {
         $this->validate([
             'trackName' => 'required|string',
+            'mentorId' => 'nullable', // Allow null if they want an unassigned hub
             'slotDate' => 'required|date',
             'startTime' => 'required',
             'endTime' => 'required|after:startTime',
             'durationMinutes' => 'required|integer|min:10',
         ]);
 
-        // 1. Forge the Hub/Track
+        // 1. Forge the Hub/Track with the assigned mentor
         $track = IbalongActivityTrack::create([
             'activity_id' => $this->selectedActivityId,
             'name' => $this->trackName,
             'location' => $this->location,
+            'mentor_id' => $this->mentorId ?: null, // Converts empty strings to true null
         ]);
 
         // 2. The Slot Generation Engine
@@ -104,8 +105,6 @@ class SchedulerManager extends Component
 
         while ($current < $end) {
             $slotEnd = $current->copy()->addMinutes($duration);
-
-            // Prevent a 30-min slot from overlapping the end time if only 15 mins remain
             if ($slotEnd > $end) { break; }
 
             IbalongActivitySlot::create([
@@ -114,7 +113,6 @@ class SchedulerManager extends Component
                 'end_time' => $slotEnd,
                 'capacity' => 1
             ]);
-
             $current = $slotEnd;
         }
 
@@ -124,11 +122,18 @@ class SchedulerManager extends Component
 
     public function render()
     {
-        $activities = IbalongActivity::with(['tracks.slots.appointments'])
+        // Added 'tracks.mentor' to eager load the assigned personnel
+        $activities = IbalongActivity::with(['tracks.mentor', 'tracks.slots.appointments'])
             ->where('hackathon_id', $this->activeHackathon->id)
             ->latest()
             ->get();
 
-        return view('livewire.ibalong.admin.scheduler-manager', compact('activities'))->layout('layouts.dashboard');
+        // Fetch all Command Center staff, Facilitators, and Judges (Roles 1, 2, 4, 5)
+        $mentors = IbalongUser::whereIn('role_id', [2, 4, 5])
+            ->orderBy('name', 'asc')
+            ->get();
+
+        return view('livewire.ibalong.admin.scheduler-manager', compact('activities', 'mentors'))
+            ->layout('layouts.dashboard');
     }
 }

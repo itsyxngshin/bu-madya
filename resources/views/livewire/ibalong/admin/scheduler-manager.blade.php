@@ -62,17 +62,25 @@
                     {{-- Hubs & Slots Display --}}
                     <div class="p-6">
                         @if($activity->tracks->count() > 0)
-                            <div class="space-y-6">
+                            <div class="space-y-8">
                                 @foreach($activity->tracks as $track)
-                                    <div class="border-2 border-dashed border-gray-300 p-4 relative">
-                                        <div class="absolute -top-3 left-4 flex items-center shadow-[2px_2px_0_0_#131011]">
+                                    <div class="border-2 border-dashed border-gray-300 p-4 relative mt-4">
+
+                                        {{-- Hub Title and Delete Button --}}
+                                        <div class="absolute -top-4 left-4 flex items-center shadow-[2px_2px_0_0_#131011]">
                                             <span class="bg-white px-2 py-1 font-black text-sm uppercase text-iba-teal border-2 border-iba-black border-r-0">{{ $track->name }}</span>
                                             <button wire:click="deleteTrack({{ $track->id }})" wire:confirm="Purge this entire hub and all its time blocks?" class="bg-iba-red text-white px-2 py-1 border-2 border-iba-black hover:bg-red-800 transition-colors">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                                             </button>
                                         </div>
-                                        <div class="text-[10px] font-bold text-gray-500 uppercase mb-3">{{ $track->location ?? 'No location designated' }}</div>
 
+                                        {{-- Hub Details (Location & Assigned Mentor) --}}
+                                        <div class="text-[10px] font-bold text-gray-500 uppercase mb-4 flex flex-col gap-1 mt-2">
+                                            <span class="flex items-center gap-1">📍 {{ $track->location ?? 'No location designated' }}</span>
+                                            <span class="flex items-center gap-1 text-iba-orange">👤 {{ $track->mentor->name ?? 'NO MENTOR ASSIGNED' }}</span>
+                                        </div>
+
+                                        {{-- Slot Blocks --}}
                                         <div class="flex flex-wrap gap-2">
                                             @foreach($track->slots as $slot)
                                                 @php $booked = $slot->appointments->count(); @endphp
@@ -100,17 +108,30 @@
 
     {{-- The Slot Generator Modal --}}
     @if($selectedActivityId)
-        <div class="fixed inset-0 z-50 overflow-y-auto">
+        <div class="fixed inset-0 z-[100] overflow-y-auto">
             <div class="fixed inset-0 bg-iba-black/80 backdrop-blur-sm" wire:click="$set('selectedActivityId', null)"></div>
             <div class="flex min-h-screen items-center justify-center p-4">
                 <div class="relative w-full max-w-md bg-white border-4 border-iba-black shadow-[8px_8px_0_0_#FF8623] p-6">
                     <h3 class="text-lg font-black uppercase tracking-widest text-iba-black border-b-2 border-iba-black pb-2 mb-4">Hub & Time Generator</h3>
 
                     <form wire:submit.prevent="generateTrackAndSlots" class="space-y-4">
+
                         <div>
                             <label class="text-[10px] font-black uppercase text-gray-500">Hub / Track Name</label>
                             <input type="text" wire:model="trackName" placeholder="e.g. Business Strategy Room" class="w-full border-2 border-iba-black p-2 font-bold focus:outline-none focus:border-iba-orange bg-gray-50">
                         </div>
+
+                        {{-- NEW: Mentor Assignment Dropdown --}}
+                        <div>
+                            <label class="text-[10px] font-black uppercase text-gray-500">Assign Mentor / Facilitator</label>
+                            <select wire:model="mentorId" class="w-full border-2 border-iba-black p-2 font-bold uppercase focus:outline-none focus:border-iba-orange bg-gray-50">
+                                <option value="">-- Unassigned (Open Hub) --</option>
+                                @foreach($mentors as $mentor)
+                                    <option value="{{ $mentor->id }}">{{ $mentor->name }} ({{ $mentor->designation ?? 'Personnel' }})</option>
+                                @endforeach
+                            </select>
+                        </div>
+
                         <div>
                             <label class="text-[10px] font-black uppercase text-gray-500">Location / Platform</label>
                             <input type="text" wire:model="location" placeholder="e.g. Zoom Link or Library Hub" class="w-full border-2 border-iba-black p-2 font-bold focus:outline-none focus:border-iba-orange bg-gray-50">
@@ -132,7 +153,7 @@
                                     <input type="time" wire:model="endTime" class="w-full border-2 border-iba-black p-2 font-bold focus:outline-none focus:border-iba-orange bg-gray-50">
                                 </div>
                                 <div class="col-span-2">
-                                    <label class="text-[10px] font-black uppercase text-gray-500">Duration per Slot (Minutes)</label>
+                                    <label class="text-[10px] font-black uppercase text-gray-500">Duration per Slot</label>
                                     <select wire:model="durationMinutes" class="w-full border-2 border-iba-black p-2 font-bold uppercase focus:outline-none focus:border-iba-orange bg-gray-50">
                                         <option value="15">15 Minutes</option>
                                         <option value="30">30 Minutes</option>
