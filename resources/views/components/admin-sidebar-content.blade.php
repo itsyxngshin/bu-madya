@@ -30,16 +30,8 @@
                 Appointments & Hubs
             </a>
 
-            <a href="{{ route('ibalong.evaluations.index') }}" class="group flex items-center px-4 py-3 text-xs font-bold uppercase tracking-wider border-2 transition-all {{ request()->routeIs('ibalong.evaluations.index') ? 'bg-iba-teal text-white border-iba-black shadow-[4px_4px_0_0_#131011]' : 'border-transparent text-gray-600 hover:border-iba-black hover:bg-gray-100 hover:-translate-y-0.5' }}">
-                <svg class="mr-3 flex-shrink-0 h-5 w-5 transition-colors {{ request()->routeIs('ibalong.evaluations.index') ? 'text-white' : 'text-gray-400 group-hover:text-iba-teal' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 OTHING ELSE
-            </a>
-        @endif
-
-        {{-- Community Logs --}}
-        <a href="{{ route('ibalong.community-logs') }}" class="group flex items-center px-4 py=3 text-xs font-bold uppercase tracking-wider border-2 transition-all {{ request()->routeIs('ibalong.community-logs*') ? 'bg-iba-teal text-white border-iba-black dark:border-iba-light shadow-[4px_4px_<|fim_suffix|>
-            Community Logs
-        </a>
-
+            <a href="{{ route('ibalong.evaluations.index') }}" class="group flex items-center px-4 py-3 text-xs font-bold uppercase tracking-wider border-2 transition-all {{ request()->routeIs('evaluations.*') ? 'bg-iba-teal text-white border-iba-black shadow-[4px_4px_0_0_#131011]' : 'border-transparent text-gray-600 hover:border-iba-black hover:bg-gray-100 hover:-translate-y-0.5' }}">
+                <svg class="mr-3 flex-shrink-0 h-5 w-5 transition-colors {{ request()->routeIs('ibalong.evaluations.*') ? 'text-white' : 'text-gray-400 group-hover:text-iba-teal' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
                 Surveys & Feedback
             </a>
         @endif
@@ -94,8 +86,8 @@
             </a>
 
             {{-- Scheduling Matrix (Accessible to Admins & Facilitators) --}}
-            <a href="{{ route('ibalong.admin.scheduler') }}" class="group flex items-center px-4 py-3 text-xs font-bold uppercase tracking-wider border-2 transition-all {{ request()->routeIs('ibalong.admin.scheduler') ? 'bg-iba-orange text-iba-black border-iba-black dark:border-iba-light shadow-[4px_4px_0_0_#131011] dark:shadow-[4px_4px_0_0_#FFFBF7]' : 'border-transparent text-gray-600 dark:text-gray-400 hover:border-iba-black dark:hover:border-iba-light hover:bg-gray-100 dark:hover:bg-gray-800 hover:-translate-y-0.5' }}">
-                <svg class="mr-3 flex-shrink-0 h-5 w-5 transition-colors {{ request()->routeIs('ibalong.admin.scheduler') ? 'text-iba-black' : 'text-gray-400 group-hover:text-iba-orange' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <a href="{{ route('ibalong.admin.scheduler') }}" class="group flex items-center px-4 py-3 text-xs font-bold uppercase tracking-wider border-2 transition-all {{ request()->routeIs('admin.scheduler') ? 'bg-iba-orange text-iba-black border-iba-black dark:border-iba-light shadow-[4px_4px_0_0_#131011] dark:shadow-[4px_4px_0_0_#FFFBF7]' : 'border-transparent text-gray-600 dark:text-gray-400 hover:border-iba-black dark:hover:border-iba-light hover:bg-gray-100 dark:hover:bg-gray-800 hover:-translate-y-0.5' }}">
+                <svg class="mr-3 flex-shrink-0 h-5 w-5 transition-colors {{ request()->routeIs('admin.scheduler') ? 'text-iba-black' : 'text-gray-400 group-hover:text-iba-orange' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 Scheduling Matrix
             </a>
 
