@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
+
     {{-- 1. Dynamic Page Title --}}
     <title>BU MADYA</title>
     <link rel="icon" href="{{ asset('images/MADYA Web Logo1.png') }}">
@@ -23,7 +23,7 @@
     <meta name="twitter:title" content="@yield('meta_title', config('app.name'))">
     <meta name="twitter:description" content="@yield('meta_description', 'Join the movement for youth-led advocacy.')">
     <meta name="twitter:image" content="@yield('meta_image', asset('images/default_share_image.jpg'))">
-    
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
@@ -36,6 +36,8 @@
         h1, h2, h3, h4, .font-heading { font-family: 'Montserrat', sans-serif; }
         [x-cloak] { display: none !important; }
     </style>
+
+    @stack('adsense')
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
