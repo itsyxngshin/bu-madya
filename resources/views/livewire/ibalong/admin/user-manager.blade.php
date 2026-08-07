@@ -128,12 +128,12 @@
             <div class="fixed inset-0 bg-iba-black/80 backdrop-blur-sm transition-opacity" wire:click="closeModals"></div>
             <div class="flex min-h-screen items-center justify-center p-4 text-center sm:p-6">
                 <div class="relative w-full sm:max-w-xl flex flex-col bg-white dark:bg-[#1A1617] border-4 border-iba-black dark:border-iba-light shadow-[8px_8px_0_0_#0095AC] text-left transition-all overflow-hidden">
-                    
+
                     <div class="bg-gray-50 dark:bg-gray-800 px-6 py-4 border-b-4 border-iba-black dark:border-iba-light flex justify-between items-center">
                         <h3 class="text-lg font-black text-iba-black dark:text-white uppercase tracking-wider">Edit User Profile</h3>
                         <button wire:click="closeModals" class="text-gray-400 hover:text-iba-red"><svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
                     </div>
-                    
+
                     <form wire:submit.prevent="updateUser">
                         <div class="p-6 space-y-4">
                             <div>
@@ -161,7 +161,7 @@
                                 @error('edit_designation') <span class="text-iba-red text-xs font-bold block mt-1">⚠ {{ $message }}</span> @enderror
                             </div>
                         </div>
-                        
+
                         <div class="bg-gray-50 dark:bg-gray-800 px-6 py-4 border-t-4 border-iba-black dark:border-iba-light flex justify-end gap-4">
                             <button type="button" wire:click="closeModals" class="px-6 py-2 text-sm font-bold uppercase text-gray-600 hover:text-iba-black dark:text-gray-400 dark:hover:text-white transition-colors">Cancel</button>
                             <button type="submit" class="bg-iba-teal text-white font-bold px-6 py-2.5 text-sm uppercase border-2 border-iba-black dark:border-iba-light shadow-[3px_3px_0_0_#131011] dark:shadow-[3px_3px_0_0_#FFFBF7] hover:translate-y-0.5 hover:shadow-none transition-all active:translate-y-1">Save Changes</button>
@@ -178,7 +178,7 @@
             <div class="fixed inset-0 bg-iba-black/80 backdrop-blur-sm transition-opacity" wire:click="closeModals"></div>
             <div class="flex min-h-screen items-center justify-center p-4 text-center sm:p-6">
                 <div class="relative w-full sm:max-w-md flex flex-col bg-white dark:bg-[#1A1617] border-4 border-iba-black dark:border-iba-light shadow-[8px_8px_0_0_#FF8623] text-left transition-all overflow-hidden">
-                    
+
                     <div class="bg-gray-50 dark:bg-gray-800 px-6 py-4 border-b-4 border-iba-black dark:border-iba-light flex justify-between items-center">
                         <h3 class="text-lg font-black text-iba-black dark:text-white uppercase tracking-wider">Admin Authorization Required</h3>
                         <button wire:click="closeModals" class="text-gray-400 hover:text-iba-red"><svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
