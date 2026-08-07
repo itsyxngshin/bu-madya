@@ -1,3 +1,9 @@
+@push('adsense')
+    @if(env('APP_ENV') === 'production')
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6467581285062853" crossorigin="anonymous"></script>
+    @endif
+@endpush
+
 <div class="min-h-screen bg-stone-50 font-sans text-gray-900 selection:bg-red-600 selection:text-white overflow-x-hidden">
 
     {{-- ========================================== --}}

@@ -1,3 +1,9 @@
+@push('adsense')
+    @if(env('APP_ENV') === 'production')
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6467581285062853" crossorigin="anonymous"></script>
+    @endif
+@endpush
+
 @section('meta_title', '[EVENT] ' . $event->title)
 @section('meta_description', $event->description ? Str::limit(strip_tags($event->description), 160) : 'Join us for an unforgettable experience at our upcoming event! Discover inspiring speakers, engaging activities, and valuable networking opportunities. Don\'t miss out on this chance to connect and grow. Register now!')
 @php
@@ -36,10 +42,10 @@
 
             {{-- The 2-Column Grid --}}
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center relative z-20">
-                
+
                 {{-- LEFT COLUMN: Title, Dates, and Button --}}
                 <div class="order-2 lg:order-1 text-center lg:text-left">
-                    
+
                     {{-- Responsive Title Scaling --}}
                     <h1 class="font-heading text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-gray-900 leading-[1.15] md:leading-[1.1] mb-6 md:mb-8 drop-shadow-sm">
                         {{ $event->title }}
@@ -47,7 +53,7 @@
 
                     {{-- Dates and Times --}}
                     <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3 md:gap-4 mb-8 md:mb-10">
-                        
+
                         {{-- STARTS --}}
                         <div class="flex items-center gap-3 md:gap-4 bg-white/80 backdrop-blur px-4 py-3 md:px-5 md:py-4 rounded-xl md:rounded-2xl shadow-sm border border-gray-100 w-full sm:w-auto">
                             <div class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-green-50 text-green-600 flex items-center justify-center shrink-0">
@@ -103,7 +109,7 @@
                 <div class="order-1 lg:order-2 w-full">
                     {{-- Responsive Aspect Ratio: 16:9 on Mobile, 4:3 on Desktop --}}
                     <div class="relative w-full aspect-video lg:aspect-[4/3] rounded-2xl md:rounded-[2rem] overflow-hidden shadow-2xl border-4 border-white bg-gray-100 group">
-                        
+
                         @if($event->cover_image)
                             <img src="{{ Str::startsWith($event->cover_image, 'http') ? $event->cover_image : asset('storage/'.$event->cover_image) }}"
                                  class="absolute inset-0 w-full h-full object-cover transform group-hover:scale-105 transition duration-1000">
@@ -113,7 +119,7 @@
                                 <span class="tracking-widest opacity-50 text-[10px] md:text-sm">BU MADYA EVENT</span>
                             </div>
                         @endif
-                        
+
                         <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none"></div>
 
                         {{-- Responsive Status Badge --}}

@@ -1,3 +1,9 @@
+@push('adsense')
+    @if(env('APP_ENV') === 'production')
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6467581285062853" crossorigin="anonymous"></script>
+    @endif
+@endpush
+
 <div class="bg-iba-light dark:bg-iba-black min-h-screen py-10 sm:py-16 px-4 sm:px-6 transition-colors duration-300">
     <div class="max-w-4xl mx-auto space-y-8">
 

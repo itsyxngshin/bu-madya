@@ -1,8 +1,14 @@
+@push('adsense')
+    @if(env('APP_ENV') === 'production')
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6467581285062853" crossorigin="anonymous"></script>
+    @endif
+@endpush
+
 @section('meta_title', $article->title)
 @section('meta_description', $article->summary ?? Str::limit(strip_tags($article->content), 150))
 @php
     // 1. Determine the image URL using PHP logic
-    $ogImage = $article->cover_img 
+    $ogImage = $article->cover_img
         ? (Str::startsWith($article->cover_img, 'http') ? $article->cover_img : asset('storage/' . $article->cover_img))
         : asset('images/default_news.jpg');
 @endphp
@@ -11,7 +17,7 @@
 @section('meta_image', $ogImage)
 
 <div class="relative min-h-screen bg-gray-50 font-sans text-gray-900 selection:bg-red-200 selection:text-red-900">
-    
+
     {{-- BACKGROUND BLOBS --}}
     <div class="fixed inset-0 z-0 overflow-hidden pointer-events-none">
         <div class="absolute top-0 left-0 w-full h-full bg-gray-50/80"></div>
@@ -22,10 +28,10 @@
 
     {{-- 1. READING PROGRESS BAR & STICKY NAV --}}
     {{-- (Kept identical to previous version) --}}
-    <div x-data="{ width: 0 }" 
+    <div x-data="{ width: 0 }"
          @scroll.window="width = (window.pageYOffset / (document.documentElement.scrollHeight - window.innerHeight)) * 100"
          class="fixed top-0 left-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-white/20 shadow-sm h-16 flex items-center justify-between px-4 lg:px-12 transition-all duration-300">
-        
+
         <a href="{{ route('news.index') }}" clsection: ass="group flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-500 hover:text-red-600 transition">
             <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center group-hover:bg-red-50 transition">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
@@ -40,7 +46,7 @@
         <div class="flex gap-2">
             @auth
                 @if(auth()->id() === $article->user_id)
-                    <a href="{{ route('news.edit', $article->slug) }}" 
+                    <a href="{{ route('news.edit', $article->slug) }}"
                     class="flex items-center gap-1 px-3 py-1 bg-gray-100 hover:bg-yellow-100 text-gray-500 hover:text-yellow-700 rounded-full text-[10px] font-bold uppercase tracking-wider transition border border-gray-200 hover:border-yellow-300">
                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                         Edit
@@ -49,8 +55,8 @@
             @endauth
 
             @auth
-                <button wire:click="toggleLike" 
-                        class="group relative w-8 h-8 rounded-full border flex items-center justify-center transition shadow-sm {{ $isLiked ? 'bg-red-50 border-red-200 text-red-600' : 'bg-white/50 border-gray-200 text-gray-400 hover:text-red-600' }}" 
+                <button wire:click="toggleLike"
+                        class="group relative w-8 h-8 rounded-full border flex items-center justify-center transition shadow-sm {{ $isLiked ? 'bg-red-50 border-red-200 text-red-600' : 'bg-white/50 border-gray-200 text-gray-400 hover:text-red-600' }}"
                         title="{{ $likesCount }} Likes">
                     <svg class="w-4 h-4 transition-transform group-hover:scale-110 {{ $isLiked ? 'fill-current' : 'fill-none' }}" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
@@ -62,19 +68,19 @@
             @endauth
         </div>
 
-        <div class="absolute bottom-0 left-0 h-[3px] bg-gradient-to-r from-green-500 via-yellow-400 to-red-600 transition-all duration-100 ease-out shadow-[0_0_10px_rgba(239,68,68,0.5)]" 
+        <div class="absolute bottom-0 left-0 h-[3px] bg-gradient-to-r from-green-500 via-yellow-400 to-red-600 transition-all duration-100 ease-out shadow-[0_0_10px_rgba(239,68,68,0.5)]"
              :style="`width: ${width}%`"></div>
     </div>
 
     {{-- 2. NEW SIDE-BY-SIDE HEADER SECTION --}}
     <section class="relative pt-24 pb-8 px-4 md:px-6 z-10 max-w-[1400px] mx-auto animate-fade-in-up">
-        
+
         {{-- Added gap-8 for mobile (tighter) vs gap-12 for desktop --}}
         <div class="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-            
+
             {{-- LEFT COLUMN: Text Content --}}
             <div class="text-left space-y-6 md:space-y-8">
-                
+
                 {{-- Category: Smaller text and padding on mobile --}}
                 <div>
                     <span class="px-3 py-1 md:px-4 md:py-1.5 bg-white/60 backdrop-blur-md text-red-600 text-[10px] md:text-xs font-black uppercase tracking-[0.2em] border border-white/50 rounded-full shadow-sm ring-1 ring-red-100">
@@ -122,14 +128,14 @@
                 <div class="relative p-2 bg-white/30 backdrop-blur-sm rounded-[2rem] md:rounded-[2.5rem] shadow-2xl border border-white/50 transform hover:scale-[1.02] transition duration-500">
                     <div class="relative aspect-[16/9] lg:aspect-[4/3] overflow-hidden rounded-[1.5rem] md:rounded-[2rem]">
                         @php
-                            $imgSrc = $article->cover_img 
+                            $imgSrc = $article->cover_img
                                 ? (Str::startsWith($article->cover_img, 'http') ? $article->cover_img : asset('storage/' . $article->cover_img))
                                 : asset('images/default_news.jpg');
                         @endphp
                         <img src="{{ $imgSrc }}" class="w-full h-full object-cover">
                         <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
                     </div>
-                    
+
                     @if($article->photo_credit)
                     <div class="absolute bottom-4 right-6 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/10 hidden md:block">
                         <p class="text-[10px] md:text-xs text-white/90 italic">Image: {{ $article->photo_credit }}</p>
@@ -142,12 +148,12 @@
 
     {{-- 3. ARTICLE BODY & SIDEBAR --}}
     <div class="relative z-10 max-w-[1400px] mx-auto px-4 md:px-6 grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12 pb-12">
-        
+
         {{-- LEFT SIDEBAR: Summary & SDGs --}}
         {{-- Mobile: Appears First. Desktop: Sticky Left Column --}}
         <aside class="lg:col-span-3 order-1 lg:order-1">
             <div class="lg:sticky lg:top-28 space-y-6">
-                
+
                 {{-- Summary Card --}}
                 @if($article->summary)
                 <div class="bg-white/80 backdrop-blur-md p-6 rounded-2xl border-l-4 border-red-500 shadow-sm">
@@ -170,7 +176,7 @@
                         @foreach($article->sdgs as $sdg)
                             <div class="relative group cursor-help">
                                 {{-- The SDG Icon --}}
-                                <div style="background-color: {{ $sdg->color_hex ?? '#6b7280' }}" 
+                                <div style="background-color: {{ $sdg->color_hex ?? '#6b7280' }}"
                                      class="w-10 h-10 rounded-lg flex items-center justify-center text-white font-black text-xs shadow-sm transform group-hover:scale-110 transition z-10 relative">
                                     {{ $sdg->id }}
                                 </div>
@@ -195,15 +201,15 @@
         {{-- Mobile: Appears Second. Desktop: Takes up remaining 9 cols --}}
         <article class="lg:col-span-9 order-2 lg:order-2">
             <div class="bg-white/70 backdrop-blur-xl p-5 md:p-12 rounded-[2rem] shadow-xl border border-white/60">
-                
+
                 {{-- Markdown Content --}}
                 <div class="prose prose-red max-w-none font-sans text-gray-600 leading-7 md:prose-lg md:leading-8
                             {{-- Drop Cap Logic --}}
                             {{ $article->show_drop_cap ? "[&>p:first-child]:first-letter:text-4xl md:[&>p:first-child]:first-letter:text-6xl [&>p:first-child]:first-letter:font-black [&>p:first-child]:first-letter:text-transparent [&>p:first-child]:first-letter:bg-clip-text [&>p:first-child]:first-letter:bg-gradient-to-br [&>p:first-child]:first-letter:from-red-600 [&>p:first-child]:first-letter:to-yellow-500 [&>p:first-child]:first-letter:float-left [&>p:first-child]:first-letter:mr-2 md:[&>p:first-child]:first-letter:mr-3 [&>p:first-child]:first-letter:mt-[-2px] md:[&>p:first-child]:first-letter:mt-[-5px]" : '' }}
                             [&_img]:rounded-xl [&_img]:shadow-lg [&_img]:w-full">
-                    
+
                     {!! Str::markdown($article->content) !!}
-                
+
                 </div>
 
                 {{-- Tags --}}
@@ -291,3 +297,4 @@
         </div>
     </footer>
 </div>
+

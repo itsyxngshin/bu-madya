@@ -1,8 +1,13 @@
+@push('adsense')
+    @if(env('APP_ENV') === 'production')
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6467581285062853" crossorigin="anonymous"></script>
+    @endif
+@endpush
 <div class="w-full">
     {{-- HERO HEADER --}}
     <header id="home" class="relative min-h-[85vh] flex flex-col items-center justify-center px-4 sm:px-6 text-center overflow-hidden pb-12 bg-iba-light dark:bg-iba-black bg-pixel-pattern transition-colors duration-300">
         <div class="relative z-10 space-y-8 max-w-5xl mx-auto w-full bg-iba-light/90 dark:bg-iba-black/90 p-8 sm:p-12 border-4 border-iba-black dark:border-iba-light shadow-[12px_12px_0_0_#0095AC] dark:shadow-[12px_12px_0_0_#0095AC]">
-            
+
             <div class="inline-flex items-center justify-center gap-2 bg-iba-orange text-iba-black border-4 border-iba-black px-4 py-2 font-pixel text-[8px] sm:text-[9px] tracking-tight shadow-[4px_4px_0_0_#131011]">
                 <svg class="w-4 h-4 animate-pulse" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M15.362 5.214A8.252 8.252 0 0112 21 8.25 8.25 0 016.038 7.048 8.287 8.287 0 009 9.6a8.983 8.983 0 013.361-6.867 8.21 8.21 0 003 2.48z" />
@@ -13,11 +18,11 @@
             <h1 class="font-pixel text-4xl sm:text-5xl md:text-6xl lg:text-7xl tracking-wide text-iba-black dark:text-iba-light leading-[1.3] sm:leading-tight uppercase drop-shadow-md">
                 FROM EPIC<br><span class="text-iba-red">TO IMPACT</span>
             </h1>
-            
+
             <div class="inline-block bg-iba-black text-iba-light font-pixel text-xs sm:text-lg md:text-xl px-6 py-3 border-4 border-iba-red shadow-[4px_4px_0_0_#CF452C] uppercase tracking-widest">
                 AUGUST 12-13, 2026
             </div>
-            
+
             <div class="pt-6 sm:pt-8 w-full sm:w-auto relative inline-block">
                 <a href="{{ route('ibalong.register') }}" class="btn-retro flex items-center justify-center sm:inline-block font-pixel text-iba-black dark:text-iba-black bg-iba-green px-6 py-4 sm:px-10 sm:py-5 text-[10px] sm:text-sm md:text-base cursor-pointer tracking-wider w-full sm:w-auto">
                     LAUNCH APPLICATION
@@ -31,7 +36,7 @@
     {{-- THE BRIEFING --}}
     <section id="about" class="pt-16 sm:pt-24 bg-iba-teal dark:bg-iba-black relative border-y-4 border-iba-black dark:border-y-iba-teal transition-colors duration-300">
         <div class="max-w-6xl mx-auto flex flex-col md:flex-row gap-10 sm:gap-16 items-center justify-between px-4 sm:px-6 pb-16 sm:pb-24">
-            
+
             <div class="w-full md:w-7/12 space-y-6 text-iba-light leading-relaxed text-sm sm:text-base md:text-lg">
                 <h3 class="font-pixel text-[12px] sm:text-sm text-iba-orange tracking-widest uppercase flex items-center gap-3 drop-shadow-md">
                     <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 111.063.852l-.708 2.836a.75.75 0 001.063.852l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" /></svg>
@@ -47,7 +52,7 @@
                     Coordinated via BiCoRSE under Project REACH, working side-by-side with localized administration networks, startup business incubators, and civic tech working groups.
                 </div>
             </div>
-            
+
             <div class="w-full md:w-4/12 flex justify-center md:justify-end mt-6 md:mt-0">
                 <div class="bg-iba-light dark:bg-[#1A1617] border-4 border-iba-black dark:border-iba-light p-8 sm:p-10 text-center shadow-[10px_10px_0_0_#CF452C] w-full max-w-[320px] transform rotate-2 hover:rotate-0 transition-transform duration-300">
                     <div class="w-20 h-20 sm:w-24 sm:h-24 bg-iba-red rounded-full flex items-center justify-center mx-auto mb-6 border-4 border-iba-black dark:border-iba-light shadow-inner">
@@ -168,7 +173,7 @@
             <p class="text-white dark:text-gray-300 font-semibold max-w-xl mx-auto text-sm sm:text-base leading-relaxed px-2">
                 Assemble a cohort containing 3 to 5 members. Interdisciplinary skill sets are highly valued. Intake closes on July 19, 2026.
             </p>
-            
+
             <div class="pt-8 w-full sm:w-auto">
                 <a href="{{ route('ibalong.register') }}" class="btn-retro flex items-center justify-center sm:inline-block font-pixel text-iba-black bg-iba-orange px-6 py-5 sm:px-10 sm:py-6 text-[11px] sm:text-sm md:text-base tracking-widest font-bold w-full sm:w-auto uppercase">
                     INITIALIZE LINK REGISTRATION

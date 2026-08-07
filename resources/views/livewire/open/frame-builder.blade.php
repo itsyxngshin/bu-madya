@@ -1,5 +1,11 @@
+@push('adsense')
+    @if(env('APP_ENV') === 'production')
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6467581285062853" crossorigin="anonymous"></script>
+    @endif
+@endpush
+
 <div class="relative min-h-screen bg-slate-50 overflow-x-hidden font-sans z-0">
-    
+
     {{-- Tricolor Gradient Background --}}
     <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden bg-slate-50">
         <div class="absolute -top-[10%] -left-[10%] w-[50vw] h-[50vw] max-w-[600px] max-h-[600px] rounded-full bg-gradient-to-br from-yellow-300 to-orange-400 blur-[100px] opacity-30 mix-blend-multiply"></div>
@@ -13,27 +19,27 @@
 
             {{-- LEFT COLUMN: Details (4/12) --}}
             <div class="lg:col-span-4 space-y-6 lg:sticky lg:top-12 min-w-0 w-full">
-                
+
                 {{-- Main Info Card --}}
                 <div class="bg-white/60 backdrop-blur-2xl p-6 md:p-8 rounded-[2rem] border border-white/80 shadow-2xl shadow-orange-900/5 w-full overflow-hidden">
                     <div class="flex items-center justify-between mb-5">
                         <span class="inline-block px-3 py-1 bg-white/80 text-orange-600 text-[10px] font-black uppercase tracking-widest rounded-full shadow-sm border border-orange-100 backdrop-blur-md">
                             Campaign Frame
                         </span>
-                        
+
                         <div class="flex items-center gap-1.5 text-[10px] font-black text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-100">
                             <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z"></path></svg>
                             <span>{{ number_format($frame->usage_count) }} Used</span>
                         </div>
                     </div>
-                    
+
                     {{-- FIXED: Changed break-all to break-words to prevent ugly word splits --}}
                     <h1 class="text-3xl md:text-5xl font-black text-gray-900 leading-tight mb-4 tracking-tight drop-shadow-sm break-words w-full">
                         {{ $frame->title }}
                     </h1>
-                    
+
                     <p class="text-sm text-gray-700 mb-8 leading-relaxed font-medium break-words w-full">{{ $frame->description }}</p>
-                    
+
                     <div class="flex items-center gap-3 bg-white/80 p-3 rounded-2xl border border-white shadow-sm max-w-full">
                         <div class="w-10 h-10 shrink-0 bg-gradient-to-tr from-gray-100 to-gray-200 rounded-xl flex items-center justify-center font-black text-gray-500 text-xs uppercase shadow-inner">
                             {{ substr($frame->user->name ?? 'BU', 0, 2) }}
@@ -53,7 +59,7 @@
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path></svg>
                             Official Caption
                         </p>
-                        <button @click="navigator.clipboard.writeText($refs.captionBlock.innerText); copiedCap = true; setTimeout(() => copiedCap = false, 2000)" 
+                        <button @click="navigator.clipboard.writeText($refs.captionBlock.innerText); copiedCap = true; setTimeout(() => copiedCap = false, 2000)"
                                 class="text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-lg transition-colors"
                                 :class="copiedCap ? 'bg-emerald-100 text-emerald-600' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'">
                             <span x-show="!copiedCap">Copy</span>
@@ -69,7 +75,7 @@
                     <p class="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-3">Share Campaign Link</p>
                     <div class="flex items-center gap-2 w-full">
                         <input type="text" readonly value="{{ url()->current() }}" class="flex-1 w-full min-w-0 bg-white/80 border border-white/50 shadow-inner rounded-xl text-xs py-3 px-4 text-gray-600 focus:outline-none font-medium">
-                        <button @click="navigator.clipboard.writeText('{{ url()->current() }}'); copied = true; setTimeout(() => copied = false, 2000)" 
+                        <button @click="navigator.clipboard.writeText('{{ url()->current() }}'); copied = true; setTimeout(() => copied = false, 2000)"
                                 class="bg-gray-900 hover:bg-gray-800 text-white p-3 rounded-xl transition-all transform hover:-translate-y-0.5 flex items-center justify-center shrink-0 w-11 h-11 shadow-lg">
                             <svg x-show="!copied" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
                             <svg x-show="copied" style="display: none;" class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
@@ -80,7 +86,7 @@
 
             {{-- RIGHT COLUMN: The Studio (8/12) --}}
             <div class="lg:col-span-8 w-full min-w-0 flex flex-col items-center lg:items-start">
-                
+
                 {{-- Drag & Drop Wrapper --}}
                 <div class="w-full bg-white/70 backdrop-blur-2xl p-4 md:p-8 lg:p-10 rounded-[2.5rem] shadow-2xl shadow-orange-900/10 border border-white relative transition-all duration-300"
                      :class="{'ring-4 ring-orange-400 bg-orange-50/80 scale-[1.02]': isDraggingOver}"
@@ -94,7 +100,7 @@
                      x-data="studio(@js($frameUrls))"
                      x-init="init()"
                 >
-                    
+
                     {{-- Drag & Drop Overlay --}}
                     <div x-show="isDraggingOver" x-transition.opacity.duration.300ms style="display: none;" class="absolute inset-0 z-50 flex items-center justify-center bg-white/70 backdrop-blur-md rounded-[2.5rem] border-4 border-dashed border-orange-400 m-2 pointer-events-none">
                         <div class="flex flex-col items-center text-orange-500">
@@ -105,8 +111,8 @@
 
                     {{-- Toolbar --}}
                     <div class="flex flex-col gap-4 mb-8 bg-white/90 shadow-sm p-4 rounded-3xl border border-gray-100 max-w-[500px] mx-auto w-full relative z-10">
-                        
-                        <label class="cursor-pointer w-full py-4 md:py-4 rounded-2xl text-sm font-black uppercase tracking-widest shadow-xl shadow-orange-500/20 hover:shadow-2xl hover:scale-[1.02] transition-all text-center flex items-center justify-center gap-2.5 relative overflow-hidden group" 
+
+                        <label class="cursor-pointer w-full py-4 md:py-4 rounded-2xl text-sm font-black uppercase tracking-widest shadow-xl shadow-orange-500/20 hover:shadow-2xl hover:scale-[1.02] transition-all text-center flex items-center justify-center gap-2.5 relative overflow-hidden group"
                                style="background: linear-gradient(90deg, #f97316, #ef4444, #eab308); color: #ffffff;">
                             <div class="absolute inset-0 bg-white/20 -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-500"></div>
                             <svg class="w-5 h-5 shrink-0 relative z-10 drop-shadow-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
@@ -117,7 +123,7 @@
 
                         {{-- Image Adjustment Controls --}}
                         <div x-show="userImg" style="display: none;" class="flex flex-col gap-3 w-full px-2 py-1">
-                            
+
                             {{-- Scale Slider --}}
                             <div class="flex items-center gap-3 w-full">
                                 <svg class="w-4 h-4 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7"></path></svg>
@@ -156,7 +162,7 @@
                         <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-4 text-center">Select Variation</p>
                         <div class="flex flex-wrap justify-center gap-3">
                             <template x-for="(frameUrl, index) in frames" :key="index">
-                                <button @click="changeFrame(frameUrl)" 
+                                <button @click="changeFrame(frameUrl)"
                                         :class="{'ring-4 ring-orange-400 scale-110 shadow-lg z-10': activeFrame === frameUrl, 'border border-gray-200 hover:border-orange-300 opacity-60 hover:opacity-100 hover:scale-105': activeFrame !== frameUrl}"
                                         class="w-16 h-16 rounded-2xl bg-[url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAMUlEQVQ4T2NkYNgBxVD8nwEPsOEHMBqNhsFhAAfLwcAAYf///z8DHgZQDw1DDEAGDAAASgIdX/3i4QAAAABJRU5ErkJggg==')] overflow-hidden transition-all duration-300 bg-repeat focus:outline-none relative bg-white">
                                     <img :src="frameUrl" class="absolute inset-0 w-full h-full object-contain p-1.5">
@@ -180,7 +186,7 @@
                     {{-- SUCCESS MODAL PROMPT --}}
                     <div x-show="showSuccess" style="display: none;" class="fixed inset-0 z-50 flex items-center justify-center px-4">
                         <div x-show="showSuccess" x-transition.opacity.duration.300ms class="absolute inset-0 bg-gray-900/40 backdrop-blur-sm"></div>
-                        <div x-show="showSuccess" 
+                        <div x-show="showSuccess"
                              @click.away="showSuccess = false"
                              x-transition:enter="transition ease-out duration-300"
                              x-transition:enter-start="opacity-0 scale-90 translate-y-8"
@@ -189,14 +195,14 @@
                              x-transition:leave-start="opacity-100 scale-100 translate-y-0"
                              x-transition:leave-end="opacity-0 scale-95 translate-y-4"
                              class="bg-white rounded-[2rem] p-8 max-w-sm w-full relative z-10 shadow-2xl flex flex-col items-center text-center">
-                             
+
                              <div class="w-20 h-20 bg-green-50 text-green-500 rounded-full flex items-center justify-center mb-6 shadow-inner ring-4 ring-green-50">
                                  <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
                              </div>
-                             
+
                              <h3 class="text-2xl font-black text-gray-900 mb-2">Frame Saved!</h3>
                              <p class="text-sm text-gray-500 mb-8 font-medium leading-relaxed">Your campaign frame has been successfully downloaded. Don't forget to copy the official caption to post with it!</p>
-                             
+
                              <button @click="showSuccess = false" class="w-full bg-gray-900 text-white font-black uppercase tracking-widest py-3.5 rounded-xl hover:bg-gray-800 transition-colors shadow-lg">
                                 Awesome!
                              </button>
@@ -207,11 +213,11 @@
             </div>
         </div>
     </div>
-    
+
     {{-- Footer --}}
     <footer class="bg-gray-900 text-white pt-20 pb-10 border-t-8 border-red-600 relative z-20">
         <div class="max-w-[1800px] w-[95%] mx-auto px-6 grid md:grid-cols-4 gap-12 mb-16">
-            
+
             <div class="col-span-1 md:col-span-2">
                 <div class="flex items-center gap-3 mb-6">
                     <div class="w-10 h-10 bg-red-600 text-white rounded-full flex items-center justify-center shadow-[0_0_15px_rgba(220,38,38,0.5)]">
@@ -222,7 +228,7 @@
                 <p class="text-gray-400 leading-relaxed max-w-sm mb-6 text-sm">
                     The Bicol University - Movement for the Advancement of Youth-led Advocacy is a duly-accredited University Based Organization in Bicol University committed to service and reaching communities through advocacy.
                 </p>
-                
+
                 {{-- Social Media Links --}}
                 <div class="flex space-x-4">
                     <a href="https://www.facebook.com/BUMadya" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-blue-600 hover:text-white text-gray-400 transition">
@@ -236,7 +242,7 @@
                     </a>
                 </div>
             </div>
-            
+
             <ul class="space-y-3 text-gray-400 text-sm">
                 <li><a href="{{ route('about') }}" class="hover:text-white hover:translate-x-1 transition inline-block">About BU MADYA</a></li>
                 <li><a href="{{ route('open.directory') }}" class="hover:text-white hover:translate-x-1 transition inline-block">Our Officers</a></li>
@@ -268,18 +274,18 @@
         Alpine.data('studio', (frameUrls) => ({
             canvas: null, ctx: null,
             userImg: null, frameImg: null,
-            
+
             // Image adjustments
-            scale: 1, 
-            rotation: 0, 
+            scale: 1,
+            rotation: 0,
             dx: 0, dy: 0,
-            
+
             // Interaction States
             isDraggingOver: false,
-            isDragging: false, 
+            isDragging: false,
             startX: 0, startY: 0,
             initialDx: 0, initialDy: 0,
-            
+
             // Touch specific interactions
             initialPinchDist: null,
             initialScale: 1,
@@ -299,18 +305,18 @@
                     this.loadFrameImage(this.activeFrame);
                 }
             },
-            
+
             loadFrameImage(url) {
                 this.imageError = false;
                 this.frameImg = new Image();
-                this.frameImg.crossOrigin = "Anonymous"; 
+                this.frameImg.crossOrigin = "Anonymous";
                 this.frameImg.onload = () => this.draw();
                 this.frameImg.onerror = () => {
                     this.imageError = true;
-                    this.frameImg = null; 
-                    this.draw(); 
+                    this.frameImg = null;
+                    this.draw();
                 };
-                this.frameImg.src = url; 
+                this.frameImg.src = url;
             },
 
             changeFrame(url) {
@@ -331,12 +337,12 @@
                 reader.onload = (event) => {
                     this.userImg = new Image();
                     this.userImg.onload = () => {
-                        this.dx = 0; 
+                        this.dx = 0;
                         this.dy = 0;
                         this.rotation = 0; // Reset rotation on new upload
                         let scaleX = 1080 / this.userImg.width;
                         let scaleY = 1080 / this.userImg.height;
-                        this.scale = Math.max(scaleX, scaleY); 
+                        this.scale = Math.max(scaleX, scaleY);
                         this.draw();
                     }
                     this.userImg.src = event.target.result;
@@ -347,7 +353,7 @@
             draw() {
                 if (!this.ctx) return;
                 this.ctx.clearRect(0, 0, 1080, 1080);
-                
+
                 if(this.userImg) {
                     let w = this.userImg.width * this.scale;
                     let h = this.userImg.height * this.scale;
@@ -355,12 +361,12 @@
                     let centerY = (1080 / 2) + this.dy;
 
                     this.ctx.save();
-                    
+
                     // Translate to where the center of the image should be, rotate, and draw offset by half width/height
                     this.ctx.translate(centerX, centerY);
                     this.ctx.rotate(this.rotation * Math.PI / 180);
                     this.ctx.drawImage(this.userImg, -w / 2, -h / 2, w, h);
-                    
+
                     this.ctx.restore();
                 }
 
@@ -377,7 +383,7 @@
                 this.initialDx = this.dx;
                 this.initialDy = this.dy;
             },
-            
+
             drag(e) {
                 if(!this.isDragging) return;
                 let canvasRect = this.canvas.getBoundingClientRect();
@@ -386,7 +392,7 @@
                 this.dy = this.initialDy + ((e.clientY - this.startY) * scaleRatio);
                 this.draw();
             },
-            
+
             endDrag() {
                 this.isDragging = false;
             },
@@ -405,14 +411,14 @@
                 if(!this.userImg) return;
                 if (e.touches.length === 2) {
                     this.isDragging = false;
-                    
+
                     // Multi-touch Zoom/Rotate Init
                     this.initialPinchDist = this.getDistance(e.touches[0], e.touches[1]);
                     this.initialScale = parseFloat(this.scale);
-                    
+
                     this.initialTouchAngle = this.getAngle(e.touches[0], e.touches[1]);
                     this.initialRotation = parseFloat(this.rotation);
-                    
+
                 } else if (e.touches.length === 1) {
                     this.isDragging = true;
                     this.startX = e.touches[0].clientX;
@@ -421,7 +427,7 @@
                     this.initialDy = this.dy;
                 }
             },
-            
+
             handleTouchMove(e) {
                 if(!this.userImg) return;
                 if (e.touches.length === 2 && this.initialPinchDist) {
@@ -436,12 +442,12 @@
                     // Handle Rotate
                     let currentAngle = this.getAngle(e.touches[0], e.touches[1]);
                     let angleDiff = currentAngle - this.initialTouchAngle;
-                    
+
                     // Keeps it within range, though canvas doesn't strictly care
                     let newRotation = this.initialRotation + angleDiff;
                     if(newRotation > 180) newRotation -= 360;
                     if(newRotation < -180) newRotation += 360;
-                    
+
                     this.rotation = newRotation;
 
                     this.draw();
@@ -453,7 +459,7 @@
                     this.draw();
                 }
             },
-            
+
             handleTouchEnd(e) {
                 this.isDragging = false;
                 this.initialPinchDist = null;
@@ -462,35 +468,35 @@
 
             download() {
                 const filename = 'BU-MADYA-' + Date.now() + '.png';
-                
+
                 // Convert the canvas to a Blob (Better for mobile memory than a massive Base64 string)
                 this.canvas.toBlob(async (blob) => {
                     if (!blob) return;
-            
+
                     // Check if the device supports the native Web Share API (Ideal for iPhones)
                     if (navigator.share && navigator.canShare) {
                         const file = new File([blob], filename, { type: 'image/png' });
-                        
+
                         if (navigator.canShare({ files: [file] })) {
                             try {
                                 await navigator.share({
                                     files: [file],
                                     title: 'Campaign Frame'
                                 });
-                                
+
                                 // Trigger success modal and Livewire usage count
                                 this.showSuccess = true;
                                 @this.incrementUsage();
-                                return; 
-                                
+                                return;
+
                             } catch (error) {
                                 // If the user simply closes the share sheet, do nothing
-                                if (error.name === 'AbortError') return; 
+                                if (error.name === 'AbortError') return;
                                 console.log('Share failed:', error);
                             }
                         }
                     }
-            
+
                     // Fallback for Desktop, Android, or browsers that don't support file sharing
                     let link = document.createElement('a');
                     link.download = filename;
@@ -499,10 +505,10 @@
                     link.click();
                     document.body.removeChild(link);
                     URL.revokeObjectURL(link.href); // Clean up memory
-            
+
                     this.showSuccess = true;
                     @this.incrementUsage();
-                    
+
                 }, 'image/png');
             }
         }));

@@ -58,6 +58,7 @@
         }
         @media (min-width: 768px) { .trim-element-1, .trim-element-2 { height: 44px; } }
     </style>
+    @stack('adsense')
 </head>
 <body class="antialiased overflow-x-hidden pt-20 md:pt-24 bg-iba-light text-iba-black dark:bg-iba-black dark:text-iba-light transition-colors duration-300">
 

@@ -1,4 +1,6 @@
-<div x-data="{ lightboxOpen: false, lightboxImage: '' }" 
+
+
+<div x-data="{ lightboxOpen: false, lightboxImage: '' }"
      @open-lightbox.window="lightboxImage = $event.detail.image; lightboxOpen = true"
      @keydown.escape.window="lightboxOpen = false"
      class="max-w-4xl mx-auto space-y-8 pb-24 relative">
@@ -202,7 +204,7 @@
                                     @php
                                         $wrapperClass = '';
                                         $imgClass = 'w-full h-full object-cover';
-                                        
+
                                         if ($imgCount == 1) {
                                             $imgClass = 'w-full max-h-[500px] object-contain';
                                         } elseif ($imgCount == 3 && $index == 0) {
