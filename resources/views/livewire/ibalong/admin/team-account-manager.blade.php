@@ -1,12 +1,15 @@
-<div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white dark:bg-[#1A1617] p-6 border-2 border-iba-black dark:border-iba-light shadow-[4px_4px_0_0_#131011] dark:shadow-[4px_4px_0_0_#FFFBF7]">
+<div class="w-full max-w-7xl mx-auto flex flex-col gap-6">
+
+    {{-- Header --}}
+    <div class="w-full flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white dark:bg-[#1A1617] p-6 border-2 border-iba-black dark:border-iba-light shadow-[4px_4px_0_0_#131011] dark:shadow-[4px_4px_0_0_#FFFBF7]">
         <div>
             <h1 class="text-xl font-black text-iba-black dark:text-iba-light uppercase tracking-wider">Team Accounts</h1>
             <p class="text-sm font-bold text-gray-500 dark:text-gray-400 mt-1">Manage portal access and view profiles for approved cohort teams.</p>
         </div>
-        
+
         <div class="w-full md:w-auto flex flex-col sm:flex-row gap-3">
             <input wire:model.live.debounce.300ms="search" type="text" placeholder="Search team or email..." class="w-full sm:w-64 border-2 border-iba-black dark:border-iba-light p-2 text-sm bg-white dark:bg-gray-900 focus:outline-none focus:border-iba-teal text-iba-black dark:text-white font-bold uppercase">
-            
+
             {{-- Data Extraction Button (Visible only to Admins) --}}
             @if(in_array(auth('ibalong')->user()->role_id, [1, 2]))
                 <button wire:click="exportTeamRoster" wire:loading.attr="disabled" class="bg-iba-teal text-white font-black px-4 py-2 text-xs uppercase tracking-widest border-2 border-iba-black shadow-[3px_3px_0_0_#131011] hover:translate-y-0.5 hover:shadow-none transition-all flex items-center justify-center gap-2 w-full sm:w-auto cursor-pointer">
@@ -17,14 +20,16 @@
                 </button>
             @endif
         </div>
+    </div>
+
     @if (session()->has('success'))
-        <div class="bg-iba-green/10 border-l-4 border-iba-green p-4 flex items-center justify-between">
+        <div class="w-full bg-iba-green/10 border-l-4 border-iba-green p-4 flex items-center justify-between">
             <p class="text-sm font-bold text-iba-green uppercase tracking-wider">{{ session('success') }}</p>
         </div>
     @endif
 
     {{-- Team Accounts Table --}}
-    <div class="bg-white dark:bg-[#1A1617] border-2 border-iba-black dark:border-iba-light shadow-[4px_4px_0_0_#131011] dark:shadow-[4px_4px_0_0_#FFFBF7] overflow-x-auto">
+    <div class="w-full bg-white dark:bg-[#1A1617] border-2 border-iba-black dark:border-iba-light shadow-[4px_4px_0_0_#131011] dark:shadow-[4px_4px_0_0_#FFFBF7] overflow-x-auto">
         <table class="min-w-full divide-y-2 divide-iba-black dark:divide-iba-light">
             <thead class="bg-gray-100 dark:bg-gray-800">
                 <tr>
@@ -78,7 +83,7 @@
         </table>
     </div>
 
-    <div>
+    <div class="w-full">
         {{ $teams->links() }}
     </div>
 
@@ -226,3 +231,4 @@
         </div>
     @endif
 </div>
+
