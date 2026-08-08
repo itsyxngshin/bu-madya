@@ -4,7 +4,12 @@
     @endif
 @endpush
 
-<div class="relative min-h-screen bg-slate-50 overflow-x-hidden font-sans z-0">
+<div class="relative min-h-screen bg-slate-50 overflow-x-hidden font-sans z-0"
+     x-data="studio({
+         defaultCaption: @js($frame->caption ?? ''),
+         variations: @js(is_string($frame->frame_images) ? json_decode($frame->frame_images, true) : ($frame->frame_images ?? []))
+     })"
+     x-init="init()">
 
     {{-- Tricolor Gradient Background --}}
     <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden bg-slate-50">
@@ -33,7 +38,6 @@
                         </div>
                     </div>
 
-                    {{-- FIXED: Changed break-all to break-words to prevent ugly word splits --}}
                     <h1 class="text-3xl md:text-5xl font-black text-gray-900 leading-tight mb-4 tracking-tight drop-shadow-sm break-words w-full">
                         {{ $frame->title }}
                     </h1>
@@ -51,24 +55,43 @@
                     </div>
                 </div>
 
-                {{-- Caption Card --}}
-                @if($frame->caption)
+                {{-- NEW: Dynamic Placeholder Inputs --}}
+                <template x-if="placeholders.length > 0">
+                    <div class="bg-white/60 backdrop-blur-2xl p-5 md:p-6 rounded-[2rem] border border-white/80 shadow-2xl shadow-orange-900/5">
+                        <h4 class="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-4 flex items-center gap-2">
+                            <svg class="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                            Personalize Caption
+                        </h4>
+
+                        <div class="space-y-3">
+                            <template x-for="placeholder in placeholders" :key="placeholder">
+                                <div>
+                                    <label class="block text-[10px] font-bold text-gray-700 uppercase tracking-wider mb-1.5" x-text="placeholder"></label>
+                                    <input type="text" x-model="userInputs[placeholder]"
+                                        class="appearance-none block w-full px-4 py-3 border border-white rounded-xl bg-white/80 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all text-sm font-medium shadow-inner"
+                                        :placeholder="'Enter your ' + placeholder">
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+
+                {{-- Official Caption Output --}}
                 <div class="bg-white/60 backdrop-blur-2xl p-5 md:p-6 rounded-[2rem] border border-white/80 shadow-2xl shadow-indigo-900/5" x-data="{ copiedCap: false }">
                     <div class="flex items-center justify-between mb-3">
                         <p class="text-[10px] font-black text-gray-500 uppercase tracking-widest flex items-center gap-2">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path></svg>
                             Official Caption
                         </p>
-                        <button @click="navigator.clipboard.writeText($refs.captionBlock.innerText); copiedCap = true; setTimeout(() => copiedCap = false, 2000)"
+                        <button @click="navigator.clipboard.writeText(finalGeneratedCaption); copiedCap = true; setTimeout(() => copiedCap = false, 2000)"
                                 class="text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-lg transition-colors"
                                 :class="copiedCap ? 'bg-emerald-100 text-emerald-600' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'">
                             <span x-show="!copiedCap">Copy</span>
                             <span x-show="copiedCap" style="display: none;">Copied!</span>
                         </button>
                     </div>
-                    <div class="bg-white/80 border border-white/50 shadow-inner rounded-xl p-4 text-xs text-gray-700 leading-relaxed font-medium whitespace-pre-wrap max-h-48 overflow-y-auto" x-ref="captionBlock">{{ $frame->caption }}</div>
+                    <div class="bg-white/80 border border-white/50 shadow-inner rounded-xl p-4 text-xs text-gray-700 leading-relaxed font-medium whitespace-pre-wrap max-h-48 overflow-y-auto" x-text="finalGeneratedCaption"></div>
                 </div>
-                @endif
 
                 {{-- Share Card --}}
                 <div class="bg-white/60 backdrop-blur-2xl p-5 md:p-6 rounded-[2rem] border border-white/80 shadow-2xl shadow-blue-900/5" x-data="{ copied: false }">
@@ -92,14 +115,7 @@
                      :class="{'ring-4 ring-orange-400 bg-orange-50/80 scale-[1.02]': isDraggingOver}"
                      @dragover.prevent="isDraggingOver = true"
                      @dragleave.prevent="isDraggingOver = false"
-                     @drop.prevent="isDraggingOver = false; uploadPhoto($event)"
-                     @php
-                         $images = is_array($frame->frame_images) ? array_filter($frame->frame_images) : (empty($frame->frame_image) ? [] : [$frame->frame_image]);
-                         $frameUrls = array_map(fn($path) => asset('storage/' . $path), $images);
-                     @endphp
-                     x-data="studio(@js($frameUrls))"
-                     x-init="init()"
-                >
+                     @drop.prevent="isDraggingOver = false; uploadPhoto($event)">
 
                     {{-- Drag & Drop Overlay --}}
                     <div x-show="isDraggingOver" x-transition.opacity.duration.300ms style="display: none;" class="absolute inset-0 z-50 flex items-center justify-center bg-white/70 backdrop-blur-md rounded-[2.5rem] border-4 border-dashed border-orange-400 m-2 pointer-events-none">
@@ -124,14 +140,12 @@
                         {{-- Image Adjustment Controls --}}
                         <div x-show="userImg" style="display: none;" class="flex flex-col gap-3 w-full px-2 py-1">
 
-                            {{-- Scale Slider --}}
                             <div class="flex items-center gap-3 w-full">
                                 <svg class="w-4 h-4 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7"></path></svg>
                                 <input type="range" x-model="scale" @input="draw" min="0.1" max="5" step="0.01" class="w-full flex-1 min-w-[100px] h-2 bg-gray-200 rounded-full appearance-none cursor-pointer accent-orange-500">
                                 <svg class="w-5 h-5 text-gray-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"></path></svg>
                             </div>
 
-                            {{-- Rotation Slider --}}
                             <div class="flex items-center gap-3 w-full">
                                 <svg class="w-4 h-4 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path></svg>
                                 <input type="range" x-model="rotation" @input="draw" min="-180" max="180" step="1" class="w-full flex-1 min-w-[100px] h-2 bg-gray-200 rounded-full appearance-none cursor-pointer accent-orange-500">
@@ -158,14 +172,21 @@
                     </div>
 
                     {{-- Variation Selector --}}
-                    <div x-show="frames.length > 1" style="display: none;" class="mt-8 bg-white/80 p-5 rounded-2xl border border-white shadow-sm max-w-[500px] mx-auto backdrop-blur-md relative z-10">
+                    <div x-show="variations.length > 1" style="display: none;" class="mt-8 bg-white/80 p-5 rounded-2xl border border-white shadow-sm max-w-[500px] mx-auto backdrop-blur-md relative z-10">
                         <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-4 text-center">Select Variation</p>
                         <div class="flex flex-wrap justify-center gap-3">
-                            <template x-for="(frameUrl, index) in frames" :key="index">
-                                <button @click="changeFrame(frameUrl)"
-                                        :class="{'ring-4 ring-orange-400 scale-110 shadow-lg z-10': activeFrame === frameUrl, 'border border-gray-200 hover:border-orange-300 opacity-60 hover:opacity-100 hover:scale-105': activeFrame !== frameUrl}"
-                                        class="w-16 h-16 rounded-2xl bg-[url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAMUlEQVQ4T2NkYNgBxVD8nwEPsOEHMBqNhsFhAAfLwcAAYf///z8DHgZQDw1DDEAGDAAASgIdX/3i4QAAAABJRU5ErkJggg==')] overflow-hidden transition-all duration-300 bg-repeat focus:outline-none relative bg-white">
-                                    <img :src="frameUrl" class="absolute inset-0 w-full h-full object-contain p-1.5">
+                            <template x-for="(variant, index) in variations" :key="index">
+                                <button @click="changeVariation(index)"
+                                        :class="{'ring-4 ring-orange-400 scale-110 shadow-lg z-10': currentVariationIndex === index, 'border border-gray-200 hover:border-orange-300 opacity-60 hover:opacity-100 hover:scale-105': currentVariationIndex !== index}"
+                                        class="w-16 h-16 rounded-2xl bg-[url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAMUlEQVQ4T2NkYNgBxVD8nwEPsOEHMBqNhsFhAAfLwcAAYf///z8DHgZQDw1DDEAGDAAASgIdX/3i4QAAAABJRU5ErkJggg==')] overflow-hidden transition-all duration-300 bg-repeat focus:outline-none relative bg-white group">
+
+                                    {{-- Use path directly if object, or fallback if string (legacy) --}}
+                                    <img :src="'/storage/' + (variant.path || variant)" class="absolute inset-0 w-full h-full object-contain p-1.5">
+
+                                    {{-- Optional label overlay on hover --}}
+                                    <div x-show="variant.label" class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-center p-1">
+                                        <span class="text-[8px] font-bold text-white truncate w-full" x-text="variant.label"></span>
+                                    </div>
                                 </button>
                             </template>
                         </div>
@@ -271,9 +292,15 @@
 @push('scripts')
 <script>
     document.addEventListener('alpine:init', () => {
-        Alpine.data('studio', (frameUrls) => ({
+        Alpine.data('studio', (config) => ({
             canvas: null, ctx: null,
             userImg: null, frameImg: null,
+
+            // Text configuration
+            defaultCaption: config.defaultCaption,
+            variations: Array.isArray(config.variations) ? config.variations : [],
+            currentVariationIndex: 0,
+            userInputs: {},
 
             // Image adjustments
             scale: 1,
@@ -292,18 +319,65 @@
             initialTouchAngle: null,
             initialRotation: 0,
 
-            frames: Array.isArray(frameUrls) ? frameUrls : [],
-            activeFrame: null,
             imageError: false,
             showSuccess: false,
 
             init() {
+                // Compatibility mapping for legacy string arrays vs new object arrays
+                this.variations = this.variations.map(varItem => {
+                    return typeof varItem === 'string' ? { path: varItem, label: '', caption: '' } : varItem;
+                });
+
                 this.canvas = this.$refs.canvas;
                 this.ctx = this.canvas.getContext('2d');
-                if (this.frames.length > 0 && this.frames[0] !== '') {
-                    this.activeFrame = this.frames[0];
-                    this.loadFrameImage(this.activeFrame);
+                if (this.variations.length > 0) {
+                    this.loadFrameImage('/storage/' + this.variations[0].path);
                 }
+            },
+
+            // Caption Generation Logic
+            get activeCaptionTemplate() {
+                let variant = this.variations[this.currentVariationIndex];
+                if (variant && variant.caption && variant.caption.trim() !== '') {
+                    return variant.caption;
+                }
+                return this.defaultCaption;
+            },
+
+            get placeholders() {
+                let template = this.activeCaptionTemplate;
+                if (!template) return [];
+
+                let regex = /\[(.*?)\]/g;
+                let matches = [];
+                let match;
+
+                while ((match = regex.exec(template)) !== null) {
+                    if (!matches.includes(match[1])) {
+                        matches.push(match[1]);
+                        if (this.userInputs[match[1]] === undefined) {
+                            this.userInputs[match[1]] = '';
+                        }
+                    }
+                }
+                return matches;
+            },
+
+            get finalGeneratedCaption() {
+                let text = this.activeCaptionTemplate;
+                if (!text) return '';
+
+                this.placeholders.forEach(placeholder => {
+                    let val = this.userInputs[placeholder] || `[${placeholder}]`;
+                    text = text.split(`[${placeholder}]`).join(val);
+                });
+
+                return text;
+            },
+
+            changeVariation(index) {
+                this.currentVariationIndex = index;
+                this.loadFrameImage('/storage/' + this.variations[index].path);
             },
 
             loadFrameImage(url) {
@@ -317,11 +391,6 @@
                     this.draw();
                 };
                 this.frameImg.src = url;
-            },
-
-            changeFrame(url) {
-                this.activeFrame = url;
-                this.loadFrameImage(url);
             },
 
             uploadPhoto(e) {
@@ -339,7 +408,7 @@
                     this.userImg.onload = () => {
                         this.dx = 0;
                         this.dy = 0;
-                        this.rotation = 0; // Reset rotation on new upload
+                        this.rotation = 0;
                         let scaleX = 1080 / this.userImg.width;
                         let scaleY = 1080 / this.userImg.height;
                         this.scale = Math.max(scaleX, scaleY);
@@ -361,12 +430,9 @@
                     let centerY = (1080 / 2) + this.dy;
 
                     this.ctx.save();
-
-                    // Translate to where the center of the image should be, rotate, and draw offset by half width/height
                     this.ctx.translate(centerX, centerY);
                     this.ctx.rotate(this.rotation * Math.PI / 180);
                     this.ctx.drawImage(this.userImg, -w / 2, -h / 2, w, h);
-
                     this.ctx.restore();
                 }
 
@@ -411,14 +477,10 @@
                 if(!this.userImg) return;
                 if (e.touches.length === 2) {
                     this.isDragging = false;
-
-                    // Multi-touch Zoom/Rotate Init
                     this.initialPinchDist = this.getDistance(e.touches[0], e.touches[1]);
                     this.initialScale = parseFloat(this.scale);
-
                     this.initialTouchAngle = this.getAngle(e.touches[0], e.touches[1]);
                     this.initialRotation = parseFloat(this.rotation);
-
                 } else if (e.touches.length === 1) {
                     this.isDragging = true;
                     this.startX = e.touches[0].clientX;
@@ -431,7 +493,6 @@
             handleTouchMove(e) {
                 if(!this.userImg) return;
                 if (e.touches.length === 2 && this.initialPinchDist) {
-                    // Handle Zoom
                     let newDist = this.getDistance(e.touches[0], e.touches[1]);
                     let zoomFactor = newDist / this.initialPinchDist;
                     let newScale = this.initialScale * zoomFactor;
@@ -439,17 +500,14 @@
                     if (newScale > 5) newScale = 5;
                     this.scale = newScale;
 
-                    // Handle Rotate
                     let currentAngle = this.getAngle(e.touches[0], e.touches[1]);
                     let angleDiff = currentAngle - this.initialTouchAngle;
 
-                    // Keeps it within range, though canvas doesn't strictly care
                     let newRotation = this.initialRotation + angleDiff;
                     if(newRotation > 180) newRotation -= 360;
                     if(newRotation < -180) newRotation += 360;
 
                     this.rotation = newRotation;
-
                     this.draw();
                 } else if (e.touches.length === 1 && this.isDragging) {
                     let canvasRect = this.canvas.getBoundingClientRect();
@@ -469,11 +527,9 @@
             download() {
                 const filename = 'BU-MADYA-' + Date.now() + '.png';
 
-                // Convert the canvas to a Blob (Better for mobile memory than a massive Base64 string)
                 this.canvas.toBlob(async (blob) => {
                     if (!blob) return;
 
-                    // Check if the device supports the native Web Share API (Ideal for iPhones)
                     if (navigator.share && navigator.canShare) {
                         const file = new File([blob], filename, { type: 'image/png' });
 
@@ -484,27 +540,23 @@
                                     title: 'Campaign Frame'
                                 });
 
-                                // Trigger success modal and Livewire usage count
                                 this.showSuccess = true;
                                 @this.incrementUsage();
                                 return;
 
                             } catch (error) {
-                                // If the user simply closes the share sheet, do nothing
                                 if (error.name === 'AbortError') return;
-                                console.log('Share failed:', error);
                             }
                         }
                     }
 
-                    // Fallback for Desktop, Android, or browsers that don't support file sharing
                     let link = document.createElement('a');
                     link.download = filename;
                     link.href = URL.createObjectURL(blob);
-                    document.body.appendChild(link); // Required for some browsers
+                    document.body.appendChild(link);
                     link.click();
                     document.body.removeChild(link);
-                    URL.revokeObjectURL(link.href); // Clean up memory
+                    URL.revokeObjectURL(link.href);
 
                     this.showSuccess = true;
                     @this.incrementUsage();

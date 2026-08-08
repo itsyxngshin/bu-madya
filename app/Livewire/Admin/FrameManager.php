@@ -16,23 +16,23 @@ class FrameManager extends Component
     use WithPagination, WithFileUploads;
 
     public $search = '';
-    public $filter = 'all'; 
+    public $filter = 'all';
 
     // Metadata Edit Properties
     public $editMode = false;
     public $editFrameId = null;
-    
+
     #[Rule('required|string|max:255')]
     public $editTitle = '';
-    
+
     #[Rule('nullable|string')]
     public $editDescription = '';
-    
+
     #[Rule('nullable|string')]
     public $editCaption = '';
 
     // Variation Edit Properties
-    public $editImages = [];
+    public $editVariations = [];
     public $imagesToDelete = [];
     public $newUploads = [];
 
@@ -48,14 +48,14 @@ class FrameManager extends Component
 
     public function deleteFrame(EventFrame $frame)
     {
-        if (is_array($frame->frame_images)) {
-            foreach ($frame->frame_images as $imagePath) {
-                if (Storage::disk('public')->exists($imagePath)) {
-                    Storage::disk('public')->delete($imagePath);
-                }
+        // Parse the stored JSON
+        $variations = is_string($frame->frame_images) ? json_decode($frame->frame_images, true) : ($frame->frame_images ?? []);
+
+        foreach ($variations as $var) {
+            $path = is_array($var) ? ($var['path'] ?? '') : $var;
+            if ($path && Storage::disk('public')->exists($path)) {
+                Storage::disk('public')->delete($path);
             }
-        } elseif ($frame->frame_image) {
-            Storage::disk('public')->delete($frame->frame_image);
         }
 
         $frame->delete();
@@ -70,72 +70,97 @@ class FrameManager extends Component
         $this->editDescription = $frame->description;
         $this->editCaption = $frame->caption;
 
-        // Load existing variations into the state
-        $this->editImages = is_array($frame->frame_images) 
-            ? $frame->frame_images 
-            : (empty($frame->frame_image) ? [] : [$frame->frame_image]);
-            
+        // Parse existing variations safely (handles both old flat arrays and new structured JSON)
+        $rawVariations = is_string($frame->frame_images)
+            ? json_decode($frame->frame_images, true)
+            : (is_array($frame->frame_images) ? $frame->frame_images : []);
+
+        $this->editVariations = [];
+
+        foreach ($rawVariations as $var) {
+            if (is_array($var)) {
+                $this->editVariations[] = [
+                    'path' => $var['path'] ?? '',
+                    'label' => $var['label'] ?? 'Variation',
+                    'caption' => $var['caption'] ?? ''
+                ];
+            } else {
+                // Backwards compatibility for flat arrays
+                $this->editVariations[] = [
+                    'path' => $var,
+                    'label' => 'Variation',
+                    'caption' => ''
+                ];
+            }
+        }
+
         $this->imagesToDelete = [];
     }
 
     public function updatedNewUploads()
     {
         $this->validate([
-            'newUploads.*' => 'image|mimes:png|max:5120', // Ensure they remain transparent PNGs
+            'newUploads.*' => 'image|mimes:png|max:5120',
         ]);
 
         foreach ($this->newUploads as $upload) {
-            // Store directly to frames to get a valid public path for rendering in the preview
             $path = $upload->store('frames', 'public');
-            $this->editImages[] = $path;
+            $this->editVariations[] = [
+                'path' => $path,
+                'label' => 'New Variation',
+                'caption' => ''
+            ];
         }
 
         $this->newUploads = [];
     }
 
-    public function moveImageUp($index)
+    public function moveVariationUp($index)
     {
         if ($index > 0) {
-            $temp = $this->editImages[$index];
-            $this->editImages[$index] = $this->editImages[$index - 1];
-            $this->editImages[$index - 1] = $temp;
+            $temp = $this->editVariations[$index];
+            $this->editVariations[$index] = $this->editVariations[$index - 1];
+            $this->editVariations[$index - 1] = $temp;
         }
     }
 
-    public function moveImageDown($index)
+    public function moveVariationDown($index)
     {
-        if ($index < count($this->editImages) - 1) {
-            $temp = $this->editImages[$index];
-            $this->editImages[$index] = $this->editImages[$index + 1];
-            $this->editImages[$index + 1] = $temp;
+        if ($index < count($this->editVariations) - 1) {
+            $temp = $this->editVariations[$index];
+            $this->editVariations[$index] = $this->editVariations[$index + 1];
+            $this->editVariations[$index + 1] = $temp;
         }
     }
 
-    public function removeImage($index)
+    public function removeVariation($index)
     {
-        // Track the path so we can delete it from storage when they click 'Save Changes'
-        $this->imagesToDelete[] = $this->editImages[$index];
-        unset($this->editImages[$index]);
-        $this->editImages = array_values($this->editImages);
+        if (isset($this->editVariations[$index]['path'])) {
+            $this->imagesToDelete[] = $this->editVariations[$index]['path'];
+        }
+        unset($this->editVariations[$index]);
+        $this->editVariations = array_values($this->editVariations);
     }
 
     public function cancelEdit()
     {
-        $this->reset(['editMode', 'editFrameId', 'editTitle', 'editDescription', 'editCaption', 'editImages', 'imagesToDelete', 'newUploads']);
+        $this->reset(['editMode', 'editFrameId', 'editTitle', 'editDescription', 'editCaption', 'editVariations', 'imagesToDelete', 'newUploads']);
         $this->resetValidation();
     }
 
     public function updateFrame()
     {
-        $this->validate();
-
-        if (empty($this->editImages)) {
-            $this->addError('editImages', 'You must have at least one frame variation uploaded.');
-            return;
-        }
+        $this->validate([
+            'editVariations' => 'array|min:1',
+            'editVariations.*.label' => 'required|string|max:100',
+            'editVariations.*.caption' => 'nullable|string',
+        ], [
+            'editVariations.min' => 'You must have at least one frame variation uploaded.',
+            'editVariations.*.label.required' => 'All variations must have a label.'
+        ]);
 
         $frame = EventFrame::findOrFail($this->editFrameId);
-        
+
         // Clean up the removed files from the server
         foreach ($this->imagesToDelete as $path) {
             if (Storage::disk('public')->exists($path)) {
@@ -147,7 +172,7 @@ class FrameManager extends Component
             'title' => $this->editTitle,
             'description' => $this->editDescription,
             'caption' => $this->editCaption,
-            'frame_images' => $this->editImages, // Saves the new reordered array
+            'frame_images' => json_encode($this->editVariations),
         ]);
 
         session()->flash('message', 'Campaign details and variations successfully updated.');
