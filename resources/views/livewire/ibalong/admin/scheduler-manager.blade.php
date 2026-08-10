@@ -1,17 +1,24 @@
 <div class="max-w-7xl mx-auto space-y-8 pb-24">
 
     {{-- System Header --}}
-    <div class="bg-iba-black border-4 border-iba-black shadow-[8px_8px_0_0_#0095AC] p-6 text-white">
-        <div class="flex items-center gap-3 mb-2">
-            <h1 class="text-2xl font-black uppercase tracking-widest text-white">Scheduling Matrix</h1>
-            <span class="bg-iba-teal text-white text-[10px] font-black uppercase px-2 py-1">SYS: {{ $activeHackathon->name }}</span>
+    <div class="bg-iba-black border-4 border-iba-black shadow-[8px_8px_0_0_#0095AC] p-6 text-white flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+            <div class="flex items-center gap-3 mb-2">
+                <h1 class="text-2xl font-black uppercase tracking-widest text-white">Scheduling Matrix</h1>
+                <span class="bg-iba-teal text-white text-[10px] font-black uppercase px-2 py-1">SYS: {{ $activeHackathon->name }}</span>
+            </div>
+            <p class="text-sm font-bold text-gray-400 uppercase tracking-widest">Establish activities, manage hubs, and assign cohorts.</p>
         </div>
-        <p class="text-sm font-bold text-gray-400 uppercase tracking-widest">Establish activities, manage hubs, and analyze timetable graphs.</p>
     </div>
 
     @if (session()->has('success'))
         <div class="bg-iba-teal/10 border-l-4 border-iba-teal p-4 shadow-[4px_4px_0_0_#131011]">
             <p class="text-xs font-black text-iba-teal uppercase tracking-widest">{{ session('success') }}</p>
+        </div>
+    @endif
+    @if (session()->has('error'))
+        <div class="bg-iba-red/10 border-l-4 border-iba-red p-4 shadow-[4px_4px_0_0_#131011]">
+            <p class="text-xs font-black text-iba-red uppercase tracking-widest">{{ session('error') }}</p>
         </div>
     @endif
 
@@ -81,7 +88,6 @@
                                     </thead>
                                     <tbody>
                                         @php
-                                            // Extract all unique times across all hubs to build the rows
                                             $allSlots = $activity->tracks->flatMap->slots->sortBy('start_time');
                                             $uniqueTimes = $allSlots->pluck('start_time')->unique(function($time) { return $time->format('H:i'); });
                                         @endphp
@@ -93,7 +99,6 @@
                                                 </td>
                                                 @foreach($activity->tracks as $track)
                                                     @php
-                                                        // Find the slot for this specific hub at this specific time
                                                         $slot = $track->slots->first(function($s) use ($time) { return $s->start_time->format('H:i') === $time->format('H:i'); });
                                                     @endphp
                                                     <td class="p-3 border-r-2 border-b-2 border-gray-300 text-center">
@@ -113,21 +118,66 @@
                                 </table>
                             </div>
 
-                            {{-- RAW HUB LIST (For Details & Editing) --}}
-                            <h4 class="text-xs font-black text-gray-500 uppercase tracking-widest border-b-2 border-dashed border-gray-300 pb-2 mb-4">Hub Configuration Details</h4>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {{-- RAW HUB LIST & MANUAL ASSIGNMENTS --}}
+                            <h4 class="text-xs font-black text-gray-500 uppercase tracking-widest border-b-2 border-dashed border-gray-300 pb-2 mb-4">Hub Configuration & Roster Details</h4>
+                            <div class="grid grid-cols-1 gap-6">
                                 @foreach($activity->tracks as $track)
                                     <div class="border-2 border-iba-black p-4 bg-gray-50 shadow-[4px_4px_0_0_#131011]">
-                                        <div class="flex justify-between items-start mb-2">
-                                            <span class="bg-iba-orange px-2 py-1 font-black text-xs uppercase text-iba-black border-2 border-iba-black">{{ $track->name }}</span>
-                                            <div class="flex gap-2">
-                                                <button wire:click="openEditTrack({{ $track->id }})" class="text-blue-600 hover:text-blue-800 text-[10px] font-black uppercase underline">Edit</button>
-                                                <button wire:click="deleteTrack({{ $track->id }})" wire:confirm="Purge this entire hub and all its time blocks?" class="text-iba-red hover:text-red-800 text-[10px] font-black uppercase underline">Purge</button>
+
+                                        {{-- Hub Header --}}
+                                        <div class="flex justify-between items-start mb-4 border-b-2 border-gray-300 pb-3">
+                                            <div>
+                                                <span class="bg-iba-orange px-2 py-1 font-black text-xs uppercase text-iba-black border-2 border-iba-black shadow-[2px_2px_0_0_#131011]">{{ $track->name }}</span>
+                                                <div class="text-[10px] font-bold text-gray-500 uppercase flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mt-3">
+                                                    <span class="flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path></svg> {{ $track->location ?? 'No location designated' }}</span>
+                                                    <span class="flex items-center gap-1 text-iba-teal"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg> {{ $track->mentor->name ?? 'NO MENTOR ASSIGNED' }}</span>
+                                                </div>
+                                            </div>
+                                            <div class="flex flex-col sm:flex-row gap-2">
+                                                <button wire:click="openEditTrack({{ $track->id }})" class="bg-gray-200 border-2 border-iba-black text-iba-black hover:bg-gray-300 px-3 py-1 text-[10px] font-black uppercase">Edit & Extend</button>
+                                                <button wire:click="deleteTrack({{ $track->id }})" wire:confirm="Purge this entire hub and all its time blocks?" class="bg-iba-red border-2 border-iba-black text-white hover:bg-red-800 px-3 py-1 text-[10px] font-black uppercase">Purge Hub</button>
                                             </div>
                                         </div>
-                                        <div class="text-[10px] font-bold text-gray-500 uppercase flex flex-col gap-1 mt-3">
-                                            <span class="flex items-center gap-2"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg> {{ $track->location ?? 'No location designated' }}</span>
-                                            <span class="flex items-center gap-2 text-iba-teal"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg> {{ $track->mentor->name ?? 'NO MENTOR ASSIGNED' }}</span>
+
+                                        {{-- Upgraded Interactive Slot Blocks --}}
+                                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3">
+                                            @foreach($track->slots as $slot)
+                                                @php $booked = $slot->appointments->count(); @endphp
+                                                <div class="border-2 border-iba-black flex flex-col bg-white group relative">
+
+                                                    {{-- Time Header --}}
+                                                    <div class="p-2 {{ $booked >= $slot->capacity ? 'bg-iba-black text-white' : 'bg-gray-100 text-iba-black' }} border-b-2 border-iba-black flex justify-between items-center">
+                                                        <div class="text-xs font-black uppercase">{{ $slot->start_time->format('h:i A') }}</div>
+                                                        <div class="text-[9px] font-bold uppercase">{{ $booked }}/{{ $slot->capacity }}</div>
+                                                    </div>
+
+                                                    {{-- NEW: Single Slot Purge Button (Only visible on hover if empty) --}}
+                                                    @if($booked == 0)
+                                                        <button wire:click="removeSlot({{ $slot->id }})" wire:confirm="Purge this specific time block?" class="absolute -top-2 -right-2 bg-iba-red text-white p-1 shadow-[2px_2px_0_0_#131011] opacity-0 group-hover:opacity-100 transition-opacity hover:scale-110">
+                                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                                        </button>
+                                                    @endif
+
+                                                    {{-- Assigned Teams Roster --}}
+                                                    <div class="p-2 flex-1 flex flex-col gap-2">
+                                                        @foreach($slot->appointments as $apt)
+                                                            <div class="flex justify-between items-center border-l-2 border-iba-orange pl-2 bg-gray-50 py-1">
+                                                                <span class="text-[9px] font-black uppercase text-iba-black truncate pr-2" title="{{ $apt->team->team_name ?? 'Unknown' }}">{{ $apt->team->team_name ?? 'Unknown' }}</span>
+                                                                <button wire:click="removeAppointment({{ $apt->id }})" wire:confirm="Evict this cohort from the time block?" class="text-iba-red hover:text-red-800 shrink-0 pr-1">
+                                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                                                </button>
+                                                            </div>
+                                                        @endforeach
+
+                                                        {{-- Add Button (If space available) --}}
+                                                        @if($booked < $slot->capacity)
+                                                            <button wire:click="openAssignModal({{ $slot->id }})" class="w-full text-center text-[9px] font-black uppercase text-gray-400 hover:text-iba-teal border-2 border-dashed border-gray-300 hover:border-iba-teal p-1 mt-auto transition-colors">
+                                                                + Override Assign
+                                                            </button>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                            @endforeach
                                         </div>
                                     </div>
                                 @endforeach
@@ -210,13 +260,13 @@
         </div>
     @endif
 
-    {{-- MODAL 2: Hub Editor (Update) --}}
+    {{-- MODAL 2: Hub Editor & Extension (Update) --}}
     @if($editingTrackId)
         <div class="fixed inset-0 z-[100] overflow-y-auto">
             <div class="fixed inset-0 bg-iba-black/80 backdrop-blur-sm" wire:click="$set('editingTrackId', null)"></div>
             <div class="flex min-h-screen items-center justify-center p-4">
                 <div class="relative w-full max-w-md bg-white border-4 border-iba-black shadow-[8px_8px_0_0_#0095AC] p-6">
-                    <h3 class="text-lg font-black uppercase tracking-widest text-iba-black border-b-2 border-iba-black pb-2 mb-4">Edit Hub Parameters</h3>
+                    <h3 class="text-lg font-black uppercase tracking-widest text-iba-black border-b-2 border-iba-black pb-2 mb-4">Edit Hub & Extend Timeframe</h3>
 
                     <form wire:submit.prevent="updateTrack" class="space-y-4">
                         <div>
@@ -237,6 +287,39 @@
                             <input type="text" wire:model="editLocation" class="w-full border-2 border-iba-black p-2 font-bold focus:outline-none focus:border-iba-orange bg-gray-50">
                         </div>
 
+                        {{-- NEW: Extension Block --}}
+                        <div class="border-t-2 border-dashed border-gray-300 pt-4 mt-4">
+                            <label class="text-xs font-black uppercase text-iba-teal block mb-1">Extend Hub (Optional)</label>
+                            <p class="text-[9px] font-bold text-gray-500 uppercase mb-3">Generate additional time blocks without overwriting existing ones. Leave blank to skip.</p>
+
+                            <div class="grid grid-cols-2 gap-3">
+                                <div class="col-span-2">
+                                    <label class="text-[10px] font-black uppercase text-gray-500">Additional Date</label>
+                                    <input type="date" wire:model="appendSlotDate" class="w-full border-2 border-iba-black p-2 font-bold focus:outline-none focus:border-iba-orange bg-gray-50">
+                                    @error('appendSlotDate') <span class="text-[9px] text-iba-red font-bold uppercase block mt-1">{{ $message }}</span> @enderror
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-black uppercase text-gray-500">Start Time</label>
+                                    <input type="time" wire:model="appendStartTime" class="w-full border-2 border-iba-black p-2 font-bold focus:outline-none focus:border-iba-orange bg-gray-50">
+                                    @error('appendStartTime') <span class="text-[9px] text-iba-red font-bold uppercase block mt-1">{{ $message }}</span> @enderror
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-black uppercase text-gray-500">End Time</label>
+                                    <input type="time" wire:model="appendEndTime" class="w-full border-2 border-iba-black p-2 font-bold focus:outline-none focus:border-iba-orange bg-gray-50">
+                                    @error('appendEndTime') <span class="text-[9px] text-iba-red font-bold uppercase block mt-1">{{ $message }}</span> @enderror
+                                </div>
+                                <div class="col-span-2">
+                                    <label class="text-[10px] font-black uppercase text-gray-500">Duration per Slot</label>
+                                    <select wire:model="appendDurationMinutes" class="w-full border-2 border-iba-black p-2 font-bold uppercase focus:outline-none focus:border-iba-orange bg-gray-50">
+                                        <option value="15">15 Minutes</option>
+                                        <option value="30">30 Minutes</option>
+                                        <option value="45">45 Minutes</option>
+                                        <option value="60">1 Hour</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="pt-4 flex gap-3">
                             <button type="button" wire:click="$set('editingTrackId', null)" class="w-full bg-gray-100 text-iba-black font-black uppercase py-2 border-2 border-iba-black hover:bg-gray-200">Cancel</button>
                             <button type="submit" class="w-full bg-iba-teal text-white font-black uppercase py-2 border-2 border-iba-black shadow-[3px_3px_0_0_#131011] hover:translate-y-0.5 hover:shadow-none transition-all">Update Hub</button>
@@ -246,4 +329,36 @@
             </div>
         </div>
     @endif
+
+    {{-- MODAL 3: Manual Team Assignment (Override) --}}
+    @if($assigningSlotId)
+        <div class="fixed inset-0 z-[100] overflow-y-auto">
+            <div class="fixed inset-0 bg-iba-black/80 backdrop-blur-sm" wire:click="$set('assigningSlotId', null)"></div>
+            <div class="flex min-h-screen items-center justify-center p-4">
+                <div class="relative w-full max-w-md bg-white border-4 border-iba-black shadow-[8px_8px_0_0_#FF8623] p-6">
+                    <h3 class="text-lg font-black uppercase tracking-widest text-iba-black border-b-2 border-iba-black pb-2 mb-4">Command Override: Inject Cohort</h3>
+
+                    <form wire:submit.prevent="assignTeamToSlot" class="space-y-4">
+                        <p class="text-xs font-bold text-gray-600 uppercase mb-4">Bypass the public booking system and forcibly assign a cohort to this specific time block.</p>
+
+                        <div>
+                            <label class="text-[10px] font-black uppercase text-gray-500">Select Cohort Roster</label>
+                            <select wire:model="assignTeamId" class="w-full border-2 border-iba-black p-2 font-bold uppercase focus:outline-none focus:border-iba-orange bg-gray-50 cursor-pointer">
+                                <option value="">-- Choose Target Cohort --</option>
+                                @foreach($teams as $team)
+                                    <option value="{{ $team->id }}">{{ $team->team_name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="pt-4 flex gap-3">
+                            <button type="button" wire:click="$set('assigningSlotId', null)" class="w-full bg-gray-100 text-iba-black font-black uppercase py-2 border-2 border-iba-black hover:bg-gray-200">Cancel</button>
+                            <button type="submit" class="w-full bg-iba-orange text-iba-black font-black uppercase py-2 border-2 border-iba-black shadow-[3px_3px_0_0_#131011] hover:translate-y-0.5 hover:shadow-none transition-all">Assign Cohort</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    @endif
+
 </div>

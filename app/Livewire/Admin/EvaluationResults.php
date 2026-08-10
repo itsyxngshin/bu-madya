@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin;
 
 use Livewire\Component;
+use Livewire\WithPagination;
 use App\Models\Evaluation;
 use App\Models\EvaluationResponse;
 use Livewire\Attributes\Layout;
@@ -16,8 +17,10 @@ use Illuminate\Support\Str;
 
 class EvaluationResults extends Component
 {
+    use WithPagination;
     public Evaluation $evaluation;
     public $stats = [];
+
 
     // Tab & Individual Response Tracking
     public $tab = 'summary'; // 'summary' or 'individual'
@@ -58,6 +61,7 @@ class EvaluationResults extends Component
     {
         $this->tab = $tabName;
         $this->currentIndex = 0;
+        $this->resetPage();
     }
 
     public function nextResponse()
@@ -73,6 +77,69 @@ class EvaluationResults extends Component
         if ($this->currentIndex > 0) {
             $this->currentIndex--;
         }
+    }
+
+    public function exportToCsv()
+    {
+        // 1. Eager load the required relationships
+        $evaluation = $this->evaluation->load(['questions' => function($query) {
+            $query->orderBy('order');
+        }, 'responses.answers', 'responses.user']);
+
+        // 2. Generate a clean, timestamped filename
+        $fileName = 'evaluation_results_' . Str::slug($evaluation->title) . '_' . date('Y-m-d_H-i-s') . '.csv';
+
+        // 3. Stream the download
+        return response()->streamDownload(function () use ($evaluation) {
+            $file = fopen('php://output', 'w');
+
+            // --- A. Setup CSV Headers ---
+            $headers = ['Response ID', 'Date Submitted', 'Participant Name', 'Participant Email'];
+            $validQuestions = [];
+
+            foreach ($evaluation->questions as $question) {
+                // Skip structural elements just like in calculateStats()
+                if (in_array($question->type, ['section', 'page_break'])) continue;
+
+                // Strip markdown and tags for clean column headers
+                $headers[] = strip_tags(Str::markdown($question->question_text ?? ''));
+                $validQuestions[] = $question->id;
+            }
+            fputcsv($file, $headers);
+
+            // --- B. Setup CSV Rows ---
+            foreach ($evaluation->responses as $response) {
+                $row = [
+                    $response->id,
+                    $response->created_at->format('Y-m-d H:i:s'),
+                    $response->user ? $response->user->name : 'Anonymous',
+                    $response->user ? $response->user->email : 'N/A',
+                ];
+
+                // Key answers by question ID for fast O(1) lookups
+                $answers = $response->answers->keyBy('evaluation_question_id');
+
+                foreach ($validQuestions as $qId) {
+                    $val = $answers->has($qId) ? $answers->get($qId)->answer_value : '';
+
+                    // Handle JSON array responses from 'checkbox' types safely
+                    $decoded = json_decode($val, true);
+                    if (is_array($decoded)) {
+                        $val = implode(', ', $decoded);
+                    }
+
+                    $row[] = $val;
+                }
+
+                fputcsv($file, $row);
+            }
+
+            fclose($file);
+
+        }, $fileName, [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="'.$fileName.'"',
+        ]);
     }
 
     public function calculateStats()
@@ -427,6 +494,7 @@ EOT;
     {
         $totalResponsesCount = $this->evaluation->responses()->count();
         $currentResponse = null;
+        $allResponses = null;
 
         if ($this->tab === 'individual' && $totalResponsesCount > 0) {
             $currentResponse = EvaluationResponse::with(['answers', 'user'])
@@ -434,6 +502,13 @@ EOT;
                 ->orderBy('created_at')
                 ->skip($this->currentIndex)
                 ->first();
+        }
+        elseif ($this->tab === 'table' && $totalResponsesCount > 0) {
+            // 4. CHANGE get() TO paginate()
+            $allResponses = EvaluationResponse::with(['answers', 'user'])
+                ->where('evaluation_id', $this->evaluation->id)
+                ->orderBy('created_at', 'desc')
+                ->paginate(15);
         }
 
         $layoutFile = in_array(auth()->user()->role?->role_name, ['administrator', 'organization'])
@@ -443,6 +518,7 @@ EOT;
         return view('livewire.admin.evaluation-results', [
             'totalResponsesCount' => $totalResponsesCount,
             'currentResponse' => $currentResponse,
+            'allResponses' => $allResponses,
         ])->layout($layoutFile);
     }
 }

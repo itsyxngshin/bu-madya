@@ -44,10 +44,16 @@
 
                     <p class="text-sm text-gray-700 mb-8 leading-relaxed font-medium break-words w-full">{{ $frame->description }}</p>
 
+                    {{-- CREATOR PROFILE (Custom Column Check) --}}
                     <div class="flex items-center gap-3 bg-white/80 p-3 rounded-2xl border border-white shadow-sm max-w-full">
-                        <div class="w-10 h-10 shrink-0 bg-gradient-to-tr from-gray-100 to-gray-200 rounded-xl flex items-center justify-center font-black text-gray-500 text-xs uppercase shadow-inner">
-                            {{ substr($frame->user->name ?? 'BU', 0, 2) }}
-                        </div>
+                        @if($frame->user && $frame->user->profile_photo_path)
+                            <img src="{{ asset('storage/' . $frame->user->profile_photo_path) }}" alt="{{ $frame->user->name }}" class="w-10 h-10 shrink-0 rounded-xl object-cover shadow-inner border border-gray-100">
+                        @else
+                            <div class="w-10 h-10 shrink-0 bg-gradient-to-tr from-gray-100 to-gray-200 rounded-xl flex items-center justify-center font-black text-gray-500 text-xs uppercase shadow-inner">
+                                {{ substr($frame->user->name ?? 'BU', 0, 2) }}
+                            </div>
+                        @endif
+
                         <div class="pr-3 min-w-0 flex-1">
                             <p class="text-[9px] text-gray-400 font-bold uppercase tracking-widest">Created By</p>
                             <p class="text-xs font-black text-gray-900 leading-tight truncate w-full">{{ $frame->user->name ?? 'BU MADYA' }}</p>
@@ -55,7 +61,7 @@
                     </div>
                 </div>
 
-                {{-- NEW: Dynamic Placeholder Inputs --}}
+                {{-- Dynamic Placeholder Inputs --}}
                 <template x-if="placeholders.length > 0">
                     <div class="bg-white/60 backdrop-blur-2xl p-5 md:p-6 rounded-[2rem] border border-white/80 shadow-2xl shadow-orange-900/5">
                         <h4 class="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-4 flex items-center gap-2">
@@ -97,8 +103,8 @@
                 <div class="bg-white/60 backdrop-blur-2xl p-5 md:p-6 rounded-[2rem] border border-white/80 shadow-2xl shadow-blue-900/5" x-data="{ copied: false }">
                     <p class="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-3">Share Campaign Link</p>
                     <div class="flex items-center gap-2 w-full">
-                        <input type="text" readonly value="{{ url()->current() }}" class="flex-1 w-full min-w-0 bg-white/80 border border-white/50 shadow-inner rounded-xl text-xs py-3 px-4 text-gray-600 focus:outline-none font-medium">
-                        <button @click="navigator.clipboard.writeText('{{ url()->current() }}'); copied = true; setTimeout(() => copied = false, 2000)"
+                        <input type="text" readonly value="{{ route('open.frames.show', $frame->slug) }}" class="flex-1 w-full min-w-0 bg-white/80 border border-white/50 shadow-inner rounded-xl text-xs py-3 px-4 text-gray-600 focus:outline-none font-medium">
+                        <button @click="navigator.clipboard.writeText('{{ route('open.frames.show', $frame->slug) }}'); copied = true; setTimeout(() => copied = false, 2000)"
                                 class="bg-gray-900 hover:bg-gray-800 text-white p-3 rounded-xl transition-all transform hover:-translate-y-0.5 flex items-center justify-center shrink-0 w-11 h-11 shadow-lg">
                             <svg x-show="!copied" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
                             <svg x-show="copied" style="display: none;" class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
@@ -185,7 +191,7 @@
 
                                     {{-- Optional label overlay on hover --}}
                                     <div x-show="variant.label" class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-center p-1">
-                                        <span class="text-[8px] font-bold text-white truncate w-full" x-text="variant.label"></span>
+                                        <span class="text-[8px] font-bold text-white text-center leading-tight truncate w-full" x-text="variant.label"></span>
                                     </div>
                                 </button>
                             </template>

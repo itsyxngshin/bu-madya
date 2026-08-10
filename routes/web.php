@@ -254,6 +254,7 @@ Route::domain('ibalong.' . env('APP_DOMAIN'))->name('ibalong.')->group(function 
             Route::get('/scheduler', \App\Livewire\Ibalong\Admin\SchedulerManager::class)->name('admin.scheduler');
             Route::get('/mentor-hub', \App\Livewire\Ibalong\Mentor\MentorHub::class)->name('mentor.hub');
             // Future route example: Route::get('/mentorship-queue', ...)->name('facilitator.mentors');
+            Route::get('/awards-citations', \App\Livewire\Ibalong\Admin\AwardsManager::class)->name('admin.awards');
         });
 
         // ==========================================

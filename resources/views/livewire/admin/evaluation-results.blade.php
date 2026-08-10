@@ -25,10 +25,19 @@
 
         {{-- HEADER --}}
         <div class="mb-5 sm:mb-6">
+
+          @if(auth()->check() && auth()->user()->role === 'administrator')
             <a href="{{ route('admin.evaluations.index') }}" class="inline-flex items-center gap-2 text-xs font-bold text-gray-400 hover:text-orange-600 mb-3 uppercase tracking-widest transition p-1 -ml-1">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                 Back to List
             </a>
+        @elseif(auth()->check() && auth()->user()->role === 'organization')
+            {{-- Update the route below to match your organization route name --}}
+            <a href="{{ route('partners.evaluations.index') }}" class="inline-flex items-center gap-2 text-xs font-bold text-gray-400 hover:text-orange-600 mb-3 uppercase tracking-widest transition p-1 -ml-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                Back to List
+            </a>
+        @endif
             <div class="flex flex-col sm:flex-row sm:items-center gap-3">
                 <h1 class="text-2xl sm:text-3xl font-black text-gray-900 leading-tight">{{ $evaluation->title }}</h1>
 
@@ -39,10 +48,19 @@
                     </span>
                 @endif
             </div>
-            <div class="mt-3 flex flex-wrap items-center gap-3">
+           <div class="mt-3 flex flex-wrap items-center gap-3">
                 <span class="text-sm text-gray-500">
                     Analysis of <strong class="text-gray-900">{{ $totalResponsesCount }}</strong> total responses.
                 </span>
+
+                {{-- NEW EXPORT BUTTON --}}
+                @if($totalResponsesCount > 0)
+                    <button wire:click="exportToCsv" wire:loading.attr="disabled" class="inline-flex items-center gap-1.5 px-3 py-1 bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 hover:text-orange-600 text-[10px] sm:text-xs font-bold uppercase tracking-widest rounded-lg shadow-sm transition">
+                        <svg wire:loading.remove wire:target="exportToCsv" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        <svg wire:loading wire:target="exportToCsv" class="animate-spin w-3.5 h-3.5 text-orange-500" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                        Export CSV
+                    </button>
+                @endif
 
                 @if($evaluation->certificate_template)
                     @php
@@ -63,6 +81,10 @@
             </button>
             <button wire:click="setTab('individual')" class="pb-3 text-sm font-bold uppercase tracking-widest transition border-b-2 {{ $tab === 'individual' ? 'border-orange-500 text-orange-600' : 'border-transparent text-gray-400 hover:text-gray-600' }}">
                 Individual Responses
+            </button>
+            {{-- NEW TABLE TAB BUTTON --}}
+            <button wire:click="setTab('table')" class="pb-3 text-sm font-bold uppercase tracking-widest transition border-b-2 {{ $tab === 'table' ? 'border-orange-500 text-orange-600' : 'border-transparent text-gray-400 hover:text-gray-600' }}">
+                Data Table
             </button>
         </div>
 
@@ -717,6 +739,93 @@
                             </div>
                         @endif
                     @endforeach
+                </div>
+            @endif
+            {{-- ========================================== --}}
+        {{-- TAB 3: SPREADSHEET / DATA TABLE            --}}
+        {{-- ========================================== --}}
+        @elseif($tab === 'table')
+
+            @if($totalResponsesCount === 0)
+                <div class="bg-white rounded-2xl p-8 sm:p-12 text-center border border-gray-200">
+                    <p class="text-gray-400 font-bold text-sm sm:text-base">No responses have been submitted yet.</p>
+                </div>
+            @else
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden animate-fade-in-up">
+                    <div class="p-4 sm:p-5 border-b border-gray-200 bg-gray-50/80">
+                        <h3 class="text-base sm:text-lg font-black text-gray-900 flex items-center gap-2">
+                            <svg class="w-5 h-5 text-orange-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                            Raw Data Table
+                        </h3>
+                        <p class="text-[11px] sm:text-xs text-gray-500 mt-1">Spreadsheet view of all submitted responses. Horizontally scrollable.</p>
+                    </div>
+
+                    <div class="overflow-x-auto custom-scrollbar">
+                        <table class="w-full text-left border-collapse min-w-max">
+                            <thead>
+                                <tr class="bg-gray-50 border-b border-gray-200 text-[10px] uppercase tracking-widest text-gray-500 font-bold">
+                                    <th class="p-3 sm:p-4 whitespace-nowrap sticky left-0 z-20 bg-gray-50 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">ID</th>
+                                    <th class="p-3 sm:p-4 whitespace-nowrap">Date Submitted</th>
+                                    <th class="p-3 sm:p-4 whitespace-nowrap">Participant Name</th>
+                                    @foreach($evaluation->questions->sortBy('order') as $question)
+                                        @if(!in_array($question->type, ['section', 'page_break']))
+                                            <th class="p-3 sm:p-4 whitespace-nowrap max-w-[250px] truncate" title="{{ strip_tags(Str::markdown($question->question_text ?? '')) }}">
+                                                {{ strip_tags(Str::markdown($question->question_text ?? '')) }}
+                                            </th>
+                                        @endif
+                                    @endforeach
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100">
+                                @foreach($allResponses as $response)
+                                    <tr class="hover:bg-gray-50 transition-colors group">
+                                        <td class="p-3 sm:p-4 text-xs font-black text-gray-900 sticky left-0 bg-white group-hover:bg-gray-50 z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)] transition-colors">
+                                            #{{ $response->id }}
+                                        </td>
+                                        <td class="p-3 sm:p-4 text-xs text-gray-500 whitespace-nowrap">
+                                            {{ $response->created_at->format('M d, Y g:i A') }}
+                                        </td>
+                                        <td class="p-3 sm:p-4 text-xs text-gray-900 font-bold whitespace-nowrap">
+                                            {{ $response->user ? $response->user->name : 'Anonymous' }}
+                                        </td>
+
+                                        @php
+                                            $answers = $response->answers->keyBy('evaluation_question_id');
+                                        @endphp
+
+                                        @foreach($evaluation->questions->sortBy('order') as $question)
+                                            @if(!in_array($question->type, ['section', 'page_break']))
+                                                <td class="p-3 sm:p-4 text-xs text-gray-700 min-w-[150px] max-w-[300px] truncate">
+                                                    @php
+                                                        $val = $answers->has($question->id) ? $answers->get($question->id)->answer_value : '-';
+                                                        $decoded = json_decode($val, true);
+                                                        if(is_array($decoded)) {
+                                                            $val = implode(', ', $decoded);
+                                                        }
+                                                    @endphp
+
+                                                    @if($question->type === 'file' && $val !== '-')
+                                                        <button type="button" @click="openPreview('{{ asset('storage/'.$val) }}')" class="text-blue-600 hover:underline font-bold inline-flex items-center gap-1">
+                                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                                                            View File
+                                                        </button>
+                                                    @else
+                                                        <span title="{{ $val }}">{{ Str::limit($val, 50) }}</span>
+                                                    @endif
+                                                </td>
+                                            @endif
+                                        @endforeach
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                    {{-- NEW PAGINATION LINKS --}}
+                    @if($allResponses && $allResponses->hasPages())
+                        <div class="p-4 sm:p-5 border-t border-gray-200 bg-white">
+                            {{ $allResponses->links() }}
+                        </div>
+                    @endif
                 </div>
             @endif
         @endif
