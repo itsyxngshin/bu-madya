@@ -179,6 +179,7 @@ Route::domain('ibalong.' . env('APP_DOMAIN'))->name('ibalong.')->group(function 
     Route::get('/roster', \App\Livewire\Ibalong\MeetTheTeam::class)->name('roster');
     Route::get('/about', \App\Livewire\Ibalong\AboutHackathon::class)->name('about');
     Route::get('/volunteer', \App\Livewire\Ibalong\VolunteerIntake::class)->name('volunteer');
+    Route::get('/peoples-choice', \App\Livewire\Ibalong\Public\VotingTerminal::class)->name('public.voting');
 
     // ==========================================
     // TIER 2: AUTHENTICATED (All Logged-in Roles: 1, 2, 3, 4, 5)
@@ -255,6 +256,7 @@ Route::domain('ibalong.' . env('APP_DOMAIN'))->name('ibalong.')->group(function 
             Route::get('/mentor-hub', \App\Livewire\Ibalong\Mentor\MentorHub::class)->name('mentor.hub');
             // Future route example: Route::get('/mentorship-queue', ...)->name('facilitator.mentors');
             Route::get('/awards-citations', \App\Livewire\Ibalong\Admin\AwardsManager::class)->name('admin.awards');
+            Route::get('/polls-manager', \App\Livewire\Ibalong\Admin\PollManager::class)->name('admin.polls');
         });
 
         // ==========================================
