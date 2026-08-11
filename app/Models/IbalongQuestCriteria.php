@@ -11,9 +11,7 @@ class IbalongQuestCriteria extends Model
     // Override Laravel's default pluralization
     protected $table = 'ibalong_quest_criteria';
 
-    protected $fillable = [
-        'quest_id', 'name', 'max_score', 'description', 'rubric_levels'
-    ];
+    protected $guarded = [];
 
     protected $casts = [
         'rubric_levels' => 'array', // Automatically casts the tiered descriptions

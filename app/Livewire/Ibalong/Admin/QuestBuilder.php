@@ -8,12 +8,10 @@ use Illuminate\Support\Facades\DB;
 
 class QuestBuilder extends Component
 {
-    public $quest_id; // Will be set if editing
+    public $quest_id;
     public $title, $description, $deadline, $is_published = false;
 
     public $tasks = [];
-
-    // NEW: Nested array for Groups -> Criteria
     public $evaluationGroups = [];
 
     public function mount($quest_id = null)
@@ -26,7 +24,6 @@ class QuestBuilder extends Component
             $this->deadline = $quest->deadline->format('Y-m-d\TH:i');
             $this->is_published = $quest->is_published;
 
-            // Load existing tasks
             $this->tasks = $quest->tasks->map(function($task) {
                 return [
                     'id' => $task->id,
@@ -38,7 +35,6 @@ class QuestBuilder extends Component
                 ];
             })->toArray();
 
-            // Load existing criteria into nested Evaluation Groups
             $groupedCriteria = $quest->criteria->groupBy(function($crit) {
                 return !empty($crit->evaluation_group) ? $crit->evaluation_group : 'Main Scoring Matrix';
             });
@@ -59,7 +55,6 @@ class QuestBuilder extends Component
             }
 
         } else {
-            // Default setup for a new quest
             $this->addTask();
             $this->addEvaluationGroup();
         }
@@ -91,8 +86,6 @@ class QuestBuilder extends Component
             'name' => '',
             'criteria' => []
         ];
-
-        // Auto-add the first criteria slot to the new group
         $this->addCriteriaToGroup(count($this->evaluationGroups) - 1);
     }
 
@@ -124,6 +117,31 @@ class QuestBuilder extends Component
         $this->evaluationGroups[$groupIndex]['criteria'] = array_values($this->evaluationGroups[$groupIndex]['criteria']);
     }
 
+    // NEW: DRAG AND DROP MATRIX REORGANIZER
+    public function moveCriteria($oldGroupIndex, $newGroupIndex, $oldIndex, $newIndex)
+    {
+        // Safety check to ensure the dragged item actually exists in the array
+        if (!isset($this->evaluationGroups[$oldGroupIndex]['criteria'][$oldIndex])) {
+            return;
+        }
+
+        // 1. Extract the criteria block from the old group
+        $item = $this->evaluationGroups[$oldGroupIndex]['criteria'][$oldIndex];
+
+        // 2. Remove it from the old array and re-index
+        unset($this->evaluationGroups[$oldGroupIndex]['criteria'][$oldIndex]);
+        $this->evaluationGroups[$oldGroupIndex]['criteria'] = array_values($this->evaluationGroups[$oldGroupIndex]['criteria']);
+
+        // 3. Inject it into the new array at the exact dropped position
+        if (!isset($this->evaluationGroups[$newGroupIndex]['criteria'])) {
+            $this->evaluationGroups[$newGroupIndex]['criteria'] = [];
+        }
+        array_splice($this->evaluationGroups[$newGroupIndex]['criteria'], $newIndex, 0, [$item]);
+
+        // 4. Final re-index to ensure wire:models don't desync
+        $this->evaluationGroups[$newGroupIndex]['criteria'] = array_values($this->evaluationGroups[$newGroupIndex]['criteria']);
+    }
+
     // --- EXECUTE SAVE ---
     public function saveQuest()
     {
@@ -137,7 +155,6 @@ class QuestBuilder extends Component
         ]);
 
         DB::transaction(function () {
-            // Update or Create Master Quest
             $quest = IbalongQuest::updateOrCreate(
                 ['id' => $this->quest_id],
                 [
@@ -148,7 +165,6 @@ class QuestBuilder extends Component
                 ]
             );
 
-            // Sync Tasks
             $existingTaskIds = [];
             foreach ($this->tasks as $index => $taskData) {
                 $options = null;
@@ -157,7 +173,7 @@ class QuestBuilder extends Component
                 }
 
                 $task = $quest->tasks()->updateOrCreate(
-                    ['id' => $taskData['id']],
+                    ['id' => $taskData['id'] ?? null],
                     [
                         'question' => $taskData['question'],
                         'type' => $taskData['type'],
@@ -171,16 +187,15 @@ class QuestBuilder extends Component
             }
             $quest->tasks()->whereNotIn('id', $existingTaskIds)->delete();
 
-            // Sync Criteria via Groups
             $existingCritIds = [];
             foreach ($this->evaluationGroups as $group) {
                 $groupName = trim($group['name']);
 
                 foreach ($group['criteria'] as $critData) {
                     $crit = $quest->criteria()->updateOrCreate(
-                        ['id' => $critData['id']],
+                        ['id' => $critData['id'] ?? null],
                         [
-                            'evaluation_group' => $groupName,
+                            'evaluation_group' => $groupName ?: 'Main Scoring Matrix',
                             'name' => $critData['name'],
                             'max_score' => $critData['max_score'],
                             'description' => $critData['description'],
