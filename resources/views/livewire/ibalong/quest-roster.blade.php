@@ -54,14 +54,15 @@
                 {{-- Action Controls --}}
                 <div class="mt-auto border-t-2 border-dashed border-gray-300 dark:border-gray-600 pt-4">
                     @if($isAdminView)
-                        {{-- Admin/Judge Controls --}}
-                        <div class="flex flex-col gap-2">
-                            <div class="flex gap-2">
-                                <a href="{{ route('ibalong.admin.quests.submissions', $quest->id) }}" class="flex-1 bg-iba-teal text-white text-center text-xs font-black uppercase tracking-widest py-3 border-2 border-iba-black dark:border-gray-200 hover:translate-y-0.5 hover:shadow-[2px_2px_0_0_#131011] dark:hover:shadow-[2px_2px_0_0_#FFFBF7] transition-all">Submissions</a>
+                        @php $userRole = auth('ibalong')->user()->role_id ?? 0; @endphp
 
-                                @if(in_array(auth('ibalong')->user()->role_id, [1, 2, 4]))
+                        @if(in_array($userRole, [1, 2, 4]))
+                            {{-- Admin & Facilitator Controls --}}
+                            <div class="flex flex-col gap-2">
+                                <div class="flex gap-2">
+                                    <a href="{{ route('ibalong.admin.quests.submissions', $quest->id) }}" class="flex-1 bg-iba-teal text-white text-center text-xs font-black uppercase tracking-widest py-3 border-2 border-iba-black dark:border-gray-200 hover:translate-y-0.5 hover:shadow-[2px_2px_0_0_#131011] dark:hover:shadow-[2px_2px_0_0_#FFFBF7] transition-all">Submissions</a>
                                     <a href="{{ route('ibalong.admin.quests.results', $quest->id) }}" class="flex-1 bg-iba-black dark:bg-gray-200 text-iba-orange dark:text-iba-black text-center text-xs font-black uppercase tracking-widest py-3 border-2 border-iba-black dark:border-gray-200 hover:translate-y-0.5 hover:shadow-[2px_2px_0_0_#FF8623] transition-all">Tabulation</a>
-                                    {{-- NEW: Clearance Terminal Route --}}
+
                                     <a href="{{ route('ibalong.admin.quests.clearance', $quest->id) }}" class="flex-1 bg-white dark:bg-[#1A1617] text-iba-red text-center text-xs font-black uppercase tracking-widest py-3 border-2 border-iba-black dark:border-gray-200 hover:translate-y-0.5 hover:shadow-[2px_2px_0_0_#D93B3B] transition-all">
                                         @if($quest->is_restricted)
                                             <span class="flex items-center justify-center gap-1">
@@ -72,14 +73,21 @@
                                             Clearance
                                         @endif
                                     </a>
-                                @endif
+                                </div>
+
+                                <div class="flex gap-2">
+                                    <a href="{{ route('ibalong.admin.quests.forge', $quest->id) }}" class="flex-1 bg-gray-100 dark:bg-gray-700 text-iba-black dark:text-white text-center text-[10px] font-black uppercase tracking-widest py-2 border-2 border-iba-black dark:border-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">Edit Quest</a>
+                                    <button wire:click="deleteQuest({{ $quest->id }})" wire:confirm="WARNING: This will permanently delete the Quest, all Tasks, Criteria, AND all Team Submissions/Scores attached to it. Proceed?" class="flex-1 bg-iba-red text-white text-center text-[10px] font-black uppercase tracking-widest py-2 border-2 border-iba-black dark:border-gray-200 hover:bg-red-800 transition-colors">Drop</button>
+                                </div>
                             </div>
 
-                            <div class="flex gap-2">
-                                <a href="{{ route('ibalong.admin.quests.forge', $quest->id) }}" class="flex-1 bg-gray-100 dark:bg-gray-700 text-iba-black dark:text-white text-center text-[10px] font-black uppercase tracking-widest py-2 border-2 border-iba-black dark:border-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">Edit Quest</a>
-                                <button wire:click="deleteQuest({{ $quest->id }})" wire:confirm="WARNING: This will permanently delete the Quest, all Tasks, Criteria, AND all Team Submissions/Scores attached to it. Proceed?" class="flex-1 bg-iba-red text-white text-center text-[10px] font-black uppercase tracking-widest py-2 border-2 border-iba-black dark:border-gray-200 hover:bg-red-800 transition-colors">Drop</button>
-                            </div>
-                        </div>
+                        @elseif($userRole == 5)
+                            {{-- Judges Controls (Strictly Submissions Only) --}}
+                            <a href="{{ route('ibalong.admin.quests.submissions', $quest->id) }}" class="block w-full bg-iba-teal text-white text-center text-xs font-black uppercase tracking-widest py-3 border-2 border-iba-black dark:border-gray-200 shadow-[4px_4px_0_0_#131011] dark:shadow-[4px_4px_0_0_#FFFBF7] hover:translate-y-0.5 hover:shadow-none transition-all">
+                                Evaluate Submissions
+                            </a>
+                        @endif
+
                     @else
                         {{-- Team Controls --}}
                         <a href="{{ route('ibalong.team.quests.terminal', $quest->id) }}" class="block bg-iba-black dark:bg-gray-200 text-white dark:text-iba-black text-center text-xs font-black uppercase tracking-widest w-full py-3 border-2 border-iba-black dark:border-gray-200 hover:translate-y-0.5 hover:shadow-[2px_2px_0_0_#FF8623] transition-all">
