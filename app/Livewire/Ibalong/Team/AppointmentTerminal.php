@@ -21,21 +21,24 @@ class AppointmentTerminal extends Component
             abort(403, 'UNAUTHORIZED: Timetable access is restricted to official cohorts.');
         }
 
-        // Fetch the active hackathon container
         $this->activeHackathon = IbalongHackathon::where('status', 'active')->first();
     }
 
     public function bookSlot($slotId)
     {
-        $slot = IbalongActivitySlot::with('appointments')->findOrFail($slotId);
+        $slot = IbalongActivitySlot::with(['track.activity', 'appointments'])->findOrFail($slotId);
 
-        // 1. Security Check: Is the slot full?
+        // Security Check 1: Is Booking Locked?
+        if (!$slot->track->activity->allow_booking) {
+            session()->flash('error', 'SYSTEM REJECT: The Command Center has locked the matrix. No new appointments can be made.');
+            return;
+        }
+
         if ($slot->appointments->count() >= $slot->capacity) {
             session()->flash('error', 'SYSTEM LOCK: This time block is already at maximum capacity.');
             return;
         }
 
-        // 2. Security Check: Did this team already book this exact slot?
         $alreadyBooked = IbalongAppointment::where('slot_id', $slotId)
             ->where('team_id', $this->teamId)
             ->exists();
@@ -45,21 +48,6 @@ class AppointmentTerminal extends Component
             return;
         }
 
-        // 3. Optional Rule: Prevent team from booking multiple slots in the same Hub/Track
-        // Uncomment the block below if a team should only get ONE slot per Hub.
-        /*
-        $hasSlotInHub = IbalongAppointment::where('team_id', $this->teamId)
-            ->whereHas('slot', function($query) use ($slot) {
-                $query->where('track_id', $slot->track_id);
-            })->exists();
-
-        if ($hasSlotInHub) {
-            session()->flash('error', 'SYSTEM LOCK: Your cohort already has a secured block in this Hub.');
-            return;
-        }
-        */
-
-        // Execute Booking
         IbalongAppointment::create([
             'slot_id' => $slotId,
             'team_id' => $this->teamId,
@@ -71,10 +59,16 @@ class AppointmentTerminal extends Component
 
     public function relinquishSlot($appointmentId)
     {
-        // Ensure they can only delete their OWN appointment
-        $appointment = IbalongAppointment::where('id', $appointmentId)
+        $appointment = IbalongAppointment::with('slot.track.activity')
+            ->where('id', $appointmentId)
             ->where('team_id', $this->teamId)
             ->firstOrFail();
+
+        // Security Check 1: Is Booking Locked?
+        if (!$appointment->slot->track->activity->allow_booking) {
+            session()->flash('error', 'SYSTEM REJECT: The Command Center has locked the matrix. You cannot drop a finalized schedule.');
+            return;
+        }
 
         $appointment->delete();
         session()->flash('success', 'Appointment relinquished. The block is now open for other cohorts.');
@@ -82,11 +76,11 @@ class AppointmentTerminal extends Component
 
     public function render()
     {
-        // Fetch only PUBLISHED activities for the active hackathon
         $activities = collect();
 
         if ($this->activeHackathon) {
-            $activities = IbalongActivity::with(['tracks.slots' => function($query) {
+            // Added 'tracks.mentor' to eagerly load the mentor details
+            $activities = IbalongActivity::with(['tracks.mentor', 'tracks.slots' => function($query) {
                 $query->orderBy('start_time', 'asc');
             }, 'tracks.slots.appointments'])
             ->where('hackathon_id', $this->activeHackathon->id)

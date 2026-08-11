@@ -43,7 +43,8 @@
                         <option value="">Select Role...</option>
                         <option value="2">System Admin</option>
                         <option value="4">Judge</option>
-                        <option value="5">Facilitator / Mentor</option>
+                        <option value="5">Facilitator</option>
+                        <option value="6">Mentor</option>
                     </select>
                     @error('role_id') <span class="text-iba-red text-xs font-bold mt-1 block">⚠ {{ $message }}</span> @enderror
                 </div>
@@ -89,8 +90,9 @@
                             <span class="px-2 py-1 border-2 border-iba-black dark:border-iba-light text-[10px] font-bold uppercase tracking-wider bg-gray-100 dark:bg-gray-800 text-iba-black dark:text-white">
                                 @if($user->role_id == 1) Super Admin
                                 @elseif($user->role_id == 2) Admin
-                                @elseif($user->role_id == 4) Judge
-                                @elseif($user->role_id == 5) Facilitator
+                                @elseif($user->role_id == 4) Facilitator
+                                @elseif($user->role_id == 5) Judge
+                                                                          @elseif($user->role_id == 6) Mentor
                                 @else Unknown @endif
                             </span>
                         </td>
@@ -151,7 +153,8 @@
                                 <select wire:model="edit_role_id" class="w-full border-2 border-iba-black dark:border-iba-light p-2 text-sm focus:outline-none focus:border-iba-teal bg-white dark:bg-gray-900 text-iba-black dark:text-white font-bold uppercase">
                                     <option value="2">System Admin</option>
                                     <option value="4">Judge</option>
-                                    <option value="5">Facilitator / Mentor</option>
+                                    <option value="5">Facilitator</option>
+                    <option value="6">Mentor</option>         
                                 </select>
                                 @error('edit_role_id') <span class="text-iba-red text-xs font-bold block mt-1">⚠ {{ $message }}</span> @enderror
                             </div>

@@ -268,6 +268,14 @@ Route::domain('ibalong.' . env('APP_DOMAIN'))->name('ibalong.')->group(function 
             // Route::get('/scoring-dashboard', ...)->name('judge.scoring');
 
         });
+        
+        Route::middleware([IbalongRoleMiddleware::class.':1,2,6'])->group(function () {
+            Route::get('/mentor-hub', \App\Livewire\Ibalong\Mentor\MentorHub::class)->name('mentor.hub');
+
+            // Future routes for judges will go here
+            // Route::get('/scoring-dashboard', ...)->name('judge.scoring');
+
+        });
     });
 });
 
