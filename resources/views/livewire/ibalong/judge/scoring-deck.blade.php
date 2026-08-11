@@ -1,11 +1,6 @@
 <div class="max-w-7xl mx-auto pb-24">
 
     <div class="bg-iba-black text-white p-6 border-4 border-iba-black shadow-[8px_8px_0_0_#FF8623] mb-8 flex justify-between items-center relative">
-        {{-- Status Badge --}}
-        @if($hasScored)
-            <div class="absolute top-4 right-4 bg-iba-red text-white font-black text-[10px] uppercase tracking-widest px-3 py-1 border-2 border-white">EVALUATION LOCKED</div>
-        @endif
-
         <div>
             <h1 class="text-2xl font-black uppercase tracking-widest">The Weighing of the Gift</h1>
             <p class="text-xs font-bold text-iba-teal mt-1 uppercase">{{ $submission->team->team_name ?? 'Unknown Cohort' }} • {{ $submission->quest->title }}</p>
@@ -61,98 +56,90 @@
         </div>
 
         {{-- RIGHT COLUMN: The Rubric & Scoring --}}
-                <div class="space-y-6">
-                    {{-- Lock Warning Banner --}}
-                    @if($hasScored)
-                        <div class="bg-blue-50 border-l-4 border-blue-500 p-4 shadow-[4px_4px_0_0_#131011]">
-                            <p class="text-xs font-black text-blue-700 uppercase tracking-widest flex items-center gap-2">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-                                Your evaluation has been successfully recorded and is now locked.
-                            </p>
+        <div class="space-y-8">
+            <h2 class="text-lg font-black uppercase border-b-4 border-iba-orange pb-2">Scoring Matrix</h2>
+
+            <form wire:submit.prevent="saveScores" class="space-y-10">
+
+                @php
+                    // Map criteria into their respective groups
+                    $groupedCriteria = $submission->quest->criteria->groupBy(function($crit) {
+                        return !empty($crit->evaluation_group) ? $crit->evaluation_group : 'Main Scoring Matrix';
+                    });
+                @endphp
+
+                @foreach($groupedCriteria as $groupName => $criteriaList)
+                    {{-- Massive Evaluation Group Container --}}
+                    <div class="bg-gray-100 border-4 border-iba-black p-1 shadow-[6px_6px_0_0_#131011]">
+
+                        {{-- Group Header Banner --}}
+                        <div class="bg-iba-black text-white px-5 py-4 flex items-center justify-between border-b-4 border-iba-black">
+                            <h3 class="text-xl font-black uppercase tracking-widest text-iba-orange">{{ $groupName }}</h3>
+                            <span class="text-[10px] font-black uppercase bg-white text-iba-black px-2 py-1">{{ count($criteriaList) }} Criteria</span>
                         </div>
-                    @endif
 
-                    <form wire:submit.prevent="lockScores" class="space-y-2">
-                        @php
-                            // Group criteria, defaulting to 'Main Evaluation' if null
-                            $groupedCriteria = $submission->quest->criteria->groupBy(function($crit) {
-                                return !empty($crit->evaluation_group) ? $crit->evaluation_group : 'Main Scoring Matrix';
-                            });
-                        @endphp
+                        <div class="p-4 space-y-6">
+                            @foreach($criteriaList as $crit)
+                                <div class="bg-white border-2 border-iba-black p-5">
+                                    <div class="flex justify-between items-center border-b-2 border-dashed border-gray-300 pb-2 mb-4">
+                                        <h4 class="text-sm font-black uppercase">{{ $crit->name }}</h4>
+                                        <span class="bg-iba-teal text-white text-[10px] font-black uppercase px-2 py-1 shadow-[2px_2px_0_0_#131011]">Max: {{ $crit->max_score }} Pts</span>
+                                    </div>
 
-                        @foreach($groupedCriteria as $groupName => $criteriaList)
+                                    <p class="text-xs font-bold text-gray-600 mb-4">{{ $crit->description }}</p>
 
-                            {{-- Dynamic Group Header --}}
-                            <div class="flex items-center gap-4 pt-6 pb-2">
-                                <div class="h-1 w-8 bg-iba-black"></div>
-                                <h2 class="text-lg font-black uppercase tracking-widest text-iba-black">{{ $groupName }}</h2>
-                                <div class="h-1 flex-1 bg-iba-black"></div>
-                            </div>
-
-                            <div class="space-y-6">
-                                @foreach($criteriaList as $crit)
-                                    <div class="bg-gray-50 border-4 border-iba-black shadow-[4px_4px_0_0_#131011] p-5">
-                                        <div class="flex justify-between items-center border-b-2 border-dashed border-gray-300 pb-2 mb-4">
-                                            <h3 class="text-sm font-black uppercase">{{ $crit->name }}</h3>
-                                            <span class="bg-iba-teal text-white text-[10px] font-black uppercase px-2 py-1">Max: {{ $crit->max_score }} Pts</span>
-                                        </div>
-
-                                        <p class="text-xs font-bold text-gray-600 mb-4">{{ $crit->description }}</p>
-
-                                        {{-- Tiers Visualizer --}}
-                                        <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-6">
-                                            @foreach($crit->rubric_levels as $level)
-                                                @php
-                                                    $color = match($level['degree']) {
-                                                        'Outstanding' => 'border-iba-teal text-iba-teal',
-                                                        'Strong' => 'border-iba-green text-iba-green',
-                                                        'Developing' => 'border-iba-orange text-iba-orange',
-                                                        'Emerging' => 'border-iba-red text-iba-red',
-                                                        default => 'border-gray-500 text-gray-500'
-                                                    };
-                                                @endphp
-                                                <div class="bg-white p-2 border-l-4 border-2 border-iba-black {{ $color }} flex flex-col h-full">
-                                                    <div class="flex justify-between items-center mb-1">
-                                                        <span class="text-[9px] font-black uppercase tracking-widest">{{ $level['degree'] }}</span>
-                                                        <span class="text-[10px] font-black">{{ $level['range'] }}</span>
-                                                    </div>
-                                                    <p class="text-[9px] font-bold text-gray-600 leading-tight flex-1">{{ $level['description'] }}</p>
+                                    {{-- Tiers Visualizer --}}
+                                    <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-6">
+                                        @foreach($crit->rubric_levels as $level)
+                                            @php
+                                                $color = match($level['degree']) {
+                                                    'Outstanding' => 'border-iba-teal text-iba-teal',
+                                                    'Strong' => 'border-iba-green text-iba-green',
+                                                    'Developing' => 'border-iba-orange text-iba-orange',
+                                                    'Emerging' => 'border-iba-red text-iba-red',
+                                                    default => 'border-gray-500 text-gray-500'
+                                                };
+                                            @endphp
+                                            <div class="bg-gray-50 p-2 border-l-4 border-2 border-gray-200 {{ $color }} flex flex-col h-full">
+                                                <div class="flex justify-between items-center mb-1">
+                                                    <span class="text-[9px] font-black uppercase tracking-widest">{{ $level['degree'] }}</span>
+                                                    <span class="text-[10px] font-black">{{ $level['range'] }}</span>
                                                 </div>
-                                            @endforeach
-                                        </div>
+                                                <p class="text-[9px] font-bold text-gray-600 leading-tight flex-1">{{ $level['description'] }}</p>
+                                            </div>
+                                        @endforeach
+                                    </div>
 
-                                        {{-- Scoring Inputs --}}
-                                        <div class="flex flex-col sm:flex-row gap-4 bg-white p-4 border-2 border-iba-black">
-                                            <div class="w-full sm:w-1/3">
-                                                <label class="block text-[10px] font-black text-gray-500 uppercase mb-1">Assigned Marks</label>
-                                                <input type="number" step="0.5" wire:model="scores.{{ $crit->id }}" max="{{ $crit->max_score }}" min="0" class="w-full border-2 border-iba-black p-3 text-lg font-black text-center focus:outline-none focus:border-iba-orange text-iba-orange {{ $hasScored ? 'bg-gray-100 cursor-not-allowed text-gray-500' : '' }}" {{ $hasScored ? 'disabled' : '' }}>
-                                                @error("scores.{$crit->id}") <span class="text-[10px] font-black text-iba-red uppercase">⚠ Required</span> @enderror
-                                            </div>
-                                            <div class="w-full sm:w-2/3">
-                                                <label class="block text-[10px] font-black text-gray-500 uppercase mb-1">Council Notes / Feedback (Optional)</label>
-                                                <textarea
-                                                    x-data="{ resize() { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px' } }"
-                                                    x-init="resize()"
-                                                    @input="resize()"
-                                                    wire:model="feedback.{{ $crit->id }}"
-                                                    rows="2"
-                                                    class="w-full border-2 border-iba-black p-2 text-xs font-bold focus:outline-none focus:border-iba-orange overflow-hidden {{ $hasScored ? 'bg-gray-100 cursor-not-allowed text-gray-500' : '' }}"
-                                                    {{ $hasScored ? 'disabled' : '' }}
-                                                ></textarea>
-                                            </div>
+                                    {{-- Scoring Inputs --}}
+                                    <div class="flex flex-col sm:flex-row gap-4 bg-gray-50 p-4 border-2 border-iba-black">
+                                        <div class="w-full sm:w-1/3">
+                                            <label class="block text-[10px] font-black text-gray-500 uppercase mb-1">Assigned Marks</label>
+                                            <input type="number" step="0.5" wire:model="scores.{{ $crit->id }}" max="{{ $crit->max_score }}" min="0" class="w-full border-2 border-iba-black p-3 text-lg font-black text-center focus:outline-none focus:border-iba-orange text-iba-orange bg-white shadow-inner">
+                                            @error("scores.{$crit->id}") <span class="text-[10px] font-black text-iba-red uppercase mt-1 block">⚠ Required</span> @enderror
+                                        </div>
+                                        <div class="w-full sm:w-2/3">
+                                            <label class="block text-[10px] font-black text-gray-500 uppercase mb-1">Council Notes / Feedback (Optional)</label>
+                                            <textarea
+                                                x-data="{ resize() { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px' } }"
+                                                x-init="resize()"
+                                                @input="resize()"
+                                                wire:model="feedback.{{ $crit->id }}"
+                                                rows="2"
+                                                class="w-full border-2 border-iba-black p-2 text-xs font-bold focus:outline-none focus:border-iba-orange overflow-hidden bg-white"
+                                            ></textarea>
                                         </div>
                                     </div>
-                                @endforeach
-                            </div>
-                        @endforeach
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                @endforeach
 
-                        {{-- Action Button --}}
-                        @if(!$hasScored)
-                            <div class="pt-8 sticky bottom-4 z-10">
-                                <button type="submit" class="w-full bg-iba-black text-iba-orange text-lg font-black uppercase tracking-widest py-4 border-4 border-iba-black shadow-[6px_6px_0_0_#FF8623] hover:translate-y-1 hover:shadow-none transition-all">Lock Council Scores</button>
-                            </div>
-                        @endif
-                    </form>
+                {{-- Action Button --}}
+                <div class="pt-4 sticky bottom-4 z-10">
+                    <button type="submit" class="w-full bg-iba-black text-iba-orange text-lg font-black uppercase tracking-widest py-4 border-4 border-iba-black shadow-[6px_6px_0_0_#FF8623] hover:translate-y-1 hover:shadow-none transition-all">Save Evaluation Progress</button>
                 </div>
+            </form>
+        </div>
     </div>
 </div>
