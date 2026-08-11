@@ -12,7 +12,6 @@ class ScoringDeck extends Component
     public $scores = [];
     public $feedback = [];
 
-    // NEW: Property to track if the judge has already submitted
     public $hasScored = false;
 
     public function mount($submission_id)
@@ -30,7 +29,6 @@ class ScoringDeck extends Component
                             ->where('judge_id', $judge_id)
                             ->get();
 
-        // If records exist, lock the terminal
         if ($existingScores->count() > 0) {
             $this->hasScored = true;
         }
@@ -43,7 +41,6 @@ class ScoringDeck extends Component
 
     public function lockScores()
     {
-        // Prevent double submission if they try to bypass the UI
         if ($this->hasScored) {
             session()->flash('error', 'SYSTEM LOCK: Your evaluation is already recorded and cannot be altered.');
             return;
@@ -51,31 +48,43 @@ class ScoringDeck extends Component
 
         $rules = [];
         foreach ($this->submission->quest->criteria as $crit) {
-            $rules["scores.{$crit->id}"] = "required|numeric|min:0|max:{$crit->max_score}";
+            // UPGRADED: Changed from 'required' to 'nullable' to support Specialized Judges
+            $rules["scores.{$crit->id}"] = "nullable|numeric|min:0|max:{$crit->max_score}";
             $rules["feedback.{$crit->id}"] = "nullable|string";
         }
 
         $this->validate($rules);
 
         $judge_id = auth('ibalong')->id();
+        $scoredAnything = false;
 
         foreach ($this->submission->quest->criteria as $crit) {
-            IbalongQuestScore::updateOrCreate(
-                [
-                    'submission_id' => $this->submission->id,
-                    'judge_id' => $judge_id,
-                    'criteria_id' => $crit->id,
-                ],
-                [
-                    'score' => $this->scores[$crit->id],
-                    'feedback' => $this->feedback[$crit->id] ?? null,
-                ]
-            );
+            $scoreValue = $this->scores[$crit->id] ?? null;
+
+            // Only record the score if the judge actually inputted a number
+            if ($scoreValue !== null && $scoreValue !== '') {
+                IbalongQuestScore::updateOrCreate(
+                    [
+                        'submission_id' => $this->submission->id,
+                        'judge_id' => $judge_id,
+                        'criteria_id' => $crit->id,
+                    ],
+                    [
+                        'score' => $scoreValue,
+                        'feedback' => $this->feedback[$crit->id] ?? null,
+                    ]
+                );
+                $scoredAnything = true;
+            }
+        }
+
+        // Security check: Make sure they didn't just submit a completely blank form
+        if (!$scoredAnything) {
+            session()->flash('error', 'SYSTEM REJECT: You must input at least one score to lock an evaluation.');
+            return;
         }
 
         $this->submission->update(['status' => 'reviewed']);
-
-        // Lock the terminal for this judge after successful save
         $this->hasScored = true;
 
         session()->flash('success', 'The Weighing is complete. Scores securely locked.');

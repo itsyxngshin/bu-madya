@@ -10,7 +10,7 @@ class QuestBuilder extends Component
 {
     public $quest_id; // Will be set if editing
     public $title, $description, $deadline, $is_published = false;
-    
+
     public $tasks = [];
     public $criteria = [];
 
@@ -36,10 +36,11 @@ class QuestBuilder extends Component
                 ];
             })->toArray();
 
-            // Load existing criteria
+            // Load existing criteria with Evaluation Group
             $this->criteria = $quest->criteria->map(function($crit) {
                 return [
                     'id' => $crit->id,
+                    'evaluation_group' => $crit->evaluation_group ?? 'Main Scoring Matrix',
                     'name' => $crit->name,
                     'max_score' => $crit->max_score,
                     'description' => $crit->description,
@@ -60,7 +61,7 @@ class QuestBuilder extends Component
             'id' => null,
             'question' => '',
             'type' => 'short_text',
-            'options' => '', 
+            'options' => '',
             'max_file_size_mb' => 5,
             'is_required' => true,
         ];
@@ -69,13 +70,14 @@ class QuestBuilder extends Component
     public function removeTask($index)
     {
         unset($this->tasks[$index]);
-        $this->tasks = array_values($this->tasks); 
+        $this->tasks = array_values($this->tasks);
     }
 
     public function addCriteria()
     {
         $this->criteria[] = [
             'id' => null,
+            'evaluation_group' => 'Main Scoring Matrix',
             'name' => '',
             'max_score' => 10,
             'description' => '',
@@ -100,6 +102,7 @@ class QuestBuilder extends Component
             'title' => 'required|string|max:255',
             'deadline' => 'required|date',
             'tasks.*.question' => 'required|string',
+            'criteria.*.evaluation_group' => 'nullable|string|max:255',
             'criteria.*.name' => 'required|string',
             'criteria.*.max_score' => 'required|numeric|min:1',
         ]);
@@ -116,7 +119,7 @@ class QuestBuilder extends Component
                 ]
             );
 
-            // Sync Tasks (Updates existing to protect submissions, adds new, deletes removed)
+            // Sync Tasks
             $existingTaskIds = [];
             foreach ($this->tasks as $index => $taskData) {
                 $options = null;
@@ -145,6 +148,7 @@ class QuestBuilder extends Component
                 $crit = $quest->criteria()->updateOrCreate(
                     ['id' => $critData['id']],
                     [
+                        'evaluation_group' => empty($critData['evaluation_group']) ? 'Main Scoring Matrix' : $critData['evaluation_group'],
                         'name' => $critData['name'],
                         'max_score' => $critData['max_score'],
                         'description' => $critData['description'],
@@ -157,7 +161,7 @@ class QuestBuilder extends Component
         });
 
         session()->flash('success', $this->quest_id ? 'Quest Log modifications accepted.' : 'Quest successfully forged and added to the logs!');
-        return redirect()->route('ibalong.admin.quests.index'); 
+        return redirect()->route('ibalong.admin.quests.index');
     }
 
     public function render()

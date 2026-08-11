@@ -53,13 +53,13 @@
                         <td class="px-6 py-4">
                             @if(in_array($userRole, [1, 2, 4]) && $sub->team)
                                 <div class="relative">
-                                    <input type="text" 
-                                           wire:change="updateCategory({{ $sub->team->id }}, $event.target.value)" 
+                                    <input type="text"
+                                           wire:change="updateCategory({{ $sub->team->id }}, $event.target.value)"
                                            value="{{ $sub->team->category ?? 'General Classification' }}"
                                            placeholder="Type division..."
                                            class="text-[10px] font-black uppercase tracking-widest border-2 border-iba-black bg-gray-50 text-iba-black focus:border-iba-orange focus:ring-0 py-2 px-3 w-full max-w-[160px] placeholder:text-gray-400">
                                     <p class="text-[8px] font-bold text-gray-400 uppercase mt-1">Press Enter to save</p>
-                                    
+
                                     <div wire:loading wire:target="updateCategory({{ $sub->team->id }})" class="absolute top-2 -right-3">
                                         <span class="flex h-3 w-3">
                                             <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-iba-orange opacity-75"></span>
@@ -100,21 +100,49 @@
                             @endif
                         </td>
 
-                        {{-- Grading Progress --}}
-                        <td class="px-6 py-4 text-center">
+                        {{-- Grading Progress (Matrix Breakdown) --}}
+                        <td class="px-6 py-4">
                             @if($sub->status === 'draft')
-                                <span class="text-xs font-bold text-gray-400">-</span>
+                                <div class="text-center">
+                                    <span class="text-xs font-bold text-gray-400">-</span>
+                                </div>
                             @else
                                 @php
-                                    $myScore = $sub->scores->where('judge_id', auth('ibalong')->id())->sum('score');
-                                    $hasGraded = $sub->scores->where('judge_id', auth('ibalong')->id())->count() > 0;
+                                    $myScores = $sub->scores->where('judge_id', auth('ibalong')->id());
+                                    $hasGraded = $myScores->count() > 0;
                                 @endphp
 
                                 @if($hasGraded)
-                                    <div class="text-sm font-black text-iba-teal">{{ $myScore }} <span class="text-[10px] text-gray-500">/ {{ $maxPossibleScore }}</span></div>
-                                    <div class="text-[9px] font-bold text-gray-500 uppercase mt-1">Eval Complete</div>
+                                    @php
+                                        // Group the criteria to show separate fractions
+                                        $groupedCrit = $quest->criteria->groupBy(function($c) {
+                                            return !empty($c->evaluation_group) ? $c->evaluation_group : 'Main Matrix';
+                                        });
+                                    @endphp
+
+                                    <div class="flex flex-col gap-1 min-w-[120px]">
+                                        @foreach($groupedCrit as $gName => $gList)
+                                            @php
+                                                $gCritIds = $gList->pluck('id');
+                                                $gScore = $myScores->whereIn('criteria_id', $gCritIds)->sum('score');
+                                                $gMax = $gList->sum('max_score');
+                                                // Only show if the judge actually scored this specific group
+                                                $didScoreGroup = $myScores->whereIn('criteria_id', $gCritIds)->count() > 0;
+                                            @endphp
+
+                                            @if($didScoreGroup)
+                                                <div class="flex justify-between items-center text-[10px] font-black uppercase border-b border-gray-200 pb-1 last:border-0">
+                                                    <span class="text-gray-500 mr-3 truncate" title="{{ $gName }}">{{ \Illuminate\Support\Str::limit($gName, 12) }}:</span>
+                                                    <span class="text-iba-teal shrink-0">{{ $gScore }} <span class="text-gray-400">/ {{ $gMax }}</span></span>
+                                                </div>
+                                            @endif
+                                        @endforeach
+                                    </div>
+                                    <div class="text-[9px] font-bold text-gray-500 uppercase mt-2 text-right">Eval Complete</div>
                                 @else
-                                    <span class="text-[10px] font-black text-iba-red uppercase border-b-2 border-iba-red">Awaiting Eval</span>
+                                    <div class="text-center">
+                                        <span class="text-[10px] font-black text-iba-red uppercase border-b-2 border-iba-red pb-0.5">Awaiting Eval</span>
+                                    </div>
                                 @endif
                             @endif
                         </td>

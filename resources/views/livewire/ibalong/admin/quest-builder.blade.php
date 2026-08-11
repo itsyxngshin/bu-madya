@@ -97,8 +97,12 @@
                     <div class="p-5 border-4 border-iba-black relative bg-gray-100">
                         <button type="button" wire:click="removeCriteria({{ $cIndex }})" class="absolute -top-3 -right-3 bg-iba-red text-white w-6 h-6 flex items-center justify-center font-bold border-2 border-iba-black hover:scale-110 transition-transform">X</button>
 
-                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-                            <div class="md:col-span-3">
+                        <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4">
+                            <div class="md:col-span-2">
+                                <label class="block text-[10px] font-black text-gray-500 uppercase mb-1">Evaluation Category (Group)</label>
+                                <input type="text" wire:model="criteria.{{ $cIndex }}.evaluation_group" placeholder="e.g. Pitch Rubric" class="w-full border-2 border-iba-black p-2 text-sm font-bold focus:outline-none">
+                            </div>
+                            <div class="md:col-span-2">
                                 <label class="block text-[10px] font-black text-gray-500 uppercase mb-1">Criteria Name</label>
                                 <input type="text" wire:model="criteria.{{ $cIndex }}.name" placeholder="e.g. Feasibility & Viability" class="w-full border-2 border-iba-black p-2 text-sm font-bold focus:outline-none">
                             </div>

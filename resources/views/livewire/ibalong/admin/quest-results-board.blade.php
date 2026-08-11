@@ -83,45 +83,48 @@
                                 </td>
 
                                 {{-- Breakdown of Judges' Scores --}}
-                                <td class="px-6 py-4">
-                                    @if($row['total_judges'] > 0)
-                                        <div class="flex flex-wrap gap-2">
-                                            @foreach($row['judge_totals'] as $judgeName => $total)
-                                                {{-- Highlight the selected judge's block if filtering --}}
-                                                @php
-                                                    $isTargetJudge = $selectedJudge === $judgeName;
-                                                    $blockStyle = $isTargetJudge ? 'bg-iba-teal text-white border-iba-black shadow-[2px_2px_0_0_#131011]' : 'bg-white border-iba-black text-iba-black shadow-[2px_2px_0_0_#131011] opacity-60';
-                                                    if ($selectedJudge === 'all') $blockStyle = 'bg-white border-iba-black text-iba-black shadow-[2px_2px_0_0_#131011]';
-                                                @endphp
-                                                <div class="border {{ $blockStyle }} p-2 flex flex-col min-w-[120px] transition-all">
-                                                    <span class="text-[9px] font-black uppercase {{ $isTargetJudge ? 'text-white' : 'text-gray-500' }} truncate">{{ $judgeName }}</span>
-                                                    <span class="text-sm font-black">{{ $total }} <span class="text-[9px] {{ $isTargetJudge ? 'text-teal-100' : 'text-gray-400' }}">/ {{ $maxPossibleScore }}</span></span>
-                                                </div>
-                                            @endforeach
-                                        </div>
-                                    @else
-                                        <span class="text-xs font-bold text-gray-400 italic">No evaluations submitted yet.</span>
-                                    @endif
-                                </td>
+                                {{-- Fractional Breakdown --}}
+                                                                <td class="px-6 py-4">
+                                                                    @if($selectedJudge === 'all' && $row['total_judges'] > 0)
+                                                                        <div class="flex flex-col gap-1 min-w-[180px]">
+                                                                            @foreach($row['group_averages'] as $groupName => $data)
+                                                                                @if($data['average'] > 0)
+                                                                                    <div class="flex justify-between items-center text-[10px] font-black uppercase border-b border-gray-200 pb-1 last:border-0">
+                                                                                        <span class="text-gray-500 mr-3 truncate" title="{{ $groupName }}">{{ \Illuminate\Support\Str::limit($groupName, 18) }}:</span>
+                                                                                        <span class="text-iba-teal shrink-0">{{ number_format($data['average'], 2) }} <span class="text-gray-400">/ {{ $data['max'] }}</span></span>
+                                                                                    </div>
+                                                                                @endif
+                                                                            @endforeach
+                                                                        </div>
+                                                                    @elseif($row['total_judges'] > 0)
+                                                                        {{-- Specific Judge View --}}
+                                                                        <div class="border bg-iba-teal text-white border-iba-black p-2 flex flex-col min-w-[120px] transition-all max-w-[160px]">
+                                                                            <span class="text-[9px] font-black uppercase text-white truncate" title="{{ $selectedJudge }}">{{ $selectedJudge }}</span>
+                                                                            <span class="text-sm font-black">{{ $row['judge_totals'][$selectedJudge] ?? 0 }} <span class="text-[9px] text-teal-100">Pts Granted</span></span>
+                                                                        </div>
+                                                                    @else
+                                                                        <span class="text-xs font-bold text-gray-400 italic">No evaluations submitted yet.</span>
+                                                                    @endif
+                                                                </td>
 
-                                {{-- Dynamic Metric Display --}}
-                                <td class="px-6 py-4 text-center">
-                                    @if($selectedJudge === 'all')
-                                        @if($row['total_judges'] > 0)
-                                            <div class="text-xl font-black text-iba-black">{{ number_format($row['average_score'], 2) }}</div>
-                                            <div class="text-[9px] font-bold text-gray-500 uppercase mt-1">Based on {{ $row['total_judges'] }} Judge(s)</div>
-                                        @else
-                                            <span class="text-xs font-black text-iba-red uppercase border-b-2 border-iba-red">Pending</span>
-                                        @endif
-                                    @else
-                                        @if(isset($row['judge_totals'][$selectedJudge]))
-                                            <div class="text-xl font-black text-iba-teal">{{ number_format($row['judge_totals'][$selectedJudge], 2) }}</div>
-                                            <div class="text-[9px] font-bold text-gray-500 uppercase mt-1">Granted Score</div>
-                                        @else
-                                            <span class="text-[10px] font-black text-gray-400 uppercase italic">Not Assessed</span>
-                                        @endif
-                                    @endif
-                                </td>
+                                                                {{-- Dynamic Final Score Display --}}
+                                                                <td class="px-6 py-4 text-center">
+                                                                    @if($selectedJudge === 'all')
+                                                                        @if($row['total_judges'] > 0)
+                                                                            <div class="text-xl font-black text-iba-black">{{ number_format($row['final_score'], 2) }}</div>
+                                                                            <div class="text-[9px] font-bold text-gray-500 uppercase mt-1">Combined Average</div>
+                                                                        @else
+                                                                            <span class="text-xs font-black text-iba-red uppercase border-b-2 border-iba-red">Pending</span>
+                                                                        @endif
+                                                                    @else
+                                                                        @if(isset($row['judge_totals'][$selectedJudge]))
+                                                                            <div class="text-xl font-black text-iba-teal">{{ number_format($row['judge_totals'][$selectedJudge], 2) }}</div>
+                                                                            <div class="text-[9px] font-bold text-gray-500 uppercase mt-1">Judge Total</div>
+                                                                        @else
+                                                                            <span class="text-[10px] font-black text-gray-400 uppercase italic">Not Assessed</span>
+                                                                        @endif
+                                                                    @endif
+                                                                </td>
                             </tr>
                         @empty
                             <tr>

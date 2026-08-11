@@ -29,7 +29,6 @@ class QuestResultsBoard extends Component
         $this->calculateLeaderboard();
     }
 
-    // Livewire lifecycle hook: Runs automatically when $selectedJudge changes
     public function updatedSelectedJudge()
     {
         $this->calculateLeaderboard();
@@ -45,29 +44,62 @@ class QuestResultsBoard extends Component
             ->whereIn('status', ['reviewing', 'reviewed', 'submitted'])
             ->get();
 
+        // 1. Organize criteria into Evaluation Groups
+        $groups = $this->quest->criteria->groupBy(function($c) {
+            return !empty($c->evaluation_group) ? $c->evaluation_group : 'Main Scoring Matrix';
+        });
+
         $results = [];
         $judgesList = [];
 
         foreach ($submissions as $sub) {
-            $judgeTotals = [];
-            $scoresByJudge = $sub->scores->groupBy('judge_id');
+            $groupAverages = [];
+            $judgeTotalsAll = [];
+            $totalFinalScore = 0;
 
-            foreach ($scoresByJudge as $judgeId => $scores) {
-                $judgeName = $scores->first()->judge->name ?? 'Unknown Judge';
-                $judgeTotals[$judgeName] = $scores->sum('score');
-                $judgesList[$judgeName] = $judgeName; // Collect unique judge names
+            // 2. Fractional Tabulation: Calculate average per group independently
+            foreach ($groups as $groupName => $critsInGroup) {
+                $critIds = $critsInGroup->pluck('id')->toArray();
+                $scoresInGroup = $sub->scores->whereIn('criteria_id', $critIds);
+                $scoresByJudgeInGroup = $scoresInGroup->groupBy('judge_id');
+
+                $sumOfJudgeTotals = 0;
+                $judgeCount = 0;
+
+                foreach ($scoresByJudgeInGroup as $judgeId => $judgeScores) {
+                    $judgeTotal = $judgeScores->sum('score');
+                    $sumOfJudgeTotals += $judgeTotal;
+                    $judgeCount++;
+
+                    // Track overall judge totals across all groups they graded for the dropdown
+                    $judgeName = $judgeScores->first()->judge->name ?? 'Unknown Judge';
+                    if (!isset($judgeTotalsAll[$judgeName])) {
+                        $judgeTotalsAll[$judgeName] = 0;
+                        $judgesList[$judgeName] = $judgeName;
+                    }
+                    $judgeTotalsAll[$judgeName] += $judgeTotal;
+                }
+
+                // Group Average = Sum of judge scores for this group / Number of judges who graded this group
+                $groupAvg = $judgeCount > 0 ? ($sumOfJudgeTotals / $judgeCount) : 0;
+                $groupAverages[$groupName] = [
+                    'average' => $groupAvg,
+                    'max' => $critsInGroup->sum('max_score')
+                ];
+
+                // Final Score = Sum of Group Averages
+                $totalFinalScore += $groupAvg;
             }
 
-            $totalJudges = count($judgeTotals);
-            $average = $totalJudges > 0 ? array_sum($judgeTotals) / $totalJudges : 0;
+            $totalJudgesOverall = count($judgeTotalsAll);
             $category = $sub->team->category ?? 'General Classification';
 
             // Determine the sorting metric based on the active filter
             $sortScore = 0;
             if ($this->selectedJudge === 'all') {
-                $sortScore = round($average, 2);
+                $sortScore = round($totalFinalScore, 2);
             } else {
-                $sortScore = $judgeTotals[$this->selectedJudge] ?? 0;
+                $sortScore = $judgeTotalsAll[$this->selectedJudge] ?? 0;
             }
 
             $results[] = [
@@ -75,21 +107,20 @@ class QuestResultsBoard extends Component
                 'team_name' => $sub->team->team_name ?? 'Unknown Cohort',
                 'ticket_code' => $sub->team->ticket_code ?? 'N/A',
                 'category' => $category,
-                'judge_totals' => $judgeTotals,
-                'total_judges' => $totalJudges,
-                'average_score' => round($average, 2),
+                'judge_totals' => $judgeTotalsAll,
+                'total_judges' => $totalJudgesOverall,
+                'group_averages' => $groupAverages,
+                'final_score' => round($totalFinalScore, 2),
                 'sort_score' => $sortScore,
                 'status' => $sub->status,
             ];
         }
 
-        // Store unique judges for the dropdown
         $this->availableJudges = array_values($judgesList);
 
         $collection = collect($results);
         $grouped = $collection->groupBy('category');
 
-        // Sort dynamically based on the target metric (sort_score)
         $this->categorizedLeaderboard = $grouped->map(function ($group) {
             return $group->sortByDesc('sort_score')->values()->toArray();
         })->toArray();
