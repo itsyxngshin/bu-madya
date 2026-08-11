@@ -117,6 +117,12 @@
                     Evaluation Matrix
                 </a>
 
+                {{-- Live Voting & Polls --}}
+                <a href="{{ route('ibalong.admin.polls') }}" class="group flex items-center px-4 py-3 text-xs font-bold uppercase tracking-wider border-2 transition-all {{ request()->routeIs('admin.polls') ? 'bg-iba-teal text-white border-iba-black dark:border-iba-light shadow-[4px_4px_0_0_#131011] dark:shadow-[4px_4px_0_0_#FFFBF7]' : 'border-transparent text-gray-600 dark:text-gray-400 hover:border-iba-black dark:hover:border-iba-light hover:bg-gray-100 dark:hover:bg-gray-800 hover:-translate-y-0.5' }}">
+                    <svg class="mr-3 flex-shrink-0 h-5 w-5 transition-colors {{ request()->routeIs('admin.polls') ? 'text-white' : 'text-gray-400 group-hover:text-iba-teal' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                    Live Voting
+                </a>
+
                 <a href="{{ route('ibalong.admin.awards') }}" class="group flex items-center px-4 py-3 text-xs font-bold uppercase tracking-wider border-2 transition-all {{ request()->routeIs('admin.awards') ? 'bg-iba-orange text-iba-black border-iba-black shadow-[4px_4px_0_0_#131011]' : 'border-transparent text-gray-600 hover:border-iba-black hover:bg-gray-100 hover:-translate-y-0.5' }}">
                     <svg class="mr-3 flex-shrink-0 h-5 w-5 transition-colors {{ request()->routeIs('ibalong.admin.awards') ? 'text-iba-black' : 'text-gray-400 group-hover:text-iba-orange' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>
                     Awards & Citations
