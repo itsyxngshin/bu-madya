@@ -210,6 +210,15 @@ class SchedulerManager extends Component
         $activity->update(['is_published' => !$activity->is_published]);
     }
 
+    public function toggleBooking($id)
+    {
+        // Protected by the Admin Password Interceptor!
+        if (!$this->checkAuthorization('toggleBooking', [$id])) return;
+
+        $activity = IbalongActivity::findOrFail($id);
+        $activity->update(['allow_booking' => !$activity->allow_booking]);
+    }
+
     // --- HUB GENERATION PROTOCOLS ---
     public function openTrackGenerator($activityId)
     {

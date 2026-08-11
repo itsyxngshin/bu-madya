@@ -40,6 +40,11 @@
                         <button wire:click="togglePublish({{ $activity->id }})" class="text-[10px] font-black uppercase px-3 py-1.5 border-2 border-iba-black {{ $activity->is_published ? 'bg-iba-green text-white' : 'bg-white text-gray-500 hover:bg-gray-200' }}">
                             {{ $activity->is_published ? 'Live Broadcast' : 'Draft Mode' }}
                         </button>
+                        
+                        {{-- NEW: BOOKING LOCK TOGGLE --}}
+                        <button wire:click="toggleBooking({{ $activity->id }})" class="text-[10px] font-black uppercase px-3 py-1.5 border-2 border-iba-black shadow-[2px_2px_0_0_#131011] hover:translate-y-0.5 hover:shadow-none transition-all {{ $activity->allow_booking ? 'bg-iba-teal text-white' : 'bg-iba-orange text-iba-black' }}">
+                            {{ $activity->allow_booking ? '🔓 Booking Open' : '🔒 Matrix Locked' }}
+                        </button>
                         <button wire:click="openEditActivity({{ $activity->id }})" class="bg-gray-200 text-iba-black border-2 border-iba-black px-3 py-1.5 text-[10px] font-black uppercase hover:bg-gray-300 transition-colors">
                             Edit Setup
                         </button>
