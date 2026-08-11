@@ -11,11 +11,17 @@ class QuestResultsBoard extends Component
     public $quest_id;
     public $quest;
     public $categorizedLeaderboard = [];
-    public $maxPossibleScore = 0;
 
-    // Filter State
+    // Scoring Limits
+    public $maxPossibleScore = 0;
+    public $dynamicMaxScore = 0;
+
+    // Filter States
     public $selectedJudge = 'all';
     public $availableJudges = [];
+
+    public $selectedGroup = 'all';
+    public $availableGroups = [];
 
     public function mount($quest_id)
     {
@@ -29,25 +35,32 @@ class QuestResultsBoard extends Component
         $this->calculateLeaderboard();
     }
 
-    public function updatedSelectedJudge()
-    {
-        $this->calculateLeaderboard();
-    }
+    // Livewire lifecycle hooks: Recalculate instantly when filters change
+    public function updatedSelectedJudge() { $this->calculateLeaderboard(); }
+    public function updatedSelectedGroup() { $this->calculateLeaderboard(); }
 
     public function calculateLeaderboard()
     {
         $this->quest = IbalongQuest::with('criteria')->findOrFail($this->quest_id);
         $this->maxPossibleScore = $this->quest->criteria->sum('max_score');
 
+        // 1. Determine Evaluation Groups
+        $groups = $this->quest->criteria->groupBy(function($c) {
+            return !empty($c->evaluation_group) ? $c->evaluation_group : 'Main Scoring Matrix';
+        });
+        $this->availableGroups = array_keys($groups->toArray());
+
+        // 2. Set dynamic max score based on selected group filter
+        if ($this->selectedGroup === 'all') {
+            $this->dynamicMaxScore = $this->maxPossibleScore;
+        } else {
+            $this->dynamicMaxScore = $groups[$this->selectedGroup]->sum('max_score');
+        }
+
         $submissions = IbalongQuestSubmission::with(['team', 'scores.judge'])
             ->where('quest_id', $this->quest_id)
             ->whereIn('status', ['reviewing', 'reviewed', 'submitted'])
             ->get();
-
-        // 1. Organize criteria into Evaluation Groups
-        $groups = $this->quest->criteria->groupBy(function($c) {
-            return !empty($c->evaluation_group) ? $c->evaluation_group : 'Main Scoring Matrix';
-        });
 
         $results = [];
         $judgesList = [];
@@ -55,9 +68,10 @@ class QuestResultsBoard extends Component
         foreach ($submissions as $sub) {
             $groupAverages = [];
             $judgeTotalsAll = [];
+            $judgeGroupScores = []; // Tracks how much Judge X scored Group Y
             $totalFinalScore = 0;
 
-            // 2. Fractional Tabulation: Calculate average per group independently
+            // 3. Tabulate matrix metrics
             foreach ($groups as $groupName => $critsInGroup) {
                 $critIds = $critsInGroup->pluck('id')->toArray();
                 $scoresInGroup = $sub->scores->whereIn('criteria_id', $critIds);
@@ -71,35 +85,39 @@ class QuestResultsBoard extends Component
                     $sumOfJudgeTotals += $judgeTotal;
                     $judgeCount++;
 
-                    // Track overall judge totals across all groups they graded for the dropdown
                     $judgeName = $judgeScores->first()->judge->name ?? 'Unknown Judge';
                     if (!isset($judgeTotalsAll[$judgeName])) {
                         $judgeTotalsAll[$judgeName] = 0;
                         $judgesList[$judgeName] = $judgeName;
                     }
+                    // Add to judge's grand total
                     $judgeTotalsAll[$judgeName] += $judgeTotal;
+                    // Log judge's score for this specific group
+                    $judgeGroupScores[$judgeName][$groupName] = $judgeTotal;
                 }
 
-                // Group Average = Sum of judge scores for this group / Number of judges who graded this group
                 $groupAvg = $judgeCount > 0 ? ($sumOfJudgeTotals / $judgeCount) : 0;
                 $groupAverages[$groupName] = [
                     'average' => $groupAvg,
                     'max' => $critsInGroup->sum('max_score')
                 ];
 
-                // Final Score = Sum of Group Averages
                 $totalFinalScore += $groupAvg;
             }
 
             $totalJudgesOverall = count($judgeTotalsAll);
             $category = $sub->team->category ?? 'General Classification';
 
-            // Determine the sorting metric based on the active filter
+            // 4. Core Sorting Logic based on Filters
             $sortScore = 0;
-            if ($this->selectedJudge === 'all') {
+            if ($this->selectedJudge === 'all' && $this->selectedGroup === 'all') {
                 $sortScore = round($totalFinalScore, 2);
-            } else {
+            } elseif ($this->selectedJudge === 'all' && $this->selectedGroup !== 'all') {
+                $sortScore = round($groupAverages[$this->selectedGroup]['average'] ?? 0, 2);
+            } elseif ($this->selectedJudge !== 'all' && $this->selectedGroup === 'all') {
                 $sortScore = $judgeTotalsAll[$this->selectedJudge] ?? 0;
+            } elseif ($this->selectedJudge !== 'all' && $this->selectedGroup !== 'all') {
+                $sortScore = $judgeGroupScores[$this->selectedJudge][$this->selectedGroup] ?? 0;
             }
 
             $results[] = [
@@ -108,6 +126,7 @@ class QuestResultsBoard extends Component
                 'ticket_code' => $sub->team->ticket_code ?? 'N/A',
                 'category' => $category,
                 'judge_totals' => $judgeTotalsAll,
+                'judge_group_scores' => $judgeGroupScores,
                 'total_judges' => $totalJudgesOverall,
                 'group_averages' => $groupAverages,
                 'final_score' => round($totalFinalScore, 2),
