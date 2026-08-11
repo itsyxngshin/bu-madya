@@ -12,7 +12,9 @@ class QuestBuilder extends Component
     public $title, $description, $deadline, $is_published = false;
 
     public $tasks = [];
-    public $criteria = [];
+
+    // NEW: Nested array for Groups -> Criteria
+    public $evaluationGroups = [];
 
     public function mount($quest_id = null)
     {
@@ -36,25 +38,34 @@ class QuestBuilder extends Component
                 ];
             })->toArray();
 
-            // Load existing criteria with Evaluation Group
-            $this->criteria = $quest->criteria->map(function($crit) {
-                return [
-                    'id' => $crit->id,
-                    'evaluation_group' => $crit->evaluation_group ?? 'Main Scoring Matrix',
-                    'name' => $crit->name,
-                    'max_score' => $crit->max_score,
-                    'description' => $crit->description,
-                    'levels' => $crit->rubric_levels,
+            // Load existing criteria into nested Evaluation Groups
+            $groupedCriteria = $quest->criteria->groupBy(function($crit) {
+                return !empty($crit->evaluation_group) ? $crit->evaluation_group : 'Main Scoring Matrix';
+            });
+
+            foreach ($groupedCriteria as $groupName => $crits) {
+                $this->evaluationGroups[] = [
+                    'name' => $groupName,
+                    'criteria' => $crits->map(function($crit) {
+                        return [
+                            'id' => $crit->id,
+                            'name' => $crit->name,
+                            'max_score' => $crit->max_score,
+                            'description' => $crit->description,
+                            'levels' => $crit->rubric_levels,
+                        ];
+                    })->toArray()
                 ];
-            })->toArray();
+            }
 
         } else {
             // Default setup for a new quest
             $this->addTask();
-            $this->addCriteria();
+            $this->addEvaluationGroup();
         }
     }
 
+    // --- TASK PROTOCOLS ---
     public function addTask()
     {
         $this->tasks[] = [
@@ -73,11 +84,28 @@ class QuestBuilder extends Component
         $this->tasks = array_values($this->tasks);
     }
 
-    public function addCriteria()
+    // --- GROUP & CRITERIA PROTOCOLS ---
+    public function addEvaluationGroup()
     {
-        $this->criteria[] = [
+        $this->evaluationGroups[] = [
+            'name' => '',
+            'criteria' => []
+        ];
+
+        // Auto-add the first criteria slot to the new group
+        $this->addCriteriaToGroup(count($this->evaluationGroups) - 1);
+    }
+
+    public function removeEvaluationGroup($groupIndex)
+    {
+        unset($this->evaluationGroups[$groupIndex]);
+        $this->evaluationGroups = array_values($this->evaluationGroups);
+    }
+
+    public function addCriteriaToGroup($groupIndex)
+    {
+        $this->evaluationGroups[$groupIndex]['criteria'][] = [
             'id' => null,
-            'evaluation_group' => 'Main Scoring Matrix',
             'name' => '',
             'max_score' => 10,
             'description' => '',
@@ -90,21 +118,22 @@ class QuestBuilder extends Component
         ];
     }
 
-    public function removeCriteria($index)
+    public function removeCriteriaFromGroup($groupIndex, $criteriaIndex)
     {
-        unset($this->criteria[$index]);
-        $this->criteria = array_values($this->criteria);
+        unset($this->evaluationGroups[$groupIndex]['criteria'][$criteriaIndex]);
+        $this->evaluationGroups[$groupIndex]['criteria'] = array_values($this->evaluationGroups[$groupIndex]['criteria']);
     }
 
+    // --- EXECUTE SAVE ---
     public function saveQuest()
     {
         $this->validate([
             'title' => 'required|string|max:255',
             'deadline' => 'required|date',
             'tasks.*.question' => 'required|string',
-            'criteria.*.evaluation_group' => 'nullable|string|max:255',
-            'criteria.*.name' => 'required|string',
-            'criteria.*.max_score' => 'required|numeric|min:1',
+            'evaluationGroups.*.name' => 'required|string|max:255',
+            'evaluationGroups.*.criteria.*.name' => 'required|string',
+            'evaluationGroups.*.criteria.*.max_score' => 'required|numeric|min:1',
         ]);
 
         DB::transaction(function () {
@@ -142,20 +171,24 @@ class QuestBuilder extends Component
             }
             $quest->tasks()->whereNotIn('id', $existingTaskIds)->delete();
 
-            // Sync Criteria
+            // Sync Criteria via Groups
             $existingCritIds = [];
-            foreach ($this->criteria as $critData) {
-                $crit = $quest->criteria()->updateOrCreate(
-                    ['id' => $critData['id']],
-                    [
-                        'evaluation_group' => empty($critData['evaluation_group']) ? 'Main Scoring Matrix' : $critData['evaluation_group'],
-                        'name' => $critData['name'],
-                        'max_score' => $critData['max_score'],
-                        'description' => $critData['description'],
-                        'rubric_levels' => $critData['levels'],
-                    ]
-                );
-                $existingCritIds[] = $crit->id;
+            foreach ($this->evaluationGroups as $group) {
+                $groupName = trim($group['name']);
+
+                foreach ($group['criteria'] as $critData) {
+                    $crit = $quest->criteria()->updateOrCreate(
+                        ['id' => $critData['id']],
+                        [
+                            'evaluation_group' => $groupName,
+                            'name' => $critData['name'],
+                            'max_score' => $critData['max_score'],
+                            'description' => $critData['description'],
+                            'rubric_levels' => $critData['levels'],
+                        ]
+                    );
+                    $existingCritIds[] = $crit->id;
+                }
             }
             $quest->criteria()->whereNotIn('id', $existingCritIds)->delete();
         });
