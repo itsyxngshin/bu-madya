@@ -37,7 +37,6 @@ class EvaluationResults extends Component
     public function mount($evaluation = null)
     {
         // 1. BULLETPROOF MODEL RETRIEVAL
-        // Automatically hunts down the correct evaluation regardless of route parameter mismatches
         if ($evaluation instanceof IbalongEvaluation && $evaluation->exists) {
             $this->evaluation = $evaluation;
         } elseif (is_string($evaluation)) {
@@ -45,39 +44,39 @@ class EvaluationResults extends Component
         } elseif (is_object($evaluation) && isset($evaluation->slug)) {
             $this->evaluation = IbalongEvaluation::where('slug', $evaluation->slug)->firstOrFail();
         } else {
-            // Absolute Fallback: Grab the slug directly from the URL (Segment 3)
-            $slug = request()->segment(3);
+            $slug = request()->segment(3) ?? request()->segment(4); // Safely hunt for slug
             $this->evaluation = IbalongEvaluation::where('slug', $slug)->firstOrFail();
         }
 
-        // 2. AUTHORIZATION & ACCESS LOGIC
-        $user = auth()->user() ?? auth('ibalong')->user();
+        // 2. AUTHORIZATION (Fixed Guard Priority)
+        // Check Ibalong guard first so Admins are properly detected
+        $user = auth('ibalong')->user() ?? auth()->user();
+        $isPublic = $this->evaluation->is_public_results ?? false;
+
+        $isAdminOrCreator = false;
+        if ($user) {
+            $roleId = $user->role_id ?? 0;
+            $isAdmin = in_array($roleId, [1, 2]); // Super Admin (1) and Admin (2)
+            $isAdminOrCreator = $isAdmin || $this->evaluation->created_by === $user->id;
+        }
 
         $isCollaborator = false;
         if ($user && method_exists($this->evaluation, 'collaborators')) {
             $isCollaborator = $this->evaluation->collaborators()->where('user_id', $user->id)->exists();
         }
 
-        $isPublic = $this->evaluation->is_public_results ?? false;
-
-        $isAdminOrCreator = false;
-        if ($user) {
-            $isAdmin = isset($user->role_id) ? in_array($user->role_id, [1, 2]) : ($user->role?->role_name === 'administrator');
-            $isAdminOrCreator = $isAdmin || $this->evaluation->created_by === $user->id;
-        }
-
         if (!$isPublic && !$isAdminOrCreator && !$isCollaborator) {
             abort(403, 'SYSTEM REJECT: You do not have permission to access this evaluation.');
         }
 
-        // 3. TRIGGER DATA CALCULATIONS
         $this->calculateStats();
     }
 
     public function togglePublicAccess()
     {
-        $user = auth()->user() ?? auth('ibalong')->user();
-        $isAdmin = isset($user->role_id) ? in_array($user->role_id, [1, 2]) : ($user->role?->role_name === 'administrator');
+        $user = auth('ibalong')->user() ?? auth()->user();
+        $roleId = $user->role_id ?? 0;
+        $isAdmin = in_array($roleId, [1, 2]);
 
         if (!$user || (!$isAdmin && $this->evaluation->created_by !== $user->id)) {
             abort(403, 'Unauthorized to modify broadcast settings.');
@@ -187,7 +186,6 @@ class EvaluationResults extends Component
 
     public function render()
     {
-        // This will now correctly count the 35 responses because the model is loaded!
         $totalResponsesCount = $this->evaluation->responses()->count();
         $currentResponse = null;
         $allResponses = null;
@@ -207,10 +205,12 @@ class EvaluationResults extends Component
         }
 
         $layoutFile = 'layouts.guest';
-        $user = auth()->user() ?? auth('ibalong')->user();
 
+        // Ensure UI styling matches the priority guard as well
+        $user = auth('ibalong')->user();
         if ($user) {
-            $isAdmin = isset($user->role_id) ? in_array($user->role_id, [1, 2]) : ($user->role?->name === 'administrator');
+            $roleId = $user->role_id ?? 0;
+            $isAdmin = in_array($roleId, [1, 2]);
             $layoutFile = $isAdmin ? 'layouts.dashboard' : 'layouts.guest';
         }
 
