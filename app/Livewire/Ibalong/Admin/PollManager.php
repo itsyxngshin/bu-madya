@@ -5,15 +5,21 @@ namespace App\Livewire\Ibalong\Admin;
 use Livewire\Component;
 use App\Models\IbalongHackathon;
 use App\Models\IbalongPoll;
-use App\Models\IbalongEvent; // Imported Event model
-use Illuminate\Support\Facades\DB;
+use App\Models\IbalongEvent;
+use App\Models\IbalongRegistration;
 
 class PollManager extends Component
 {
     public $activeHackathon;
-    public $title = "People's Choice Award";
-    public $requireTicket = true;
-    public $selectedEventId = ''; // Holds the linked event
+
+    // Form State
+    public $title = '';
+    public $requireTicket = false;
+    public $selectedEventId = '';
+
+    // Nominee Management State
+    public $managingPollId = null;
+    public $selectedNominees = [];
 
     public function mount()
     {
@@ -31,53 +37,82 @@ class PollManager extends Component
         $this->validate([
             'title' => 'required|string|max:255',
             'requireTicket' => 'boolean',
-            'selectedEventId' => 'required_if:requireTicket,true' // Must pick an event if ticket is required
+            'selectedEventId' => 'required_if:requireTicket,true'
         ]);
 
-        $this->activeHackathon->polls()->create([
+        // Direct creation to bypass relationship requirements
+        IbalongPoll::create([
+            'hackathon_id' => $this->activeHackathon->id,
             'event_id' => $this->requireTicket ? $this->selectedEventId : null,
             'title' => $this->title,
             'is_active' => false,
             'require_ticket' => $this->requireTicket
         ]);
 
-        $this->reset(['title', 'selectedEventId']);
-        $this->requireTicket = true;
+        $this->reset(['title', 'selectedEventId', 'requireTicket']);
         session()->flash('success', 'Voting Poll successfully initialized and linked.');
     }
 
-    public function togglePollStatus($pollId)
+    public function togglePollStatus($id)
     {
-        $poll = IbalongPoll::findOrFail($pollId);
+        $poll = IbalongPoll::findOrFail($id);
+
+        // Optional: If you only want one active poll at a time, uncomment the line below:
+        // IbalongPoll::where('hackathon_id', $this->activeHackathon->id)->update(['is_active' => false]);
+
         $poll->update(['is_active' => !$poll->is_active]);
-        session()->flash('success', 'Poll broadcasting status updated.');
+        session()->flash('success', 'Poll broadcast status updated.');
     }
 
-    public function toggleTicketRequirement($pollId)
+    public function deletePoll($id)
+    {
+        IbalongPoll::findOrFail($id)->delete();
+        session()->flash('success', 'Poll successfully purged.');
+    }
+
+    // --- NOMINEE PROTOCOLS ---
+    public function openNomineeManager($pollId)
     {
         $poll = IbalongPoll::findOrFail($pollId);
-        $poll->update(['require_ticket' => !$poll->require_ticket]);
-        session()->flash('success', 'Poll security requirement updated.');
+        $this->managingPollId = $poll->id;
+
+        // Load existing nominees, defaulting to an empty array
+        $this->selectedNominees = $poll->nominee_ids ?? [];
     }
 
-    public function deletePoll($pollId)
+    public function saveNominees()
     {
-        IbalongPoll::findOrFail($pollId)->delete();
-        session()->flash('success', 'Poll and all associated votes purged.');
+        $poll = IbalongPoll::findOrFail($this->managingPollId);
+
+        // Convert the string checkbox values into pure integers before saving
+        $cleanArray = array_map('intval', $this->selectedNominees);
+
+        $poll->update([
+            'nominee_ids' => $cleanArray
+        ]);
+
+        $this->managingPollId = null;
+        $this->selectedNominees = [];
+
+        session()->flash('success', 'Nominee roster successfully locked in for this poll.');
     }
 
     public function render()
     {
-        // Added 'event' eager loading
-        $polls = IbalongPoll::with(['votes.team', 'event'])
+        $polls = clone IbalongPoll::with(['votes.team', 'event'])
             ->where('hackathon_id', $this->activeHackathon->id)
             ->latest()
             ->get();
 
-        // Fetch events to link to the poll
-        $events = IbalongEvent::orderBy('start_date', 'asc')->get();
+        // Using latest() to prevent 500 SQL errors
+        $events = IbalongEvent::latest()->get();
 
-        return view('livewire.ibalong.admin.poll-manager', compact('polls', 'events'))
+        // Fetch all approved teams to populate the nominee checklist
+        $teams = IbalongRegistration::where('status', 'approved')
+            ->orderBy('team_name', 'asc')
+            ->get();
+
+        return view('livewire.ibalong.admin.poll-manager', compact('polls', 'events', 'teams'))
             ->layout('layouts.dashboard');
     }
 }

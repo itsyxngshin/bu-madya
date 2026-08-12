@@ -13,6 +13,13 @@ class AppointmentTerminal extends Component
     public $activeHackathon;
     public $teamId;
 
+    // --- MODAL STATE ---
+    public $isViewingNotes = false;
+    public $modalNotes = '';
+    public $modalHubName = '';
+    public $modalTime = '';
+    public $modalStatus = '';
+
     public function mount()
     {
         $this->teamId = auth('ibalong')->user()->registration->id ?? null;
@@ -28,7 +35,6 @@ class AppointmentTerminal extends Component
     {
         $slot = IbalongActivitySlot::with(['track.activity', 'appointments'])->findOrFail($slotId);
 
-        // Security Check 1: Is Booking Locked?
         if (!$slot->track->activity->allow_booking) {
             session()->flash('error', 'SYSTEM REJECT: The Command Center has locked the matrix. No new appointments can be made.');
             return;
@@ -64,7 +70,6 @@ class AppointmentTerminal extends Component
             ->where('team_id', $this->teamId)
             ->firstOrFail();
 
-        // Security Check 1: Is Booking Locked?
         if (!$appointment->slot->track->activity->allow_booking) {
             session()->flash('error', 'SYSTEM REJECT: The Command Center has locked the matrix. You cannot drop a finalized schedule.');
             return;
@@ -74,12 +79,35 @@ class AppointmentTerminal extends Component
         session()->flash('success', 'Appointment relinquished. The block is now open for other cohorts.');
     }
 
+    // --- MODAL PROTOCOLS ---
+    public function openNotesModal($appointmentId)
+    {
+        $apt = IbalongAppointment::with('slot.track')->findOrFail($appointmentId);
+
+        // Security check: Prevent tampering by ensuring the appointment belongs to this team
+        if ($apt->team_id !== $this->teamId) {
+            abort(403);
+        }
+
+        $this->modalNotes = $apt->notes;
+        $this->modalHubName = $apt->slot->track->name ?? 'Unknown Hub';
+        $this->modalTime = $apt->slot->start_time->format('h:i A') . ' - ' . $apt->slot->end_time->format('h:i A');
+        $this->modalStatus = $apt->status;
+
+        $this->isViewingNotes = true;
+    }
+
+    public function closeNotesModal()
+    {
+        $this->isViewingNotes = false;
+        $this->modalNotes = '';
+    }
+
     public function render()
     {
         $activities = collect();
 
         if ($this->activeHackathon) {
-            // Added 'tracks.mentor' to eagerly load the mentor details
             $activities = IbalongActivity::with(['tracks.mentor', 'tracks.slots' => function($query) {
                 $query->orderBy('start_time', 'asc');
             }, 'tracks.slots.appointments'])

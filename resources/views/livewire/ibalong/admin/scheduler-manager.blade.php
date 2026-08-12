@@ -1,4 +1,5 @@
 <div class="max-w-7xl mx-auto space-y-8 pb-24">
+    @php $userRole = auth('ibalong')->user()->role_id ?? 0; @endphp
 
     {{-- System Header --}}
     <div class="bg-iba-black border-4 border-iba-black shadow-[8px_8px_0_0_#0095AC] p-6 text-white flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -9,9 +10,12 @@
             </div>
             <p class="text-sm font-bold text-gray-400 uppercase tracking-widest">Establish activities, monitor mentor assessments, and map out cohorts.</p>
         </div>
-        <button wire:click="openForgeActivityModal" class="bg-iba-orange text-iba-black font-black uppercase px-6 py-3 border-2 border-transparent shadow-[4px_4px_0_0_#FFFBF7] hover:translate-y-0.5 hover:shadow-none transition-all">
-            + Forge Activity
-        </button>
+
+        @if(in_array($userRole, [1, 2]))
+            <button wire:click="openForgeActivityModal" class="bg-iba-orange text-iba-black font-black uppercase px-6 py-3 border-2 border-transparent shadow-[4px_4px_0_0_#FFFBF7] hover:translate-y-0.5 hover:shadow-none transition-all">
+                + Forge Activity
+            </button>
+        @endif
     </div>
 
     @if (session()->has('success'))
@@ -25,6 +29,96 @@
         </div>
     @endif
 
+    {{-- OMNI-TRACKER SEARCH ENGINE --}}
+    <div class="bg-white border-4 border-iba-black shadow-[6px_6px_0_0_#131011] p-6 mb-8">
+        <h2 class="text-lg font-black uppercase tracking-widest border-b-2 border-iba-black pb-2 mb-4 text-iba-black">Omni-Tracker System</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <div>
+                <label class="block text-[10px] font-black text-gray-500 uppercase mb-1">Target Entity Filter</label>
+                <select wire:model.live="searchType" class="w-full border-2 border-iba-black p-3 font-bold uppercase focus:outline-none focus:border-iba-teal bg-gray-50 cursor-pointer text-iba-black">
+                    <option value="">-- Select Tracking Target --</option>
+                    <option value="team">Cohort / Team</option>
+                    <option value="mentor">Mentor / Facilitator</option>
+                    <option value="hub">Specific Hub / Track</option>
+                </select>
+            </div>
+
+            @if($searchType)
+                <div class="animate-fade-in-up">
+                    <label class="block text-[10px] font-black text-gray-500 uppercase mb-1">Select Specific {{ ucfirst($searchType) }}</label>
+                    <select wire:model.live="searchEntityId" class="w-full border-2 border-iba-black p-3 font-bold uppercase focus:outline-none focus:border-iba-teal bg-white cursor-pointer text-iba-black">
+                        <option value="">-- Choose Name --</option>
+                        @if($searchType === 'team')
+                            @foreach($teams as $team)
+                                <option value="{{ $team->id }}">{{ $team->team_name }}</option>
+                            @endforeach
+                        @elseif($searchType === 'mentor')
+                            @foreach($mentors as $mentor)
+                                <option value="{{ $mentor->id }}">{{ $mentor->name }} ({{ $mentor->designation ?? 'Role' }})</option>
+                            @endforeach
+                        @elseif($searchType === 'hub')
+                            @foreach($allTracks as $track)
+                                <option value="{{ $track->id }}">{{ $track->activity->title ?? 'Activity' }} - {{ $track->name }}</option>
+                            @endforeach
+                        @endif
+                    </select>
+                </div>
+            @endif
+        </div>
+
+        {{-- Tracker Timeline Results --}}
+        @if($searchEntityId)
+            @if(count($searchResults) > 0)
+                <div class="border-4 border-iba-black overflow-hidden shadow-inner">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-iba-black text-white">
+                                <th class="p-3 text-[10px] font-black uppercase tracking-widest border-r border-gray-700 w-1/4">Date & Time</th>
+                                <th class="p-3 text-[10px] font-black uppercase tracking-widest border-r border-gray-700">Activity / Hub Map</th>
+                                <th class="p-3 text-[10px] font-black uppercase tracking-widest">Itinerary Details</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y-2 divide-gray-200 bg-white">
+                            @foreach($searchResults as $res)
+                                <tr class="hover:bg-gray-50 transition-colors">
+                                    <td class="p-3 border-r-2 border-gray-200 align-top">
+                                        <div class="text-xs font-black uppercase text-iba-teal">{{ $res['date'] }}</div>
+                                        <div class="text-[10px] font-bold text-iba-black uppercase mt-0.5">{{ $res['time'] }}</div>
+                                    </td>
+                                    <td class="p-3 border-r-2 border-gray-200 align-top">
+                                        <div class="text-xs font-black uppercase text-iba-black">{{ $res['activity'] }}</div>
+                                        <div class="text-[10px] font-bold text-gray-500 uppercase mt-0.5">{{ $res['hub'] }}</div>
+                                    </td>
+                                    <td class="p-3 align-top">
+                                        @if($searchType === 'team')
+                                            <div class="text-[10px] font-bold text-gray-500 uppercase">Mentor Assessor: <span class="text-iba-black">{{ $res['mentor'] }}</span></div>
+                                            <div class="text-[10px] font-bold text-gray-500 uppercase mt-1">Status: <span class="{{ $res['status'] === 'attended' ? 'text-iba-green' : 'text-iba-orange' }}">{{ str_replace('_', '-', $res['status']) }}</span></div>
+                                        @else
+                                            <div class="text-[10px] font-bold text-gray-500 uppercase border-b-2 border-gray-200 pb-1 mb-1">Capacity: <span class="text-iba-black">{{ $res['capacity'] }} Booked</span></div>
+                                            @if(count($res['teams']) > 0)
+                                                <div class="flex flex-col gap-1 mt-1">
+                                                    @foreach($res['teams'] as $t)
+                                                        <span class="inline-block px-2 py-0.5 bg-gray-100 border border-gray-300 text-[9px] font-black uppercase text-iba-black">{{ $t }}</span>
+                                                    @endforeach
+                                                </div>
+                                            @else
+                                                <span class="text-[9px] font-bold text-gray-400 italic mt-1 inline-block uppercase">No Cohorts Booked</span>
+                                            @endif
+                                        @endif
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @else
+                <div class="p-6 bg-gray-50 border-2 border-dashed border-gray-300 text-center">
+                    <p class="text-xs font-black text-gray-400 uppercase tracking-widest">No scheduled blocks found for this entity.</p>
+                </div>
+            @endif
+        @endif
+    </div>
+
     {{-- Activity Roster & Timetables --}}
     <div class="space-y-12">
         @forelse($activities as $activity)
@@ -36,34 +130,34 @@
                         <h3 class="text-2xl font-black uppercase tracking-widest text-iba-black">{{ $activity->title }}</h3>
                         <span class="text-[10px] font-bold text-gray-500 uppercase bg-gray-200 px-2 py-1 mt-1 inline-block">{{ $activity->type }}</span>
                     </div>
-                    <div class="flex flex-wrap items-center gap-3">
-                        <button wire:click="togglePublish({{ $activity->id }})" class="text-[10px] font-black uppercase px-3 py-1.5 border-2 border-iba-black {{ $activity->is_published ? 'bg-iba-green text-white' : 'bg-white text-gray-500 hover:bg-gray-200' }}">
-                            {{ $activity->is_published ? 'Live Broadcast' : 'Draft Mode' }}
-                        </button>
-                        
-                        {{-- NEW: BOOKING LOCK TOGGLE --}}
-                        <button wire:click="toggleBooking({{ $activity->id }})" class="text-[10px] font-black uppercase px-3 py-1.5 border-2 border-iba-black shadow-[2px_2px_0_0_#131011] hover:translate-y-0.5 hover:shadow-none transition-all {{ $activity->allow_booking ? 'bg-iba-teal text-white' : 'bg-iba-orange text-iba-black' }}">
-                            {{ $activity->allow_booking ? '🔓 Booking Open' : '🔒 Matrix Locked' }}
-                        </button>
-                        <button wire:click="openEditActivity({{ $activity->id }})" class="bg-gray-200 text-iba-black border-2 border-iba-black px-3 py-1.5 text-[10px] font-black uppercase hover:bg-gray-300 transition-colors">
-                            Edit Setup
-                        </button>
-                        <button wire:click="openTrackGenerator({{ $activity->id }})" class="bg-iba-orange text-iba-black text-[10px] font-black uppercase px-4 py-1.5 border-2 border-iba-black shadow-[2px_2px_0_0_#131011] hover:translate-y-0.5 hover:shadow-none transition-all">
-                            + Forge Hub
-                        </button>
-                        
-                        {{-- Random Auto-Assign Button --}}
-                        <button wire:click="openRandomAssignModal({{ $activity->id }})" class="bg-iba-teal text-white text-[10px] font-black uppercase px-4 py-1.5 border-2 border-iba-black shadow-[2px_2px_0_0_#131011] hover:translate-y-0.5 hover:shadow-none transition-all flex items-center gap-1">
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
-                            Auto-Assign Matrix
-                        </button>
 
-                        {{-- Nuclear Reset Schedules Button --}}
-                        <button wire:click="openResetSchedulesModal({{ $activity->id }})" class="bg-iba-red text-white text-[10px] font-black uppercase px-4 py-1.5 border-2 border-iba-black shadow-[2px_2px_0_0_#131011] hover:translate-y-0.5 hover:shadow-none transition-all flex items-center gap-1">
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                            Reset Matrix
-                        </button>
-                    </div>
+                    @if(in_array($userRole, [1, 2]))
+                        <div class="flex flex-wrap items-center gap-3">
+                            <button wire:click="togglePublish({{ $activity->id }})" class="text-[10px] font-black uppercase px-3 py-1.5 border-2 border-iba-black {{ $activity->is_published ? 'bg-iba-green text-white' : 'bg-white text-gray-500 hover:bg-gray-200' }}">
+                                {{ $activity->is_published ? 'Live Broadcast' : 'Draft Mode' }}
+                            </button>
+
+                            <button wire:click="toggleBooking({{ $activity->id }})" class="text-[10px] font-black uppercase px-3 py-1.5 border-2 border-iba-black shadow-[2px_2px_0_0_#131011] hover:translate-y-0.5 hover:shadow-none transition-all {{ $activity->allow_booking ? 'bg-iba-teal text-white' : 'bg-iba-orange text-iba-black' }}">
+                                {{ $activity->allow_booking ? '🔓 Booking Open' : '🔒 Matrix Locked' }}
+                            </button>
+                            <button wire:click="openEditActivity({{ $activity->id }})" class="bg-gray-200 text-iba-black border-2 border-iba-black px-3 py-1.5 text-[10px] font-black uppercase hover:bg-gray-300 transition-colors">
+                                Edit Setup
+                            </button>
+                            <button wire:click="openTrackGenerator({{ $activity->id }})" class="bg-iba-orange text-iba-black text-[10px] font-black uppercase px-4 py-1.5 border-2 border-iba-black shadow-[2px_2px_0_0_#131011] hover:translate-y-0.5 hover:shadow-none transition-all">
+                                + Forge Hub
+                            </button>
+
+                            <button wire:click="openRandomAssignModal({{ $activity->id }})" class="bg-iba-teal text-white text-[10px] font-black uppercase px-4 py-1.5 border-2 border-iba-black shadow-[2px_2px_0_0_#131011] hover:translate-y-0.5 hover:shadow-none transition-all flex items-center gap-1">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+                                Auto-Assign Matrix
+                            </button>
+
+                            <button wire:click="openResetSchedulesModal({{ $activity->id }})" class="bg-iba-red text-white text-[10px] font-black uppercase px-4 py-1.5 border-2 border-iba-black shadow-[2px_2px_0_0_#131011] hover:translate-y-0.5 hover:shadow-none transition-all flex items-center gap-1">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                Reset Matrix
+                            </button>
+                        </div>
+                    @endif
                 </div>
 
                 <div class="p-6">
@@ -71,27 +165,25 @@
 
                         {{-- TIMETABLE GRAPH MATRIX --}}
                         <div class="mb-8 border-4 border-iba-black shadow-[4px_4px_0_0_#0095AC] overflow-x-auto bg-white" id="timetable-{{ $activity->id }}">
-                            
+
                             {{-- Header with Export Controls --}}
                             <div class="bg-iba-black text-white p-2 border-b-4 border-iba-black flex justify-between items-center min-w-max">
                                 <div class="text-xs font-black uppercase tracking-widest pl-2">
                                     Visual Timetable Graph
                                 </div>
                                 <div class="flex gap-2">
-                                    {{-- Save PDF Button triggers JS --}}
                                     <button onclick="exportToPDF('{{ $activity->id }}', '{{ addslashes($activity->title) }}')" type="button" class="bg-iba-orange text-iba-black border-2 border-transparent px-3 py-1 text-[10px] font-black uppercase tracking-widest flex items-center gap-1 hover:bg-white hover:border-iba-black transition-all">
                                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
                                         Save PDF
                                     </button>
-                                    
-                                    {{-- CSV Export Button --}}
+
                                     <button wire:click="exportMatrixCsv({{ $activity->id }})" type="button" class="bg-iba-teal text-white border-2 border-transparent px-3 py-1 text-[10px] font-black uppercase tracking-widest flex items-center gap-1 hover:bg-white hover:text-iba-black hover:border-iba-black transition-all">
                                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                                         CSV
                                     </button>
                                 </div>
                             </div>
-                            
+
                             <table class="w-full text-left border-collapse min-w-max">
                                 <thead>
                                     <tr class="bg-gray-100 text-iba-black">
@@ -162,10 +254,13 @@
                                                 <span class="flex items-center gap-1 text-iba-teal"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg> {{ $track->mentor->name ?? 'NO MENTOR ASSIGNED' }}</span>
                                             </div>
                                         </div>
-                                        <div class="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
-                                            <button wire:click="openEditTrack({{ $track->id }})" class="bg-gray-200 border-2 border-iba-black text-iba-black hover:bg-gray-300 px-3 py-1 text-[10px] font-black uppercase text-center w-full sm:w-auto">Extend Timetable</button>
-                                            <button wire:click="deleteTrack({{ $track->id }})" wire:confirm="Purge this entire hub and all its time blocks?" class="bg-iba-red border-2 border-iba-black text-white hover:bg-red-800 px-3 py-1 text-[10px] font-black uppercase text-center w-full sm:w-auto">Purge Hub</button>
-                                        </div>
+
+                                        @if(in_array($userRole, [1, 2]))
+                                            <div class="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
+                                                <button wire:click="openEditTrack({{ $track->id }})" class="bg-gray-200 border-2 border-iba-black text-iba-black hover:bg-gray-300 px-3 py-1 text-[10px] font-black uppercase text-center w-full sm:w-auto">Extend Timetable</button>
+                                                <button wire:click="deleteTrack({{ $track->id }})" wire:confirm="Purge this entire hub and all its time blocks?" class="bg-iba-red border-2 border-iba-black text-white hover:bg-red-800 px-3 py-1 text-[10px] font-black uppercase text-center w-full sm:w-auto">Purge Hub</button>
+                                            </div>
+                                        @endif
                                     </div>
 
                                     {{-- Interactive Slot Blocks & Comments --}}
@@ -174,13 +269,21 @@
                                             @php $booked = $slot->appointments->count(); @endphp
                                             <div class="border-2 border-iba-black flex flex-col bg-white group relative">
 
-                                                {{-- Time Header --}}
+                                                {{-- UPGRADED: Time Header with Dynamic Capacity Modifiers --}}
                                                 <div class="p-2 {{ $booked >= $slot->capacity ? 'bg-iba-black text-white' : 'bg-gray-100 text-iba-black' }} border-b-2 border-iba-black flex justify-between items-center">
                                                     <div class="text-xs font-black uppercase">{{ $slot->start_time->format('h:i A') }}</div>
-                                                    <div class="text-[9px] font-bold uppercase">{{ $booked }}/{{ $slot->capacity }}</div>
+                                                    <div class="flex items-center gap-1">
+                                                        @if(in_array($userRole, [1, 2]))
+                                                            <button wire:click="decreaseSlotCapacity({{ $slot->id }})" class="hover:text-iba-red font-black px-1" title="Decrease Capacity">-</button>
+                                                        @endif
+                                                        <div class="text-[9px] font-bold uppercase">{{ $booked }}/{{ $slot->capacity }}</div>
+                                                        @if(in_array($userRole, [1, 2]))
+                                                            <button wire:click="increaseSlotCapacity({{ $slot->id }})" class="hover:text-iba-teal font-black px-1" title="Increase Capacity">+</button>
+                                                        @endif
+                                                    </div>
                                                 </div>
 
-                                                @if($booked == 0)
+                                                @if($booked == 0 && in_array($userRole, [1, 2]))
                                                     <button wire:click="removeSlot({{ $slot->id }})" wire:confirm="Purge this specific time block?" class="absolute -top-2 -right-2 bg-iba-red text-white p-1 shadow-[2px_2px_0_0_#131011] opacity-0 group-hover:opacity-100 transition-opacity hover:scale-110">
                                                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                                                     </button>
@@ -191,8 +294,8 @@
                                                     @foreach($slot->appointments as $apt)
                                                         <div class="flex flex-col border-l-2 border-iba-orange pl-2 bg-gray-50 py-1 gap-1 relative group/apt">
                                                             <div class="flex justify-between items-start">
-                                                                <span class="text-[9px] font-black uppercase text-iba-black truncate pr-2" title="{{ $apt->team->team_name ?? 'Unknown' }}">{{ $apt->team->team_name ?? 'Unknown' }}</span>
-                                                                
+                                                                <span class="text-[9px] font-black uppercase text-iba-black pr-2" title="{{ $apt->team->team_name ?? 'Unknown' }}">{{ $apt->team->team_name ?? 'Unknown' }}</span>
+
                                                                 <div class="flex items-center gap-2 shrink-0">
                                                                     <button wire:click="openOverrideModal({{ $apt->id }})" class="text-blue-600 hover:text-blue-800 text-[8px] font-black uppercase underline" title="Override Mentor Assessment">Override</button>
                                                                     <button wire:click="removeAppointment({{ $apt->id }})" wire:confirm="Evict this cohort from the time block?" class="text-iba-red hover:text-red-800">
@@ -200,11 +303,11 @@
                                                                     </button>
                                                                 </div>
                                                             </div>
-                                                            
+
                                                             <div class="text-[8px] font-bold uppercase tracking-widest mt-0.5 {{ $apt->status == 'attended' ? 'text-iba-green' : ($apt->status == 'no_show' ? 'text-iba-red' : 'text-gray-500') }}">
                                                                 Status: {{ str_replace('_', '-', $apt->status) }}
                                                             </div>
-                                                            
+
                                                             @if($apt->notes)
                                                                 <div class="text-[9px] text-gray-600 italic bg-white p-1.5 border border-gray-200 mt-1 truncate" title="{{ $apt->notes }}">
                                                                     "{{ $apt->notes }}"
@@ -245,7 +348,7 @@
             <div class="flex min-h-screen items-center justify-center p-4">
                 <div class="relative w-full max-w-md bg-white border-4 border-iba-black shadow-[8px_8px_0_0_#0095AC] p-6">
                     <h3 class="text-lg font-black uppercase tracking-widest text-iba-black border-b-2 border-iba-black pb-2 mb-4">Forge New Activity</h3>
-                    
+
                     <form wire:submit.prevent="createActivity" class="space-y-4">
                         <div>
                             <label class="text-[10px] font-black uppercase text-gray-500">Activity Title</label>
@@ -279,7 +382,7 @@
             <div class="flex min-h-screen items-center justify-center p-4">
                 <div class="relative w-full max-w-md bg-white border-4 border-iba-black shadow-[8px_8px_0_0_#0095AC] p-6">
                     <h3 class="text-lg font-black uppercase tracking-widest text-iba-black border-b-2 border-iba-black pb-2 mb-4">Edit Activity Settings</h3>
-                    
+
                     <form wire:submit.prevent="updateActivity" class="space-y-4">
                         <div>
                             <label class="text-[10px] font-black uppercase text-gray-500">Activity Title</label>
@@ -348,14 +451,20 @@
                                     <label class="text-[10px] font-black uppercase text-gray-500">End Time</label>
                                     <input type="time" wire:model="endTime" class="w-full border-2 border-iba-black p-2 font-bold focus:outline-none focus:border-iba-orange bg-gray-50">
                                 </div>
-                                <div class="col-span-2">
-                                    <label class="text-[10px] font-black uppercase text-gray-500">Duration per Slot</label>
+
+                                {{-- NEW: Capacity Control --}}
+                                <div>
+                                    <label class="text-[10px] font-black uppercase text-gray-500">Duration</label>
                                     <select wire:model="durationMinutes" class="w-full border-2 border-iba-black p-2 font-bold uppercase focus:outline-none focus:border-iba-orange bg-gray-50">
-                                        <option value="15">15 Minutes</option>
-                                        <option value="30">30 Minutes</option>
-                                        <option value="45">45 Minutes</option>
+                                        <option value="15">15 Min</option>
+                                        <option value="30">30 Min</option>
+                                        <option value="45">45 Min</option>
                                         <option value="60">1 Hour</option>
                                     </select>
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-black uppercase text-gray-500">Cohorts per Slot</label>
+                                    <input type="number" min="1" wire:model="slotCapacity" class="w-full border-2 border-iba-black p-2 font-bold focus:outline-none focus:border-iba-orange bg-gray-50 text-center">
                                 </div>
                             </div>
                         </div>
@@ -405,26 +514,29 @@
                                 <div class="col-span-2">
                                     <label class="text-[10px] font-black uppercase text-gray-500">Additional Date</label>
                                     <input type="date" wire:model="appendSlotDate" class="w-full border-2 border-iba-black p-2 font-bold focus:outline-none focus:border-iba-orange bg-gray-50">
-                                    @error('appendSlotDate') <span class="text-[9px] text-iba-red font-bold uppercase block mt-1">{{ $message }}</span> @enderror
                                 </div>
                                 <div>
                                     <label class="text-[10px] font-black uppercase text-gray-500">Start Time</label>
                                     <input type="time" wire:model="appendStartTime" class="w-full border-2 border-iba-black p-2 font-bold focus:outline-none focus:border-iba-orange bg-gray-50">
-                                    @error('appendStartTime') <span class="text-[9px] text-iba-red font-bold uppercase block mt-1">{{ $message }}</span> @enderror
                                 </div>
                                 <div>
                                     <label class="text-[10px] font-black uppercase text-gray-500">End Time</label>
                                     <input type="time" wire:model="appendEndTime" class="w-full border-2 border-iba-black p-2 font-bold focus:outline-none focus:border-iba-orange bg-gray-50">
-                                    @error('appendEndTime') <span class="text-[9px] text-iba-red font-bold uppercase block mt-1">{{ $message }}</span> @enderror
                                 </div>
-                                <div class="col-span-2">
-                                    <label class="text-[10px] font-black uppercase text-gray-500">Duration per Slot</label>
+
+                                {{-- NEW: Capacity Control --}}
+                                <div>
+                                    <label class="text-[10px] font-black uppercase text-gray-500">Duration</label>
                                     <select wire:model="appendDurationMinutes" class="w-full border-2 border-iba-black p-2 font-bold uppercase focus:outline-none focus:border-iba-orange bg-gray-50">
-                                        <option value="15">15 Minutes</option>
-                                        <option value="30">30 Minutes</option>
-                                        <option value="45">45 Minutes</option>
+                                        <option value="15">15 Min</option>
+                                        <option value="30">30 Min</option>
+                                        <option value="45">45 Min</option>
                                         <option value="60">1 Hour</option>
                                     </select>
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-black uppercase text-gray-500">Cohorts per Slot</label>
+                                    <input type="number" min="1" wire:model="appendSlotCapacity" class="w-full border-2 border-iba-black p-2 font-bold focus:outline-none focus:border-iba-orange bg-gray-50 text-center">
                                 </div>
                             </div>
                         </div>
@@ -476,7 +588,7 @@
             <div class="fixed inset-0 bg-iba-black/80 backdrop-blur-sm transition-opacity" wire:click="$set('overrideAppointmentId', null)"></div>
             <div class="flex min-h-screen items-center justify-center p-4">
                 <div class="relative w-full max-w-2xl bg-white border-4 border-iba-black shadow-[8px_8px_0_0_#0095AC] flex flex-col text-left">
-                    
+
                     <div class="px-6 py-4 border-b-4 border-iba-black bg-gray-100 flex justify-between items-center">
                         <div>
                             <h3 class="text-lg font-black text-iba-black uppercase tracking-wider">Assessment Override</h3>
@@ -520,19 +632,19 @@
             <div class="fixed inset-0 bg-iba-black/90 backdrop-blur-sm transition-opacity"></div>
             <div class="flex min-h-screen items-center justify-center p-4">
                 <div class="relative w-full max-w-4xl bg-white border-4 border-iba-black shadow-[12px_12px_0_0_#131011] flex flex-col max-h-[90vh]">
-                    
+
                     {{-- Header --}}
                     <div class="px-6 py-4 border-b-4 border-iba-black bg-gray-100 flex justify-between items-center shrink-0">
                         <div>
-                            <h3 class="text-xl font-black text-iba-black uppercase tracking-wider">Circuit Assignment Protocol</h3>
-                            <p class="text-[10px] font-bold text-gray-500 mt-1 uppercase tracking-widest">Generate a mathematically perfect rotation matrix where cohorts visit hubs without repeating.</p>
+                            <h3 class="text-xl font-black text-iba-black uppercase tracking-wider">Automated Matrix Protocol</h3>
+                            <p class="text-[10px] font-bold text-gray-500 mt-1 uppercase tracking-widest">Generate a randomized matrix filling available time blocks without double-booking cohorts.</p>
                         </div>
                         <button wire:click="discardDraft(); $set('showRandomAssignModal', false)" class="text-gray-500 hover:text-iba-red transition-colors"><svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></button>
                     </div>
 
                     {{-- Body --}}
                     <div class="p-6 overflow-y-auto flex-1 bg-white">
-                        
+
                         @if (session()->has('draft_error'))
                             <div class="bg-iba-red/10 border-l-4 border-iba-red p-4 mb-6 shadow-[4px_4px_0_0_#131011]">
                                 <p class="text-xs font-black text-iba-red uppercase tracking-widest">{{ session('draft_error') }}</p>
@@ -544,12 +656,9 @@
                             <div class="space-y-4">
                                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end border-b-2 border-dashed border-gray-300 pb-2 gap-2">
                                     <h4 class="text-sm font-black text-iba-black uppercase tracking-widest">Step 1: Select Target Cohorts</h4>
-                                    <div class="flex gap-2">
-                                        <span class="text-[10px] font-black uppercase text-gray-500 py-1">Rule: Select at least as many teams as hubs.</span>
-                                        <span class="text-[10px] font-black uppercase bg-iba-black text-white px-2 py-1">{{ count($selectedTeamsForRandom) }} Selected</span>
-                                    </div>
+                                    <span class="text-[10px] font-black uppercase bg-iba-black text-white px-2 py-1">{{ count($selectedTeamsForRandom) }} Selected</span>
                                 </div>
-                                
+
                                 {{-- Checkbox Roster --}}
                                 <div class="border-2 border-iba-black bg-gray-50 max-h-[50vh] overflow-y-auto divide-y-2 divide-gray-200 shadow-inner">
                                     @forelse($teams as $team)
@@ -569,8 +678,8 @@
                         @else
                             {{-- Step 2: Preview Phase --}}
                             <div class="space-y-4">
-                                <h4 class="text-sm font-black text-iba-black uppercase tracking-widest border-b-2 border-dashed border-gray-300 pb-2">Step 2: Preview Circuit Matrix</h4>
-                                
+                                <h4 class="text-sm font-black text-iba-black uppercase tracking-widest border-b-2 border-dashed border-gray-300 pb-2">Step 2: Preview Assignment Matrix</h4>
+
                                 <div class="border-4 border-iba-black shadow-[6px_6px_0_0_#0095AC] overflow-hidden max-h-[50vh] overflow-y-auto">
                                     <table class="w-full text-left border-collapse">
                                         <thead>
@@ -602,7 +711,7 @@
                     <div class="bg-gray-50 px-6 py-4 border-t-4 border-iba-black shrink-0 flex gap-4">
                         @if(count($draftPreview) === 0)
                             <button type="button" wire:click="discardDraft(); $set('showRandomAssignModal', false)" class="w-full bg-gray-200 text-iba-black font-black uppercase tracking-widest py-3 border-2 border-iba-black hover:bg-gray-300">Cancel</button>
-                            <button type="button" wire:click="generateRandomDraft" class="w-full bg-iba-teal text-white font-black uppercase tracking-widest py-3 border-2 border-iba-black shadow-[4px_4px_0_0_#131011] hover:translate-y-0.5 hover:shadow-none transition-all">Generate Circuit Rotation</button>
+                            <button type="button" wire:click="generateRandomDraft" class="w-full bg-iba-teal text-white font-black uppercase tracking-widest py-3 border-2 border-iba-black shadow-[4px_4px_0_0_#131011] hover:translate-y-0.5 hover:shadow-none transition-all">Generate Assignments</button>
                         @else
                             <button type="button" wire:click="discardDraft" class="w-full bg-iba-red text-white font-black uppercase tracking-widest py-3 border-2 border-iba-black shadow-[4px_4px_0_0_#131011] hover:translate-y-0.5 hover:shadow-none transition-all">Scrap Draft & Retry</button>
                             <button type="button" wire:click="commitRandomAssignments" class="w-full bg-iba-orange text-iba-black font-black uppercase tracking-widest py-3 border-2 border-iba-black shadow-[4px_4px_0_0_#131011] hover:translate-y-0.5 hover:shadow-none transition-all">Commit to Database</button>
@@ -619,13 +728,19 @@
             <div class="fixed inset-0 bg-iba-black/80 backdrop-blur-sm" wire:click="$set('resettingActivityId', null)"></div>
             <div class="flex min-h-screen items-center justify-center p-4">
                 <div class="relative w-full max-w-md bg-white border-4 border-iba-black shadow-[8px_8px_0_0_#CF452C] p-6 text-left">
-                    
+
                     <h3 class="text-xl font-black uppercase tracking-widest text-iba-red border-b-2 border-iba-black pb-2 mb-4">Nuclear Purge: Schedules</h3>
-                    
+
                     <form wire:submit.prevent="executeSchedulesReset" class="space-y-4">
                         <div class="bg-red-50 border-2 border-dashed border-iba-red p-3 mb-4">
                             <p class="text-xs font-black text-iba-red uppercase tracking-widest">Warning: Data Destruction</p>
                             <p class="text-[10px] font-bold text-gray-700 uppercase mt-1">This will permanently delete ALL team bookings and mentor assessments across ALL hubs for this activity. Hub structures and time slots will remain intact.</p>
+                        </div>
+
+                        <div>
+                            <label class="text-[10px] font-black uppercase text-gray-500">Admin Clearance Password <span class="text-iba-red">*</span></label>
+                            <input type="password" wire:model="adminPasswordForReset" class="w-full border-2 border-iba-black p-2 font-bold focus:outline-none focus:border-iba-red bg-white mt-1 tracking-widest">
+                            @error('adminPasswordForReset') <span class="text-[9px] font-bold text-iba-red uppercase mt-1 block">⚠ {{ $message }}</span> @enderror
                         </div>
 
                         <div class="pt-4 flex gap-3">
@@ -644,9 +759,9 @@
             <div class="fixed inset-0 bg-iba-black/90 backdrop-blur-sm" wire:click="$set('requiresAdminAuth', false)"></div>
             <div class="flex min-h-screen items-center justify-center p-4">
                 <div class="relative w-full max-w-sm bg-white border-4 border-iba-black shadow-[12px_12px_0_0_#CF452C] p-6 text-left transform transition-all animate-fade-in-up">
-                    
+
                     <h3 class="text-xl font-black uppercase tracking-widest text-iba-red border-b-2 border-iba-black pb-2 mb-4">Command Authorization</h3>
-                    
+
                     <form wire:submit.prevent="processAdminAuth" class="space-y-4">
                         <div class="bg-red-50 border-2 border-dashed border-iba-red p-3 mb-4">
                             <p class="text-[10px] font-bold text-gray-700 uppercase">You are attempting a restricted command. An Administrator must authorize this action.</p>
@@ -687,7 +802,7 @@
     function exportToPDF(activityId, title) {
         const tableHtml = document.getElementById('timetable-' + activityId).outerHTML;
         const printWindow = window.open('', '_blank', 'height=800,width=1200');
-        
+
         printWindow.document.write(`
             <html>
                 <head>
@@ -715,10 +830,10 @@
                 </body>
             </html>
         `);
-        
+
         printWindow.document.close();
         printWindow.focus();
-        
+
         setTimeout(() => {
             printWindow.print();
             printWindow.close();

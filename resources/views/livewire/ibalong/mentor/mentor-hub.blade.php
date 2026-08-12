@@ -31,56 +31,67 @@
                     <h2 class="text-2xl font-black uppercase tracking-widest text-iba-black">{{ $hub->name }}</h2>
                 </div>
 
-                {{-- Time Blocks --}}
+                {{-- Time Blocks Grid --}}
                 <div class="p-6 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                     @forelse($hub->slots as $slot)
                         <div class="border-2 border-iba-black flex flex-col h-full bg-gray-50">
+
                             {{-- Slot Time Header --}}
-                            <div class="bg-iba-black text-white px-4 py-2 border-b-2 border-iba-black flex justify-between items-center">
+                            <div class="bg-iba-black text-white px-4 py-3 border-b-2 border-iba-black flex justify-between items-center">
                                 <span class="text-sm font-black uppercase tracking-widest">{{ $slot->start_time->format('h:i A') }} - {{ $slot->end_time->format('h:i A') }}</span>
-                                <span class="text-[9px] font-bold uppercase text-gray-400">{{ $slot->appointments->count() }}/{{ $slot->capacity }} Booked</span>
+                                <span class="text-[9px] font-bold uppercase {{ $slot->appointments->count() >= $slot->capacity ? 'text-iba-orange' : 'text-gray-400' }}">
+                                    {{ $slot->appointments->count() }}/{{ $slot->capacity }} Booked
+                                </span>
                             </div>
 
-                            {{-- Cohort Appointments --}}
-                            <div class="p-4 flex-1 flex flex-col gap-3">
+                            {{-- Cohort Appointments (Upgraded for Multi-Capacity) --}}
+                            <div class="p-3 flex-1 flex flex-col gap-3">
                                 @forelse($slot->appointments as $appointment)
                                     @php
                                         $statusColor = match($appointment->status) {
-                                            'attended' => 'bg-iba-green text-white',
-                                            'no_show' => 'bg-iba-red text-white',
-                                            'cancelled' => 'bg-gray-300 text-gray-600',
-                                            default => 'bg-white text-iba-black border-2 border-iba-black'
+                                            'attended' => 'bg-iba-green text-white border-iba-green',
+                                            'no_show' => 'bg-iba-red text-white border-iba-red',
+                                            'cancelled' => 'bg-gray-200 text-gray-500 border-gray-300',
+                                            default => 'bg-white text-iba-black border-iba-black'
                                         };
                                     @endphp
 
-                                    <div class="border-l-4 border-iba-orange pl-3 py-1 flex flex-col gap-2">
-                                        <div>
-                                            <h4 class="text-sm font-black uppercase text-iba-black">{{ $appointment->team->team_name ?? 'Unknown Cohort' }}</h4>
-                                            <span class="inline-block mt-1 text-[9px] font-black uppercase px-2 py-0.5 {{ $statusColor }} shadow-[2px_2px_0_0_#131011]">
+                                    {{-- Distinct Sub-Card per Cohort --}}
+                                    <div class="bg-white border-2 border-gray-300 p-3 shadow-sm flex flex-col gap-2">
+                                        <div class="flex justify-between items-start border-b border-gray-200 pb-2 mb-1">
+                                            <h4 class="text-xs font-black uppercase text-iba-black leading-tight pr-2">{{ $appointment->team->team_name ?? 'Unknown Cohort' }}</h4>
+                                            <span class="inline-block text-[8px] font-black uppercase px-2 py-0.5 border-2 {{ $statusColor }} shrink-0">
                                                 {{ str_replace('_', '-', $appointment->status) }}
                                             </span>
                                         </div>
 
-                                        <button wire:click="openAssessment({{ $appointment->id }})" class="mt-2 bg-gray-200 text-iba-black text-[10px] font-black uppercase tracking-widest py-2 hover:bg-iba-teal hover:text-white transition-colors border-2 border-iba-black">
-                                            {{ $appointment->notes ? 'Update Assessment' : 'Evaluate Cohort' }}
+                                        <button wire:click="openAssessment({{ $appointment->id }})" class="w-full bg-gray-100 text-iba-black text-[9px] font-black uppercase tracking-widest py-2 border-2 border-dashed border-gray-300 hover:bg-iba-teal hover:border-iba-teal hover:text-white transition-colors mt-auto">
+                                            {{ $appointment->notes ? 'Update Evaluation' : 'Evaluate Cohort' }}
                                         </button>
                                     </div>
                                 @empty
-                                    <div class="flex-1 flex items-center justify-center text-center py-4">
+                                    <div class="flex-1 flex items-center justify-center text-center py-6 border-2 border-dashed border-gray-300 bg-white m-1">
                                         <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Time Block is Empty</span>
                                     </div>
                                 @endforelse
+
+                                {{-- Show empty slots if capacity allows --}}
+                                @if($slot->capacity > $slot->appointments->count() && $slot->appointments->count() > 0)
+                                    <div class="py-2 text-center border-2 border-dashed border-gray-200 bg-gray-50/50">
+                                        <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">+ {{ $slot->capacity - $slot->appointments->count() }} Open Slot(s)</span>
+                                    </div>
+                                @endif
                             </div>
                         </div>
                     @empty
-                        <div class="col-span-full py-8 text-center text-gray-500 text-xs font-bold uppercase tracking-widest">
+                        <div class="col-span-full py-8 text-center text-gray-500 text-xs font-bold uppercase tracking-widest border-4 border-dashed border-gray-300">
                             No time blocks generated for this hub yet.
                         </div>
                     @endforelse
                 </div>
             </div>
         @empty
-            <div class="bg-gray-50 border-4 border-dashed border-iba-black p-12 text-center">
+            <div class="bg-gray-50 border-4 border-dashed border-iba-black p-12 text-center shadow-[6px_6px_0_0_#131011]">
                 <p class="text-sm font-black text-gray-500 uppercase tracking-widest">You have not been assigned to any active hubs.</p>
             </div>
         @endforelse

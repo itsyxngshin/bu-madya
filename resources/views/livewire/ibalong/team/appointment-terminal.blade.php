@@ -109,12 +109,21 @@
                                     @endif
 
                                     @if($myAppointment)
-                                        {{-- State 1: Booked by THIS Team (Upgraded View with Notes) --}}
+                                        {{-- State 1: Booked by THIS Team --}}
                                         <div class="border-2 border-iba-black bg-white p-3 shadow-[3px_3px_0_0_#131011] relative group transition-all flex flex-col h-full min-h-[140px]">
 
                                             <div class="flex justify-between items-start border-b-2 border-iba-black pb-2 mb-2">
-                                                <div class="text-sm font-black uppercase text-iba-black">{{ $slot->start_time->format('h:i A') }}</div>
-                                                <span class="text-[8px] font-black bg-iba-teal text-white px-2 py-1 uppercase tracking-widest border-2 border-iba-black">Secured</span>
+                                                <div>
+                                                    <div class="text-sm font-black uppercase text-iba-black">{{ $slot->start_time->format('h:i A') }}</div>
+
+                                                    {{-- UPGRADED: Inform the team if this is a co-mentoring session --}}
+                                                    @if($slot->capacity > 1)
+                                                        <div class="text-[8px] font-bold text-gray-500 uppercase mt-0.5" title="You are sharing this time block with other cohorts.">Shared Clinic ({{ $slot->capacity }} Max)</div>
+                                                    @else
+                                                        <div class="text-[8px] font-bold text-gray-500 uppercase mt-0.5">Exclusive Session</div>
+                                                    @endif
+                                                </div>
+                                                <span class="text-[8px] font-black bg-iba-teal text-white px-2 py-1 uppercase tracking-widest border-2 border-iba-black shrink-0">Secured</span>
                                             </div>
 
                                             <div class="text-[10px] font-black text-gray-500 uppercase mb-3">
@@ -124,16 +133,17 @@
                                             </div>
 
                                             {{-- Mentor Assessment Notes --}}
-                                            @if($myAppointment->notes)
-                                                <div class="mt-auto bg-gray-50 border-2 border-dashed border-gray-300 p-2 relative">
-                                                    <span class="absolute -top-2.5 left-2 bg-white px-1 text-[8px] font-black text-gray-400 uppercase tracking-widest">Mentor Log</span>
-                                                    <p class="text-[10px] text-gray-700 italic font-medium pt-1">"{{ $myAppointment->notes }}"</p>
-                                                </div>
-                                            @else
-                                                <div class="mt-auto text-[9px] text-gray-400 font-bold uppercase border-t-2 border-dashed border-gray-200 pt-2 text-center">
-                                                    No assessment logs yet
-                                                </div>
-                                            @endif
+                                            <div class="mt-auto pt-2">
+                                                @if($myAppointment->notes)
+                                                    <button wire:click="openNotesModal({{ $myAppointment->id }})" class="w-full bg-gray-100 border-2 border-dashed border-gray-300 text-gray-600 text-[9px] font-black uppercase tracking-widest py-2 hover:bg-gray-200 hover:border-iba-black hover:text-iba-black transition-colors">
+                                                        Read Mentor Log
+                                                    </button>
+                                                @else
+                                                    <div class="text-[9px] text-gray-400 font-bold uppercase border-t-2 border-dashed border-gray-200 pt-2 text-center">
+                                                        No logs recorded
+                                                    </div>
+                                                @endif
+                                            </div>
 
                                             {{-- Hover to cancel (Only if booking is open) --}}
                                             @if($activity->allow_booking)
@@ -147,14 +157,21 @@
                                         {{-- State 2: Full / Booked by other teams --}}
                                         <div class="border-2 border-dashed border-gray-300 bg-gray-50 text-gray-400 p-3 opacity-60">
                                             <div class="text-sm font-black uppercase">{{ $slot->start_time->format('h:i A') }}</div>
-                                            <div class="text-[9px] font-bold uppercase mt-1">Block Unavailable</div>
+                                            <div class="text-[9px] font-bold uppercase mt-1 text-gray-500">Capacity Full ({{ $slot->capacity }}/{{ $slot->capacity }})</div>
                                         </div>
 
                                     @else
                                         {{-- State 3: Open and Available --}}
                                         <button wire:click="bookSlot({{ $slot->id }})" wire:loading.attr="disabled" class="border-2 border-iba-black bg-white text-iba-black p-3 hover:bg-iba-orange shadow-[3px_3px_0_0_#131011] hover:shadow-none hover:translate-y-0.5 transition-all text-left flex flex-col h-full min-h-[140px]">
                                             <div class="text-sm font-black uppercase">{{ $slot->start_time->format('h:i A') }}</div>
-                                            <div class="text-[9px] font-bold uppercase mt-1 text-gray-500">{{ $slot->capacity - $bookedCount }} Slot(s) Open</div>
+
+                                            {{-- UPGRADED: Clearly state how many slots are left --}}
+                                            @if($slot->capacity > 1)
+                                                <div class="text-[9px] font-bold uppercase mt-1 text-iba-orange">{{ $slot->capacity - $bookedCount }} of {{ $slot->capacity }} Slot(s) Open</div>
+                                            @else
+                                                <div class="text-[9px] font-bold uppercase mt-1 text-gray-500">1 Slot Open</div>
+                                            @endif
+
                                             <div class="mt-auto text-[9px] font-black uppercase tracking-widest text-iba-teal pt-2 border-t-2 border-dashed border-gray-200 w-full text-center">
                                                 Click to Secure
                                             </div>
@@ -174,4 +191,36 @@
             </div>
         @endforelse
     </div>
+
+    {{-- MODAL: Mentor Assessment Log --}}
+    @if($isViewingNotes)
+        <div class="fixed inset-0 z-[100] overflow-y-auto">
+            <div class="fixed inset-0 bg-iba-black/80 backdrop-blur-sm" wire:click="closeNotesModal"></div>
+            <div class="flex min-h-screen items-center justify-center p-4">
+                <div class="relative w-full max-w-lg bg-white border-4 border-iba-black shadow-[8px_8px_0_0_#0095AC] p-6 text-left transform transition-all animate-fade-in-up">
+
+                    <h3 class="text-xl font-black uppercase tracking-widest text-iba-black border-b-4 border-iba-orange pb-2 mb-4">Mentor Assessment Log</h3>
+
+                    <div class="flex justify-between items-start mb-6">
+                        <div>
+                            <p class="text-sm font-black text-iba-teal uppercase">{{ $modalHubName }}</p>
+                            <p class="text-[10px] font-bold text-gray-500 uppercase mt-1">{{ $modalTime }}</p>
+                        </div>
+                        <span class="text-[10px] font-black uppercase px-2 py-1 border-2 border-iba-black shadow-[2px_2px_0_0_#131011] {{ $modalStatus == 'attended' ? 'bg-iba-green text-white' : ($modalStatus == 'no_show' ? 'bg-iba-red text-white' : 'bg-gray-200 text-gray-600') }}">
+                            {{ str_replace('_', '-', $modalStatus) }}
+                        </span>
+                    </div>
+
+                    <div class="bg-gray-50 border-2 border-dashed border-gray-300 p-4 min-h-[150px] max-h-[50vh] overflow-y-auto">
+                        <p class="text-sm font-bold text-gray-700 leading-relaxed whitespace-pre-wrap">{{ $modalNotes }}</p>
+                    </div>
+
+                    <div class="pt-6">
+                        <button type="button" wire:click="closeNotesModal" class="w-full bg-iba-black text-white font-black uppercase py-3 border-2 border-iba-black shadow-[4px_4px_0_0_#131011] hover:translate-y-0.5 hover:shadow-none transition-all">Close Terminal</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+
 </div>
