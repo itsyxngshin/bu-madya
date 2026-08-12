@@ -211,7 +211,7 @@ class EvaluationResults extends Component
 
         if ($user) {
             $isAdmin = isset($user->role_id) ? in_array($user->role_id, [1, 2]) : ($user->role?->role_name === 'administrator');
-            $layoutFile = $isAdmin ? 'layouts.madya-admin-deck' : 'layouts.dashboard';
+            $layoutFile = $isAdmin ? 'layouts.dashboard' : 'layouts.guest';
         }
 
         return view('livewire.ibalong.admin.evaluation-results', [
