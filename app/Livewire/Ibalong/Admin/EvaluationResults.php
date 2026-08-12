@@ -1,79 +1,120 @@
 <?php
 
-namespace App\Livewire\Ibalong\Admin;
+namespace App\Livewire\Admin;
 
 use Livewire\Component;
-use App\Models\IbalongEvaluation;
+use Livewire\WithPagination;
+use App\Models\Evaluation;
+use App\Models\EvaluationResponse;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
+use App\Mail\CertificateMail;
+use Illuminate\Support\Str;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
 
 class EvaluationResults extends Component
 {
-    public $evaluation;
-    public $tallies = [];
-    public $textResponses = [];
+    use WithPagination;
 
-    public function mount($slug)
+    public Evaluation $evaluation;
+    public $stats = [];
+
+    // Tab & Individual Response Tracking
+    public $tab = 'summary';
+    public $currentIndex = 0;
+
+    // Synthesis & AI Reports
+    public $synthesisReport = null;
+    public $aiReport = null;
+
+    // Manual Issue Modal State
+    public $issueModalOpen = false;
+    public $issueResponseId = null;
+    public $issueName = '';
+    public $issueEmail = '';
+    public $issueSubject = '';
+    public $issueBody = '';
+
+    public function mount(Evaluation $evaluation)
     {
-        // Enforce RBAC
-        $role = auth('ibalong')->user()->role_id ?? 0;
-        if (!in_array($role, [1, 2, 4])) {
-            abort(403, 'ACCESS DENIED: Command Center clearance required to view telemetry data.');
+        $this->evaluation = $evaluation;
+        $user = auth()->user();
+
+        // 1. Check if user is collaborator
+        $isCollaborator = false;
+        if ($user && $this->evaluation->exists) {
+            $isCollaborator = $this->evaluation->collaborators()->where('user_id', $user->id)->exists();
         }
 
-        // Query the correct Ibalong model using the slug from the URL
-        $this->evaluation = IbalongEvaluation::with([
-            'questions' => fn($q) => $q->orderBy('order', 'asc'),
-            'responses.answers',
-            'responses.user',
-            'responses.team'
-        ])->where('slug', $slug)->firstOrFail();
+        // 2. Public Access Bypass Logic
+        $isPublic = $this->evaluation->is_public_results ?? false;
+        $isAdminOrCreator = $user && ($user->role?->role_name === 'administrator' || $this->evaluation->created_by === $user->id);
 
-        $this->processData();
-    }
-
-    private function processData()
-    {
-        foreach ($this->evaluation->questions as $question) {
-            if (in_array($question->type, ['section', 'page_break'])) continue;
-
-            if (in_array($question->type, ['radio', 'dropdown', 'checkbox', 'likert'])) {
-                // Initialize counts
-                $counts = [];
-                foreach ($this->evaluation->responses as $response) {
-                    $answer = $response->answers->where('question_id', $question->id)->first();
-                    if ($answer) {
-                        $val = $answer->answer_value;
-                        if (is_array($val)) { // For Checkboxes
-                            foreach ($val as $v) {
-                                $counts[$v] = ($counts[$v] ?? 0) + 1;
-                            }
-                        } else {
-                            $counts[$val] = ($counts[$val] ?? 0) + 1;
-                        }
-                    }
-                }
-                $this->tallies[$question->id] = $counts;
-            } else {
-                // Collect Text, Textarea, and Files
-                $texts = [];
-                foreach ($this->evaluation->responses as $response) {
-                    $answer = $response->answers->where('question_id', $question->id)->first();
-                    if ($answer && !empty($answer->answer_value)) {
-                        $texts[] = [
-                            'user' => $response->user->name ?? 'Anonymous',
-                            'team' => $response->team->team_name ?? 'No Affiliation',
-                            'value' => $answer->answer_value,
-                            'date' => $answer->created_at->format('M d, y H:i')
-                        ];
-                    }
-                }
-                $this->textResponses[$question->id] = $texts;
-            }
+        if ($this->evaluation->exists && !$isPublic && !$isAdminOrCreator && !$isCollaborator) {
+            abort(403, 'SYSTEM REJECT: You do not have permission to access this evaluation.');
         }
+
+        $this->calculateStats();
     }
+
+    public function togglePublicAccess()
+    {
+        $user = auth()->user();
+
+        // Only Admins or Creators can toggle public access
+        if (!$user || ($user->role?->role_name !== 'administrator' && $this->evaluation->created_by !== $user->id)) {
+            abort(403, 'Unauthorized to modify broadcast settings.');
+        }
+
+        $this->evaluation->update([
+            'is_public_results' => !$this->evaluation->is_public_results
+        ]);
+
+        session()->flash('success', 'Public broadcast status successfully updated.');
+    }
+
+    public function setTab($tabName)
+    {
+        $this->tab = $tabName;
+        $this->currentIndex = 0;
+        $this->resetPage();
+    }
+
+    // ... [KEEP ALL OTHER EXISTING METHODS: nextResponse, exportToCsv, calculateStats, generateSynthesis, generateAIInsights, openIssueModal, etc.] ...
 
     public function render()
     {
-        return view('livewire.ibalong.admin.evaluation-results')->layout('layouts.dashboard');
+        $totalResponsesCount = $this->evaluation->responses()->count();
+        $currentResponse = null;
+        $allResponses = null;
+
+        if ($this->tab === 'individual' && $totalResponsesCount > 0) {
+            $currentResponse = EvaluationResponse::with(['answers', 'user'])
+                ->where('evaluation_id', $this->evaluation->id)
+                ->orderBy('created_at')
+                ->skip($this->currentIndex)
+                ->first();
+        }
+        elseif ($this->tab === 'table' && $totalResponsesCount > 0) {
+            $allResponses = EvaluationResponse::with(['answers', 'user'])
+                ->where('evaluation_id', $this->evaluation->id)
+                ->orderBy('created_at', 'desc')
+                ->paginate(15);
+        }
+
+        // 3. Dynamic Layout Fallback for Public Users
+        $layoutFile = 'layouts.guest'; // Default for public access
+        if (auth()->check()) {
+            $layoutFile = in_array(auth()->user()->role?->role_name, ['administrator', 'organization'])
+                ? 'layouts.madya-admin-deck'
+                : 'layouts.madya-admin';
+        }
+
+        return view('livewire.admin.evaluation-results', [
+            'totalResponsesCount' => $totalResponsesCount,
+            'currentResponse' => $currentResponse,
+            'allResponses' => $allResponses,
+        ])->layout($layoutFile);
     }
 }
