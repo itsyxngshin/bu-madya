@@ -63,7 +63,7 @@ class QuestTerminal extends Component
             $baseRule = ($task->is_required && !$isDraft) ? 'required' : 'nullable';
 
             if ($task->type === 'file') {
-                $maxKB = ($task->max_file_size_mb ?? 5) * 1024;
+                $maxKB = ($task->max_file_size_mb ?? 100) * 1024;
                 if ($baseRule === 'required' && isset($this->existingFiles[$task->id])) {
                     $baseRule = 'nullable';
                 }
