@@ -21,6 +21,11 @@ class PollManager extends Component
     public $managingPollId = null;
     public $selectedNominees = [];
 
+    // Tally Modal State
+    public $viewingPollId = null;
+    public $pollTallyData = [];
+    public $viewingPollTitle = '';
+
     public function mount()
     {
         $role = auth('ibalong')->user()->role_id ?? 0;
@@ -40,7 +45,6 @@ class PollManager extends Component
             'selectedEventId' => 'required_if:requireTicket,true'
         ]);
 
-        // Direct creation to bypass relationship requirements
         IbalongPoll::create([
             'hackathon_id' => $this->activeHackathon->id,
             'event_id' => $this->requireTicket ? $this->selectedEventId : null,
@@ -56,10 +60,6 @@ class PollManager extends Component
     public function togglePollStatus($id)
     {
         $poll = IbalongPoll::findOrFail($id);
-
-        // Optional: If you only want one active poll at a time, uncomment the line below:
-        // IbalongPoll::where('hackathon_id', $this->activeHackathon->id)->update(['is_active' => false]);
-
         $poll->update(['is_active' => !$poll->is_active]);
         session()->flash('success', 'Poll broadcast status updated.');
     }
@@ -75,16 +75,12 @@ class PollManager extends Component
     {
         $poll = IbalongPoll::findOrFail($pollId);
         $this->managingPollId = $poll->id;
-
-        // Load existing nominees, defaulting to an empty array
         $this->selectedNominees = $poll->nominee_ids ?? [];
     }
 
     public function saveNominees()
     {
         $poll = IbalongPoll::findOrFail($this->managingPollId);
-
-        // Convert the string checkbox values into pure integers before saving
         $cleanArray = array_map('intval', $this->selectedNominees);
 
         $poll->update([
@@ -97,17 +93,67 @@ class PollManager extends Component
         session()->flash('success', 'Nominee roster successfully locked in for this poll.');
     }
 
+    // --- TALLY BOARD PROTOCOLS ---
+    public function openTallyModal($pollId)
+    {
+        $poll = IbalongPoll::with('votes.team')->findOrFail($pollId);
+        $this->viewingPollId = $poll->id;
+        $this->viewingPollTitle = $poll->title;
+
+        $voteCounts = $poll->votes->groupBy('team_id');
+        $tally = [];
+
+        $nomineeIds = $poll->nominee_ids ?? [];
+
+        // Compile votes for all assigned nominees
+        foreach ($nomineeIds as $teamId) {
+            $team = Registration::find($teamId) ?? IbalongRegistration::find($teamId);
+            $count = isset($voteCounts[$teamId]) ? $voteCounts[$teamId]->count() : 0;
+
+            $tally[] = [
+                'team_name' => $team->team_name ?? 'Unknown Team',
+                'category' => $team->category ?? 'General',
+                'logo' => $team->logo ?? $team->logo_path ?? null,
+                'votes' => $count
+            ];
+        }
+
+        // Account for votes cast outside active nominees just in case
+        foreach ($voteCounts as $teamId => $votes) {
+            if (!in_array($teamId, $nomineeIds)) {
+                $team = IbalongRegistration::find($teamId);
+                $tally[] = [
+                    'team_name' => $team->team_name ?? 'Unknown Team',
+                    'category' => $team->category ?? 'General',
+                    'logo' => $team->logo ?? $team->logo_path ?? null,
+                    'votes' => $votes->count()
+                ];
+            }
+        }
+
+        // Sort ranking descending by vote count
+        usort($tally, function($a, $b) {
+            return $b['votes'] <=> $a['votes'];
+        });
+
+        $this->pollTallyData = $tally;
+    }
+
+    public function closeTallyModal()
+    {
+        $this->viewingPollId = null;
+        $this->pollTallyData = [];
+        $this->viewingPollTitle = '';
+    }
+
     public function render()
     {
-        $polls = clone IbalongPoll::with(['votes.team', 'event'])
+        $polls = IbalongPoll::with(['votes.team', 'event'])
             ->where('hackathon_id', $this->activeHackathon->id)
             ->latest()
             ->get();
 
-        // Using latest() to prevent 500 SQL errors
         $events = IbalongEvent::latest()->get();
-
-        // Fetch all approved teams to populate the nominee checklist
         $teams = IbalongRegistration::where('status', 'approved')
             ->orderBy('team_name', 'asc')
             ->get();
