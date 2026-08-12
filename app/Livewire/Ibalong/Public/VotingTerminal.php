@@ -14,7 +14,6 @@ class VotingTerminal extends Component
 
     // Voting State
     public $selectedTeamId = null;
-    public $selectedTeamName = null; // Captured for the UI Modal
     public $ticketCode = '';
     public $hasVoted = false;
 
@@ -37,17 +36,18 @@ class VotingTerminal extends Component
         }
     }
 
-    public function selectTeam($teamId, $teamName)
+    public function selectTeam($teamId)
     {
         $this->selectedTeamId = $teamId;
-        $this->selectedTeamName = $teamName;
     }
 
     public function cancelSelection()
     {
         $this->selectedTeamId = null;
-        $this->selectedTeamName = null;
         $this->ticketCode = '';
+
+        // Dispatch an event to tell JavaScript to shut down the camera if it's running
+        $this->dispatch('close-scanner');
     }
 
     public function castVote()
