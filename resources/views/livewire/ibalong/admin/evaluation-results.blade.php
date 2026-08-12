@@ -86,8 +86,6 @@
                                 @foreach($question->options as $index => $option)
                                     @php
                                         $optText = is_array($option) ? ($option['text'] ?? '') : $option;
-
-                                        // Map count correctly whether it's indexed (Likert) or associative (Radio/Checkbox)
                                         $count = $question->type === 'likert' ? ($breakdown[$index] ?? 0) : ($breakdown[$optText] ?? 0);
                                         $percentage = $totalAnswers > 0 ? round(($count / $totalAnswers) * 100) : 0;
                                     @endphp
@@ -110,11 +108,13 @@
                     @else
                         <div class="bg-gray-50 border-2 border-iba-black max-h-[400px] overflow-y-auto divide-y-2 divide-dashed divide-gray-300 shadow-inner">
                             @php
-                                // Fetch raw textual answers for this specific question safely
-                                $textAnswers = $evaluation->responses->flatMap->answers->where('question_id', $question->id)->filter(function($ans) {
-                                    $val = $ans->answer_value ?? $ans->value;
-                                    return !empty($val);
-                                });
+                                $textAnswers = collect();
+                                if ($evaluation->responses) {
+                                    $textAnswers = $evaluation->responses->flatMap->answers->where('question_id', $question->id)->filter(function($ans) {
+                                        $val = $ans->answer_value ?? $ans->value;
+                                        return !empty($val);
+                                    });
+                                }
                             @endphp
 
                             @forelse($textAnswers as $answer)
@@ -123,7 +123,7 @@
                                 @endphp
                                 <div class="p-4 hover:bg-white transition-colors">
                                     <div class="flex justify-between items-center mb-2">
-                                        <span class="text-[10px] font-black uppercase text-iba-orange">Response Log #{{ $answer->response_id ?? $answer->evaluation_response_id }}</span>
+                                        <span class="text-[10px] font-black uppercase text-iba-orange">Response Log #{{ $answer->response_id ?? $answer->evaluation_response_id ?? 'N/A' }}</span>
                                         <span class="text-[9px] font-bold text-gray-400">{{ $answer->created_at->format('M d, h:i A') }}</span>
                                     </div>
 
