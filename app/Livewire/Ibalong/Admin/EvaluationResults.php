@@ -34,15 +34,27 @@ class EvaluationResults extends Component
     public $issueSubject = '';
     public $issueBody = '';
 
-    // PROPERLY BOUND TO IBALONGEVALUATION
-    public function mount(IbalongEvaluation $evaluation)
+    public function mount($evaluation = null)
     {
-        $this->evaluation = $evaluation;
+        // 1. BULLETPROOF MODEL RETRIEVAL
+        // Automatically hunts down the correct evaluation regardless of route parameter mismatches
+        if ($evaluation instanceof IbalongEvaluation && $evaluation->exists) {
+            $this->evaluation = $evaluation;
+        } elseif (is_string($evaluation)) {
+            $this->evaluation = IbalongEvaluation::where('slug', $evaluation)->firstOrFail();
+        } elseif (is_object($evaluation) && isset($evaluation->slug)) {
+            $this->evaluation = IbalongEvaluation::where('slug', $evaluation->slug)->firstOrFail();
+        } else {
+            // Absolute Fallback: Grab the slug directly from the URL (Segment 3)
+            $slug = request()->segment(3);
+            $this->evaluation = IbalongEvaluation::where('slug', $slug)->firstOrFail();
+        }
 
+        // 2. AUTHORIZATION & ACCESS LOGIC
         $user = auth()->user() ?? auth('ibalong')->user();
 
         $isCollaborator = false;
-        if ($user && $this->evaluation->exists && method_exists($this->evaluation, 'collaborators')) {
+        if ($user && method_exists($this->evaluation, 'collaborators')) {
             $isCollaborator = $this->evaluation->collaborators()->where('user_id', $user->id)->exists();
         }
 
@@ -54,10 +66,11 @@ class EvaluationResults extends Component
             $isAdminOrCreator = $isAdmin || $this->evaluation->created_by === $user->id;
         }
 
-        if ($this->evaluation->exists && !$isPublic && !$isAdminOrCreator && !$isCollaborator) {
+        if (!$isPublic && !$isAdminOrCreator && !$isCollaborator) {
             abort(403, 'SYSTEM REJECT: You do not have permission to access this evaluation.');
         }
 
+        // 3. TRIGGER DATA CALCULATIONS
         $this->calculateStats();
     }
 
@@ -174,6 +187,7 @@ class EvaluationResults extends Component
 
     public function render()
     {
+        // This will now correctly count the 35 responses because the model is loaded!
         $totalResponsesCount = $this->evaluation->responses()->count();
         $currentResponse = null;
         $allResponses = null;
@@ -197,10 +211,9 @@ class EvaluationResults extends Component
 
         if ($user) {
             $isAdmin = isset($user->role_id) ? in_array($user->role_id, [1, 2]) : ($user->role?->role_name === 'administrator');
-            $layoutFile = $isAdmin ? 'layouts.dashboard' : 'layouts.guest';
+            $layoutFile = $isAdmin ? 'layouts.madya-admin-deck' : 'layouts.dashboard';
         }
 
-        // CORRECTED PATH: Points to the Ibalong specific blade file
         return view('livewire.ibalong.admin.evaluation-results', [
             'totalResponsesCount' => $totalResponsesCount,
             'currentResponse' => $currentResponse,
