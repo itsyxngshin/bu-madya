@@ -210,7 +210,7 @@ class EvaluationResults extends Component
         $user = auth()->user() ?? auth('ibalong')->user();
 
         if ($user) {
-            $isAdmin = isset($user->role_id) ? in_array($user->role_id, [1, 2]) : ($user->role?->role_name === 'administrator');
+            $isAdmin = isset($user->role_id) ? in_array($user->role_id, [1, 2]) : ($user->role?->name === 'administrator');
             $layoutFile = $isAdmin ? 'layouts.dashboard' : 'layouts.guest';
         }
 
