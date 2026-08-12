@@ -8,14 +8,15 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('evaluations', function (Blueprint $table) {
-            $table->boolean('is_public_results')->default(false)->after('status');
+        // Target the correct Ibalong table and remove the strict placement anchor
+        Schema::table('ibalong_evaluations', function (Blueprint $table) {
+            $table->boolean('is_public_results')->default(false);
         });
     }
 
     public function down(): void
     {
-        Schema::table('evaluations', function (Blueprint $table) {
+        Schema::table('ibalong_evaluations', function (Blueprint $table) {
             $table->dropColumn('is_public_results');
         });
     }
