@@ -107,7 +107,7 @@ class PollManager extends Component
 
         // Compile votes for all assigned nominees
         foreach ($nomineeIds as $teamId) {
-            $team = Registration::find($teamId) ?? IbalongRegistration::find($teamId);
+            $team = IbalongRegistration::find($teamId);
             $count = isset($voteCounts[$teamId]) ? $voteCounts[$teamId]->count() : 0;
 
             $tally[] = [
