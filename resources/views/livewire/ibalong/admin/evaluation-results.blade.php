@@ -1,5 +1,12 @@
 <div class="max-w-7xl mx-auto space-y-8 pb-24">
 
+    {{-- Safe Authorization & Role Check --}}
+    @php
+        $currentUser = auth()->user() ?? auth('ibalong')->user();
+        $isAdmin = $currentUser ? (isset($currentUser->role_id) && in_array($currentUser->role_id, [1, 2])) : false;
+        $isCreator = $currentUser ? ($evaluation->created_by === $currentUser->id) : false;
+    @endphp
+
     {{-- Header Section --}}
     <div class="bg-iba-black border-4 border-iba-black shadow-[8px_8px_0_0_#FF8623] p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 text-white relative">
         <div>
@@ -11,17 +18,15 @@
         </div>
 
         <div class="flex items-center gap-3 w-full md:w-auto mt-4 md:mt-0">
-            {{-- Broadcast Controls (Hidden from Public Users) --}}
-            @auth
-                @if(auth()->user()->role?->role_name === 'administrator' || $evaluation->created_by === auth()->user()->id)
-                    <button wire:click="togglePublicAccess" class="w-full md:w-auto text-[10px] font-black uppercase px-4 py-3 border-2 border-white transition-all shadow-[2px_2px_0_0_#FFF] hover:translate-y-0.5 hover:shadow-none {{ $evaluation->is_public_results ? 'bg-iba-green text-white' : 'bg-transparent text-white hover:bg-white hover:text-iba-black' }}">
-                        {{ $evaluation->is_public_results ? 'Public Broadcast Live' : 'Enable Public Access' }}
-                    </button>
-                @endif
+            {{-- Broadcast Controls (Hidden from Public Users, Visible to Admins/Creators) --}}
+            @if($isAdmin || $isCreator)
+                <button wire:click="togglePublicAccess" class="w-full md:w-auto text-[10px] font-black uppercase px-4 py-3 border-2 border-white transition-all shadow-[2px_2px_0_0_#FFF] hover:translate-y-0.5 hover:shadow-none {{ $evaluation->is_public_results ? 'bg-iba-green text-white' : 'bg-transparent text-white hover:bg-white hover:text-iba-black' }}">
+                    {{ $evaluation->is_public_results ? 'Public Broadcast Live' : 'Enable Public Access' }}
+                </button>
                 <a href="{{ route('ibalong.admin.evaluations.index') }}" class="w-full md:w-auto bg-transparent text-white text-center text-[10px] font-black uppercase px-6 py-3 border-2 border-white hover:bg-white hover:text-iba-black transition-colors">
                     &larr; Return
                 </a>
-            @endauth
+            @endif
         </div>
     </div>
 
@@ -105,26 +110,30 @@
                     @else
                         <div class="bg-gray-50 border-2 border-iba-black max-h-[400px] overflow-y-auto divide-y-2 divide-dashed divide-gray-300 shadow-inner">
                             @php
-                                // Fetch raw textual answers for this specific question
-                                $textAnswers = $evaluation->responses->flatMap->answers->where('evaluation_question_id', $question->id)->filter(function($ans) {
-                                    return !empty($ans->answer_value);
+                                // Fetch raw textual answers for this specific question safely
+                                $textAnswers = $evaluation->responses->flatMap->answers->where('question_id', $question->id)->filter(function($ans) {
+                                    $val = $ans->answer_value ?? $ans->value;
+                                    return !empty($val);
                                 });
                             @endphp
 
                             @forelse($textAnswers as $answer)
+                                @php
+                                    $val = $answer->answer_value ?? $answer->value;
+                                @endphp
                                 <div class="p-4 hover:bg-white transition-colors">
                                     <div class="flex justify-between items-center mb-2">
-                                        <span class="text-[10px] font-black uppercase text-iba-orange">Response Log #{{ $answer->evaluation_response_id }}</span>
+                                        <span class="text-[10px] font-black uppercase text-iba-orange">Response Log #{{ $answer->response_id ?? $answer->evaluation_response_id }}</span>
                                         <span class="text-[9px] font-bold text-gray-400">{{ $answer->created_at->format('M d, h:i A') }}</span>
                                     </div>
 
                                     @if($question->type === 'file')
-                                        <a href="{{ Storage::url($answer->answer_value) }}" target="_blank" class="inline-flex items-center gap-2 bg-iba-black text-white text-[10px] font-black uppercase tracking-widest px-4 py-2 border-2 border-iba-black hover:bg-gray-800 transition-colors shadow-[2px_2px_0_0_#131011] hover:translate-y-0.5 hover:shadow-none">
+                                        <a href="{{ Storage::url($val) }}" target="_blank" class="inline-flex items-center gap-2 bg-iba-black text-white text-[10px] font-black uppercase tracking-widest px-4 py-2 border-2 border-iba-black hover:bg-gray-800 transition-colors shadow-[2px_2px_0_0_#131011] hover:translate-y-0.5 hover:shadow-none">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
                                             Access Target File
                                         </a>
                                     @else
-                                        <p class="text-sm font-bold text-gray-700 whitespace-pre-wrap leading-relaxed">{{ $answer->answer_value }}</p>
+                                        <p class="text-sm font-bold text-gray-700 whitespace-pre-wrap leading-relaxed">{{ is_string($val) ? $val : json_encode($val) }}</p>
                                     @endif
                                 </div>
                             @empty
@@ -137,11 +146,6 @@
                 </div>
 
                 @php $questionCounter++; @endphp
-            @endforeach
-        </div>
-    @endif
-</div>
-+; @endphp
             @endforeach
         </div>
     @endif
