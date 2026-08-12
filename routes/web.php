@@ -180,6 +180,7 @@ Route::domain('ibalong.' . env('APP_DOMAIN'))->name('ibalong.')->group(function 
     Route::get('/about', \App\Livewire\Ibalong\AboutHackathon::class)->name('about');
     Route::get('/volunteer', \App\Livewire\Ibalong\VolunteerIntake::class)->name('volunteer');
     Route::get('/peoples-choice', \App\Livewire\Ibalong\Public\VotingTerminal::class)->name('public.voting');
+    Route::get('/admin/evaluations/{slug}/results', IbalongEvaluationResults::class)->name('admin.evaluations.results');
 
     // ==========================================
     // TIER 2: AUTHENTICATED (All Logged-in Roles: 1, 2, 3, 4, 5)
@@ -217,7 +218,7 @@ Route::domain('ibalong.' . env('APP_DOMAIN'))->name('ibalong.')->group(function 
             Route::get('/admin/evaluations', IbalongEvaluationList::class)->name('admin.evaluations.index');
             Route::get('/admin/evaluations/forge', IbalongEvaluationBuilder::class)->name('admin.evaluations.forge');
             Route::get('/admin/evaluations/{evaluation:slug}/edit', IbalongEvaluationBuilder::class)->name('admin.evaluations.edit');
-            Route::get('/admin/evaluations/{slug}/results', IbalongEvaluationResults::class)->name('admin.evaluations.results');
+
             Route::get('/quests/override/{submission_id}', QuestOverrideTerminal::class)->name('admin.quests.override');
         });
 
@@ -268,7 +269,7 @@ Route::domain('ibalong.' . env('APP_DOMAIN'))->name('ibalong.')->group(function 
             // Route::get('/scoring-dashboard', ...)->name('judge.scoring');
 
         });
-        
+
         Route::middleware([IbalongRoleMiddleware::class.':1,2,6'])->group(function () {
             Route::get('/mentor-hub', \App\Livewire\Ibalong\Mentor\MentorHub::class)->name('mentor.hub');
 
@@ -552,8 +553,3 @@ Route::middleware(['web'])->group(function () {
 
 
 });
-
-
-
-
-
