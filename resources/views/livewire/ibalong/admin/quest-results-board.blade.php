@@ -1,5 +1,12 @@
 <div class="max-w-7xl mx-auto space-y-8 pb-24">
 
+    {{-- Error Banner for Failed Exports --}}
+    @if (session()->has('error'))
+        <div class="bg-iba-red/10 border-l-4 border-iba-red p-4 shadow-[4px_4px_0_0_#131011]">
+            <p class="text-xs font-black text-iba-red uppercase tracking-widest">{{ session('error') }}</p>
+        </div>
+    @endif
+
     {{-- Header Section --}}
     <div class="bg-iba-black border-4 border-iba-black shadow-[8px_8px_0_0_#FF8623] p-6 flex flex-col gap-4 text-white">
 
@@ -7,19 +14,48 @@
             <div>
                 <div class="flex items-center gap-3 mb-2">
                     <h1 class="text-2xl font-black uppercase tracking-widest text-white">Official Tabulation Board</h1>
-                    <span class="bg-iba-orange text-iba-black text-[10px] font-black uppercase px-2 py-1">Target Base: {{ $dynamicMaxScore }} Pts</span>
+                    <span class="bg-iba-orange text-iba-black text-[10px] font-black uppercase px-2 py-1 shadow-[2px_2px_0_0_#FFF]">Target Base: {{ $dynamicMaxScore }} Pts</span>
                 </div>
                 <p class="text-sm font-bold text-gray-400 uppercase tracking-widest">{{ $quest->title }}</p>
             </div>
 
-            <a href="{{ route('ibalong.admin.quests.index') }}" class="bg-transparent text-white text-xs font-black uppercase px-6 py-3 border-2 border-white hover:bg-white hover:text-iba-black transition-colors">
-                &larr; Return to Roster
-            </a>
+            <div class="flex items-center gap-3 w-full md:w-auto flex-wrap md:flex-nowrap">
+
+                {{-- CSV Export Button --}}
+<button wire:click="exportToExcel" wire:loading.attr="disabled" class="w-full md:w-auto bg-[#4d6a1b] text-white text-[10px] font-black uppercase px-4 py-3 border-2 border-white transition-all shadow-[2px_2px_0_0_#FFF] hover:translate-y-0.5 hover:shadow-none flex items-center justify-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                    Data (Excel)
+                </button>
+
+                {{-- General Word Export Button --}}
+                <button wire:click="exportToWord" wire:loading.attr="disabled" class="w-full md:w-auto bg-[#2563EB] text-white text-[10px] font-black uppercase px-4 py-3 border-2 border-white transition-all shadow-[2px_2px_0_0_#FFF] hover:translate-y-0.5 hover:shadow-none flex items-center justify-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                    Report (Doc)
+                </button>
+
+                {{-- Individual Judge Scorecards Export Button --}}
+                <button wire:click="exportJudgeScorecardsToWord" wire:loading.attr="disabled" class="w-full md:w-auto bg-iba-orange text-iba-black text-[10px] font-black uppercase px-4 py-3 border-2 border-white transition-all shadow-[2px_2px_0_0_#FFF] hover:translate-y-0.5 hover:shadow-none flex items-center justify-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                    Scorecards
+                </button>
+
+                {{-- Return Button --}}
+                <a href="{{ route('ibalong.admin.quests.index') }}" class="w-full md:w-auto bg-transparent text-white text-center text-[10px] font-black uppercase px-6 py-3 border-2 border-white hover:bg-white hover:text-iba-black transition-colors shrink-0">
+                    &larr; Return
+                </a>
+            </div>
         </div>
 
-        {{-- Dynamic Dual Filters --}}
+        {{-- Dynamic Filters --}}
         <div class="pt-4 border-t-2 border-dashed border-gray-600 flex flex-col sm:flex-row sm:items-center gap-3">
             <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+
+                {{-- Division Mode Filter --}}
+                <select wire:model.live="divisionMode" class="border-2 border-white bg-iba-black text-white p-2 text-xs font-black uppercase cursor-pointer hover:bg-white hover:text-iba-black focus:outline-none transition-colors w-full sm:w-auto">
+                    <option value="categorized" class="text-iba-black">Categorized (By Division)</option>
+                    <option value="unified" class="text-iba-black">Unified (Global Ranking)</option>
+                </select>
+
                 {{-- Group Filter --}}
                 <select wire:model.live="selectedGroup" class="border-2 border-white bg-iba-black text-white p-2 text-xs font-black uppercase cursor-pointer hover:bg-white hover:text-iba-black focus:outline-none transition-colors w-full sm:w-auto">
                     <option value="all" class="text-iba-black">All Matrices (Combined)</option>
@@ -37,19 +73,19 @@
                 </select>
             </div>
 
-            <div wire:loading wire:target="selectedJudge, selectedGroup" class="text-[10px] font-black text-iba-orange uppercase animate-pulse">
-                Recalculating Rankings...
+            <div wire:loading wire:target="selectedJudge, selectedGroup, divisionMode, exportJudgeScorecardsToWord" class="text-[10px] font-black text-iba-orange uppercase animate-pulse">
+                Processing Data...
             </div>
         </div>
     </div>
 
-    {{-- Categorized Leaderboards --}}
+    {{-- Categorized or Unified Leaderboards --}}
     @forelse($categorizedLeaderboard as $category => $rankings)
         <div class="bg-white border-4 border-iba-black shadow-[8px_8px_0_0_#131011] overflow-hidden mb-8 animate-fade-in-up">
 
             {{-- Division Banner --}}
             <div class="bg-iba-black text-white px-6 py-4 flex items-center justify-between border-b-4 border-iba-black">
-                <h2 class="text-lg font-black uppercase tracking-widest">{{ $category }} Division</h2>
+                <h2 class="text-lg font-black uppercase tracking-widest">{{ $category }} {{ $divisionMode === 'unified' ? 'Ranking' : 'Division' }}</h2>
                 <span class="bg-white text-iba-black text-[10px] font-black uppercase px-3 py-1 border-2 border-transparent">{{ count($rankings) }} Cohorts</span>
             </div>
 
@@ -87,7 +123,11 @@
                                 {{-- Team Info --}}
                                 <td class="px-6 py-4 align-top">
                                     <div class="text-sm font-black text-iba-black uppercase">{{ $row['team_name'] }}</div>
-                                    <div class="text-[10px] text-gray-500 font-bold uppercase mt-1">ID: {{ $row['ticket_code'] }}</div>
+                                    @if($divisionMode === 'unified')
+                                        <div class="text-[10px] text-[#0095AC] font-black uppercase mt-1">{{ $row['category'] }}</div>
+                                    @else
+                                        <div class="text-[10px] text-gray-500 font-bold uppercase mt-1">ID: {{ $row['ticket_code'] }}</div>
+                                    @endif
                                 </td>
 
                                 {{-- Dynamic Contextual Breakdown --}}

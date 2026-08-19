@@ -1,12 +1,5 @@
 <div class="max-w-7xl mx-auto space-y-8 pb-24">
 
-    {{-- Safe Authorization & Role Check --}}
-    @php
-        $currentUser = auth()->user() ?? auth('ibalong')->user();
-        $isAdmin = $currentUser ? (isset($currentUser->role_id) && in_array($currentUser->role_id, [1, 2])) : false;
-        $isCreator = $currentUser ? ($evaluation->created_by === $currentUser->id) : false;
-    @endphp
-
     {{-- Header Section --}}
     <div class="bg-iba-black border-4 border-iba-black shadow-[8px_8px_0_0_#FF8623] p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 text-white relative">
         <div>
@@ -17,16 +10,28 @@
             <p class="text-sm font-bold text-gray-400 uppercase tracking-widest">{{ $evaluation->title }}</p>
         </div>
 
-        <div class="flex items-center gap-3 w-full md:w-auto mt-4 md:mt-0">
-            {{-- Broadcast Controls (Hidden from Public Users, Visible to Admins/Creators) --}}
-            @if($isAdmin || $isCreator)
-                <button wire:click="togglePublicAccess" class="w-full md:w-auto text-[10px] font-black uppercase px-4 py-3 border-2 border-white transition-all shadow-[2px_2px_0_0_#FFF] hover:translate-y-0.5 hover:shadow-none {{ $evaluation->is_public_results ? 'bg-iba-green text-white' : 'bg-transparent text-white hover:bg-white hover:text-iba-black' }}">
-                    {{ $evaluation->is_public_results ? 'Public Broadcast Live' : 'Enable Public Access' }}
-                </button>
-                <a href="{{ route('ibalong.admin.evaluations.index') }}" class="w-full md:w-auto bg-transparent text-white text-center text-[10px] font-black uppercase px-6 py-3 border-2 border-white hover:bg-white hover:text-iba-black transition-colors">
-                    &larr; Return
-                </a>
-            @endif
+        <div class="flex items-center gap-3 w-full md:w-auto mt-4 md:mt-0 flex-wrap md:flex-nowrap">
+            {{-- CSV / Sheets Export Button --}}
+            <button wire:click="exportToCsv" wire:loading.attr="disabled" class="w-full md:w-auto bg-[#4d6a1b] text-white text-[10px] font-black uppercase px-4 py-3 border-2 border-white transition-all shadow-[2px_2px_0_0_#FFF] hover:translate-y-0.5 hover:shadow-none flex items-center justify-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                Data (CSV)
+            </button>
+
+            {{-- MS Word Document Export Button --}}
+            <button wire:click="exportToWord" wire:loading.attr="disabled" class="w-full md:w-auto bg-[#2563EB] text-white text-[10px] font-black uppercase px-4 py-3 border-2 border-white transition-all shadow-[2px_2px_0_0_#FFF] hover:translate-y-0.5 hover:shadow-none flex items-center justify-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                Report (Doc)
+            </button>
+
+            {{-- Status Toggle --}}
+            <button wire:click="togglePublicAccess" class="w-full md:w-auto text-[10px] font-black uppercase px-4 py-3 border-2 border-white transition-all shadow-[2px_2px_0_0_#FFF] hover:translate-y-0.5 hover:shadow-none {{ $evaluation->is_public_results ? 'bg-iba-green text-white' : 'bg-transparent text-white hover:bg-white hover:text-iba-black' }}">
+                {{ $evaluation->is_public_results ? 'Public Broadcast Live' : 'Enable Public Access' }}
+            </button>
+
+            {{-- Return to Matrix --}}
+            <a href="{{ route('ibalong.admin.evaluations.index') }}" class="w-full md:w-auto bg-transparent text-white text-center text-[10px] font-black uppercase px-6 py-3 border-2 border-white hover:bg-white hover:text-iba-black transition-colors shrink-0">
+                &larr; Return
+            </a>
         </div>
     </div>
 

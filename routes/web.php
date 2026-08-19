@@ -128,6 +128,7 @@ use App\Livewire\Admin\AccreditationDashboard;
 
 use App\Livewire\PublicActivityIndex;
 use App\Livewire\PublicActivityShow;
+use App\Livewire\PrizeRoulette;
 
 $host = parse_url(config('app.url'), PHP_URL_HOST) ?? 'localhost';
 $baseDomain = [str_replace('www.', '', $host), 'www.' . str_replace('www.', '', $host)];
@@ -371,6 +372,7 @@ Route::middleware(['web'])->group(function () {
 
     Route::get('/events/{event:slug}/scan', EventScanner::class)->name('admin.events.scan');
     Route::get('/unified-calendar', UnifiedCalendar::class)->name('unified-calendar');
+    Route::get('/roulette', PrizeRoulette::class)->name('roulette');
 
     // Middleware accessible to both members and directors
     Route::middleware(['auth', 'role:director'])->prefix('director')->name('director.')
