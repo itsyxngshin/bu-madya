@@ -1,17 +1,14 @@
 @section('meta_title', '[REGISTRATION] ' . $event->title)
 @section('meta_description', $event->description ? Str::limit(strip_tags($event->description), 160) : 'Join us for an unforgettable experience at our upcoming event! Discover inspiring speakers, engaging activities, and valuable networking opportunities. Don\'t miss out on this chance to connect and grow. Register now!')
 @php
-    // 1. Determine the image URL using PHP logic
     $ogImage = $event->cover_image
         ? (Str::startsWith($event->cover_image, 'http') ? $event->cover_image : asset('storage/' . $event->cover_image))
         : asset('images/MADYA Web Logo1.png');
 @endphp
 
-{{-- 2. Pass the CLEAN variable to the layout --}}
 @section('meta_image', $ogImage)
 
 <div class="min-h-screen bg-slate-50 relative font-sans selection:bg-red-500 selection:text-white pb-24">
-    {{-- Subtle Blurred Background (Luma Style) --}}
     @if($event->cover_image)
         <div class="absolute inset-0 z-0 pointer-events-none overflow-hidden h-[70vh]">
             <img src="{{ asset('storage/'.$event->cover_image) }}" class="w-full h-full object-cover opacity-[0.08] blur-3xl scale-110">
@@ -19,27 +16,20 @@
         </div>
     @endif
 
-    {{-- MAIN CONTAINER --}}
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 lg:pt-12 relative z-10">
 
-        {{-- FLEX LAYOUT (Replaces Grid to prevent squishing) --}}
         <div class="flex flex-col lg:flex-row gap-8 lg:gap-16 items-start">
 
-            {{-- ========================================== --}}
-            {{-- LEFT COLUMN: EVENT DETAILS (Editorial) --}}
-            {{-- ========================================== --}}
+            {{-- LEFT COLUMN: EVENT DETAILS --}}
             <div class="w-full lg:w-7/12 xl:w-2/3 min-w-0 flex flex-col">
 
-                {{-- Cover Image (Dynamic Height & Smooth Bottom Blend) --}}
                 @if($event->cover_image)
                     <div class="w-full rounded-2xl md:rounded-[2rem] overflow-hidden mb-6 md:mb-8 shadow-2xl shadow-slate-200/50 ring-1 ring-slate-900/5 bg-slate-200 relative">
                         <img src="{{ asset('storage/'.$event->cover_image) }}" class="w-full h-auto object-cover hover:scale-105 transition-transform duration-700 ease-out block">
-                        {{-- Bottom Smooth Blend Gradient --}}
                         <div class="absolute inset-x-0 bottom-0 h-16 md:h-24 bg-gradient-to-t from-slate-50 via-slate-50/50 to-transparent pointer-events-none"></div>
                     </div>
                 @endif
 
-                {{-- Host Info (Captures profile_photo_path) --}}
                 @if($event->organizer)
                     <div class="flex items-center gap-3 mb-4 md:mb-6">
                         @if($event->organizer->profile_photo_path)
@@ -58,57 +48,47 @@
                     </div>
                 @endif
 
-                {{-- Title (Scaled down for smaller screens) --}}
                 <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight leading-[1.1] mb-6 md:mb-8 break-words text-balance">
                     {{ $event->title }}
                 </h1>
 
-                {{-- Date & Location Quick Details (Enhanced Visual Hierarchy without Live Pulse) --}}
-<div class="flex flex-col sm:flex-row gap-4 md:gap-6 mb-8 md:mb-12 pb-8 border-b border-slate-200/60">
+                <div class="flex flex-col sm:flex-row gap-4 md:gap-6 mb-8 md:mb-12 pb-8 border-b border-slate-200/60">
 
-    {{-- Date & Time Card --}}
-    <div class="group flex items-center gap-4 flex-1 min-w-0 bg-white p-4 md:p-6 rounded-2xl border-2 border-slate-900 shadow-[4px_4px_0_0_#0f172a] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#ef4444] transition-all duration-300 relative overflow-hidden">
-        <div class="w-12 h-12 md:w-14 md:h-14 bg-red-50 rounded-2xl border-2 border-slate-900 flex items-center justify-center text-red-600 shrink-0 shadow-sm group-hover:bg-red-500 group-hover:text-white transition-colors duration-300">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-        </div>
+                    <div class="group flex items-center gap-4 flex-1 min-w-0 bg-white p-4 md:p-6 rounded-2xl border-2 border-slate-900 shadow-[4px_4px_0_0_#0f172a] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#ef4444] transition-all duration-300 relative overflow-hidden">
+                        <div class="w-12 h-12 md:w-14 md:h-14 bg-red-50 rounded-2xl border-2 border-slate-900 flex items-center justify-center text-red-600 shrink-0 shadow-sm group-hover:bg-red-500 group-hover:text-white transition-colors duration-300">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <p class="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-0.5">Date & Time</p>
+                            <p class="text-sm md:text-base font-black text-slate-900 leading-tight">
+                                {{ $event->start_date ? $event->start_date->format('l, F j, Y') : 'Date TBA' }}
+                            </p>
+                            <p class="text-xs font-bold text-red-600 mt-0.5">
+                                {{ $event->start_date ? $event->start_date->format('g:i A') : 'Time TBA' }} onwards
+                            </p>
+                        </div>
+                    </div>
 
-        <div class="min-w-0 flex-1">
-            <p class="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-0.5">Date & Time</p>
-            <p class="text-sm md:text-base font-black text-slate-900 leading-tight">
-                {{ $event->start_date ? $event->start_date->format('l, F j, Y') : 'Date TBA' }}
-            </p>
-            <p class="text-xs font-bold text-red-600 mt-0.5">
-                {{ $event->start_date ? $event->start_date->format('g:i A') : 'Time TBA' }} onwards
-            </p>
-        </div>
-    </div>
+                    <div class="group flex items-center gap-4 flex-1 min-w-0 bg-white p-4 md:p-6 rounded-2xl border-2 border-slate-900 shadow-[4px_4px_0_0_#0f172a] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#3b82f6] transition-all duration-300 relative overflow-hidden">
+                        <div class="w-12 h-12 md:w-14 md:h-14 bg-blue-50 rounded-2xl border-2 border-slate-900 flex items-center justify-center text-blue-600 shrink-0 shadow-sm group-hover:bg-blue-600 group-hover:text-white transition-colors duration-300">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <p class="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-0.5">Location</p>
+                            <p class="text-sm md:text-base font-black text-slate-900 leading-snug truncate" title="{{ $event->location }}">
+                                {{ $event->location }}
+                            </p>
+                            <p class="text-xs font-bold text-blue-600 mt-0.5">
+                                Ready to Join
+                            </p>
+                        </div>
+                    </div>
+                </div>
 
-    {{-- Location Card --}}
-    <div class="group flex items-center gap-4 flex-1 min-w-0 bg-white p-4 md:p-6 rounded-2xl border-2 border-slate-900 shadow-[4px_4px_0_0_#0f172a] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#3b82f6] transition-all duration-300 relative overflow-hidden">
-        <div class="w-12 h-12 md:w-14 md:h-14 bg-blue-50 rounded-2xl border-2 border-slate-900 flex items-center justify-center text-blue-600 shrink-0 shadow-sm group-hover:bg-blue-600 group-hover:text-white transition-colors duration-300">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-        </div>
-
-        <div class="min-w-0 flex-1">
-            <p class="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-0.5">Location</p>
-            <p class="text-sm md:text-base font-black text-slate-900 leading-snug truncate" title="{{ $event->location }}">
-                {{ $event->location }}
-            </p>
-            <p class="text-xs font-bold text-blue-600 mt-0.5">
-                Ready to Join
-            </p>
-        </div>
-    </div>
-</div>
-
-                {{-- Event Description Card --}}
                 <div class="bg-white p-5 md:p-10 rounded-[1.5rem] md:rounded-[2rem] shadow-xl border border-gray-100">
-
                     <h3 class="font-bold text-black uppercase tracking-widest text-[10px] md:text-sm border-b border-gray-200 pb-3 mb-4 md:mb-6">
                         About this Event
                     </h3>
-
-                    {{-- Markdown Description (Scaled prose for mobile readability) --}}
                     <div class="prose prose-sm sm:prose-base md:prose-lg max-w-none text-gray-900
                         prose-headings:font-black prose-headings:text-black prose-headings:tracking-tight
                         prose-p:text-gray-900 prose-p:leading-relaxed prose-p:font-medium
@@ -116,24 +96,17 @@
                         prose-a:text-red-600 hover:prose-a:text-red-700 prose-a:font-bold prose-a:underline-offset-4
                         prose-img:rounded-2xl md:prose-img:rounded-3xl prose-img:shadow-xl
                         break-words overflow-hidden">
-
                         {!! Str::markdown($event->description ?? '') !!}
-
                     </div>
-
                 </div>
             </div>
 
-            {{-- ========================================== --}}
-            {{-- RIGHT COLUMN: RSVP BOX (Sticky)          --}}
-            {{-- ========================================== --}}
+            {{-- RIGHT COLUMN: RSVP BOX (Sticky) --}}
             <div class="w-full lg:w-5/12 xl:w-1/3 min-w-0 relative">
 
-                {{-- Sticky wrapper ensures the form floats on desktop while scrolling --}}
                 <div class="bg-white rounded-[2rem] p-6 sm:p-8 shadow-2xl shadow-slate-200/60 border border-slate-100 lg:sticky lg:top-24 w-full">
 
-@if($isRegistered)
-                        {{-- STATE 1: SUCCESS TICKET --}}
+                    @if($isRegistered)
                         <div class="text-center animate-fade-in-up">
                             <div class="w-16 h-16 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4 ring-8 ring-emerald-50/50 shrink-0">
                                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
@@ -141,21 +114,17 @@
                             <h2 class="text-2xl font-black text-slate-900 mb-1 tracking-tight">You're in!</h2>
                             <p class="text-sm text-slate-500 mb-5 font-medium">Please present this ticket at the entrance.</p>
 
-                            {{-- Screenshot Helper --}}
                             <div class="inline-flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-2 rounded-lg mb-6 border border-blue-100 shadow-sm">
                                 <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                                 <span class="text-xs font-bold uppercase tracking-widest">Take a screenshot to save your QR</span>
                             </div>
 
-                            {{-- Ticket UI --}}
                             <div class="bg-white rounded-3xl border border-slate-200 shadow-xl overflow-hidden relative text-left w-full mx-auto max-w-sm">
 
-                                {{-- QR Section --}}
                                 <div class="p-6 flex flex-col items-center border-b-[3px] border-dashed border-slate-200 bg-slate-50/50 relative">
                                     <div class="absolute -bottom-4 -left-4 w-8 h-8 bg-white rounded-full border border-slate-200"></div>
                                     <div class="absolute -bottom-4 -right-4 w-8 h-8 bg-white rounded-full border border-slate-200"></div>
 
-                                    {{-- QR Code Section with Gradient --}}
                                     <div class="bg-white p-4 rounded-2xl shadow-sm inline-block"
                                         wire:ignore x-data x-init="
                                             $nextTick(() => {
@@ -198,7 +167,6 @@
                                     <p class="text-sm font-mono font-bold text-slate-400 tracking-[0.2em] mt-4">{{ $registrationRecord->ticket_code }}</p>
                                 </div>
 
-                                {{-- Details Section --}}
                                 <div class="p-6 bg-white">
                                     <p class="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-1">Attendee Name</p>
                                     <p class="text-base font-black text-slate-900 mb-5 break-words leading-tight">{{ $registrationRecord->name }}</p>
@@ -220,7 +188,6 @@
                                         @endif
                                     </div>
 
-                                    {{-- Check-In Action Section --}}
                                     <div class="mt-6 pt-5 border-t border-slate-100">
                                         @if(isset($event->allow_self_checkin) && $event->allow_self_checkin)
                                             <a href="{{ url('/events/' . $event->id . '/checkin?code=' . $registrationRecord->ticket_code) }}" class="block w-full py-3.5 bg-slate-900 text-white font-black rounded-xl shadow-lg hover:bg-black hover:-translate-y-0.5 transition-all text-[11px] uppercase tracking-widest text-center">
@@ -240,7 +207,6 @@
                             </div>
                         </div>
                     @else
-                        {{-- STATE 2: REGISTRATION FORM --}}
                         <h2 class="text-2xl sm:text-3xl font-black text-slate-900 mb-2 tracking-tight">Join Event</h2>
                         <p class="text-sm text-slate-500 mb-8">Fill out the form below to secure your spot.</p>
 
@@ -258,8 +224,6 @@
                         @endif
 
                         <form wire:submit.prevent="register" class="space-y-5">
-
-                            {{-- ACCOUNT LOOKUP --}}
                             @if($registration_method === 'account')
                                 @if(!$is_verified)
                                     <div class="bg-red-50/50 p-5 rounded-2xl border border-red-100 animate-fade-in-down">
@@ -274,7 +238,6 @@
                                         @error('lookup_id') <span class="text-xs text-red-600 mt-2 block font-bold">{{ $message }}</span> @enderror
                                     </div>
                                 @else
-                                    {{-- Verified State --}}
                                     <div class="bg-emerald-50 p-5 rounded-2xl border border-emerald-200 flex items-center justify-between animate-fade-in-down shadow-sm">
                                         <div class="min-w-0 pr-4">
                                             <p class="text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
@@ -291,8 +254,6 @@
                                         @endif
                                     </div>
                                 @endif
-
-                            {{-- MANUAL ENTRY --}}
                             @else
                                 <div class="grid grid-cols-1 gap-5 animate-fade-in-down">
                                     <div>
@@ -308,7 +269,6 @@
                                 </div>
                             @endif
 
-                            {{-- COMMON FIELDS --}}
                             @if($registration_method === 'manual' || $is_verified)
                                 <div class="animate-fade-in-up mt-2">
                                     <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Contact Number</label>
@@ -330,7 +290,6 @@
                                     </div>
                                 </div>
 
-                                {{-- TIER 1: BU STUDENT --}}
                                 @if($is_bu_student)
                                     <div class="bg-orange-50/40 p-5 rounded-2xl border border-orange-100 space-y-5 animate-fade-in-down mt-2">
                                         <div>
@@ -388,8 +347,6 @@
                                             </div>
                                         @endif
                                     </div>
-
-                                {{-- TIER 2: EXTERNAL GUEST --}}
                                 @else
                                     <div class="bg-blue-50/40 p-5 rounded-2xl border border-blue-100 space-y-5 animate-fade-in-down mt-2">
                                         <div>
@@ -403,7 +360,6 @@
                                             <select wire:model.live="classification" class="w-full rounded-xl border-blue-200 bg-white text-sm py-3 px-4 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none font-medium cursor-pointer appearance-none">
                                                 <option value="">Select your classification...</option>
                                                 <option value="Organizer">Organizer</option>
-
                                                 <option value="CSO/NGO Representative">CSO / NGO Representative</option>
                                                 <option value="Partner Representative">Partner Organization</option>
                                                 <option value="Individual Stakeholder">Individual Stakeholder</option>
@@ -425,6 +381,36 @@
                                                 </div>
                                             </div>
                                         @endif
+                                    </div>
+                                @endif
+
+                                {{-- NEW: DYNAMIC CUSTOM QUESTIONS --}}
+                                @if($event->questions && $event->questions->count() > 0)
+                                    <div class="pt-4 mt-6 border-t border-slate-200/60 space-y-5 animate-fade-in-up">
+                                        <h4 class="text-[11px] font-black text-slate-800 uppercase tracking-widest mb-3">Additional Information</h4>
+
+                                        @foreach($event->questions as $q)
+                                            <div wire:key="question-{{ $q->id }}">
+                                                @if($q->type === 'checkbox')
+                                                    <label class="flex items-start gap-3 cursor-pointer group p-4 bg-white rounded-xl border {{ $errors->has('custom_answers.'.$q->id) ? 'border-red-300 bg-red-50/50' : 'border-slate-200 hover:border-slate-300' }} transition-colors">
+                                                        <div class="relative flex items-center justify-center shrink-0 mt-0.5">
+                                                            <input type="checkbox" wire:model="custom_answers.{{ $q->id }}" class="peer w-5 h-5 rounded border-slate-300 text-red-600 focus:ring-red-500 transition cursor-pointer appearance-none bg-slate-50 checked:bg-red-600">
+                                                            <svg class="w-3.5 h-3.5 text-white absolute pointer-events-none opacity-0 peer-checked:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                                                        </div>
+                                                        <div class="flex-1">
+                                                            <span class="text-xs font-bold text-slate-700 leading-snug block">{{ $q->question_text }} {!! $q->is_required ? '<span class="text-red-500">*</span>' : '' !!}</span>
+                                                            @error('custom_answers.'.$q->id) <span class="text-[10px] text-red-600 font-bold block mt-1">{{ $message }}</span> @enderror
+                                                        </div>
+                                                    </label>
+                                                @else
+                                                    <div>
+                                                        <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">{{ $q->question_text }} {!! $q->is_required ? '<span class="text-red-500">*</span>' : '' !!}</label>
+                                                        <input type="text" wire:model="custom_answers.{{ $q->id }}" class="w-full rounded-xl border-slate-200 bg-slate-50 focus:bg-white text-sm py-3 px-4 focus:ring-2 focus:ring-slate-900/10 focus:border-slate-900 transition-all outline-none font-medium" placeholder="Your response here...">
+                                                        @error('custom_answers.'.$q->id) <span class="text-xs text-red-500 mt-1.5 block font-bold">{{ $message }}</span> @enderror
+                                                    </div>
+                                                @endif
+                                            </div>
+                                        @endforeach
                                     </div>
                                 @endif
 

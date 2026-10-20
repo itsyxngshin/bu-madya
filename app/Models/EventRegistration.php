@@ -11,14 +11,14 @@ class EventRegistration extends Model
         'user_id',
         'name',
         'email',
-        'contact_number',     
+        'contact_number',
         'classification',
-        'school',             
-        'college_id',        
-        'program',           
-        'year_level',         
-        'organization_name',  
-        'position',           
+        'school',
+        'college_id',
+        'program',
+        'year_level',
+        'organization_name',
+        'position',
         'ticket_code',
         'status',
     ];
@@ -32,4 +32,8 @@ class EventRegistration extends Model
     {
         return $this->belongsTo(College::class);
     }
+
+    public function answers() {
+            return $this->hasMany(EventAnswer::class, 'registration_id');
+        }
 }

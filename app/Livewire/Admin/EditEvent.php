@@ -20,11 +20,16 @@ class EditEvent extends Component
     public $description;
     public $cover_image;
     public $old_cover_image;
-    public $is_internal_rsvp; // [NEW]
+    public $is_internal_rsvp;
     public $registration_link;
     public $registration_button_text;
-    public $location; // [NEW]
-    public $capacity; // [NEW]
+    public $location;
+    public $capacity;
+    public $allow_self_checkin; // [NEW]
+
+    // Dynamic Questionnaire [NEW]
+    public $custom_questions = [];
+
     public $start_date;
     public $end_date;
     public $is_active;
@@ -41,11 +46,13 @@ class EditEvent extends Component
         'capacity' => 'nullable|integer|min:1',
         'checkin_start' => 'nullable|date',
         'checkin_end' => 'nullable|date|after_or_equal:checkin_start',
+        'custom_questions.*.question_text' => 'required|string|max:255',
+        'custom_questions.*.type' => 'required|in:text,checkbox',
     ];
 
     public function mount($id)
     {
-        $this->event = Event::findOrFail($id);
+        $this->event = Event::with('questions')->findOrFail($id);
 
         $userRole = auth()->user()->role?->role_name;
         if (!in_array($userRole, ['administrator', 'director']) && $this->event->user_id !== auth()->id()) {
@@ -57,18 +64,49 @@ class EditEvent extends Component
         $this->description = $this->event->description;
         $this->old_cover_image = $this->event->cover_image;
 
-        $this->is_internal_rsvp = (bool) $this->event->is_internal_rsvp; // [NEW]
+        $this->is_internal_rsvp = (bool) $this->event->is_internal_rsvp;
         $this->registration_link = $this->event->registration_link;
         $this->registration_button_text = $this->event->registration_button_text;
 
-        $this->location = $this->event->location; // [NEW]
-        $this->capacity = $this->event->capacity; // [NEW]
+        $this->location = $this->event->location;
+        $this->capacity = $this->event->capacity;
+        $this->allow_self_checkin = (bool) $this->event->allow_self_checkin; // [NEW]
 
         $this->start_date = $this->event->start_date ? $this->event->start_date->format('Y-m-d\TH:i') : null;
         $this->end_date = $this->event->end_date ? $this->event->end_date->format('Y-m-d\TH:i') : null;
         $this->is_active = (bool) $this->event->is_active;
-        $this->checkin_start = $this->event->checkin_start ? $this->event->checkin_start->format('Y-m-d\TH:i') : null; // [NEW]
-        $this->checkin_end = $this->event->checkin_end ? $this->event->checkin_end->format('Y-m-d\TH:i') : null;       // [NEW]
+        $this->checkin_start = $this->event->checkin_start ? $this->event->checkin_start->format('Y-m-d\TH:i') : null;
+        $this->checkin_end = $this->event->checkin_end ? $this->event->checkin_end->format('Y-m-d\TH:i') : null;
+
+        // [NEW] Mount existing questions
+        $this->custom_questions = $this->event->questions->map(function($q) {
+            return [
+                'id' => $q->id,
+                'question_text' => $q->question_text,
+                'type' => $q->type,
+                'is_required' => (bool) $q->is_required
+            ];
+        })->toArray();
+    }
+
+    // [NEW] Dynamic Form Builder Methods
+    public function addQuestion()
+    {
+        $this->custom_questions[] = [
+            'id' => null,
+            'question_text' => '',
+            'type' => 'text',
+            'is_required' => true
+        ];
+    }
+
+    public function removeQuestion($index)
+    {
+        if (isset($this->custom_questions[$index]['id'])) {
+            \App\Models\EventQuestion::find($this->custom_questions[$index]['id'])->delete();
+        }
+        unset($this->custom_questions[$index]);
+        $this->custom_questions = array_values($this->custom_questions);
     }
 
     public function updatedPhotoUpload()
@@ -95,17 +133,32 @@ class EditEvent extends Component
             'slug' => Str::slug($this->slug),
             'description' => $this->description,
             'cover_image' => $imagePath,
-            'is_internal_rsvp' => $this->is_internal_rsvp, // [NEW]
-            'registration_link' => $this->is_internal_rsvp ? null : $this->registration_link, // Clear link if using internal
+            'is_internal_rsvp' => $this->is_internal_rsvp,
+            'registration_link' => $this->is_internal_rsvp ? null : $this->registration_link,
             'registration_button_text' => $this->registration_button_text,
-            'location' => $this->location, // [NEW]
-            'capacity' => $this->capacity, // [NEW]
+            'location' => $this->location,
+            'capacity' => $this->capacity,
+            'allow_self_checkin' => $this->allow_self_checkin, // [NEW]
             'start_date' => $this->start_date,
             'end_date' => $this->end_date,
             'is_active' => $this->is_active,
-            'checkin_start' => empty($this->checkin_start) ? null : $this->checkin_start, // [NEW]
-            'checkin_end' => empty($this->checkin_end) ? null : $this->checkin_end,       // [NEW]
+            'checkin_start' => empty($this->checkin_start) ? null : $this->checkin_start,
+            'checkin_end' => empty($this->checkin_end) ? null : $this->checkin_end,
         ]);
+
+        // [NEW] Sync Custom Questions
+        if ($this->is_internal_rsvp) {
+            foreach ($this->custom_questions as $qData) {
+                $this->event->questions()->updateOrCreate(
+                    ['id' => $qData['id'] ?? null],
+                    [
+                        'question_text' => $qData['question_text'],
+                        'type' => $qData['type'],
+                        'is_required' => $qData['is_required']
+                    ]
+                );
+            }
+        }
 
         if (auth()->user()->role?->role_name === 'organization') {
             return redirect()->route('partner.events.index')->with('message', 'Event updated successfully!');

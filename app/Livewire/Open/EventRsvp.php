@@ -5,6 +5,7 @@ namespace App\Livewire\Open;
 use Livewire\Component;
 use App\Models\Event;
 use App\Models\EventRegistration;
+use App\Models\EventAnswer;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use Illuminate\Support\Facades\Mail;
@@ -31,21 +32,27 @@ class EventRsvp extends Component
     public $contact_number = '';
     public $school = '';
 
-    // [NEW] The Primary Toggle
     public $is_bu_student = true;
     public $is_representing_org = false;
     public $isRegistered = false;
     public $registrationRecord;
 
+    // [NEW] State for Dynamic Answers
+    public $custom_answers = [];
+
     public function mount(Event $event)
     {
-        $this->event = $event;
+        $this->event = $event->load('questions');
 
         if (!$this->event->is_internal_rsvp) {
             return redirect()->route('open.events.show', $this->event->slug);
         }
 
-        // If they are already logged in, instantly verify them
+        // [NEW] Initialize empty custom answers
+        foreach ($this->event->questions as $q) {
+            $this->custom_answers[$q->id] = ($q->type === 'checkbox') ? false : '';
+        }
+
         if (Auth::check()) {
             $this->registration_method = 'account';
             $this->is_verified = true;
@@ -63,7 +70,6 @@ class EventRsvp extends Component
         }
     }
 
-    // [NEW] Method to lookup user by ID or Email
     public function verifyAccount()
     {
         $this->validateOnly('lookup_id', ['lookup_id' => 'required']);
@@ -85,7 +91,6 @@ class EventRsvp extends Component
         }
     }
 
-    // [NEW] Reset if they switch modes
     public function updatedRegistrationMethod()
     {
         if (!Auth::check()) {
@@ -106,7 +111,7 @@ class EventRsvp extends Component
             $this->position = '';
         }
         else {
-            $this->classification = ''; // Force them to select from the external dropdown
+            $this->classification = '';
             $this->college_id = '';
             $this->program = '';
             $this->year_level = '';
@@ -123,7 +128,7 @@ class EventRsvp extends Component
         $rules = [
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255',
-            'contact_number' => 'required|string|max:20', 
+            'contact_number' => 'required|string|max:20',
             'classification' => 'required|string',
         ];
 
@@ -145,7 +150,21 @@ class EventRsvp extends Component
             }
         }
 
-        $this->validate($rules);
+        // [NEW] Dynamic validation for Custom Questions
+        $messages = [];
+        foreach ($this->event->questions as $q) {
+            if ($q->is_required) {
+                if ($q->type === 'checkbox') {
+                    $rules["custom_answers.{$q->id}"] = 'accepted';
+                    $messages["custom_answers.{$q->id}.accepted"] = 'You must agree to this policy to proceed.';
+                } else {
+                    $rules["custom_answers.{$q->id}"] = 'required|string';
+                    $messages["custom_answers.{$q->id}.required"] = 'This response is required.';
+                }
+            }
+        }
+
+        $this->validate($rules, $messages);
 
         if ($this->event->capacity && $this->event->registrations()->count() >= $this->event->capacity) {
             session()->flash('error', 'Sorry, this event is fully booked.');
@@ -154,26 +173,34 @@ class EventRsvp extends Component
 
         $ticketCode = 'BU-MADYA-' . strtoupper(Str::random(8));
         $finalUserId = $this->verified_user_id ?? Auth::id() ?? null;
-        
-        // Define if they are representing an org to use for the logic below
         $isOrgRep = ($this->is_bu_student && $this->is_representing_org) || in_array($this->classification, ['CSO/NGO Representative', 'Partner Representative']);
 
-        // [FIXED] Contact Number added, and Org/Position logic aligned perfectly
         $this->registrationRecord = EventRegistration::create([
             'event_id' => $this->event->id,
             'user_id' => $finalUserId,
             'name' => $this->name,
             'email' => $this->email,
-            'contact_number' => $this->contact_number, // <--- Added this!
+            'contact_number' => $this->contact_number,
             'classification' => $this->classification,
             'college_id' => $this->classification === 'BU Student' ? $this->college_id : null,
             'program' => $this->classification === 'BU Student' ? $this->program : null,
             'school' => $this->is_bu_student ? 'Bicol University' : $this->school,
             'year_level' => $this->classification === 'BU Student' ? $this->year_level : null,
             'organization_name' => $isOrgRep ? $this->organization_name : null,
-            'position' => $isOrgRep ? $this->position : null, // <--- Fixed logic to allow BU students!
+            'position' => $isOrgRep ? $this->position : null,
             'ticket_code' => $ticketCode,
         ]);
+
+        // [NEW] Save dynamic answers
+        foreach ($this->custom_answers as $questionId => $answerValue) {
+            if ($answerValue !== '' && $answerValue !== false) {
+                EventAnswer::create([
+                    'registration_id' => $this->registrationRecord->id,
+                    'question_id' => $questionId,
+                    'answer' => is_bool($answerValue) ? ($answerValue ? 'true' : 'false') : $answerValue
+                ]);
+            }
+        }
 
         try {
             Mail::to($this->email)->send(new EventTicketMail($this->event, $this->registrationRecord));
@@ -187,7 +214,7 @@ class EventRsvp extends Component
     public function render()
     {
         return view('livewire.open.event-rsvp', [
-                    'colleges' => \App\Models\College::orderBy('name')->get()
-                ]);
+            'colleges' => \App\Models\College::orderBy('name')->get()
+        ]);
     }
 }

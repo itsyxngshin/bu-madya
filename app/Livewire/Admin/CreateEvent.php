@@ -19,15 +19,19 @@ class CreateEvent extends Component
     public $cover_image;
 
     // Toggle Mode
-    public $is_internal_rsvp = false; // [NEW]
+    public $is_internal_rsvp = false;
 
     // External Link details
     public $registration_link;
     public $registration_button_text = 'Register Now';
 
-    // Internal RSVP details [NEW]
+    // Internal RSVP details
     public $location;
     public $capacity;
+    public $allow_self_checkin = false; // [NEW]
+
+    // Dynamic Questionnaire [NEW]
+    public $custom_questions = [];
 
     public $start_date;
     public $end_date;
@@ -44,12 +48,30 @@ class CreateEvent extends Component
         'capacity' => 'nullable|integer|min:1',
         'checkin_start' => 'nullable|date',
         'checkin_end' => 'nullable|date|after_or_equal:checkin_start',
+        'custom_questions.*.question_text' => 'required|string|max:255',
+        'custom_questions.*.type' => 'required|in:text,checkbox',
     ];
 
     public function updatedTitle($value)
     {
         $this->validateOnly('title');
-        $this->slug = Str::slug($value); // Optionally auto-fill slug here
+        $this->slug = Str::slug($value);
+    }
+
+    // [NEW] Dynamic Form Builder Methods
+    public function addQuestion()
+    {
+        $this->custom_questions[] = [
+            'question_text' => '',
+            'type' => 'text',
+            'is_required' => true
+        ];
+    }
+
+    public function removeQuestion($index)
+    {
+        unset($this->custom_questions[$index]);
+        $this->custom_questions = array_values($this->custom_questions);
     }
 
     public function save()
@@ -61,23 +83,35 @@ class CreateEvent extends Component
             $imagePath = $this->cover_image->store('events', 'public');
         }
 
-        Event::create([
+        $event = Event::create([
             'user_id' => auth()->id(),
             'title' => $this->title,
             'slug' => Str::slug($this->slug),
             'description' => $this->description,
             'cover_image' => $imagePath,
-            'is_internal_rsvp' => $this->is_internal_rsvp, // [NEW]
-            'registration_link' => $this->is_internal_rsvp ? null : $this->registration_link, // Clear link if using internal
+            'is_internal_rsvp' => $this->is_internal_rsvp,
+            'registration_link' => $this->is_internal_rsvp ? null : $this->registration_link,
             'registration_button_text' => $this->registration_button_text,
-            'location' => $this->location, // [NEW]
-            'capacity' => $this->capacity, // [NEW]
+            'location' => $this->location,
+            'capacity' => $this->capacity,
+            'allow_self_checkin' => $this->allow_self_checkin, // [NEW]
             'start_date' => $this->start_date,
             'end_date' => $this->end_date,
             'is_active' => $this->is_active,
-            'checkin_start' => empty($this->checkin_start) ? null : $this->checkin_start, // [NEW]
-            'checkin_end' => empty($this->checkin_end) ? null : $this->checkin_end,       // [NEW]
+            'checkin_start' => empty($this->checkin_start) ? null : $this->checkin_start,
+            'checkin_end' => empty($this->checkin_end) ? null : $this->checkin_end,
         ]);
+
+        // [NEW] Save dynamic questions
+        if ($this->is_internal_rsvp && !empty($this->custom_questions)) {
+            foreach ($this->custom_questions as $qData) {
+                $event->questions()->create([
+                    'question_text' => $qData['question_text'],
+                    'type' => $qData['type'],
+                    'is_required' => $qData['is_required']
+                ]);
+            }
+        }
 
         session()->flash('message', 'Event created successfully.');
 

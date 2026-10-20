@@ -1,40 +1,30 @@
 <div class="max-w-7xl mx-auto py-10 sm:px-6 lg:px-8">
-
-    {{-- Header --}}
     <div class="flex items-center gap-4 mb-6">
-        <a href="{{ route('admin.events.index') }}" class="text-gray-400 hover:text-red-600 transition font-bold text-sm">
-            &larr; Cancel
-        </a>
+        <a href="{{ route('admin.events.index') }}" class="text-gray-400 hover:text-red-600 transition font-bold text-sm">&larr; Cancel</a>
         <h2 class="font-bold text-2xl text-gray-800">Edit Event</h2>
     </div>
 
     <div class="md:grid md:grid-cols-3 md:gap-6">
-
         {{-- LEFT COLUMN: Details --}}
         <div class="md:col-span-2 space-y-6">
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
                 <h3 class="text-lg font-bold text-gray-900 mb-6">Event Details</h3>
 
-                {{-- Title --}}
                 <div class="mb-4">
                     <label class="block text-sm font-bold text-gray-700 mb-1">Event Title</label>
                     <input wire:model.live="title" type="text" class="w-full rounded-lg border-gray-200 focus:ring-red-500 focus:border-red-500 transition font-bold text-lg">
                     @error('title') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                 </div>
 
-                {{-- Slug Input --}}
                 <div class="mb-6">
                     <label class="block text-sm font-bold text-gray-700 mb-1">Slug (URL)</label>
                     <div class="flex rounded-lg shadow-sm">
-                        <span class="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-gray-200 bg-gray-50 text-gray-500 text-xs font-bold uppercase tracking-wider">
-                            /events/
-                        </span>
+                        <span class="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-gray-200 bg-gray-50 text-gray-500 text-xs font-bold uppercase tracking-wider">/events/</span>
                         <input wire:model="slug" type="text" class="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-r-lg border-gray-200 focus:ring-red-500 focus:border-red-500 text-sm text-gray-600 bg-white">
                     </div>
                     @error('slug') <span class="text-red-500 text-xs font-bold">{{ $message }}</span> @enderror
                 </div>
 
-                {{-- MARKDOWN EDITOR --}}
                 <div class="mb-6">
                     <label class="block text-sm font-bold text-gray-700 mb-2">Description</label>
 
@@ -53,10 +43,7 @@
                          }"
                          x-on:photo-inserted.window="insert('\n<figure>\n  <img src=\'' + $event.detail.url + '\' alt=\'Image\'>\n  <figcaption>Caption...</figcaption>\n</figure>\n', '');"
                     >
-                        {{-- Hidden File Input for Toolbar --}}
                         <input type="file" wire:model="photo_upload" class="hidden" x-ref="photoUploader" accept="image/*">
-
-                        {{-- TOOLBAR --}}
                         <div class="flex items-center gap-1 bg-gray-50 border-b border-gray-200 p-2 overflow-x-auto">
                             <button @click="insert('**', '**')" class="p-1.5 text-gray-500 hover:text-gray-900 hover:bg-gray-200 rounded transition font-bold text-xs w-8" title="Bold">B</button>
                             <button @click="insert('*', '*')" class="p-1.5 text-gray-500 hover:text-gray-900 hover:bg-gray-200 rounded transition italic text-xs w-8" title="Italic">I</button>
@@ -76,12 +63,10 @@
                                 <span wire:loading wire:target="photo_upload" class="animate-spin block w-3 h-3 border-2 border-gray-300 border-t-red-600 rounded-full"></span>
                             </button>
                         </div>
-
                         <textarea x-ref="editor" wire:model.live="description" rows="15" class="w-full text-sm leading-relaxed text-gray-700 bg-transparent border-none p-4 focus:ring-0 resize-y font-sans placeholder-gray-300" placeholder="Start writing..."></textarea>
                     </div>
                 </div>
 
-                {{-- DRAG AND DROP IMAGE UPLOAD --}}
                 <div>
                     <label class="block text-sm font-bold text-gray-700 mb-2">Cover Poster</label>
 
@@ -97,9 +82,7 @@
                                x-on:dragleave.prevent="isDropping = false"
                                x-on:drop.prevent="isDropping = false">
 
-                            {{-- Image Preview Logic: New Upload OR Existing DB Image --}}
                             @if ($cover_image)
-                                {{-- Case 1: New Upload --}}
                                 <div class="absolute inset-0 z-10 w-full h-full bg-white">
                                     <img src="{{ $cover_image->temporaryUrl() }}" class="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition">
                                     <div class="absolute inset-0 bg-black/50 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition duration-300 backdrop-blur-sm">
@@ -107,7 +90,6 @@
                                     </div>
                                 </div>
                             @elseif($event->cover_image)
-                                {{-- Case 2: Existing Database Image --}}
                                 <div class="absolute inset-0 z-10 w-full h-full bg-white">
                                     <img src="{{ asset('storage/'.$event->cover_image) }}" class="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition">
                                     <div class="absolute inset-0 bg-black/50 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition duration-300 backdrop-blur-sm">
@@ -117,7 +99,6 @@
                                 </div>
                             @endif
 
-                            {{-- Default State (Hidden if image exists) --}}
                             <div class="flex flex-col items-center justify-center pt-5 pb-6 text-center px-4 {{ ($cover_image || $event->cover_image) ? 'hidden' : '' }}" :class="{ 'opacity-0': isUploading }">
                                 <div class="p-3 bg-white rounded-full shadow-sm mb-3 group-hover:scale-110 transition duration-300">
                                     <svg class="w-8 h-8 text-gray-400 group-hover:text-red-500 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
@@ -127,7 +108,6 @@
                                 </p>
                             </div>
 
-                            {{-- Loading Bar --}}
                             <div x-show="isUploading" class="absolute inset-0 z-20 flex flex-col items-center justify-center bg-white/90 backdrop-blur-sm">
                                 <svg class="animate-spin w-10 h-10 text-red-600 mb-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                                 <div class="w-48 h-2 bg-gray-200 rounded-full overflow-hidden">
@@ -135,7 +115,6 @@
                                 </div>
                                 <p class="text-xs font-bold text-red-600 mt-2">Uploading... <span x-text="progress + '%'"></span></p>
                             </div>
-
                             <input type="file" wire:model="cover_image" class="hidden" accept="image/png, image/jpeg, image/jpg" />
                         </label>
                     </div>
@@ -144,11 +123,9 @@
             </div>
         </div>
 
-        {{-- RIGHT COLUMN: Settings & QR --}}
         {{-- RIGHT COLUMN: Settings --}}
         <div class="md:col-span-1 space-y-6">
 
-            {{-- EVENT LOCATION & TIMING --}}
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
                 <h3 class="text-sm font-bold text-gray-900 uppercase tracking-widest mb-4">Details</h3>
                 <div class="space-y-4">
@@ -164,7 +141,7 @@
                         <label class="block text-xs font-bold text-gray-500 mb-1">End Date</label>
                         <input wire:model="end_date" type="datetime-local" class="w-full rounded-lg border-gray-200 text-sm focus:ring-red-500 focus:border-red-500">
                     </div>
-                    {{-- [NEW] Conditional Check-in Settings --}}
+
                     @if($is_internal_rsvp)
                         <div class="pt-4 mt-4 border-t border-gray-100">
                             <h4 class="text-[10px] font-black text-red-500 uppercase tracking-widest mb-3">Scanner Settings</h4>
@@ -184,18 +161,14 @@
                 </div>
             </div>
 
-            {{-- REGISTRATION MODE TOGGLE --}}
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
                 <h3 class="text-sm font-bold text-gray-900 uppercase tracking-widest mb-4">Registration</h3>
 
-                {{-- The Toggle --}}
                 <div class="flex items-center justify-between mb-6 p-3 bg-gray-50 rounded-xl border border-gray-200">
                     <div>
                         <span class="block text-sm font-bold text-gray-900">RSVP</span>
                         <span class="text-xs text-gray-500">Enable internal ticketing & QR codes</span>
                     </div>
-
-                    {{-- Bulletproof Livewire Toggle --}}
                     <button type="button"
                         wire:click="$toggle('is_internal_rsvp')"
                         class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 {{ $is_internal_rsvp ? 'bg-red-600' : 'bg-gray-300' }}">
@@ -203,7 +176,6 @@
                     </button>
                 </div>
 
-                {{-- Mode 1: Internal RSVP Settings --}}
                 @if($is_internal_rsvp)
                     <div class="space-y-4 animate-fade-in-up">
                         <div class="p-4 bg-red-50 border border-red-100 rounded-xl">
@@ -212,13 +184,75 @@
                                 <p class="text-xs text-red-800 font-medium">Users will register on the site and receive a QR Code ticket via email. An admin can scan them at the door.</p>
                             </div>
                         </div>
+
+                        {{-- NEW: CHECK-IN MODE TOGGLE --}}
+                        <div class="flex items-center justify-between p-4 bg-gray-50 border border-gray-200 rounded-xl mt-4">
+                            <div>
+                                <span class="block text-sm font-bold text-gray-900">Allow Self Check-In</span>
+                                <span class="text-[10px] text-gray-500 block mt-1 leading-tight max-w-[200px]">If enabled, attendees can click a link on their digital ticket to check themselves in. If disabled, facilitators MUST scan their QR code.</span>
+                            </div>
+                            <button type="button"
+                                wire:click="$toggle('allow_self_checkin')"
+                                class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 {{ $allow_self_checkin ? 'bg-red-600' : 'bg-gray-300' }}">
+                                <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out {{ $allow_self_checkin ? 'translate-x-5' : 'translate-x-0' }}"></span>
+                            </button>
+                        </div>
+
                         <div>
                             <label class="block text-xs font-bold text-gray-500 mb-1">Max Capacity (Optional)</label>
                             <input wire:model="capacity" type="number" placeholder="Leave empty for unlimited" class="w-full rounded-lg border-gray-200 text-sm focus:ring-red-500 focus:border-red-500">
                         </div>
+
+                        {{-- NEW: DYNAMIC QUESTION BUILDER --}}
+                        <div class="pt-6 mt-4 border-t border-gray-200">
+                            <div class="flex justify-between items-center mb-4">
+                                <div>
+                                    <h4 class="text-sm font-bold text-gray-900">Custom RSVP Questions</h4>
+                                    <p class="text-[10px] text-gray-500 uppercase tracking-widest mt-0.5">Collect specific data or consent</p>
+                                </div>
+                                <button type="button" wire:click="addQuestion" class="px-3 py-1.5 bg-gray-900 text-white text-[10px] font-bold uppercase tracking-widest rounded-lg hover:bg-black transition shadow-sm">
+                                    + Add Field
+                                </button>
+                            </div>
+
+                            <div class="space-y-4">
+                                @foreach($custom_questions as $index => $question)
+                                    <div class="p-4 border border-gray-200 rounded-xl bg-gray-50 relative group" wire:key="q-{{ $index }}">
+                                        <button type="button" wire:click="removeQuestion({{ $index }})" class="absolute -top-2 -right-2 w-6 h-6 bg-red-100 text-red-600 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition shadow-sm hover:bg-red-600 hover:text-white">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                        </button>
+
+                                        <div class="grid grid-cols-1 sm:grid-cols-12 gap-4">
+                                            <div class="sm:col-span-6">
+                                                <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Question / Prompt</label>
+                                                <input type="text" wire:model="custom_questions.{{ $index }}.question_text" placeholder="e.g. Do you agree to the DPA?" class="w-full rounded-lg border-gray-200 text-sm focus:ring-red-500 focus:border-red-500">
+                                            </div>
+                                            <div class="sm:col-span-4">
+                                                <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Input Type</label>
+                                                <select wire:model="custom_questions.{{ $index }}.type" class="w-full rounded-lg border-gray-200 text-sm focus:ring-red-500 focus:border-red-500">
+                                                    <option value="text">Short Text</option>
+                                                    <option value="checkbox">Consent Checkbox</option>
+                                                </select>
+                                            </div>
+                                            <div class="sm:col-span-2 flex items-end pb-2">
+                                                <label class="flex items-center gap-2 cursor-pointer">
+                                                    <input type="checkbox" wire:model="custom_questions.{{ $index }}.is_required" class="rounded text-red-600 focus:ring-red-500">
+                                                    <span class="text-[10px] font-bold text-gray-700 uppercase">Required</span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endforeach
+
+                                @if(empty($custom_questions))
+                                    <div class="text-center p-6 border-2 border-dashed border-gray-200 rounded-xl text-gray-400 text-xs font-bold uppercase tracking-widest">
+                                        No custom questions added.
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
                     </div>
 
-                {{-- Mode 2: External Link Settings (Your old logic) --}}
                 @else
                     <div class="space-y-4 animate-fade-in-up"
                          x-data="{
@@ -251,7 +285,6 @@
                             <input wire:model="registration_button_text" type="text" class="w-full rounded-lg border-gray-200 text-sm focus:ring-red-500 focus:border-red-500">
                         </div>
 
-                        {{-- Live QR Preview for External Link --}}
                         <div class="bg-gray-50 p-4 rounded-xl border border-gray-200 flex flex-col items-center text-center mt-4">
                             <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Promo QR Code</p>
                             <div class="bg-white p-2 rounded-2xl shadow-sm mb-2" x-show="link">
@@ -269,14 +302,13 @@
                 @endif
             </div>
 
-            {{-- Publish Action --}}
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
                 <div class="flex items-center gap-2 mb-4">
                     <input type="checkbox" wire:model="is_active" class="rounded text-red-600 focus:ring-red-500 cursor-pointer w-5 h-5">
                     <span class="text-sm font-bold text-gray-900">Publish immediately</span>
                 </div>
-                <button wire:click="{{ isset($event) ? 'update' : 'save' }}" class="w-full bg-red-600 text-white font-bold py-4 rounded-xl hover:bg-red-700 transition shadow-lg text-sm uppercase tracking-widest">
-                    {{ isset($event) ? 'Update Event' : 'Create Event' }}
+                <button wire:click="update" class="w-full bg-red-600 text-white font-bold py-4 rounded-xl hover:bg-red-700 transition shadow-lg text-sm uppercase tracking-widest">
+                    Update Event
                 </button>
             </div>
 
