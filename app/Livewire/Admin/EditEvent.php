@@ -155,7 +155,7 @@ class EditEvent extends Component
             'checkin_end' => $this->checkin_end,
 
             'custom_questions.*.id' => 'nullable',
-                    'custom_questions.*.question_text' => 'required|string|max:255',
+                    'custom_questions.*.question_text' => 'required|string|max:5000',
                     'custom_questions.*.type' => 'required|in:text,checkbox',
                     'custom_questions.*.is_required' => 'boolean',
         ]);

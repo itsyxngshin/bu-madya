@@ -12,7 +12,7 @@ return new class extends Migration
         Schema::create('event_questions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('event_id')->constrained('events')->cascadeOnDelete();
-            $table->string('question_text'); // e.g., "Do you agree to the Data Privacy Act?"
+            $table->text('question_text'); // e.g., "Do you agree to the Data Privacy Act?"
             $table->string('type')->default('checkbox'); // 'checkbox', 'text', 'select'
             $table->boolean('is_required')->default(true);
             $table->timestamps();
