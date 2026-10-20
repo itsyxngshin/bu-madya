@@ -30,19 +30,27 @@
             {{-- ========================================== --}}
             <div class="w-full lg:w-7/12 xl:w-2/3 min-w-0 flex flex-col">
 
-                {{-- Cover Image --}}
+                {{-- Cover Image (Dynamic Height & Smooth Bottom Blend) --}}
                 @if($event->cover_image)
-                    <div class="w-full aspect-video md:aspect-[21/9] lg:aspect-[16/9] rounded-2xl md:rounded-[2rem] overflow-hidden mb-6 md:mb-8 shadow-2xl shadow-slate-200/50 ring-1 ring-slate-900/5 bg-slate-200">
-                        <img src="{{ asset('storage/'.$event->cover_image) }}" class="w-full h-full object-cover hover:scale-105 transition-transform duration-700 ease-out">
+                    <div class="w-full rounded-2xl md:rounded-[2rem] overflow-hidden mb-6 md:mb-8 shadow-2xl shadow-slate-200/50 ring-1 ring-slate-900/5 bg-slate-200 relative">
+                        <img src="{{ asset('storage/'.$event->cover_image) }}" class="w-full h-auto object-cover hover:scale-105 transition-transform duration-700 ease-out block">
+                        {{-- Bottom Smooth Blend Gradient --}}
+                        <div class="absolute inset-x-0 bottom-0 h-16 md:h-24 bg-gradient-to-t from-slate-50 via-slate-50/50 to-transparent pointer-events-none"></div>
                     </div>
                 @endif
 
-                {{-- Host Info --}}
+                {{-- Host Info (Captures profile_photo_path) --}}
                 @if($event->organizer)
                     <div class="flex items-center gap-3 mb-4 md:mb-6">
-                        <div class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center text-white font-black text-xs md:text-sm uppercase shadow-md shrink-0 ring-4 ring-red-50">
-                            {{ substr($event->organizer->name, 0, 2) }}
-                        </div>
+                        @if($event->organizer->profile_photo_path)
+                            <div class="w-10 h-10 md:w-12 md:h-12 rounded-full overflow-hidden shadow-md shrink-0 ring-4 ring-red-50 bg-slate-200">
+                                <img src="{{ asset('storage/'.$event->organizer->profile_photo_path) }}" alt="{{ $event->organizer->name }}" class="w-full h-full object-cover">
+                            </div>
+                        @else
+                            <div class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center text-white font-black text-xs md:text-sm uppercase shadow-md shrink-0 ring-4 ring-red-50">
+                                {{ substr($event->organizer->name, 0, 2) }}
+                            </div>
+                        @endif
                         <div class="min-w-0">
                             <p class="text-[9px] md:text-[10px] text-slate-500 font-black uppercase tracking-widest mb-0.5">Hosted By</p>
                             <p class="text-xs md:text-sm font-bold text-slate-900 truncate pr-4">{{ $event->organizer->name }}</p>
@@ -55,38 +63,43 @@
                     {{ $event->title }}
                 </h1>
 
-                {{-- Date & Location Quick Details (Mobile-Refined) --}}
-                <div class="flex flex-col sm:flex-row gap-3 md:gap-6 mb-8 md:mb-12 pb-8 border-b border-slate-200/60">
+                {{-- Date & Location Quick Details (Enhanced Visual Hierarchy without Live Pulse) --}}
+<div class="flex flex-col sm:flex-row gap-4 md:gap-6 mb-8 md:mb-12 pb-8 border-b border-slate-200/60">
 
-                    {{-- Date --}}
-                    <div class="flex items-center gap-4 flex-1 min-w-0 bg-white p-4 md:p-5 rounded-2xl border border-slate-100 shadow-sm">
-                        <div class="w-12 h-12 bg-red-50 rounded-xl flex items-center justify-center text-red-600 shrink-0">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                        </div>
-                        <div class="min-w-0 flex-1">
-                            <p class="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-0.5">Date & Time</p>
-                            <p class="text-sm md:text-base font-bold text-slate-900 leading-tight">
-                                {{ $event->start_date ? $event->start_date->format('l, F j, Y') : 'Date TBA' }}
-                            </p>
-                            <p class="text-xs text-slate-500 font-medium mt-0.5">
-                                {{ $event->start_date ? $event->start_date->format('g:i A') : 'Time TBA' }}
-                            </p>
-                        </div>
-                    </div>
+    {{-- Date & Time Card --}}
+    <div class="group flex items-center gap-4 flex-1 min-w-0 bg-white p-4 md:p-6 rounded-2xl border-2 border-slate-900 shadow-[4px_4px_0_0_#0f172a] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#ef4444] transition-all duration-300 relative overflow-hidden">
+        <div class="w-12 h-12 md:w-14 md:h-14 bg-red-50 rounded-2xl border-2 border-slate-900 flex items-center justify-center text-red-600 shrink-0 shadow-sm group-hover:bg-red-500 group-hover:text-white transition-colors duration-300">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+        </div>
 
-                    {{-- Location --}}
-                    <div class="flex items-center gap-4 flex-1 min-w-0 bg-white p-4 md:p-5 rounded-2xl border border-slate-100 shadow-sm">
-                        <div class="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600 shrink-0">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                        </div>
-                        <div class="min-w-0 flex-1">
-                            <p class="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-0.5">Location</p>
-                            <p class="text-sm md:text-base font-bold text-slate-900 leading-snug">
-                                {{ $event->location }}
-                            </p>
-                        </div>
-                    </div>
-                </div>
+        <div class="min-w-0 flex-1">
+            <p class="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-0.5">Date & Time</p>
+            <p class="text-sm md:text-base font-black text-slate-900 leading-tight">
+                {{ $event->start_date ? $event->start_date->format('l, F j, Y') : 'Date TBA' }}
+            </p>
+            <p class="text-xs font-bold text-red-600 mt-0.5">
+                {{ $event->start_date ? $event->start_date->format('g:i A') : 'Time TBA' }} onwards
+            </p>
+        </div>
+    </div>
+
+    {{-- Location Card --}}
+    <div class="group flex items-center gap-4 flex-1 min-w-0 bg-white p-4 md:p-6 rounded-2xl border-2 border-slate-900 shadow-[4px_4px_0_0_#0f172a] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#3b82f6] transition-all duration-300 relative overflow-hidden">
+        <div class="w-12 h-12 md:w-14 md:h-14 bg-blue-50 rounded-2xl border-2 border-slate-900 flex items-center justify-center text-blue-600 shrink-0 shadow-sm group-hover:bg-blue-600 group-hover:text-white transition-colors duration-300">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+        </div>
+
+        <div class="min-w-0 flex-1">
+            <p class="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-0.5">Location</p>
+            <p class="text-sm md:text-base font-black text-slate-900 leading-snug truncate" title="{{ $event->location }}">
+                {{ $event->location }}
+            </p>
+            <p class="text-xs font-bold text-blue-600 mt-0.5">
+                Ready to Join
+            </p>
+        </div>
+    </div>
+</div>
 
                 {{-- Event Description Card --}}
                 <div class="bg-white p-5 md:p-10 rounded-[1.5rem] md:rounded-[2rem] shadow-xl border border-gray-100">
@@ -119,14 +132,20 @@
                 {{-- Sticky wrapper ensures the form floats on desktop while scrolling --}}
                 <div class="bg-white rounded-[2rem] p-6 sm:p-8 shadow-2xl shadow-slate-200/60 border border-slate-100 lg:sticky lg:top-24 w-full">
 
-                    @if($isRegistered)
+@if($isRegistered)
                         {{-- STATE 1: SUCCESS TICKET --}}
                         <div class="text-center animate-fade-in-up">
                             <div class="w-16 h-16 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4 ring-8 ring-emerald-50/50 shrink-0">
                                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
                             </div>
                             <h2 class="text-2xl font-black text-slate-900 mb-1 tracking-tight">You're in!</h2>
-                            <p class="text-sm text-slate-500 mb-8 font-medium">Please present this ticket at the entrance.</p>
+                            <p class="text-sm text-slate-500 mb-5 font-medium">Please present this ticket at the entrance.</p>
+
+                            {{-- Screenshot Helper --}}
+                            <div class="inline-flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-2 rounded-lg mb-6 border border-blue-100 shadow-sm">
+                                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                                <span class="text-xs font-bold uppercase tracking-widest">Take a screenshot to save your QR</span>
+                            </div>
 
                             {{-- Ticket UI --}}
                             <div class="bg-white rounded-3xl border border-slate-200 shadow-xl overflow-hidden relative text-left w-full mx-auto max-w-sm">
@@ -149,11 +168,11 @@
                                                         type: 'square',
                                                         gradient: {
                                                             type: 'linear',
-                                                            rotation: Math.PI / 4, // Diagonal gradient
+                                                            rotation: Math.PI / 4,
                                                             colorStops: [
-                                                                { offset: 0, color: '#ef4444' },   // Red
-                                                                { offset: 0.5, color: '#eab308' }, // Yellow
-                                                                { offset: 1, color: '#22c55e' }    // Green
+                                                                { offset: 0, color: '#ef4444' },
+                                                                { offset: 0.5, color: '#eab308' },
+                                                                { offset: 1, color: '#22c55e' }
                                                             ]
                                                         }
                                                     },
@@ -169,12 +188,8 @@
                                                             ]
                                                         }
                                                     },
-                                                    backgroundOptions: {
-                                                        color: '#ffffff'
-                                                    }
+                                                    backgroundOptions: { color: '#ffffff' }
                                                 });
-
-                                                // Append the beautiful gradient QR code to the div
                                                 qrCode.append($refs.ticketQr);
                                             })
                                         ">
@@ -204,10 +219,26 @@
                                         </div>
                                         @endif
                                     </div>
+
+                                    {{-- Check-In Action Section --}}
+                                    <div class="mt-6 pt-5 border-t border-slate-100">
+                                        @if(isset($event->allow_self_checkin) && $event->allow_self_checkin)
+                                            <a href="{{ url('/events/' . $event->id . '/checkin?code=' . $registrationRecord->ticket_code) }}" class="block w-full py-3.5 bg-slate-900 text-white font-black rounded-xl shadow-lg hover:bg-black hover:-translate-y-0.5 transition-all text-[11px] uppercase tracking-widest text-center">
+                                                Self Check-In Now
+                                            </a>
+                                            <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-3 text-center">Or present QR code for manual scanning</p>
+                                        @else
+                                            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                                                <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center justify-center gap-1.5">
+                                                    <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm14 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
+                                                    Facilitators will scan this QR
+                                                </p>
+                                            </div>
+                                        @endif
+                                    </div>
                                 </div>
                             </div>
                         </div>
-
                     @else
                         {{-- STATE 2: REGISTRATION FORM --}}
                         <h2 class="text-2xl sm:text-3xl font-black text-slate-900 mb-2 tracking-tight">Join Event</h2>
@@ -362,7 +393,7 @@
                                 @else
                                     <div class="bg-blue-50/40 p-5 rounded-2xl border border-blue-100 space-y-5 animate-fade-in-down mt-2">
                                         <div>
-                                            <label class="block text-[10px] font-black text-blue-800 uppercase tracking-widest mb-2">School / University (Optional)</label>
+                                            <label class="block text-[10px] font-black text-blue-800 uppercase tracking-widest mb-2">School / Institution (Optional)</label>
                                             <input type="text" wire:model="school" class="w-full rounded-xl border-blue-200 bg-white text-sm py-3 px-4 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none font-medium" placeholder="e.g. Ateneo de Naga">
                                             @error('school') <span class="text-xs text-red-500 mt-1.5 block font-bold">{{ $message }}</span> @enderror
                                         </div>
@@ -371,6 +402,8 @@
                                             <label class="block text-[10px] font-black text-blue-800 uppercase tracking-widest mb-2">Guest Classification</label>
                                             <select wire:model.live="classification" class="w-full rounded-xl border-blue-200 bg-white text-sm py-3 px-4 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none font-medium cursor-pointer appearance-none">
                                                 <option value="">Select your classification...</option>
+                                                <option value="Organizer">Organizer</option>
+
                                                 <option value="CSO/NGO Representative">CSO / NGO Representative</option>
                                                 <option value="Partner Representative">Partner Organization</option>
                                                 <option value="Individual Stakeholder">Individual Stakeholder</option>
@@ -396,7 +429,6 @@
                                 @endif
 
                                 <div class="pt-6">
-                                    {{-- Changed bg-slate-900 to bg-gray-900 to ensure it renders correctly --}}
                                     <button type="submit" class="w-full py-4 bg-gray-900 text-white font-black rounded-2xl shadow-xl hover:bg-black hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 text-sm uppercase tracking-widest flex items-center justify-center gap-2 group border border-transparent">
                                         <span>Secure My Spot</span>
                                         <svg class="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>

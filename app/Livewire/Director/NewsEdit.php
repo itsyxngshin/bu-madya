@@ -49,7 +49,11 @@ class NewsEdit extends Component
         // 1. Load Article with Relationships
         $this->article = News::with(['category', 'sdgs', 'authors'])->where('slug', $slug)->firstOrFail();
 
-        if (auth()->id() !== $this->article->user_id) {
+        $user = auth()->user();
+        $isAuthor = $user->id === $this->article->user_id;
+        $isAdminOrDirector = in_array($user->role?->role_name, ['administrator', 'director']);
+        
+        if (!$isAuthor && !$isAdminOrDirector) {
             abort(403, 'Unauthorized action.');
         }
 
