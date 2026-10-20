@@ -6,22 +6,31 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        Schema::create('event_questions_tables', function (Blueprint $table) {
+        // 1. The Questions Table (Linked to the Event)
+        Schema::create('event_questions', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('event_id')->constrained('events')->cascadeOnDelete();
+            $table->string('question_text'); // e.g., "Do you agree to the Data Privacy Act?"
+            $table->string('type')->default('checkbox'); // 'checkbox', 'text', 'select'
+            $table->boolean('is_required')->default(true);
+            $table->timestamps();
+        });
+
+        // 2. The Answers Ledger (Linked to the Registration Ticket)
+        Schema::create('event_answers', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('registration_id')->constrained('event_registrations')->cascadeOnDelete();
+            $table->foreignId('question_id')->constrained('event_questions')->cascadeOnDelete();
+            $table->text('answer')->nullable(); // "Yes", "No", or typed text
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::dropIfExists('event_questions_tables');
+        Schema::dropIfExists('event_answers');
+        Schema::dropIfExists('event_questions');
     }
 };
