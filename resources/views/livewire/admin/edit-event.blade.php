@@ -229,7 +229,15 @@
                                         <div class="grid grid-cols-1 sm:grid-cols-12 gap-4">
                                             <div class="sm:col-span-6">
                                                 <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Question / Prompt</label>
-                                                <input type="text" wire:model="custom_questions.{{ $index }}.question_text" placeholder="e.g. Do you agree to the DPA?" class="w-full rounded-lg border-gray-200 text-sm focus:ring-red-500 focus:border-red-500">
+                                                <textarea
+                                                    wire:model="custom_questions.{{ $index }}.question_text"
+                                                    placeholder="e.g. Do you agree to the DPA?"
+                                                    rows="1"
+                                                    x-data="{ resize() { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; } }"
+                                                    x-init="resize()"
+                                                    @input="resize()"
+                                                    class="w-full rounded-lg border-gray-200 text-sm focus:ring-red-500 focus:border-red-500 resize-none overflow-hidden"
+                                                ></textarea>
                                             </div>
                                             <div class="sm:col-span-4">
                                                 <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Input Type</label>
