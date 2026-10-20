@@ -13,17 +13,17 @@ class EventTicketMail extends Mailable
     use Queueable, SerializesModels;
 
     public $event;
-    public $registration;
+    public $registrationRecord; // Match whatever variable your blade view uses!
 
-    public function __construct(Event $event, EventRegistration $registration)
-    {
-        $this->event = $event;
-        $this->registration = $registration;
-    }
+        public function __construct(Event $event, EventRegistration $registrationRecord)
+        {
+            $this->event = $event;
+            $this->registrationRecord = $registrationRecord;
+        }
 
-    public function build()
-    {
-        return $this->subject('Your Ticket: ' . $this->event->title)
-                    ->view('emails.event-ticket'); // We will create this view next
-    }
+        public function build()
+        {
+            return $this->subject('[REGISTRATION TICKET] ' . $this->event->title)
+                        ->view('emails.event-ticket');
+        }
 }
