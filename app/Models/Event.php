@@ -14,7 +14,7 @@ class Event extends Model
         'registration_link', 'registration_button_text',
         'start_date', 'end_date', 'is_active', 'capacity',
         'location', 'is_internal_rsvp', 'classification', 'college_id', 'user_id',
-        'program', 'year_level','checkin_start','checkin_end',
+        'program', 'year_level','checkin_start','checkin_end', 'allow_self_checkin'
     ];
 
     protected $casts = [

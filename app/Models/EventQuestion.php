@@ -3,7 +3,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 
 class EventQuestion extends Model {
-    protected $guarded = [];
+    protected $fillable = ['question_text', 'type', 'is_required'];
 
     public function event() {
         return $this->belongsTo(Event::class, 'event_id');
