@@ -25,9 +25,8 @@ class EditEvent extends Component
     public $registration_button_text;
     public $location;
     public $capacity;
-    public $allow_self_checkin; // [NEW]
+    public $allow_self_checkin;
 
-    // Dynamic Questionnaire [NEW]
     public $custom_questions = [];
 
     public $start_date;
@@ -44,6 +43,8 @@ class EditEvent extends Component
         'cover_image' => 'nullable|image|max:8192',
         'location' => 'nullable|string|max:255',
         'capacity' => 'nullable|integer|min:1',
+        'start_date' => 'nullable|date',
+        'end_date' => 'nullable|date|after_or_equal:start_date',
         'checkin_start' => 'nullable|date',
         'checkin_end' => 'nullable|date|after_or_equal:checkin_start',
         'custom_questions.*.question_text' => 'required|string|max:255',
@@ -70,7 +71,7 @@ class EditEvent extends Component
 
         $this->location = $this->event->location;
         $this->capacity = $this->event->capacity;
-        $this->allow_self_checkin = (bool) $this->event->allow_self_checkin; // [NEW]
+        $this->allow_self_checkin = (bool) $this->event->allow_self_checkin;
 
         $this->start_date = $this->event->start_date ? $this->event->start_date->format('Y-m-d\TH:i') : null;
         $this->end_date = $this->event->end_date ? $this->event->end_date->format('Y-m-d\TH:i') : null;
@@ -78,7 +79,6 @@ class EditEvent extends Component
         $this->checkin_start = $this->event->checkin_start ? $this->event->checkin_start->format('Y-m-d\TH:i') : null;
         $this->checkin_end = $this->event->checkin_end ? $this->event->checkin_end->format('Y-m-d\TH:i') : null;
 
-        // [NEW] Mount existing questions
         $this->custom_questions = $this->event->questions->map(function($q) {
             return [
                 'id' => $q->id,
@@ -89,7 +89,6 @@ class EditEvent extends Component
         })->toArray();
     }
 
-    // [NEW] Dynamic Form Builder Methods
     public function addQuestion()
     {
         $this->custom_questions[] = [
@@ -117,6 +116,16 @@ class EditEvent extends Component
 
     public function update()
     {
+        // 1. Sanitize empty strings to strictly null so nullable validation passes
+        $this->capacity = $this->capacity === '' ? null : $this->capacity;
+        $this->checkin_start = $this->checkin_start === '' ? null : $this->checkin_start;
+        $this->checkin_end = $this->checkin_end === '' ? null : $this->checkin_end;
+        $this->location = $this->location === '' ? null : $this->location;
+        $this->registration_link = $this->registration_link === '' ? null : $this->registration_link;
+        $this->start_date = $this->start_date === '' ? null : $this->start_date;
+        $this->end_date = $this->end_date === '' ? null : $this->end_date;
+
+        // 2. Execute Validation
         $this->validate();
 
         $imagePath = $this->old_cover_image;
@@ -138,15 +147,14 @@ class EditEvent extends Component
             'registration_button_text' => $this->registration_button_text,
             'location' => $this->location,
             'capacity' => $this->capacity,
-            'allow_self_checkin' => $this->allow_self_checkin, // [NEW]
+            'allow_self_checkin' => $this->allow_self_checkin,
             'start_date' => $this->start_date,
             'end_date' => $this->end_date,
             'is_active' => $this->is_active,
-            'checkin_start' => empty($this->checkin_start) ? null : $this->checkin_start,
-            'checkin_end' => empty($this->checkin_end) ? null : $this->checkin_end,
+            'checkin_start' => $this->checkin_start,
+            'checkin_end' => $this->checkin_end,
         ]);
 
-        // [NEW] Sync Custom Questions
         if ($this->is_internal_rsvp) {
             foreach ($this->custom_questions as $qData) {
                 $this->event->questions()->updateOrCreate(

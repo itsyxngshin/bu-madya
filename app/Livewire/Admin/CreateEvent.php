@@ -28,9 +28,9 @@ class CreateEvent extends Component
     // Internal RSVP details
     public $location;
     public $capacity;
-    public $allow_self_checkin = false; // [NEW]
+    public $allow_self_checkin = false;
 
-    // Dynamic Questionnaire [NEW]
+    // Dynamic Questionnaire
     public $custom_questions = [];
 
     public $start_date;
@@ -46,6 +46,8 @@ class CreateEvent extends Component
         'cover_image' => 'nullable|image|max:8192',
         'location' => 'nullable|string|max:255',
         'capacity' => 'nullable|integer|min:1',
+        'start_date' => 'nullable|date',
+        'end_date' => 'nullable|date|after_or_equal:start_date',
         'checkin_start' => 'nullable|date',
         'checkin_end' => 'nullable|date|after_or_equal:checkin_start',
         'custom_questions.*.question_text' => 'required|string|max:255',
@@ -58,7 +60,6 @@ class CreateEvent extends Component
         $this->slug = Str::slug($value);
     }
 
-    // [NEW] Dynamic Form Builder Methods
     public function addQuestion()
     {
         $this->custom_questions[] = [
@@ -76,6 +77,16 @@ class CreateEvent extends Component
 
     public function save()
     {
+        // 1. Sanitize empty strings to strictly null so nullable validation passes
+        $this->capacity = $this->capacity === '' ? null : $this->capacity;
+        $this->checkin_start = $this->checkin_start === '' ? null : $this->checkin_start;
+        $this->checkin_end = $this->checkin_end === '' ? null : $this->checkin_end;
+        $this->location = $this->location === '' ? null : $this->location;
+        $this->registration_link = $this->registration_link === '' ? null : $this->registration_link;
+        $this->start_date = $this->start_date === '' ? null : $this->start_date;
+        $this->end_date = $this->end_date === '' ? null : $this->end_date;
+
+        // 2. Execute Validation
         $this->validate();
 
         $imagePath = null;
@@ -94,15 +105,14 @@ class CreateEvent extends Component
             'registration_button_text' => $this->registration_button_text,
             'location' => $this->location,
             'capacity' => $this->capacity,
-            'allow_self_checkin' => $this->allow_self_checkin, // [NEW]
+            'allow_self_checkin' => $this->allow_self_checkin,
             'start_date' => $this->start_date,
             'end_date' => $this->end_date,
             'is_active' => $this->is_active,
-            'checkin_start' => empty($this->checkin_start) ? null : $this->checkin_start,
-            'checkin_end' => empty($this->checkin_end) ? null : $this->checkin_end,
+            'checkin_start' => $this->checkin_start,
+            'checkin_end' => $this->checkin_end,
         ]);
 
-        // [NEW] Save dynamic questions
         if ($this->is_internal_rsvp && !empty($this->custom_questions)) {
             foreach ($this->custom_questions as $qData) {
                 $event->questions()->create([
@@ -116,10 +126,10 @@ class CreateEvent extends Component
         session()->flash('message', 'Event created successfully.');
 
         if (auth()->user()->role?->role_name === 'organization') {
-            return redirect()->route('partner.events.index')->with('message', 'Event updated successfully!');
+            return redirect()->route('partner.events.index')->with('message', 'Event created successfully!');
         }
 
-        return redirect()->route('admin.events.index')->with('message', 'Event updated successfully!');
+        return redirect()->route('admin.events.index')->with('message', 'Event created successfully!');
     }
 
     public function updatedPhotoUpload()

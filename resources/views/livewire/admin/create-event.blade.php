@@ -6,7 +6,6 @@
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
                 <h3 class="text-lg font-bold text-gray-900 mb-6">Event Details</h3>
 
-                {{-- Title --}}
                 <div class="mb-6">
                     <label class="block text-sm font-bold text-gray-700 mb-1">Event Title</label>
                     <input wire:model.live="title" type="text" class="w-full rounded-lg border-gray-200 focus:ring-red-500 focus:border-red-500 transition font-bold text-lg placeholder-gray-300" placeholder="e.g. Annual Charity Gala 2025">
@@ -43,10 +42,7 @@
                          }"
                          x-on:photo-inserted.window="insert('\n<figure>\n  <img src=\'' + $event.detail.url + '\' alt=\'Image\'>\n  <figcaption>Caption...</figcaption>\n</figure>\n', '');"
                     >
-                        {{-- Hidden File Input for Toolbar --}}
                         <input type="file" wire:model="photo_upload" class="hidden" x-ref="photoUploader" accept="image/*">
-
-                        {{-- TOOLBAR --}}
                         <div class="flex items-center gap-1 bg-gray-50 border-b border-gray-200 p-2 overflow-x-auto">
                             <button @click="insert('**', '**')" class="p-1.5 text-gray-500 hover:text-gray-900 hover:bg-gray-200 rounded transition font-bold text-xs w-8" title="Bold">B</button>
                             <button @click="insert('*', '*')" class="p-1.5 text-gray-500 hover:text-gray-900 hover:bg-gray-200 rounded transition italic text-xs w-8" title="Italic">I</button>
@@ -97,7 +93,7 @@
                                 </div>
                             @endif
 
-                            <div class="flex flex-col items-center justify-center pt-5 pb-6 text-center px-4" :class="{ 'opacity-0': isUploading }">
+                            <div class="flex flex-col items-center justify-center pt-5 pb-6 text-center px-4 {{ ($cover_image) ? 'hidden' : '' }}" :class="{ 'opacity-0': isUploading }">
                                 <div class="p-3 bg-white rounded-full shadow-sm mb-3 group-hover:scale-110 transition duration-300">
                                     <svg class="w-8 h-8 text-gray-400 group-hover:text-red-500 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                                 </div>
@@ -114,7 +110,6 @@
                                 </div>
                                 <p class="text-xs font-bold text-red-600 mt-2">Uploading... <span x-text="progress + '%'"></span></p>
                             </div>
-
                             <input type="file" wire:model="cover_image" class="hidden" accept="image/png, image/jpeg, image/jpg" />
                         </label>
                     </div>
@@ -133,14 +128,17 @@
                     <div>
                         <label class="block text-xs font-bold text-gray-500 mb-1">Location</label>
                         <input wire:model="location" type="text" placeholder="e.g. BU Ampitheater" class="w-full rounded-lg border-gray-200 text-sm focus:ring-red-500 focus:border-red-500">
+                        @error('location') <span class="text-red-500 text-xs mt-1 block font-bold">{{ $message }}</span> @enderror
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-gray-500 mb-1">Start Date</label>
                         <input wire:model="start_date" type="datetime-local" class="w-full rounded-lg border-gray-200 text-sm focus:ring-red-500 focus:border-red-500">
+                        @error('start_date') <span class="text-red-500 text-xs mt-1 block font-bold">{{ $message }}</span> @enderror
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-gray-500 mb-1">End Date</label>
                         <input wire:model="end_date" type="datetime-local" class="w-full rounded-lg border-gray-200 text-sm focus:ring-red-500 focus:border-red-500">
+                        @error('end_date') <span class="text-red-500 text-xs mt-1 block font-bold">{{ $message }}</span> @enderror
                     </div>
 
                     @if($is_internal_rsvp)
@@ -150,10 +148,12 @@
                                 <div>
                                     <label class="block text-xs font-bold text-gray-700 mb-1">Scanner Opens At</label>
                                     <input wire:model="checkin_start" type="datetime-local" class="w-full rounded-lg border-gray-200 text-sm focus:ring-red-500 focus:border-red-500 bg-red-50">
+                                    @error('checkin_start') <span class="text-red-500 text-xs mt-1 block font-bold">{{ $message }}</span> @enderror
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-gray-700 mb-1">Scanner Closes At</label>
                                     <input wire:model="checkin_end" type="datetime-local" class="w-full rounded-lg border-gray-200 text-sm focus:ring-red-500 focus:border-red-500 bg-red-50">
+                                    @error('checkin_end') <span class="text-red-500 text-xs mt-1 block font-bold">{{ $message }}</span> @enderror
                                 </div>
                                 <p class="text-[10px] text-gray-400 leading-tight">If left blank, the scanner will accept tickets indefinitely.</p>
                             </div>
@@ -162,7 +162,6 @@
                 </div>
             </div>
 
-            {{-- REGISTRATION MODE TOGGLE --}}
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
                 <h3 class="text-sm font-bold text-gray-900 uppercase tracking-widest mb-4">Registration</h3>
 
@@ -171,7 +170,6 @@
                         <span class="block text-sm font-bold text-gray-900">RSVP</span>
                         <span class="text-xs text-gray-500">Enable internal ticketing & QR codes</span>
                     </div>
-
                     <button type="button"
                         wire:click="$toggle('is_internal_rsvp')"
                         class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 {{ $is_internal_rsvp ? 'bg-red-600' : 'bg-gray-300' }}">
@@ -179,7 +177,6 @@
                     </button>
                 </div>
 
-                {{-- Mode 1: Internal RSVP Settings --}}
                 @if($is_internal_rsvp)
                     <div class="space-y-4 animate-fade-in-up">
                         <div class="p-4 bg-red-50 border border-red-100 rounded-xl">
@@ -189,7 +186,6 @@
                             </div>
                         </div>
 
-                        {{-- NEW: CHECK-IN MODE TOGGLE --}}
                         <div class="flex items-center justify-between p-4 bg-gray-50 border border-gray-200 rounded-xl mt-4">
                             <div>
                                 <span class="block text-sm font-bold text-gray-900">Allow Self Check-In</span>
@@ -205,9 +201,9 @@
                         <div>
                             <label class="block text-xs font-bold text-gray-500 mb-1">Max Capacity (Optional)</label>
                             <input wire:model="capacity" type="number" placeholder="Leave empty for unlimited" class="w-full rounded-lg border-gray-200 text-sm focus:ring-red-500 focus:border-red-500">
+                            @error('capacity') <span class="text-red-500 text-xs mt-1 block font-bold">{{ $message }}</span> @enderror
                         </div>
 
-                        {{-- NEW: DYNAMIC QUESTION BUILDER --}}
                         <div class="pt-6 mt-4 border-t border-gray-200">
                             <div class="flex justify-between items-center mb-4">
                                 <div>
@@ -258,7 +254,6 @@
 
                     </div>
 
-                {{-- Mode 2: External Link Settings --}}
                 @else
                     <div class="space-y-4 animate-fade-in-up"
                          x-data="{
@@ -308,7 +303,6 @@
                 @endif
             </div>
 
-            {{-- Publish Action --}}
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
                 <div class="flex items-center gap-2 mb-4">
                     <input type="checkbox" wire:model="is_active" class="rounded text-red-600 focus:ring-red-500 cursor-pointer w-5 h-5">

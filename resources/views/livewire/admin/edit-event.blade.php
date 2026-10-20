@@ -132,14 +132,17 @@
                     <div>
                         <label class="block text-xs font-bold text-gray-500 mb-1">Location</label>
                         <input wire:model="location" type="text" placeholder="e.g. BU Ampitheater" class="w-full rounded-lg border-gray-200 text-sm focus:ring-red-500 focus:border-red-500">
+                        @error('location') <span class="text-red-500 text-xs mt-1 block font-bold">{{ $message }}</span> @enderror
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-gray-500 mb-1">Start Date</label>
                         <input wire:model="start_date" type="datetime-local" class="w-full rounded-lg border-gray-200 text-sm focus:ring-red-500 focus:border-red-500">
+                        @error('start_date') <span class="text-red-500 text-xs mt-1 block font-bold">{{ $message }}</span> @enderror
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-gray-500 mb-1">End Date</label>
                         <input wire:model="end_date" type="datetime-local" class="w-full rounded-lg border-gray-200 text-sm focus:ring-red-500 focus:border-red-500">
+                        @error('end_date') <span class="text-red-500 text-xs mt-1 block font-bold">{{ $message }}</span> @enderror
                     </div>
 
                     @if($is_internal_rsvp)
@@ -149,10 +152,12 @@
                                 <div>
                                     <label class="block text-xs font-bold text-gray-700 mb-1">Scanner Opens At</label>
                                     <input wire:model="checkin_start" type="datetime-local" class="w-full rounded-lg border-gray-200 text-sm focus:ring-red-500 focus:border-red-500 bg-red-50">
+                                    @error('checkin_start') <span class="text-red-500 text-xs mt-1 block font-bold">{{ $message }}</span> @enderror
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-gray-700 mb-1">Scanner Closes At</label>
                                     <input wire:model="checkin_end" type="datetime-local" class="w-full rounded-lg border-gray-200 text-sm focus:ring-red-500 focus:border-red-500 bg-red-50">
+                                    @error('checkin_end') <span class="text-red-500 text-xs mt-1 block font-bold">{{ $message }}</span> @enderror
                                 </div>
                                 <p class="text-[10px] text-gray-400 leading-tight">If left blank, the scanner will accept tickets indefinitely.</p>
                             </div>
@@ -185,7 +190,6 @@
                             </div>
                         </div>
 
-                        {{-- NEW: CHECK-IN MODE TOGGLE --}}
                         <div class="flex items-center justify-between p-4 bg-gray-50 border border-gray-200 rounded-xl mt-4">
                             <div>
                                 <span class="block text-sm font-bold text-gray-900">Allow Self Check-In</span>
@@ -201,9 +205,9 @@
                         <div>
                             <label class="block text-xs font-bold text-gray-500 mb-1">Max Capacity (Optional)</label>
                             <input wire:model="capacity" type="number" placeholder="Leave empty for unlimited" class="w-full rounded-lg border-gray-200 text-sm focus:ring-red-500 focus:border-red-500">
+                            @error('capacity') <span class="text-red-500 text-xs mt-1 block font-bold">{{ $message }}</span> @enderror
                         </div>
 
-                        {{-- NEW: DYNAMIC QUESTION BUILDER --}}
                         <div class="pt-6 mt-4 border-t border-gray-200">
                             <div class="flex justify-between items-center mb-4">
                                 <div>
@@ -251,6 +255,7 @@
                                 @endif
                             </div>
                         </div>
+
                     </div>
 
                 @else
