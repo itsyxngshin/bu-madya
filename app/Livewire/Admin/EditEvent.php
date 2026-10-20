@@ -153,6 +153,11 @@ class EditEvent extends Component
             'is_active' => $this->is_active,
             'checkin_start' => $this->checkin_start,
             'checkin_end' => $this->checkin_end,
+
+            'custom_questions.*.id' => 'nullable',
+                    'custom_questions.*.question_text' => 'required|string|max:255',
+                    'custom_questions.*.type' => 'required|in:text,checkbox',
+                    'custom_questions.*.is_required' => 'boolean',
         ]);
 
         if ($this->is_internal_rsvp) {
