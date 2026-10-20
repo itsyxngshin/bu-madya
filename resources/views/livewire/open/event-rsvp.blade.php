@@ -190,7 +190,7 @@
 
                                     <div class="mt-6 pt-5 border-t border-slate-100">
                                         @if(isset($event->allow_self_checkin) && $event->allow_self_checkin)
-                                            <a href="{{ url('/events/' . $event->id . '/checkin?code=' . $registrationRecord->ticket_code) }}" class="block w-full py-3.5 bg-slate-900 text-white font-black rounded-xl shadow-lg hover:bg-black hover:-translate-y-0.5 transition-all text-[11px] uppercase tracking-widest text-center">
+                                            <a href="{{ url('/events/' . $event->slug . '/scan?code=' . $registrationRecord->ticket_code) }}" class="block w-full py-3.5 bg-slate-900 text-white font-black rounded-xl shadow-lg hover:bg-black hover:-translate-y-0.5 transition-all text-[11px] uppercase tracking-widest text-center">
                                                 Self Check-In Now
                                             </a>
                                             <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-3 text-center">Or present QR code for manual scanning</p>
@@ -384,7 +384,6 @@
                                     </div>
                                 @endif
 
-                                {{-- NEW: DYNAMIC CUSTOM QUESTIONS --}}
                                 @if($event->questions && $event->questions->count() > 0)
                                     <div class="pt-4 mt-6 border-t border-slate-200/60 space-y-5 animate-fade-in-up">
                                         <h4 class="text-[11px] font-black text-slate-800 uppercase tracking-widest mb-3">Additional Information</h4>

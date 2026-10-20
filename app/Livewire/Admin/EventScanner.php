@@ -15,23 +15,37 @@ class EventScanner extends Component
     public Event $event;
     public $scanStatus = null;
     public $scanMessage = '';
-    public $lastScannedData = null; // [FIXED] Properly declared as an array
+    public $lastScannedData = null;
     public $manualCode = '';
+
+    // [NEW] Security clearance flag
+    public $isAuthorizedScanner = false;
 
     public function mount(Event $event)
     {
         $this->event = $event;
+
+        // Determine if the user has official backend access
+        $userRole = Auth::check() ? Auth::user()->role?->role_name : null;
+        $this->isAuthorizedScanner = Auth::check() && in_array($userRole, ['administrator', 'director', 'organization']);
     }
 
     // Triggered by the camera
     public function processScan($ticketCode)
     {
+        if (!$this->event->allow_self_checkin && !$this->isAuthorizedScanner) {
+            return; // Hard block for unauthorized external scans
+        }
         $this->verifyTicket(trim($ticketCode));
     }
 
     // Triggered by the manual form
     public function manualCheckIn()
     {
+        if (!$this->event->allow_self_checkin && !$this->isAuthorizedScanner) {
+            return; // Hard block
+        }
+
         $this->validate([
             'manualCode' => 'required|string'
         ]);
@@ -58,7 +72,7 @@ class EventScanner extends Component
             return;
         }
 
-        // [NEW LOGIC] 3. Validate the Check-In Window
+        // 3. Validate the Check-In Window
         $now = Carbon::now();
 
         if ($this->event->checkin_start && $now->lt($this->event->checkin_start)) {
@@ -95,13 +109,11 @@ class EventScanner extends Component
 
         // 5. Process Attendance
         if ($reg->status !== 'Attended') {
-
             $reg->update([
                 'status' => 'Attended',
-                'scanned_at' => $now // Record the exact scan time if you have this column!
+                'scanned_at' => $now
             ]);
 
-            // Optional: Send Email
             try {
                 Mail::to($reg->email)->queue(new EventAttendedMail($this->event, $reg));
             } catch (\Exception $e) {
@@ -121,11 +133,8 @@ class EventScanner extends Component
 
     public function render()
     {
-        // Dynamic Layout Check
-        $isAdmin = Auth::check() && in_array(Auth::user()->role?->role_name, ['administrator', 'director']);
-        $layout = $isAdmin ? 'layouts.madya-admin-deck' : 'layouts.madya-template';
+        $layout = $this->isAuthorizedScanner ? 'layouts.madya-admin-deck' : 'layouts.madya-template';
 
-        // Calculate Stats
         $total = $this->event->registrations()->count();
         $attended = $this->event->registrations()->where('status', 'Attended')->count();
         $percentage = $total > 0 ? round(($attended / $total) * 100) : 0;
