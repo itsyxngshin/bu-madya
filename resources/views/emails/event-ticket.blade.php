@@ -27,7 +27,6 @@
             color: #ffffff;
             text-align: center;
             padding: 40px 20px;
-            border-radius: 0 !important; /* Strictly square corners */
         }
 
         .ticket-header h1 {
@@ -105,42 +104,12 @@
             margin-bottom: 15px;
             display: flex;
             align-items: center;
-            gap: 10px;
-        }
-
-        .footer-logo-icon {
-            background-color: #ef4444; /* Red accent */
-            color: white;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            display: inline-block;
-            text-align: center;
-            line-height: 24px;
-            font-size: 12px;
-            margin-right: 8px;
         }
 
         .footer-description {
             line-height: 1.6;
             margin-bottom: 25px;
             color: #94a3b8;
-        }
-
-        /* Social Icons */
-        .social-links a {
-            display: inline-block;
-            width: 36px;
-            height: 36px;
-            background-color: #1e293b;
-            color: #ffffff;
-            text-align: center;
-            line-height: 36px;
-            border-radius: 50%;
-            text-decoration: none;
-            margin-right: 10px;
-            font-weight: bold;
-            font-size: 14px;
         }
 
         /* Quick Links */
@@ -186,8 +155,7 @@
 
             <!-- QR Container -->
             <div class="qr-container">
-                <!-- Replace src with your backend gradient QR generator or image path -->
-                <img src="{{ $qrCodeUrl }}" alt="QR Code Ticket">
+                <img src="{{ $qrCodeUrl ?? 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' . urlencode($registrationRecord->ticket_code) }}" alt="QR Code Ticket">
                 <div class="ticket-code">BU-MADYA-{{ strtoupper($registrationRecord->ticket_code) }}</div>
             </div>
 
@@ -202,17 +170,46 @@
                 <tr>
                     <!-- Left Column: Branding -->
                     <td width="60%" valign="top" style="padding-right: 20px;">
-                        <div class="footer-logo">
-                            <span class="footer-logo-icon"><img src="{{ $message->embed(public_path('images/MADYA Web Logo1.png')) }}" alt="BU MADYA" style="border-radius: 50%; width: 90px; height: 90px; border: 4px solid #ffffff; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); margin-bottom: 20px;"></span> BU MADYA
-                        </div>
+
+                        <!-- Safe Email Logo Structure -->
+                        <table cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 15px;">
+                            <tr>
+                                <td valign="middle" style="padding-right: 15px;">
+                                    <img src="{{ $message->embed(public_path('images/MADYA Web Logo1.png')) }}" alt="BU MADYA" style="width: 50px; height: auto; display: block; border-radius: 50px; border: 3px solid #ffffff;">
+                                </td>
+                                <td valign="middle" style="color: #ffffff; font-size: 20px; font-weight: 900; font-family: system-ui, -apple-system, sans-serif;">
+                                    BU MADYA
+                                </td>
+                            </tr>
+                        </table>
+
                         <p class="footer-description">
                             The Bicol University - Movement for the Advancement of Youth-led Advocacy is a duly-accredited University Based Organization in Bicol University committed to service and reaching communities through advocacy.
                         </p>
-                        <div class="social-links">
-                            <a href="https://facebook.com/bumadya" target="_blank">f</a>
-                            <a href="https://instagram.com/bu_madya" target="_blank">ig</a>
-                            <a href="https://x.com/bu_madya" target="_blank">x</a>
-                        </div>
+
+                        <!-- Social Links with Correct SVGs -->
+                        <table cellpadding="0" cellspacing="0" border="0">
+                            <tr>
+                                <!-- Facebook -->
+                                <td style="padding-right: 10px;">
+                                    <a href="https://www.facebook.com/BUMadya" style="display: inline-block; width: 36px; height: 36px; background-color: #1e293b; border-radius: 50%; text-align: center; line-height: 36px;">
+                                        <img src="https://img.icons8.com/ios-filled/50/ffffff/facebook-new.png" alt="Facebook" style="width: 18px; height: 18px; vertical-align: middle;">
+                                    </a>
+                                </td>
+                                <!-- Instagram -->
+                                <td style="padding-right: 10px;">
+                                    <a href="https://www.instagram.com/bu_madya" style="display: inline-block; width: 36px; height: 36px; background-color: #1e293b; border-radius: 50%; text-align: center; line-height: 36px;">
+                                        <img src="https://img.icons8.com/ios-filled/50/ffffff/instagram-new.png" alt="Instagram" style="width: 18px; height: 18px; vertical-align: middle;">
+                                    </a>
+                                </td>
+                                <!-- X / Twitter -->
+                                <td>
+                                    <a href="https://www.x.com/bu_madya" style="display: inline-block; width: 36px; height: 36px; background-color: #1e293b; border-radius: 50%; text-align: center; line-height: 36px;">
+                                        <img src="https://img.icons8.com/ios-filled/50/ffffff/twitterx--v1.png" alt="X" style="width: 16px; height: 16px; vertical-align: middle;">
+                                    </a>
+                                </td>
+                            </tr>
+                        </table>
                     </td>
 
                     <!-- Right Column: Links -->
