@@ -15,7 +15,7 @@
 
         /* 1. Widened Desktop Container */
         .email-wrapper {
-            max-width: 750px; 
+            max-width: 750px;
             margin: 0 auto;
             background-color: #ffffff;
             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
@@ -190,7 +190,7 @@
                 <img src="{{ $qrCodeUrl }}" alt="QR Code Ticket">
                 <div class="ticket-code">BU-MADYA-{{ strtoupper($registrationRecord->ticket_code) }}</div>
             </div>
-            
+
             <p style="font-size: 12px; color: #94a3b8; max-width: 400px; margin: 0 auto; line-height: 1.5;">
                 To expedite check-in, please have this QR code ready on your screen or printed before approaching the facilitators.
             </p>
@@ -203,7 +203,7 @@
                     <!-- Left Column: Branding -->
                     <td width="60%" valign="top" style="padding-right: 20px;">
                         <div class="footer-logo">
-                            <span class="footer-logo-icon">&blk14;</span> BU MADYA
+                            <span class="footer-logo-icon"><img src="{{ $message->embed(public_path('images/MADYA Web Logo1.png')) }}" alt="BU MADYA" style="border-radius: 50%; width: 90px; height: 90px; border: 4px solid #ffffff; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); margin-bottom: 20px;"></span> BU MADYA
                         </div>
                         <p class="footer-description">
                             The Bicol University - Movement for the Advancement of Youth-led Advocacy is a duly-accredited University Based Organization in Bicol University committed to service and reaching communities through advocacy.
@@ -214,7 +214,7 @@
                             <a href="https://x.com/bu_madya" target="_blank">x</a>
                         </div>
                     </td>
-                    
+
                     <!-- Right Column: Links -->
                     <td width="40%" valign="top" style="padding-left: 20px;">
                         <ul class="footer-links">
