@@ -156,7 +156,7 @@
             <!-- QR Container -->
             <div class="qr-container">
                 <img src="{{ $qrCodeUrl ?? 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' . urlencode($registrationRecord->ticket_code) }}" alt="QR Code Ticket">
-                <div class="ticket-code">BU-MADYA-{{ strtoupper($registrationRecord->ticket_code) }}</div>
+                <div class="ticket-code">{{ strtoupper($registrationRecord->ticket_code) }}</div>
             </div>
 
             <p style="font-size: 12px; color: #94a3b8; max-width: 400px; margin: 0 auto; line-height: 1.5;">
