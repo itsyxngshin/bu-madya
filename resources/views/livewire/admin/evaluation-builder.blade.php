@@ -22,7 +22,7 @@
                     @endif
                 </h1>
             </div>
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-2 sm:gap-3 flex-wrap justify-center">
                 <a href="{{ route('admin.evaluations.index') }}" class="hidden sm:inline-block px-5 py-2.5 bg-white border border-gray-300 text-gray-700 font-bold rounded-xl text-sm hover:bg-gray-50 transition shadow-sm">Cancel</a>
 
                 @if($evaluation->exists)
@@ -38,7 +38,7 @@
                     @endif
                 @endif
 
-                <button wire:click="save" class="px-8 py-2.5 bg-gray-900 text-white font-bold rounded-xl shadow-lg hover:bg-gray-800 transition text-sm flex items-center gap-2">
+                <button wire:click="save" class="px-6 sm:px-8 py-2.5 bg-gray-900 text-white font-bold rounded-xl shadow-lg hover:bg-gray-800 transition text-sm flex items-center gap-2">
                     Save Changes
                 </button>
             </div>
@@ -387,7 +387,7 @@
                                     </div>
                                 @else
                                     <div class="bg-gray-50 p-5 rounded-2xl border border-gray-200 border-dashed text-center flex flex-col items-center justify-center">
-                                        <svg class="w-6 h-6 text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                                        <svg class="w-6 h-6 text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
                                         <p class="text-sm font-semibold text-gray-700">Using Default System Template</p>
                                         <p class="text-xs text-gray-500 mt-1">A standard automated message will be sent.</p>
                                     </div>
@@ -404,6 +404,7 @@
             {{-- ========================================== --}}
             <div class="xl:col-span-8 relative">
 
+                {{-- Mobile-Friendly Add Element Bar --}}
                 <div class="sticky top-6 z-[100] flex justify-center mb-8 pointer-events-none px-4 sm:px-0">
                     <div class="pointer-events-auto relative w-full max-w-sm sm:max-w-md md:max-w-2xl" x-data="{ open: false }">
                         <button @click="open = !open" @click.outside="open = false" type="button" class="w-full flex items-center justify-center gap-3 py-3.5 bg-gray-900 text-white font-bold rounded-full shadow-2xl hover:bg-gray-800 transition ring-4 ring-white/80 group">
@@ -475,7 +476,7 @@
                 <div class="bg-transparent min-h-[400px] pb-20 relative"
                      x-data="{
                         initSortable() {
-                            this.sortable = new Sortable(this.$el, {
+                            this.sortable = new Sortable(this.$refs.sortableList, {
                                 animation: 200,
                                 handle: '.drag-handle',
                                 ghostClass: 'opacity-40',
@@ -485,7 +486,7 @@
                                 scrollSpeed: 25,
                                 onEnd: (evt) => {
                                     let newOrder = [];
-                                    this.$el.querySelectorAll('[data-sort-id]').forEach((el, index) => {
+                                    this.$refs.sortableList.querySelectorAll('[data-sort-id]').forEach((el, index) => {
                                         newOrder.push({ value: el.getAttribute('data-sort-id'), order: index });
                                     });
                                     $wire.updateQuestionOrder(newOrder);
@@ -494,229 +495,258 @@
                         }
                      }" x-init="initSortable()">
 
-                    @foreach($questions as $index => $question)
+                    {{-- The Flat Loop (Visually simulated hierarchy via Alpine) --}}
+                    <div x-ref="sortableList" class="space-y-4">
 
                         @php
-                            $qKey = $question['temp_id'];
-                            $isSectionHeader = $question['type'] === 'section';
-                            $isPageBreak = $question['type'] === 'page_break';
-                            $isActive = ($activeQuestionIndex === $index);
-
-                            $classes = 'group/card relative transition-all duration-200 cursor-text p-5 sm:p-6 ';
-
-                            if ($isSectionHeader) {
-                                $classes .= 'rounded-2xl border-2 border-orange-300 border-l-8 border-l-orange-500 bg-orange-50 mb-6 shadow-sm overflow-hidden ';
-                            } elseif ($isPageBreak) {
-                                $classes .= 'rounded-2xl border border-red-200 bg-red-50/80 shadow-sm mb-6 ';
-                            } else {
-                                $classes .= 'rounded-2xl border border-gray-200 bg-white shadow-sm mb-6 hover:border-gray-300 ';
-                            }
-
-                            if ($isActive) $classes .= 'ring-2 ring-orange-400 ring-offset-2 z-20 ';
-                            else $classes .= 'z-10 ';
+                            $inSection = false;
                         @endphp
 
-                        <div data-sort-id="{{ $qKey }}" wire:key="question-{{ $index }}-{{ $qKey }}" class="{{ $classes }}" wire:click="setActiveQuestion({{ $index }})"
-                             @if($isSectionHeader) x-data="{ isExpanded: true }" x-effect="window.currentSectionExpanded = isExpanded" @endif
-                             @if(!$isSectionHeader && !$isPageBreak) x-data="{}" x-show="window.currentSectionExpanded !== false" x-transition @endif
-                        >
+                        @foreach($questions as $index => $question)
 
-                            @if($isActive && !$isSectionHeader)
-                                <div class="absolute left-0 top-6 bottom-6 w-1.5 bg-orange-500 rounded-r-full"></div>
-                            @endif
+                            @php
+                                $qKey = $question['temp_id'];
 
-                            {{-- Collapsible Section Header (Accordion) --}}
-                            @if($isSectionHeader)
-                                <div class="flex items-center justify-between cursor-pointer" @click.self="isExpanded = !isExpanded">
-                                    <div class="flex items-center gap-4 w-full">
-                                        <div class="drag-handle text-orange-400 hover:text-orange-700 cursor-move">
-                                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"></path></svg>
-                                        </div>
-                                        <div class="w-full flex-1" x-data="{
+                                if ($question['type'] === 'section') $inSection = true;
+                                elseif ($question['type'] === 'page_break') $inSection = false;
+
+                                $isSectionHeader = $question['type'] === 'section';
+                                $isPageBreak = $question['type'] === 'page_break';
+                                $isActive = ($activeQuestionIndex === $index);
+                                $isEnclosedItem = $inSection && !$isSectionHeader && !$isPageBreak;
+                            @endphp
+
+                            <div data-sort-id="{{ $qKey }}" wire:key="question-{{ $index }}-{{ $qKey }}"
+                                 wire:click="setActiveQuestion({{ $index }})"
+
+                                 {{-- Dynamic Alpine Collapsible Display Logic --}}
+                                 @if($isSectionHeader)
+                                     x-data="{ isExpanded: true }"
+                                     x-effect="window.currentSectionExpanded = isExpanded"
+                                     class="relative bg-orange-50/50 border-2 border-orange-300 border-l-[12px] border-l-orange-500 rounded-2xl shadow-sm mt-8 transition-all group {{ $isActive ? 'ring-2 ring-orange-500 ring-offset-2' : '' }}"
+                                 @elseif($isPageBreak)
+                                     x-data="{}"
+                                     class="relative bg-red-50/80 border border-red-200 rounded-2xl shadow-sm transition-all group {{ $isActive ? 'ring-2 ring-red-500 ring-offset-2' : '' }}"
+                                 @else
+                                     x-data="{}"
+                                     x-show="window.currentSectionExpanded !== false"
+                                     x-transition
+                                     class="relative bg-white border border-gray-200 rounded-2xl shadow-sm transition-all hover:border-orange-300 group {{ $isActive ? 'ring-2 ring-orange-400 ring-offset-2 z-20' : 'z-10' }} {{ $isEnclosedItem ? 'ml-0 sm:ml-12 border-l-4 border-l-orange-200' : '' }}"
+                                 @endif
+                            >
+
+                                {{-- Active Indicator Line --}}
+                                @if($isActive && !$isSectionHeader)
+                                    <div class="absolute left-0 top-6 bottom-6 w-1.5 bg-orange-500 rounded-r-full"></div>
+                                @endif
+
+                                {{-- ====================================== --}}
+                                {{-- 1. SECTION HEADER BLOCK (Accordion) --}}
+                                {{-- ====================================== --}}
+                                @if($isSectionHeader)
+                                    <div class="px-4 sm:px-6 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+
+                                        <div class="flex items-center gap-3 sm:gap-4 w-full cursor-text" x-data="{
                                                 resize(el) { this.$nextTick(() => { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; }); }
                                             }">
+                                            <div class="drag-handle text-orange-400 hover:text-orange-700 cursor-move shrink-0 p-2">
+                                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"></path></svg>
+                                            </div>
                                             <textarea wire:model="questions.{{ $index }}.question_text"
                                                   x-init="$nextTick(() => resize($el))" @input="resize($el)" rows="1"
-                                                  class="w-full text-xl font-black text-gray-900 border-0 bg-transparent focus:ring-0 p-0 overflow-hidden resize-none uppercase tracking-widest leading-tight"
+                                                  class="w-full text-lg sm:text-xl font-black text-gray-900 border-0 border-b-2 border-transparent hover:border-orange-200 focus:border-orange-500 focus:ring-0 px-0 bg-transparent overflow-hidden resize-none uppercase tracking-widest leading-tight"
                                                   placeholder="Type Section Title"></textarea>
                                         </div>
-                                    </div>
 
-                                    <div class="flex items-center gap-3 shrink-0 ml-4">
-                                        <button wire:click.stop="duplicateSection({{ $index }})" class="hidden sm:flex items-center gap-1.5 text-orange-600 hover:text-orange-800 bg-orange-100/50 hover:bg-orange-200 px-3 py-1.5 rounded-lg transition-colors text-xs font-bold" title="Duplicate Section">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
-                                        </button>
-                                        <button wire:click.stop="confirmDeleteSection({{ $index }})" class="text-red-400 hover:text-red-600 p-2 bg-white/50 rounded-lg hover:bg-red-100 transition-colors" title="Delete Section">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                        </button>
-                                        <svg class="w-6 h-6 text-orange-500 transition-transform cursor-pointer" :class="isExpanded ? 'rotate-180' : ''" @click="isExpanded = !isExpanded" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                                    </div>
-                                </div>
-
-                                {{-- Section Description (Hidden inside accordion) --}}
-                                <div x-show="isExpanded" class="mt-4 pl-10" x-data="{
-                                        resize(el) { this.$nextTick(() => { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; }); }
-                                    }">
-                                    <textarea wire:model="questions.{{ $index }}.description"
-                                              x-init="$nextTick(() => resize($el))" @input="resize($el)" rows="1"
-                                              class="w-full text-sm text-gray-600 border-0 bg-transparent placeholder-orange-400/60 focus:ring-0 p-0 overflow-hidden resize-none"
-                                              placeholder="Provide context or instructions for this section..."></textarea>
-                                </div>
-
-                            @elseif($isPageBreak)
-                                <div class="drag-handle absolute left-0 top-0 bottom-0 w-10 flex flex-col items-center justify-center cursor-move z-10 text-red-300 hover:text-red-500 transition-colors rounded-l-2xl">
-                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"></path></svg>
-                                </div>
-                                <div class="flex items-center justify-between pl-6 sm:pl-8">
-                                    <div class="flex-1 flex flex-col sm:flex-row sm:items-center gap-4">
-                                        <div class="hidden sm:block h-px bg-red-200 flex-1"></div>
-                                        <span class="text-xs font-bold uppercase tracking-wider text-red-700 bg-white px-3 py-1 rounded-lg border border-red-200 shadow-sm w-max">Page Break</span>
-
-                                        @if($isActive)
-                                            <div class="flex items-center gap-3">
-                                                <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">After page:</span>
-                                                <select wire:model="questions.{{ $index }}.options.0.jump" class="text-sm font-medium border-red-200 rounded-xl py-1.5 px-3 bg-white text-gray-700 shadow-sm focus:ring-red-500 focus:border-red-500 w-48 cursor-pointer">
-                                                    <option value="">Continue to next page</option>
-                                                    <option value="submit">Submit Form</option>
-                                                    @foreach($this->sections as $section)
-                                                        <option value="{{ $section['id'] }}">Go to: {{ Str::limit($section['title'], 20) }}</option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                        @endif
-                                        <div class="hidden sm:block h-px bg-red-200 flex-1"></div>
-                                    </div>
-                                    <button wire:click.stop="removeQuestion({{ $index }})" class="text-red-300 hover:text-red-600 p-2 transition-colors ml-2 shrink-0">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                    </button>
-                                </div>
-
-                            @else
-                                <div class="drag-handle absolute left-0 top-0 bottom-0 w-10 flex flex-col items-center justify-center cursor-move z-10 text-gray-300 hover:text-gray-500 transition-colors rounded-l-2xl hover:bg-gray-50">
-                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"></path></svg>
-                                </div>
-
-                                <div class="pl-6 sm:pl-8" x-data="{
-                                        activeField: 'qText',
-                                        insert(start, end) {
-                                            let el = this.$refs[this.activeField];
-                                            if(!el) return;
-                                            let text = el.value;
-                                            let s = el.selectionStart;
-                                            let e = el.selectionEnd;
-                                            el.value = text.substring(0, s) + start + text.substring(s, e) + end + text.substring(e);
-                                            el.dispatchEvent(new Event('input'));
-                                            setTimeout(() => { el.focus(); el.setSelectionRange(s + start.length, e + start.length); }, 50);
-                                        },
-                                        resize(el) {
-                                            this.$nextTick(() => { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; });
-                                        }
-                                    }">
-
-                                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-4 gap-4">
-                                        <div class="flex flex-col gap-3 flex-1 w-full">
-
-                                            {{-- Rich Text Editor Toolbar (Appears when active) --}}
-                                            <div x-show="$wire.activeQuestionIndex === {{ $index }}" class="flex bg-orange-50 rounded-lg border border-orange-200 w-max overflow-hidden shadow-sm" style="display: none;">
-                                                <button type="button" @click="insert('**', '**')" class="px-3 py-1.5 hover:bg-orange-100 text-orange-700 font-black text-xs transition" title="Bold">B</button>
-                                                <button type="button" @click="insert('*', '*')" class="px-3 py-1.5 hover:bg-orange-100 text-orange-700 italic text-xs transition border-l border-orange-200" title="Italic">I</button>
-                                                <button type="button" @click="insert('~~', '~~')" class="px-3 py-1.5 hover:bg-orange-100 text-orange-700 line-through text-xs transition border-l border-orange-200" title="Strikethrough">S</button>
-                                                <button type="button" @click="insert('[', '](https://)')" class="px-3 py-1.5 hover:bg-orange-100 text-orange-700 font-bold text-xs transition border-l border-orange-200" title="Link">Link</button>
-                                            </div>
-
-                                            <span class="text-[10px] font-bold uppercase tracking-wider text-gray-500 bg-gray-100 px-2 py-0.5 rounded-lg w-max border border-gray-200 shadow-sm">{{ ucfirst($question['type']) }}</span>
-                                        </div>
-
-                                        <div class="flex items-center gap-2 sm:gap-4 ml-auto shrink-0 mt-3 sm:mt-0">
-                                            <label class="flex items-center gap-2 cursor-pointer group/req border-r border-gray-200 pr-4 mr-2">
-                                                <input type="checkbox" wire:model="questions.{{ $index }}.is_required" class="rounded text-orange-500 w-4 h-4 border-gray-300 focus:ring-orange-500">
-                                                <span class="text-xs font-semibold text-gray-500 group-hover/req:text-gray-800 transition-colors uppercase tracking-wider">Required</span>
-                                            </label>
-
-                                            <button wire:click.stop="duplicateQuestion({{ $index }})" class="text-gray-400 hover:text-blue-500 transition-colors p-1 mr-1" title="Duplicate Question">
-                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                                        {{-- Section Action Buttons (Aligned properly) --}}
+                                        <div class="flex items-center gap-1 sm:gap-2 shrink-0 self-end sm:self-auto w-full sm:w-auto justify-end border-t sm:border-0 border-orange-200 pt-2 sm:pt-0 mt-2 sm:mt-0">
+                                            <button wire:click.stop="duplicateSection({{ $index }})" class="flex items-center justify-center text-orange-600 hover:text-orange-800 bg-orange-100 hover:bg-orange-200 p-2 sm:px-3 sm:py-2 rounded-lg transition-colors text-xs font-bold" title="Duplicate Section">
+                                                <svg class="w-5 h-5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
                                             </button>
-                                            <button wire:click.stop="removeQuestion({{ $index }})" class="text-gray-400 hover:text-red-500 transition-colors p-1" title="Delete Question">
+                                            <button wire:click.stop="confirmDeleteSection({{ $index }})" class="text-red-400 hover:text-red-600 p-2 bg-white/50 rounded-lg hover:bg-red-100 transition-colors flex items-center justify-center" title="Delete Section">
                                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                                             </button>
+
+                                            {{-- Collapse Toggle --}}
+                                            <button @click.stop="isExpanded = !isExpanded" class="p-2 text-orange-500 hover:bg-orange-100 rounded-lg transition-colors flex items-center justify-center">
+                                                <svg class="w-6 h-6 transition-transform" :class="isExpanded ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                            </button>
                                         </div>
                                     </div>
 
-                                    {{-- Standard Question Details --}}
-                                    <textarea x-ref="qText" @focus="activeField = 'qText'" wire:model="questions.{{ $index }}.question_text"
-                                              x-init="$nextTick(() => resize($el))" @input="resize($el)" rows="1"
-                                              class="w-full text-base font-semibold border-0 border-b-2 border-transparent hover:border-gray-200 focus:border-orange-500 focus:ring-0 bg-transparent transition-colors p-0 mb-3 overflow-hidden resize-none leading-snug"
-                                              placeholder="Enter your question..."></textarea>
+                                    {{-- Section Description (Hidden inside accordion) --}}
+                                    <div x-show="isExpanded" class="pb-4 px-4 sm:px-6 sm:pl-[3.25rem]" x-data="{
+                                            resize(el) { this.$nextTick(() => { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; }); }
+                                        }">
+                                        <textarea wire:model="questions.{{ $index }}.description"
+                                                  x-init="$nextTick(() => resize($el))" @input="resize($el)" rows="1"
+                                                  class="w-full text-sm text-orange-800/80 border-0 bg-transparent placeholder-orange-400/60 focus:ring-0 p-0 overflow-hidden resize-none"
+                                                  placeholder="Provide context or instructions for this section..."></textarea>
+                                    </div>
 
-                                    @if($isActive || $question['description'] || $question['image_path'] || (isset($question['new_image']) && $question['new_image']))
-                                        <textarea x-ref="qDesc" @focus="activeField = 'qDesc'" wire:model="questions.{{ $index }}.description"
-                                                  x-init="resize($el)" @input="resize($el)" rows="1"
-                                                  class="w-full text-sm text-gray-500 border-0 border-b-2 border-transparent hover:border-gray-100 focus:border-orange-300 focus:ring-0 bg-transparent transition-colors p-0 mb-4 placeholder-gray-300 overflow-hidden resize-none"
-                                                  placeholder="Add helper text or a description..."></textarea>
+                                {{-- ====================================== --}}
+                                {{-- 2. PAGE BREAK BLOCK --}}
+                                {{-- ====================================== --}}
+                                @elseif($isPageBreak)
+                                    <div class="drag-handle absolute left-0 top-0 bottom-0 w-10 flex flex-col items-center justify-center cursor-move z-10 text-red-300 hover:text-red-500 transition-colors rounded-l-2xl">
+                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"></path></svg>
+                                    </div>
+                                    <div class="flex items-center justify-between pl-10 sm:pl-12 py-4 pr-4">
+                                        <div class="flex-1 flex flex-col sm:flex-row sm:items-center gap-4">
+                                            <div class="hidden sm:block h-px bg-red-200 flex-1"></div>
+                                            <span class="text-xs font-bold uppercase tracking-wider text-red-700 bg-white px-3 py-1 rounded-lg border border-red-200 shadow-sm w-max">Page Break</span>
 
-                                        {{-- Image Attachments --}}
-                                        <div class="mb-4 flex flex-wrap items-center gap-4">
-                                            @if(isset($questions[$index]['new_image']) && $questions[$index]['new_image'])
-                                                <img src="{{ $questions[$index]['new_image']->temporaryUrl() }}" class="h-16 w-auto rounded-lg border border-gray-200 shadow-sm">
-                                            @elseif(isset($question['image_path']) && $question['image_path'])
-                                                <img src="{{ asset('storage/'.$question['image_path']) }}" class="h-16 w-auto rounded-lg border border-gray-200 shadow-sm">
-                                            @endif
-
-                                            <label class="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-gray-500 hover:text-orange-600 hover:bg-orange-50 transition-colors cursor-pointer bg-gray-100 border border-gray-200 px-3 py-2 rounded-lg shadow-sm">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                                                Attach Image
-                                                <input type="file" wire:model="questions.{{ $index }}.new_image" class="hidden" accept="image/*">
-                                            </label>
-                                        </div>
-                                    @endif
-
-                                    {{-- Options Mapping (Radio/Check/Drop) --}}
-                                    @if(in_array($question['type'], ['radio', 'checkbox', 'dropdown']))
-                                        <div class="pl-2 border-l-2 border-gray-100 space-y-2.5 mt-4">
-                                            @foreach($question['options'] as $optIndex => $opt)
-                                                <div class="flex flex-col gap-1.5" wire:key="opt-{{ $index }}-{{ $qKey }}-{{ $optIndex }}">
-                                                    <div class="flex items-center gap-3">
-                                                        <div class="w-3 h-3 border-2 border-gray-300 {{ $question['type'] === 'checkbox' ? 'rounded-sm' : 'rounded-full' }} shrink-0"></div>
-                                                        <input type="text" wire:model="questions.{{ $index }}.options.{{ $optIndex }}{{ is_array($opt) ? '.text' : '' }}" class="w-full text-sm border-0 border-b border-dashed border-gray-300 hover:border-gray-400 bg-transparent focus:border-orange-500 focus:ring-0 p-1 placeholder-gray-400 transition-colors" placeholder="Enter option text">
-                                                        <button wire:click.stop="removeOption({{ $index }}, {{ $optIndex }})" class="text-gray-300 hover:text-red-500 p-1 transition-colors shrink-0">
-                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                                                        </button>
-                                                    </div>
-
-                                                    {{-- Conditional Jump Logic --}}
-                                                    @if($question['type'] === 'radio' && is_array($opt) && $isActive)
-                                                        <div class="flex items-center gap-2 pl-6">
-                                                            <svg class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path></svg>
-                                                            <select wire:model="questions.{{ $index }}.options.{{ $optIndex }}.jump" class="w-full max-w-[200px] text-[10px] font-bold border-gray-200 rounded-lg py-1.5 px-2 bg-gray-50 hover:bg-white text-gray-600 focus:ring-orange-500 focus:border-orange-500 transition-colors cursor-pointer truncate shadow-sm">
-                                                                <option value="">Continue to next</option>
-                                                                <option value="submit">Submit Form</option>
-                                                                @foreach($this->sections as $section)
-                                                                    <option value="{{ $section['id'] }}">Go to: {{ Str::limit($section['title'], 20) }}</option>
-                                                                @endforeach
-                                                            </select>
-                                                        </div>
-                                                    @endif
+                                            @if($isActive)
+                                                <div class="flex items-center gap-3">
+                                                    <span class="text-xs font-bold text-gray-500 uppercase tracking-wider hidden sm:inline">After page:</span>
+                                                    <select wire:model="questions.{{ $index }}.options.0.jump" class="text-sm font-medium border-red-200 rounded-xl py-1.5 px-3 bg-white text-gray-700 shadow-sm focus:ring-red-500 focus:border-red-500 w-48 cursor-pointer">
+                                                        <option value="">Continue to next page</option>
+                                                        <option value="submit">Submit Form</option>
+                                                        @foreach($this->sections as $section)
+                                                            <option value="{{ $section['id'] }}">Go to: {{ Str::limit($section['title'], 20) }}</option>
+                                                        @endforeach
+                                                    </select>
                                                 </div>
-                                            @endforeach
-                                            <button wire:click.stop="addOption({{ $index }})" class="text-[10px] font-bold uppercase tracking-widest text-blue-600 hover:text-blue-800 transition-colors mt-2 ml-6 flex items-center gap-1">
-                                                <span>+</span> Add another option
-                                            </button>
+                                            @endif
+                                            <div class="hidden sm:block h-px bg-red-200 flex-1"></div>
                                         </div>
+                                        <button wire:click.stop="removeQuestion({{ $index }})" class="text-red-300 hover:text-red-600 p-2 transition-colors ml-2 shrink-0">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                        </button>
+                                    </div>
 
-                                    {{-- Likert Scale Mapping --}}
-                                    @elseif($question['type'] === 'likert')
-                                        <div class="bg-gray-50 rounded-xl p-3 border border-gray-100 mt-4 overflow-x-auto shadow-inner">
-                                            <div class="flex gap-2 min-w-max">
-                                                @foreach($question['options'] as $optIndex => $option)
-                                                    <input type="text" wire:key="likert-{{ $index }}-{{ $qKey }}-{{ $optIndex }}" wire:model="questions.{{ $index }}.options.{{ $optIndex }}" class="w-24 text-xs font-medium text-center border-gray-200 focus:border-orange-500 focus:ring-orange-500 rounded-lg p-2 shadow-sm bg-white">
-                                                @endforeach
+                                {{-- ====================================== --}}
+                                {{-- 3. STANDARD QUESTION BLOCKS --}}
+                                {{-- ====================================== --}}
+                                @else
+                                    <div class="drag-handle absolute left-0 top-0 bottom-0 w-10 flex flex-col items-center justify-center cursor-move z-10 text-gray-300 hover:text-gray-500 transition-colors rounded-l-2xl hover:bg-gray-50">
+                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"></path></svg>
+                                    </div>
+
+                                    <div class="pl-10 sm:pl-12 py-5 sm:py-6 pr-4 sm:pr-6" x-data="{
+                                            activeField: 'qText',
+                                            insert(start, end) {
+                                                let el = this.$refs[this.activeField];
+                                                if(!el) return;
+                                                let text = el.value;
+                                                let s = el.selectionStart;
+                                                let e = el.selectionEnd;
+                                                el.value = text.substring(0, s) + start + text.substring(s, e) + end + text.substring(e);
+                                                el.dispatchEvent(new Event('input'));
+                                                setTimeout(() => { el.focus(); el.setSelectionRange(s + start.length, e + start.length); }, 50);
+                                            },
+                                            resize(el) {
+                                                this.$nextTick(() => { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; });
+                                            }
+                                        }">
+
+                                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-4 gap-4">
+
+                                            <div class="flex flex-col gap-3 flex-1 w-full">
+                                                {{-- Rich Text Editor Toolbar (Appears when active) --}}
+                                                <div x-show="$wire.activeQuestionIndex === {{ $index }}" class="flex bg-orange-50 rounded-lg border border-orange-200 w-max overflow-hidden shadow-sm" style="display: none;">
+                                                    <button type="button" @click="insert('**', '**')" class="px-3 py-1.5 hover:bg-orange-100 text-orange-700 font-black text-xs transition" title="Bold">B</button>
+                                                    <button type="button" @click="insert('*', '*')" class="px-3 py-1.5 hover:bg-orange-100 text-orange-700 italic text-xs transition border-l border-orange-200" title="Italic">I</button>
+                                                    <button type="button" @click="insert('~~', '~~')" class="px-3 py-1.5 hover:bg-orange-100 text-orange-700 line-through text-xs transition border-l border-orange-200" title="Strikethrough">S</button>
+                                                    <button type="button" @click="insert('[', '](https://)')" class="px-3 py-1.5 hover:bg-orange-100 text-orange-700 font-bold text-xs transition border-l border-orange-200" title="Link">Link</button>
+                                                </div>
+
+                                                <span class="text-[10px] font-bold uppercase tracking-wider text-gray-500 bg-gray-100 px-2 py-0.5 rounded-lg w-max border border-gray-200 shadow-sm">{{ ucfirst($question['type']) }}</span>
+                                            </div>
+
+                                            <div class="flex items-center justify-between sm:justify-end gap-2 sm:gap-4 w-full sm:w-auto shrink-0 mt-2 sm:mt-0 border-t sm:border-0 border-gray-100 pt-3 sm:pt-0">
+                                                <label class="flex items-center gap-2 cursor-pointer group/req sm:border-r border-gray-200 sm:pr-4 sm:mr-2">
+                                                    <input type="checkbox" wire:model="questions.{{ $index }}.is_required" class="rounded text-orange-500 w-4 h-4 border-gray-300 focus:ring-orange-500">
+                                                    <span class="text-xs font-semibold text-gray-500 group-hover/req:text-gray-800 transition-colors uppercase tracking-wider">Required</span>
+                                                </label>
+
+                                                <div class="flex gap-1">
+                                                    <button wire:click.stop="duplicateQuestion({{ $index }})" class="text-gray-400 hover:text-blue-500 transition-colors p-1" title="Duplicate Question">
+                                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                                                    </button>
+                                                    <button wire:click.stop="removeQuestion({{ $index }})" class="text-gray-400 hover:text-red-500 transition-colors p-1" title="Delete Question">
+                                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
-                                    @endif
-                                </div>
-                            @endif
-                        </div>
-                    @endforeach
+
+                                        {{-- Standard Question Details --}}
+                                        <textarea x-ref="qText" @focus="activeField = 'qText'" wire:model="questions.{{ $index }}.question_text"
+                                                  x-init="$nextTick(() => resize($el))" @input="resize($el)" rows="1"
+                                                  class="w-full text-base font-semibold border-0 border-b-2 border-transparent hover:border-gray-200 focus:border-orange-500 focus:ring-0 bg-transparent transition-colors p-0 mb-3 overflow-hidden resize-none leading-snug"
+                                                  placeholder="Enter your question..."></textarea>
+
+                                        @if($isActive || $question['description'] || $question['image_path'] || (isset($question['new_image']) && $question['new_image']))
+                                            <textarea x-ref="qDesc" @focus="activeField = 'qDesc'" wire:model="questions.{{ $index }}.description"
+                                                      x-init="resize($el)" @input="resize($el)" rows="1"
+                                                      class="w-full text-sm text-gray-500 border-0 border-b-2 border-transparent hover:border-gray-100 focus:border-orange-300 focus:ring-0 bg-transparent transition-colors p-0 mb-4 placeholder-gray-300 overflow-hidden resize-none"
+                                                      placeholder="Add helper text or a description..."></textarea>
+
+                                            {{-- Image Attachments --}}
+                                            <div class="mb-4 flex flex-wrap items-center gap-4">
+                                                @if(isset($questions[$index]['new_image']) && $questions[$index]['new_image'])
+                                                    <img src="{{ $questions[$index]['new_image']->temporaryUrl() }}" class="h-16 w-auto rounded-lg border border-gray-200 shadow-sm">
+                                                @elseif(isset($question['image_path']) && $question['image_path'])
+                                                    <img src="{{ asset('storage/'.$question['image_path']) }}" class="h-16 w-auto rounded-lg border border-gray-200 shadow-sm">
+                                                @endif
+
+                                                <label class="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-gray-500 hover:text-orange-600 hover:bg-orange-50 transition-colors cursor-pointer bg-gray-100 border border-gray-200 px-3 py-2 rounded-lg shadow-sm">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                                    Attach Image
+                                                    <input type="file" wire:model="questions.{{ $index }}.new_image" class="hidden" accept="image/*">
+                                                </label>
+                                            </div>
+                                        @endif
+
+                                        {{-- Options Mapping (Radio/Check/Drop) --}}
+                                        @if(in_array($question['type'], ['radio', 'checkbox', 'dropdown']))
+                                            <div class="pl-2 border-l-2 border-gray-100 space-y-2.5 mt-4">
+                                                @foreach($question['options'] as $optIndex => $opt)
+                                                    <div class="flex flex-col gap-1.5" wire:key="opt-{{ $index }}-{{ $qKey }}-{{ $optIndex }}">
+                                                        <div class="flex items-center gap-2 sm:gap-3">
+                                                            <div class="w-3 h-3 border-2 border-gray-300 {{ $question['type'] === 'checkbox' ? 'rounded-sm' : 'rounded-full' }} shrink-0"></div>
+                                                            <input type="text" wire:model="questions.{{ $index }}.options.{{ $optIndex }}{{ is_array($opt) ? '.text' : '' }}" class="w-full text-sm border-0 border-b border-dashed border-gray-300 hover:border-gray-400 bg-transparent focus:border-orange-500 focus:ring-0 p-1 placeholder-gray-400 transition-colors" placeholder="Enter option text">
+                                                            <button wire:click.stop="removeOption({{ $index }}, {{ $optIndex }})" class="text-gray-300 hover:text-red-500 p-1 transition-colors shrink-0">
+                                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                                            </button>
+                                                        </div>
+
+                                                        {{-- Conditional Jump Logic --}}
+                                                        @if($question['type'] === 'radio' && is_array($opt) && $isActive)
+                                                            <div class="flex items-center gap-2 pl-5 sm:pl-6">
+                                                                <svg class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path></svg>
+                                                                <select wire:model="questions.{{ $index }}.options.{{ $optIndex }}.jump" class="w-full max-w-[200px] text-[10px] font-bold border-gray-200 rounded-lg py-1.5 px-2 bg-gray-50 hover:bg-white text-gray-600 focus:ring-orange-500 focus:border-orange-500 transition-colors cursor-pointer truncate shadow-sm">
+                                                                    <option value="">Continue to next</option>
+                                                                    <option value="submit">Submit Form</option>
+                                                                    @foreach($this->sections as $section)
+                                                                        <option value="{{ $section['id'] }}">Go to: {{ Str::limit($section['title'], 20) }}</option>
+                                                                    @endforeach
+                                                                </select>
+                                                            </div>
+                                                        @endif
+                                                    </div>
+                                                @endforeach
+                                                <button wire:click.stop="addOption({{ $index }})" class="text-[10px] font-bold uppercase tracking-widest text-blue-600 hover:text-blue-800 transition-colors mt-2 ml-5 sm:ml-6 flex items-center gap-1">
+                                                    <span>+</span> Add another option
+                                                </button>
+                                            </div>
+
+                                        {{-- Likert Scale Mapping --}}
+                                        @elseif($question['type'] === 'likert')
+                                            <div class="bg-gray-50 rounded-xl p-3 border border-gray-100 mt-4 overflow-x-auto shadow-inner">
+                                                <div class="flex gap-2 min-w-max">
+                                                    @foreach($question['options'] as $optIndex => $option)
+                                                        <input type="text" wire:key="likert-{{ $index }}-{{ $qKey }}-{{ $optIndex }}" wire:model="questions.{{ $index }}.options.{{ $optIndex }}" class="w-24 text-xs font-medium text-center border-gray-200 focus:border-orange-500 focus:ring-orange-500 rounded-lg p-2 shadow-sm bg-white">
+                                                    @endforeach
+                                                </div>
+                                            </div>
+                                        @endif
+                                    </div>
+                                @endif
+                            </div>
+                        @endforeach
+                    </div>
                 </div>
             </div>
         </div>
@@ -737,7 +767,7 @@
                     <p class="text-sm text-gray-500 mb-6 leading-relaxed">
                         You are about to delete <strong class="text-gray-800">"{{ $questions[$sectionToDeleteIndex]['question_text'] ?: 'Untitled Section' }}"</strong> and <strong class="text-red-600">all questions contained inside it</strong>. This action cannot be undone.
                     </p>
-                    <div class="flex gap-3 w-full">
+                    <div class="flex gap-3 w-full flex-col sm:flex-row">
                         <button wire:click="cancelDeleteSection" class="flex-1 px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl text-sm transition shadow-sm">
                             Cancel
                         </button>
