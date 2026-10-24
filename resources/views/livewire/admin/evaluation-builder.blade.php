@@ -7,13 +7,13 @@
         {{-- ========================================== --}}
         {{-- HEADER / ACTIONS --}}
         {{-- ========================================== --}}
-        <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
             <div>
                 <h1 class="text-2xl md:text-3xl font-black text-gray-900 flex items-center gap-2 tracking-tight">
                     @if($evaluation->exists)
                         <span class="text-orange-600">Edit</span> Evaluation
                         @if(auth()->user()->role?->role_name === 'administrator' && $evaluation->creator_id !== auth()->id())
-                            <span class="ml-3 px-3 py-1 bg-blue-50 border border-blue-200 text-blue-700 text-xs uppercase tracking-wider font-bold rounded-full shadow-sm">
+                            <span class="ml-3 px-3 py-1 bg-blue-50 border border-blue-200 text-blue-700 text-xs font-bold rounded-full shadow-sm">
                                 Owner: {{ $evaluation->creator->name ?? 'System' }}
                             </span>
                         @endif
@@ -22,23 +22,23 @@
                     @endif
                 </h1>
             </div>
-            <div class="flex items-center gap-2 sm:gap-3 flex-wrap justify-center">
+            <div class="flex items-center gap-2 sm:gap-3 flex-wrap w-full md:w-auto">
                 <a href="{{ route('admin.evaluations.index') }}" class="hidden sm:inline-block px-5 py-2.5 bg-white border border-gray-300 text-gray-700 font-bold rounded-xl text-sm hover:bg-gray-50 transition shadow-sm">Cancel</a>
 
                 @if($evaluation->exists)
-                    <button wire:click="duplicate" type="button" class="px-4 py-2.5 bg-blue-50 border border-blue-200 text-blue-700 font-bold rounded-xl text-sm hover:bg-blue-100 transition flex items-center gap-2 shadow-sm">
+                    <button wire:click="duplicate" type="button" class="flex-1 sm:flex-none px-4 py-2.5 bg-blue-50 border border-blue-200 text-blue-700 font-bold rounded-xl text-sm hover:bg-blue-100 transition flex items-center justify-center gap-2 shadow-sm">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
                         <span class="hidden sm:inline">Duplicate</span>
                     </button>
 
                     @if($evaluation->responses()->count() > 0)
-                        <button type="button" onclick="confirmReset({{ $evaluation->responses()->count() }})" class="px-4 py-2.5 bg-red-50 border border-red-200 text-red-700 font-bold rounded-xl text-sm hover:bg-red-100 transition flex items-center gap-2 shadow-sm">
+                        <button type="button" onclick="confirmReset({{ $evaluation->responses()->count() }})" class="flex-1 sm:flex-none px-4 py-2.5 bg-red-50 border border-red-200 text-red-700 font-bold rounded-xl text-sm hover:bg-red-100 transition flex items-center justify-center gap-2 shadow-sm">
                             Reset ({{ $evaluation->responses()->count() }})
                         </button>
                     @endif
                 @endif
 
-                <button wire:click="save" class="px-6 sm:px-8 py-2.5 bg-gray-900 text-white font-bold rounded-xl shadow-lg hover:bg-gray-800 transition text-sm flex items-center gap-2">
+                <button wire:click="save" class="flex-1 sm:flex-none px-6 sm:px-8 py-2.5 bg-gray-900 text-white font-bold rounded-xl shadow-lg hover:bg-gray-800 transition text-sm flex items-center justify-center gap-2">
                     Save Changes
                 </button>
             </div>
@@ -122,7 +122,7 @@
                         <div class="flex justify-between items-end mb-1.5">
                             <label class="block text-sm font-semibold text-gray-700">Description</label>
                             <div class="flex bg-gray-100 rounded-lg border border-gray-200 overflow-hidden">
-                                <button type="button" @click="insert('**', '**')" class="px-2.5 py-1.5 hover:bg-gray-200 text-gray-700 font-black text-xs transition" title="Bold">B</button>
+                                <button type="button" @click="insert('**', '**')" class="px-2.5 py-1.5 hover:bg-gray-200 text-gray-700 font-bold text-xs transition" title="Bold">B</button>
                                 <button type="button" @click="insert('*', '*')" class="px-2.5 py-1.5 hover:bg-gray-200 text-gray-700 italic text-xs transition border-l border-gray-200" title="Italic">I</button>
                                 <button type="button" @click="insert('~~', '~~')" class="px-2.5 py-1.5 hover:bg-gray-200 text-gray-700 line-through text-xs transition border-l border-gray-200" title="Strikethrough">S</button>
                                 <button type="button" @click="insert('[', '](https://)')" class="px-2.5 py-1.5 hover:bg-gray-200 text-gray-700 font-semibold text-xs transition border-l border-gray-200" title="Link">Link</button>
@@ -407,9 +407,24 @@
                 {{-- Mobile-Friendly Add Element Bar --}}
                 <div class="sticky top-6 z-[100] flex justify-center mb-8 pointer-events-none px-4 sm:px-0">
                     <div class="pointer-events-auto relative w-full max-w-sm sm:max-w-md md:max-w-2xl" x-data="{ open: false }">
-                        <button @click="open = !open" @click.outside="open = false" type="button" class="w-full flex items-center justify-center gap-3 py-3.5 bg-gray-900 text-white font-bold rounded-full shadow-2xl hover:bg-gray-800 transition ring-4 ring-white/80 group">
+
+                        {{-- Desktop Menu Box --}}
+                        <div class="hidden md:flex bg-gray-900 rounded-full p-2 shadow-2xl items-center justify-between border-4 border-white/80 w-full">
+                            <span class="text-white font-bold uppercase tracking-widest text-xs ml-6">Append Block:</span>
+                            <div class="flex gap-2">
+                                <button wire:click="addQuestion('text')" class="bg-gray-800 hover:bg-gray-700 text-white text-xs font-bold px-4 py-2.5 rounded-full transition text-center">Text</button>
+                                <button wire:click="addQuestion('radio')" class="bg-gray-800 hover:bg-gray-700 text-white text-xs font-bold px-4 py-2.5 rounded-full transition text-center">Choices</button>
+                                <button wire:click="addQuestion('section')" class="bg-orange-600 hover:bg-orange-500 text-white text-xs font-bold px-4 py-2.5 rounded-full transition shadow-md text-center">+ Section</button>
+                                <button @click="open = !open" class="bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white px-3 py-2.5 rounded-full transition">
+                                    <svg class="w-5 h-5 transition-transform duration-300" :class="open ? 'rotate-180 text-orange-400' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        {{-- Mobile Menu Trigger --}}
+                        <button @click="open = !open" @click.outside="open = false" type="button" class="md:hidden w-full flex items-center justify-center gap-3 py-3.5 bg-gray-900 text-white font-bold rounded-full shadow-2xl hover:bg-gray-800 transition ring-4 ring-white/80 group">
                             <svg class="w-5 h-5 transition-transform duration-300" :class="open ? 'rotate-45 text-orange-400' : 'text-gray-300 group-hover:text-white'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                            <span class="text-sm uppercase tracking-wider" x-text="open ? 'Close Menu' : 'Add Element'"></span>
+                            <span class="text-sm font-bold uppercase tracking-widest" x-text="open ? 'Close Menu' : 'Add Element'"></span>
                         </button>
 
                         <div x-show="open" x-cloak
@@ -523,7 +538,7 @@
                                  @if($isSectionHeader)
                                      x-data="{ isExpanded: true }"
                                      x-effect="window.currentSectionExpanded = isExpanded"
-                                     class="relative bg-orange-50/50 border-2 border-orange-300 border-l-[12px] border-l-orange-500 rounded-2xl shadow-sm mt-8 transition-all group {{ $isActive ? 'ring-2 ring-orange-500 ring-offset-2' : '' }}"
+                                     class="relative bg-orange-50/50 border border-orange-200 border-l-4 border-l-orange-500 rounded-2xl shadow-sm mt-8 transition-all group {{ $isActive ? 'ring-2 ring-orange-500 ring-offset-2' : '' }}"
                                  @elseif($isPageBreak)
                                      x-data="{}"
                                      class="relative bg-red-50/80 border border-red-200 rounded-2xl shadow-sm transition-all group {{ $isActive ? 'ring-2 ring-red-500 ring-offset-2' : '' }}"
@@ -531,7 +546,7 @@
                                      x-data="{}"
                                      x-show="window.currentSectionExpanded !== false"
                                      x-transition
-                                     class="relative bg-white border border-gray-200 rounded-2xl shadow-sm transition-all hover:border-orange-300 group {{ $isActive ? 'ring-2 ring-orange-400 ring-offset-2 z-20' : 'z-10' }} {{ $isEnclosedItem ? 'ml-0 sm:ml-12 border-l-4 border-l-orange-200' : '' }}"
+                                     class="relative bg-white border border-gray-200 rounded-2xl shadow-sm transition-all hover:border-orange-300 group {{ $isActive ? 'ring-2 ring-orange-400 ring-offset-2 z-20' : 'z-10' }} {{ $isEnclosedItem ? 'ml-0 sm:ml-10 border-l-4 border-l-orange-200' : '' }}"
                                  @endif
                             >
 
@@ -549,18 +564,18 @@
                                         <div class="flex items-center gap-3 sm:gap-4 w-full cursor-text" x-data="{
                                                 resize(el) { this.$nextTick(() => { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; }); }
                                             }">
-                                            <div class="drag-handle text-orange-400 hover:text-orange-700 cursor-move shrink-0 p-2">
+                                            <div class="drag-handle text-orange-400 hover:text-orange-600 cursor-move shrink-0 py-2 pr-2">
                                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"></path></svg>
                                             </div>
                                             <textarea wire:model="questions.{{ $index }}.question_text"
                                                   x-init="$nextTick(() => resize($el))" @input="resize($el)" rows="1"
-                                                  class="w-full text-lg sm:text-xl font-black text-gray-900 border-0 border-b-2 border-transparent hover:border-orange-200 focus:border-orange-500 focus:ring-0 px-0 bg-transparent overflow-hidden resize-none uppercase tracking-widest leading-tight"
+                                                  class="w-full text-lg sm:text-xl font-bold text-gray-900 border-0 border-b-2 border-transparent hover:border-orange-200 focus:border-orange-500 focus:ring-0 px-0 bg-transparent overflow-hidden resize-none leading-tight"
                                                   placeholder="Type Section Title"></textarea>
                                         </div>
 
-                                        {{-- Section Action Buttons (Aligned properly) --}}
-                                        <div class="flex items-center gap-1 sm:gap-2 shrink-0 self-end sm:self-auto w-full sm:w-auto justify-end border-t sm:border-0 border-orange-200 pt-2 sm:pt-0 mt-2 sm:mt-0">
-                                            <button wire:click.stop="duplicateSection({{ $index }})" class="flex items-center justify-center text-orange-600 hover:text-orange-800 bg-orange-100 hover:bg-orange-200 p-2 sm:px-3 sm:py-2 rounded-lg transition-colors text-xs font-bold" title="Duplicate Section">
+                                        {{-- Section Action Buttons (Aligned properly for mobile & desktop) --}}
+                                        <div class="flex items-center gap-1 sm:gap-2 shrink-0 self-end sm:self-auto border-t sm:border-0 border-orange-200/60 pt-3 sm:pt-0 mt-2 sm:mt-0 w-full sm:w-auto justify-end">
+                                            <button wire:click.stop="duplicateSection({{ $index }})" class="flex items-center justify-center text-orange-600 hover:text-orange-800 bg-orange-100/50 hover:bg-orange-200 p-2 sm:px-3 sm:py-2 rounded-lg transition-colors text-xs font-bold" title="Duplicate Section">
                                                 <svg class="w-5 h-5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
                                             </button>
                                             <button wire:click.stop="confirmDeleteSection({{ $index }})" class="text-red-400 hover:text-red-600 p-2 bg-white/50 rounded-lg hover:bg-red-100 transition-colors flex items-center justify-center" title="Delete Section">
@@ -575,12 +590,12 @@
                                     </div>
 
                                     {{-- Section Description (Hidden inside accordion) --}}
-                                    <div x-show="isExpanded" class="pb-4 px-4 sm:px-6 sm:pl-[3.25rem]" x-data="{
+                                    <div x-show="isExpanded" class="pb-4 px-4 sm:px-6 sm:pl-[3.5rem]" x-data="{
                                             resize(el) { this.$nextTick(() => { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; }); }
                                         }">
                                         <textarea wire:model="questions.{{ $index }}.description"
                                                   x-init="$nextTick(() => resize($el))" @input="resize($el)" rows="1"
-                                                  class="w-full text-sm text-orange-800/80 border-0 bg-transparent placeholder-orange-400/60 focus:ring-0 p-0 overflow-hidden resize-none"
+                                                  class="w-full text-sm text-orange-800/70 border-0 bg-transparent placeholder-orange-400/50 focus:ring-0 p-0 overflow-hidden resize-none"
                                                   placeholder="Provide context or instructions for this section..."></textarea>
                                     </div>
 
@@ -594,11 +609,11 @@
                                     <div class="flex items-center justify-between pl-10 sm:pl-12 py-4 pr-4">
                                         <div class="flex-1 flex flex-col sm:flex-row sm:items-center gap-4">
                                             <div class="hidden sm:block h-px bg-red-200 flex-1"></div>
-                                            <span class="text-xs font-bold uppercase tracking-wider text-red-700 bg-white px-3 py-1 rounded-lg border border-red-200 shadow-sm w-max">Page Break</span>
+                                            <span class="text-xs font-bold text-red-700 bg-white px-3 py-1 rounded-lg border border-red-200 shadow-sm w-max">Page Break</span>
 
                                             @if($isActive)
                                                 <div class="flex items-center gap-3">
-                                                    <span class="text-xs font-bold text-gray-500 uppercase tracking-wider hidden sm:inline">After page:</span>
+                                                    <span class="text-xs font-bold text-gray-500 hidden sm:inline">After page:</span>
                                                     <select wire:model="questions.{{ $index }}.options.0.jump" class="text-sm font-medium border-red-200 rounded-xl py-1.5 px-3 bg-white text-gray-700 shadow-sm focus:ring-red-500 focus:border-red-500 w-48 cursor-pointer">
                                                         <option value="">Continue to next page</option>
                                                         <option value="submit">Submit Form</option>
@@ -645,19 +660,19 @@
                                             <div class="flex flex-col gap-3 flex-1 w-full">
                                                 {{-- Rich Text Editor Toolbar (Appears when active) --}}
                                                 <div x-show="$wire.activeQuestionIndex === {{ $index }}" class="flex bg-orange-50 rounded-lg border border-orange-200 w-max overflow-hidden shadow-sm" style="display: none;">
-                                                    <button type="button" @click="insert('**', '**')" class="px-3 py-1.5 hover:bg-orange-100 text-orange-700 font-black text-xs transition" title="Bold">B</button>
+                                                    <button type="button" @click="insert('**', '**')" class="px-3 py-1.5 hover:bg-orange-100 text-orange-700 font-bold text-xs transition" title="Bold">B</button>
                                                     <button type="button" @click="insert('*', '*')" class="px-3 py-1.5 hover:bg-orange-100 text-orange-700 italic text-xs transition border-l border-orange-200" title="Italic">I</button>
                                                     <button type="button" @click="insert('~~', '~~')" class="px-3 py-1.5 hover:bg-orange-100 text-orange-700 line-through text-xs transition border-l border-orange-200" title="Strikethrough">S</button>
                                                     <button type="button" @click="insert('[', '](https://)')" class="px-3 py-1.5 hover:bg-orange-100 text-orange-700 font-bold text-xs transition border-l border-orange-200" title="Link">Link</button>
                                                 </div>
 
-                                                <span class="text-[10px] font-bold uppercase tracking-wider text-gray-500 bg-gray-100 px-2 py-0.5 rounded-lg w-max border border-gray-200 shadow-sm">{{ ucfirst($question['type']) }}</span>
+                                                <span class="text-[10px] font-bold text-gray-500 bg-gray-100 px-2 py-0.5 rounded-lg w-max border border-gray-200 shadow-sm">{{ ucfirst($question['type']) }}</span>
                                             </div>
 
                                             <div class="flex items-center justify-between sm:justify-end gap-2 sm:gap-4 w-full sm:w-auto shrink-0 mt-2 sm:mt-0 border-t sm:border-0 border-gray-100 pt-3 sm:pt-0">
                                                 <label class="flex items-center gap-2 cursor-pointer group/req sm:border-r border-gray-200 sm:pr-4 sm:mr-2">
                                                     <input type="checkbox" wire:model="questions.{{ $index }}.is_required" class="rounded text-orange-500 w-4 h-4 border-gray-300 focus:ring-orange-500">
-                                                    <span class="text-xs font-semibold text-gray-500 group-hover/req:text-gray-800 transition-colors uppercase tracking-wider">Required</span>
+                                                    <span class="text-xs font-semibold text-gray-500 group-hover/req:text-gray-800 transition-colors">Required</span>
                                                 </label>
 
                                                 <div class="flex gap-1">
@@ -691,7 +706,7 @@
                                                     <img src="{{ asset('storage/'.$question['image_path']) }}" class="h-16 w-auto rounded-lg border border-gray-200 shadow-sm">
                                                 @endif
 
-                                                <label class="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-gray-500 hover:text-orange-600 hover:bg-orange-50 transition-colors cursor-pointer bg-gray-100 border border-gray-200 px-3 py-2 rounded-lg shadow-sm">
+                                                <label class="inline-flex items-center gap-2 text-[10px] font-bold text-gray-500 hover:text-orange-600 hover:bg-orange-50 transition-colors cursor-pointer bg-gray-100 border border-gray-200 px-3 py-2 rounded-lg shadow-sm">
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                                                     Attach Image
                                                     <input type="file" wire:model="questions.{{ $index }}.new_image" class="hidden" accept="image/*">
@@ -727,7 +742,7 @@
                                                         @endif
                                                     </div>
                                                 @endforeach
-                                                <button wire:click.stop="addOption({{ $index }})" class="text-[10px] font-bold uppercase tracking-widest text-blue-600 hover:text-blue-800 transition-colors mt-2 ml-5 sm:ml-6 flex items-center gap-1">
+                                                <button wire:click.stop="addOption({{ $index }})" class="text-[10px] font-bold text-blue-600 hover:text-blue-800 transition-colors mt-2 ml-5 sm:ml-6 flex items-center gap-1">
                                                     <span>+</span> Add another option
                                                 </button>
                                             </div>
