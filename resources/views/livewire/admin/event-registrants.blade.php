@@ -11,7 +11,15 @@
         </div>
 
         <div class="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
-            <input type="text" wire:model.live="search" placeholder="Search name, email, or ticket..." class="w-full sm:w-64 rounded-xl border-gray-200 text-sm focus:ring-red-500 focus:border-red-500 bg-gray-50">
+            <input type="text" wire:model.live.debounce.300ms="search" placeholder="Search name, org, school..." class="w-full sm:w-56 rounded-xl border-gray-200 text-sm focus:ring-red-500 focus:border-red-500 bg-gray-50">
+
+            {{-- NEW: Classification Filter --}}
+            <select wire:model.live="classificationFilter" class="w-full sm:w-auto rounded-xl border-gray-200 text-sm focus:ring-red-500 focus:border-red-500 font-bold bg-gray-50 cursor-pointer text-gray-700">
+                <option value="">All Types</option>
+                @foreach($classifications as $c)
+                    <option value="{{ $c }}">{{ $c }}</option>
+                @endforeach
+            </select>
 
             <select wire:model.live="statusFilter" class="w-full sm:w-auto rounded-xl border-gray-200 text-sm focus:ring-red-500 focus:border-red-500 font-bold bg-gray-50 cursor-pointer text-gray-700">
                 <option value="">All Statuses</option>
@@ -19,16 +27,28 @@
                 <option value="Attended">Checked In</option>
             </select>
 
-            <button wire:click="exportRosterXls" class="w-full sm:w-auto bg-green-600 text-white font-bold px-4 py-2.5 rounded-xl text-sm shadow-sm hover:bg-green-700 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 whitespace-nowrap">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                Export XLSX
-            </button>
+            <div class="flex gap-2 w-full sm:w-auto">
+                <button wire:click="openBlastModal" class="flex-1 sm:flex-none bg-blue-600 text-white font-bold px-4 py-2.5 rounded-xl text-sm shadow-sm hover:bg-blue-700 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 whitespace-nowrap">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                    Email
+                </button>
+                <button wire:click="exportRosterXls" class="flex-1 sm:flex-none bg-green-600 text-white font-bold px-4 py-2.5 rounded-xl text-sm shadow-sm hover:bg-green-700 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 whitespace-nowrap">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                    XLSX
+                </button>
+            </div>
         </div>
     </div>
 
     @if (session()->has('message'))
-        <div class="bg-red-50 border border-red-100 text-red-700 px-6 py-4 rounded-xl text-sm font-bold shadow-sm animate-fade-in-down">
+        <div class="bg-emerald-50 border border-emerald-100 text-emerald-700 px-6 py-4 rounded-xl text-sm font-bold shadow-sm animate-fade-in-down">
             {{ session('message') }}
+        </div>
+    @endif
+
+    @if (session()->has('error'))
+        <div class="bg-red-50 border border-red-100 text-red-700 px-6 py-4 rounded-xl text-sm font-bold shadow-sm animate-fade-in-down">
+            {{ session('error') }}
         </div>
     @endif
 
@@ -36,28 +56,38 @@
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse min-w-max">
-                <thead>
-                    <tr class="bg-gray-50 border-b border-gray-100">
-                        <th class="p-4 text-xs font-black uppercase text-gray-500 tracking-widest">Ticket Code</th>
-                        <th class="p-4 text-xs font-black uppercase text-gray-500 tracking-widest">Attendee</th>
-                        <th class="p-4 text-xs font-black uppercase text-gray-500 tracking-widest">Classification</th>
-                        <th class="p-4 text-xs font-black uppercase text-gray-500 tracking-widest">Status</th>
-                        <th class="p-4 text-xs font-black uppercase text-gray-500 tracking-widest text-right">Action</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-100">
-                    @forelse($registrants as $reg)
-                        <tr class="hover:bg-gray-50 transition-colors">
-                            <td class="p-4 text-sm font-mono font-bold text-gray-600">
-                                {{ $reg->ticket_code }}
-                            </td>
+                <thead class="bg-gray-50">
+                                <tr>
+                                    {{-- NEW CHECKBOX HEADER --}}
+                                    <th class="p-4 w-10 text-center">
+                                        <svg class="w-4 h-4 text-gray-400 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                    </th>
+                                    <th class="p-4 text-xs font-black uppercase text-gray-500 tracking-widest">Ticket Code</th>
+                                    <th class="p-4 text-xs font-black uppercase text-gray-500 tracking-widest">Attendee</th>
+                                    <th class="p-4 text-xs font-black uppercase text-gray-500 tracking-widest">Affiliation</th>
+                                    <th class="p-4 text-xs font-black uppercase text-gray-500 tracking-widest">Status</th>
+                                    <th class="p-4 text-xs font-black uppercase text-gray-500 tracking-widest text-right">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100">
+                                @forelse($registrants as $reg)
+                                    <tr class="hover:bg-gray-50 transition-colors {{ in_array($reg->id, $selectedRegistrants) ? 'bg-blue-50/50' : '' }}">
+                                        {{-- NEW CHECKBOX DATA CELL --}}
+                                        <td class="p-4 text-center">
+                                            <input type="checkbox" wire:model="selectedRegistrants" value="{{ $reg->id }}" class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500 cursor-pointer">
+                                        </td>
+                                        <td class="p-4 text-sm font-mono font-bold text-gray-600">
+                                            {{ $reg->ticket_code }}
+                                        </td>
                             <td class="p-4">
                                 <p class="text-sm font-bold text-gray-900">{{ $reg->name }}</p>
                                 <p class="text-xs text-gray-500 mt-0.5">{{ $reg->email }}</p>
                             </td>
                             <td class="p-4">
                                 <p class="text-sm font-bold text-gray-700">{{ $reg->classification ?? 'N/A' }}</p>
-                                @if($reg->college)
+                                @if($reg->organization_name)
+                                    <p class="text-xs text-indigo-600 font-bold mt-0.5">{{ $reg->organization_name }}</p>
+                                @elseif($reg->college)
                                     <p class="text-xs text-gray-500 mt-0.5">{{ $reg->college->name }}</p>
                                 @endif
                             </td>
@@ -69,7 +99,7 @@
                             </td>
                             <td class="p-4 text-right">
                                 <button wire:click="viewRegistrant({{ $reg->id }})" class="text-red-600 hover:text-red-800 font-bold text-sm bg-red-50 hover:bg-red-100 px-4 py-2 rounded-lg transition-colors inline-block">
-                                    Review Profile
+                                    Profile
                                 </button>
                             </td>
                         </tr>
@@ -90,10 +120,10 @@
 
     {{-- MODAL: Review Registrant Profile --}}
     @if($showModal && $viewingRegistrant)
-        <div class="fixed inset-0 z-50 overflow-y-auto">
+        <div class="fixed inset-0 z-40 overflow-y-auto">
             <div class="fixed inset-0 bg-gray-900/40 backdrop-blur-sm" wire:click="$set('showModal', false)"></div>
             <div class="flex min-h-screen items-center justify-center p-4">
-                <div class="relative w-full max-w-2xl bg-white rounded-[2rem] shadow-2xl p-8 transform transition-all flex flex-col max-h-[90vh]">
+                <div class="relative w-full max-w-2xl bg-white rounded-[2rem] shadow-2xl p-8 transform transition-all flex flex-col max-h-[90vh] z-50">
 
                     {{-- Modal Header --}}
                     <div class="flex justify-between items-start mb-6 shrink-0">
@@ -108,8 +138,6 @@
 
                     {{-- Scrollable Profile Body --}}
                     <div class="overflow-y-auto flex-1 pr-2 space-y-6">
-
-                        {{-- Demographics Grid --}}
                         <div class="grid grid-cols-2 gap-4 bg-gray-50 p-5 rounded-2xl border border-gray-100">
                             <div>
                                 <p class="text-[10px] font-black uppercase text-gray-500 mb-1">Email Address</p>
@@ -135,7 +163,6 @@
                             @endif
                         </div>
 
-                        {{-- Dynamic Questionnaire Responses --}}
                         <div>
                             <h3 class="text-sm font-black text-gray-900 uppercase tracking-widest border-b border-gray-200 pb-2 mb-4">Questionnaire Responses</h3>
 
@@ -170,15 +197,70 @@
                                     Mark as Attended
                                 </button>
                             @endif
+                            {{-- NEW: Delete Override Button --}}
+                            <button wire:click="deleteRegistrant({{ $viewingRegistrant->id }})" wire:confirm="Are you sure you want to permanently delete this registration? This action cannot be undone." class="w-full sm:w-auto bg-white border border-red-200 text-red-600 font-bold px-4 py-2 rounded-xl text-sm hover:bg-red-50 transition-colors">
+                                Delete Record
+                            </button>
                         </div>
 
-                        {{-- Download Profile DOC --}}
                         <button wire:click="exportProfileDoc({{ $viewingRegistrant->id }})" class="w-full sm:w-auto bg-slate-900 text-white font-bold px-5 py-2.5 rounded-xl text-sm shadow-sm hover:bg-black hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                             Export DOC Profile
                         </button>
                     </div>
+                </div>
+            </div>
+        </div>
+    @endif
 
+    {{-- MODAL: Email Blast --}}
+    @if($showBlastModal)
+        <div class="fixed inset-0 z-50 overflow-y-auto">
+            <div class="fixed inset-0 bg-gray-900/40 backdrop-blur-sm" wire:click="$set('showBlastModal', false)"></div>
+            <div class="flex min-h-screen items-center justify-center p-4">
+                <div class="relative w-full max-w-2xl bg-white rounded-[2rem] shadow-2xl p-8 transform transition-all flex flex-col z-50">
+
+                    <div class="flex justify-between items-start mb-6">
+                        <div>
+                            <h2 class="text-2xl font-black text-gray-900">Email Broadcast</h2>
+                            <p class="text-sm font-medium text-gray-500 mt-1">Send an announcement to event participants.</p>
+                        </div>
+                        <button wire:click="$set('showBlastModal', false)" class="text-gray-400 hover:text-red-500 bg-gray-100 hover:bg-red-50 rounded-full p-2 transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        </button>
+                    </div>
+
+                    <form wire:submit.prevent="sendBlast" class="space-y-5">
+                        <div>
+                            <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2">Target Audience</label>
+                            <select wire:model="blastTarget" class="w-full rounded-xl border-gray-200 text-sm py-3 px-4 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-bold outline-none cursor-pointer">
+                                <option value="all">Everyone on Roster</option>
+                                <option value="Registered">Registered (Not Checked In)</option>
+                                <option value="Attended">Checked In (Attended)</option>
+                                <option value="selected" class="font-black text-blue-600">Selected Participants Only ({{ count($selectedRegistrants) }})</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2">Email Subject</label>
+                            <input type="text" wire:model="blastSubject" class="w-full rounded-xl border-gray-200 text-sm py-3 px-4 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-bold outline-none">
+                            @error('blastSubject') <span class="text-xs text-red-500 mt-1 font-bold">{{ $message }}</span> @enderror
+                        </div>
+
+                        <div>
+                            <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2">Message Body</label>
+                            <textarea wire:model="blastMessage" rows="6" placeholder="Type your announcement here..." class="w-full rounded-xl border-gray-200 text-sm py-3 px-4 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none resize-none"></textarea>
+                            @error('blastMessage') <span class="text-xs text-red-500 mt-1 font-bold">{{ $message }}</span> @enderror
+                        </div>
+
+                        <div class="pt-4 border-t border-gray-100 flex gap-3 justify-end">
+                            <button type="button" wire:click="$set('showBlastModal', false)" class="px-5 py-2.5 rounded-xl font-bold text-gray-500 hover:bg-gray-100 text-sm transition-colors">Cancel</button>
+                            <button type="submit" wire:loading.attr="disabled" class="bg-blue-600 text-white px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-blue-700 shadow-md transition-all flex items-center gap-2">
+                                <span wire:loading.remove wire:target="sendBlast">Send Broadcast</span>
+                                <span wire:loading wire:target="sendBlast" class="animate-pulse">Queueing Emails...</span>
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>

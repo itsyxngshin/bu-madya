@@ -9,27 +9,35 @@ use Livewire\Attributes\Layout;
 class EventRaffle extends Component
 {
     public Event $event;
-    public $winners = []; 
-    public $winnerList = []; 
-    
-    // [FIXED] Explicitly declare this as a public property so Alpine can watch it
-    public $eligibleAttendees = []; 
+    public $winners = [];
+    public $winnerList = [];
+    public $eligibleAttendees = [];
+
+    // [NEW] Toggle state for the Raffle Mode
+    public $raffleMode = 'slot'; // Options: 'slot' or 'wheel'
 
     public function mount(Event $event)
     {
         $this->event = $event;
-        $this->updatePool(); // Load the pool when the page opens
+        $this->updatePool();
+    }
+
+    // [NEW] Switch modes safely
+    public function switchMode($mode)
+    {
+        if (in_array($mode, ['slot', 'wheel'])) {
+            $this->raffleMode = $mode;
+            $this->dispatch('raffle-mode-changed', mode: $mode);
+        }
     }
 
     public function recordWinner($winnerId)
     {
         if (!in_array($winnerId, $this->winners)) {
             $this->winners[] = $winnerId;
-            
-            // Fetch the winner's details to display in the UI list
+
             $winnerRecord = $this->event->registrations()->find($winnerId);
             if ($winnerRecord) {
-                // Prepend so the newest winner is at the top of the list
                 array_unshift($this->winnerList, [
                     'name' => $winnerRecord->name,
                     'classification' => $winnerRecord->classification,
@@ -37,8 +45,7 @@ class EventRaffle extends Component
                 ]);
             }
 
-            // [FIXED] Shrink the pool immediately after someone wins
-            $this->updatePool(); 
+            $this->updatePool();
         }
     }
 
@@ -49,15 +56,10 @@ class EventRaffle extends Component
                 unset($this->winnerList[$key]);
             }
         }
-        
-        // Re-index the array so Livewire's frontend loop doesn't break
+
         $this->winnerList = array_values($this->winnerList);
-        
-        // Note: We deliberately leave them in $this->winners so their ticket 
-        // remains "burned" and they can't be drawn a second time!
     }
 
-    // [FIXED] Dedicated method to fetch the latest pool of attendees
     public function updatePool()
     {
         $this->eligibleAttendees = $this->event->registrations()
@@ -69,11 +71,10 @@ class EventRaffle extends Component
 
     public function render()
     {
-
         $layoutFile = in_array(auth()->user()->role?->role_name, ['administrator', 'organization'])
             ? 'layouts.madya-admin-deck'
             : 'layouts.madya-admin';
-        // We no longer pass data here; the public property handles it automatically
+
         return view('livewire.admin.event-raffle')->layout($layoutFile);
     }
 }

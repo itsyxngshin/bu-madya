@@ -7,7 +7,9 @@ use Livewire\WithPagination;
 use App\Models\Event;
 use App\Models\EventRegistration;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Mail;
 use Livewire\Attributes\Layout;
+use App\Mail\EventBlastMail; // We will create this next
 
 class EventRegistrants extends Component
 {
@@ -16,23 +18,32 @@ class EventRegistrants extends Component
     public Event $event;
     public $search = '';
     public $statusFilter = '';
+    public $classificationFilter = '';
+    public $selectedRegistrants = [];
 
     // --- Modal State ---
     public $viewingRegistrant = null;
     public $showModal = false;
 
+    // --- Email Blast State ---
+    public $showBlastModal = false;
+    public $blastSubject = '';
+    public $blastMessage = '';
+    public $blastTarget = 'all'; // all, registered, attended
+
     public function mount(Event $event)
     {
         $this->event = $event;
+        $this->blastSubject = 'Update: ' . $event->title;
     }
 
     public function updatingSearch() { $this->resetPage(); }
     public function updatingStatusFilter() { $this->resetPage(); }
+    public function updatingClassificationFilter() { $this->resetPage(); }
 
-    // --- Modal Protocols ---
+    // --- Roster Management ---
     public function viewRegistrant($id)
     {
-        // Eager load the college and the dynamic answers
         $this->viewingRegistrant = EventRegistration::with(['college', 'answers.question'])->findOrFail($id);
         $this->showModal = true;
     }
@@ -48,9 +59,72 @@ class EventRegistrants extends Component
         session()->flash('message', 'Registrant status successfully updated.');
     }
 
-    // ==========================================
-    // EXPORT 1: Bulk Event Roster to Excel (No Questions)
-    // ==========================================
+    // NEW: Delete Override
+    public function deleteRegistrant($id)
+    {
+        $reg = EventRegistration::findOrFail($id);
+        $reg->delete();
+
+        $this->showModal = false;
+        $this->viewingRegistrant = null;
+
+        session()->flash('message', 'Registrant has been permanently removed from the roster.');
+    }
+
+    // --- NEW: Email Blast System ---
+    public function openBlastModal()
+    {
+        $this->showBlastModal = true;
+    }
+
+    public function sendBlast()
+        {
+            $this->validate([
+                'blastSubject' => 'required|string|max:255',
+                'blastMessage' => 'required|string',
+                'blastTarget' => 'required|in:all,Registered,Attended,selected' // Added 'selected'
+            ]);
+
+            $query = $this->event->registrations();
+
+            // Filter based on the dropdown target
+            if ($this->blastTarget === 'selected') {
+                if (empty($this->selectedRegistrants)) {
+                    session()->flash('error', 'You must select at least one participant from the table.');
+                    $this->showBlastModal = false;
+                    return;
+                }
+                $query->whereIn('id', $this->selectedRegistrants);
+            } elseif ($this->blastTarget !== 'all') {
+                $query->where('status', $this->blastTarget);
+            }
+
+            $recipients = $query->pluck('email')->toArray();
+            $organizerName = $this->event->organizer ? $this->event->organizer->name : 'BU MADYA Events Team';
+
+            if (count($recipients) > 0) {
+                // Queue emails in safe batches of 50 using BCC
+                foreach (array_chunk($recipients, 50) as $chunk) {
+                    Mail::bcc($chunk)->queue(new EventBlastMail(
+                        $this->event,
+                        $this->blastSubject,
+                        $this->blastMessage,
+                        $organizerName
+                    ));
+                }
+                session()->flash('message', 'Email blast successfully queued to ' . count($recipients) . ' participants.');
+
+                // Clear selections after sending
+                $this->selectedRegistrants = [];
+            } else {
+                session()->flash('error', 'No participants match the selected target group.');
+            }
+
+            $this->showBlastModal = false;
+            $this->blastMessage = '';
+        }
+
+    // --- Export Systems (Preserved) ---
     public function exportRosterXls()
     {
         $query = $this->event->registrations()->with('college')->latest();
@@ -59,12 +133,18 @@ class EventRegistrants extends Component
             $query->where(function($q) {
                 $q->where('name', 'like', '%' . $this->search . '%')
                   ->orWhere('email', 'like', '%' . $this->search . '%')
-                  ->orWhere('ticket_code', 'like', '%' . $this->search . '%');
+                  ->orWhere('ticket_code', 'like', '%' . $this->search . '%')
+                  ->orWhere('school', 'like', '%' . $this->search . '%')
+                  ->orWhere('organization_name', 'like', '%' . $this->search . '%');
             });
         }
 
         if ($this->statusFilter) {
             $query->where('status', $this->statusFilter);
+        }
+
+        if ($this->classificationFilter) {
+            $query->where('classification', $this->classificationFilter);
         }
 
         $registrants = $query->get();
@@ -74,25 +154,10 @@ class EventRegistrants extends Component
             echo '<html xmlns:x="urn:schemas-microsoft-com:office:excel">';
             echo '<head><meta charset="utf-8"></head><body>';
             echo '<table border="1" style="font-family: Arial, sans-serif;">';
-
-            // Header Row
             echo '<tr style="background-color: #0f172a; color: #ffffff; font-weight: bold;">';
-            echo '<th>Date Registered</th>';
-            echo '<th>Ticket Code</th>';
-            echo '<th>Status</th>';
-            echo '<th>Full Name</th>';
-            echo '<th>Email Address</th>';
-            echo '<th>Contact Number</th>';
-            echo '<th>Classification</th>';
-            echo '<th>School / University</th>';
-            echo '<th>College / Unit</th>';
-            echo '<th>Program</th>';
-            echo '<th>Year Level</th>';
-            echo '<th>Organization Name</th>';
-            echo '<th>Position</th>';
+            echo '<th>Date Registered</th><th>Ticket Code</th><th>Status</th><th>Full Name</th><th>Email Address</th><th>Contact Number</th><th>Classification</th><th>School / University</th><th>College / Unit</th><th>Program</th><th>Year Level</th><th>Organization Name</th><th>Position</th>';
             echo '</tr>';
 
-            // Data Rows
             foreach ($registrants as $reg) {
                 echo '<tr>';
                 echo '<td>' . $reg->created_at->format('Y-m-d H:i A') . '</td>';
@@ -118,9 +183,6 @@ class EventRegistrants extends Component
         ]);
     }
 
-    // ==========================================
-    // EXPORT 2: Individual Profile to Word (With Dynamic Answers)
-    // ==========================================
     public function exportProfileDoc($id)
     {
         $reg = EventRegistration::with(['college', 'answers.question'])->findOrFail($id);
@@ -130,14 +192,11 @@ class EventRegistrants extends Component
             echo "<html xmlns:w='urn:schemas-microsoft-com:office:word'>";
             echo "<head><meta charset='utf-8'></head>";
             echo "<body style='font-family: Helvetica, Arial, sans-serif; line-height: 1.6;'>";
-
-            // Header
             echo "<h1 style='text-align:center; color: #0f172a; margin-bottom: 5px;'>" . htmlspecialchars($this->event->title) . "</h1>";
             echo "<h2 style='text-align:center; color: #dc2626; margin-top: 0;'>Attendee Profile</h2>";
             echo "<p style='text-align:center; color: #64748b; margin-top: -10px;'>Generated on " . date('F j, Y') . "</p>";
             echo "<hr style='border: 1px solid #e2e8f0; margin-bottom: 20px;'>";
 
-            // Demographic Data Table
             echo "<h3 style='color: #0f172a; border-bottom: 2px solid #dc2626; padding-bottom: 5px;'>Registration Details</h3>";
             echo "<table style='width:100%; border-collapse: collapse; margin-bottom: 30px;' border='1' cellpadding='8'>";
             echo "<tr style='background-color: #f8fafc;'><td style='width:35%; font-weight:bold;'>Ticket Code</td><td style='font-family: monospace; font-weight: bold; letter-spacing: 2px;'>" . htmlspecialchars($reg->ticket_code) . "</td></tr>";
@@ -152,7 +211,6 @@ class EventRegistrants extends Component
             echo "<tr><td style='font-weight:bold;'>Organization Affiliation</td><td>" . htmlspecialchars($reg->organization_name ?? 'N/A') . "</td></tr>";
             echo "</table>";
 
-            // Custom Questionnaire Answers
             if ($reg->answers && $reg->answers->count() > 0) {
                 echo "<h3 style='color: #0f172a; border-bottom: 2px solid #dc2626; padding-bottom: 5px;'>Custom Questionnaire Responses</h3>";
                 foreach ($reg->answers as $answerRecord) {
@@ -160,12 +218,10 @@ class EventRegistrants extends Component
                     echo "<div style='margin-bottom: 20px; padding: 15px; background-color: #f8fafc; border: 1px solid #e2e8f0;'>";
                     echo "<p style='font-weight:bold; color: #0f172a; margin-top: 0; margin-bottom: 10px; font-size: 11pt;'>" . htmlspecialchars($questionText) . "</p>";
 
-                    // Format boolean checkboxes cleanly
                     $ansVal = $answerRecord->answer;
                     if ($answerRecord->question && $answerRecord->question->type === 'checkbox') {
                         $ansVal = ($ansVal === 'true' || $ansVal === '1' || $ansVal === 'Yes' || $ansVal === 'on') ? 'Yes / Agreed' : 'No';
                     }
-
                     echo "<p style='margin-top: 0; margin-bottom: 0; color: #334155;'>" . nl2br(htmlspecialchars($ansVal ?: 'No response provided')) . "</p>";
                     echo "</div>";
                 }
@@ -184,17 +240,29 @@ class EventRegistrants extends Component
     {
         $query = $this->event->registrations()->latest();
 
+        // 1. General Search (Expanded to include school/org)
         if ($this->search) {
             $query->where(function($q) {
                 $q->where('name', 'like', '%' . $this->search . '%')
                   ->orWhere('email', 'like', '%' . $this->search . '%')
-                  ->orWhere('ticket_code', 'like', '%' . $this->search . '%');
+                  ->orWhere('ticket_code', 'like', '%' . $this->search . '%')
+                  ->orWhere('school', 'like', '%' . $this->search . '%')
+                  ->orWhere('organization_name', 'like', '%' . $this->search . '%');
             });
         }
 
+        // 2. Status Filter
         if ($this->statusFilter) {
             $query->where('status', $this->statusFilter);
         }
+
+        // 3. Classification Filter
+        if ($this->classificationFilter) {
+            $query->where('classification', $this->classificationFilter);
+        }
+
+        // Distinct classifications for dropdown
+        $classifications = $this->event->registrations()->select('classification')->distinct()->whereNotNull('classification')->pluck('classification');
 
         $layoutFile = in_array(auth()->user()->role?->role_name, ['administrator', 'organization'])
             ? 'layouts.madya-admin-deck'
@@ -202,6 +270,7 @@ class EventRegistrants extends Component
 
         return view('livewire.admin.event-registrants', [
             'registrants' => $query->paginate(20),
+            'classifications' => $classifications,
             'stats' => [
                 'total' => $this->event->registrations()->count(),
                 'attended' => $this->event->registrations()->where('status', 'Attended')->count(),
