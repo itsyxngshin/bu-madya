@@ -6,20 +6,28 @@
             @php
                 $user = auth()->user();
                 $canAccessAdmin = false;
+                $backRoute = route('admin.events.index'); // Default route for System Admins
 
                 if ($user) {
                     $role = strtolower($user->role?->role_name ?? '');
 
-                    // Grant access if user is a system admin/director
+                    // 1. System Administrators & Directors (Full Access)
                     if (in_array($role, ['administrator', 'director'])) {
                         $canAccessAdmin = true;
                     }
-                    // Grant access if user is the organization that owns this event
+                    // 2. Event Owner (Organization) or Collaborators
                     elseif ($role === 'organization' && $event->user_id === $user->id) {
                         $canAccessAdmin = true;
+                        $backRoute = route('partner.events.index'); // Redirect to Partner Dashboard
                     }
                 }
             @endphp
+
+            @if($canAccessAdmin)
+                <div class="flex items-center gap-3 mb-1">
+                    <a href="{{ $backRoute }}" class="text-gray-400 hover:text-red-600 transition font-bold text-sm">&larr; Back to Dashboard</a>
+                </div>
+            @endif
 
             @if($canAccessAdmin)
                 <div class="flex items-center gap-3 mb-1">
