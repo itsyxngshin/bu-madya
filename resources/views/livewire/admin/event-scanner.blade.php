@@ -95,7 +95,7 @@
             <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-200">
                 <label class="block text-xs font-bold text-gray-500 uppercase mb-3">Manual Check-in</label>
                 <form wire:submit.prevent="manualCheckIn" class="flex gap-2">
-                    <input type="text" wire:model="manualCode" placeholder="e.g. BUMADYA-XYZ123" class="w-full rounded-xl border-gray-200 text-sm uppercase focus:ring-red-500">
+                    <input type="text" wire:model="manualCode" placeholder="e.g. BU-MADYA-XYZ123" class="w-full rounded-xl border-gray-200 text-sm uppercase focus:ring-red-500">
                     <button type="submit" class="bg-gray-900 text-white px-5 rounded-xl font-bold hover:bg-gray-800 transition">Verify</button>
                 </form>
             </div>
