@@ -160,31 +160,48 @@
                     </div>
 
                     {{-- Scrollable Profile Body --}}
-                    <div class="overflow-y-auto flex-1 pr-2 space-y-6">
-                        <div class="grid grid-cols-2 gap-4 bg-gray-50 p-5 rounded-2xl border border-gray-100">
-                            <div>
-                                <p class="text-[10px] font-black uppercase text-gray-500 mb-1">Email Address</p>
-                                <p class="text-sm font-bold text-gray-900">{{ $viewingRegistrant->email }}</p>
-                            </div>
-                            <div>
-                                <p class="text-[10px] font-black uppercase text-gray-500 mb-1">Contact Number</p>
-                                <p class="text-sm font-bold text-gray-900">{{ $viewingRegistrant->contact_number ?? 'N/A' }}</p>
-                            </div>
-                            <div>
-                                <p class="text-[10px] font-black uppercase text-gray-500 mb-1">Classification</p>
-                                <p class="text-sm font-bold text-gray-900">{{ $viewingRegistrant->classification ?? 'N/A' }}</p>
-                            </div>
-                            <div>
-                                <p class="text-[10px] font-black uppercase text-gray-500 mb-1">College / School</p>
-                                <p class="text-sm font-bold text-gray-900">{{ $viewingRegistrant->college ? $viewingRegistrant->college->name : ($viewingRegistrant->school ?? 'N/A') }}</p>
-                            </div>
-                            @if($viewingRegistrant->organization_name)
-                                <div class="col-span-2">
-                                    <p class="text-[10px] font-black uppercase text-gray-500 mb-1">Organization Affiliation</p>
-                                    <p class="text-sm font-bold text-gray-900">{{ $viewingRegistrant->organization_name }} <span class="text-gray-400 font-medium ml-1">({{ $viewingRegistrant->position }})</span></p>
-                                </div>
-                            @endif
-                        </div>
+                                        <div class="overflow-y-auto flex-1 pr-2 space-y-6">
+
+                                            {{-- Top Identity Panel & QR Code --}}
+                                            <div class="flex flex-col md:flex-row gap-6 bg-gray-50 p-5 rounded-2xl border border-gray-100">
+
+                                                {{-- Dynamic QR Code Display --}}
+                                                <div class="flex flex-col items-center justify-center shrink-0">
+                                                    <div class="bg-white p-3 rounded-xl shadow-sm border border-gray-200 inline-block">
+                                                        <div id="admin-qr-container" class="w-32 h-32 flex items-center justify-center bg-gray-50 rounded-lg">
+                                                            {{-- The JS library will inject the QR code here --}}
+                                                            <svg class="w-8 h-8 text-gray-300 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm14 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
+                                                        </div>
+                                                    </div>
+                                                    <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-2">Scan for Attendance</p>
+                                                </div>
+
+                                                {{-- Demographics Grid --}}
+                                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 flex-1">
+                                                    <div>
+                                                        <p class="text-[10px] font-black uppercase text-gray-500 mb-1">Email Address</p>
+                                                        <p class="text-sm font-bold text-gray-900">{{ $viewingRegistrant->email }}</p>
+                                                    </div>
+                                                    <div>
+                                                        <p class="text-[10px] font-black uppercase text-gray-500 mb-1">Contact Number</p>
+                                                        <p class="text-sm font-bold text-gray-900">{{ $viewingRegistrant->contact_number ?? 'N/A' }}</p>
+                                                    </div>
+                                                    <div>
+                                                        <p class="text-[10px] font-black uppercase text-gray-500 mb-1">Classification</p>
+                                                        <p class="text-sm font-bold text-gray-900">{{ $viewingRegistrant->classification ?? 'N/A' }}</p>
+                                                    </div>
+                                                    <div>
+                                                        <p class="text-[10px] font-black uppercase text-gray-500 mb-1">College / School</p>
+                                                        <p class="text-sm font-bold text-gray-900">{{ $viewingRegistrant->college ? $viewingRegistrant->college->name : ($viewingRegistrant->school ?? 'N/A') }}</p>
+                                                    </div>
+                                                    @if($viewingRegistrant->organization_name)
+                                                        <div class="col-span-1 sm:col-span-2 mt-2 pt-3 border-t border-gray-200/60">
+                                                            <p class="text-[10px] font-black uppercase text-gray-500 mb-1">Organization Affiliation</p>
+                                                            <p class="text-sm font-bold text-gray-900">{{ $viewingRegistrant->organization_name }} <span class="text-gray-400 font-medium ml-1">({{ $viewingRegistrant->position }})</span></p>
+                                                        </div>
+                                                    @endif
+                                                </div>
+                                            </div>
 
                         <div>
                             <h3 class="text-sm font-black text-gray-900 uppercase tracking-widest border-b border-gray-200 pb-2 mb-4">Questionnaire Responses</h3>
@@ -288,4 +305,61 @@
             </div>
         </div>
     @endif
+
+    {{-- Javascript for Dynamic QR Generation in Admin Modal --}}
+        @push('scripts')
+            <script type="text/javascript" src="https://unpkg.com/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
+            <script>
+                document.addEventListener('livewire:initialized', () => {
+                    let qrCodeInstance = null;
+
+                    // Watch for Livewire DOM updates to inject the QR Code when the modal opens
+                    Livewire.hook('morph.updated', ({ component, el }) => {
+                        const container = document.getElementById('admin-qr-container');
+
+                        // Only run if the container exists and we have a ticket code loaded
+                        if (container && @this.viewingRegistrant) {
+                            const ticketCode = @this.viewingRegistrant.ticket_code;
+
+                            // Clear the container (removes the loading spinner)
+                            container.innerHTML = '';
+
+                            qrCodeInstance = new QRCodeStyling({
+                                width: 128,
+                                height: 128,
+                                data: ticketCode,
+                                margin: 0,
+                                dotsOptions: {
+                                    type: 'square',
+                                    gradient: {
+                                        type: 'linear',
+                                        rotation: Math.PI / 4,
+                                        colorStops: [
+                                            { offset: 0, color: '#ef4444' }, // Red
+                                            { offset: 0.5, color: '#eab308' }, // Yellow
+                                            { offset: 1, color: '#22c55e' }  // Green
+                                        ]
+                                    }
+                                },
+                                cornersSquareOptions: {
+                                    type: 'square',
+                                    gradient: {
+                                        type: 'linear',
+                                        rotation: Math.PI / 4,
+                                        colorStops: [
+                                            { offset: 0, color: '#ef4444' },
+                                            { offset: 0.5, color: '#eab308' },
+                                            { offset: 1, color: '#22c55e' }
+                                        ]
+                                    }
+                                },
+                                backgroundOptions: { color: 'transparent' }
+                            });
+
+                            qrCodeInstance.append(container);
+                        }
+                    });
+                });
+            </script>
+        @endpush
 </div>
