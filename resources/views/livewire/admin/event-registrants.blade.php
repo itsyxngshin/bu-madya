@@ -282,6 +282,7 @@
 </div>
 
 {{-- Javascript for Dynamic QR Generation in Admin Modal --}}
+{{-- Javascript for Dynamic QR Generation in Admin Modal --}}
 @push('scripts')
     <script type="text/javascript" src="https://unpkg.com/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
     <script>
@@ -294,44 +295,47 @@
 
                 // Only run if the container exists and we have a ticket code loaded
                 if (container && @this.viewingRegistrant) {
+                    // Fetch the ticket code directly from Livewire's state
                     const ticketCode = @this.viewingRegistrant.ticket_code;
 
-                    // Clear the container (removes the loading spinner)
-                    container.innerHTML = '';
+                    if (ticketCode) {
+                        // Clear the container (removes the loading spinner)
+                        container.innerHTML = '';
 
-                    qrCodeInstance = new QRCodeStyling({
-                        width: 128,
-                        height: 128,
-                        data: ticketCode,
-                        margin: 0,
-                        dotsOptions: {
-                            type: 'square',
-                            gradient: {
-                                type: 'linear',
-                                rotation: Math.PI / 4,
-                                colorStops: [
-                                    { offset: 0, color: '#ef4444' }, // Red
-                                    { offset: 0.5, color: '#eab308' }, // Yellow
-                                    { offset: 1, color: '#22c55e' }  // Green
-                                ]
-                            }
-                        },
-                        cornersSquareOptions: {
-                            type: 'square',
-                            gradient: {
-                                type: 'linear',
-                                rotation: Math.PI / 4,
-                                colorStops: [
-                                    { offset: 0, color: '#ef4444' },
-                                    { offset: 0.5, color: '#eab308' },
-                                    { offset: 1, color: '#22c55e' }
-                                ]
-                            }
-                        },
-                        backgroundOptions: { color: 'transparent' }
-                    });
+                        qrCodeInstance = new QRCodeStyling({
+                            width: 128,
+                            height: 128,
+                            data: ticketCode,
+                            margin: 0,
+                            dotsOptions: {
+                                type: 'square',
+                                gradient: {
+                                    type: 'linear',
+                                    rotation: Math.PI / 4,
+                                    colorStops: [
+                                        { offset: 0, color: '#ef4444' }, // Red
+                                        { offset: 0.5, color: '#eab308' }, // Yellow
+                                        { offset: 1, color: '#22c55e' }  // Green
+                                    ]
+                                }
+                            },
+                            cornersSquareOptions: {
+                                type: 'square',
+                                gradient: {
+                                    type: 'linear',
+                                    rotation: Math.PI / 4,
+                                    colorStops: [
+                                        { offset: 0, color: '#ef4444' },
+                                        { offset: 0.5, color: '#eab308' },
+                                        { offset: 1, color: '#22c55e' }
+                                    ]
+                                }
+                            },
+                            backgroundOptions: { color: 'transparent' }
+                        });
 
-                    qrCodeInstance.append(container);
+                        qrCodeInstance.append(container);
+                    }
                 }
             });
         });
