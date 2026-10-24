@@ -6,10 +6,33 @@
 
     {{-- Header --}}
     <div class="flex justify-between items-center mb-8 relative z-10">
-        <a href="{{ route('admin.events.index') }}" class="text-xs font-bold text-gray-400 hover:text-white uppercase tracking-widest flex items-center gap-2 transition">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-            Exit Raffle
-        </a>
+        @php
+            $user = auth()->user();
+            $canAccessAdmin = false;
+            $backRoute = route('admin.events.index'); // Default route for System Admins
+
+            if ($user) {
+                $role = strtolower($user->role?->role_name ?? '');
+
+                // 1. System Administrators & Directors (Full Access)
+                if (in_array($role, ['administrator', 'director'])) {
+                    $canAccessAdmin = true;
+                }
+                // 2. Event Owner (Organization) or Collaborators
+                elseif ($role === 'organization' && $event->user_id === $user->id) {
+                    $canAccessAdmin = true;
+                    $backRoute = route('partner.events.index'); // Redirect to Partner Dashboard
+                }
+            }
+        @endphp
+
+        @if($canAccessAdmin)
+            <a href="{{ $backRoute }}" class="text-xs font-bold text-gray-400 hover:text-white uppercase tracking-widest flex items-center gap-2 transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                Exit Raffle
+            </a>
+        @endif
+
         <div class="text-right">
             <h1 class="text-xl font-black text-white uppercase tracking-widest">{{ $event->title }}</h1>
             <p class="text-xs text-red-500 font-bold uppercase tracking-widest mt-1">Live Electronic Raffle</p>
