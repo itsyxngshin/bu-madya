@@ -3,32 +3,9 @@
     {{-- Header & Top Controls --}}
     <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-            @php
-                $user = auth()->user();
-                $canAccessAdmin = false;
-                $backRoute = route('admin.events.index'); // Default route for System Admins
-
-                if ($user) {
-                    $role = strtolower($user->role?->role_name ?? '');
-
-                    // 1. System Administrators & Directors (Full Access)
-                    if (in_array($role, ['administrator', 'director'])) {
-                        $canAccessAdmin = true;
-                    }
-                    // 2. Event Owner (Organization) or Collaborators
-                    elseif ($role === 'organization' && $event->user_id === $user->id) {
-                        $canAccessAdmin = true;
-                        $backRoute = route('partner.events.index'); // Redirect to Partner Dashboard
-                    }
-                }
-            @endphp
-
-            @if($canAccessAdmin)
-                <div class="flex items-center gap-3 mb-1">
-                    <a href="{{ $backRoute }}" class="text-gray-400 hover:text-red-600 transition font-bold text-sm">&larr; Back to Events</a>
-                </div>
-            @endif
-
+            <div class="flex items-center gap-3 mb-1">
+                <a href="{{ route('admin.events.index') }}" class="text-gray-400 hover:text-red-600 transition font-bold text-sm">&larr; Back to Events</a>
+            </div>
             <h1 class="text-2xl font-black text-gray-900 tracking-tight">{{ $event->title }}</h1>
             <p class="text-sm font-medium text-gray-500 mt-1">Manage {{ $stats['total'] }} total registrants and check-ins.</p>
         </div>
@@ -36,7 +13,7 @@
         <div class="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
             <input type="text" wire:model.live.debounce.300ms="search" placeholder="Search name, org, school..." class="w-full sm:w-56 rounded-xl border-gray-200 text-sm focus:ring-red-500 focus:border-red-500 bg-gray-50">
 
-            {{-- NEW: Classification Filter --}}
+            {{-- Classification Filter --}}
             <select wire:model.live="classificationFilter" class="w-full sm:w-auto rounded-xl border-gray-200 text-sm focus:ring-red-500 focus:border-red-500 font-bold bg-gray-50 cursor-pointer text-gray-700">
                 <option value="">All Types</option>
                 @foreach($classifications as $c)
@@ -80,28 +57,26 @@
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse min-w-max">
                 <thead class="bg-gray-50">
-                                <tr>
-                                    {{-- NEW CHECKBOX HEADER --}}
-                                    <th class="p-4 w-10 text-center">
-                                        <svg class="w-4 h-4 text-gray-400 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                    </th>
-                                    <th class="p-4 text-xs font-black uppercase text-gray-500 tracking-widest">Ticket Code</th>
-                                    <th class="p-4 text-xs font-black uppercase text-gray-500 tracking-widest">Attendee</th>
-                                    <th class="p-4 text-xs font-black uppercase text-gray-500 tracking-widest">Affiliation</th>
-                                    <th class="p-4 text-xs font-black uppercase text-gray-500 tracking-widest">Status</th>
-                                    <th class="p-4 text-xs font-black uppercase text-gray-500 tracking-widest text-right">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-100">
-                                @forelse($registrants as $reg)
-                                    <tr class="hover:bg-gray-50 transition-colors {{ in_array($reg->id, $selectedRegistrants) ? 'bg-blue-50/50' : '' }}">
-                                        {{-- NEW CHECKBOX DATA CELL --}}
-                                        <td class="p-4 text-center">
-                                            <input type="checkbox" wire:model="selectedRegistrants" value="{{ $reg->id }}" class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500 cursor-pointer">
-                                        </td>
-                                        <td class="p-4 text-sm font-mono font-bold text-gray-600">
-                                            {{ $reg->ticket_code }}
-                                        </td>
+                    <tr>
+                        <th class="p-4 w-10 text-center">
+                            <svg class="w-4 h-4 text-gray-400 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        </th>
+                        <th class="p-4 text-xs font-black uppercase text-gray-500 tracking-widest">Ticket Code</th>
+                        <th class="p-4 text-xs font-black uppercase text-gray-500 tracking-widest">Attendee</th>
+                        <th class="p-4 text-xs font-black uppercase text-gray-500 tracking-widest">Affiliation</th>
+                        <th class="p-4 text-xs font-black uppercase text-gray-500 tracking-widest">Status</th>
+                        <th class="p-4 text-xs font-black uppercase text-gray-500 tracking-widest text-right">Action</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    @forelse($registrants as $reg)
+                        <tr class="hover:bg-gray-50 transition-colors {{ in_array($reg->id, $selectedRegistrants) ? 'bg-blue-50/50' : '' }}">
+                            <td class="p-4 text-center">
+                                <input type="checkbox" wire:model="selectedRegistrants" value="{{ $reg->id }}" class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500 cursor-pointer">
+                            </td>
+                            <td class="p-4 text-sm font-mono font-bold text-gray-600">
+                                {{ $reg->ticket_code }}
+                            </td>
                             <td class="p-4">
                                 <p class="text-sm font-bold text-gray-900">{{ $reg->name }}</p>
                                 <p class="text-xs text-gray-500 mt-0.5">{{ $reg->email }}</p>
@@ -128,7 +103,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="p-8 text-center text-gray-400 font-bold text-sm">
+                            <td colspan="6" class="p-8 text-center text-gray-400 font-bold text-sm">
                                 No attendees found matching your filters.
                             </td>
                         </tr>
@@ -146,7 +121,7 @@
         <div class="fixed inset-0 z-40 overflow-y-auto">
             <div class="fixed inset-0 bg-gray-900/40 backdrop-blur-sm" wire:click="$set('showModal', false)"></div>
             <div class="flex min-h-screen items-center justify-center p-4">
-                <div class="relative w-full max-w-2xl bg-white rounded-[2rem] shadow-2xl p-8 transform transition-all flex flex-col max-h-[90vh] z-50">
+                <div class="relative w-full max-w-3xl bg-white rounded-[2rem] shadow-2xl p-8 transform transition-all flex flex-col max-h-[90vh] z-50">
 
                     {{-- Modal Header --}}
                     <div class="flex justify-between items-start mb-6 shrink-0">
@@ -160,48 +135,48 @@
                     </div>
 
                     {{-- Scrollable Profile Body --}}
-                                        <div class="overflow-y-auto flex-1 pr-2 space-y-6">
+                    <div class="overflow-y-auto flex-1 pr-2 space-y-6">
 
-                                            {{-- Top Identity Panel & QR Code --}}
-                                            <div class="flex flex-col md:flex-row gap-6 bg-gray-50 p-5 rounded-2xl border border-gray-100">
+                        {{-- Top Identity Panel & QR Code --}}
+                        <div class="flex flex-col md:flex-row gap-6 bg-gray-50 p-5 rounded-2xl border border-gray-100">
 
-                                                {{-- Dynamic QR Code Display --}}
-                                                <div class="flex flex-col items-center justify-center shrink-0">
-                                                    <div class="bg-white p-3 rounded-xl shadow-sm border border-gray-200 inline-block">
-                                                        <div id="admin-qr-container" class="w-32 h-32 flex items-center justify-center bg-gray-50 rounded-lg">
-                                                            {{-- The JS library will inject the QR code here --}}
-                                                            <svg class="w-8 h-8 text-gray-300 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm14 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
-                                                        </div>
-                                                    </div>
-                                                    <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-2">Scan for Attendance</p>
-                                                </div>
+                            {{-- Dynamic QR Code Display --}}
+                            <div class="flex flex-col items-center justify-center shrink-0">
+                                <div class="bg-white p-3 rounded-xl shadow-sm border border-gray-200 inline-block">
+                                    <div id="admin-qr-container" class="w-32 h-32 flex items-center justify-center bg-gray-50 rounded-lg">
+                                        {{-- The JS library will inject the QR code here --}}
+                                        <svg class="w-8 h-8 text-gray-300 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm14 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
+                                    </div>
+                                </div>
+                                <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-2">Scan for Attendance</p>
+                            </div>
 
-                                                {{-- Demographics Grid --}}
-                                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 flex-1">
-                                                    <div>
-                                                        <p class="text-[10px] font-black uppercase text-gray-500 mb-1">Email Address</p>
-                                                        <p class="text-sm font-bold text-gray-900">{{ $viewingRegistrant->email }}</p>
-                                                    </div>
-                                                    <div>
-                                                        <p class="text-[10px] font-black uppercase text-gray-500 mb-1">Contact Number</p>
-                                                        <p class="text-sm font-bold text-gray-900">{{ $viewingRegistrant->contact_number ?? 'N/A' }}</p>
-                                                    </div>
-                                                    <div>
-                                                        <p class="text-[10px] font-black uppercase text-gray-500 mb-1">Classification</p>
-                                                        <p class="text-sm font-bold text-gray-900">{{ $viewingRegistrant->classification ?? 'N/A' }}</p>
-                                                    </div>
-                                                    <div>
-                                                        <p class="text-[10px] font-black uppercase text-gray-500 mb-1">College / School</p>
-                                                        <p class="text-sm font-bold text-gray-900">{{ $viewingRegistrant->college ? $viewingRegistrant->college->name : ($viewingRegistrant->school ?? 'N/A') }}</p>
-                                                    </div>
-                                                    @if($viewingRegistrant->organization_name)
-                                                        <div class="col-span-1 sm:col-span-2 mt-2 pt-3 border-t border-gray-200/60">
-                                                            <p class="text-[10px] font-black uppercase text-gray-500 mb-1">Organization Affiliation</p>
-                                                            <p class="text-sm font-bold text-gray-900">{{ $viewingRegistrant->organization_name }} <span class="text-gray-400 font-medium ml-1">({{ $viewingRegistrant->position }})</span></p>
-                                                        </div>
-                                                    @endif
-                                                </div>
-                                            </div>
+                            {{-- Demographics Grid --}}
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 flex-1">
+                                <div>
+                                    <p class="text-[10px] font-black uppercase text-gray-500 mb-1">Email Address</p>
+                                    <p class="text-sm font-bold text-gray-900">{{ $viewingRegistrant->email }}</p>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] font-black uppercase text-gray-500 mb-1">Contact Number</p>
+                                    <p class="text-sm font-bold text-gray-900">{{ $viewingRegistrant->contact_number ?? 'N/A' }}</p>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] font-black uppercase text-gray-500 mb-1">Classification</p>
+                                    <p class="text-sm font-bold text-gray-900">{{ $viewingRegistrant->classification ?? 'N/A' }}</p>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] font-black uppercase text-gray-500 mb-1">College / School</p>
+                                    <p class="text-sm font-bold text-gray-900">{{ $viewingRegistrant->college ? $viewingRegistrant->college->name : ($viewingRegistrant->school ?? 'N/A') }}</p>
+                                </div>
+                                @if($viewingRegistrant->organization_name)
+                                    <div class="col-span-1 sm:col-span-2 mt-2 pt-3 border-t border-gray-200/60">
+                                        <p class="text-[10px] font-black uppercase text-gray-500 mb-1">Organization Affiliation</p>
+                                        <p class="text-sm font-bold text-gray-900">{{ $viewingRegistrant->organization_name }} <span class="text-gray-400 font-medium ml-1">({{ $viewingRegistrant->position }})</span></p>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
 
                         <div>
                             <h3 class="text-sm font-black text-gray-900 uppercase tracking-widest border-b border-gray-200 pb-2 mb-4">Questionnaire Responses</h3>
@@ -237,7 +212,6 @@
                                     Mark as Attended
                                 </button>
                             @endif
-                            {{-- NEW: Delete Override Button --}}
                             <button wire:click="deleteRegistrant({{ $viewingRegistrant->id }})" wire:confirm="Are you sure you want to permanently delete this registration? This action cannot be undone." class="w-full sm:w-auto bg-white border border-red-200 text-red-600 font-bold px-4 py-2 rounded-xl text-sm hover:bg-red-50 transition-colors">
                                 Delete Record
                             </button>
@@ -305,61 +279,61 @@
             </div>
         </div>
     @endif
-
-    {{-- Javascript for Dynamic QR Generation in Admin Modal --}}
-        @push('scripts')
-            <script type="text/javascript" src="https://unpkg.com/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
-            <script>
-                document.addEventListener('livewire:initialized', () => {
-                    let qrCodeInstance = null;
-
-                    // Watch for Livewire DOM updates to inject the QR Code when the modal opens
-                    Livewire.hook('morph.updated', ({ component, el }) => {
-                        const container = document.getElementById('admin-qr-container');
-
-                        // Only run if the container exists and we have a ticket code loaded
-                        if (container && @this.viewingRegistrant) {
-                            const ticketCode = @this.viewingRegistrant.ticket_code;
-
-                            // Clear the container (removes the loading spinner)
-                            container.innerHTML = '';
-
-                            qrCodeInstance = new QRCodeStyling({
-                                width: 128,
-                                height: 128,
-                                data: ticketCode,
-                                margin: 0,
-                                dotsOptions: {
-                                    type: 'square',
-                                    gradient: {
-                                        type: 'linear',
-                                        rotation: Math.PI / 4,
-                                        colorStops: [
-                                            { offset: 0, color: '#ef4444' }, // Red
-                                            { offset: 0.5, color: '#eab308' }, // Yellow
-                                            { offset: 1, color: '#22c55e' }  // Green
-                                        ]
-                                    }
-                                },
-                                cornersSquareOptions: {
-                                    type: 'square',
-                                    gradient: {
-                                        type: 'linear',
-                                        rotation: Math.PI / 4,
-                                        colorStops: [
-                                            { offset: 0, color: '#ef4444' },
-                                            { offset: 0.5, color: '#eab308' },
-                                            { offset: 1, color: '#22c55e' }
-                                        ]
-                                    }
-                                },
-                                backgroundOptions: { color: 'transparent' }
-                            });
-
-                            qrCodeInstance.append(container);
-                        }
-                    });
-                });
-            </script>
-        @endpush
 </div>
+
+{{-- Javascript for Dynamic QR Generation in Admin Modal --}}
+@push('scripts')
+    <script type="text/javascript" src="https://unpkg.com/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
+    <script>
+        document.addEventListener('livewire:initialized', () => {
+            let qrCodeInstance = null;
+
+            // Watch for Livewire DOM updates to inject the QR Code when the modal opens
+            Livewire.hook('morph.updated', ({ component, el }) => {
+                const container = document.getElementById('admin-qr-container');
+
+                // Only run if the container exists and we have a ticket code loaded
+                if (container && @this.viewingRegistrant) {
+                    const ticketCode = @this.viewingRegistrant.ticket_code;
+
+                    // Clear the container (removes the loading spinner)
+                    container.innerHTML = '';
+
+                    qrCodeInstance = new QRCodeStyling({
+                        width: 128,
+                        height: 128,
+                        data: ticketCode,
+                        margin: 0,
+                        dotsOptions: {
+                            type: 'square',
+                            gradient: {
+                                type: 'linear',
+                                rotation: Math.PI / 4,
+                                colorStops: [
+                                    { offset: 0, color: '#ef4444' }, // Red
+                                    { offset: 0.5, color: '#eab308' }, // Yellow
+                                    { offset: 1, color: '#22c55e' }  // Green
+                                ]
+                            }
+                        },
+                        cornersSquareOptions: {
+                            type: 'square',
+                            gradient: {
+                                type: 'linear',
+                                rotation: Math.PI / 4,
+                                colorStops: [
+                                    { offset: 0, color: '#ef4444' },
+                                    { offset: 0.5, color: '#eab308' },
+                                    { offset: 1, color: '#22c55e' }
+                                ]
+                            }
+                        },
+                        backgroundOptions: { color: 'transparent' }
+                    });
+
+                    qrCodeInstance.append(container);
+                }
+            });
+        });
+    </script>
+@endpush
