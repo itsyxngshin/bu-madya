@@ -9,7 +9,7 @@ use App\Models\EventRegistration;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Mail;
 use Livewire\Attributes\Layout;
-use App\Mail\EventBlastMail; // We will create this next
+use App\Mail\EventBlastMail;
 
 class EventRegistrants extends Component
 {
@@ -19,7 +19,6 @@ class EventRegistrants extends Component
     public $search = '';
     public $statusFilter = '';
     public $classificationFilter = '';
-    public $selectedRegistrants = [];
 
     // --- Modal State ---
     public $viewingRegistrant = null;
@@ -29,7 +28,8 @@ class EventRegistrants extends Component
     public $showBlastModal = false;
     public $blastSubject = '';
     public $blastMessage = '';
-    public $blastTarget = 'all'; // all, registered, attended
+    public $blastTarget = 'all';
+    public $selectedRegistrants = [];
 
     public function mount(Event $event)
     {
@@ -59,7 +59,6 @@ class EventRegistrants extends Component
         session()->flash('message', 'Registrant status successfully updated.');
     }
 
-    // NEW: Delete Override
     public function deleteRegistrant($id)
     {
         $reg = EventRegistration::findOrFail($id);
@@ -71,60 +70,56 @@ class EventRegistrants extends Component
         session()->flash('message', 'Registrant has been permanently removed from the roster.');
     }
 
-    // --- NEW: Email Blast System ---
+    // --- Email Blast System ---
     public function openBlastModal()
     {
         $this->showBlastModal = true;
     }
 
     public function sendBlast()
-        {
-            $this->validate([
-                'blastSubject' => 'required|string|max:255',
-                'blastMessage' => 'required|string',
-                'blastTarget' => 'required|in:all,Registered,Attended,selected' // Added 'selected'
-            ]);
+    {
+        $this->validate([
+            'blastSubject' => 'required|string|max:255',
+            'blastMessage' => 'required|string',
+            'blastTarget' => 'required|in:all,Registered,Attended,selected'
+        ]);
 
-            $query = $this->event->registrations();
+        $query = $this->event->registrations();
 
-            // Filter based on the dropdown target
-            if ($this->blastTarget === 'selected') {
-                if (empty($this->selectedRegistrants)) {
-                    session()->flash('error', 'You must select at least one participant from the table.');
-                    $this->showBlastModal = false;
-                    return;
-                }
-                $query->whereIn('id', $this->selectedRegistrants);
-            } elseif ($this->blastTarget !== 'all') {
-                $query->where('status', $this->blastTarget);
+        if ($this->blastTarget === 'selected') {
+            if (empty($this->selectedRegistrants)) {
+                session()->flash('error', 'You must select at least one participant from the table.');
+                $this->showBlastModal = false;
+                return;
             }
-
-            $recipients = $query->pluck('email')->toArray();
-            $organizerName = $this->event->organizer ? $this->event->organizer->name : 'BU MADYA Events Team';
-
-            if (count($recipients) > 0) {
-                // Queue emails in safe batches of 50 using BCC
-                foreach (array_chunk($recipients, 50) as $chunk) {
-                    Mail::bcc($chunk)->queue(new EventBlastMail(
-                        $this->event,
-                        $this->blastSubject,
-                        $this->blastMessage,
-                        $organizerName
-                    ));
-                }
-                session()->flash('message', 'Email blast successfully queued to ' . count($recipients) . ' participants.');
-
-                // Clear selections after sending
-                $this->selectedRegistrants = [];
-            } else {
-                session()->flash('error', 'No participants match the selected target group.');
-            }
-
-            $this->showBlastModal = false;
-            $this->blastMessage = '';
+            $query->whereIn('id', $this->selectedRegistrants);
+        } elseif ($this->blastTarget !== 'all') {
+            $query->where('status', $this->blastTarget);
         }
 
-    // --- Export Systems (Preserved) ---
+        $recipients = $query->pluck('email')->toArray();
+        $organizerName = $this->event->organizer ? $this->event->organizer->name : 'BU MADYA Events Team';
+
+        if (count($recipients) > 0) {
+            foreach (array_chunk($recipients, 50) as $chunk) {
+                Mail::bcc($chunk)->queue(new EventBlastMail(
+                    $this->event,
+                    $this->blastSubject,
+                    $this->blastMessage,
+                    $organizerName
+                ));
+            }
+            session()->flash('message', 'Email blast successfully queued to ' . count($recipients) . ' participants.');
+            $this->selectedRegistrants = [];
+        } else {
+            session()->flash('error', 'No participants match the selected target group.');
+        }
+
+        $this->showBlastModal = false;
+        $this->blastMessage = '';
+    }
+
+    // --- Export Systems ---
     public function exportRosterXls()
     {
         $query = $this->event->registrations()->with('college')->latest();
@@ -240,7 +235,6 @@ class EventRegistrants extends Component
     {
         $query = $this->event->registrations()->latest();
 
-        // 1. General Search (Expanded to include school/org)
         if ($this->search) {
             $query->where(function($q) {
                 $q->where('name', 'like', '%' . $this->search . '%')
@@ -251,17 +245,14 @@ class EventRegistrants extends Component
             });
         }
 
-        // 2. Status Filter
         if ($this->statusFilter) {
             $query->where('status', $this->statusFilter);
         }
 
-        // 3. Classification Filter
         if ($this->classificationFilter) {
             $query->where('classification', $this->classificationFilter);
         }
 
-        // Distinct classifications for dropdown
         $classifications = $this->event->registrations()->select('classification')->distinct()->whereNotNull('classification')->pluck('classification');
 
         $layoutFile = in_array(auth()->user()->role?->role_name, ['administrator', 'organization'])
