@@ -3,9 +3,29 @@
     {{-- Header & Top Controls --}}
     <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-            <div class="flex items-center gap-3 mb-1">
-                <a href="{{ route('admin.events.index') }}" class="text-gray-400 hover:text-red-600 transition font-bold text-sm">&larr; Back to Events</a>
-            </div>
+            @php
+                $user = auth()->user();
+                $canAccessAdmin = false;
+
+                if ($user) {
+                    $role = strtolower($user->role?->role_name ?? '');
+
+                    // Grant access if user is a system admin/director
+                    if (in_array($role, ['administrator', 'director'])) {
+                        $canAccessAdmin = true;
+                    }
+                    // Grant access if user is the organization that owns this event
+                    elseif ($role === 'organization' && $event->user_id === $user->id) {
+                        $canAccessAdmin = true;
+                    }
+                }
+            @endphp
+
+            @if($canAccessAdmin)
+                <div class="flex items-center gap-3 mb-1">
+                    <a href="{{ route('admin.events.index') }}" class="text-gray-400 hover:text-red-600 transition font-bold text-sm">&larr; Back to Events</a>
+                </div>
+            @endif
             <h1 class="text-2xl font-black text-gray-900 tracking-tight">{{ $event->title }}</h1>
             <p class="text-sm font-medium text-gray-500 mt-1">Manage {{ $stats['total'] }} total registrants and check-ins.</p>
         </div>
