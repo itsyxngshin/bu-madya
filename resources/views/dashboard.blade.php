@@ -22,11 +22,11 @@
             <div class="flex flex-col sm:flex-row sm:items-center gap-6 md:gap-8">
                 {{-- Dynamic Profile Photo --}}
                 <div class="shrink-0 relative">
-                    <img src="{{ Auth::user()->profile_photo_url ?? 'https://ui-avatars.com/api/?name='.urlencode(Auth::user()->name).'&color=7F9CF5&background=EBF4FF' }}"
-                         alt="{{ Auth::user()->name }}"
-                         class="w-20 h-20 md:w-28 md:h-28 rounded-full border-4 border-gray-800 object-cover shadow-2xl group-hover:scale-105 transition-transform duration-500">
-                    <div class="absolute bottom-1 right-1 w-5 h-5 bg-green-500 border-2 border-gray-900 rounded-full animate-pulse"></div>
-                </div>
+                                    <img src="{{ Auth::user()->profile_photo_url ?? 'https://ui-avatars.com/api/?name='.urlencode(Auth::user()->name).'&color=7F9CF5&background=EBF4FF' }}"
+                                         alt="{{ Auth::user()->name }}"
+                                         class="w-24 h-32 md:w-28 md:h-36 rounded-2xl border-2 border-white/10 object-cover shadow-2xl bg-gray-800 group-hover:scale-[1.02] transition-transform duration-500">
+                                    <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-gray-900 rounded-full animate-pulse"></div>
+                                </div>
 
                 <div>
                     <h2 class="text-gray-400 text-[10px] md:text-xs font-bold uppercase tracking-widest mb-1.5 md:mb-2">Director Command Center</h2>
