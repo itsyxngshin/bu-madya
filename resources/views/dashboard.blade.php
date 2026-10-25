@@ -187,9 +187,9 @@
                             <div class="bg-stone-50/50 rounded-3xl overflow-hidden shadow-sm border border-gray-100 flex flex-col hover:shadow-md transition-shadow group">
 
                                 {{-- Project Cover Image --}}
-                                @if($project->cover_image)
+                                @if($project->cover_img)
                                     <div class="h-32 sm:h-44 overflow-hidden relative bg-gray-100">
-                                        <img src="{{ asset('storage/'.$project->cover_image) }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                                        <img src="{{ asset('storage/'.$project->cover_img) }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
                                     </div>
                                 @else
                                     <div class="h-32 sm:h-36 bg-gray-100 flex flex-col items-center justify-center text-gray-400 border-b border-gray-100">
