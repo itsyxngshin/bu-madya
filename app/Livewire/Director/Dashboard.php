@@ -31,7 +31,7 @@ class Dashboard extends Component
             $directorAssignment = null;
         }
 
-        return view('livewire.director.dashboard', [
+        return view('dashboard', [
             'pendingProposals'   => Proposal::where('status', 'pending review')->count(),
             'activeProjects'     => Project::where('status', 'Ongoing')->count(),
             'totalPartners'      => class_exists(Linkage::class) ? Linkage::count() : 0,
