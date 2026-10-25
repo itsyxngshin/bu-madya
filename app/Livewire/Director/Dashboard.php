@@ -18,20 +18,27 @@ class Dashboard extends Component
         {
             $user = Auth::user();
 
-            // Fetch active director assignment and its position title if it exists
-            $directorAssignment = DirectorAssignment::with('director', 'committee')
-                ->where('user_id', $user->id)
-                ->latest()
-                ->first();
+            // Safely fetch director assignment with fallback handling
+            $directorAssignment = null;
+            try {
+                if (class_exists(DirectorAssignment::class)) {
+                    $directorAssignment = DirectorAssignment::with(['director', 'committee'])
+                        ->where('user_id', $user->id)
+                        ->latest()
+                        ->first();
+                }
+            } catch (\Exception $e) {
+                $directorAssignment = null;
+            }
 
             return view('livewire.director.dashboard', [
-                'pendingProposals' => Proposal::where('status', 'pending review')->count(),
-                'activeProjects'   => Project::where('status', 'Ongoing')->count(),
-                'totalPartners'    => class_exists(Linkage::class) ? Linkage::count() : 0,
-                'totalUsers'       => User::count(),
-                'recentProposals'  => Proposal::where('status', 'pending review')->latest()->take(5)->get(),
-                'upcomingProjects' => Project::where('status', 'Upcoming')->orderBy('implementation_date', 'asc')->take(3)->get(),
-                'myProjects'       => Project::whereHas('proponents', function($q) {
+                'pendingProposals'   => Proposal::where('status', 'pending review')->count(),
+                'activeProjects'     => Project::where('status', 'Ongoing')->count(),
+                'totalPartners'      => class_exists(Linkage::class) ? Linkage::count() : 0,
+                'totalUsers'         => User::count(),
+                'recentProposals'    => Proposal::where('status', 'pending review')->latest()->take(5)->get(),
+                'upcomingProjects'   => Project::where('status', 'Upcoming')->orderBy('implementation_date', 'asc')->take(3)->get(),
+                'myProjects'         => Project::whereHas('proponents', function($q) {
                                             $q->where('user_id', Auth::id());
                                       })
                                       ->orderBy('implementation_date', 'desc')
