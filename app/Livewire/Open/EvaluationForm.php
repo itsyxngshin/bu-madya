@@ -72,67 +72,74 @@ class EvaluationForm extends Component
         {
             $pages = [];
             $pageIndex = 0;
-            
+
+            // Ensure questions are perfectly ordered
             $sortedQuestions = $this->evaluation->questions->sortBy('order')->values()->all();
             $totalQuestions = count($sortedQuestions);
-            
+
             $i = 0;
-            
+
             while ($i < $totalQuestions) {
                 $question = $sortedQuestions[$i];
                 $jumpTargetId = null;
-    
+
                 if ($question->type === 'page_break') {
                     $pageIndex++;
                     $jumpTargetId = is_array($question->options) ? ($question->options[0]['jump'] ?? null) : null;
                 } else {
+                    // Add the question to the CURRENT page
                     $pages[$pageIndex][] = $question;
-    
+
                     // Check for conditional jumps on user input (Radio / Dropdown)
                     if (isset($this->answers[$question->id]) && in_array($question->type, ['radio', 'dropdown'])) {
                         $selectedAnswer = $this->answers[$question->id];
                         if (is_array($question->options)) {
                             foreach ($question->options as $opt) {
                                 $optText = is_array($opt) ? ($opt['text'] ?? '') : $opt;
-                                if ($optText == $selectedAnswer) {
-                                    $jumpTargetId = is_array($opt) ? ($opt['jump'] ?? null) : null;
+
+                                // If this answer matches AND it has a jump condition
+                                if ($optText == $selectedAnswer && !empty($opt['jump'])) {
+                                    $jumpTargetId = $opt['jump'];
                                     break;
                                 }
                             }
                         }
                     }
                 }
-    
-                // Execute the Jump Logic
+
+                // Execute the Jump Logic ONLY if a target was found
                 if (!empty($jumpTargetId)) {
+
+                    // If it's a submit jump, we immediately break the entire rendering loop
                     if ($jumpTargetId === 'submit') {
-                        // If target is submit, break the loop entirely. The remaining pages will be empty/ignored.
                         break;
                     } else {
                         // Find the exact index of the target section within the sorted array
                         $foundIndex = -1;
                         foreach ($sortedQuestions as $searchIndex => $q) {
-                            // Support both old DB ids and new uuid temp_ids
                             if ($q->id == $jumpTargetId || $q->temp_id == $jumpTargetId) {
                                 $foundIndex = $searchIndex;
                                 break;
                             }
                         }
-    
+
                         if ($foundIndex !== -1) {
-                            // Set the loop index to the target. 
-                            // Because the loop will increment $i at the end of the block, we subtract 1.
-                            $i = $foundIndex - 1; 
-                            
-                            // We must also increment the page index when a major jump occurs so it renders properly as the 'next' step
-                            $pageIndex++; 
+                            // CRITICAL FIX: Only jump if the target is NOT on the current page.
+                            // If the target is physically further down the array, we jump to it.
+                            // If the target is physically behind us, we jump back to it.
+
+                            $i = $foundIndex - 1;
+
+                            // Increment the page index so the target section starts on a fresh page
+                            $pageIndex++;
                         }
                     }
                 }
-                
+
                 $i++;
             }
-    
+
+            // Filter out any pages that ended up empty (e.g., consecutive page breaks)
             return array_values(array_filter($pages));
         }
 
