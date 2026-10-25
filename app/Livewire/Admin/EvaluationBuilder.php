@@ -541,7 +541,7 @@ class EvaluationBuilder extends Component
 
     public function render()
     {
-        return view('livewire.admin.evaluation-list')
+        return view('livewire.admin.evaluation-builder')
                     ->layout('layouts.madya-admin-deck');
     }
 }
