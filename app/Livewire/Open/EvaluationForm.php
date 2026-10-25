@@ -68,80 +68,77 @@ class EvaluationForm extends Component
         $this->dispatch('draft-autosaved');
     }
 
+    // [UPGRADED] Deferred Jump Logic Algorithm
     private function getPages()
-        {
-            $pages = [];
-            $pageIndex = 0;
+    {
+        $pages = [];
+        $pageIndex = 0;
 
-            // Ensure questions are perfectly ordered
-            $sortedQuestions = $this->evaluation->questions->sortBy('order')->values()->all();
-            $totalQuestions = count($sortedQuestions);
+        $sortedQuestions = $this->evaluation->questions->sortBy('order')->values()->all();
+        $totalQuestions = count($sortedQuestions);
 
-            $i = 0;
+        $i = 0;
+        $pendingJumpTarget = null; // Stores conditional jumps until a Page Break is reached
 
-            while ($i < $totalQuestions) {
-                $question = $sortedQuestions[$i];
-                $jumpTargetId = null;
+        while ($i < $totalQuestions) {
+            $question = $sortedQuestions[$i];
 
-                if ($question->type === 'page_break') {
-                    $pageIndex++;
-                    $jumpTargetId = is_array($question->options) ? ($question->options[0]['jump'] ?? null) : null;
-                } else {
-                    // Add the question to the CURRENT page
-                    $pages[$pageIndex][] = $question;
+            if ($question->type === 'page_break') {
+                // A page break signifies the end of the current visual page.
+                // This is where we execute any jumps triggered by answers on this page.
 
-                    // Check for conditional jumps on user input (Radio / Dropdown)
-                    if (isset($this->answers[$question->id]) && in_array($question->type, ['radio', 'dropdown'])) {
-                        $selectedAnswer = $this->answers[$question->id];
-                        if (is_array($question->options)) {
-                            foreach ($question->options as $opt) {
-                                $optText = is_array($opt) ? ($opt['text'] ?? '') : $opt;
+                $breakJumpTarget = is_array($question->options) ? ($question->options[0]['jump'] ?? null) : null;
 
-                                // If this answer matches AND it has a jump condition
-                                if ($optText == $selectedAnswer && !empty($opt['jump'])) {
-                                    $jumpTargetId = $opt['jump'];
-                                    break;
-                                }
+                // Priority: User's selected jump (via radio) > Default Page Break jump
+                $finalJumpTarget = $pendingJumpTarget ?: $breakJumpTarget;
+
+                if ($finalJumpTarget === 'submit') {
+                    // If target is submit, stop building pages. The next button becomes 'Submit'.
+                    break;
+                } elseif (!empty($finalJumpTarget)) {
+                    // Find the exact index of the target section within the sorted array
+                    $foundIndex = -1;
+                    foreach ($sortedQuestions as $searchIndex => $q) {
+                        if ($q->id == $finalJumpTarget || $q->temp_id == $finalJumpTarget) {
+                            $foundIndex = $searchIndex;
+                            break;
+                        }
+                    }
+
+                    if ($foundIndex !== -1) {
+                        // Time Travel: Jump the loop iterator to the target section
+                        $i = $foundIndex - 1;
+                    }
+                }
+
+                $pageIndex++;
+                $pendingJumpTarget = null; // Clear the pending jump for the new page
+
+            } else {
+                // Add the question to the current page. It will NOT disappear!
+                $pages[$pageIndex][] = $question;
+
+                // Check if this question sets a conditional jump based on the user's answer
+                if (isset($this->answers[$question->id]) && in_array($question->type, ['radio', 'dropdown'])) {
+                    $selectedAnswer = $this->answers[$question->id];
+                    if (is_array($question->options)) {
+                        foreach ($question->options as $opt) {
+                            $optText = is_array($opt) ? ($opt['text'] ?? '') : $opt;
+
+                            // Register the jump in memory, but DO NOT execute it yet
+                            if ($optText == $selectedAnswer && !empty($opt['jump'])) {
+                                $pendingJumpTarget = $opt['jump'];
                             }
                         }
                     }
                 }
-
-                // Execute the Jump Logic ONLY if a target was found
-                if (!empty($jumpTargetId)) {
-
-                    // If it's a submit jump, we immediately break the entire rendering loop
-                    if ($jumpTargetId === 'submit') {
-                        break;
-                    } else {
-                        // Find the exact index of the target section within the sorted array
-                        $foundIndex = -1;
-                        foreach ($sortedQuestions as $searchIndex => $q) {
-                            if ($q->id == $jumpTargetId || $q->temp_id == $jumpTargetId) {
-                                $foundIndex = $searchIndex;
-                                break;
-                            }
-                        }
-
-                        if ($foundIndex !== -1) {
-                            // CRITICAL FIX: Only jump if the target is NOT on the current page.
-                            // If the target is physically further down the array, we jump to it.
-                            // If the target is physically behind us, we jump back to it.
-
-                            $i = $foundIndex - 1;
-
-                            // Increment the page index so the target section starts on a fresh page
-                            $pageIndex++;
-                        }
-                    }
-                }
-
-                $i++;
             }
 
-            // Filter out any pages that ended up empty (e.g., consecutive page breaks)
-            return array_values(array_filter($pages));
+            $i++;
         }
+
+        return array_values(array_filter($pages));
+    }
 
     public function nextPage()
     {
@@ -209,7 +206,7 @@ class EvaluationForm extends Component
             ]);
         }
 
-        // 2. EXTRACT THE MAPPED DATA
+        // EXTRACT THE MAPPED DATA
         $nameAnswer = $response->answers()->where('evaluation_question_id', $this->evaluation->cert_name_question_id)->first();
         $respondentName = $nameAnswer && !empty($nameAnswer->answer_value)
             ? $nameAnswer->answer_value
@@ -224,7 +221,7 @@ class EvaluationForm extends Component
         cache()->forget($this->getDraftKey());
         $this->isSubmitted = true;
 
-        // 3. E-CERTIFICATE GENERATION
+        // E-CERTIFICATE GENERATION
         if ($this->evaluation->certificate_template && $this->evaluation->cert_delivery_mode === 'automatic') {
             $manager = new ImageManager(new Driver());
             $image = $manager->read(storage_path('app/public/' . $this->evaluation->certificate_template));
@@ -232,7 +229,6 @@ class EvaluationForm extends Component
             $pixelX = $image->width() * ($this->evaluation->cert_pos_x / 100);
             $pixelY = $image->height() * ($this->evaluation->cert_pos_y / 100);
 
-            // [FIXED] Use local $respondentName variable
             $image->text($respondentName, $pixelX, $pixelY, function($font) {
                 $font->file(public_path('fonts/Montserrat-Bold.ttf'));
                 $font->size($this->evaluation->cert_font_size);
@@ -250,7 +246,7 @@ class EvaluationForm extends Component
                 ? $this->evaluation->cert_email_subject
                 : 'Your Certificate of Participation - BU MADYA';
 
-            // [FIXED] Formulate the email body
+            // Formulate the email body
             if ($this->evaluation->cert_use_custom_email) {
                 $body = str_replace(['[Name]', '[Event]'], [$respondentName, $eventName], $this->evaluation->cert_email_body);
             } else {
