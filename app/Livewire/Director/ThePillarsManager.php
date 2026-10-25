@@ -8,9 +8,9 @@ use App\Models\Pillar;
 use App\Models\PillarOption; // Import this
 use App\Models\PillarVote;   // Import this
 use Illuminate\Support\Facades\Storage;
-use Livewire\Attributes\Layout; 
+use Livewire\Attributes\Layout;
 
-#[Layout('layouts.madya-template')]
+#[Layout('layouts.madya-admin-deck')]
 class ThePillarsManager extends Component
 {
     use WithFileUploads;
@@ -21,9 +21,9 @@ class ThePillarsManager extends Component
 
     // Form Data
     public $title, $description, $image;
-    
+
     // Nested Structure: [ ['id'=>null, 'text'=>'?', 'options'=>[ ['id'=>null, 'label'=>'Yes', 'color'=>'green'] ]] ]
-    public $questions = []; 
+    public $questions = [];
 
     public $isVotersModalOpen = false;
     public $selectedOptionLabel = '';
@@ -43,10 +43,10 @@ class ThePillarsManager extends Component
     public function viewVoters($optionId)
     {
         $option = PillarOption::with('votes.user')->find($optionId);
-        
+
         if ($option) {
             $this->selectedOptionLabel = $option->label;
-            
+
             // Map the voters to a clean array
             $this->selectedOptionVoters = $option->votes
                 ->whereNotNull('user_id') // Filter out guest votes
@@ -82,7 +82,7 @@ class ThePillarsManager extends Component
     public function resetVotes($id)
     {
         $pillar = Pillar::find($id);
-        
+
         // 1. Get all question IDs for this pillar
         $questionIds = $pillar->questions()->pluck('id');
 
@@ -108,7 +108,7 @@ class ThePillarsManager extends Component
 
         $this->title = $pillar->title;
         $this->description = $pillar->description;
-        
+
         // Map existing structure to array
         $this->questions = $pillar->questions->map(function($q) {
             return [
@@ -178,10 +178,10 @@ class ThePillarsManager extends Component
             $data['image_path'] = $this->image->store('pillars', 'public');
         }
 
-        $pillar = $this->editingPillarId 
-            ? Pillar::find($this->editingPillarId) 
+        $pillar = $this->editingPillarId
+            ? Pillar::find($this->editingPillarId)
             : new Pillar();
-        
+
         $pillar->fill($data);
         $pillar->save();
 
@@ -190,7 +190,7 @@ class ThePillarsManager extends Component
 
         foreach ($this->questions as $qData) {
             $question = $pillar->questions()->updateOrCreate(
-                ['id' => $qData['id']], 
+                ['id' => $qData['id']],
                 ['question_text' => $qData['text']]
             );
             $keepQuestionIds[] = $question->id;
