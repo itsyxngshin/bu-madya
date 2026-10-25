@@ -91,7 +91,7 @@
                             @elseif(!empty($post->gallery))
                                 @php $galleryCount = count($post->gallery); @endphp
                                 <div class="grid gap-[2px] bg-white {{ $galleryCount === 1 ? 'grid-cols-1' : 'grid-cols-2' }}">
-                                    @foreach(array_slice($post->gall-ery, 0, 4) as $index => $photo)
+                                    @foreach(array_slice($post->gallery, 0, 4) as $index => $photo)
                                         <button type="button" @click="globalLightboxImage = '{{ asset('storage/'.$photo) }}'; globalLightboxOpen = true" class="block relative overflow-hidden group focus:outline-none {{ $galleryCount === 1 ? 'aspect-video max-h-[350px]' : '' }} {{ $galleryCount === 3 && $index === 0 ? 'col-span-2 aspect-video' : '' }} {{ $galleryCount > 1 && !($galleryCount === 3 && $index === 0) ? 'aspect-square' : '' }}">
                                             <img src="{{ asset('storage/'.$photo) }}" class="w-full h-full object-cover group-hover:opacity-90 transition-opacity">
 
