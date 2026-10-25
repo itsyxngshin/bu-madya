@@ -29,7 +29,7 @@ class EvaluationBuilder extends Component
     public $existing_header_image;
     public $theme_color = '#f1e7e2';
     public $event_id = null;
-        public $available_events = [];
+    public $available_events = [];
 
     // Data Containers
     public $questions = [];
@@ -85,7 +85,7 @@ class EvaluationBuilder extends Component
             'certNameQuestionId' => 'nullable',
             'certEmailQuestionId' => 'nullable',
             'project_id' => 'nullable|integer',
-                        'event_id' => 'nullable|integer',
+            'event_id' => 'nullable|integer',
         ];
     }
 
@@ -113,6 +113,7 @@ class EvaluationBuilder extends Component
             $this->slug = $this->evaluation->slug;
             $this->description = $this->evaluation->description;
             $this->project_id = $this->evaluation->project_id;
+            $this->event_id = $this->evaluation->event_id;
             $this->is_active = $this->evaluation->is_active;
             $this->existing_header_image = $this->evaluation->header_image;
             $this->theme_color = $this->evaluation->theme_color ?? '#f1e7e2';
