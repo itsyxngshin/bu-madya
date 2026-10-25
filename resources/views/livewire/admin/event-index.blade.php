@@ -1,257 +1,268 @@
-<div class="max-w-7xl mx-auto py-10 sm:px-6 lg:px-8">
+<div class="min-h-screen bg-stone-50 font-sans text-gray-900 overflow-x-hidden relative">
 
-    {{-- Header & Search --}}
-    <div class="flex justify-between items-center mb-6">
-        <h2 class="font-bold text-2xl text-gray-800">Manage Events</h2>
+    {{-- SEO --}}
+    @section('meta_title', 'Events & Campaigns')
+    @section('meta_description', 'Join the movement. Participate in upcoming advocacies, contests, and gatherings.')
 
-       @php
-            // Check the role and set the correct route
-            $roleName = auth()->user()->role->role_name;
-
-            // STRICT CHECK: Is the user an administrator?
-            $createRoute = ($roleName === 'administrator')
-                ? route('admin.events.create')     // Yes? Send to Admin
-                : route('partner.events.create');  // No? Send to Partner
-        @endphp
-
-        <a href="{{ $createRoute }}" class="bg-red-600 hover:bg-red-700 text-white text-sm font-bold py-2 px-4 rounded-lg shadow-md transition">
-            + Create New Event
-        </a>
+    {{-- 1. ATMOSPHERE --}}
+    <div class="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+        <div class="absolute top-0 left-0 w-full h-full bg-gray-50/80"></div>
+        <div class="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-red-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob"></div>
+        <div class="absolute top-[20%] left-[-10%] w-[500px] h-[500px] bg-yellow-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob animation-delay-2000"></div>
+        <div class="absolute bottom-[-10%] right-[20%] w-[500px] h-[500px] bg-green-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob animation-delay-4000"></div>
     </div>
 
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-
-        {{-- Search Bar --}}
-        <div class="p-4 border-b border-gray-100">
-            <input wire:model.live.debounce.300ms="search" type="text" placeholder="Search events..." class="w-full md:w-64 rounded-lg border-gray-300 text-sm focus:ring-red-500">
+    {{-- 2. HERO HEADER --}}
+    <header class="relative h-[350px] flex items-center justify-center text-white overflow-hidden rounded-3xl shadow-xl mx-6 -mt-20 z-10">
+        <div class="absolute inset-0 z-0">
+            <img src="https://images.unsplash.com/photo-1523580494863-6f3031224c94?q=80&w=2070" class="w-full h-full object-cover">
+            <div class="absolute inset-0 bg-gradient-to-r from-red-900/90 to-yellow-700/80 mix-blend-multiply"></div>
         </div>
 
-        {{-- Table --}}
-        <div class="overflow-x-auto">
-            <table class="w-full text-left text-sm text-gray-600">
-                <thead class="bg-gray-50 text-gray-900 font-bold uppercase text-xs tracking-wider">
-                    <tr>
-                        <th class="p-4">Event</th>
-                        <th class="p-4">Schedule</th>
-                        <th class="p-4">Status</th>
-                        <th class="p-4 text-right">Actions</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-100">
-                    @forelse($events as $event)
-                    <tr class="hover:bg-gray-50 transition">
-                        <td class="p-4">
-                            <div class="flex items-center gap-3">
-                                @if($event->cover_image)
-                                    <img src="{{ asset('storage/'.$event->cover_image) }}" class="w-12 h-12 rounded-lg object-cover bg-gray-100 shadow-sm shrink-0">
-                                @else
-                                    <div class="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center text-gray-400 font-bold text-xs shrink-0 border border-gray-200">IMG</div>
-                                @endif
-                                <div class="min-w-0">
-                                    <div class="font-bold text-gray-900 truncate">{{ $event->title }}</div>
-                                    <div class="text-xs text-gray-500 truncate max-w-xs">{{ Str::limit(strip_tags($event->description), 40) }}</div>
+        <div class="relative z-10 text-center px-4 mt-16">
+            <h2 class="text-yellow-300 font-bold tracking-[0.3em] text-xs uppercase mb-2 animate-fade-in-down">Opportunities & Activities</h2>
+            <h1 class="font-heading text-3xl md:text-5xl font-black uppercase tracking-tight mb-4 drop-shadow-lg animate-fade-in-up leading-none">
+                Events & Campaigns
+            </h1>
 
-                                    {{-- Admin Visibility: Show who created the event --}}
-                                    @if(in_array(auth()->user()->role?->role_name, ['administrator', 'director']))
-                                        <div class="mt-1 flex items-center gap-1 text-[9px] font-bold uppercase tracking-widest text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded w-max">
-                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
-                                            {{ $event->user->name ?? 'Unknown Org' }}
-                                        </div>
-                                    @endif
-                                </div>
-                            </div>
-                        </td>
-                        <td class="p-4 whitespace-nowrap">
-                            @if($event->start_date)
-                                <div class="font-medium text-gray-900">{{ $event->start_date->format('M d, Y') }}</div>
-                                <div class="text-xs text-gray-400">{{ $event->start_date->format('h:i A') }}</div>
-                            @else
-                                <span class="text-gray-400 italic">TBA</span>
-                            @endif
-                        </td>
-                        <td class="p-4">
-                            @if($event->is_active)
-                                <span class="bg-green-100 text-green-700 px-2 py-1 rounded text-[10px] font-black uppercase tracking-wider">Published</span>
-                            @else
-                                <span class="bg-gray-100 text-gray-500 px-2 py-1 rounded text-[10px] font-black uppercase tracking-wider">Draft</span>
-                            @endif
-                        </td>
-                        <td class="p-4 text-right">
-                            <div class="flex items-center justify-end gap-1.5">
-
-                                @if($event->is_internal_rsvp)
-                                    {{-- Registrants --}}
-                                    @if(in_array(Auth::user()?->role?->role_name, ['administrator', 'director']))
-                                        <a href="{{ route('admin.events.registrants', $event->slug) }}" title="Manage Registrants"
-                                            class="p-2 text-gray-400 hover:text-green-600 bg-gray-50 hover:bg-green-50 rounded-lg transition">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-                                        </a>
-                                    @elseif(in_array(Auth::user()?->role?->role_name, ['organization']))
-                                        <a href="{{ route('partner.events.registrants', $event->slug) }}" title="Manage Registrants"
-                                                class="p-2 text-gray-400 hover:text-green-600 bg-gray-50 hover:bg-green-50 rounded-lg transition">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-                                            </a>
-                                    @endif
-
-                                    {{-- Scanner --}}
-                                    <a href="{{ route('admin.events.scan', $event->slug) }}" target="_blank" title="Launch QR Scanner"
-                                       class="p-2 text-gray-400 hover:text-purple-600 bg-gray-50 hover:bg-purple-50 rounded-lg transition">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
-                                    </a>
-
-                                    {{-- Raffle --}}
-                                    @if(in_array(Auth::user()?->role?->role_name, ['administrator', 'director']))
-                                        <a href="{{ route('admin.events.raffle', $event->slug) }}" target="_blank" title="Launch Live Raffle"
-                                            class="p-2 text-gray-400 hover:text-orange-600 bg-gray-50 hover:bg-orange-50 rounded-lg transition">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"></path></svg>
-                                            </a>
-
-                                    @elseif(in_array(Auth::user()?->role?->role_name, ['organization']))
-                                        <a href="{{ route('partner.events.raffle', $event->slug) }}" target="_blank" title="Launch Live Raffle"
-                                            class="p-2 text-gray-400 hover:text-orange-600 bg-gray-50 hover:bg-orange-50 rounded-lg transition">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"></path></svg>
-                                            </a>
-                                    @endif
-
-                                    {{-- Divider --}}
-                                    <div class="w-px h-5 bg-gray-200 mx-1"></div>
-                                @endif
-
-                                {{-- View Public Page --}}
-                                <a href="{{ route('events.show', $event->slug) }}" target="_blank" title="Preview Public Page"
-                                   class="p-2 text-gray-400 hover:text-blue-600 bg-gray-50 hover:bg-blue-50 rounded-lg transition">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                                </a>
-
-                                @if($event->user_id === auth()->id() || in_array(auth()->user()->role?->role_name, ['administrator', 'director']))
-                                    <button wire:click="openCollaborators({{ $event->id }})" class="px-3 py-1.5 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-lg text-xs font-bold transition">
-                                        👥 Share Access
-                                    </button>
-                                @endif
-
-                                {{-- Edit --}}
-                                <a href="{{ route('admin.events.edit', $event->id) }}" title="Edit Event"
-                                   class="p-2 text-gray-400 hover:text-gray-900 bg-gray-50 hover:bg-gray-200 rounded-lg transition">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                                </a>
-
-                                {{-- Delete --}}
-                                <button wire:click="delete({{ $event->id }})" wire:confirm="Are you sure you want to delete this event?" title="Delete Event"
-                                        class="p-2 text-gray-400 hover:text-red-600 bg-gray-50 hover:bg-red-50 rounded-lg transition">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                </button>
-
-                            </div>
-                        </td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="4" class="p-10 text-center text-gray-400">
-                            <svg class="w-8 h-8 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                            <p class="text-sm font-bold uppercase tracking-widest">No events found.</p>
-                        </td>
-                    </tr>
-                    @endforelse
-                </tbody>
-            </table>
+            @auth
+                @if(in_array(Auth::user()?->role?->role_name, ['administrator', 'director']))
+                <div class="mt-6 animate-fade-in-up delay-100">
+                    <a href="{{ route('admin.events.create') }}"
+                       class="inline-flex items-center gap-2 px-6 py-3 bg-white text-red-600 rounded-full font-bold text-xs uppercase tracking-widest hover:bg-yellow-400 hover:text-red-900 transition shadow-lg transform hover:-translate-y-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                        Create Event
+                    </a>
+                </div>
+                @endif
+            @endauth
         </div>
+    </header>
 
-        {{-- The pagination links will now render perfectly --}}
-        <div class="p-4 border-t border-gray-100 bg-gray-50/50">
-            {{ $events->links() }}
-        </div>
-    </div>
+    {{-- 3. MAIN CONTENT --}}
+    <div class="relative min-h-screen px-6 pb-24 mt-12 max-w-[1800px] w-[95%] mx-auto">
 
-    {{-- ========================================== --}}
-        {{-- MANAGE COLLABORATORS MODAL --}}
         {{-- ========================================== --}}
-        @if($manageModalOpen)
-            <div class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6" x-data="{}" x-cloak>
-                <div class="fixed inset-0 bg-gray-900/80 backdrop-blur-sm transition-opacity" wire:click="closeCollaborators"></div>
+        {{-- FEATURED / UPCOMING EVENT SPOTLIGHT        --}}
+        {{-- ========================================== --}}
+        @if($events->count() > 0)
+            @php
+                // Automatically grabs the first event in the collection for the spotlight
+                // Because of our smart sorting, this is guaranteed to be the most pressing upcoming event!
+                $featuredEvent = $events->first();
+            @endphp
+            <div class="mb-16 relative group cursor-pointer animate-fade-in-up delay-200">
+                {{-- Dynamic Glowing Tricolor Backdrop --}}
+                <div class="absolute -inset-1 bg-gradient-to-r from-red-500 via-yellow-400 to-green-500 rounded-[2.5rem] blur-lg opacity-25 group-hover:opacity-60 transition duration-1000 group-hover:duration-300"></div>
 
-                <div class="relative bg-white rounded-3xl shadow-2xl w-full max-w-xl flex flex-col max-h-[85vh] overflow-hidden transform transition-all">
+                <div class="relative bg-white rounded-[2rem] shadow-xl overflow-hidden flex flex-col lg:flex-row border border-gray-100">
 
-                    {{-- Header --}}
-                    <div class="flex items-center justify-between p-6 border-b border-gray-100 bg-gray-50 shrink-0">
-                        <div>
-                            <h3 class="text-xl font-black text-gray-900">Manage Event Access</h3>
-                            <p class="text-xs text-gray-500 mt-1">Select organizations to help manage registrants.</p>
-                        </div>
-                        <button wire:click="closeCollaborators" class="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                        </button>
-                    </div>
-
-                    {{-- Body --}}
-                    <div class="p-6 overflow-y-auto custom-scrollbar flex-1 bg-white">
-
-                        {{-- Flash Message --}}
-                        @if (session()->has('collaborator_msg'))
-                            <div class="mb-4 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl text-sm font-bold flex items-center gap-2" x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3000)">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                                {{ session('collaborator_msg') }}
-                            </div>
-                        @endif
-
-                        {{-- [NEW] Add Collaborator Form --}}
-                        <div class="bg-gray-50 p-4 rounded-2xl border border-gray-100 mb-6">
-                            <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Grant Access</label>
-                            <div class="flex flex-col sm:flex-row gap-3">
-                                <div class="flex-1">
-                                    <select wire:model="selectedOrgToAdd" class="w-full rounded-xl border-gray-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm font-bold text-gray-700 bg-white shadow-sm">
-                                        <option value="">Select an organization...</option>
-                                        @foreach($availableOrgs as $org)
-                                            <option value="{{ $org->id }}">{{ $org->name }}</option>
-                                        @endforeach
-                                    </select>
-                                    @error('selectedOrgToAdd') <span class="text-[10px] text-red-500 font-bold block mt-1">{{ $message }}</span> @enderror
+                    {{-- Highlight Image Side --}}
+                    <div class="lg:w-1/2 h-80 lg:h-[450px] relative overflow-hidden bg-gray-100">
+                        <a href="{{ route('events.show', $featuredEvent->slug) }}" class="block w-full h-full">
+                            @if($featuredEvent->cover_image)
+                                <img src="{{ asset('storage/'.$featuredEvent->cover_image) }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-700">
+                            @else
+                                <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-200">
+                                    <svg class="w-20 h-20 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                                 </div>
-                                <button wire:click="addCollaborator" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm rounded-xl shadow-sm transition flex items-center justify-center gap-2 sm:w-auto w-full">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                                    Add
-                                </button>
-                            </div>
+                            @endif
+                        </a>
+
+                        {{-- Floating Status Badge --}}
+                        <div class="absolute top-6 left-6 z-20">
+                            <span class="px-4 py-1.5 bg-yellow-400 text-yellow-900 text-[10px] font-black uppercase tracking-widest rounded-full shadow-md flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-yellow-900 animate-pulse"></span>
+                                Featured Event
+                            </span>
                         </div>
-
-                        {{-- [NEW] Active Collaborators List --}}
-                        <div>
-                            <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 px-1">Currently Authorized</h4>
-
-                            <div class="space-y-2">
-                                @forelse($currentCollaborators as $org)
-                                    <div class="flex items-center justify-between p-3 rounded-xl border border-gray-100 bg-white hover:border-gray-200 transition-colors shadow-sm">
-                                        <div class="flex items-center gap-3">
-                                            <div class="w-8 h-8 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600 font-black text-xs border border-indigo-100">
-                                                {{ substr($org->name, 0, 1) }}
-                                            </div>
-                                            <span class="text-sm font-bold text-gray-800">{{ $org->name }}</span>
-                                        </div>
-
-                                        {{-- Revoke Button --}}
-                                        <button wire:click="removeCollaborator({{ $org->id }})" class="px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 rounded-lg text-xs font-bold transition flex items-center gap-1">
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                            Revoke
-                                        </button>
-                                    </div>
-                                @empty
-                                    <div class="text-center py-6 bg-gray-50 border border-gray-100 border-dashed rounded-xl">
-                                        <svg class="w-8 h-8 text-gray-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-                                        <p class="text-xs text-gray-500 font-bold">No organizations have been granted access yet.</p>
-                                    </div>
-                                @endforelse
-                            </div>
-                        </div>
-
                     </div>
 
-                    {{-- Footer --}}
-                    <div class="p-4 border-t border-gray-100 bg-gray-50 shrink-0 text-right">
-                        <button wire:click="closeCollaborators" class="px-5 py-2 bg-gray-900 text-white font-bold text-sm rounded-xl hover:bg-gray-800 transition shadow-sm">
-                            Done
-                        </button>
-                    </div>
+                    {{-- Highlight Content Side --}}
+                    <div class="lg:w-1/2 p-8 md:p-12 flex flex-col justify-center">
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="px-3 py-1 bg-red-50 text-red-600 text-[10px] font-bold uppercase tracking-widest rounded-lg shadow-sm border border-red-100">
+                                {{ $featuredEvent->start_date ? $featuredEvent->start_date->format('M d, Y') : 'TBA' }}
+                            </span>
+                            @if($featuredEvent->isOpen())
+                                <span class="px-3 py-1 bg-green-50 text-green-600 text-[10px] font-bold uppercase tracking-widest rounded-lg shadow-sm border border-green-100">Registration Open</span>
+                            @else
+                                <span class="px-3 py-1 bg-gray-100 text-gray-600 text-[10px] font-bold uppercase tracking-widest rounded-lg shadow-sm border border-gray-200">Event Ended</span>
+                            @endif
+                        </div>
 
+                        <a href="{{ route('events.show', $featuredEvent->slug) }}" class="block mb-4">
+                            <h3 class="font-heading font-black text-3xl md:text-4xl text-gray-900 leading-tight group-hover:text-red-600 transition-colors">
+                                {{ $featuredEvent->title }}
+                            </h3>
+                        </a>
+
+                        <div class="text-base text-gray-500 line-clamp-3 mb-8 leading-relaxed">
+                            {{ Str::limit(strip_tags($featuredEvent->description), 200) }}
+                        </div>
+
+                        <div class="mt-auto">
+                            <a href="{{ route('events.show', $featuredEvent->slug) }}" class="inline-flex items-center justify-center gap-2 px-8 py-4 w-full md:w-auto bg-gray-900 text-white rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-red-600 transition-all duration-300 shadow-md">
+                                View Event Details
+                                <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
         @endif
+
+        {{-- ========================================== --}}
+        {{-- SEARCH & MODERN DROPDOWN FILTER            --}}
+        {{-- ========================================== --}}
+        <div class="relative z-10 flex flex-col md:flex-row justify-between items-center mb-12 gap-4">
+
+            {{-- Modern Dropdown Filter --}}
+            <div class="w-full md:w-auto relative" x-data="{ open: false, current: '{{ $filter === 'upcoming' ? 'Upcoming Events' : ($filter === 'past' ? 'Past Events' : 'All Events') }}' }">
+                <button @click="open = !open" @click.outside="open = false" type="button"
+                        class="w-full md:w-56 flex items-center justify-between px-6 py-3 bg-red-600 text-white rounded-full font-bold text-xs uppercase tracking-widest shadow-md hover:bg-red-700 hover:shadow-lg transition-all">
+                    <span class="flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
+                        <span x-text="current"></span>
+                    </span>
+                    <svg class="w-4 h-4 transition-transform duration-300" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </button>
+
+                {{-- Dropdown Menu --}}
+                <div x-show="open" x-cloak
+                     x-transition:enter="transition ease-out duration-200"
+                     x-transition:enter-start="opacity-0 scale-95 translate-y-[-10px]"
+                     x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                     x-transition:leave="transition ease-in duration-150"
+                     x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+                     x-transition:leave-end="opacity-0 scale-95 translate-y-[-10px]"
+                     class="absolute top-full left-0 mt-3 w-full md:w-56 bg-white border border-gray-100 rounded-2xl shadow-xl overflow-hidden z-50">
+
+                    <div class="p-1.5 space-y-1">
+                        <button wire:click="$set('filter', 'all')" @click="current = 'All Events'; open = false"
+                                class="w-full text-left px-4 py-3 rounded-xl text-xs font-bold uppercase tracking-widest transition-colors flex items-center justify-between {{ $filter === 'all' ? 'bg-red-50 text-red-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                            <span>All Events</span>
+                            @if($filter === 'all') <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> @endif
+                        </button>
+
+                        <div class="h-px bg-gray-100 mx-2"></div>
+
+                        <button wire:click="$set('filter', 'upcoming')" @click="current = 'Upcoming Events'; open = false"
+                                class="w-full text-left px-4 py-3 rounded-xl text-xs font-bold uppercase tracking-widest transition-colors flex items-center justify-between {{ $filter === 'upcoming' ? 'bg-red-50 text-red-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                            <span>Upcoming Events</span>
+                            @if($filter === 'upcoming') <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> @endif
+                        </button>
+
+                        <button wire:click="$set('filter', 'past')" @click="current = 'Past Events'; open = false"
+                                class="w-full text-left px-4 py-3 rounded-xl text-xs font-bold uppercase tracking-widest transition-colors flex items-center justify-between {{ $filter === 'past' ? 'bg-red-50 text-red-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                            <span>Past Events</span>
+                            @if($filter === 'past') <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> @endif
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Search Bar --}}
+            <div class="relative w-full md:w-80">
+                <input wire:model.live.debounce.300ms="search" type="text" placeholder="Search events..."
+                       class="w-full pl-11 pr-4 py-3 rounded-full border border-gray-200 bg-white shadow-sm focus:border-red-500 focus:ring-2 focus:ring-red-500/20 text-sm placeholder-gray-400 transition-all font-medium">
+                <svg class="absolute left-4 top-3.5 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            </div>
+        </div>
+
+        {{-- LOADING SPINNER --}}
+        <div wire:loading class="w-full text-center py-12">
+            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white shadow-md">
+                <svg class="animate-spin h-5 w-5 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                <span class="text-xs font-bold text-gray-500 uppercase tracking-widest">Loading...</span>
+            </div>
+        </div>
+
+        {{-- ========================================== --}}
+        {{-- STANDARD EVENTS GRID                       --}}
+        {{-- ========================================== --}}
+        <div wire:loading.remove>
+            @if($events->count() > 0)
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    @foreach($events as $index => $event)
+                        {{-- Skip the first event in the grid IF we are currently viewing the default 'Upcoming' or 'All' filter to avoid duplication --}}
+                        @if($index === 0 && ($filter === 'upcoming' || $filter === 'all' || empty($search)))
+                            @continue
+                        @endif
+
+                        <article class="group bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col relative h-full border border-gray-100">
+
+                            {{-- Image Thumbnail --}}
+                            <div class="h-56 overflow-hidden relative bg-gray-100">
+                                <a href="{{ route('events.show', $event->slug) }}">
+                                    @if($event->cover_image)
+                                        <img src="{{ asset('storage/'.$event->cover_image) }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                                    @else
+                                        <div class="w-full h-full flex flex-col items-center justify-center text-gray-300 bg-gray-50">
+                                            <svg class="w-12 h-12 mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                        </div>
+                                    @endif
+                                </a>
+
+                                {{-- Status Badge --}}
+                                <div class="absolute top-4 right-4 z-20">
+                                    @if($event->isOpen())
+                                        <span class="px-3 py-1 bg-green-500/90 backdrop-blur text-white text-[9px] font-black uppercase tracking-widest rounded-full shadow-sm">
+                                            Open
+                                        </span>
+                                    @else
+                                        <span class="px-3 py-1 bg-gray-800/90 backdrop-blur text-white text-[9px] font-black uppercase tracking-widest rounded-full shadow-sm">
+                                            Closed
+                                        </span>
+                                    @endif
+                                </div>
+
+                                {{-- Date Badge --}}
+                                <div class="absolute bottom-4 left-4 z-20">
+                                    <span class="px-3 py-1.5 bg-white/95 backdrop-blur text-gray-900 text-[9px] font-bold uppercase tracking-widest rounded-lg shadow-sm flex items-center gap-1.5">
+                                        <svg class="w-3 h-3 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                        {{ $event->start_date ? $event->start_date->format('M d, Y') : 'TBA' }}
+                                    </span>
+                                </div>
+                            </div>
+
+                            {{-- Content Body --}}
+                            <div class="p-6 md:p-8 flex flex-col flex-grow">
+                                <a href="{{ route('events.show', $event->slug) }}" class="block mb-3">
+                                    <h3 class="font-heading font-black text-xl text-gray-900 leading-tight group-hover:text-red-600 transition-colors">
+                                        {{ $event->title }}
+                                    </h3>
+                                </a>
+
+                                <div class="text-sm text-gray-500 line-clamp-3 mb-6 flex-grow leading-relaxed">
+                                    {{ Str::limit(strip_tags($event->description), 120) }}
+                                </div>
+
+                                <div class="pt-5 border-t border-gray-100 mt-auto">
+                                    <a href="{{ route('events.show', $event->slug) }}" class="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-gray-50 text-gray-600 text-[10px] font-bold uppercase tracking-widest group-hover:bg-red-600 group-hover:text-white transition-colors duration-300">
+                                        View Details
+                                        <svg class="w-3.5 h-3.5 opacity-0 -ml-4 group-hover:opacity-100 group-hover:ml-0 transition-all duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                                    </a>
+                                </div>
+                            </div>
+                        </article>
+                    @endforeach
+                </div>
+
+                {{-- Pagination --}}
+                <div class="mt-16">
+                    {{ $events->links() }}
+                </div>
+            @else
+                {{-- Empty State --}}
+                <div class="flex flex-col items-center justify-center py-24 text-center bg-white rounded-[2rem] border border-dashed border-gray-200 shadow-sm">
+                    <div class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center text-gray-300 mb-4">
+                        <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    </div>
+                    <h3 class="text-xl font-black text-gray-900">No events found</h3>
+                    <p class="text-gray-500 text-sm mt-2 font-medium">Try adjusting your filters or search terms.</p>
+                </div>
+            @endif
+        </div>
+    </div>
 </div>

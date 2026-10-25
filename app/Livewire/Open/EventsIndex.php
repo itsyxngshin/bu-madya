@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 namespace App\Livewire\Open;
 
@@ -15,22 +15,21 @@ class EventsIndex extends Component
     use WithPagination;
 
     public $search = '';
-    public $filter = 'upcoming'; // Options: 'upcoming', 'past', 'all'
+    // Change the default filter to 'all' so everything loads immediately
+    public $filter = 'all';
     public $visitorCount = 1;
+
     public function mount()
     {
         // 1. Check if this specific user has already been counted in this session
         if (!Session::has('has_visited_site')) {
-            
             // 2. Increment the database value securely
             SiteStat::where('key', 'visitor_count')->increment('value');
-            
             // 3. Mark this user as counted for this browser session
             Session::put('has_visited_site', true);
         }
 
-        // 4. Retrieve the current total (cache it briefly to reduce DB queries on high traffic)
-        // We remember it for 10 minutes, or fetch directly if you want instant real-time
+        // 4. Retrieve the current total
         $this->visitorCount = SiteStat::where('key', 'visitor_count')->value('value');
     }
 
@@ -43,32 +42,40 @@ class EventsIndex extends Component
         $query = Event::where('is_active', true);
 
         // 1. Search Logic
-        if ($this->search) {
-            $query->where('title', 'like', '%' . $this->search . '%');
+        if (!empty($this->search)) {
+            $query->where(function($q) {
+                $q->where('title', 'like', '%' . $this->search . '%')
+                  ->orWhere('description', 'like', '%' . $this->search . '%');
+            });
         }
 
-        // 2. Filter Logic
+        // 2. Filter & Smart Sorting Logic
         switch ($this->filter) {
             case 'upcoming':
-                // Shows events that haven't ended yet (or have no end date)
+                // Shows events that haven't ended yet
                 $query->where(function($q) {
                     $q->whereNull('end_date')
-                      ->orWhere('end_date', '>=', now());
-                })->orderBy('start_date', 'asc'); // Soonest first
+                      ->orWhere('end_date', '>=', now()->startOfDay());
+                })->orderBy('start_date', 'asc'); // Nearest upcoming first
                 break;
 
             case 'past':
-                $query->where('end_date', '<', now())
+                $query->whereNotNull('end_date')
+                      ->where('end_date', '<', now()->startOfDay())
                       ->orderBy('start_date', 'desc'); // Most recent past first
                 break;
-            
+
             default: // 'all'
-                $query->orderBy('start_date', 'desc');
+                // 'ALL' FILTER (Default):
+                // Puts active/upcoming events at the TOP (0), and past events at the BOTTOM (1)
+                $query->orderByRaw("CASE WHEN end_date >= ? OR end_date IS NULL THEN 0 ELSE 1 END ASC", [now()->startOfDay()])
+                      // Then sort by start date (newest first) within those two groups
+                      ->orderBy('start_date', 'desc');
                 break;
         }
 
         return view('livewire.open.events-index', [
             'events' => $query->paginate(9)
-        ]); // Use your main layout
+        ]);
     }
 }
