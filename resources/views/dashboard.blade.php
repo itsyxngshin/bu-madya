@@ -30,14 +30,13 @@
                                     <div class="flex flex-wrap items-center gap-3 mb-2">
                                         <span class="text-gray-400 text-[10px] md:text-xs font-bold uppercase tracking-widest">Director Command Center</span>
                                         {{-- Official Position / Title Badge (Skewed Rhombus Style) --}}
-                                                                @if(isset($directorAssignment) && $directorAssignment)
-                                                                    <div class="inline-flex items-center transform -skew-x-12 bg-gradient-to-r from-red-950/80 via-red-900/60 to-gray-900/80 border border-red-500/40 px-4 py-1.5 shadow-lg">
+                                        @if(isset($directorAssignment) && $directorAssignment)
+                                                                    <div class="inline-flex items-center transform -skew-x-12 bg-red-950/60 border border-red-500/30 px-3 py-1 shadow-sm">
                                                                         <div class="transform skew-x-12 flex items-center gap-2">
-
-                                                                            <span class="text-red-400 text-[10px] md:text-xs font-black uppercase tracking-[0.2em] font-heading">
+                                                                            <span class="text-red-400 text-[9px] md:text-[10px] font-bold uppercase tracking-wider font-heading">
                                                                                 {{ $directorAssignment->title ?? $directorAssignment->director?->name ?? 'Director' }}
                                                                                 @if(isset($directorAssignment->committee) && $directorAssignment->committee)
-                                                                                    <span class="text-gray-400 mx-1">&bull;</span> {{ $directorAssignment->committee->name }}
+                                                                                    <span class="text-gray-500 mx-1">&bull;</span> {{ $directorAssignment->committee->name }}
                                                                                 @endif
                                                                             </span>
                                                                         </div>
