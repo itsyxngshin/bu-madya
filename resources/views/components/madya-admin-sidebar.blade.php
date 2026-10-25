@@ -95,8 +95,8 @@
             </a>
 
             @php
-                $projectsRoute = $isAdmin ? route('admin.projects.index') : route('projects.index');
-                $isProjectsActive = request()->routeIs('admin.projects.*') || request()->routeIs('projects.*');
+                $projectsRoute = $isAdmin ? route('admin.projects.index') : route('director.projects.index');
+                $isProjectsActive = request()->routeIs('admin.projects.*') || request()->routeIs('director.projects.*');
             @endphp
             <a href="{{ $projectsRoute }}" class="{{ $linkClass }} {{ $isProjectsActive ? $activeClass : $inactiveClass }}">
                 <svg class="{{ $isProjectsActive ? $iconActive : $iconInactive }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
@@ -202,8 +202,8 @@
 
         @if($isAdmin || $isDirector)
             @php
-                $newsRoute = $isAdmin ? route('admin.news.index') : route('news.index');
-                $isNewsActive = request()->routeIs('*.news.*') || request()->routeIs('news.*');
+                $newsRoute = $isAdmin ? route('admin.news.index') : route('director.news.index');
+                $isNewsActive = request()->routeIs('*.news.*') || request()->routeIs('director.news.*');
             @endphp
             <a href="{{ $newsRoute }}" class="{{ $linkClass }} {{ $isNewsActive ? $activeClass : $inactiveClass }}">
                 <svg class="{{ $isNewsActive ? $iconActive : $iconInactive }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"></path></svg>
@@ -211,8 +211,8 @@
             </a>
 
             @php
-                $linkagesRoute = $isAdmin ? route('admin.linkages.index') : route('linkages.index');
-                $isLinkagesActive = request()->routeIs('admin.linkages.*') || request()->routeIs('linkages.*');
+                $linkagesRoute = $isAdmin ? route('admin.linkages.index') : route('director.linkages.index');
+                $isLinkagesActive = request()->routeIs('admin.linkages.*') || request()->routeIs('director.linkages.*');
             @endphp
             <a href="{{ $linkagesRoute }}" class="{{ $linkClass }} {{ $isLinkagesActive ? $activeClass : $inactiveClass }}">
                 <svg class="{{ $isLinkagesActive ? $iconActive : $iconInactive }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
