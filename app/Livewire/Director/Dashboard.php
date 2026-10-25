@@ -24,7 +24,8 @@ class Dashboard extends Component
             if (class_exists(DirectorAssignment::class)) {
                 $directorAssignment = DirectorAssignment::with(['director', 'committee'])
                     ->where('user_id', $user->id)
-                    ->latest();
+                    ->latest()
+                    ->last();
             }
         } catch (\Exception $e) {
             $directorAssignment = null;
