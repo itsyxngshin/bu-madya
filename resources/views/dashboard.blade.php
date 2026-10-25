@@ -126,6 +126,45 @@
                     </div>
                 </div>
 
+                {{-- PENDING PROPOSALS (List View) --}}
+                <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 md:p-8 flex flex-col">
+                    <div class="flex items-center justify-between mb-8 pb-4 border-b border-gray-100">
+                        <h3 class="font-heading font-black text-lg text-gray-900 flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-yellow-400 animate-pulse"></span> Needs Review
+                        </h3>
+                        <a href="{{ route('admin.proposals.index') }}" class="text-[10px] font-bold text-gray-400 uppercase tracking-widest hover:text-gray-900 hover:underline">View All Proposals</a>
+                    </div>
+
+                    <div class="space-y-4 flex-1">
+                        @forelse($recentProposals as $proposal)
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-gray-50 rounded-2xl hover:bg-gray-100 border border-transparent hover:border-gray-200 transition-all group gap-4">
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 rounded-xl bg-white border border-gray-200 flex items-center justify-center font-bold text-xs text-gray-500 shrink-0 group-hover:border-red-200 group-hover:text-red-600 transition-colors">
+                                    {{ substr($proposal->user ? $proposal->user->name : $proposal->name, 0, 1) }}
+                                </div>
+                                <div>
+                                    <h4 class="text-sm font-bold text-gray-900 group-hover:text-red-600 transition">{{ $proposal->title }}</h4>
+                                    <p class="text-[10px] text-gray-500 uppercase font-bold tracking-wider mt-0.5">
+                                        {{ $proposal->proponent_type }} &bull; {{ $proposal->created_at->diffForHumans() }}
+                                    </p>
+                                </div>
+                            </div>
+                            <a href="{{ route('admin.proposals.show', $proposal->id) }}" class="px-4 py-2 bg-white border border-gray-200 text-gray-700 text-[10px] font-bold uppercase rounded-lg shadow-sm hover:border-red-300 hover:text-red-600 transition-colors text-center whitespace-nowrap">
+                                Review &rarr;
+                            </a>
+                        </div>
+                        @empty
+                        <div class="flex flex-col items-center justify-center h-full py-8 text-center">
+                            <div class="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center text-green-500 mb-3">
+                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                            </div>
+                            <p class="text-sm font-bold text-gray-900">All Caught Up!</p>
+                            <p class="text-xs text-gray-500 mt-1">No pending proposals right now.</p>
+                        </div>
+                        @endforelse
+                    </div>
+                </div>
+
                 {{-- 3. SECTION: MY LED PROJECTS (Collapsible using Alpine.js) --}}
                 <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden" x-data="{ open: true }">
 
@@ -213,44 +252,6 @@
                     </div>
                 </div>
 
-                {{-- 4. PENDING PROPOSALS (List View) --}}
-                <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 md:p-8 flex flex-col">
-                    <div class="flex items-center justify-between mb-8 pb-4 border-b border-gray-100">
-                        <h3 class="font-heading font-black text-lg text-gray-900 flex items-center gap-2">
-                            <span class="w-2 h-2 rounded-full bg-yellow-400 animate-pulse"></span> Needs Review
-                        </h3>
-                        <a href="{{ route('admin.proposals.index') }}" class="text-[10px] font-bold text-gray-400 uppercase tracking-widest hover:text-gray-900 hover:underline">View All Proposals</a>
-                    </div>
-
-                    <div class="space-y-4 flex-1">
-                        @forelse($recentProposals as $proposal)
-                        <div class="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-gray-50 rounded-2xl hover:bg-gray-100 border border-transparent hover:border-gray-200 transition-all group gap-4">
-                            <div class="flex items-center gap-4">
-                                <div class="w-10 h-10 rounded-xl bg-white border border-gray-200 flex items-center justify-center font-bold text-xs text-gray-500 shrink-0 group-hover:border-red-200 group-hover:text-red-600 transition-colors">
-                                    {{ substr($proposal->user ? $proposal->user->name : $proposal->name, 0, 1) }}
-                                </div>
-                                <div>
-                                    <h4 class="text-sm font-bold text-gray-900 group-hover:text-red-600 transition">{{ $proposal->title }}</h4>
-                                    <p class="text-[10px] text-gray-500 uppercase font-bold tracking-wider mt-0.5">
-                                        {{ $proposal->proponent_type }} &bull; {{ $proposal->created_at->diffForHumans() }}
-                                    </p>
-                                </div>
-                            </div>
-                            <a href="{{ route('admin.proposals.show', $proposal->id) }}" class="px-4 py-2 bg-white border border-gray-200 text-gray-700 text-[10px] font-bold uppercase rounded-lg shadow-sm hover:border-red-300 hover:text-red-600 transition-colors text-center whitespace-nowrap">
-                                Review &rarr;
-                            </a>
-                        </div>
-                        @empty
-                        <div class="flex flex-col items-center justify-center h-full py-8 text-center">
-                            <div class="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center text-green-500 mb-3">
-                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                            </div>
-                            <p class="text-sm font-bold text-gray-900">All Caught Up!</p>
-                            <p class="text-xs text-gray-500 mt-1">No pending proposals right now.</p>
-                        </div>
-                        @endforelse
-                    </div>
-                </div>
 
             </div>
 
