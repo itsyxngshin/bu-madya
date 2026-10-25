@@ -35,9 +35,6 @@
                                                                         <div class="transform skew-x-12 flex items-center gap-2">
                                                                             <span class="text-red-400 text-[9px] md:text-[10px] font-bold uppercase tracking-wider font-heading">
                                                                                 {{ $directorAssignment->title ?? $directorAssignment->director?->name ?? 'Director' }}
-                                                                                @if(isset($directorAssignment->committee) && $directorAssignment->committee)
-                                                                                    <span class="text-gray-500 mx-1">&bull;</span> {{ $directorAssignment->committee->name }}
-                                                                                @endif
                                                                             </span>
                                                                         </div>
                                                                     </div>
