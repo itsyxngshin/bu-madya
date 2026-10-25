@@ -110,10 +110,6 @@ class CampaignBuilder extends Component
 
     public function render()
     {
-        $layoutFile = in_array(auth()->user()->role?->role_name, ['administrator', 'organization'])
-            ? 'layouts.madya-admin-deck'
-            : 'layouts.madya-admin';
-
-        return view('livewire.admin.campaign-builder')->layout($layoutFile);
+        return view('livewire.admin.campaign-builder')->layout('layouts.madya-admin-deck');
     }
 }

@@ -33,8 +33,8 @@ class CampaignList extends Component
 
         // Security check
         abort_if(
-            auth()->user()->role?->role_name !== 'administrator' && $campaign->created_by !== auth()->id(), 
-            403, 
+            auth()->user()->role?->role_name !== 'administrator' && $campaign->created_by !== auth()->id(),
+            403,
             'Unauthorized Action.'
         );
 
@@ -58,8 +58,8 @@ class CampaignList extends Component
         $campaign = Campaign::findOrFail($id);
 
         abort_if(
-            auth()->user()->role?->role_name !== 'administrator' && $campaign->created_by !== auth()->id(), 
-            403, 
+            auth()->user()->role?->role_name !== 'administrator' && $campaign->created_by !== auth()->id(),
+            403,
             'Unauthorized Action.'
         );
 
@@ -76,22 +76,22 @@ class CampaignList extends Component
         $campaign = Campaign::with(['signatures.user', 'signatures.college'])->findOrFail($id);
 
         abort_if(
-            auth()->user()->role?->role_name !== 'administrator' && $campaign->created_by !== auth()->id(), 
-            403, 
+            auth()->user()->role?->role_name !== 'administrator' && $campaign->created_by !== auth()->id(),
+            403,
             'Unauthorized Action.'
         );
-        
+
         $csvData = "Name,Email,Affiliation,College,Program,Year Level,Date Signed\n";
-        
+
         foreach($campaign->signatures as $sig) {
             $name = $sig->user ? $sig->user->name : $sig->guest_name;
             $email = $sig->user ? $sig->user->email : $sig->guest_email;
-            
+
             // Safely grab the college name if it exists via the relationship
             $collegeName = $sig->college ? $sig->college->name : 'N/A';
-            
+
             $date = $sig->created_at->format('Y-m-d H:i:s');
-            
+
             $csvData .= "\"{$name}\",\"{$email}\",\"{$sig->affiliation}\",\"{$collegeName}\",\"{$sig->program}\",\"{$sig->year_level}\",\"{$date}\"\n";
         }
 
@@ -105,8 +105,8 @@ class CampaignList extends Component
         $campaign = Campaign::findOrFail($id);
 
         abort_if(
-            auth()->user()->role?->role_name !== 'administrator' && $campaign->created_by !== auth()->id(), 
-            403, 
+            auth()->user()->role?->role_name !== 'administrator' && $campaign->created_by !== auth()->id(),
+            403,
             'Unauthorized Action.'
         );
 
@@ -129,11 +129,6 @@ class CampaignList extends Component
 
         $campaigns = $query->paginate(9);
 
-        // Uses your existing layout logic
-        $layoutFile = in_array(auth()->user()->role?->role_name, ['administrator', 'organization'])
-            ? 'layouts.madya-admin-deck'
-            : 'layouts.madya-admin';
-
-        return view('livewire.admin.campaign-list', compact('campaigns'))->layout($layoutFile);
+        return view('livewire.admin.campaign-list', compact('campaigns'))->layout('layouts.madya-admin-deck');
     }
 }

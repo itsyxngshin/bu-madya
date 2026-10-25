@@ -21,7 +21,7 @@ class CampaignAnalytics extends Component
     {
         // 1. Fetch Campaign & Security Check
         $this->campaign = Campaign::where('slug', $slug)->firstOrFail();
-        
+
         $role = auth()->user()->role?->role_name;
         if (!in_array($role, ['administrator', 'director', 'organization'])) {
              abort(403, 'Unauthorized access.');
@@ -63,10 +63,6 @@ class CampaignAnalytics extends Component
 
     public function render()
     {
-        $layoutFile = in_array(auth()->user()->role?->role_name, ['administrator', 'organization'])
-            ? 'layouts.madya-admin-deck'
-            : 'layouts.madya-admin';
-
-        return view('livewire.admin.campaign-analytics')->layout($layoutFile);
+        return view('livewire.admin.campaign-analytics')->layout('layouts.madya-admin-deck');
     }
 }
