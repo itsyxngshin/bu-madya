@@ -17,7 +17,8 @@ class Evaluation extends Model
         'description',
         'type',
         'is_active',
-        'project_id'
+        'project_id',
+        'event_id'
     ];
 
     /**

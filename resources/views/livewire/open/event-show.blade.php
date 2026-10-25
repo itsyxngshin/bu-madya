@@ -230,7 +230,7 @@
                                     <p class="text-[10px] md:text-xs text-gray-500 font-bold uppercase tracking-widest mt-1">Based on {{ $totalResponses }} official evaluations</p>
                                 </div>
                             </div>
-                            
+
                             @if($canViewEvaluationResults)
                                 <a href="{{ route('admin.evaluations.results', $event->evaluation->slug) }}" class="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-red-50 text-red-600 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-100 transition-colors border border-red-100">
                                     Admin View &rarr;
@@ -241,7 +241,7 @@
                         {{-- High-Contrast Premium Score Card --}}
                         <div class="bg-gray-900 rounded-[1.25rem] md:rounded-[1.5rem] p-6 md:p-10 flex flex-col lg:flex-row items-center justify-between gap-8 mb-10 relative overflow-hidden shadow-2xl">
                             <div class="absolute top-0 right-0 w-64 h-64 bg-red-600/20 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none"></div>
-                            
+
                             <div class="relative z-10 text-center lg:text-left w-full lg:w-auto">
                                 <h4 class="text-gray-400 font-bold uppercase tracking-widest text-[10px] md:text-xs mb-2">Overall Satisfaction</h4>
                                 <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 md:gap-6">
@@ -264,7 +264,7 @@
                                 <div class="text-lg md:text-xl font-black text-white bg-white/10 backdrop-blur-md px-6 py-2.5 rounded-full border border-white/10 shadow-inner">
                                     {{ $overallRating >= 4.5 ? 'Excellent' : ($overallRating >= 4.0 ? 'Very Good' : ($overallRating >= 3.0 ? 'Good' : 'Needs Improvement')) }}
                                 </div>
-                                
+
                                 <button @click="showChartDrawer = !showChartDrawer" class="mt-6 flex items-center justify-center gap-2 w-full lg:w-auto px-5 py-3 bg-red-600 hover:bg-red-500 text-white rounded-xl text-[10px] md:text-xs font-bold uppercase tracking-widest transition-all shadow-lg hover:shadow-red-500/30">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path></svg>
                                     <span x-text="showChartDrawer ? 'Hide Radar Chart' : 'View Radar Chart'"></span>
@@ -319,7 +319,7 @@
                                                         </div>
                                                     </div>
                                                     <div class="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden">
-                                                        <div class="{{ $barColor }} h-full rounded-full transition-all duration-1000 ease-out" 
+                                                        <div class="{{ $barColor }} h-full rounded-full transition-all duration-1000 ease-out"
                                                              style="width: {{ $percent }}%; box-shadow: 0 0 8px {{ $shadow }};"></div>
                                                     </div>
                                                 </div>
@@ -334,7 +334,7 @@
             </main>
         </div>
     </div>
-    
+
     {{-- FOOTER --}}
     <footer class="bg-gray-900 text-white pt-20 pb-10 border-t-8 border-red-600 relative z-20">
         <div class="max-w-[1800px] w-[95%] mx-auto px-6 grid md:grid-cols-4 gap-12 mb-16">
