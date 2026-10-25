@@ -28,20 +28,6 @@
                 </div>
 
                 <div>
-                    <div class="flex flex-wrap items-center gap-3 mb-2">
-                                            <span class="text-gray-400 text-[10px] md:text-xs font-bold uppercase tracking-widest">Director Command Center</span>
-
-                                            {{-- Official Position / Title Badge from Database --}}
-                                            @if(isset($directorAssignment))
-                                                <span class="px-3 py-0.5 bg-red-500/20 border border-red-500/30 text-red-400 text-[10px] font-black uppercase tracking-wider rounded-full flex items-center gap-1.5">
-                                                    <span class="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse"></span>
-                                                    {{ $directorAssignment->title ?? $directorAssignment->director?->name ?? 'Director' }}
-                                                    @if($directorAssignment->committee)
-                                                        &bull; {{ $directorAssignment->committee->name }}
-                                                    @endif
-                                                </span>
-                                            @endif
-                                        </div>
                     <h2 class="text-gray-400 text-[10px] md:text-xs font-bold uppercase tracking-widest mb-1.5 md:mb-2">Director Command Center</h2>
                     <h1 class="font-heading text-3xl md:text-5xl font-black text-white mb-2 md:mb-3 tracking-tight leading-none">
                         Welcome back, <span class="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-200">{{ auth()->user()->name }}</span>!
