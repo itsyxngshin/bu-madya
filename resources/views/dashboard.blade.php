@@ -24,23 +24,25 @@
                     <img src="{{ Auth::user()->profile_photo_url ?? 'https://ui-avatars.com/api/?name='.urlencode(Auth::user()->name).'&color=7F9CF5&background=EBF4FF' }}"
                          alt="{{ Auth::user()->name }}"
                          class="w-24 h-32 md:w-28 md:h-36 rounded-2xl border-2 border-white/10 object-cover shadow-2xl bg-gray-800 group-hover:scale-[1.02] transition-transform duration-500">
-                    <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-gray-900 rounded-full animate-pulse"></div>
                 </div>
 
                 <div>
                                     <div class="flex flex-wrap items-center gap-3 mb-2">
                                         <span class="text-gray-400 text-[10px] md:text-xs font-bold uppercase tracking-widest">Director Command Center</span>
+                                        {{-- Official Position / Title Badge (Skewed Rhombus Style) --}}
+                                                                @if(isset($directorAssignment) && $directorAssignment)
+                                                                    <div class="inline-flex items-center transform -skew-x-12 bg-gradient-to-r from-red-950/80 via-red-900/60 to-gray-900/80 border border-red-500/40 px-4 py-1.5 shadow-lg">
+                                                                        <div class="transform skew-x-12 flex items-center gap-2">
 
-                                        {{-- Official Position / Title Badge from Database --}}
-                                        @if(isset($directorAssignment))
-                                            <span class="px-3 py-0.5 bg-red-500/20 border border-red-500/30 text-red-400 text-[10px] font-black uppercase tracking-wider rounded-full flex items-center gap-1.5">
-                                                <span class="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse"></span>
-                                                {{ $directorAssignment->title ?? $directorAssignment->director?->name ?? 'Director' }}
-                                                @if($directorAssignment->committee)
-                                                    &bull; {{ $directorAssignment->committee->name }}
-                                                @endif
-                                            </span>
-                                        @endif
+                                                                            <span class="text-red-400 text-[10px] md:text-xs font-black uppercase tracking-[0.2em] font-heading">
+                                                                                {{ $directorAssignment->title ?? $directorAssignment->director?->name ?? 'Director' }}
+                                                                                @if(isset($directorAssignment->committee) && $directorAssignment->committee)
+                                                                                    <span class="text-gray-400 mx-1">&bull;</span> {{ $directorAssignment->committee->name }}
+                                                                                @endif
+                                                                            </span>
+                                                                        </div>
+                                                                    </div>
+                                                                @endif
                                     </div>
 
                                     <h1 class="font-heading text-3xl md:text-5xl font-black text-white mb-2 md:mb-3 tracking-tight leading-none">
