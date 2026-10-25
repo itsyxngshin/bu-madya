@@ -60,6 +60,11 @@ class Evaluation extends Model
         return $this->belongsTo(Project::class);
     }
 
+    public function event()
+        {
+            return $this->belongsTo(Event::class, 'event_id');
+        }
+
     public function collaborators()
     {
         return $this->belongsToMany(User::class, 'evaluation_collaborators')->withTimestamps();

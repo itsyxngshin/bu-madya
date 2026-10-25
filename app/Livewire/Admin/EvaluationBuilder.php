@@ -8,6 +8,7 @@ use Livewire\Attributes\On;
 use Livewire\Attributes\Layout;
 use App\Models\Evaluation;
 use App\Models\Project;
+use App\Models\Event;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Computed;
@@ -27,6 +28,8 @@ class EvaluationBuilder extends Component
     public $header_image;
     public $existing_header_image;
     public $theme_color = '#f1e7e2';
+    public $event_id = null;
+        public $available_events = [];
 
     // Data Containers
     public $questions = [];
@@ -81,6 +84,8 @@ class EvaluationBuilder extends Component
             'certEmailBody' => 'nullable|string',
             'certNameQuestionId' => 'nullable',
             'certEmailQuestionId' => 'nullable',
+            'project_id' => 'nullable|integer',
+                        'event_id' => 'nullable|integer',
         ];
     }
 
@@ -88,6 +93,7 @@ class EvaluationBuilder extends Component
     {
         $this->available_projects = Project::where('status', '!=', 'Draft')->orderBy('title')->select('id', 'title')->get();
         $this->evaluation = $evaluation ?? new Evaluation();
+        $this->available_events = Event::orderBy('title')->select('id', 'title')->get();
 
         $user = auth()->user();
         $role = $user->role?->role_name;
@@ -448,6 +454,7 @@ class EvaluationBuilder extends Component
         $this->evaluation->slug = !empty($this->slug) ? Str::slug($this->slug) : Str::slug($this->title);
         $this->evaluation->description = $this->description;
         $this->evaluation->project_id = empty($this->project_id) ? null : $this->project_id;
+        $this->evaluation->event_id = empty($this->event_id) ? null : $this->event_id;
         $this->evaluation->is_active = $this->is_active;
         if (!$this->evaluation->exists) {
             $this->evaluation->created_by = auth()->id();

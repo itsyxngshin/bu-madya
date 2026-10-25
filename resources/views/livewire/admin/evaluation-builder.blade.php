@@ -93,6 +93,16 @@
                     </div>
 
                     <div class="mb-5">
+                                            <label class="block text-sm font-semibold text-gray-700 mb-1.5">Link to Event</label>
+                                            <select wire:model="event_id" class="w-full rounded-xl border-gray-200 bg-gray-50 text-sm p-3 focus:bg-white focus:ring-orange-500 focus:border-orange-500 transition-colors cursor-pointer">
+                                                <option value="">-- No Event Linked --</option>
+                                                @foreach($available_events as $evt)
+                                                    <option value="{{ $evt->id }}">{{ $evt->title }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+
+                    <div class="mb-5">
                         <label class="block text-sm font-semibold text-gray-700 mb-1.5">URL Slug</label>
                         <div class="flex gap-2">
                             <input wire:model="slug" type="text" class="w-full rounded-xl border-gray-200 bg-gray-50 text-sm font-mono p-3 focus:bg-white focus:ring-orange-500 focus:border-orange-500 transition-colors" placeholder="auto-generated-slug">

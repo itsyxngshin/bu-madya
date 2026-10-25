@@ -60,4 +60,8 @@ class Event extends Model
     public function questions() {
             return $this->hasMany(EventQuestion::class, 'event_id');
         }
+
+    public function evaluation(){
+        return $this->hasOne(Evaluation::class, 'event_id');
+    }
 }
