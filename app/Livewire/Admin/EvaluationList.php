@@ -194,11 +194,7 @@ class EvaluationList extends Component
 
         $evaluations = $query->paginate(10);
 
-        $layoutFile = in_array(auth()->user()->role?->role_name, ['administrator', 'organization'])
-            ? 'layouts.madya-admin-deck'
-            : 'layouts.madya-admin';
-
         return view('livewire.admin.evaluation-list', compact('evaluations'))
-            ->layout($layoutFile);
+                    ->layout('layouts.madya-admin-deck');
     }
 }
