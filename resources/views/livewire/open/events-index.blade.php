@@ -18,17 +18,17 @@
             <img src="https://images.unsplash.com/photo-1523580494863-6f3031224c94?q=80&w=2070" class="w-full h-full object-cover">
             <div class="absolute inset-0 bg-gradient-to-r from-red-900/90 to-yellow-700/80 mix-blend-multiply"></div>
         </div>
-        
+
         <div class="relative z-10 text-center px-4 mt-16">
             <h2 class="text-yellow-300 font-bold tracking-[0.3em] text-xs uppercase mb-2 animate-fade-in-down">Opportunities & Activities</h2>
             <h1 class="font-heading text-3xl md:text-5xl font-black uppercase tracking-tight mb-4 drop-shadow-lg animate-fade-in-up leading-none">
                 Events & Campaigns
             </h1>
-            
+
             @auth
                 @if(in_array(Auth::user()?->role?->role_name, ['administrator', 'director']))
                 <div class="mt-6 animate-fade-in-up delay-100">
-                    <a href="{{ route('admin.events.create') }}" 
+                    <a href="{{ route('admin.events.create') }}"
                        class="inline-flex items-center gap-2 px-6 py-3 bg-white text-red-600 rounded-full font-bold text-xs uppercase tracking-widest hover:bg-yellow-400 hover:text-red-900 transition shadow-lg transform hover:-translate-y-1">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                         Create Event
@@ -41,21 +41,22 @@
 
     {{-- 3. MAIN CONTENT --}}
     <div class="relative min-h-screen px-6 pb-24 mt-12 max-w-[1800px] w-[95%] mx-auto">
-        
+
         {{-- ========================================== --}}
         {{-- FEATURED / UPCOMING EVENT SPOTLIGHT        --}}
         {{-- ========================================== --}}
         @if($events->count() > 0)
             @php
                 // Automatically grabs the first event in the collection for the spotlight
-                $featuredEvent = $events->first(); 
+                // Because of our smart sorting, this is guaranteed to be the most pressing upcoming event!
+                $featuredEvent = $events->first();
             @endphp
             <div class="mb-16 relative group cursor-pointer animate-fade-in-up delay-200">
                 {{-- Dynamic Glowing Tricolor Backdrop --}}
                 <div class="absolute -inset-1 bg-gradient-to-r from-red-500 via-yellow-400 to-green-500 rounded-[2.5rem] blur-lg opacity-25 group-hover:opacity-60 transition duration-1000 group-hover:duration-300"></div>
 
                 <div class="relative bg-white rounded-[2rem] shadow-xl overflow-hidden flex flex-col lg:flex-row border border-gray-100">
-                    
+
                     {{-- Highlight Image Side --}}
                     <div class="lg:w-1/2 h-80 lg:h-[450px] relative overflow-hidden bg-gray-100">
                         <a href="{{ route('events.show', $featuredEvent->slug) }}" class="block w-full h-full">
@@ -85,6 +86,8 @@
                             </span>
                             @if($featuredEvent->isOpen())
                                 <span class="px-3 py-1 bg-green-50 text-green-600 text-[10px] font-bold uppercase tracking-widest rounded-lg shadow-sm border border-green-100">Registration Open</span>
+                            @else
+                                <span class="px-3 py-1 bg-gray-100 text-gray-600 text-[10px] font-bold uppercase tracking-widest rounded-lg shadow-sm border border-gray-200">Event Ended</span>
                             @endif
                         </div>
 
@@ -108,26 +111,62 @@
                 </div>
             </div>
         @endif
-        
+
         {{-- ========================================== --}}
-        {{-- SEARCH & FILTER BAR                        --}}
+        {{-- SEARCH & MODERN DROPDOWN FILTER            --}}
         {{-- ========================================== --}}
         <div class="relative z-10 flex flex-col md:flex-row justify-between items-center mb-12 gap-4">
-            
-            <div class="flex gap-2 overflow-x-auto pb-2 max-w-full no-scrollbar">
-                @foreach(['upcoming' => 'Upcoming', 'past' => 'Past Events', 'all' => 'All Events'] as $key => $label)
-                <button wire:click="$set('filter', '{{ $key }}')"
-                        class="whitespace-nowrap px-6 py-2 rounded-full text-xs font-bold shadow-sm transition-all uppercase tracking-wide border
-                               {{ $filter === $key ? 'bg-red-600 border-red-600 text-white transform scale-105 shadow-md' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50' }}">
-                    {{ $label }}
+
+            {{-- Modern Dropdown Filter --}}
+            <div class="w-full md:w-auto relative" x-data="{ open: false, current: '{{ $filter === 'upcoming' ? 'Upcoming Events' : ($filter === 'past' ? 'Past Events' : 'All Events') }}' }">
+                <button @click="open = !open" @click.outside="open = false" type="button"
+                        class="w-full md:w-56 flex items-center justify-between px-6 py-3 bg-red-600 text-white rounded-full font-bold text-xs uppercase tracking-widest shadow-md hover:bg-red-700 hover:shadow-lg transition-all">
+                    <span class="flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
+                        <span x-text="current"></span>
+                    </span>
+                    <svg class="w-4 h-4 transition-transform duration-300" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                 </button>
-                @endforeach
+
+                {{-- Dropdown Menu --}}
+                <div x-show="open" x-cloak
+                     x-transition:enter="transition ease-out duration-200"
+                     x-transition:enter-start="opacity-0 scale-95 translate-y-[-10px]"
+                     x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                     x-transition:leave="transition ease-in duration-150"
+                     x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+                     x-transition:leave-end="opacity-0 scale-95 translate-y-[-10px]"
+                     class="absolute top-full left-0 mt-3 w-full md:w-56 bg-white border border-gray-100 rounded-2xl shadow-xl overflow-hidden z-50">
+
+                    <div class="p-1.5 space-y-1">
+                        <button wire:click="$set('filter', 'all')" @click="current = 'All Events'; open = false"
+                                class="w-full text-left px-4 py-3 rounded-xl text-xs font-bold uppercase tracking-widest transition-colors flex items-center justify-between {{ $filter === 'all' ? 'bg-red-50 text-red-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                            <span>All Events</span>
+                            @if($filter === 'all') <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> @endif
+                        </button>
+
+                        <div class="h-px bg-gray-100 mx-2"></div>
+
+                        <button wire:click="$set('filter', 'upcoming')" @click="current = 'Upcoming Events'; open = false"
+                                class="w-full text-left px-4 py-3 rounded-xl text-xs font-bold uppercase tracking-widest transition-colors flex items-center justify-between {{ $filter === 'upcoming' ? 'bg-red-50 text-red-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                            <span>Upcoming Events</span>
+                            @if($filter === 'upcoming') <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> @endif
+                        </button>
+
+                        <button wire:click="$set('filter', 'past')" @click="current = 'Past Events'; open = false"
+                                class="w-full text-left px-4 py-3 rounded-xl text-xs font-bold uppercase tracking-widest transition-colors flex items-center justify-between {{ $filter === 'past' ? 'bg-red-50 text-red-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                            <span>Past Events</span>
+                            @if($filter === 'past') <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> @endif
+                        </button>
+                    </div>
+                </div>
             </div>
 
+            {{-- Search Bar --}}
             <div class="relative w-full md:w-80">
-                <input wire:model.live.debounce.300ms="search" type="text" placeholder="Search all events..." 
-                       class="w-full pl-10 pr-4 py-2.5 rounded-full border border-gray-200 bg-white shadow-sm focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400/20 text-sm placeholder-gray-400 transition-all">
-                <svg class="absolute left-3.5 top-3 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                <input wire:model.live.debounce.300ms="search" type="text" placeholder="Search events..."
+                       class="w-full pl-11 pr-4 py-3 rounded-full border border-gray-200 bg-white shadow-sm focus:border-red-500 focus:ring-2 focus:ring-red-500/20 text-sm placeholder-gray-400 transition-all font-medium">
+                <svg class="absolute left-4 top-3.5 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
             </div>
         </div>
 
@@ -152,7 +191,7 @@
                         @endif
 
                         <article class="group bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col relative h-full border border-gray-100">
-                            
+
                             {{-- Image Thumbnail --}}
                             <div class="h-56 overflow-hidden relative bg-gray-100">
                                 <a href="{{ route('events.show', $event->slug) }}">
@@ -164,7 +203,7 @@
                                         </div>
                                     @endif
                                 </a>
-                                
+
                                 {{-- Status Badge --}}
                                 <div class="absolute top-4 right-4 z-20">
                                     @if($event->isOpen())
@@ -216,7 +255,7 @@
                 </div>
             @else
                 {{-- Empty State --}}
-                <div class="flex flex-col items-center justify-center py-24 text-center bg-white rounded-[2rem] border border-dashed border-gray-200">
+                <div class="flex flex-col items-center justify-center py-24 text-center bg-white rounded-[2rem] border border-dashed border-gray-200 shadow-sm">
                     <div class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center text-gray-300 mb-4">
                         <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                     </div>
