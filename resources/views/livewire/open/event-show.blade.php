@@ -224,6 +224,130 @@
                     </div>
                 </div>
             </main>
+            {{-- EVALUATION RESULTS (PREMIUM UI UPGRADE) --}}
+                            @if($event->evaluation && $totalResponses > 0 && $overallRating > 0 && !$event->isOpen())
+                                <div class="mt-8 md:mt-12 bg-white rounded-2xl md:rounded-[2rem] p-6 md:p-8 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)]"
+                                     x-data="{ showChartDrawer: false, chartInitialized: false }"
+                                     x-init="$watch('showChartDrawer', value => {
+                                         if(value && !chartInitialized) {
+                                             initEvaluationChart();
+                                             chartInitialized = true;
+                                         }
+                                     })">
+
+                                    <div class="flex items-center justify-between mb-6 md:mb-8">
+                                        <div class="flex items-center gap-3">
+                                            <div class="p-2 md:p-2.5 bg-gray-900 rounded-xl text-white shadow-md">
+                                                <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                                            </div>
+                                            <div>
+                                                <h3 class="font-heading text-xl md:text-2xl font-black text-gray-900 tracking-tight">Post-Event Analytics</h3>
+                                                <p class="text-[10px] md:text-xs text-gray-500 font-bold uppercase tracking-widest mt-1">Based on {{ $totalResponses }} official evaluations</p>
+                                            </div>
+                                        </div>
+
+                                        {{-- Admin View Button --}}
+                                        @if($canViewEvaluationResults)
+                                            <a href="{{ route('admin.evaluations.results', $event->evaluation->slug) }}" class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-600 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-red-100 transition-colors">
+                                                Admin View &rarr;
+                                            </a>
+                                        @endif
+                                    </div>
+
+                                    {{-- TOP ROW: High-Contrast Premium Score Card --}}
+                                    <div class="bg-gray-900 rounded-[1.5rem] p-6 md:p-10 flex flex-col lg:flex-row items-center justify-between gap-8 mb-10 relative overflow-hidden shadow-2xl">
+                                        <div class="absolute top-0 right-0 w-64 h-64 bg-red-600/20 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none"></div>
+
+                                        <div class="relative z-10 text-center lg:text-left w-full lg:w-auto">
+                                            <h4 class="text-gray-400 font-bold uppercase tracking-widest text-[10px] md:text-xs mb-2">Overall Satisfaction</h4>
+                                            <div class="flex items-center justify-center lg:justify-start gap-4 md:gap-6">
+                                                <div class="text-6xl md:text-8xl font-black text-red-500 leading-none tracking-tighter drop-shadow-md">
+                                                    {{ number_format($overallRating, 1) }}
+                                                </div>
+                                                <div class="flex flex-col items-start gap-1">
+                                                    <span class="text-sm font-bold text-gray-300">Out of 5.0</span>
+                                                    <div class="flex text-red-500">
+                                                        @for($i=1; $i<=5; $i++)
+                                                            <svg class="w-5 h-5 md:w-6 md:h-6 {{ $i <= round($overallRating) ? 'fill-current' : 'text-gray-700' }}" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                                                        @endfor
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="relative z-10 flex flex-col items-center lg:items-end w-full lg:w-auto border-t lg:border-t-0 lg:border-l border-gray-800 pt-6 lg:pt-0 lg:pl-8">
+                                            <span class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Performance Rating</span>
+                                            <div class="text-lg md:text-xl font-black text-white bg-white/10 backdrop-blur-md px-6 py-2.5 rounded-full border border-white/10 shadow-inner">
+                                                {{ $overallRating >= 4.5 ? 'Excellent' : ($overallRating >= 4.0 ? 'Very Good' : ($overallRating >= 3.0 ? 'Good' : 'Needs Improvement')) }}
+                                            </div>
+
+                                            <button @click="showChartDrawer = !showChartDrawer" class="mt-6 flex items-center gap-2 px-5 py-2.5 bg-red-600 hover:bg-red-500 text-white rounded-xl text-[10px] md:text-xs font-bold uppercase tracking-widest transition-all shadow-lg hover:shadow-red-500/30">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path></svg>
+                                                <span x-text="showChartDrawer ? 'Hide Radar Chart' : 'View Radar Chart'"></span>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    {{-- INTERACTIVE CHART DRAWER --}}
+                                    <div x-show="showChartDrawer" x-collapse x-cloak>
+                                        <div class="mb-10 bg-gray-50 rounded-[1.5rem] border border-gray-200 p-6 md:p-8 relative shadow-inner">
+                                            <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-6 text-center">Section Radar Analysis</h4>
+                                            <div class="relative h-[300px] md:h-[450px] w-full flex justify-center">
+                                                <canvas id="evaluationRadarChart"></canvas>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {{-- BOTTOM ROW: The Card-Based Section Breakdown --}}
+                                    <div>
+                                        <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-6 border-b border-gray-100 pb-3">Detailed Metric Breakdown</h4>
+
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            @foreach($groupedLikertResults as $section)
+                                                <div class="bg-white border border-gray-100 rounded-2xl p-5 md:p-6 shadow-sm hover:shadow-md transition-shadow">
+                                                    <div class="flex justify-between items-start mb-5">
+                                                        <h5 class="text-sm font-black text-gray-900 uppercase tracking-widest leading-tight pr-4">{{ $section['title'] }}</h5>
+                                                        <div class="shrink-0 bg-gray-900 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg">
+                                                            {{ number_format($section['section_average'], 1) }}
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="space-y-4">
+                                                        @foreach($section['criteria'] as $criteria)
+                                                            @php
+                                                                $percent = ($criteria['score'] / 5) * 100;
+                                                                if ($criteria['score'] >= 4.5) {
+                                                                    $barColor = 'bg-green-500'; $textColor = 'text-green-600'; $shadow = 'rgba(34, 197, 94, 0.4)';
+                                                                } elseif ($criteria['score'] >= 3.5) {
+                                                                    $barColor = 'bg-blue-500'; $textColor = 'text-blue-600'; $shadow = 'rgba(59, 130, 246, 0.4)';
+                                                                } elseif ($criteria['score'] >= 2.5) {
+                                                                    $barColor = 'bg-yellow-400'; $textColor = 'text-yellow-600'; $shadow = 'rgba(250, 204, 21, 0.4)';
+                                                                } else {
+                                                                    $barColor = 'bg-red-500'; $textColor = 'text-red-600'; $shadow = 'rgba(239, 68, 68, 0.4)';
+                                                                }
+                                                            @endphp
+                                                            <div class="w-full block group/bar">
+                                                                <div class="flex justify-between items-end gap-4 mb-1.5 w-full">
+                                                                    <div class="text-[11px] sm:text-xs font-bold text-gray-600 leading-snug group-hover/bar:text-gray-900 transition-colors">
+                                                                        {{ html_entity_decode($criteria['label']) }}
+                                                                    </div>
+                                                                    <div class="text-[10px] font-black {{ $textColor }} shrink-0">
+                                                                        {{ number_format($criteria['score'], 1) }}
+                                                                    </div>
+                                                                </div>
+                                                                <div class="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden">
+                                                                    <div class="{{ $barColor }} h-full rounded-full transition-all duration-1000 ease-out"
+                                                                         style="width: {{ $percent }}%; box-shadow: 0 0 8px {{ $shadow }};"></div>
+                                                                </div>
+                                                            </div>
+                                                        @endforeach
+                                                    </div>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
         </div>
     </div>
     <footer class="bg-gray-900 text-white pt-20 pb-10 border-t-8 border-red-600 relative z-20">
@@ -287,4 +411,103 @@
 {{-- QR SCRIPT (Same as before) --}}
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/easyqrcodejs@4.5.0/dist/easy.qrcode.min.js"></script>
+
+{{-- Include Chart.js --}}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        const groupedResults = @json($groupedLikertResults ?? []);
+
+        function initEvaluationChart() {
+            const canvas = document.getElementById('evaluationRadarChart');
+            if(!canvas) return;
+
+            const ctx = canvas.getContext('2d');
+
+            const labels = [];
+            const dataScores = [];
+
+            groupedResults.forEach(section => {
+                let title = section.title;
+                if(title.length > 20) title = title.substring(0, 20) + '...';
+                labels.push(title);
+                dataScores.push(section.section_average);
+            });
+
+            // Red/Pink Gradient matching the Event UI
+            const gradientFill = ctx.createRadialGradient(
+                canvas.width / 2, canvas.height / 2, 0,
+                canvas.width / 2, canvas.height / 2, canvas.width / 2
+            );
+            gradientFill.addColorStop(0, 'rgba(220, 38, 38, 0.4)');   // Red-600, 40%
+            gradientFill.addColorStop(1, 'rgba(239, 68, 68, 0.05)');  // Red-500, 5%
+
+            new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Section Average',
+                        data: dataScores,
+                        backgroundColor: gradientFill,
+                        borderColor: '#DC2626', // Red-600
+                        borderWidth: 3,
+                        tension: 0.3,
+                        pointBackgroundColor: '#FFFFFF',
+                        pointBorderColor: '#DC2626',
+                        pointBorderWidth: 3,
+                        pointRadius: 5,
+                        pointHoverRadius: 8,
+                        pointHoverBackgroundColor: '#991B1B', // Dark Red
+                        pointHoverBorderColor: '#FFFFFF',
+                        pointHoverBorderWidth: 3,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: {
+                        duration: 2000,
+                        easing: 'easeOutQuart'
+                    },
+                    scales: {
+                        r: {
+                            min: 0,
+                            max: 5,
+                            circular: true,
+                            angleLines: { color: 'rgba(0, 0, 0, 0.05)', lineWidth: 1 },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)',
+                                circular: true,
+                                lineWidth: 1.5,
+                                borderDash: [5, 5]
+                            },
+                            pointLabels: {
+                                font: { family: "'Inter', sans-serif", size: 11, weight: '800' },
+                                color: '#4B5563', padding: 15
+                            },
+                            ticks: {
+                                stepSize: 1, display: true, backdropColor: 'transparent',
+                                color: '#9CA3AF', font: { size: 10, weight: 'bold', family: "'Inter', sans-serif" }, z: 10
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(17, 24, 39, 0.95)',
+                            titleFont: { family: "'Inter', sans-serif", size: 14, weight: 'bold' },
+                            bodyFont: { family: "'Inter', sans-serif", size: 13 },
+                            padding: 16, cornerRadius: 12, displayColors: false,
+                            callbacks: {
+                                label: function(context) {
+                                    return '⭐ Average Score: ' + context.parsed.r.toFixed(2) + ' / 5.00';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
 @endpush
