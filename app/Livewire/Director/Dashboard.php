@@ -15,35 +15,35 @@ use App\Models\Linkage;
 class Dashboard extends Component
 {
     public function render()
-        {
-            $user = Auth::user();
+    {
+        $user = Auth::user();
 
-            // Safely fetch director assignment with fallback handling
-            $directorAssignment = null;
-            try {
-                if (class_exists(DirectorAssignment::class)) {
-                    $directorAssignment = DirectorAssignment::with(['director', 'committee'])
-                        ->where('user_id', $user->id)
-                        ->latest()
-                        ->first();
-                }
-            } catch (\Exception $e) {
-                $directorAssignment = null;
+        // Safely fetch director assignment with fallback handling
+        $directorAssignment = null;
+        try {
+            if (class_exists(DirectorAssignment::class)) {
+                $directorAssignment = DirectorAssignment::with(['director', 'committee'])
+                    ->where('user_id', $user->id)
+                    ->latest()
+                    ->first();
             }
-
-            return view('livewire.director.dashboard', [
-                'pendingProposals'   => Proposal::where('status', 'pending review')->count(),
-                'activeProjects'     => Project::where('status', 'Ongoing')->count(),
-                'totalPartners'      => class_exists(Linkage::class) ? Linkage::count() : 0,
-                'totalUsers'         => User::count(),
-                'recentProposals'    => Proposal::where('status', 'pending review')->latest()->take(5)->get(),
-                'upcomingProjects'   => Project::where('status', 'Upcoming')->orderBy('implementation_date', 'asc')->take(3)->get(),
-                'myProjects'         => Project::whereHas('proponents', function($q) {
-                                            $q->where('user_id', Auth::id());
-                                      })
-                                      ->orderBy('implementation_date', 'desc')
-                                      ->get(),
-                'directorAssignment' => $directorAssignment
-            ]);
+        } catch (\Exception $e) {
+            $directorAssignment = null;
         }
+
+        return view('livewire.director.dashboard', [
+            'pendingProposals'   => Proposal::where('status', 'pending review')->count(),
+            'activeProjects'     => Project::where('status', 'Ongoing')->count(),
+            'totalPartners'      => class_exists(Linkage::class) ? Linkage::count() : 0,
+            'totalUsers'         => User::count(),
+            'recentProposals'    => Proposal::where('status', 'pending review')->latest()->take(5)->get(),
+            'upcomingProjects'   => Project::where('status', 'Upcoming')->orderBy('implementation_date', 'asc')->take(3)->get(),
+            'myProjects'         => Project::whereHas('proponents', function($q) {
+                                        $q->where('user_id', Auth::id());
+                                  })
+                                  ->orderBy('implementation_date', 'desc')
+                                  ->get(),
+            'directorAssignment' => $directorAssignment
+        ]);
+    }
 }
