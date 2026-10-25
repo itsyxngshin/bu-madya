@@ -24,7 +24,7 @@ class Dashboard extends Component
             if (class_exists(DirectorAssignment::class)) {
                 $directorAssignment = DirectorAssignment::with(['director', 'committee'])
                     ->where('user_id', $user->id)
-                    ->orderBy('academic_year_id', 'desc')
+                    ->orderBy('academic_year_id', 'asc')
                     ->latest()
                     ->first();
             }
