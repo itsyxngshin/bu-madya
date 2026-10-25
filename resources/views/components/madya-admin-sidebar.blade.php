@@ -29,21 +29,26 @@
     {{-- NAVIGATION LINKS --}}
     <nav class="flex-1 overflow-y-auto py-6 px-4 space-y-1.5 custom-scrollbar">
 
-        {{-- UNIFIED STYLING SYSTEM --}}
-        @php
-            $linkClass = 'flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 text-sm group font-semibold';
-            $activeClass = 'bg-gradient-to-r from-red-50 to-white text-red-700 shadow-sm ring-1 ring-red-100/50';
-            $inactiveClass = 'text-gray-500 hover:bg-gray-50 hover:text-gray-900';
+    {{-- UNIFIED STYLING SYSTEM --}}
+            @php
+                $linkClass = 'flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 text-sm group font-semibold relative overflow-hidden';
 
-            $iconBase = 'w-5 h-5 shrink-0 transition-transform group-hover:scale-110 duration-200';
-            $iconActive = $iconBase . ' text-red-600';
-            $iconInactive = $iconBase . ' text-gray-400 group-hover:text-gray-500';
+                // Premium Active State: Subtle tricolor gradient background with a prominent red left-border accent
+                $activeClass = 'bg-gradient-to-r from-red-50 via-yellow-50/30 to-white text-gray-900 shadow-sm border-l-4 border-red-500 font-bold';
 
-            $role = auth()->user()->role?->role_name ?? 'guest';
-            $isAdmin = in_array($role, ['administrator']);
-            $isOrg = $role === 'organization';
-            $isDirector = $role === 'director';
-        @endphp
+                $inactiveClass = 'text-gray-500 hover:bg-gray-50 hover:text-gray-900 border-l-4 border-transparent';
+
+                $iconBase = 'w-5 h-5 shrink-0 transition-transform group-hover:scale-110 duration-200 z-10';
+
+                // Icon State Styling: Using the red-600 for the active icon to tie it to the border
+                $iconActive = $iconBase . ' text-red-600';
+                $iconInactive = $iconBase . ' text-gray-400 group-hover:text-gray-500';
+
+                $role = auth()->user()->role?->role_name ?? 'guest';
+                $isAdmin = in_array($role, ['administrator']);
+                $isOrg = $role === 'organization';
+                $isDirector = $role === 'director';
+            @endphp
 
         {{-- ========================================== --}}
         {{-- DASHBOARD (All Roles) --}}
