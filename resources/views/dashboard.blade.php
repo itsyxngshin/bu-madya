@@ -5,8 +5,7 @@
     </x-slot>
 
     {{-- 1. EDGE-TO-EDGE PREMIUM WELCOME BANNER --}}
-    {{-- Using negative margins to break out of the parent padding and stretch across the screen --}}
-    <div class="relative bg-gray-900 px-6 py-10 md:px-12 md:py-14 shadow-xl border-b border-gray-800 -mt-4 -mx-4 md:-mt-6 md:-mx-6 lg:-mt-8 lg:-mx-8 mb-8 overflow-hidden group">
+    <div class="relative bg-gray-900 px-6 py-10 md:px-12 md:py-12 shadow-xl border-b border-gray-800 -mt-4 -mx-4 md:-mt-6 md:-mx-6 lg:-mt-8 lg:-mx-8 mb-8 overflow-hidden group">
 
         {{-- Tricolor Top Border Sweep --}}
         <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-red-600 via-yellow-400 to-green-500"></div>
@@ -16,22 +15,22 @@
         <div class="absolute right-40 -bottom-20 w-64 h-64 bg-yellow-400/10 rounded-full blur-3xl pointer-events-none group-hover:bg-yellow-400/20 transition-all duration-700"></div>
         <div class="absolute -left-20 -bottom-20 w-64 h-64 bg-green-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
-        <div class="relative z-10 flex flex-col xl:flex-row xl:items-center justify-between gap-8 text-white max-w-[1600px] mx-auto">
+        <div class="relative z-10 max-w-[1600px] mx-auto text-white">
 
-            {{-- Left: Profile & Welcome Text --}}
-            <div class="flex flex-col sm:flex-row sm:items-center gap-6 md:gap-8">
-                {{-- Dynamic Profile Photo --}}
+            {{-- Top Row: Photo & Welcome Text --}}
+            <div class="flex flex-col sm:flex-row sm:items-center gap-6 md:gap-8 mb-8">
+                {{-- Rectangular Portrait Photo --}}
                 <div class="shrink-0 relative">
-                                    <img src="{{ Auth::user()->profile_photo_url ?? 'https://ui-avatars.com/api/?name='.urlencode(Auth::user()->name).'&color=7F9CF5&background=EBF4FF' }}"
-                                         alt="{{ Auth::user()->name }}"
-                                         class="w-24 h-32 md:w-28 md:h-36 rounded-2xl border-2 border-white/10 object-cover shadow-2xl bg-gray-800 group-hover:scale-[1.02] transition-transform duration-500">
-                                    <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-gray-900 rounded-full animate-pulse"></div>
-                                </div>
+                    <img src="{{ Auth::user()->profile_photo_url ?? 'https://ui-avatars.com/api/?name='.urlencode(Auth::user()->name).'&color=7F9CF5&background=EBF4FF' }}"
+                         alt="{{ Auth::user()->name }}"
+                         class="w-24 h-32 md:w-28 md:h-36 rounded-2xl border-2 border-white/10 object-cover shadow-2xl bg-gray-800 group-hover:scale-[1.02] transition-transform duration-500">
+                    <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-gray-900 rounded-full animate-pulse"></div>
+                </div>
 
                 <div>
                     <h2 class="text-gray-400 text-[10px] md:text-xs font-bold uppercase tracking-widest mb-1.5 md:mb-2">Director Command Center</h2>
                     <h1 class="font-heading text-3xl md:text-5xl font-black text-white mb-2 md:mb-3 tracking-tight leading-none">
-                        Welcome back,<br class="hidden sm:block xl:hidden"> <span class="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-200">{{ auth()->user()->name }}</span>!
+                        Welcome back, <span class="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-200">{{ auth()->user()->name }}</span>!
                     </h1>
                     <p class="text-gray-300 text-sm max-w-xl leading-relaxed">
                         You have <strong class="text-yellow-400">{{ $pendingProposals }} new proposals</strong> waiting for your review.
@@ -40,17 +39,18 @@
                 </div>
             </div>
 
-            {{-- Right: Quick Action Buttons --}}
-            <div class="flex flex-wrap items-center gap-3 shrink-0">
-                <a href="{{ route('news.create') }}" class="px-5 py-3.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 backdrop-blur-md text-white text-[10px] md:text-xs font-bold uppercase tracking-widest transition-all flex items-center gap-2">
+            {{-- Bottom Row: Action Buttons Moved Here --}}
+            <div class="flex flex-wrap items-center gap-3 pt-4 border-t border-white/10">
+                <a href="{{ route('news.create') }}" class="px-5 py-3 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 backdrop-blur-md text-white text-[10px] md:text-xs font-bold uppercase tracking-widest transition-all flex items-center gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"></path></svg>
                     Add News
                 </a>
-                <a href="{{ route('projects.create') }}" class="px-6 py-3.5 rounded-xl bg-white hover:bg-gray-50 text-gray-900 text-[10px] md:text-xs font-bold uppercase tracking-widest shadow-lg transition-all flex items-center gap-2 transform hover:-translate-y-0.5">
+                <a href="{{ route('projects.create') }}" class="px-6 py-3 rounded-xl bg-white hover:bg-gray-50 text-gray-900 text-[10px] md:text-xs font-bold uppercase tracking-widest shadow-lg transition-all flex items-center gap-2 transform hover:-translate-y-0.5">
                     <svg class="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                     New Project
                 </a>
             </div>
+
         </div>
     </div>
 
@@ -126,80 +126,90 @@
                     </div>
                 </div>
 
-                {{-- 3. SECTION: MY LED PROJECTS (With Banners) --}}
-                <div>
-                    <h3 class="font-heading font-black text-xl text-gray-900 mb-6 flex items-center gap-3 pl-2 border-l-4 border-red-600">
-                        My Led Projects
-                    </h3>
+                {{-- 3. SECTION: MY LED PROJECTS (Collapsible using Alpine.js) --}}
+                <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden" x-data="{ open: true }">
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        @forelse($myProjects as $project)
-                        <div class="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 flex flex-col hover:shadow-md transition-shadow group">
+                    {{-- Collapsible Header --}}
+                    <div @click="open = !open" class="p-6 md:p-8 flex items-center justify-between cursor-pointer hover:bg-gray-50/50 transition-colors select-none">
+                        <h3 class="font-heading font-black text-xl text-gray-900 flex items-center gap-3 pl-2 border-l-4 border-red-600">
+                            My Led Projects
+                            <span class="text-xs font-bold text-gray-400 bg-gray-100 px-2.5 py-0.5 rounded-full">{{ count($myProjects) }}</span>
+                        </h3>
 
-                            {{-- Project Cover Image --}}
-                            @if($project->cover_image)
-                                <div class="h-32 sm:h-48 overflow-hidden relative bg-gray-100">
-                                    <img src="{{ asset('storage/'.$project->cover_image) }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
-                                    {{-- Optional: Gradient overlay for readability if needed --}}
-                                    <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
-                                </div>
-                            @else
-                                <div class="h-32 sm:h-40 bg-gray-50 flex flex-col items-center justify-center text-gray-400 border-b border-gray-100">
-                                    <svg class="w-8 h-8 mb-2 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                                    <span class="text-[9px] font-bold uppercase tracking-widest opacity-50">No Cover Photo</span>
-                                </div>
-                            @endif
+                        <button type="button" class="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 hover:text-gray-900 transition">
+                            <svg class="w-5 h-5 transition-transform duration-300" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                    </div>
 
-                            <div class="p-6 flex flex-col flex-1">
-                                {{-- Header: Status & Category --}}
-                                <div class="flex justify-between items-start mb-4">
-                                    <span class="px-2.5 py-1 rounded text-[9px] font-black uppercase tracking-widest
-                                        {{ $project->status === 'Completed' ? 'bg-green-50 text-green-700 border border-green-100' :
-                                          ($project->status === 'Ongoing' ? 'bg-red-50 text-red-600 border border-red-100' : 'bg-yellow-50 text-yellow-700 border border-yellow-100') }}">
-                                        {{ $project->status }}
-                                    </span>
-                                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                                        {{ $project->category->name ?? 'General' }}
-                                    </span>
-                                </div>
+                    {{-- Collapsible Content Body --}}
+                    <div x-show="open" x-collapse>
+                        <div class="p-6 md:p-8 pt-0 grid grid-cols-1 md:grid-cols-2 gap-6">
+                            @forelse($myProjects as $project)
+                            <div class="bg-stone-50/50 rounded-3xl overflow-hidden shadow-sm border border-gray-100 flex flex-col hover:shadow-md transition-shadow group">
 
-                                {{-- Title --}}
-                                <h4 class="text-lg font-black text-gray-900 leading-tight mb-2 group-hover:text-red-600 transition-colors">
-                                    <a href="{{ route('projects.show', $project->slug) }}">
-                                        {{ $project->title }}
-                                    </a>
-                                </h4>
-                                <p class="text-xs text-gray-500 line-clamp-2 mb-6 leading-relaxed flex-1">
-                                    {{ $project->description }}
-                                </p>
+                                {{-- Project Cover Image --}}
+                                @if($project->cover_image)
+                                    <div class="h-32 sm:h-44 overflow-hidden relative bg-gray-100">
+                                        <img src="{{ asset('storage/'.$project->cover_image) }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                                    </div>
+                                @else
+                                    <div class="h-32 sm:h-36 bg-gray-100 flex flex-col items-center justify-center text-gray-400 border-b border-gray-100">
+                                        <svg class="w-8 h-8 mb-2 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                        <span class="text-[9px] font-bold uppercase tracking-widest opacity-50">No Cover Photo</span>
+                                    </div>
+                                @endif
 
-                                {{-- Footer: Meta --}}
-                                <div class="pt-4 border-t border-gray-50 flex items-center justify-between mt-auto">
-                                    <div class="flex items-center gap-2">
-                                        <div class="w-6 h-6 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center">
-                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                                        </div>
-                                        <span class="text-[10px] font-bold uppercase tracking-wider text-gray-600">
-                                            {{ $project->implementation_date ? \Carbon\Carbon::parse($project->implementation_date)->format('M d, Y') : 'Date TBA' }}
+                                <div class="p-5 flex flex-col flex-1 bg-white">
+                                    {{-- Header: Status & Category --}}
+                                    <div class="flex justify-between items-start mb-3">
+                                        <span class="px-2.5 py-1 rounded text-[9px] font-black uppercase tracking-widest
+                                            {{ $project->status === 'Completed' ? 'bg-green-50 text-green-700 border border-green-100' :
+                                              ($project->status === 'Ongoing' ? 'bg-red-50 text-red-600 border border-red-100' : 'bg-yellow-50 text-yellow-700 border border-yellow-100') }}">
+                                            {{ $project->status }}
+                                        </span>
+                                        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                                            {{ $project->category->name ?? 'General' }}
                                         </span>
                                     </div>
 
-                                    {{-- "Manage" Link --}}
-                                    <a href="{{ route('projects.edit', $project->slug) }}" class="text-[10px] font-bold uppercase tracking-widest text-red-600 hover:text-red-700 hover:underline flex items-center gap-1 bg-red-50 px-3 py-1.5 rounded-lg group-hover:bg-red-100 transition-colors">
-                                        Manage <span>&rarr;</span>
-                                    </a>
+                                    {{-- Title --}}
+                                    <h4 class="text-base font-black text-gray-900 leading-tight mb-2 group-hover:text-red-600 transition-colors">
+                                        <a href="{{ route('projects.show', $project->slug) }}">
+                                            {{ $project->title }}
+                                        </a>
+                                    </h4>
+                                    <p class="text-xs text-gray-500 line-clamp-2 mb-4 leading-relaxed flex-1">
+                                        {{ $project->description }}
+                                    </p>
+
+                                    {{-- Footer: Meta --}}
+                                    <div class="pt-4 border-t border-gray-50 flex items-center justify-between mt-auto">
+                                        <div class="flex items-center gap-2">
+                                            <div class="w-6 h-6 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center">
+                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                            </div>
+                                            <span class="text-[10px] font-bold uppercase tracking-wider text-gray-600">
+                                                {{ $project->implementation_date ? \Carbon\Carbon::parse($project->implementation_date)->format('M d, Y') : 'Date TBA' }}
+                                            </span>
+                                        </div>
+
+                                        {{-- "Manage" Link --}}
+                                        <a href="{{ route('projects.edit', $project->slug) }}" class="text-[10px] font-bold uppercase tracking-widest text-red-600 hover:text-red-700 hover:underline flex items-center gap-1 bg-red-50 px-3 py-1.5 rounded-lg group-hover:bg-red-100 transition-colors">
+                                            Manage <span>&rarr;</span>
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        @empty
-                        <div class="col-span-1 md:col-span-2 bg-white rounded-3xl p-10 text-center border border-dashed border-gray-200 shadow-sm">
-                            <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-400">
-                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                            @empty
+                            <div class="col-span-1 md:col-span-2 bg-stone-50 rounded-2xl p-8 text-center border border-dashed border-gray-200">
+                                <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center mx-auto mb-3 text-gray-400 shadow-sm">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2H5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                                </div>
+                                <h3 class="text-sm font-bold text-gray-900 mb-1">No Led Projects Yet</h3>
+                                <p class="text-xs text-gray-500">You haven't been listed as a proponent for any projects.</p>
                             </div>
-                            <h3 class="text-base font-black text-gray-900 mb-1">No Led Projects Yet</h3>
-                            <p class="text-sm text-gray-500">You haven't been listed as a proponent for any projects.</p>
+                            @endforelse
                         </div>
-                        @endforelse
                     </div>
                 </div>
 
@@ -249,13 +259,16 @@
             {{-- ========================================== --}}
             <div class="xl:col-span-4 space-y-8">
 
-                {{-- 5. CALENDAR SECTION (Sidebar Sized) --}}
-                <div class="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
-                    <h3 class="font-heading font-black text-lg text-gray-900 mb-6 flex items-center gap-2">
-                        <span class="w-2 h-2 rounded-full bg-blue-500"></span> Calendar
+                {{-- 5. COMPACT CALENDAR SECTION (Sidebar Widget Style) --}}
+                <div class="bg-white rounded-3xl p-5 shadow-sm border border-gray-100 overflow-hidden">
+                    <h3 class="font-heading font-black text-sm text-gray-900 mb-4 flex items-center gap-2 px-1">
+                        <span class="w-2 h-2 rounded-full bg-blue-500"></span> Schedule
                     </h3>
-                    {{-- The calendar will naturally compress to fit this col-span-4 column --}}
-                    <livewire:events-calendar />
+
+                    {{-- Compact wrapper to shrink calendar elements gracefully on desktop --}}
+                    <div class="text-xs scale-95 origin-top transform">
+                        <livewire:events-calendar />
+                    </div>
                 </div>
 
                 {{-- 6. UPCOMING PROJECTS (Simple Dark Mode Sidebar List) --}}
