@@ -511,14 +511,10 @@ EOT;
                 ->paginate(15);
         }
 
-        $layoutFile = in_array(auth()->user()->role?->role_name, ['administrator', 'organization'])
-            ? 'layouts.madya-admin-deck'
-            : 'layouts.madya-admin';
-
         return view('livewire.admin.evaluation-results', [
             'totalResponsesCount' => $totalResponsesCount,
             'currentResponse' => $currentResponse,
             'allResponses' => $allResponses,
-        ])->layout($layoutFile);
+        ])->layout('layouts.madya-admin-deck');
     }
 }
