@@ -65,12 +65,12 @@
 
             <div class="md:col-span-2">
                 <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Signatory Name</label>
-                <input type="text" wire:model="name" placeholder="e.g. POLLY CRISTY P. MADRILEJOS" class="w-full border-gray-200 rounded-xl focus:border-red-500 focus:ring-red-500 text-sm font-bold shadow-sm">
+                <input type="text" wire:model="name" placeholder="e.g. JUAN DELA CRUZ" class="w-full border-gray-200 rounded-xl focus:border-red-500 focus:ring-red-500 text-sm font-bold shadow-sm">
             </div>
 
             <div class="md:col-span-2">
                 <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Official Position</label>
-                <input type="text" wire:model="position" placeholder="e.g. Finance Officer, BU CircUITS" class="w-full border-gray-200 rounded-xl focus:border-red-500 focus:ring-red-500 text-sm font-bold shadow-sm">
+                <input type="text" wire:model="position" placeholder="e.g. Finance Officer, BU MADYA" class="w-full border-gray-200 rounded-xl focus:border-red-500 focus:ring-red-500 text-sm font-bold shadow-sm">
             </div>
         </div>
 

@@ -50,7 +50,7 @@
 
                         <div>
                             <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">Disbursement Voucher No.</label>
-                            <input type="text" wire:model="dv_number" placeholder="e.g. CircUITS-DV-2026-016" class="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-medium focus:ring-red-500 focus:border-red-500 shadow-sm">
+                            <input type="text" wire:model="dv_number" placeholder="e.g. MADYA-DV-2026-016" class="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-medium focus:ring-red-500 focus:border-red-500 shadow-sm">
                         </div>
 
                         <div>
