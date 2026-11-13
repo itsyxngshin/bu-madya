@@ -32,7 +32,7 @@
                     </div>
                 </div>
                 <div class="p-4 flex-1">
-                    <p class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4">{{ $ledger->organization_name }}</p>
+                    <p class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4">{{ $ledger->user ? $ledger->user->name : 'Unassigned Ledger' }}</p>
                     <div class="space-y-2">
                         <div class="flex justify-between items-center text-sm border-b border-dashed border-gray-200 pb-1">
                             <span class="font-bold text-gray-400 uppercase">Starting Cap:</span>
@@ -75,9 +75,21 @@
                             <input type="text" wire:model="period_name" class="w-full border-2 border-iba-black p-2 text-sm font-bold focus:outline-none focus:border-iba-orange">
                         </div>
                         <div>
-                            <label class="block text-[10px] font-black text-gray-500 uppercase mb-1">Organization Name</label>
-                            <input type="text" wire:model="organization_name" {{ auth()->user()->role?->role_name === 'organization' ? 'readonly' : '' }} class="w-full border-2 border-iba-black p-2 text-sm font-bold {{ auth()->user()->role?->role_name === 'organization' ? 'bg-gray-200 text-gray-600' : 'focus:outline-none focus:border-iba-orange' }}">
-                        </div>
+                                                    <label class="block text-[10px] font-black text-gray-500 uppercase mb-1">Assigned Organization</label>
+                                                    @if(auth()->user()->role?->role_name === 'organization')
+                                                        {{-- Locked input for orgs --}}
+                                                        <input type="text" value="{{ auth()->user()->name }}" readonly class="w-full border-2 border-iba-black p-2 text-sm font-bold bg-gray-200 text-gray-600">
+                                                        <input type="hidden" wire:model="target_user_id">
+                                                    @else
+                                                        {{-- Dropdown for Admins --}}
+                                                        <select wire:model="target_user_id" class="w-full border-2 border-iba-black p-2 text-sm font-bold focus:outline-none focus:border-iba-orange">
+                                                            <option value="">-- Select Organization --</option>
+                                                            @foreach($organizations as $org)
+                                                                <option value="{{ $org->id }}">{{ $org->name }}</option>
+                                                            @endforeach
+                                                        </select>
+                                                    @endif
+                                                </div>
                         <div class="grid grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-[10px] font-black text-gray-500 uppercase mb-1">Beginning Bank (PHP)</label>

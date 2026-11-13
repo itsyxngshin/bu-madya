@@ -526,10 +526,10 @@ Route::middleware(['web'])->group(function () {
     ->group(function () {
         Route::get('/elucida/roster', \App\Livewire\Elucida\FinancialRoster::class)->name('elucida.roster');
 
-            // Notice we accept {ledger_id} to bind the specific components to the correct active period
-            Route::get('/elucida/ledger/{ledger}', \App\Livewire\Elucida\LedgerBoard::class)->name('elucida.board');
-                Route::get('/elucida/liquidation/{ledger}', \App\Livewire\Elucida\LiquidationManager::class)->name('elucida.liquidation');
-                Route::get('/elucida/sales/{ledger}', \App\Livewire\Elucida\SalesRegister::class)->name('elucida.sales');
+        // Notice we accept {ledger_id} to bind the specific components to the correct active period
+        Route::get('/elucida/ledger/{ledger}', \App\Livewire\Elucida\LedgerBoard::class)->name('elucida.board');
+        Route::get('/elucida/liquidation/{ledger}', \App\Livewire\Elucida\LiquidationManager::class)->name('elucida.liquidation');
+        Route::get('/elucida/sales/{ledger}', \App\Livewire\Elucida\SalesRegister::class)->name('elucida.sales');
 
     });
 

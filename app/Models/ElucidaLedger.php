@@ -36,4 +36,9 @@ class ElucidaLedger extends Model {
     public function signatories() {
         return $this->morphMany(ElucidaSignatory::class, 'signable')->orderBy('order_sequence');
     }
+
+    public function user()
+        {
+            return $this->belongsTo(User::class, 'user_id');
+        }
 }
