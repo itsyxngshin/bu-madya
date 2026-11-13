@@ -3,6 +3,7 @@
 namespace App\Livewire\Elucida;
 
 use Livewire\Component;
+use Livewire\WithFileUploads;
 use App\Models\ElucidaLedger;
 use App\Models\ElucidaTransaction;
 use App\Models\ElucidaSignatory;
@@ -12,6 +13,8 @@ use Livewire\Attributes\Layout;
 #[Layout('layouts.madya-admin-deck')]
 class LedgerBoard extends Component
 {
+    use WithFileUploads;
+
     public $activeLedger;
     public $inflows = [];
     public $outflows = [];
@@ -30,6 +33,8 @@ class LedgerBoard extends Component
     public $tx_description = '';
     public $tx_reference = '';
     public $tx_amount = '';
+    public $tx_receipt_image = null; // To hold the uploaded file
+        public $existing_receipt_path = null; // To preview an existing file during edit
 
     public $inflowCategories = [
         'Membership Fee',
@@ -61,64 +66,79 @@ class LedgerBoard extends Component
     }
 
     public function editTransaction($id)
-    {
-        $this->resetForm();
-        $tx = ElucidaTransaction::findOrFail($id);
+        {
+            $this->resetForm();
+            $tx = ElucidaTransaction::findOrFail($id);
 
-        // Security check
-        if($tx->ledger_id !== $this->activeLedger->id) {
-            abort(403);
+            if($tx->ledger_id !== $this->activeLedger->id) { abort(403); }
+
+            $this->editingTransactionId = $tx->id;
+            $this->transactionType = $tx->type;
+            $this->tx_category = $tx->category;
+            $this->tx_description = $tx->description;
+            $this->tx_reference = $tx->reference_code;
+            $this->tx_amount = $tx->amount;
+            $this->existing_receipt_path = $tx->receipt_image_path; // Load existing proof
+
+            $this->showTransactionModal = true;
         }
 
-        $this->editingTransactionId = $tx->id;
-        $this->transactionType = $tx->type;
-        $this->tx_category = $tx->category;
-        $this->tx_description = $tx->description;
-        $this->tx_reference = $tx->reference_code;
-        $this->tx_amount = $tx->amount;
-
-        $this->showTransactionModal = true;
-    }
-
-    public function resetForm()
-    {
-        $this->reset(['editingTransactionId', 'tx_category', 'tx_description', 'tx_reference', 'tx_amount']);
-    }
-
-    public function saveTransaction()
-    {
-        $this->validate([
-            'tx_category' => 'required|string',
-            'tx_description' => 'required|string|max:255',
-            'tx_amount' => 'required|numeric|min:0.01'
-        ]);
-
-        if ($this->editingTransactionId) {
-            $tx = ElucidaTransaction::findOrFail($this->editingTransactionId);
-            $tx->update([
-                'category' => $this->tx_category,
-                'description' => mb_strtoupper($this->tx_description),
-                'reference_code' => $this->tx_reference ?: null,
-                'amount' => $this->tx_amount,
-            ]);
-            session()->flash('success', 'Transaction updated successfully.');
-        } else {
-            ElucidaTransaction::create([
-                'ledger_id' => $this->activeLedger->id,
-                'type' => $this->transactionType,
-                'category' => $this->tx_category,
-                'description' => mb_strtoupper($this->tx_description),
-                'reference_code' => $this->tx_reference ?: null,
-                'amount' => $this->tx_amount,
-                'transaction_date' => Carbon::now()
-            ]);
-            session()->flash('success', ucfirst($this->transactionType) . ' securely logged to the ledger.');
+        public function resetForm()
+        {
+            $this->reset(['editingTransactionId', 'tx_category', 'tx_description', 'tx_reference', 'tx_amount', 'tx_receipt_image', 'existing_receipt_path']);
         }
 
-        $this->showTransactionModal = false;
-        $this->resetForm();
-        $this->calculateTotals();
-    }
+        public function saveTransaction()
+        {
+            $rules = [
+                'tx_category' => 'required|string',
+                'tx_description' => 'required|string|max:255',
+                'tx_amount' => 'required|numeric|min:0.01',
+                'tx_receipt_image' => 'nullable|image|max:10240' // Max 10MB image
+            ];
+
+            // Require proof specifically for new inflows (can customize this logic as needed)
+            if ($this->transactionType === 'inflow' && !$this->editingTransactionId && !$this->tx_receipt_image) {
+                $rules['tx_receipt_image'] = 'required|image|max:10240';
+            }
+
+            $this->validate($rules, [
+                'tx_receipt_image.required' => 'Proof of receipt/deposit is required to log an inflow.'
+            ]);
+
+            $imagePath = $this->existing_receipt_path;
+            if ($this->tx_receipt_image) {
+                $imagePath = $this->tx_receipt_image->store('ledger-receipts', 'public');
+            }
+
+            if ($this->editingTransactionId) {
+                $tx = ElucidaTransaction::findOrFail($this->editingTransactionId);
+                $tx->update([
+                    'category' => $this->tx_category,
+                    'description' => mb_strtoupper($this->tx_description),
+                    'reference_code' => $this->tx_reference ?: null,
+                    'amount' => $this->tx_amount,
+                    'receipt_image_path' => $imagePath,
+                ]);
+                session()->flash('success', 'Transaction updated successfully.');
+            } else {
+                ElucidaTransaction::create([
+                    'ledger_id' => $this->activeLedger->id,
+                    'type' => $this->transactionType,
+                    'category' => $this->tx_category,
+                    'description' => mb_strtoupper($this->tx_description),
+                    'reference_code' => $this->tx_reference ?: null,
+                    'amount' => $this->tx_amount,
+                    'receipt_image_path' => $imagePath,
+                    'transaction_date' => Carbon::now()
+                ]);
+                session()->flash('success', ucfirst($this->transactionType) . ' securely logged to the ledger.');
+            }
+
+            $this->showTransactionModal = false;
+            $this->resetForm();
+            $this->calculateTotals();
+        }
 
     public function deleteTransaction($id)
     {

@@ -13,7 +13,7 @@
                 </div>
 
                 <div class="flex flex-wrap justify-center sm:justify-end gap-3">
-                    <button wire:click="openTransactionModal('inflow')" class="bg-gray-100 hover:bg-green-50 text-gray-700 hover:text-green-700 border border-gray-200 hover:border-green-200 rounded-xl px-4 py-2.5 text-[10px] md:text-xs font-bold uppercase tracking-widest transition flex items-center gap-2">
+                    <button wire:click="openTransactionModal('inflow')" class="bg-green-50 hover:bg-green-100 text-green-700 border border-green-200 rounded-xl px-4 py-2.5 text-[10px] md:text-xs font-bold uppercase tracking-widest transition flex items-center gap-2">
                         + Log Inflow
                     </button>
                     <a href="{{ route('elucida.sales', $activeLedger) }}" class="bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-200 rounded-xl px-4 py-2.5 text-[10px] md:text-xs font-bold uppercase tracking-widest transition flex items-center gap-2">
@@ -71,13 +71,18 @@
                                     @if($tx->reference_code)
                                         <span class="bg-gray-100 border border-gray-200 text-gray-500 text-[9px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">{{ $tx->reference_code }}</span>
                                     @endif
+                                    @if($tx->receipt_image_path)
+                                        <a href="{{ asset('storage/' . $tx->receipt_image_path) }}" target="_blank" class="text-blue-500 hover:text-blue-700 bg-blue-50 p-1 rounded-md" title="View Proof of Receipt">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path></svg>
+                                        </a>
+                                    @endif
                                 </span>
                                 <div class="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto">
                                     <span class="font-bold text-gray-900">PHP {{ number_format($tx->amount, 2) }}</span>
 
                                     {{-- Edit/Delete Actions --}}
                                     <div x-data="{ open: false }" class="relative">
-                                        <button @click="open = !open" @click.outside="open = false" class="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 text-gray-400 hover:text-gray-900 bg-white border border-gray-200 hover:bg-gray-100 px-2 py-1 rounded-lg transition-all shadow-sm">
+                                        <button @click="open = !open" @click.outside="open = false" class="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 text-gray-400 hover:text-gray-900 bg-white border border-gray-200 hover:bg-gray-100 px-2 py-1 rounded-lg transition-all shadow-sm focus:outline-none">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path></svg>
                                         </button>
                                         <div x-show="open" style="display: none;" class="absolute right-0 top-full mt-1 w-28 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden z-20">
@@ -132,7 +137,7 @@
 
                                     {{-- Edit/Delete Actions --}}
                                     <div x-data="{ open: false }" class="relative">
-                                        <button @click="open = !open" @click.outside="open = false" class="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 text-gray-400 hover:text-gray-900 bg-white border border-gray-200 hover:bg-gray-100 px-2 py-1 rounded-lg transition-all shadow-sm">
+                                        <button @click="open = !open" @click.outside="open = false" class="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 text-gray-400 hover:text-gray-900 bg-white border border-gray-200 hover:bg-gray-100 px-2 py-1 rounded-lg transition-all shadow-sm focus:outline-none">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path></svg>
                                         </button>
                                         <div x-show="open" style="display: none;" class="absolute right-0 top-full mt-1 w-28 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden z-20">
@@ -171,7 +176,7 @@
         <div class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
             <div class="fixed inset-0 bg-gray-900/80 backdrop-blur-sm transition-opacity" wire:click="$set('showTransactionModal', false)"></div>
 
-            <div class="relative bg-white rounded-3xl shadow-2xl w-full max-w-md flex flex-col overflow-hidden transform transition-all">
+            <div class="relative bg-white rounded-3xl shadow-2xl w-full max-w-md flex flex-col overflow-hidden transform transition-all max-h-screen">
                 <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r {{ $transactionType === 'inflow' ? 'from-green-400 to-green-600' : 'from-red-400 to-red-600' }}"></div>
 
                 <div class="flex items-center justify-between p-6 border-b border-gray-100 bg-white">
@@ -186,7 +191,7 @@
                     </button>
                 </div>
 
-                <form wire:submit.prevent="saveTransaction" class="p-6 bg-gray-50 space-y-4">
+                <form wire:submit.prevent="saveTransaction" class="p-6 bg-gray-50 space-y-4 overflow-y-auto custom-scrollbar">
                     <div>
                         <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">Category</label>
                         <select wire:model="tx_category" class="w-full border-gray-200 rounded-xl text-sm font-bold shadow-sm focus:ring-2 {{ $transactionType === 'inflow' ? 'focus:ring-green-500 focus:border-green-500' : 'focus:ring-red-500 focus:border-red-500' }}">
@@ -203,6 +208,7 @@
                     <div>
                         <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">Description (Particulars)</label>
                         <input type="text" wire:model="tx_description" class="w-full border-gray-200 rounded-xl text-sm font-bold shadow-sm focus:ring-2 {{ $transactionType === 'inflow' ? 'focus:ring-green-500 focus:border-green-500' : 'focus:ring-red-500 focus:border-red-500' }}">
+                        @error('tx_description') <span class="text-xs text-red-500 font-bold block mt-1.5">{{ $message }}</span> @enderror
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
@@ -215,6 +221,45 @@
                             <input type="number" step="0.01" wire:model="tx_amount" class="w-full border-gray-200 rounded-xl text-sm font-black shadow-sm text-right focus:ring-2 {{ $transactionType === 'inflow' ? 'text-green-600 focus:ring-green-500 focus:border-green-500' : 'text-red-600 focus:ring-red-500 focus:border-red-500' }}">
                         </div>
                     </div>
+
+                    {{-- Inflow Proof Uploader (Only visible if the transaction type is inflow) --}}
+                    @if($transactionType === 'inflow')
+                        <div class="mt-4 border-t border-gray-200 pt-4">
+                            <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">
+                                Proof of Transaction <span class="text-red-500">*</span>
+                            </label>
+
+                            @if($existing_receipt_path && !$tx_receipt_image)
+                                <div class="mb-3 relative rounded-xl border border-gray-200 overflow-hidden bg-gray-50">
+                                    <img src="{{ asset('storage/' . $existing_receipt_path) }}" class="w-full h-32 object-cover opacity-75">
+                                    <div class="absolute inset-0 flex items-center justify-center">
+                                        <span class="bg-gray-900/80 text-white text-[10px] font-bold uppercase px-3 py-1 rounded-lg backdrop-blur-sm">Current File on Record</span>
+                                    </div>
+                                </div>
+                            @endif
+
+                            <div x-data="{ isUploading: false, progress: 0 }"
+                                 x-on:livewire-upload-start="isUploading = true"
+                                 x-on:livewire-upload-finish="isUploading = false"
+                                 x-on:livewire-upload-error="isUploading = false"
+                                 x-on:livewire-upload-progress="progress = $event.detail.progress">
+
+                                <input type="file" wire:model="tx_receipt_image" accept="image/*" class="block w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-[10px] file:font-bold file:uppercase file:tracking-wider file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 transition cursor-pointer bg-white border border-gray-200 rounded-2xl p-1.5 shadow-sm focus:ring-2 focus:ring-green-500">
+                                @error('tx_receipt_image') <span class="text-xs text-red-500 font-bold block mt-1.5">{{ $message }}</span> @enderror
+
+                                <div x-show="isUploading" style="display: none;" class="mt-3 h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+                                    <div class="h-1.5 rounded-full bg-green-500" x-bind:style="'width: ' + progress + '%'"></div>
+                                </div>
+
+                                @if($tx_receipt_image)
+                                    <div class="mt-2 text-[10px] font-bold text-green-600 uppercase tracking-widest flex items-center gap-1">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                        File staged for upload
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                    @endif
 
                     <button type="submit" class="w-full mt-4 bg-gray-900 text-white font-bold rounded-xl py-3 shadow-md transition flex justify-center items-center gap-2 {{ $transactionType === 'inflow' ? 'hover:bg-green-600' : 'hover:bg-red-600' }}">
                         {{ $editingTransactionId ? 'Save Changes' : 'Commit to Ledger' }}
