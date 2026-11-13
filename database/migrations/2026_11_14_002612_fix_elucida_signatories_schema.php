@@ -9,14 +9,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('elucida_signatories', function (Blueprint $table) {
+            // Safely appending columns without strict ->after() anchors
             if (!Schema::hasColumn('elucida_signatories', 'order_sequence')) {
-                $table->integer('order_sequence')->default(1)->after('signature_path');
+                $table->integer('order_sequence')->default(1);
             }
             if (!Schema::hasColumn('elucida_signatories', 'has_signed')) {
-                $table->boolean('has_signed')->default(false)->after('position');
+                $table->boolean('has_signed')->default(false);
             }
             if (!Schema::hasColumn('elucida_signatories', 'signed_at')) {
-                $table->timestamp('signed_at')->nullable()->after('has_signed');
+                $table->timestamp('signed_at')->nullable();
             }
         });
     }
