@@ -7,7 +7,9 @@ use App\Models\ElucidaLedger;
 use App\Models\ElucidaTransaction;
 use App\Models\ElucidaSignatory;
 use Carbon\Carbon;
+use Livewire\Attributes\Layout;
 
+#[Layout('layouts.madya-admin-deck')]
 class LedgerBoard extends Component
 {
     public $activeLedger;
