@@ -9,7 +9,9 @@ use App\Models\ElucidaTransaction;
 use App\Models\ElucidaLiquidation;
 use App\Models\ElucidaLiquidationItem;
 use Illuminate\Support\Facades\Storage;
+use Livewire\Attributes\Layout;
 
+#[Layout('layouts.madya-admin-deck')]
 class LiquidationManager extends Component
 {
     use WithFileUploads;

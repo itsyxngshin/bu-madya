@@ -5,7 +5,9 @@ namespace App\Livewire\Elucida;
 use Livewire\Component;
 use App\Models\ElucidaSignatory;
 use Illuminate\Database\Eloquent\Model;
+use Livewire\Attributes\Layout;
 
+#[Layout('layouts.madya-admin-deck')]
 class SignatoryManager extends Component
 {
     // The polymorphic target (either an ElucidaLedger or ElucidaLiquidation instance)

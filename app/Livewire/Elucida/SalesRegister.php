@@ -7,7 +7,9 @@ use App\Models\ElucidaLedger;
 use App\Models\ElucidaTransaction;
 use App\Models\ElucidaSalesRegister;
 use Carbon\Carbon;
+use Livewire\Attributes\Layout;
 
+#[Layout('layouts.madya-admin-deck')]
 class SalesRegister extends Component
 {
     public $activeLedger;
