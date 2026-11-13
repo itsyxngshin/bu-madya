@@ -4,6 +4,7 @@ namespace App\Livewire\Elucida;
 
 use Livewire\Component;
 use Livewire\WithFileUploads;
+use App\Models\ElucidaLedger;
 use App\Models\ElucidaTransaction;
 use App\Models\ElucidaLiquidation;
 use App\Models\ElucidaLiquidationItem;
