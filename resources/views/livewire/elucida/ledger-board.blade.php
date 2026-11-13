@@ -1,9 +1,8 @@
-<div class="min-h-screen bg-gray-100 p-4 md:p-6 font-sans text-gray-900">
+<div class="min-h-screen bg-gray-100 p-4 md:p-6 font-sans text-gray-900 pb-24">
     <div class="max-w-5xl mx-auto space-y-6 pb-24">
 
         {{-- EDGE-TO-EDGE PREMIUM HEADER --}}
         <div class="relative bg-white rounded-3xl p-8 md:p-10 shadow-sm border border-gray-200 overflow-hidden group">
-            {{-- Tricolor Sweep --}}
             <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-red-600 via-yellow-400 to-green-500"></div>
 
             <div class="relative z-10 flex flex-col md:flex-row justify-between items-center text-center md:text-left gap-6">
@@ -13,17 +12,26 @@
                     <p class="text-sm font-bold text-gray-600 uppercase">{{ $activeLedger->period_name }}</p>
                 </div>
 
-                <div class="flex gap-3">
-                    <a href="{{ route('elucida.sales', $activeLedger) }}" class="bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-200 rounded-xl px-5 py-2.5 text-[10px] md:text-xs font-bold uppercase tracking-widest transition flex items-center gap-2">
-                        + Log Sales
+                <div class="flex flex-wrap justify-center sm:justify-end gap-3">
+                    <button wire:click="openTransactionModal('inflow')" class="bg-gray-100 hover:bg-green-50 text-gray-700 hover:text-green-700 border border-gray-200 hover:border-green-200 rounded-xl px-4 py-2.5 text-[10px] md:text-xs font-bold uppercase tracking-widest transition flex items-center gap-2">
+                        + Log Inflow
+                    </button>
+                    <a href="{{ route('elucida.sales', $activeLedger) }}" class="bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-200 rounded-xl px-4 py-2.5 text-[10px] md:text-xs font-bold uppercase tracking-widest transition flex items-center gap-2">
+                        POS Tracker
                     </a>
-                    <button wire:click="exportStatementDoc" class="bg-gray-900 hover:bg-red-600 text-white rounded-xl px-5 py-2.5 text-[10px] md:text-xs font-bold uppercase tracking-widest shadow-md transition flex items-center gap-2">
+                    <button wire:click="exportStatementDoc" class="bg-gray-900 hover:bg-red-600 text-white rounded-xl px-4 py-2.5 text-[10px] md:text-xs font-bold uppercase tracking-widest shadow-md transition flex items-center gap-2 w-full sm:w-auto justify-center">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                         Export DOCX
                     </button>
                 </div>
             </div>
         </div>
+
+        @if (session()->has('success'))
+            <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl text-sm font-bold shadow-sm">
+                {{ session('success') }}
+            </div>
+        @endif
 
         {{-- MAIN DATA CARDS --}}
 
@@ -46,7 +54,7 @@
         </div>
 
         {{-- II. Cash Inflows --}}
-        <div class="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray-200">
+        <div class="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray-200 relative">
             <div class="flex justify-between items-center mb-6 border-b border-gray-100 pb-4">
                 <h3 class="text-lg font-black text-gray-900 uppercase">II. Add: Cash Inflow</h3>
                 <span class="text-lg font-black text-green-600">PHP {{ number_format($totalCashAvailable - ($activeLedger->beginning_bank + $activeLedger->beginning_cash), 2) }}</span>
@@ -54,12 +62,30 @@
 
             @forelse($inflows as $category => $transactions)
                 <div class="mb-6 last:mb-0">
-                    <h4 class="text-xs font-bold uppercase text-gray-400 tracking-widest mb-3 bg-gray-50 inline-block px-3 py-1 rounded-lg">{{ $category }}</h4>
-                    <div class="space-y-3 pl-2 md:pl-4">
+                    <h4 class="text-[10px] sm:text-xs font-bold uppercase text-gray-400 tracking-widest mb-3 bg-gray-50 inline-block px-3 py-1 rounded-lg border border-gray-100">{{ $category }}</h4>
+                    <div class="space-y-3 pl-1 sm:pl-4">
                         @foreach($transactions as $tx)
-                            <div class="flex justify-between items-center text-sm">
-                                <span class="font-medium text-gray-800">{{ $tx->description }}</span>
-                                <span class="font-bold text-gray-900">PHP {{ number_format($tx->amount, 2) }}</span>
+                            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center text-sm group hover:bg-gray-50 p-2 -mx-2 rounded-lg transition-colors gap-2 sm:gap-0">
+                                <span class="font-medium text-gray-800 flex items-center gap-2">
+                                    {{ $tx->description }}
+                                    @if($tx->reference_code)
+                                        <span class="bg-gray-100 border border-gray-200 text-gray-500 text-[9px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">{{ $tx->reference_code }}</span>
+                                    @endif
+                                </span>
+                                <div class="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto">
+                                    <span class="font-bold text-gray-900">PHP {{ number_format($tx->amount, 2) }}</span>
+
+                                    {{-- Edit/Delete Actions --}}
+                                    <div x-data="{ open: false }" class="relative">
+                                        <button @click="open = !open" @click.outside="open = false" class="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 text-gray-400 hover:text-gray-900 bg-white border border-gray-200 hover:bg-gray-100 px-2 py-1 rounded-lg transition-all shadow-sm">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path></svg>
+                                        </button>
+                                        <div x-show="open" style="display: none;" class="absolute right-0 top-full mt-1 w-28 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden z-20">
+                                            <button wire:click="editTransaction({{ $tx->id }})" class="w-full text-left px-4 py-2 text-xs font-bold text-gray-700 hover:bg-gray-50">Edit</button>
+                                            <button onclick="confirm('Permanently delete this inflow?') || event.stopImmediatePropagation()" wire:click="deleteTransaction({{ $tx->id }})" class="w-full text-left px-4 py-2 text-xs font-bold text-red-600 hover:bg-red-50 border-t border-gray-50">Delete</button>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         @endforeach
                     </div>
@@ -78,25 +104,43 @@
         </div>
 
         {{-- IV. Expenses --}}
-        <div class="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray-200">
-            <div class="flex justify-between items-center mb-6 border-b border-gray-100 pb-4">
+        <div class="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray-200 relative">
+            <div class="flex flex-col sm:flex-row justify-between sm:items-center mb-6 border-b border-gray-100 pb-4 gap-2">
                 <h3 class="text-lg font-black text-gray-900 uppercase">IV. Less: Expenses</h3>
-                <span class="text-lg font-black text-red-600">PHP {{ number_format($totalExpenses, 2) }}</span>
+                <div class="flex items-center gap-3">
+                    <button wire:click="openTransactionModal('outflow')" class="text-[10px] font-bold uppercase tracking-widest text-red-600 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg transition-colors border border-red-100">
+                        + Add Expense
+                    </button>
+                    <span class="text-lg font-black text-red-600">PHP {{ number_format($totalExpenses, 2) }}</span>
+                </div>
             </div>
 
             @forelse($outflows as $category => $transactions)
                 <div class="mb-6 last:mb-0">
-                    <h4 class="text-xs font-bold uppercase text-gray-400 tracking-widest mb-3 bg-gray-50 inline-block px-3 py-1 rounded-lg">{{ $category }}</h4>
-                    <div class="space-y-3 pl-2 md:pl-4">
+                    <h4 class="text-[10px] sm:text-xs font-bold uppercase text-gray-400 tracking-widest mb-3 bg-gray-50 inline-block px-3 py-1 rounded-lg border border-gray-100">{{ $category }}</h4>
+                    <div class="space-y-3 pl-1 sm:pl-4">
                         @foreach($transactions as $tx)
-                            <div class="flex justify-between items-center text-sm">
-                                <span class="flex items-center gap-2 font-medium text-gray-800">
+                            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center text-sm group hover:bg-gray-50 p-2 -mx-2 rounded-lg transition-colors gap-2 sm:gap-0">
+                                <span class="font-medium text-gray-800 flex items-center gap-2">
                                     {{ $tx->description }}
                                     @if($tx->reference_code)
-                                        <span class="bg-gray-100 text-gray-500 text-[10px] px-2 py-0.5 rounded-md font-bold">{{ $tx->reference_code }}</span>
+                                        <span class="bg-gray-100 border border-gray-200 text-gray-500 text-[9px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">{{ $tx->reference_code }}</span>
                                     @endif
                                 </span>
-                                <span class="font-bold text-gray-900">PHP {{ number_format($tx->amount, 2) }}</span>
+                                <div class="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto">
+                                    <span class="font-bold text-gray-900">PHP {{ number_format($tx->amount, 2) }}</span>
+
+                                    {{-- Edit/Delete Actions --}}
+                                    <div x-data="{ open: false }" class="relative">
+                                        <button @click="open = !open" @click.outside="open = false" class="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 text-gray-400 hover:text-gray-900 bg-white border border-gray-200 hover:bg-gray-100 px-2 py-1 rounded-lg transition-all shadow-sm">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path></svg>
+                                        </button>
+                                        <div x-show="open" style="display: none;" class="absolute right-0 top-full mt-1 w-28 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden z-20">
+                                            <button wire:click="editTransaction({{ $tx->id }})" class="w-full text-left px-4 py-2 text-xs font-bold text-gray-700 hover:bg-gray-50">Edit</button>
+                                            <button onclick="confirm('Permanently delete this expense?') || event.stopImmediatePropagation()" wire:click="deleteTransaction({{ $tx->id }})" class="w-full text-left px-4 py-2 text-xs font-bold text-red-600 hover:bg-red-50 border-t border-gray-50">Delete</button>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         @endforeach
                     </div>
@@ -115,10 +159,68 @@
             <span class="text-2xl md:text-3xl font-black text-white relative z-10">PHP {{ number_format($endingBalance, 2) }}</span>
         </div>
 
-        {{-- 6. Polymorphic Signatory Manager Component Injection --}}
+        {{-- Signatory Manager Component Injection --}}
         <div class="mt-8">
             <livewire:elucida.signatory-manager :targetModel="$activeLedger" />
         </div>
 
     </div>
+
+    {{-- UNIFIED TRANSACTION MODAL (Create/Edit, Inflow/Outflow) --}}
+    @if($showTransactionModal)
+        <div class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
+            <div class="fixed inset-0 bg-gray-900/80 backdrop-blur-sm transition-opacity" wire:click="$set('showTransactionModal', false)"></div>
+
+            <div class="relative bg-white rounded-3xl shadow-2xl w-full max-w-md flex flex-col overflow-hidden transform transition-all">
+                <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r {{ $transactionType === 'inflow' ? 'from-green-400 to-green-600' : 'from-red-400 to-red-600' }}"></div>
+
+                <div class="flex items-center justify-between p-6 border-b border-gray-100 bg-white">
+                    <div>
+                        <h3 class="text-xl font-black text-gray-900 leading-tight">
+                            {{ $editingTransactionId ? 'Edit' : 'Log' }} {{ ucfirst($transactionType) }}
+                        </h3>
+                        <p class="text-xs font-bold text-gray-400 mt-1 uppercase tracking-widest">Update ledger entry</p>
+                    </div>
+                    <button wire:click="$set('showTransactionModal', false)" class="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+
+                <form wire:submit.prevent="saveTransaction" class="p-6 bg-gray-50 space-y-4">
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">Category</label>
+                        <select wire:model="tx_category" class="w-full border-gray-200 rounded-xl text-sm font-bold shadow-sm focus:ring-2 {{ $transactionType === 'inflow' ? 'focus:ring-green-500 focus:border-green-500' : 'focus:ring-red-500 focus:border-red-500' }}">
+                            @foreach($transactionType === 'inflow' ? $inflowCategories : $outflowCategories as $cat)
+                                <option value="{{ $cat }}">{{ $cat }}</option>
+                            @endforeach
+                            <option value="Custom">Custom (Type below)</option>
+                        </select>
+                        @if($tx_category === 'Custom')
+                            <input type="text" wire:model="tx_category" placeholder="Custom category..." class="w-full mt-2 border-gray-200 rounded-xl text-sm font-bold shadow-sm focus:ring-2 {{ $transactionType === 'inflow' ? 'focus:ring-green-500 focus:border-green-500' : 'focus:ring-red-500 focus:border-red-500' }}">
+                        @endif
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">Description (Particulars)</label>
+                        <input type="text" wire:model="tx_description" class="w-full border-gray-200 rounded-xl text-sm font-bold shadow-sm focus:ring-2 {{ $transactionType === 'inflow' ? 'focus:ring-green-500 focus:border-green-500' : 'focus:ring-red-500 focus:border-red-500' }}">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">Ref. Code (Optional)</label>
+                            <input type="text" wire:model="tx_reference" placeholder="e.g. Note 3 / LR014" class="w-full border-gray-200 rounded-xl text-sm font-mono shadow-sm focus:ring-2 {{ $transactionType === 'inflow' ? 'focus:ring-green-500 focus:border-green-500' : 'focus:ring-red-500 focus:border-red-500' }}">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">Amount (PHP)</label>
+                            <input type="number" step="0.01" wire:model="tx_amount" class="w-full border-gray-200 rounded-xl text-sm font-black shadow-sm text-right focus:ring-2 {{ $transactionType === 'inflow' ? 'text-green-600 focus:ring-green-500 focus:border-green-500' : 'text-red-600 focus:ring-red-500 focus:border-red-500' }}">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="w-full mt-4 bg-gray-900 text-white font-bold rounded-xl py-3 shadow-md transition flex justify-center items-center gap-2 {{ $transactionType === 'inflow' ? 'hover:bg-green-600' : 'hover:bg-red-600' }}">
+                        {{ $editingTransactionId ? 'Save Changes' : 'Commit to Ledger' }}
+                    </button>
+                </form>
+            </div>
+        </div>
+    @endif
 </div>

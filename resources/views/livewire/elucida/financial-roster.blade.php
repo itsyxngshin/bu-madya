@@ -79,14 +79,25 @@
                     </div>
 
                     {{-- Actions Footer --}}
-                    <div class="border-t border-gray-100 pt-4 mt-6 flex gap-2">
-                        <a href="{{ route('elucida.board', $ledger) }}" class="flex-1 text-center bg-gray-900 text-white px-4 py-2 rounded-xl text-[10px] sm:text-xs font-bold uppercase tracking-wider hover:bg-red-600 transition">
-                            Board
-                        </a>
-                        <a href="{{ route('elucida.liquidation', $ledger) }}" class="flex-1 text-center bg-gray-50 border border-gray-200 text-gray-700 px-4 py-2 rounded-xl text-[10px] sm:text-xs font-bold uppercase tracking-wider hover:bg-gray-100 transition">
-                            Liquidations
-                        </a>
-                    </div>
+                                        <div class="border-t border-gray-100 pt-4 mt-6 flex gap-2">
+                                            <a href="{{ route('elucida.board', $ledger) }}" class="flex-1 text-center bg-gray-900 text-white px-4 py-2 rounded-xl text-[10px] sm:text-xs font-bold uppercase tracking-wider hover:bg-red-600 transition">
+                                                Board
+                                            </a>
+                                            <a href="{{ route('elucida.liquidation', $ledger) }}" class="flex-1 text-center bg-gray-50 border border-gray-200 text-gray-700 px-4 py-2 rounded-xl text-[10px] sm:text-xs font-bold uppercase tracking-wider hover:bg-gray-100 transition">
+                                                Liquidations
+                                            </a>
+
+                                            {{-- Context Menu for Edit/Delete --}}
+                                            <div x-data="{ open: false }" class="relative">
+                                                <button @click="open = !open" @click.outside="open = false" class="h-full px-3 text-gray-400 border border-gray-200 bg-gray-50 rounded-xl hover:text-gray-900 hover:bg-gray-100 transition">
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path></svg>
+                                                </button>
+                                                <div x-show="open" style="display: none;" class="absolute right-0 bottom-full mb-2 w-32 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden z-50">
+                                                    <button wire:click="openEditModal({{ $ledger->id }})" class="w-full text-left px-4 py-2 text-xs font-bold text-gray-700 hover:bg-gray-50">Edit Setting</button>
+                                                    <button onclick="confirm('Are you sure you want to permanently delete this ledger and all associated transactions?') || event.stopImmediatePropagation()" wire:click="deleteLedger({{ $ledger->id }})" class="w-full text-left px-4 py-2 text-xs font-bold text-red-600 hover:bg-red-50 border-t border-gray-50">Delete Ledger</button>
+                                                </div>
+                                            </div>
+                                        </div>
                 </div>
             @empty
                 {{-- Empty state is handled by the Ghost Card above --}}

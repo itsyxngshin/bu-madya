@@ -15,16 +15,19 @@ class FinancialRoster extends Component
 
     public $search = '';
 
-    // Modal state
+    // Modal State
     public $showCreateModal = false;
+    public $editMode = false;
+    public $editingLedgerId = null;
+
+    // Form Fields
     public $period_name = '';
-    public $target_user_id = null; // Changed from organization_name
+    public $target_user_id = null;
     public $beginning_bank = 0;
     public $beginning_cash = 0;
 
     public function mount()
     {
-        // Auto-lock to the logged-in org
         if (auth()->user()->role?->role_name === 'organization') {
             $this->target_user_id = auth()->id();
         }
@@ -32,7 +35,38 @@ class FinancialRoster extends Component
 
     public function updatingSearch() { $this->resetPage(); }
 
-    public function createLedger()
+    public function openCreateModal()
+    {
+        $this->resetForm();
+        $this->showCreateModal = true;
+    }
+
+    public function openEditModal($ledgerId)
+    {
+        $this->resetForm();
+        $ledger = ElucidaLedger::findOrFail($ledgerId);
+
+        $this->editingLedgerId = $ledger->id;
+        $this->period_name = $ledger->period_name;
+        $this->target_user_id = $ledger->user_id;
+        $this->beginning_bank = $ledger->beginning_bank;
+        $this->beginning_cash = $ledger->beginning_cash;
+
+        $this->editMode = true;
+        $this->showCreateModal = true;
+    }
+
+    public function resetForm()
+    {
+        $this->reset(['editingLedgerId', 'period_name', 'beginning_bank', 'beginning_cash', 'editMode']);
+        if (auth()->user()->role?->role_name === 'organization') {
+            $this->target_user_id = auth()->id();
+        } else {
+            $this->target_user_id = null;
+        }
+    }
+
+    public function saveLedger()
     {
         $this->validate([
             'period_name' => 'required|string|max:255',
@@ -41,26 +75,48 @@ class FinancialRoster extends Component
             'beginning_cash' => 'required|numeric|min:0',
         ]);
 
-        $ledger = ElucidaLedger::create([
-            'period_name' => $this->period_name,
-            'user_id' => $this->target_user_id,
-            'beginning_bank' => $this->beginning_bank,
-            'beginning_cash' => $this->beginning_cash,
-            'status' => 'draft'
-        ]);
+        if ($this->editMode) {
+            $ledger = ElucidaLedger::findOrFail($this->editingLedgerId);
+            $ledger->update([
+                'period_name' => $this->period_name,
+                'user_id' => $this->target_user_id,
+                'beginning_bank' => $this->beginning_bank,
+                'beginning_cash' => $this->beginning_cash,
+            ]);
+            session()->flash('success', 'Financial Ledger updated successfully.');
+        } else {
+            $ledger = ElucidaLedger::create([
+                'period_name' => $this->period_name,
+                'user_id' => $this->target_user_id,
+                'beginning_bank' => $this->beginning_bank,
+                'beginning_cash' => $this->beginning_cash,
+                'status' => 'draft'
+            ]);
+            session()->flash('success', 'New Financial Ledger successfully forged.');
+            return redirect()->route('elucida.board', $ledger);
+        }
 
-        $this->reset(['showCreateModal', 'period_name', 'beginning_bank', 'beginning_cash']);
+        $this->showCreateModal = false;
+        $this->resetForm();
+    }
 
-        session()->flash('success', 'New Financial Ledger successfully forged.');
-        return redirect()->route('elucida.board', $ledger); // Uses UUID binding
+    public function deleteLedger($ledgerId)
+    {
+        $ledger = ElucidaLedger::findOrFail($ledgerId);
+
+        // RBAC: Only admins or the owner can delete
+        if (auth()->user()->role?->role_name !== 'administrator' && $ledger->user_id !== auth()->id()) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $ledger->delete();
+        session()->flash('success', 'Ledger permanently deleted.');
     }
 
     public function render()
     {
-        // Eager load the user relation to prevent N+1 queries
         $query = ElucidaLedger::with('user');
 
-        // RBAC Protocol: Organizations only see their own ledgers
         if (auth()->user()->role?->role_name === 'organization') {
             $query->where('user_id', auth()->id());
         }
@@ -68,14 +124,12 @@ class FinancialRoster extends Component
         if ($this->search) {
             $query->where(function ($q) {
                 $q->where('period_name', 'like', '%' . $this->search . '%')
-                  // Search through the relationship using ILIKE for Postgres safety
                   ->orWhereHas('user', function($userQuery) {
                       $userQuery->where('name', 'ILIKE', '%' . $this->search . '%');
                   });
             });
         }
 
-        // Fetch organizations for the admin dropdown
         $organizations = User::whereHas('role', function($q) {
             $q->where('role_name', 'organization');
         })->orderBy('name')->get();
