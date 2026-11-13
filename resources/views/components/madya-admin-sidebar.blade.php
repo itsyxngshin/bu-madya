@@ -118,9 +118,9 @@
                 Manage Events
             </a>
 
-            <a href="{{ route('elucida.roster') }}" class="group flex items-center px-4 py-3 text-xs font-bold uppercase tracking-wider border-2 transition-all {{ request()->routeIs('elucida.*') ? 'bg-iba-black text-white border-iba-black shadow-[4px_4px_0_0_#FF8623]' : 'border-transparent text-gray-600 hover:border-iba-black hover:bg-gray-100' }}">
-                <svg class="mr-3 flex-shrink-0 h-5 w-5 transition-colors {{ request()->routeIs('elucida.*') ? 'text-iba-orange' : 'text-gray-400 group-hover:text-iba-black' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                eLucida Financial
+            <a href="{{ route('elucida.roster') }}" class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all {{ request()->routeIs('elucida.*') ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:text-indigo-700 hover:bg-gray-50' }}">
+                <svg class="mr-3 flex-shrink-0 h-5 w-5 transition-colors {{ request()->routeIs('elucida.*') ? 'text-indigo-600' : 'text-gray-400 group-hover:text-indigo-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                eLucida Financials
             </a>
 
             @php
