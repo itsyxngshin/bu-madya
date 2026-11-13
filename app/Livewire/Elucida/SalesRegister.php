@@ -74,31 +74,35 @@ class SalesRegister extends Component
 
         $totalRevenue = array_sum(array_column($this->salesGrid, 'price'));
 
-        // 1. Forge the Parent Inflow Transaction
-        $transaction = ElucidaTransaction::create([
-            'ledger_id' => $this->activeLedger->id,
-            'type' => 'inflow',
-            'category' => 'Income Generating Fund',
-            'description' => $this->transactionDescription,
-            'amount' => $totalRevenue,
-            'transaction_date' => Carbon::now()
-        ]);
+        // Wrap in a database transaction to ensure both the parent and children save securely, or neither do.
+        \Illuminate\Support\Facades\DB::transaction(function () use ($totalRevenue) {
 
-        // 2. Persist the individual receipt rows
-        foreach ($this->salesGrid as $sale) {
-            ElucidaSalesRegister::create([
-                'transaction_id' => $transaction->id,
-                'buyer_name' => $sale['buyer_name'],
-                'receipt_number' => $sale['receipt_number'],
-                'price' => $sale['price']
+            // 1. Forge the Parent Inflow Transaction in the Ledger
+            $parentTransaction = ElucidaTransaction::create([
+                'ledger_id' => $this->activeLedger->id,
+                'type' => 'inflow',
+                'category' => 'Income Generating Fund',
+                'description' => mb_strtoupper($this->transactionDescription),
+                'amount' => $totalRevenue,
+                'transaction_date' => \Carbon\Carbon::now()
             ]);
-        }
 
-        // Reset Terminal
+            // 2. Persist the individual receipt rows, dynamically linking the newly created Parent ID
+            foreach ($this->salesGrid as $sale) {
+                ElucidaSalesRegister::create([
+                    'transaction_id' => $parentTransaction->id, // <--- Automatic Linkage
+                    'buyer_name' => mb_strtoupper($sale['buyer_name']),
+                    'receipt_number' => $sale['receipt_number'],
+                    'price' => $sale['price']
+                ]);
+            }
+        });
+
+        // Reset Terminal after successful commit
         $this->salesGrid = [];
         $this->transactionDescription = '';
 
-        session()->flash('success', "Batch committed! PHP " . number_format($totalRevenue, 2) . " established in the ledger.");
+        session()->flash('success', "Batch committed! PHP " . number_format($totalRevenue, 2) . " securely established under a unified ledger transaction.");
     }
 
     public function render()
