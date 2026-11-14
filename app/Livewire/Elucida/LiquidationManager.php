@@ -111,7 +111,7 @@ class LiquidationManager extends Component
         // Map the items to their strict database columns
         foreach ($this->items as $item) {
             $imagePath = null;
-
+            
             if (!empty($item['receipt_image_path'])) {
                 if (is_string($item['receipt_image_path'])) {
                     $imagePath = $item['receipt_image_path'];
@@ -134,7 +134,7 @@ class LiquidationManager extends Component
         }
 
         session()->flash('success', 'Liquidation Report securely established in the ledger.');
-        return redirect()->route('elucida.roster');
+        return redirect()->route('elucida.roster'); 
     }
 
     public function render()
