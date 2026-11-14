@@ -383,15 +383,3 @@
     });
 </script>
 @endpush
-gend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10, weight: 'bold' } } }
-                    },
-                    scales: {
-                        y: { beginAtZero: true, grid: { borderDash: [2, 4], color: '#f3f4f6' } },
-                        x: { grid: { display: false } }
-                    }
-                }
-            });
-        }
-    });
-</script>
-@endpush
