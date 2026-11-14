@@ -16,8 +16,9 @@ class LiquidationManager extends Component
 {
     use WithFileUploads;
 
+    public $activeLedger;
     public $transactions;
-    public $selectedTransactionId;
+    public $selectedTransactionId = '';
     public $tracker_number;
     public $dv_number;
     public $accountable_officer;
@@ -43,11 +44,14 @@ class LiquidationManager extends Component
     public function mount(ElucidaLedger $ledger)
     {
         $this->activeLedger = $ledger;
-                // Load outflows that might need liquidation for THIS specific ledger
-                $this->transactions = ElucidaTransaction::where('ledger_id', $this->activeLedger->id)
-                                                        ->where('type', 'outflow')
-                                                        ->get();
-        // Generate a tracker number (e.g., CircUITS-2026-LR-XXX)
+
+        // Fetch all outflows linked to this specific ledger
+        $this->transactions = ElucidaTransaction::where('ledger_id', $this->activeLedger->id)
+            ->where('type', 'outflow')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        // Generate a dynamic tracker number
         $this->tracker_number = 'MADYA-' . date('Y') . '-LR-' . str_pad(ElucidaLiquidation::count() + 1, 3, '0', STR_PAD_LEFT);
     }
 
@@ -59,33 +63,21 @@ class LiquidationManager extends Component
             'newItem.amount' => 'required|numeric|min:0.01',
         ]);
 
-        $imagePath = null;
-        if ($this->newItem['receipt_image']) {
-            $imagePath = $this->newItem['receipt_image']->store('receipts', 'public');
-        }
-
         $this->items[] = [
             'category' => $this->newItem['category'],
-            'quantity' => $this->newItem['quantity'],
+            'quantity' => $this->newItem['quantity'] ?: 1,
             'particulars' => $this->newItem['particulars'],
             'receipt_date' => $this->newItem['receipt_date'],
             'payee' => $this->newItem['payee'],
             'or_si_number' => $this->newItem['or_si_number'],
             'amount' => $this->newItem['amount'],
-            'receipt_image_path' => $imagePath,
+            'receipt_image_path' => $this->newItem['receipt_image'],
         ];
 
-        // Reset the form
-        $this->newItem = [
-            'category' => '',
-            'quantity' => 1,
-            'particulars' => '',
-            'receipt_date' => '',
-            'payee' => '',
-            'or_si_number' => '',
-            'amount' => 0,
-            'receipt_image' => null,
-        ];
+        // Reset the form safely
+        $this->reset('newItem');
+        $this->newItem['quantity'] = 1;
+        $this->newItem['amount'] = 0;
     }
 
     public function removeItem($index)
@@ -103,6 +95,7 @@ class LiquidationManager extends Component
             'cash_advance' => 'required|numeric',
         ]);
 
+        // Securely map the liquidation parent record
         $liquidation = ElucidaLiquidation::create([
             'transaction_id' => $this->selectedTransactionId,
             'lr_tracker_number' => $this->tracker_number,
@@ -110,33 +103,44 @@ class LiquidationManager extends Component
             'accountable_officer' => $this->accountable_officer,
             'officer_position' => $this->officer_position,
             'cash_advance' => $this->cash_advance,
-            'implementation_start' => $this->implementation_start,
-            'implementation_end' => $this->implementation_end,
+            'implementation_start' => empty($this->implementation_start) ? null : $this->implementation_start,
+            'implementation_end' => empty($this->implementation_end) ? null : $this->implementation_end,
             'status' => 'pending'
         ]);
 
+        // Map the items to their strict database columns
         foreach ($this->items as $item) {
+            $imagePath = null;
+
+            if (!empty($item['receipt_image_path'])) {
+                if (is_string($item['receipt_image_path'])) {
+                    $imagePath = $item['receipt_image_path'];
+                } else {
+                    $imagePath = $item['receipt_image_path']->store('liquidation-receipts', 'public');
+                }
+            }
+
             ElucidaLiquidationItem::create([
                 'liquidation_id' => $liquidation->id,
-                'category' => $item['category'],
-                'quantity' => $item['quantity'],
+                'expense_category' => $item['category'], // Mapped from 'category'
+                'qty' => $item['quantity'] ?? 1,         // Mapped from 'quantity'
                 'particulars' => $item['particulars'],
-                'receipt_date' => $item['receipt_date'],
+                'date_incurred' => empty($item['receipt_date']) ? null : $item['receipt_date'], // Safe Null formatting
                 'payee' => $item['payee'],
-                'or_si_number' => $item['or_si_number'],
+                'receipt_number' => $item['or_si_number'], // Mapped from 'or_si_number'
                 'amount' => $item['amount'],
-                'receipt_image_path' => $item['receipt_image_path'],
+                'receipt_image_path' => $imagePath,
             ]);
         }
 
         session()->flash('success', 'Liquidation Report securely established in the ledger.');
-        return redirect()->route('elucida.liquidation.index'); // Adjust route as needed
+        return redirect()->route('elucida.roster');
     }
 
     public function render()
     {
         $totalExpenses = array_sum(array_column($this->items, 'amount'));
-        $excessShort = $this->cash_advance - $totalExpenses;
+        $excessShort = (float)$this->cash_advance - $totalExpenses;
 
         return view('livewire.elucida.liquidation-manager', [
             'totalExpenses' => $totalExpenses,
