@@ -12,14 +12,32 @@
                     <p class="text-sm font-bold text-gray-600 uppercase">{{ $activeLedger->period_name }}</p>
                 </div>
 
-                <div class="flex flex-wrap justify-center sm:justify-end gap-3">
-                    <button wire:click="openTransactionModal('inflow')" class="bg-green-50 hover:bg-green-100 text-green-700 border border-green-200 rounded-xl px-4 py-2.5 text-[10px] md:text-xs font-bold uppercase tracking-widest transition flex items-center gap-2">
-                        + Log Inflow
-                    </button>
-                    <a href="{{ route('elucida.sales', $activeLedger) }}" class="bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-200 rounded-xl px-4 py-2.5 text-[10px] md:text-xs font-bold uppercase tracking-widest transition flex items-center gap-2">
-                        POS Tracker
-                    </a>
-                    <button wire:click="exportStatementDoc" class="bg-gray-900 hover:bg-red-600 text-white rounded-xl px-4 py-2.5 text-[10px] md:text-xs font-bold uppercase tracking-widest shadow-md transition flex items-center gap-2 w-full sm:w-auto justify-center">
+                <div class="flex flex-wrap justify-center sm:justify-end gap-3 items-center">
+
+                    @if($isAuthorizedManager)
+                        {{-- Management Tools --}}
+                        <button wire:click="openTransactionModal('inflow')" class="bg-green-50 hover:bg-green-100 text-green-700 border border-green-200 rounded-xl px-3 py-2 text-[10px] md:text-xs font-bold uppercase tracking-widest transition flex items-center gap-1.5">
+                            + Log Inflow
+                        </button>
+                        <a href="{{ route('elucida.sales', $activeLedger) }}" class="bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-200 rounded-xl px-3 py-2 text-[10px] md:text-xs font-bold uppercase tracking-widest transition">
+                            POS Tracker
+                        </a>
+
+                        {{-- Broadcast Toggle --}}
+                        <button wire:click="togglePublicAccess" class="text-[10px] md:text-xs font-bold uppercase tracking-widest px-3 py-2 rounded-xl transition border {{ $activeLedger->is_public ? 'bg-green-600 text-white border-green-700' : 'bg-white text-gray-500 border-gray-200 hover:bg-gray-50' }}">
+                            {{ $activeLedger->is_public ? 'Live Broadcast' : 'Make Public' }}
+                        </button>
+
+                        {{-- Copy Share Link --}}
+                        <button x-data="{ copied: false }"
+                                @click="navigator.clipboard.writeText('{{ route('elucida.board', $activeLedger) }}').then(() => { copied = true; setTimeout(() => copied = false, 2000); })"
+                                class="bg-white border border-gray-200 text-gray-600 rounded-xl p-2 hover:bg-gray-50 transition" title="Copy Share Link">
+                            <svg x-show="!copied" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+                            <svg x-show="copied" style="display: none;" class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                        </button>
+                    @endif
+
+                    <button wire:click="exportStatementDoc" class="bg-gray-900 hover:bg-red-600 text-white rounded-xl px-4 py-2 text-[10px] md:text-xs font-bold uppercase tracking-widest shadow-md transition flex items-center gap-2 w-full sm:w-auto justify-center">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                         Export DOCX
                     </button>
@@ -32,6 +50,29 @@
                 {{ session('success') }}
             </div>
         @endif
+
+        {{-- VISUAL CHART.JS METRICS --}}
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {{-- Doughnut Chart: Overall Balance Health --}}
+            <div class="bg-white rounded-3xl p-6 shadow-sm border border-gray-200 flex flex-col items-center justify-center min-h-[250px]">
+                <h3 class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-4 w-full text-left">Fund Utilization</h3>
+                <div class="relative w-full max-w-[200px] aspect-square">
+                    <canvas id="healthChart"></canvas>
+                    <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                        <span class="text-xs font-bold text-gray-400 uppercase">Remaining</span>
+                        <span class="text-lg font-black text-gray-900">{{ number_format(($endingBalance / max($totalCashAvailable, 1)) * 100, 1) }}%</span>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Bar Chart: Inflows vs Outflows by Category --}}
+            <div class="md:col-span-2 bg-white rounded-3xl p-6 shadow-sm border border-gray-200">
+                <h3 class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-4 w-full text-left">Category Ledger Breakdown</h3>
+                <div class="w-full h-48 md:h-64">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+            </div>
+        </div>
 
         {{-- MAIN DATA CARDS --}}
 
@@ -80,16 +121,17 @@
                                 <div class="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto">
                                     <span class="font-bold text-gray-900">PHP {{ number_format($tx->amount, 2) }}</span>
 
-                                    {{-- Edit/Delete Actions --}}
-                                    <div x-data="{ open: false }" class="relative">
-                                        <button @click="open = !open" @click.outside="open = false" class="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 text-gray-400 hover:text-gray-900 bg-white border border-gray-200 hover:bg-gray-100 px-2 py-1 rounded-lg transition-all shadow-sm focus:outline-none">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path></svg>
-                                        </button>
-                                        <div x-show="open" style="display: none;" class="absolute right-0 top-full mt-1 w-28 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden z-20">
-                                            <button wire:click="editTransaction({{ $tx->id }})" class="w-full text-left px-4 py-2 text-xs font-bold text-gray-700 hover:bg-gray-50">Edit</button>
-                                            <button onclick="confirm('Permanently delete this inflow?') || event.stopImmediatePropagation()" wire:click="deleteTransaction({{ $tx->id }})" class="w-full text-left px-4 py-2 text-xs font-bold text-red-600 hover:bg-red-50 border-t border-gray-50">Delete</button>
+                                    @if($isAuthorizedManager)
+                                        <div x-data="{ open: false }" class="relative">
+                                            <button @click="open = !open" @click.outside="open = false" class="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 text-gray-400 hover:text-gray-900 bg-white border border-gray-200 hover:bg-gray-100 px-2 py-1 rounded-lg transition-all shadow-sm focus:outline-none">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path></svg>
+                                            </button>
+                                            <div x-show="open" style="display: none;" class="absolute right-0 top-full mt-1 w-28 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden z-20">
+                                                <button wire:click="editTransaction({{ $tx->id }})" class="w-full text-left px-4 py-2 text-xs font-bold text-gray-700 hover:bg-gray-50">Edit</button>
+                                                <button onclick="confirm('Permanently delete this inflow?') || event.stopImmediatePropagation()" wire:click="deleteTransaction({{ $tx->id }})" class="w-full text-left px-4 py-2 text-xs font-bold text-red-600 hover:bg-red-50 border-t border-gray-50">Delete</button>
+                                            </div>
                                         </div>
-                                    </div>
+                                    @endif
                                 </div>
                             </div>
                         @endforeach
@@ -113,9 +155,11 @@
             <div class="flex flex-col sm:flex-row justify-between sm:items-center mb-6 border-b border-gray-100 pb-4 gap-2">
                 <h3 class="text-lg font-black text-gray-900 uppercase">IV. Less: Expenses</h3>
                 <div class="flex items-center gap-3">
-                    <button wire:click="openTransactionModal('outflow')" class="text-[10px] font-bold uppercase tracking-widest text-red-600 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg transition-colors border border-red-100">
-                        + Add Expense
-                    </button>
+                    @if($isAuthorizedManager)
+                        <button wire:click="openTransactionModal('outflow')" class="text-[10px] font-bold uppercase tracking-widest text-red-600 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg transition-colors border border-red-100">
+                            + Add Expense
+                        </button>
+                    @endif
                     <span class="text-lg font-black text-red-600">PHP {{ number_format($totalExpenses, 2) }}</span>
                 </div>
             </div>
@@ -135,16 +179,17 @@
                                 <div class="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto">
                                     <span class="font-bold text-gray-900">PHP {{ number_format($tx->amount, 2) }}</span>
 
-                                    {{-- Edit/Delete Actions --}}
-                                    <div x-data="{ open: false }" class="relative">
-                                        <button @click="open = !open" @click.outside="open = false" class="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 text-gray-400 hover:text-gray-900 bg-white border border-gray-200 hover:bg-gray-100 px-2 py-1 rounded-lg transition-all shadow-sm focus:outline-none">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path></svg>
-                                        </button>
-                                        <div x-show="open" style="display: none;" class="absolute right-0 top-full mt-1 w-28 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden z-20">
-                                            <button wire:click="editTransaction({{ $tx->id }})" class="w-full text-left px-4 py-2 text-xs font-bold text-gray-700 hover:bg-gray-50">Edit</button>
-                                            <button onclick="confirm('Permanently delete this expense?') || event.stopImmediatePropagation()" wire:click="deleteTransaction({{ $tx->id }})" class="w-full text-left px-4 py-2 text-xs font-bold text-red-600 hover:bg-red-50 border-t border-gray-50">Delete</button>
+                                    @if($isAuthorizedManager)
+                                        <div x-data="{ open: false }" class="relative">
+                                            <button @click="open = !open" @click.outside="open = false" class="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 text-gray-400 hover:text-gray-900 bg-white border border-gray-200 hover:bg-gray-100 px-2 py-1 rounded-lg transition-all shadow-sm focus:outline-none">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path></svg>
+                                            </button>
+                                            <div x-show="open" style="display: none;" class="absolute right-0 top-full mt-1 w-28 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden z-20">
+                                                <button wire:click="editTransaction({{ $tx->id }})" class="w-full text-left px-4 py-2 text-xs font-bold text-gray-700 hover:bg-gray-50">Edit</button>
+                                                <button onclick="confirm('Permanently delete this expense?') || event.stopImmediatePropagation()" wire:click="deleteTransaction({{ $tx->id }})" class="w-full text-left px-4 py-2 text-xs font-bold text-red-600 hover:bg-red-50 border-t border-gray-50">Delete</button>
+                                            </div>
                                         </div>
-                                    </div>
+                                    @endif
                                 </div>
                             </div>
                         @endforeach
@@ -164,76 +209,81 @@
             <span class="text-2xl md:text-3xl font-black text-white relative z-10">PHP {{ number_format($endingBalance, 2) }}</span>
         </div>
 
-        {{-- Signatory Manager Component Injection --}}
-        <div class="mt-8">
-            <livewire:elucida.signatory-manager :targetModel="$activeLedger" />
-        </div>
+        @if($isAuthorizedManager)
+            {{-- Signatory Manager Component Injection --}}
+            <div class="mt-8">
+                <livewire:elucida.signatory-manager :targetModel="$activeLedger" />
+            </div>
+        @endif
 
     </div>
 
     {{-- UNIFIED TRANSACTION MODAL (Create/Edit, Inflow/Outflow) --}}
-    @if($showTransactionModal)
+    @if($isAuthorizedManager && $showTransactionModal)
         <div class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
-            <div class="fixed inset-0 bg-gray-900/80 backdrop-blur-sm transition-opacity" wire:click="$set('showTransactionModal', false)"></div>
+            <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity" wire:click="$set('showTransactionModal', false)"></div>
 
-            <div class="relative bg-white rounded-3xl shadow-2xl w-full max-w-md flex flex-col overflow-hidden transform transition-all max-h-screen">
-                <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r {{ $transactionType === 'inflow' ? 'from-green-400 to-green-600' : 'from-red-400 to-red-600' }}"></div>
+            <div class="relative bg-white rounded-3xl shadow-2xl w-full max-w-md flex flex-col overflow-hidden transform transition-all max-h-[90vh]">
+                <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r {{ $transactionType === 'inflow' ? 'from-green-500 to-green-600' : 'from-red-600 to-red-700' }}"></div>
 
                 <div class="flex items-center justify-between p-6 border-b border-gray-100 bg-white">
                     <div>
-                        <h3 class="text-xl font-black text-gray-900 leading-tight">
+                        <h3 class="text-2xl font-black text-gray-900 leading-tight">
                             {{ $editingTransactionId ? 'Edit' : 'Log' }} {{ ucfirst($transactionType) }}
                         </h3>
                         <p class="text-xs font-bold text-gray-400 mt-1 uppercase tracking-widest">Update ledger entry</p>
                     </div>
-                    <button wire:click="$set('showTransactionModal', false)" class="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition">
+                    <button wire:click="$set('showTransactionModal', false)" class="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-colors">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
                 </div>
 
-                <form wire:submit.prevent="saveTransaction" class="p-6 bg-gray-50 space-y-4 overflow-y-auto custom-scrollbar">
+                <form wire:submit.prevent="saveTransaction" class="p-6 bg-white space-y-5 overflow-y-auto custom-scrollbar flex-1">
                     <div>
                         <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">Category</label>
-                        <select wire:model="tx_category" class="w-full border-gray-200 rounded-xl text-sm font-bold shadow-sm focus:ring-2 {{ $transactionType === 'inflow' ? 'focus:ring-green-500 focus:border-green-500' : 'focus:ring-red-500 focus:border-red-500' }}">
+                        <select wire:model="tx_category" class="w-full border border-gray-200 bg-white rounded-xl px-4 py-2.5 text-sm font-bold shadow-sm focus:ring-2 {{ $transactionType === 'inflow' ? 'focus:ring-green-500 focus:border-green-500' : 'focus:ring-red-500 focus:border-red-500' }} appearance-none">
                             @foreach($transactionType === 'inflow' ? $inflowCategories : $outflowCategories as $cat)
                                 <option value="{{ $cat }}">{{ $cat }}</option>
                             @endforeach
                             <option value="Custom">Custom (Type below)</option>
                         </select>
                         @if($tx_category === 'Custom')
-                            <input type="text" wire:model="tx_category" placeholder="Custom category..." class="w-full mt-2 border-gray-200 rounded-xl text-sm font-bold shadow-sm focus:ring-2 {{ $transactionType === 'inflow' ? 'focus:ring-green-500 focus:border-green-500' : 'focus:ring-red-500 focus:border-red-500' }}">
+                            <input type="text" wire:model="tx_category" placeholder="Custom category..." class="w-full mt-3 border border-gray-200 bg-gray-50 rounded-xl px-4 py-2.5 text-sm font-bold shadow-sm focus:ring-2 {{ $transactionType === 'inflow' ? 'focus:ring-green-500 focus:border-green-500 bg-white' : 'focus:ring-red-500 focus:border-red-500 bg-white' }}">
                         @endif
                     </div>
 
                     <div>
                         <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">Description (Particulars)</label>
-                        <input type="text" wire:model="tx_description" class="w-full border-gray-200 rounded-xl text-sm font-bold shadow-sm focus:ring-2 {{ $transactionType === 'inflow' ? 'focus:ring-green-500 focus:border-green-500' : 'focus:ring-red-500 focus:border-red-500' }}">
+                        <input type="text" wire:model="tx_description" placeholder="e.g. Accreditation" class="w-full border border-gray-200 bg-white rounded-xl px-4 py-2.5 text-sm font-bold shadow-sm focus:ring-2 {{ $transactionType === 'inflow' ? 'focus:ring-green-500 focus:border-green-500' : 'focus:ring-red-500 focus:border-red-500' }}">
                         @error('tx_description') <span class="text-xs text-red-500 font-bold block mt-1.5">{{ $message }}</span> @enderror
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid {{ $transactionType === 'inflow' ? 'grid-cols-2' : 'grid-cols-1' }} gap-4">
                         <div>
                             <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">Ref. Code (Optional)</label>
-                            <input type="text" wire:model="tx_reference" placeholder="e.g. Note 3 / LR014" class="w-full border-gray-200 rounded-xl text-sm font-mono shadow-sm focus:ring-2 {{ $transactionType === 'inflow' ? 'focus:ring-green-500 focus:border-green-500' : 'focus:ring-red-500 focus:border-red-500' }}">
+                            <input type="text" wire:model="tx_reference" placeholder="LR001" class="w-full border border-gray-200 bg-white rounded-xl px-4 py-2.5 text-sm font-mono shadow-sm focus:ring-2 {{ $transactionType === 'inflow' ? 'focus:ring-green-500 focus:border-green-500' : 'focus:ring-red-500 focus:border-red-500' }}">
                         </div>
-                        <div>
-                            <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">Amount (PHP)</label>
-                            <input type="number" step="0.01" wire:model="tx_amount" class="w-full border-gray-200 rounded-xl text-sm font-black shadow-sm text-right focus:ring-2 {{ $transactionType === 'inflow' ? 'text-green-600 focus:ring-green-500 focus:border-green-500' : 'text-red-600 focus:ring-red-500 focus:border-red-500' }}">
-                        </div>
+
+                        @if($transactionType === 'inflow')
+                            <div>
+                                <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">Amount (PHP)</label>
+                                <input type="number" step="0.01" wire:model="tx_amount" placeholder="1500" class="w-full border border-gray-200 bg-white rounded-xl px-4 py-2.5 text-sm font-black shadow-sm text-right focus:ring-2 text-green-600 focus:ring-green-500 focus:border-green-500">
+                                @error('tx_amount') <span class="text-[10px] text-red-500 font-bold block mt-1">{{ $message }}</span> @enderror
+                            </div>
+                        @endif
                     </div>
 
-                    {{-- Inflow Proof Uploader (Only visible if the transaction type is inflow) --}}
                     @if($transactionType === 'inflow')
-                        <div class="mt-4 border-t border-gray-200 pt-4">
+                        <div class="pt-2">
                             <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">
                                 Proof of Transaction <span class="text-red-500">*</span>
                             </label>
 
                             @if($existing_receipt_path && !$tx_receipt_image)
-                                <div class="mb-3 relative rounded-xl border border-gray-200 overflow-hidden bg-gray-50">
+                                <div class="mb-3 relative rounded-xl border border-gray-200 overflow-hidden bg-gray-50 shadow-sm">
                                     <img src="{{ asset('storage/' . $existing_receipt_path) }}" class="w-full h-32 object-cover opacity-75">
                                     <div class="absolute inset-0 flex items-center justify-center">
-                                        <span class="bg-gray-900/80 text-white text-[10px] font-bold uppercase px-3 py-1 rounded-lg backdrop-blur-sm">Current File on Record</span>
+                                        <span class="bg-gray-900/80 text-white text-[10px] font-bold uppercase px-3 py-1 rounded-lg backdrop-blur-sm shadow-md">Current File on Record</span>
                                     </div>
                                 </div>
                             @endif
@@ -244,8 +294,8 @@
                                  x-on:livewire-upload-error="isUploading = false"
                                  x-on:livewire-upload-progress="progress = $event.detail.progress">
 
-                                <input type="file" wire:model="tx_receipt_image" accept="image/*" class="block w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-[10px] file:font-bold file:uppercase file:tracking-wider file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 transition cursor-pointer bg-white border border-gray-200 rounded-2xl p-1.5 shadow-sm focus:ring-2 focus:ring-green-500">
-                                @error('tx_receipt_image') <span class="text-xs text-red-500 font-bold block mt-1.5">{{ $message }}</span> @enderror
+                                <input type="file" wire:model="tx_receipt_image" accept="image/*" class="block w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-[10px] file:font-bold file:uppercase file:tracking-wider file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 transition cursor-pointer bg-white border border-gray-200 rounded-xl p-1.5 shadow-sm focus:ring-2 focus:ring-green-500">
+                                @error('tx_receipt_image') <span class="text-[10px] text-red-500 font-bold block mt-1.5 uppercase tracking-wide">{{ $message }}</span> @enderror
 
                                 <div x-show="isUploading" style="display: none;" class="mt-3 h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
                                     <div class="h-1.5 rounded-full bg-green-500" x-bind:style="'width: ' + progress + '%'"></div>
@@ -261,7 +311,7 @@
                         </div>
                     @endif
 
-                    <button type="submit" class="w-full mt-4 bg-gray-900 text-white font-bold rounded-xl py-3 shadow-md transition flex justify-center items-center gap-2 {{ $transactionType === 'inflow' ? 'hover:bg-green-600' : 'hover:bg-red-600' }}">
+                    <button type="submit" class="w-full mt-6 bg-gray-900 text-white font-black text-sm rounded-xl py-3.5 shadow-md transition-colors flex justify-center items-center gap-2 {{ $transactionType === 'inflow' ? 'hover:bg-green-600' : 'hover:bg-red-600' }}">
                         {{ $editingTransactionId ? 'Save Changes' : 'Commit to Ledger' }}
                     </button>
                 </form>
@@ -269,3 +319,67 @@
         </div>
     @endif
 </div>
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('livewire:initialized', () => {
+
+        const healthCtx = document.getElementById('healthChart');
+        if(healthCtx) {
+            new Chart(healthCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Spent (PHP)', 'Remaining Balance (PHP)'],
+                    datasets: [{
+                        data: [{{ $totalExpenses }}, {{ max($endingBalance, 0) }}],
+                        backgroundColor: ['#ef4444', '#22c55e'],
+                        borderWidth: 0,
+                        cutout: '75%'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        const catCtx = document.getElementById('categoryChart');
+        if(catCtx) {
+            new Chart(catCtx, {
+                type: 'bar',
+                data: {
+                    labels: @json($chartCategoryLabels),
+                    datasets: [
+                        {
+                            label: 'Inflows (Revenue)',
+                            data: @json($chartInflowData),
+                            backgroundColor: '#22c55e',
+                            borderRadius: 4
+                        },
+                        {
+                            label: 'Outflows (Expenses)',
+                            data: @json($chartOutflowData),
+                            backgroundColor: '#ef4444',
+                            borderRadius: 4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10, weight: 'bold' } } }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, grid: { borderDash: [2, 4], color: '#f3f4f6' } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        }
+    });
+</script>
+@endpush

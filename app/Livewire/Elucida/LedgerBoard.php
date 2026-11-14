@@ -8,9 +8,8 @@ use App\Models\ElucidaLedger;
 use App\Models\ElucidaTransaction;
 use App\Models\ElucidaSignatory;
 use Carbon\Carbon;
-use Livewire\Attributes\Layout;
+use Illuminate\Support\Facades\Storage;
 
-#[Layout('layouts.madya-admin-deck')]
 class LedgerBoard extends Component
 {
     use WithFileUploads;
@@ -23,9 +22,17 @@ class LedgerBoard extends Component
     public $totalExpenses = 0;
     public $endingBalance = 0;
 
+    // --- CHART DATA ARRAYS ---
+    public $chartCategoryLabels = [];
+    public $chartInflowData = [];
+    public $chartOutflowData = [];
+
+    // --- AUTHORIZATION STATE ---
+    public $isAuthorizedManager = false;
+
     // --- TRANSACTION MODAL STATE ---
     public $showTransactionModal = false;
-    public $transactionType = 'inflow'; // 'inflow' or 'outflow'
+    public $transactionType = 'inflow';
     public $editingTransactionId = null;
 
     // Form Fields
@@ -33,8 +40,8 @@ class LedgerBoard extends Component
     public $tx_description = '';
     public $tx_reference = '';
     public $tx_amount = '';
-    public $tx_receipt_image = null; // To hold the uploaded file
-        public $existing_receipt_path = null; // To preview an existing file during edit
+    public $tx_receipt_image = null;
+    public $existing_receipt_path = null;
 
     public $inflowCategories = [
         'Membership Fee',
@@ -54,11 +61,37 @@ class LedgerBoard extends Component
     public function mount(ElucidaLedger $ledger)
     {
         $this->activeLedger = $ledger;
+
+        // SECURITY CLEARANCE CHECK
+        $user = auth()->user();
+        if ($user) {
+            $role = $user->role?->role_name;
+            if ($ledger->user_id === $user->id || in_array($role, ['administrator', 'director'])) {
+                $this->isAuthorizedManager = true;
+            }
+        }
+
+        if (!$this->isAuthorizedManager && !$this->activeLedger->is_public) {
+            abort(403, 'This financial ledger is restricted.');
+        }
+
         $this->calculateTotals();
+    }
+
+    public function togglePublicAccess()
+    {
+        if (!$this->isAuthorizedManager) { abort(403); }
+
+        $this->activeLedger->update([
+            'is_public' => !$this->activeLedger->is_public
+        ]);
+
+        session()->flash('success', $this->activeLedger->is_public ? 'Ledger is now publicly broadcasting.' : 'Ledger is now private.');
     }
 
     public function openTransactionModal($type = 'inflow')
     {
+        if (!$this->isAuthorizedManager) { abort(403); }
         $this->resetForm();
         $this->transactionType = $type;
         $this->tx_category = $type === 'inflow' ? 'Income Generating Fund' : 'Events';
@@ -66,82 +99,99 @@ class LedgerBoard extends Component
     }
 
     public function editTransaction($id)
-        {
-            $this->resetForm();
-            $tx = ElucidaTransaction::findOrFail($id);
+    {
+        if (!$this->isAuthorizedManager) { abort(403); }
+        $this->resetForm();
+        $tx = ElucidaTransaction::findOrFail($id);
 
-            if($tx->ledger_id !== $this->activeLedger->id) { abort(403); }
+        if($tx->ledger_id !== $this->activeLedger->id) { abort(403); }
 
-            $this->editingTransactionId = $tx->id;
-            $this->transactionType = $tx->type;
-            $this->tx_category = $tx->category;
-            $this->tx_description = $tx->description;
-            $this->tx_reference = $tx->reference_code;
-            $this->tx_amount = $tx->amount;
-            $this->existing_receipt_path = $tx->receipt_image_path; // Load existing proof
+        $this->editingTransactionId = $tx->id;
+        $this->transactionType = $tx->type;
+        $this->tx_category = $tx->category;
+        $this->tx_description = $tx->description;
+        $this->tx_reference = $tx->reference_code;
+        $this->tx_amount = $tx->amount;
+        $this->existing_receipt_path = $tx->receipt_image_path;
 
-            $this->showTransactionModal = true;
-        }
+        $this->showTransactionModal = true;
+    }
 
-        public function resetForm()
-        {
-            $this->reset(['editingTransactionId', 'tx_category', 'tx_description', 'tx_reference', 'tx_amount', 'tx_receipt_image', 'existing_receipt_path']);
-        }
+    public function resetForm()
+    {
+        $this->reset(['editingTransactionId', 'tx_category', 'tx_description', 'tx_reference', 'tx_amount', 'tx_receipt_image', 'existing_receipt_path']);
+    }
 
-        public function saveTransaction()
-        {
-            $rules = [
-                'tx_category' => 'required|string',
-                'tx_description' => 'required|string|max:255',
-                'tx_amount' => 'required|numeric|min:0.01',
-                'tx_receipt_image' => 'nullable|image|max:10240' // Max 10MB image
-            ];
+    public function saveTransaction()
+    {
+        if (!$this->isAuthorizedManager) { abort(403); }
 
-            // Require proof specifically for new inflows (can customize this logic as needed)
-            if ($this->transactionType === 'inflow' && !$this->editingTransactionId && !$this->tx_receipt_image) {
+        $rules = [
+            'tx_category' => 'required|string',
+            'tx_description' => 'required|string|max:255',
+            'tx_receipt_image' => 'nullable|image|max:10240'
+        ];
+
+        if ($this->transactionType === 'inflow') {
+            $rules['tx_amount'] = 'required|numeric|min:0.01';
+
+            if (!$this->editingTransactionId && !$this->tx_receipt_image) {
                 $rules['tx_receipt_image'] = 'required|image|max:10240';
             }
-
-            $this->validate($rules, [
-                'tx_receipt_image.required' => 'Proof of receipt/deposit is required to log an inflow.'
-            ]);
-
-            $imagePath = $this->existing_receipt_path;
-            if ($this->tx_receipt_image) {
-                $imagePath = $this->tx_receipt_image->store('ledger-receipts', 'public');
-            }
-
-            if ($this->editingTransactionId) {
-                $tx = ElucidaTransaction::findOrFail($this->editingTransactionId);
-                $tx->update([
-                    'category' => $this->tx_category,
-                    'description' => mb_strtoupper($this->tx_description),
-                    'reference_code' => $this->tx_reference ?: null,
-                    'amount' => $this->tx_amount,
-                    'receipt_image_path' => $imagePath,
-                ]);
-                session()->flash('success', 'Transaction updated successfully.');
-            } else {
-                ElucidaTransaction::create([
-                    'ledger_id' => $this->activeLedger->id,
-                    'type' => $this->transactionType,
-                    'category' => $this->tx_category,
-                    'description' => mb_strtoupper($this->tx_description),
-                    'reference_code' => $this->tx_reference ?: null,
-                    'amount' => $this->tx_amount,
-                    'receipt_image_path' => $imagePath,
-                    'transaction_date' => Carbon::now()
-                ]);
-                session()->flash('success', ucfirst($this->transactionType) . ' securely logged to the ledger.');
-            }
-
-            $this->showTransactionModal = false;
-            $this->resetForm();
-            $this->calculateTotals();
         }
+
+        $this->validate($rules, [
+            'tx_receipt_image.required' => 'Proof of receipt/deposit is required to log an inflow.'
+        ]);
+
+        $imagePath = $this->existing_receipt_path;
+        if ($this->tx_receipt_image) {
+            $imagePath = $this->tx_receipt_image->store('ledger-receipts', 'public');
+        }
+
+        $finalAmount = $this->transactionType === 'inflow' ? $this->tx_amount : 0;
+
+        if ($this->editingTransactionId) {
+            $tx = ElucidaTransaction::findOrFail($this->editingTransactionId);
+
+            $dataToUpdate = [
+                'category' => $this->tx_category,
+                'description' => mb_strtoupper($this->tx_description),
+                'reference_code' => $this->tx_reference ?: null,
+            ];
+
+            if ($this->transactionType === 'inflow') {
+                $dataToUpdate['amount'] = $finalAmount;
+            }
+
+            if ($this->tx_receipt_image) {
+                $dataToUpdate['receipt_image_path'] = $imagePath;
+            }
+
+            $tx->update($dataToUpdate);
+            session()->flash('success', 'Transaction updated successfully.');
+        } else {
+            ElucidaTransaction::create([
+                'ledger_id' => $this->activeLedger->id,
+                'type' => $this->transactionType,
+                'category' => $this->tx_category,
+                'description' => mb_strtoupper($this->tx_description),
+                'reference_code' => $this->tx_reference ?: null,
+                'amount' => $finalAmount,
+                'receipt_image_path' => $imagePath,
+                'transaction_date' => Carbon::now()
+            ]);
+            session()->flash('success', ucfirst($this->transactionType) . ' securely logged to the ledger.');
+        }
+
+        $this->showTransactionModal = false;
+        $this->resetForm();
+        $this->calculateTotals();
+    }
 
     public function deleteTransaction($id)
     {
+        if (!$this->isAuthorizedManager) { abort(403); }
         $tx = ElucidaTransaction::findOrFail($id);
 
         if($tx->ledger_id === $this->activeLedger->id) {
@@ -164,9 +214,20 @@ class LedgerBoard extends Component
         $beginningTotal = $this->activeLedger->beginning_bank + $this->activeLedger->beginning_cash;
         $this->totalCashAvailable = $beginningTotal + $totalInflows;
         $this->endingBalance = $this->totalCashAvailable - $this->totalExpenses;
+
+        // --- PREPARE CHART DATA ---
+        $allCategories = collect($this->inflows->keys())->merge($this->outflows->keys())->unique()->values();
+
+        $this->chartCategoryLabels = $allCategories->toArray();
+        $this->chartInflowData = [];
+        $this->chartOutflowData = [];
+
+        foreach ($allCategories as $cat) {
+            $this->chartInflowData[] = isset($this->inflows[$cat]) ? $this->inflows[$cat]->sum('amount') : 0;
+            $this->chartOutflowData[] = isset($this->outflows[$cat]) ? $this->outflows[$cat]->sum('amount') : 0;
+        }
     }
 
-    // --- DOCX EXPORT PROTOCOL ---
     public function exportStatementDoc()
     {
         $this->calculateTotals();
@@ -242,6 +303,8 @@ class LedgerBoard extends Component
             ->where('signable_id', $this->activeLedger->id)
             ->orderBy('order_sequence')->get();
 
-        return view('livewire.elucida.ledger-board', compact('signatories'));
+        $layout = $this->isAuthorizedManager ? 'layouts.madya-admin-deck' : 'layouts.guest';
+
+        return view('livewire.elucida.ledger-board', compact('signatories'))->layout($layout);
     }
 }

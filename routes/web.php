@@ -522,9 +522,10 @@ Route::middleware(['web'])->group(function () {
 
     });
 
+    Route::get('/elucida/ledger/{ledger}', \App\Livewire\Elucida\LedgerBoard::class)->name('elucida.board');
+
     Route::middleware(['auth', 'role:administrator,organization'])
     ->group(function () {
-        Route::get('/elucida/roster', \App\Livewire\Elucida\FinancialRoster::class)->name('elucida.roster');
 
         // Notice we accept {ledger_id} to bind the specific components to the correct active period
         Route::get('/elucida/ledger/{ledger}', \App\Livewire\Elucida\LedgerBoard::class)->name('elucida.board');
