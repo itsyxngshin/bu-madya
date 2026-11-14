@@ -104,8 +104,8 @@ class LiquidationManager extends Component
         ]);
 
         $liquidation = ElucidaLiquidation::create([
+            'transaction_id' => $this->selectedTransactionId,
             'lr_tracker_number' => $this->tracker_number,
-            'tracker_number' => $this->tracker_number,
             'dv_number' => $this->dv_number,
             'accountable_officer' => $this->accountable_officer,
             'officer_position' => $this->officer_position,
