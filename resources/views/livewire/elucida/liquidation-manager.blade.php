@@ -160,12 +160,18 @@
                             <div class="item-row bg-gray-50 border border-gray-100 rounded-2xl p-4 flex flex-col sm:flex-row justify-between sm:items-center gap-4 hover:border-gray-200 transition-colors">
                                 <div class="flex items-start sm:items-center gap-4">
                                     @if(!empty($item['receipt_image_path']))
-                                        <div class="w-14 h-14 rounded-xl bg-white border border-gray-200 overflow-hidden flex items-center justify-center shrink-0 shadow-sm p-1">
-                                            <img src="{{ $item['receipt_image_path']->temporaryUrl() }}" class="object-cover w-full h-full rounded-lg">
-                                        </div>
-                                    @else
-                                        <div class="w-14 h-14 rounded-xl bg-white border border-dashed border-gray-300 flex items-center justify-center text-[8px] font-bold uppercase text-gray-400 text-center shrink-0">No Img</div>
-                                    @endif
+                                                                            <div class="w-14 h-14 rounded-xl bg-white border border-gray-200 overflow-hidden flex items-center justify-center shrink-0 shadow-sm p-1">
+                                                                                @if(is_string($item['receipt_image_path']))
+                                                                                    {{-- Loaded from the database --}}
+                                                                                    <img src="{{ asset('storage/' . $item['receipt_image_path']) }}" class="object-cover w-full h-full rounded-lg">
+                                                                                @else
+                                                                                    {{-- Pending Livewire upload preview --}}
+                                                                                    <img src="{{ $item['receipt_image_path']->temporaryUrl() }}" class="object-cover w-full h-full rounded-lg">
+                                                                                @endif
+                                                                            </div>
+                                                                        @else
+                                                                            <div class="w-14 h-14 rounded-xl bg-white border border-dashed border-gray-300 flex items-center justify-center text-[8px] font-bold uppercase text-gray-400 text-center shrink-0">No Img</div>
+                                                                        @endif
                                     <div>
                                         <h4 class="item-particulars text-sm font-bold text-gray-900 leading-tight mb-1">{{ $item['particulars'] }}</h4>
                                         <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider"><span class="item-payee">{{ $item['payee'] }}</span> • OR: <span class="item-or font-mono">{{ $item['or_si_number'] }}</span></p>
