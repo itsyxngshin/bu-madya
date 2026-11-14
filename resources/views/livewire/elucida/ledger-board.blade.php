@@ -24,7 +24,7 @@
                         </a>
 
                         {{-- Broadcast Toggle --}}
-                        <button wire:click="togglePublicAccess" class="text-[10px] md:text-xs font-bold uppercase tracking-widest px-3 py-2 rounded-xl transition border {{ $activeLedger->is_public ? 'bg-green-600 text-white border-green-700' : 'bg-white text-gray-500 border-gray-200 hover:bg-gray-50' }}">
+                        <button wire:click="togglePublicAccess" class="text-[10px] md:text-xs font-bold uppercase tracking-widest px-3 py-2 rounded-xl transition border {{ $activeLedger->is_public ? 'bg-blue-600 text-white border-blue-700' : 'bg-white text-gray-500 border-gray-200 hover:bg-gray-50' }}">
                             {{ $activeLedger->is_public ? 'Live Broadcast' : 'Make Public' }}
                         </button>
 
@@ -372,6 +372,18 @@
                     maintainAspectRatio: false,
                     plugins: {
                         legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10, weight: 'bold' } } }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, grid: { borderDash: [2, 4], color: '#f3f4f6' } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        }
+    });
+</script>
+@endpush
+gend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10, weight: 'bold' } } }
                     },
                     scales: {
                         y: { beginAtZero: true, grid: { borderDash: [2, 4], color: '#f3f4f6' } },

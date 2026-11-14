@@ -4,31 +4,29 @@ namespace App\Livewire\Elucida;
 
 use Livewire\Component;
 use Livewire\WithFileUploads;
+use Livewire\Attributes\Locked;
 use App\Models\ElucidaLedger;
 use App\Models\ElucidaTransaction;
 use App\Models\ElucidaSignatory;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Storage;
 
 class LedgerBoard extends Component
 {
     use WithFileUploads;
 
-    public $activeLedger;
-    public $inflows = [];
-    public $outflows = [];
+    #[Locked]
+    public ElucidaLedger $activeLedger;
 
+    // --- SCALAR STATE (Safe for Livewire) ---
     public $totalCashAvailable = 0;
     public $totalExpenses = 0;
     public $endingBalance = 0;
+    public $isAuthorizedManager = false;
 
     // --- CHART DATA ARRAYS ---
     public $chartCategoryLabels = [];
     public $chartInflowData = [];
     public $chartOutflowData = [];
-
-    // --- AUTHORIZATION STATE ---
-    public $isAuthorizedManager = false;
 
     // --- TRANSACTION MODAL STATE ---
     public $showTransactionModal = false;
@@ -82,10 +80,7 @@ class LedgerBoard extends Component
     {
         if (!$this->isAuthorizedManager) { abort(403); }
 
-        $this->activeLedger->update([
-            'is_public' => !$this->activeLedger->is_public
-        ]);
-
+        $this->activeLedger->update(['is_public' => !$this->activeLedger->is_public]);
         session()->flash('success', $this->activeLedger->is_public ? 'Ledger is now publicly broadcasting.' : 'Ledger is now private.');
     }
 
@@ -94,7 +89,7 @@ class LedgerBoard extends Component
         if (!$this->isAuthorizedManager) { abort(403); }
         $this->resetForm();
         $this->transactionType = $type;
-        $this->tx_category = $type === 'inflow' ? 'Income Generating Fund' : 'Events';
+        $this->tx_category = $type === 'inflow' ? 'Income Generating Fund' : 'Operational Expenses';
         $this->showTransactionModal = true;
     }
 
@@ -132,10 +127,11 @@ class LedgerBoard extends Component
             'tx_receipt_image' => 'nullable|image|max:10240'
         ];
 
+        // ONLY INFLOWS REQUIRE AMOUNT AND IMAGE
         if ($this->transactionType === 'inflow') {
             $rules['tx_amount'] = 'required|numeric|min:0.01';
 
-            if (!$this->editingTransactionId && !$this->tx_receipt_image) {
+            if (!$this->editingTransactionId && !$this->tx_receipt_image && !$this->existing_receipt_path) {
                 $rules['tx_receipt_image'] = 'required|image|max:10240';
             }
         }
@@ -149,11 +145,11 @@ class LedgerBoard extends Component
             $imagePath = $this->tx_receipt_image->store('ledger-receipts', 'public');
         }
 
+        // Outflows bypass the manual amount input entirely
         $finalAmount = $this->transactionType === 'inflow' ? $this->tx_amount : 0;
 
         if ($this->editingTransactionId) {
             $tx = ElucidaTransaction::findOrFail($this->editingTransactionId);
-
             $dataToUpdate = [
                 'category' => $this->tx_category,
                 'description' => mb_strtoupper($this->tx_description),
@@ -163,7 +159,6 @@ class LedgerBoard extends Component
             if ($this->transactionType === 'inflow') {
                 $dataToUpdate['amount'] = $finalAmount;
             }
-
             if ($this->tx_receipt_image) {
                 $dataToUpdate['receipt_image_path'] = $imagePath;
             }
@@ -203,10 +198,11 @@ class LedgerBoard extends Component
 
     public function calculateTotals()
     {
+        // By calculating here and NOT storing the eloquent collection in public state, we fix the morph bug!
         $transactions = ElucidaTransaction::where('ledger_id', $this->activeLedger->id)->get();
 
-        $this->inflows = $transactions->where('type', 'inflow')->groupBy('category');
-        $this->outflows = $transactions->where('type', 'outflow')->groupBy('category');
+        $inflows = $transactions->where('type', 'inflow')->groupBy('category');
+        $outflows = $transactions->where('type', 'outflow')->groupBy('category');
 
         $totalInflows = $transactions->where('type', 'inflow')->sum('amount');
         $this->totalExpenses = $transactions->where('type', 'outflow')->sum('amount');
@@ -215,30 +211,34 @@ class LedgerBoard extends Component
         $this->totalCashAvailable = $beginningTotal + $totalInflows;
         $this->endingBalance = $this->totalCashAvailable - $this->totalExpenses;
 
-        // --- PREPARE CHART DATA ---
-        $allCategories = collect($this->inflows->keys())->merge($this->outflows->keys())->unique()->values();
+        $allCategories = collect($inflows->keys())->merge($outflows->keys())->unique()->values();
 
         $this->chartCategoryLabels = $allCategories->toArray();
         $this->chartInflowData = [];
         $this->chartOutflowData = [];
 
         foreach ($allCategories as $cat) {
-            $this->chartInflowData[] = isset($this->inflows[$cat]) ? $this->inflows[$cat]->sum('amount') : 0;
-            $this->chartOutflowData[] = isset($this->outflows[$cat]) ? $this->outflows[$cat]->sum('amount') : 0;
+            $this->chartInflowData[] = isset($inflows[$cat]) ? $inflows[$cat]->sum('amount') : 0;
+            $this->chartOutflowData[] = isset($outflows[$cat]) ? $outflows[$cat]->sum('amount') : 0;
         }
     }
 
     public function exportStatementDoc()
     {
         $this->calculateTotals();
-        $signatories = \App\Models\ElucidaSignatory::where('signable_type', \App\Models\ElucidaLedger::class)
+
+        // Pass collections directly into the local closure instead of state
+        $transactions = ElucidaTransaction::where('ledger_id', $this->activeLedger->id)->get();
+        $inflows = $transactions->where('type', 'inflow')->groupBy('category');
+        $outflows = $transactions->where('type', 'outflow')->groupBy('category');
+
+        $signatories = ElucidaSignatory::where('signable_type', ElucidaLedger::class)
             ->where('signable_id', $this->activeLedger->id)->orderBy('order_sequence')->get();
 
         $fileName = "Statement_of_Cash_Flows_" . \Illuminate\Support\Str::slug($this->activeLedger->user->name ?? 'Organization') . ".doc";
 
-        return response()->streamDownload(function () use ($signatories) {
+        return response()->streamDownload(function () use ($signatories, $inflows, $outflows) {
             echo "<html xmlns:w='urn:schemas-microsoft-com:office:word'><head><meta charset='utf-8'></head><body style='font-family: Arial, sans-serif; line-height: 1.5; font-size: 11pt;'>";
-
             echo "<div style='text-align: center; margin-bottom: 20px;'>";
             echo "<h3 style='margin: 0; font-size: 14pt; font-weight: bold;'>Bicol University</h3>";
             echo "<h4 style='margin: 0; font-size: 12pt;'>Legazpi City, Albay</h4>";
@@ -256,8 +256,8 @@ class LedgerBoard extends Component
             echo "<tr><td colspan='2' style='font-weight: bold; background-color: #f3f4f6; border-bottom: 1px solid #000; margin-top: 15px;'>ADD: CASH INFLOW</td></tr>";
             echo "<tr><td style='font-weight: bold; text-decoration: underline; padding-top: 10px;'>Activity/Transaction</td><td style='font-weight: bold; text-align: right; text-decoration: underline; padding-top: 10px;'>Total</td></tr>";
 
-            foreach ($this->inflows as $category => $transactions) {
-                foreach ($transactions as $tx) {
+            foreach ($inflows as $category => $txs) {
+                foreach ($txs as $tx) {
                     echo "<tr><td>" . htmlspecialchars($tx->description) . "</td><td style='text-align: right;'>PHP " . number_format($tx->amount, 2) . "</td></tr>";
                 }
             }
@@ -267,8 +267,8 @@ class LedgerBoard extends Component
             echo "<tr><td colspan='2' style='font-weight: bold; background-color: #f3f4f6; border-bottom: 1px solid #000; padding-top: 15px;'>LESS: EXPENSES</td></tr>";
             echo "<tr><td style='font-weight: bold; text-decoration: underline; padding-top: 10px;'>Activity/Transaction</td><td style='font-weight: bold; text-align: right; text-decoration: underline; padding-top: 10px;'>Total</td></tr>";
 
-            foreach ($this->outflows as $category => $transactions) {
-                foreach ($transactions as $tx) {
+            foreach ($outflows as $category => $txs) {
+                foreach ($txs as $tx) {
                     $ref = $tx->reference_code ? " (" . $tx->reference_code . ")" : "";
                     echo "<tr><td>" . htmlspecialchars($tx->description . $ref) . "</td><td style='text-align: right;'>PHP " . number_format($tx->amount, 2) . "</td></tr>";
                 }
@@ -299,12 +299,16 @@ class LedgerBoard extends Component
 
     public function render()
     {
+        $transactions = ElucidaTransaction::where('ledger_id', $this->activeLedger->id)->get();
+        $inflows = $transactions->where('type', 'inflow')->groupBy('category');
+        $outflows = $transactions->where('type', 'outflow')->groupBy('category');
+
         $signatories = ElucidaSignatory::where('signable_type', ElucidaLedger::class)
             ->where('signable_id', $this->activeLedger->id)
             ->orderBy('order_sequence')->get();
 
         $layout = $this->isAuthorizedManager ? 'layouts.madya-admin-deck' : 'layouts.guest';
 
-        return view('livewire.elucida.ledger-board', compact('signatories'))->layout($layout);
+        return view('livewire.elucida.ledger-board', compact('signatories', 'inflows', 'outflows'))->layout($layout);
     }
 }
