@@ -175,6 +175,13 @@
                                     @if($tx->reference_code)
                                         <span class="bg-gray-100 border border-gray-200 text-gray-500 text-[9px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">{{ $tx->reference_code }}</span>
                                     @endif
+
+                                    {{-- UPGRADE: DIRECT LINK TO LIQUIDATION VIEWER --}}
+                                    @if($isAuthorizedManager)
+                                        <a href="{{ route('elucida.transaction.liquidations', $tx->id) }}" class="text-[9px] font-bold uppercase tracking-widest bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-600 hover:text-white px-2 py-0.5 rounded transition ml-2">
+                                            View Liquidations
+                                        </a>
+                                    @endif
                                 </span>
                                 <div class="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto">
                                     <span class="font-bold text-gray-900">PHP {{ number_format($tx->amount, 2) }}</span>

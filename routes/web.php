@@ -526,7 +526,7 @@ Route::middleware(['web'])->group(function () {
     Route::middleware(['auth', 'role:administrator,organization'])
     ->group(function () {
         Route::get('/elucida/roster', \App\Livewire\Elucida\FinancialRoster::class)->name('elucida.roster');
-
+        Route::get('/elucida/transaction/{transaction}/liquidations', \App\Livewire\Elucida\LiquidationViewer::class)->name('elucida.transaction.liquidations');
         // Notice we accept {ledger_id} to bind the specific components to the correct active period
         Route::get('/elucida/liquidation/{ledger}', \App\Livewire\Elucida\LiquidationManager::class)->name('elucida.liquidation');
         Route::get('/elucida/sales/{ledger}', \App\Livewire\Elucida\SalesRegister::class)->name('elucida.sales');
